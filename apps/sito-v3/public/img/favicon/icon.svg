@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">
+
+	<style type="text/css">
+		.icon__cat {
+			fill: #9F8BE7;
+		}
+		.icon__eyes {
+			fill: #ffffff;
+		}
+		@media (prefers-color-scheme: dark) {
+			.icon__cat {
+			fill: #DDF160;
+			}
+			.icon__eyes {
+				fill: #000000;
+			}
+		}
+	</style>
+
+	<path class="icon__cat" d="M15,8v1h1v1h-1v1v1v1v1h-1v1h0h-1h-1h-1h-1h-1h-1h-1h-1h-1h-1H2.8H2.4H2.1h0v-1H1v-1v-1v-1v-1H0V9h1V8H0V7h1h0.7v-1v-1h1v-1
+		v-1v-1h1v-1h1v1h1v1h1h1h1h1v-1h1v-1h1v1h1v1v1v1h1v1v1H15h1v1H15z"/>
+
+	<path class="icon__eyes" d="M9.7,5.9h1v1v1h-1V7V5.9z M5.2,7v1h1V7v-1h-1V7z"/>
+
+</svg>

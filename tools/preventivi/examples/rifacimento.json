@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "numero_preventivo": "2026-003",
+    "data": "2026-03-08",
+    "validita_giorni": 30,
+    "tipo_cliente": "azienda"
+  },
+  "cliente": {
+    "ragione_sociale": "Road Mapper / Tre Esse Italia",
+    "nome_display": "Road Mapper",
+    "sottotitolo": "Tre Esse Italia",
+    "sede_legale": "",
+    "piva": "",
+    "codice_fiscale": "",
+    "codice_univoco_pec": "",
+    "legale_rappresentante": "",
+    "telefono": "",
+    "email": "",
+    "sito_web": "road-mapper.com"
+  },
+  "documento": {
+    "titolo": "Proposta di Rifacimento Sito Web",
+    "sottotitolo": "Preventivo e Contratto di Incarico"
+  },
+  "premessa": {
+    "testo": "Road Mapper è un sistema proprietario di video rilievo dinamico della strada che necessita di una presenza web aggiornata e performante. L'analisi del sito attuale ha evidenziato numerose problematiche tecniche, di sicurezza e SEO che impattano negativamente la credibilità del servizio e la capacità di acquisizione clienti B2B.",
+    "statistiche": [
+      {"valore": "8", "label": "Pagine funzionanti"},
+      {"valore": "90+", "label": "Link morti"},
+      {"valore": "33", "label": "Problemi rilevati"},
+      {"valore": "7", "label": "Criticità gravi"}
+    ],
+    "problemi_critici": [
+      "Sitemap.xml punta a localhost",
+      "Typo 'DIMANICO' nel title di tutte le pagine",
+      "Checkbox GDPR pre-selezionata (viola art. 7 GDPR)",
+      "Canonical HTTP invece di HTTPS",
+      "Meta description mancante su tutte le pagine",
+      "Immagini non ottimizzate (3-5 secondi caricamento)",
+      "Nessun structured data (Schema.org)"
+    ]
+  },
+  "sezioni_extra": [
+    {
+      "tipo": "comparativa",
+      "titolo": "Perché Astro.build invece di Drupal",
+      "intro": "Per un sito vetrina B2B come Road Mapper, Astro.build offre vantaggi decisivi rispetto all'attuale stack Drupal:",
+      "intestazione_a": "Astro.build",
+      "intestazione_b": "Drupal (attuale)",
+      "righe": [
+        {"caratteristica": "Velocità caricamento", "colonna_a": "< 1 secondo", "colonna_b": "2-5 secondi", "a_positivo": true},
+        {"caratteristica": "Sicurezza", "colonna_a": "Nessun database esposto", "colonna_b": "Vulnerabilità frequenti CMS", "a_positivo": true},
+        {"caratteristica": "Manutenzione", "colonna_a": "Zero aggiornamenti server", "colonna_b": "Aggiornamenti costanti necessari", "a_positivo": true},
+        {"caratteristica": "Costo hosting", "colonna_a": "Da €0/mese (Netlify/Vercel)", "colonna_b": "€10-30/mese (VPS)", "a_positivo": true},
+        {"caratteristica": "SEO (Core Web Vitals)", "colonna_a": "Score 95-100", "colonna_b": "Score 40-60", "a_positivo": true},
+        {"caratteristica": "Gestione contenuti", "colonna_a": "File Markdown o headless CMS", "colonna_b": "Admin panel Drupal", "a_positivo": false}
+      ]
+    }
+  ],
+  "offerte": [
+    {
+      "id": "sito_astro",
+      "nome": "Rifacimento Sito Web Astro.build",
+      "descrizione": "Ricostruzione completa del sito con framework moderno, design responsive, migrazione contenuti e risoluzione di tutti i problemi individuati dall'audit.",
+      "prezzo": 1099.00,
+      "consigliata": true,
+      "include": [
+        "Struttura pagine: Homepage, Servizi, Prodotti, Territorio, Contatti, Privacy, Cookie",
+        "Design moderno responsive mobile-first",
+        "Migrazione contenuti dal sito attuale",
+        "Ottimizzazione immagini WebP + lazy loading",
+        "SEO completa: title, meta, H1, sitemap, structured data",
+        "Form contatto GDPR compliant con double opt-in",
+        "Risoluzione di tutti i 33 problemi individuati"
+      ],
+      "esclude": [
+        "Hosting e dominio (a carico cliente)",
+        "Creazione contenuti nuovi (testi, foto, video)",
+        "Configurazione e gestione Google Analytics",
+        "Manutenzione post-rilascio"
+      ],
+      "note_extra": null
+    }
+  ],
+  "problemi_risolti": [
+    {"numero": 1, "problema": "Sitemap.xml punta a localhost", "soluzione": "Sitemap XML corretta con URL canonici"},
+    {"numero": 2, "problema": "Typo 'DIMANICO' nei title", "soluzione": "Title corretti e ottimizzati per SEO"},
+    {"numero": 3, "problema": "Canonical HTTP invece di HTTPS", "soluzione": "Canonical HTTPS con redirect 301"},
+    {"numero": 4, "problema": "Checkbox GDPR pre-selezionata", "soluzione": "Form GDPR compliant (opt-in esplicito)"},
+    {"numero": 5, "problema": "Meta description mancanti", "soluzione": "Meta description uniche per ogni pagina"},
+    {"numero": 6, "problema": "90+ link morti (404)", "soluzione": "Tutti i link verificati e corretti"},
+    {"numero": 7, "problema": "Immagini non ottimizzate", "soluzione": "WebP + lazy loading + dimensioni responsive"}
+  ],
+  "clausole_speciali": [
+    {
+      "tipo": "warning",
+      "titolo": "Hosting e Dominio — A Carico del Cliente",
+      "testo": "Il presente preventivo non include servizi di hosting web o gestione del dominio. Il Cliente è responsabile di:",
+      "lista": [
+        "Mantenere attivo l'hosting web",
+        "Rinnovare il dominio road-mapper.com",
+        "Configurare i record DNS come indicato dal Fornitore",
+        "Gestire il certificato SSL (o utilizzare hosting con SSL automatico)"
+      ]
+    }
+  ],
+  "materiali_necessari": [
+    "PDF scheda tecnica Road Mapper aggiornato",
+    "Logo Road Mapper in alta qualità (formato vettoriale SVG o AI)",
+    "Conferma testi e contenuti da migrare dal sito attuale",
+    "Foto/video dei servizi (se disponibili)",
+    "Accesso FTP o hosting per deploy finale"
+  ],
+  "tempistiche": {
+    "prima_bozza": "10-15 giorni lavorativi",
+    "nota": "dalla ricezione di tutti i materiali necessari"
+  },
+  "pagamento": {
+    "modalita": [
+      {
+        "id": "anticipato",
+        "nome": "Pagamento Anticipato (Saldo Unico)",
+        "sconto_percentuale": 10,
+        "descrizione": "Pagamento dell'intero importo alla sottoscrizione del contratto",
+        "rate": []
+      },
+      {
+        "id": "rate_2",
+        "nome": "Bonifico Bancario (2 rate)",
+        "sconto_percentuale": 0,
+        "descrizione": "",
+        "rate": [
+          {"percentuale": 50, "momento": "alla sottoscrizione del contratto"},
+          {"percentuale": 50, "momento": "al completamento e consegna del sito"}
+        ]
+      }
+    ]
+  },
+  "contratto_perimetro": {
+    "servizi": [
+      "Sviluppo sito web con framework Astro.build",
+      "Design moderno e responsive mobile-first",
+      "Migrazione contenuti dal sito Drupal attuale",
+      "Risoluzione di tutti i problemi emersi dall'audit tecnico",
+      "Ottimizzazione SEO completa (on-page + tecnica)",
+      "Go-live, deploy e handover al Cliente"
+    ],
+    "clausole": [
+      "L'hosting web e il dominio restano a carico del Cliente",
+      "La creazione di contenuti nuovi (testi, foto, video) è a carico del Cliente",
+      "Eventuali funzionalità aggiuntive non previste nel preventivo saranno quotate separatamente"
+    ]
+  }
+}

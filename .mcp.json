@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "caldes": {
+      "command": "node",
+      "args": ["apps/mcp/dist/index.js"],
+      "env": {
+        "API_URL": "http://localhost:3001",
+        "MCP_SERVICE_TOKEN": "${MCP_SERVICE_TOKEN}"
+      }
+    }
+  }
+}

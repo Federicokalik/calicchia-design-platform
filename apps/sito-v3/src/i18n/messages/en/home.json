@@ -1,0 +1,144 @@
+{
+  "metadata": {
+    "title": "Freelance Web Designer & Developer based in Italy · Websites, e-commerce, development, SEO, WordPress | Federico Calicchia",
+    "description": "Freelance Web Designer & Developer based in Italy. Websites, e-commerce, custom development, SEO, WordPress maintenance. Working with Italian and European businesses, in English. One contact, full stack, no agency middlemen.",
+    "ogTitle": "Freelance Web Designer & Developer based in Italy",
+    "ogDescription": "Freelance web designer and developer based in Italy. Websites, e-commerce, development, SEO, WordPress maintenance. Italy + international, one contact."
+  },
+  "hero": {
+    "eyebrow": "01 — Freelance Web Designer & Developer · Italy · {year}",
+    "h1Prefix": "Website design",
+    "h1Connector": "and",
+    "h1Suffix": ".",
+    "meta": "Based in Italy.\nWorking with European, UK, and US businesses.",
+    "pitch": "{years}+ years designing websites, e-commerce and digital systems for professionals who do not have time to manage a six-person agency.\nNo agency, one single contact.",
+    "available": "Open to new projects",
+    "cta": "Let's talk"
+  },
+  "portrait": {
+    "eyebrow": "02 — Federico",
+    "location": "Ceccano · FR",
+    "portraitAlt": "Federico Calicchia, Freelance Web Designer & Developer — studio portrait in Ceccano",
+    "h2": "Freelance Web Designer & Developer\nfor people who do not have time to manage\na six-person agency.",
+    "bio": "Freelance web designer and developer since 2016.\nStudio in Ceccano (FR), clients across Italy and beyond.\nNo agency, no hand-offs, no blame shifting.\nI design, build and keep the site running after launch.\nOne contact.",
+    "stats": {
+      "years": "years freelance",
+      "projects": "projects shipped",
+      "contact": "point of contact",
+      "agencies": "agencies in between"
+    }
+  },
+  "trust": {
+    "eyebrow": "04 — Trust",
+    "subtitle": "Verified Google reviews",
+    "h2": "Don't trust me. Trust the people who already picked me.",
+    "reviewsLabel": "Reviews",
+    "clientsLabel": "Some clients",
+    "logosAriaLabel": "Client logos",
+    "logoAlt": "{name} logo",
+    "openClientSite": "{name} — open the website",
+    "clientPaginationLabel": "Select client",
+    "showClient": "Show {name}"
+  },
+  "services": {
+    "eyebrow": "What I do for you",
+    "h2": "Eleven services, one standard.",
+    "viewAll": "All services →",
+    "readMore": "Read more"
+  },
+  "finalCta": {
+    "eyebrow": "12 — Next step",
+    "h2Line1": "Have an idea?",
+    "h2Line2": "Let's look at it together.",
+    "cta": "Write to me"
+  },
+  "howIWork": {
+    "eyebrow": "06 — How I work",
+    "meta": "5 principles · 5 phases · 1 contact",
+    "h2": "Principles first, execution right after.",
+    "lead": "My five pillars are not a slogan.\nThey are the rules I use to make decisions every day.\nBelow, the five phases where those principles become concrete work on your project."
+  },
+  "manifestoLongform": {
+    "eyebrowSuffix": "Approach",
+    "pillarsCount": "5 pillars",
+    "pillars": {
+      "details": {
+        "title": "Obsessed with details",
+        "body": "Every pixel has a reason. Every millisecond counts.\nIf it does not feel right, I redo it.\nThat is the difference between a site that opens and a site that sells."
+      },
+      "ahead": {
+        "title": "One step ahead",
+        "body": "Tech changes every month.\nI study, test, discard.\nWhat ends up in your project has already been through the wringer. You are not the testing ground."
+      },
+      "crossSkills": {
+        "title": "Cross-discipline skills",
+        "body": "Design, development, SEO, performance, copy.\nNot three different people. One.\nThat means consistent decisions and no \"not my department\"."
+      },
+      "oneContact": {
+        "title": "One single contact",
+        "body": "No project managers, no hand-offs.\nYou write me, I answer.\nA simple request gets a mockup within 48 hours."
+      },
+      "results": {
+        "title": "Results, not promises",
+        "body": "Numbers you can verify: load time, Google rankings, conversions.\nNiente \"we are creative\" pitch.\nOnly what gets measured counts."
+      }
+    }
+  },
+  "processLongform": {
+    "eyebrowSuffix": "How I work",
+    "phasesMeta": "5 phases · 1 contact",
+    "steps": {
+      "brief": {
+        "label": "Brief",
+        "title": "I listen.",
+        "body": "A 30-minute call to understand who you are, what you sell, and why a client should pick you.\nNo agency-style questionnaires, no off-the-shelf decisions."
+      },
+      "strategy": {
+        "label": "Strategy",
+        "title": "I draft the plan.",
+        "body": "I pick structure, tone, palette and stack.\nI explain why in ten minutes. No philosophy.\nThe plan is written, shared, editable."
+      },
+      "design": {
+        "label": "Design",
+        "title": "Pixels carry weight.",
+        "body": "Interactive mockups, not static frames.\nVedi le animazioni, ascolti come si muove.\nCambiamo prima di scrivere codice — quando costa zero sistemare."
+      },
+      "build": {
+        "label": "Build",
+        "title": "I build it well.",
+        "body": "Modern stack, obsessive performance, SEO wired in from day one.\nEvery line has a reason.\nInternal review: I write, I re-read, I break it to rebuild it cleaner."
+      },
+      "launch": {
+        "label": "Launch",
+        "title": "I fix, I test, I ship.",
+        "body": "Tests on ten real devices, analytics monitoring, a 30-minute training session.\nPoi un anno di assistenza inclusa — perché i siti veri vivono dopo il lancio."
+      }
+    }
+  },
+  "stats": {
+    "linesOfCode": "Lines of code shipped",
+    "coffeeCups": "Cups of coffee drunk",
+    "yearsExperience": "Years of experience",
+    "projectsDelivered": "Projects delivered"
+  },
+  "worksHorizontal": {
+    "eyebrow": "Selected work · {count}",
+    "viewAll": "All projects →",
+    "h2": "Things I built for people who needed them.",
+    "openLabel": "Open"
+  },
+  "skillsGravity": {
+    "eyebrowDefault": "Tools",
+    "titleDefault": "Tools I master.",
+    "subtitleDefault": "Technical craft sharpened with AI for outcomes you can measure.\nDrag them, throw them — they always settle back where they belong.",
+    "counterLabel": "I use every day",
+    "resetButton": "Reset everything",
+    "resetAriaLabel": "Reset the tools to their starting position",
+    "stackListLabel": "Tech and AI stack"
+  },
+  "blogLatest": {
+    "eyebrowDefault": "Journal",
+    "titleDefault": "From my journal.",
+    "viewAll": "All articles"
+  }
+}

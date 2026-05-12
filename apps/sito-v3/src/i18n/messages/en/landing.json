@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "eyebrowFallback": "Landing",
+    "backFallback": "Back"
+  },
+  "microStory": {
+    "eyebrow": "Micro story",
+    "caseStudyLink": "See the full project"
+  },
+  "comboAngle": {
+    "eyebrow": "Why here"
+  },
+  "features": {
+    "heading": "What I design for {profession}",
+    "fallbackHeading": "What I design for you",
+    "itemsCount": "{count, plural, one {# item} other {# items}}"
+  },
+  "problems": {
+    "eyebrow": "Awareness",
+    "heading": "Common problems"
+  },
+  "cta": {
+    "eyebrow": "Start here?",
+    "button": "Let's talk"
+  },
+  "relatedProfessions": {
+    "heading": "Other professions"
+  },
+  "relatedZones": {
+    "heading": "Service areas · {region}",
+    "subheading": "I also work nearby."
+  }
+}

@@ -1,0 +1,480 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 24.6 95% 53.1%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 60 4.8% 95.9%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 60 4.8% 95.9%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 20 14.3% 4.1%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 20 14.3% 4.1%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 20.5 90.2% 48.2%;
+    --primary-foreground: 60 9.1% 97.8%;
+    --secondary: 12 6.5% 15.1%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 20.5 90.2% 48.2%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* React Flow theme overrides */
+.react-flow__controls {
+  box-shadow: none !important;
+}
+.react-flow__controls button {
+  background: hsl(var(--card)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+}
+.react-flow__controls button:hover {
+  background: hsl(var(--muted)) !important;
+}
+.react-flow__edge-path {
+  stroke: hsl(var(--primary) / 0.6) !important;
+}
+.react-flow__minimap {
+  background: hsl(var(--card)) !important;
+}
+
+/* === ISLAND LAYOUT === */
+/* All chrome elements (sidebar, topbar, AI bar) are floating "islands" */
+
+.sidebar-island {
+  background: hsl(var(--card));
+  border-radius: 16px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
+  margin: 8px;
+  height: calc(100vh - 16px);
+}
+
+.dark .sidebar-island {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.topbar-island {
+  background: hsl(var(--card));
+  border-radius: 12px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  margin: 8px 8px 0 8px;
+}
+
+.ai-bubble-island {
+  background: hsl(var(--card));
+  border-radius: 16px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.dark .ai-bubble-island {
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* Active nav item */
+.nav-item-active {
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+  border-left: 2px solid hsl(var(--primary));
+  font-weight: 600;
+}
+
+.dark .nav-item-active {
+  background: hsl(var(--primary) / 0.15);
+}
+
+/* Custom scrollbar styling */
+@layer utilities {
+  /* Thin scrollbar for all elements */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Auto-hide scrollbar (shows on hover) */
+  .scrollbar-auto {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-auto::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-auto::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+  }
+
+  .scrollbar-auto:hover {
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .scrollbar-auto:hover::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+  }
+}
+
+/* FullCalendar — shadcn theme override */
+.fc {
+  --fc-border-color: hsl(var(--border));
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: hsl(var(--muted));
+  --fc-neutral-text-color: hsl(var(--muted-foreground));
+  --fc-today-bg-color: hsl(var(--primary) / 0.06);
+  --fc-highlight-color: hsl(var(--primary) / 0.1);
+  --fc-non-business-color: hsl(var(--muted) / 0.5);
+  --fc-event-border-color: transparent;
+  font-family: inherit;
+}
+
+/* Toolbar */
+.fc .fc-toolbar {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 1.125rem !important;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+/* Buttons — match shadcn outline button */
+.fc .fc-button {
+  background-color: transparent !important;
+  border: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: 0.375rem 0.75rem !important;
+  border-radius: calc(var(--radius) - 2px) !important;
+  box-shadow: none !important;
+  transition: background-color 0.15s, color 0.15s;
+  text-transform: none !important;
+}
+
+.fc .fc-button:hover {
+  background-color: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.fc .fc-button:focus {
+  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.3) !important;
+}
+
+.fc .fc-button-active,
+.fc .fc-button.fc-button-active {
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border-color: hsl(var(--primary)) !important;
+}
+
+.fc .fc-button-active:hover,
+.fc .fc-button.fc-button-active:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+}
+
+/* Button group — rounded corners */
+.fc .fc-button-group > .fc-button {
+  border-radius: 0 !important;
+}
+
+.fc .fc-button-group > .fc-button:first-child {
+  border-top-left-radius: calc(var(--radius) - 2px) !important;
+  border-bottom-left-radius: calc(var(--radius) - 2px) !important;
+}
+
+.fc .fc-button-group > .fc-button:last-child {
+  border-top-right-radius: calc(var(--radius) - 2px) !important;
+  border-bottom-right-radius: calc(var(--radius) - 2px) !important;
+}
+
+/* Day headers */
+.fc .fc-col-header-cell {
+  background-color: hsl(var(--muted) / 0.5);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: hsl(var(--muted-foreground));
+  padding: 0.5rem 0;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: inherit;
+  text-decoration: none !important;
+}
+
+/* Day numbers */
+.fc .fc-daygrid-day-number {
+  font-size: 0.8125rem;
+  color: hsl(var(--foreground));
+  padding: 0.375rem 0.5rem;
+  text-decoration: none !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 9999px;
+  width: 1.625rem;
+  height: 1.625rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0.25rem;
+  font-weight: 600;
+}
+
+/* Events */
+.fc .fc-event {
+  border-radius: calc(var(--radius) - 4px) !important;
+  font-size: 0.75rem !important;
+  padding: 1px 4px !important;
+  cursor: pointer;
+}
+
+.fc .fc-daygrid-event {
+  margin: 1px 2px !important;
+}
+
+.fc .fc-daygrid-more-link {
+  font-size: 0.75rem;
+  color: hsl(var(--primary));
+  font-weight: 500;
+}
+
+/* Time grid */
+.fc .fc-timegrid-slot-label-cushion {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.fc .fc-timegrid-axis-cushion {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Scrollbar inside calendar */
+.fc .fc-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+/* Dark mode — cells */
+.dark .fc .fc-daygrid-day.fc-day-other .fc-daygrid-day-number {
+  opacity: 0.4;
+}
+
+/* ── Tiptap Editor ── */
+.ProseMirror {
+  outline: none;
+  /* Garantisce un'area cliccabile generosa anche con contenuto vuoto, così
+     l'editor è visibile come un campo di scrittura e non come una banda
+     stretta sotto la toolbar (lo style minHeight passato a <EditorContent>
+     viene applicato al wrapper, non al ProseMirror stesso). */
+  min-height: 280px;
+  cursor: text;
+  /* Spaziatura interna (era applicata via .prose px-4 py-3 di Tailwind
+     Typography che non è installato). */
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: hsl(var(--foreground));
+}
+.ProseMirror:focus { outline: none; }
+.ProseMirror p { margin: 0 0 0.6em; }
+.ProseMirror p:last-child { margin-bottom: 0; }
+.ProseMirror h1 { font-size: 1.6rem; font-weight: 700; margin: 0.8em 0 0.4em; line-height: 1.2; }
+.ProseMirror h2 { font-size: 1.3rem; font-weight: 700; margin: 0.7em 0 0.35em; line-height: 1.25; }
+.ProseMirror h3 { font-size: 1.1rem; font-weight: 600; margin: 0.6em 0 0.3em; line-height: 1.3; }
+.ProseMirror ul, .ProseMirror ol { padding-left: 1.4em; margin: 0 0 0.6em; }
+.ProseMirror code { background: hsl(var(--muted)); padding: 0.1em 0.35em; border-radius: 4px; font-size: 0.86em; }
+.ProseMirror pre { background: hsl(var(--muted)); padding: 0.75em 1em; border-radius: 6px; overflow-x: auto; }
+.ProseMirror pre code { background: transparent; padding: 0; }
+
+/* Placeholder — ben visibile sia light che dark, così l'editor non sembra
+   un buco nero sotto la toolbar quando è vuoto. */
+.ProseMirror p.is-editor-empty:first-child::before,
+.ProseMirror.is-editor-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.6;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+}
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding: 0;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.ProseMirror ul[data-type="taskList"] li > label {
+  margin-top: 0.15rem;
+}
+.ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+.ProseMirror blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 1rem;
+  color: hsl(var(--muted-foreground));
+}
+.ProseMirror hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1.5rem 0;
+}
+.ProseMirror img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+.ProseMirror table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 2px);
+}
+.ProseMirror th,
+.ProseMirror td {
+  min-width: 1em;
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 0.625rem;
+  vertical-align: top;
+}
+.ProseMirror th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+}
+.ProseMirror .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: hsl(var(--primary) / 0.12);
+}
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: hsl(var(--primary));
+  pointer-events: none;
+}
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+.ProseMirror div[data-youtube-video] {
+  margin: 1rem 0;
+}
+.ProseMirror div[data-youtube-video] iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+/* ── Excalidraw overrides ── */
+.excalidraw .App-menu_top .buttonList {
+  display: flex;
+}
+.excalidraw {
+  --color-primary: hsl(var(--primary)) !important;
+}

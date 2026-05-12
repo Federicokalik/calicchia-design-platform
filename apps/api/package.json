@@ -1,0 +1,50 @@
+{
+  "name": "@caldes/api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "migrate": "tsx --env-file=../../.env scripts/migrate.ts",
+    "migrate:new": "tsx --env-file=../../.env scripts/migrate-new.ts",
+    "verify:calendar": "tsx --env-file=../../.env scripts/verify-calendar-schema.ts",
+    "seed": "tsx scripts/seed.ts",
+    "test:e2e": "tsx scripts/test-e2e.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.992.0",
+    "@aws-sdk/s3-request-presigner": "^3.992.0",
+    "@hono/node-server": "^1.13.7",
+    "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dotenv": "^16.4.7",
+    "hono": "^4.6.16",
+    "imapflow": "^1.0.189",
+    "jose": "^5.9.6",
+    "mailparser": "^3.7.2",
+    "marked": "^17.0.3",
+    "mjml": "^5.2.0",
+    "nanoid": "^5.0.9",
+    "nodemailer": "^6.9.16",
+    "postgres": "^3.4.5",
+    "puppeteer": "^24.40.0",
+    "resend": "^6.8.0",
+    "rrule": "^2.8.1",
+    "sanitize-html": "^2.14.0",
+    "stripe": "^17.5.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/mailparser": "^3.4.5",
+    "@types/mjml": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "@types/nodemailer": "^6.4.17",
+    "@types/sanitize-html": "^2.13.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

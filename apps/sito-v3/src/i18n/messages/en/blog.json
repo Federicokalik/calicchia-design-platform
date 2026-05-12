@@ -1,0 +1,54 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Blog · Web design, development, SEO without the fluff | Federico Calicchia",
+      "description": "Articles on web design, development, SEO, performance, accessibility. No recycled listicles, no SEO trending topics without substance. Just usable analysis and tutorials.",
+      "ogTitle": "Blog · The web truth agencies do not tell you",
+      "ogDescription": "Web design, SEO, performance and digital business — without the fluff."
+    },
+    "eyebrow": "Blog",
+    "title": "Articles without the fluff.",
+    "lead": "Web design, development, SEO, performance, accessibility.\nNo recycled listicles, no clickbait.\nOnly stuff that changes how you do your work.",
+    "eyebrowWithCount": "Blog - {count, plural, one {# article} other {# articles}}",
+    "pageTitle": "Blog. The web truth agencies do not tell you.",
+    "pageLead": "Articles on web design, e-commerce, SEO and performance.\nNo \"10 trends for 2026\", no buzzwords. Only work that moves the numbers.",
+    "filters": {
+      "all": "All",
+      "category": "Category",
+      "tag": "Tag"
+    },
+    "empty": "No articles found.",
+    "emptyState": {
+      "eyebrow": "Coming",
+      "title": "The blog kicks off with the first article in late 2026.",
+      "lead": "Want a heads-up when it lands? Write me two lines.\nI add you to a light email list. No automated newsletters, no spam.",
+      "ctaPrimary": "Write me",
+      "ctaSecondary": "Read the pillar"
+    },
+    "readingTime": "{minutes} min read",
+    "publishedAt": "Published on {date}",
+    "updatedAt": "Updated on {date}"
+  },
+  "detail": {
+    "tableOfContents": {
+      "label": "Contents",
+      "ariaLabel": "Article contents",
+      "chapterFallback": "Chapter {count}"
+    },
+    "share": "Share",
+    "copyLink": "Copy link",
+    "linkCopied": "Copiato ✓",
+    "readingTime": "{count} min read",
+    "publishedAt": "{date}",
+    "sharePlatforms": {
+      "twitterX": "Twitter / X",
+      "linkedIn": "LinkedIn"
+    },
+    "author": "Author",
+    "relatedPosts": "Related articles",
+    "next": "Next article",
+    "prev": "Previous article",
+    "backToBlog": "Back to blog",
+    "comments": "Comments"
+  }
+}

@@ -1,0 +1,81 @@
+:root {
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-fast: 240ms;
+  --motion-base: 320ms;
+  --motion-slow: 480ms;
+  --motion-stagger: 80ms;
+}
+
+/*
+ * Hover transition utilities — single source for non-GSAP micro motion.
+ * Tailwind defaults `transition-*` to ~150ms; the rest of the site speaks 180ms
+ * (`--motion-micro`). These classes close that gap.
+ *
+ * GSAP-driven motion (MagneticButton, scroll reveals) is
+ * intentionally separate — different feel, different ownership.
+ */
+
+.transition-hover {
+  transition: all var(--motion-micro) var(--ease-out-quint);
+}
+.transition-hover-color {
+  transition:
+    color var(--motion-micro) var(--ease-out-quint),
+    background-color var(--motion-micro) var(--ease-out-quint),
+    border-color var(--motion-micro) var(--ease-out-quint);
+}
+.transition-hover-transform {
+  transition: transform var(--motion-micro) var(--ease-out-quint);
+}
+.transition-hover-opacity {
+  transition: opacity var(--motion-micro) var(--ease-out-quint);
+}
+
+/*
+ * Swiss hover card — pattern signature delle card portfolio/blog/case-study.
+ * Motion-meaning: il border-top accent appare per dire "sei sulla card".
+ * L'image scale 1.02 + brightness 1.05 dà vita senza displacement.
+ * Reduced-motion: solo cambio brightness + accent border, no transform.
+ */
+:root {
+  --motion-card-hover: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.swiss-hover-card {
+  border-top: 1px solid transparent;
+  transition: border-top-color var(--motion-card-hover);
+}
+
+.swiss-hover-card .swiss-hover-card-image {
+  transition:
+    transform var(--motion-card-hover),
+    filter var(--motion-card-hover);
+  will-change: transform;
+}
+
+.swiss-hover-card:hover .swiss-hover-card-image,
+.swiss-hover-card:focus-visible .swiss-hover-card-image {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.swiss-hover-card:hover,
+.swiss-hover-card:focus-visible {
+  border-top-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+    --motion-stagger: 0ms;
+  }
+
+  .swiss-hover-card .swiss-hover-card-image,
+  .swiss-hover-card:hover .swiss-hover-card-image,
+  .swiss-hover-card:focus-visible .swiss-hover-card-image {
+    transform: none;
+    filter: brightness(1.02);
+  }
+}

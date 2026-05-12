@@ -1,0 +1,82 @@
+/*
+ * Logo.module.css
+ *
+ * Stili scoped del componente Logo.
+ * Dipende dai motion tokens globali definiti in styles/motion-tokens.css
+ * (--motion-fast, --motion-base, --motion-stagger, --motion-ease-standard).
+ *
+ * Se i tokens non sono definiti globalmente, ci sono fallback inline.
+ */
+
+.logo {
+  display: block;
+  height: var(--logo-height, 48px);
+  width: auto;
+  color: var(--logo-color, currentColor);
+  /* overflow visible è ESSENZIALE: Calicchia con translateX(-100%)
+     altrimenti viene clipped dai bordi del container SVG */
+  overflow: visible;
+}
+
+/* === transform-box: fill-box ===
+   Senza questo, transform-origin si riferisce all'origine del viewBox SVG (0,0).
+   Con fill-box, si riferisce al bbox dell'elemento → percentuali coerenti. */
+.calicchia,
+.design,
+.tilde {
+  transform-box: fill-box;
+}
+
+/* === CALICCHIA: esce a sinistra ===
+   Movimento ortogonale puro (asse X), valore intero -100%.
+   No scale, no diagonali — coerente con motion swiss-revival. */
+.calicchia {
+  transition:
+    transform var(--motion-fast, 240ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    opacity var(--motion-fast, 240ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+}
+
+.collapsed .calicchia {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+/* === DESIGN: esce verso il basso ===
+   Movimento ortogonale (asse Y), valore intero +100%.
+   Stagger 80ms: parte leggermente dopo Calicchia per creare gerarchia di lettura. */
+.design {
+  transition:
+    transform var(--motion-fast, 240ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) var(--motion-stagger, 80ms),
+    opacity var(--motion-fast, 240ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) var(--motion-stagger, 80ms);
+}
+
+.collapsed .design {
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+/* === TILDE: anchor con saturazione adattiva ===
+   La tilde non si muove né scala. Cambia solo l'opacità per rinforzare
+   il pattern di sistema "arancione discreto = componente, arancione pieno = punto fermo".
+   Stagger maggiore (160ms): la promozione a logo standalone avviene DOPO l'uscita
+   degli altri elementi. */
+.tilde {
+  transition: opacity var(--motion-fast, 240ms) var(--motion-ease-standard, cubic-bezier(0.4, 0, 0.2, 1)) calc(var(--motion-stagger, 80ms) * 2);
+  opacity: 0.85;
+}
+
+.collapsed .tilde {
+  opacity: 1;
+}
+
+/* === Reduced motion ===
+   Disattiva tutte le transizioni quando l'utente ha richiesto motion ridotto.
+   L'animazione del viewBox è gestita separatamente nel componente JS
+   (vedi Logo.tsx: prefersReducedMotion → setAttribute immediato). */
+@media (prefers-reduced-motion: reduce) {
+  .calicchia,
+  .design,
+  .tilde {
+    transition: none;
+  }
+}

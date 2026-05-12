@@ -1,0 +1,43 @@
+/*
+ * Motion design tokens — Calicchia Design
+ * 
+ * Sistema swiss-revival contemporaneo.
+ * Usare questi valori per TUTTE le transizioni del sito (hover, menu, route,
+ * lingua, ecc.) per mantenere coerenza temporale.
+ */
+
+:root {
+  /* === Easing ===
+     Standard easing neutro, vicino a linear con leggera smoothness.
+     ZERO overshoot. Pentagram/Material/IBM Carbon usano questa curva. */
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Easing alternativi disponibili (usare con parsimonia) */
+  --motion-ease-out: cubic-bezier(0, 0, 0.2, 1);    /* per "entrate" più dolci */
+  --motion-ease-in: cubic-bezier(0.4, 0, 1, 1);     /* per "uscite" più decise */
+  
+  /* === Durate ===
+     Scala modulare basata su 80ms.
+     fast = 240ms (3 × 80) — micro-interactions
+     base = 320ms (4 × 80) — transizioni di stato
+     slow = 480ms (6 × 80) — transizioni di vista/route */
+  --motion-fast: 240ms;
+  --motion-base: 320ms;
+  --motion-slow: 480ms;
+  
+  /* Stagger base per orchestrazioni sequenziali */
+  --motion-stagger: 80ms;
+}
+
+/* === Reduced motion ===
+   Quando l'utente ha richiesto motion ridotto a livello sistema,
+   azzeriamo le durate. I componenti che fanno animazioni JS-driven
+   devono comunque verificarlo via matchMedia. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+    --motion-slow: 0ms;
+    --motion-stagger: 0ms;
+  }
+}

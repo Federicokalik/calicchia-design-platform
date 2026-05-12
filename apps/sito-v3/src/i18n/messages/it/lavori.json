@@ -1,0 +1,53 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Portfolio · Progetti che hanno fatto guadagnare i miei clienti | Federico Calicchia",
+      "description": "Portfolio web design e e-commerce: progetti reali, numeri verificabili, clienti veri. Niente render finti, niente concept art. Solo lavori che lavorano.",
+      "ogTitle": "Portfolio · Progetti che hanno fatto guadagnare clienti veri",
+      "ogDescription": "Web design e e-commerce: progetti reali, numeri verificabili, clienti veri. Niente render finti."
+    },
+    "eyebrow": "02 — Portfolio",
+    "title": "Lavori che lavorano. Niente concept art.",
+    "lead": "Progetti reali pubblicati. Clienti veri, numeri verificabili.\nSotto ogni cover trovi cosa è stato fatto e perché.",
+    "eyebrowWithCount": "Portfolio — {count, plural, one {# progetto} other {# progetti}}",
+    "pageTitle": "Portfolio. Progetti che hanno fatto guadagnare clienti veri.",
+    "pageLead": "Web design, e-commerce e sviluppo realizzati da zero.\nNiente render finti, niente \"concept art\" da pubblicare su Behance.\nOgni progetto è online, lavora per il cliente, e i numeri sono verificabili."
+  },
+  "detail": {
+    "stale": {
+      "single": "Lavoro pubblicato oltre un anno fa ({year})",
+      "multi": "Lavoro pubblicato {years} anni fa ({year})",
+      "warning": "Il sito potrebbe essere cambiato o non più online",
+      "verify": "Verifica lo stato attuale",
+      "ariaLabel": "Avviso sull'età del progetto",
+      "ageSingle": "oltre un anno fa",
+      "ageMulti": "{years} anni fa",
+      "publishedPrefix": "Lavoro pubblicato"
+    },
+    "next": "Prossimo progetto",
+    "prev": "Progetto precedente",
+    "outcome": "Risultati",
+    "challenge": "La sfida",
+    "approach": "Approccio",
+    "stack": "Stack tecnico",
+    "breadcrumbHome": "Home",
+    "breadcrumbLavori": "Lavori",
+    "backToAll": "Tutti i lavori",
+    "caseStudy": "Case study",
+    "client": "Cliente",
+    "tagLabel": "Tag",
+    "context": "Il contesto",
+    "overview": "Overview",
+    "challengeFallbackHeading": "Quello che andava risolto.",
+    "clientVoice": "Voce del cliente",
+    "seeMore": "Vuoi vederne altri?",
+    "allProjects": "Tutti i lavori",
+    "goToArchive": "Vai all'archivio",
+    "goToCaseStudy": "Vai al case study",
+    "beforeAfterHeading": "Prima e dopo, in numeri.",
+    "numbersHeading": "I numeri parlano.",
+    "gallery": "Galleria",
+    "longformTitle": "Approfondimento",
+    "longformHeading": "Note dietro al progetto"
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "title": "Contatti - Niente PowerPoint, niente promesse vuote | Federico Calicchia",
+    "description": "Web Designer & Developer Freelance a Ceccano (FR). Scrivimi, chiamami o prenota una consulenza gratuita di 30 minuti. Niente PowerPoint, niente promesse vuote, niente catena di fornitori.",
+    "ogTitle": "Contatti - Niente PowerPoint, niente promesse vuote",
+    "ogDescription": "Consulenza gratuita di 30 minuti. Senza impegno, senza presentazioni."
+  },
+  "hero": {
+    "eyebrow": "Contatti",
+    "title": "Contatti. Niente PowerPoint, niente promesse vuote.",
+    "lead": "Una chiamata di 30 minuti per capire se ha senso lavorare insieme.\nWeb Designer & Developer Freelance a Ceccano (FR).\nNiente catena di fornitori. Risposta garantita entro 24 ore."
+  },
+  "form": {
+    "name": "Nome",
+    "email": "Email",
+    "subject": "Oggetto",
+    "message": "Messaggio",
+    "namePlaceholder": "Come ti chiami?",
+    "emailPlaceholder": "Dove ti scrivo?",
+    "messagePlaceholder": "Cosa vuoi costruire? Più sei specifico meglio è.",
+    "submit": "Invia messaggio",
+    "submitting": "Invio in corso…",
+    "success": {
+      "eyebrow": "Messaggio ricevuto",
+      "heading": "Ti rispondo entro 24 ore.",
+      "textBeforeEmail": "Se non vedi nulla, controlla la cartella spam.\nSe è urgente, scrivimi direttamente a",
+      "textAfterEmail": ".",
+      "sendAnother": "Invia un altro messaggio"
+    },
+    "error": "Invio fallito. Riprova tra qualche minuto o scrivimi a mail@calicchia.design.",
+    "errorWithMessage": "Invio fallito: {message}",
+    "labels": {
+      "name": "Nome e cognome",
+      "email": "Email",
+      "phone": "Telefono",
+      "company": "Azienda (opzionale)",
+      "requestType": "Tipo richiesta",
+      "services": "Servizi di interesse",
+      "message": "Messaggio",
+      "wantsCall": "Preferisco una chiamata",
+      "wantsMeet": "Preferisco un Google Meet"
+    },
+    "auditRequestType": "Audit gratuito 15min",
+    "services": {
+      "web-design": "Web Design",
+      "e-commerce": "E-commerce",
+      "sviluppo-web": "Sviluppo Web",
+      "seo": "SEO",
+      "branding": "Branding",
+      "home-maintenance": "Manutenzione siti",
+      "assistenza-wordpress": "Assistenza WordPress",
+      "wordpress-migrazione": "Migrazione & Hosting WordPress"
+    },
+    "gdpr": {
+      "beforeLink": "Ho letto l'",
+      "link": "informativa privacy",
+      "afterLink": "e autorizzo il trattamento dei miei dati per gestire la richiesta."
+    },
+    "turnstileDisabled": "Anti-bot disabilitato (env mancante).",
+    "responseNote": "Risposta entro 24 ore · niente bot, scrivo io",
+    "prefill": {
+      "greeting": "Ciao Federico,",
+      "servicePlan": "mi interessa il pacchetto \"{plan}\" del servizio \"{service}\".",
+      "service": "mi interessa il servizio \"{service}\".",
+      "plan": "mi interessa il pacchetto \"{plan}\".",
+      "context": "Contesto: {context}."
+    },
+    "validation": {
+      "nameRequired": "Il nome è richiesto",
+      "nameMin": "Inserisci nome e cognome (almeno 2 caratteri).",
+      "nameMax": "Nome troppo lungo (max 100 caratteri).",
+      "emailRequired": "L'email è richiesta",
+      "emailInvalid": "Email non valida",
+      "emailMax": "Email troppo lunga.",
+      "messageRequired": "Scrivi un messaggio",
+      "messageMin": "Scrivimi almeno 20 caratteri sul progetto.",
+      "messageMax": "Messaggio troppo lungo (max 2000 caratteri).",
+      "phoneInvalid": "Formato telefono non valido (es. +39 3510000000).",
+      "companyMax": "Nome azienda troppo lungo (max 150 caratteri).",
+      "gdprRequired": "Devi accettare l'informativa privacy.",
+      "slotInvalid": "Formato slot non valido.",
+      "turnstileRequired": "Verifica anti-bot richiesta."
+    }
+  },
+  "channels": {
+    "title": "Altri canali",
+    "eyebrow": "Social — dove trovarmi",
+    "heading": "Anche fuori da qui.",
+    "email": "Email",
+    "phone": "Telefono",
+    "whatsapp": "WhatsApp",
+    "calendar": "Calendario"
+  }
+}

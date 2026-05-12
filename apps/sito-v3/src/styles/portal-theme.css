@@ -1,0 +1,87 @@
+/*
+ * Portal theme — shadcn/Radix token aliases for the (portal)/clienti/* route group.
+ * shadcn components reference utilities like `bg-background`, `text-foreground`,
+ * `border-border`, `bg-primary`, `bg-accent`. We map shadcn's expected token
+ * names onto the existing Pentagram design tokens defined in tokens.css so the
+ * portal stays visually consistent with the marketing site (warm off-white
+ * surface, ink #111, brand orange accent #F57F44).
+ *
+ * Scoping: registered via `@theme inline` so Tailwind v4 generates utilities,
+ * but `--color-accent` (shadcn-meaning ≠ brand accent) is overridden inside
+ * `[data-portal-shell]` only. Outside the portal, `bg-accent` stays brand
+ * orange as before.
+ */
+@theme inline {
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-text-primary);
+
+  --color-card: var(--color-surface-elev);
+  --color-card-foreground: var(--color-text-primary);
+
+  --color-popover: var(--color-surface-elev);
+  --color-popover-foreground: var(--color-text-primary);
+
+  --color-primary: var(--color-cta-bg);
+  --color-primary-foreground: var(--color-cta-fg);
+
+  --color-secondary: var(--color-surface-elev);
+  --color-secondary-foreground: var(--color-text-primary);
+
+  --color-muted: var(--color-surface-elev);
+  --color-muted-foreground: var(--color-text-secondary);
+
+  --color-destructive: var(--color-text-error);
+  --color-destructive-foreground: var(--color-accent-ink);
+
+  --color-input: var(--color-border);
+  --color-ring: var(--color-focus);
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
+
+  /*
+   * Portal type scale — single source of truth for typography inside
+   * `app/[locale]/(portal)/**`. Naming mirrors purpose, not size, so font
+   * sizes can be re-tuned without renaming components. Tailwind v4 turns
+   * each token into a utility (`text-portal-display` ecc.) with the
+   * line-height baked in via the second tuple value.
+   */
+  --text-portal-display: 2rem;
+  --text-portal-display--line-height: 1.1;
+  --text-portal-h1: 1.625rem;
+  --text-portal-h1--line-height: 1.2;
+  --text-portal-h2: 1.25rem;
+  --text-portal-h2--line-height: 1.3;
+  --text-portal-h3: 1rem;
+  --text-portal-h3--line-height: 1.45;
+  --text-portal-body: 0.875rem;
+  --text-portal-body--line-height: 1.55;
+  --text-portal-caption: 0.75rem;
+  --text-portal-caption--line-height: 1.5;
+  --text-portal-label: 0.6875rem;
+  --text-portal-label--line-height: 1.4;
+}
+
+/*
+ * Display token escape hatch — clamp-based fluid value applied directly via
+ * the @media-aware var override (Tailwind v4 doesn't accept clamp() inside
+ * @theme inline cleanly; we shadow the raw token at runtime).
+ */
+@media (min-width: 1024px) {
+  :root {
+    --text-portal-display: clamp(2rem, 1.4vw + 1.5rem, 2.5rem);
+  }
+}
+
+/*
+ * Portal-only override: shadcn's `bg-accent` / `text-accent-foreground` mean
+ * "muted hover background" (used in dropdowns, focus states), NOT the brand
+ * accent. Inside the portal we point them at surface-elev. Outside, the
+ * global `--color-accent: #F57F44` brand orange wins.
+ */
+[data-portal-shell] {
+  --color-accent: var(--color-surface-elev);
+  --color-accent-foreground: var(--color-text-primary);
+}

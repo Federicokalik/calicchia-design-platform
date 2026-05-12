@@ -1,0 +1,49 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Servizi · Web Design, E-Commerce, Sviluppo, SEO, WordPress, Performance, Accessibilità | Federico Calicchia",
+      "description": "Undici servizi, un solo standard. Web design, e-commerce, sviluppo custom, SEO, WordPress, branding, manutenzione, performance Core Web Vitals, accessibilità WCAG, analytics. Niente pacchetti pre-cotti.",
+      "ogTitle": "Servizi web & WordPress freelance — Zero scaricabarile, risultati misurati",
+      "ogDescription": "Web design, e-commerce, sviluppo, SEO, branding, manutenzione, WordPress. Un solo contatto, risultati misurati."
+    },
+    "eyebrow": "Cosa faccio per te",
+    "title": "Undici servizi, un solo standard.",
+    "lead": "Niente pacchetti pre-cotti, niente listini fissi.\nOgni servizio è cucito sul progetto reale dopo una chiamata di scoperta.",
+    "eyebrowWithCount": "{count} servizi · un solo standard",
+    "pageTitle": "Servizi web & WordPress. Zero scaricabarile, risultati misurati.",
+    "pageLead": "Quattro core verticali: web design, e-commerce, sviluppo web e SEO.\nOltre a branding e assistenza specifica per WordPress.\nUn solo contatto diretto, niente project manager che non scrive codice."
+  },
+  "detail": {
+    "eyebrow": "Servizio",
+    "deliverables": "Cosa ricevi",
+    "process": "Come lavoro",
+    "faqs": "Domande frequenti",
+    "awareness": "Cosa va storto senza",
+    "expandedScope": "Dopo la consegna",
+    "leadMagnet": "Audit gratuito",
+    "relatedServices": "Servizi collegati",
+    "ctaTitle": "Pronto a partire?",
+    "ctaSubtitle": "Una chiamata di 30 minuti per capire cosa serve davvero.\nNiente PowerPoint.",
+    "allServices": "Tutti i servizi",
+    "talkAboutProject": "Parliamo del progetto",
+    "featuresCount": "{count, plural, one {# feature} other {# feature}}",
+    "processCount": "{count, plural, one {# fase} other {# fasi}}",
+    "faqCount": "{count, plural, one {# risposta} other {# risposte}}",
+    "faqHeading": "Le domande che mi fanno tutti.",
+    "ctaEyebrow": "Iniziamo?",
+    "ctaButton": "Parliamone",
+    "deliverablesHeading": "Deliverables",
+    "deliverablesTableNumber": "N.",
+    "deliverablesTableDeliverable": "Deliverable",
+    "deliverablesTableFormat": "Formato",
+    "deliverablesTableTiming": "Timing",
+    "leadMagnetButton": "Prenota audit",
+    "leadMagnetNote": "Nessun obbligo - risposta entro 24h",
+    "showcaseEyebrow": "{index} — Lavori · {service}",
+    "showcaseHeading": "Lavori realizzati con questo servizio.",
+    "projectFallback": "Progetto",
+    "openCaseStudy": "Apri il case study",
+    "coverAlt": "{title} — cover",
+    "awarenessEyebrow": "Consapevolezza"
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "home": "Home",
+    "lavori": "Lavori",
+    "portfolio": "Portfolio",
+    "servizi": "Servizi",
+    "serviziPerProfessioni": "Servizi per professioni",
+    "zoneServite": "Zone servite",
+    "contatti": "Contatti",
+    "perche": "Perché me",
+    "percheScegliereMe": "Perché scegliere me",
+    "blog": "Blog",
+    "areaClienti": "Area Clienti",
+    "faq": "FAQ",
+    "freelance": "Web Designer Freelance"
+  },
+  "header": {
+    "logoAriaLabel": "Calicchia Design - homepage",
+    "contactCta": "Contattami",
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "menu": "Menu",
+    "close": "Chiudi",
+    "switchToLocale": "Passa a {locale}",
+    "switchLocaleTitle": "{current} -> {next}"
+  },
+  "menuOverlay": {
+    "title": "Menu",
+    "subtitle": "Naviga il sito",
+    "closeLabel": "Chiudi menu",
+    "ariaLabel": "Menu di navigazione",
+    "metaCount": "Menu - {count} sezioni",
+    "mainNavAriaLabel": "Navigazione principale",
+    "notes": {
+      "home": "Ingresso",
+      "portfolio": "Progetti selezionati",
+      "services": "Design, codice e crescita",
+      "why": "Metodo e responsabilità",
+      "blog": "Journal",
+      "contact": "Inizia da qui"
+    },
+    "consultationMeta": "30 min - Google Meet - Gratis",
+    "consultationTitle": "Parliamone.",
+    "consultationText": "Una prima call per capire se il progetto ha senso, quali vincoli ci sono e quale strada conviene prendere.",
+    "chooseTime": "Scegli un orario",
+    "quickPaths": "Percorsi rapidi",
+    "studio": "Studio",
+    "secondary": {
+      "clientAreaDescription": "Documenti, file e avanzamento progetto.",
+      "professionsDescription": "Landing verticali per categorie e attività.",
+      "faqDescription": "Dubbi frequenti prima di iniziare."
+    },
+    "serviceTags": {
+      "webDesign": "Web Design",
+      "eCommerce": "E-Commerce",
+      "webDevelopment": "Sviluppo Web",
+      "seo": "SEO",
+      "performance": "Performance & CWV",
+      "accessibility": "Accessibilità WCAG",
+      "analytics": "Analytics & GA4",
+      "maintenance": "Manutenzione siti",
+      "wordpressSupport": "Assistenza WordPress",
+      "wordpressMigration": "Migrazione WordPress"
+    }
+  },
+  "morphTicker": {
+    "label": "In cosa posso aiutarti?",
+    "openLabel": "Apri il filtro: in cosa posso aiutarti",
+    "dismissLabel": "Nascondi il filtro per questa sessione",
+    "closedDescription": "Filtro chiuso. Clicca per aprirlo e scegliere servizio + professione.",
+    "openDescription": "Filtro aperto. {services} servizi disponibili. {professions} professioni compatibili.",
+    "iNeed": "Ho bisogno di",
+    "for": "per",
+    "go": "Vai",
+    "choose": "Scegli ↑",
+    "chooseService": "Scegli un servizio",
+    "chooseProfession": "Scegli per chi",
+    "forWhom": "Per chi",
+    "iNeedCount": "Ho bisogno di · {count} servizi",
+    "forWhomCount": "Per chi · {count} compatibili",
+    "ariaServicesAvailable": "Servizi disponibili",
+    "ariaForWhom": "Per chi",
+    "ariaForWhomWithService": "Per chi ({count} compatibili con {service})",
+    "ariaCloseFilter": "Chiudi il filtro"
+  },
+  "breadcrumb": {
+    "home": "Home",
+    "separator": "→"
+  },
+  "skipLinks": {
+    "main": "Vai al contenuto",
+    "nav": "Vai alla navigazione",
+    "footer": "Vai al footer"
+  }
+}

@@ -1,0 +1,23 @@
+/*
+ * Reduced-motion fallbacks. GSAP is gated by gsap.matchMedia, but CSS-only
+ * animations (marquee, hover, transitions) need their own escape hatch.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  [data-motion='hide-on-reduced'] {
+    display: none !important;
+  }
+
+  [data-motion='static-on-reduced'] {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}

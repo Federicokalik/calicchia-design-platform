@@ -1,0 +1,410 @@
+{
+  "shell": {
+    "sessionLabel": "Session",
+    "logout": "Sign out",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "backToDashboard": "Back to dashboard",
+    "navAriaLabel": "Client area navigation",
+    "userFallback": "Client",
+    "areaEyebrow": "Client area"
+  },
+  "nav": {
+    "groups": {
+      "work": "Work",
+      "documents": "Documents",
+      "account": "Account"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "projects": "Projects",
+      "reports": "Reports",
+      "files": "Files",
+      "upload": "Upload",
+      "billing": "Billing",
+      "invoices": "Invoices",
+      "subscriptions": "Subscriptions",
+      "renewals": "Renewals",
+      "logout": "Sign out"
+    }
+  },
+  "card": {
+    "open": "Open"
+  },
+  "login": {
+    "cover": {
+      "headline": "Your work, in one place.",
+      "description": "Project status, files, deadlines and invoices — always up to date. No lost emails, no \"let me check and get back to you\".",
+      "bullets": {
+        "activeOnly": "For active clients only",
+        "noTracking": "HttpOnly cookies, no tracking"
+      }
+    },
+    "title": "Sign in",
+    "intro": "Enter your email and we'll send you a sign-in link. No password, link valid for 15 minutes.",
+    "fields": {
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "accessCode": "Access code",
+      "accessCodePlaceholder": "e.g. PRJ-XXXXXXXX"
+    },
+    "submit": {
+      "idle": "Send sign-in link",
+      "loading": "Sending…",
+      "codeIdle": "Sign in with code",
+      "codeLoading": "Verifying…"
+    },
+    "linkSent": {
+      "title": "Check your email.",
+      "body": "If the address is registered, you'll get a sign-in link within seconds. The link expires in 15 minutes.",
+      "retry": "Send another link"
+    },
+    "fallback": {
+      "toggleShow": "Got an access code? Sign in directly →",
+      "toggleHide": "← Back to email link",
+      "header": "Access code",
+      "subheader": "For emergencies or if you don't receive the email. Use the email + code your admin provided."
+    },
+    "errors": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Invalid email format.",
+      "accessCodeRequired": "Enter the access code.",
+      "credentialsInvalid": "Invalid email or code.",
+      "codeInvalid": "Invalid or expired code.",
+      "linkRequestFailed": "Couldn't send the link. Try again in a minute.",
+      "connectionLost": "Connection lost. Try again.",
+      "connectionLostDetail": "Connection lost: {message}",
+      "invalidLinkUrl": "The link is no longer valid or has expired. Request a new one."
+    },
+    "footer": {
+      "noAccess": "Don't have an account?",
+      "writeMe": "email me",
+      "backToSite": "← Back to site"
+    },
+    "logoAriaLabel": "Back to home"
+  },
+  "dashboard": {
+    "eyebrow": "Welcome back",
+    "title": "Here's where we are.",
+    "intro": "Projects, deadlines, files and invoices synced from the back office.",
+    "stats": {
+      "label": "Snapshot",
+      "activeProjects": "Active projects",
+      "openInvoices": "Open invoices",
+      "pending": "Outstanding",
+      "paid": "Paid"
+    },
+    "activeProjects": {
+      "title": "Active projects",
+      "viewAll": "All projects →",
+      "empty": {
+        "eyebrow": "Nothing in progress",
+        "title": "No active projects right now.",
+        "description": "When we start new work together, you'll find it here."
+      },
+      "fallbackDescription": "Project in progress."
+    },
+    "renewals": {
+      "title": "Upcoming deadlines",
+      "viewAll": "Calendar →",
+      "empty": {
+        "eyebrow": "No deadlines",
+        "title": "No upcoming renewals.",
+        "description": "Domains, hosting and recurring services will show up here."
+      }
+    },
+    "activity": {
+      "title": "Recent activity"
+    }
+  },
+  "projects": {
+    "list": {
+      "eyebrow": "Work in progress",
+      "title": "Your projects.",
+      "columns": {
+        "project": "Project",
+        "status": "Status",
+        "dueDate": "Due",
+        "messages": "Messages",
+        "progress": "Progress"
+      },
+      "empty": {
+        "eyebrow": "Nothing in progress",
+        "title": "No active projects right now.",
+        "description": "When we start new work together, you'll find it here."
+      }
+    },
+    "detail": {
+      "metaLabels": {
+        "type": "Type",
+        "start": "Start",
+        "due": "Expected delivery",
+        "currentStep": "Current step"
+      },
+      "metaFallbacks": {
+        "type": "Project",
+        "step": "To be defined"
+      },
+      "stats": {
+        "label": "Snapshot",
+        "progress": "Progress",
+        "milestones": "Milestones",
+        "deliverables": "Deliverables",
+        "daysToTarget": "Days to target"
+      },
+      "sections": {
+        "pipeline": "Pipeline",
+        "milestones": "Milestones",
+        "deliverables": "Deliverables",
+        "messages": "Messages"
+      },
+      "milestonesEmpty": {
+        "eyebrow": "Roadmap",
+        "title": "Milestones not yet published.",
+        "description": "They'll appear here once the project roadmap is visible in the portal."
+      },
+      "openStaging": "Open staging →",
+      "daysNotDefined": "N/A"
+    }
+  },
+  "files": {
+    "eyebrow": "Library",
+    "title": "Shared files.",
+    "intro": "Briefs, mockups, assets and documents uploaded to the portal.",
+    "uploadCta": "Upload",
+    "uploadFirstCta": "Upload the first file",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "project": "Project",
+      "size": "Size",
+      "uploadedAt": "Uploaded"
+    },
+    "fallbackProject": "General library",
+    "types": {
+      "pdf": "PDF",
+      "image": "Image",
+      "video": "Video",
+      "archive": "Archive",
+      "other": "File"
+    },
+    "empty": {
+      "eyebrow": "Empty library",
+      "title": "No files uploaded.",
+      "description": "Anything we share will land here."
+    }
+  },
+  "upload": {
+    "eyebrow": "Upload",
+    "title": "Upload files.",
+    "intro": "Pick a project, upload a file, and you'll find it in the library.",
+    "noteLabel": "Note",
+    "noteText": "Uploaded files are visible only inside your client area."
+  },
+  "billing": {
+    "eyebrow": "Transparent numbers",
+    "title": "What you invest. What you receive.",
+    "stats": {
+      "label": "Snapshot",
+      "total": "Total",
+      "paid": "Paid",
+      "pending": "Outstanding",
+      "invoices": "Invoices"
+    },
+    "history": "Invoice history",
+    "columns": {
+      "number": "Number",
+      "issueDate": "Date",
+      "dueDate": "Due",
+      "status": "Status",
+      "total": "Amount"
+    },
+    "empty": {
+      "eyebrow": "No invoices",
+      "title": "No invoices published.",
+      "description": "When an invoice is available you'll see it in this history."
+    }
+  },
+  "renewals": {
+    "eyebrow": "No surprises",
+    "title": "Domains, hosting, services. All deadlines.",
+    "intro": "Auto-renewals, costs and dates published from the back office.",
+    "calendar": "Deadline calendar",
+    "auto": "auto-renew",
+    "manual": "manual renewal",
+    "empty": {
+      "eyebrow": "No renewals",
+      "title": "No active deadlines.",
+      "description": "Domains, hosting and recurring services will appear here."
+    }
+  },
+  "invoices": {
+    "eyebrow": "Balance and receipts",
+    "title": "Invoices.",
+    "intro": "Pay an invoice, download the receipt, see the full history.",
+    "stats": {
+      "label": "Snapshot",
+      "outstanding": "Outstanding",
+      "paid": "Paid",
+      "count": "Invoices"
+    },
+    "columns": {
+      "number": "Number",
+      "issueDate": "Date",
+      "dueDate": "Due",
+      "status": "Status",
+      "total": "Amount"
+    },
+    "table": {
+      "open": "Open"
+    },
+    "detail": {
+      "back": "← All invoices",
+      "lineItems": "Items",
+      "lineItemColumns": {
+        "description": "Description",
+        "quantity": "Qty",
+        "unitPrice": "Unit price",
+        "total": "Total"
+      },
+      "totals": {
+        "subtotal": "Subtotal",
+        "tax": "VAT",
+        "total": "Total",
+        "paid": "Paid",
+        "due": "Due"
+      },
+      "paymentPlan": "Payment plan",
+      "stripeInvoice": "Open Stripe invoice",
+      "stripePdf": "Download Stripe PDF"
+    },
+    "empty": {
+      "eyebrow": "No invoices",
+      "title": "No invoices yet.",
+      "description": "When an invoice is issued, you'll find it here."
+    }
+  },
+  "payment": {
+    "payNow": "Pay now",
+    "payWith": "Pay with",
+    "stripe": "Credit card (Stripe)",
+    "paypal": "PayPal",
+    "preparing": "Preparing…",
+    "redirecting": "Redirecting…",
+    "scheduleType": {
+      "deposit": "Deposit",
+      "milestone": "Milestone",
+      "balance": "Balance",
+      "installment": "Installment"
+    },
+    "due": "Due {date}",
+    "noActiveLinks": "No active payment link. Contact the admin to generate one.",
+    "success": {
+      "eyebrow": "Payment received",
+      "title": "Thank you!",
+      "intro": "Your payment has been recorded. You'll get a confirmation by email.",
+      "downloadReceipt": "Download receipt",
+      "viewInvoices": "Go to invoices",
+      "stripeProcessing": "Confirming…",
+      "stripeProcessingHint": "Hold tight: we are finalising with Stripe.",
+      "stripeTimeout": "Payment still processing. I'll reach out once confirmed.",
+      "paypalCapturing": "Capturing PayPal payment…",
+      "paypalError": "Error while capturing PayPal payment. Retry or contact the admin."
+    },
+    "cancelled": {
+      "eyebrow": "Payment cancelled",
+      "title": "Payment not completed.",
+      "intro": "No charge was made. You can try again any time.",
+      "tryAgain": "Try again",
+      "viewInvoices": "Go to invoices"
+    }
+  },
+  "subscriptions": {
+    "eyebrow": "Recurring services",
+    "title": "Active subscriptions.",
+    "intro": "Hosting, maintenance, retainers: all auto-billed services.",
+    "columns": {
+      "name": "Service",
+      "provider": "Method",
+      "amount": "Amount",
+      "interval": "Frequency",
+      "next": "Next invoice",
+      "status": "Status"
+    },
+    "interval": {
+      "month": "Monthly",
+      "year": "Yearly"
+    },
+    "manageHint": "To cancel a subscription, drop me a line — we'll handle it together.",
+    "noAutoRenew": "No auto-renew",
+    "empty": {
+      "eyebrow": "No subscriptions",
+      "title": "No recurring services yet.",
+      "description": "Hosting, maintenance or retainers will appear here when enabled."
+    }
+  },
+  "reports": {
+    "list": {
+      "eyebrow": "Verifiable numbers",
+      "title": "Monthly reports.",
+      "intro": "Analytics, performance and SEO: reports published from the back office.",
+      "columns": {
+        "report": "Report",
+        "period": "Period",
+        "project": "Project",
+        "publishedAt": "Published"
+      },
+      "fallbackProject": "General",
+      "empty": {
+        "eyebrow": "No reports",
+        "title": "First report coming soon.",
+        "description": "Monthly reports start from the first full month after go-live."
+      }
+    },
+    "detail": {
+      "summary": "Summary",
+      "data": "Data",
+      "kpi": "KPIs",
+      "downloadPdf": "PDF"
+    }
+  },
+  "format": {
+    "dateNotDefined": "Not set",
+    "statusNotDefined": "Not set"
+  },
+  "status": {
+    "draft": "Draft",
+    "in_progress": "In progress",
+    "review": "In review",
+    "completed": "Completed",
+    "approved": "Approved",
+    "cancelled": "Cancelled",
+    "on_hold": "On hold",
+    "open": "Open",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "active": "Active",
+    "expiring_soon": "Expiring soon",
+    "past_due": "Past due",
+    "expired": "Expired",
+    "renewing": "Renewing",
+    "partial": "Partial payment",
+    "refunded": "Refunded",
+    "partially_refunded": "Partially refunded",
+    "void": "Void",
+    "trialing": "Trialing",
+    "unpaid": "Unpaid",
+    "incomplete": "Incomplete",
+    "incomplete_expired": "Incomplete (expired)",
+    "canceled": "Canceled",
+    "APPROVAL_PENDING": "Approval pending",
+    "ACTIVE": "Active",
+    "SUSPENDED": "Suspended",
+    "CANCELLED": "Cancelled",
+    "deposit": "Deposit",
+    "milestone": "Milestone",
+    "balance": "Balance",
+    "installment": "Installment"
+  }
+}

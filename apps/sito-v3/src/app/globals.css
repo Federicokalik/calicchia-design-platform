@@ -1,0 +1,396 @@
+@import 'tailwindcss';
+@import '../styles/tokens.css';
+@import '../styles/portal-theme.css';
+/* fonts.css rimosso — next/font/local in app/layout.tsx gestisce ora @font-face,
+   preload selettivo, size-adjust e hashing. var(--font-display) e var(--font-sans)
+   sono iniettate da next/font con className sul <html>. */
+@import '../styles/motion.css';
+@import '../styles/motion-tokens.css';
+
+/* View Transitions:
+   - Fade base 230ms cross-route (root pseudo)
+   - Morph 350ms su named transitions (case-{slug} per cover lavori) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 230ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 350ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    color-scheme: light;
+    background: var(--color-bg);
+  }
+
+  body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    margin: 0;
+    overflow-x: clip;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+
+  /* Display family on headings; layouts override via tailwind utilities */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0;
+  }
+
+  /* Focus ring — visible on warm-white bg */
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Lenis hook — required for smooth-scroll bridge */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  html.lenis-stopped body {
+    overflow: hidden;
+  }
+
+}
+
+.border-hairline {
+  border-color: var(--color-border);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   MenuOverlay — fuori da @layer base per avere priority sopra Tailwind utilities
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Fade ambient floating UI (MorphTicker, future docks) when menu is open */
+[data-morph-ticker] {
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+body[data-menu-open='true'] [data-morph-ticker] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.site-header-logo {
+  --logo-height: 34px;
+}
+
+@media (min-width: 768px) {
+  .site-header-logo {
+    --logo-height: 38px;
+  }
+}
+
+/* Menu overlay: short, structural reveal aligned with the static page model. */
+.caldes-menu-band {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 160ms ease,
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+[role='dialog'] {
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+
+[role='dialog'].is-open {
+  opacity: 1;
+}
+
+[role='dialog'].is-open [data-band='left'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+[role='dialog'].is-open [data-band='right'] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[role='dialog'].is-closing .caldes-menu-band {
+  opacity: 0;
+  transform: translateY(4px);
+  transition-duration: 120ms !important;
+}
+
+/* Reduced-motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  [role='dialog'],
+  .caldes-menu-band {
+    transition: none !important;
+  }
+  [role='dialog'].is-open .caldes-menu-band {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Blog body — long-form editorial typography for /blog/[anno]/[mese]/[slug]
+   ─────────────────────────────────────────────────────────────────────────── */
+.prose-blog {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+.prose-blog > * + * { margin-top: 1.5rem; }
+.prose-blog h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-display-sm);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+}
+.prose-blog h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-card-title);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+}
+.prose-blog p { max-width: 65ch; }
+.prose-blog a {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+.prose-blog a:hover { color: var(--color-accent); }
+.prose-blog strong { font-weight: 600; color: var(--color-ink); }
+.prose-blog em { font-style: italic; }
+.prose-blog blockquote {
+  border-left: 2px solid var(--color-accent);
+  padding-left: 1.5rem;
+  margin-left: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  color: var(--color-ink-muted);
+}
+.prose-blog ul, .prose-blog ol {
+  padding-left: 1.5rem;
+  max-width: 65ch;
+}
+.prose-blog ul { list-style: disc; }
+.prose-blog ol { list-style: decimal; }
+.prose-blog li { margin-top: 0.5rem; }
+.prose-blog code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.15em 0.35em;
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+}
+.prose-blog pre {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  background: var(--color-ink);
+  color: var(--color-bg);
+  padding: 1.5rem;
+  overflow-x: auto;
+  border-radius: 4px;
+}
+.prose-blog pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: inherit;
+}
+.prose-blog hr {
+  border: none;
+  border-top: 1px solid var(--color-line);
+  margin: 3rem 0;
+}
+.prose-blog img {
+  max-width: 100%;
+  height: auto;
+  margin: 2rem 0;
+}
+
+/* ── Case study longform — Pentagram editorial ────────────────────── */
+/* Stili per il markdown renderizzato da CaseLongform.tsx. Niente
+   prose-grey di Tailwind Typography (non installato): replichiamo le
+   regole essenziali in modo coerente con SWISS-RULES (hairline, mono
+   labels, accent solo su elementi specifici). */
+.case-longform {
+  font-size: var(--text-body-lg);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.case-longform p {
+  margin: 0 0 1.4rem;
+}
+.case-longform h2 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--text-display-sm);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--color-ink);
+  margin: 3rem 0 1.2rem;
+  max-width: 22ch;
+}
+.case-longform h3 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--color-ink);
+  margin: 2.5rem 0 0.8rem;
+}
+.case-longform a {
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-border-strong);
+  text-decoration: none;
+  transition: border-color 0.18s, color 0.18s;
+}
+.case-longform a:hover {
+  border-bottom-color: var(--color-accent-deep);
+  color: var(--color-accent-deep);
+}
+.case-longform ul,
+.case-longform ol {
+  padding-left: 1.4rem;
+  margin: 0 0 1.4rem;
+}
+.case-longform li {
+  margin-bottom: 0.6rem;
+}
+.case-longform ul li::marker {
+  color: var(--color-accent-deep);
+}
+.case-longform blockquote {
+  border-left: 1px solid var(--color-border-strong);
+  padding: 0.4rem 0 0.4rem 1.4rem;
+  margin: 2rem 0;
+  font-style: normal;
+  color: var(--color-ink);
+}
+.case-longform code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.9em;
+  background: var(--color-surface-elev);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+}
+.case-longform pre {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  background: var(--color-surface-elev);
+  border: 1px solid var(--color-border);
+  padding: 1rem 1.2rem;
+  margin: 1.6rem 0;
+  overflow-x: auto;
+  font-size: 0.92em;
+}
+.case-longform pre code {
+  background: transparent;
+  padding: 0;
+}
+.case-longform hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 2.5rem 0;
+}
+.case-longform img {
+  max-width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border: 1px solid var(--color-border);
+}
+.case-longform strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* ── Case study fade-in entry — Bierut austerity ───────────────────── */
+/* Opacity + small Y translation. Niente SplitText, niente word-reveal,
+   niente parallax. Solo soft entrance. Reduce-motion-aware. */
+@keyframes case-fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.case-fade-in {
+  animation: case-fade-in 320ms ease-out both;
+  will-change: opacity, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .case-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ── Body longform tipografia editoriale Swiss/Pentagram ───────────────── */
+/* Per body lunghi (services intro, pillar SEO, pagine info) che altrimenti
+ * risultano "seghettati" sul lato destro. Justify + auto-hyphens + text-wrap
+ * pretty (Chrome 117+, Safari 17.4+, Firefox 121+ con fallback graceful)
+ * danno un margine destro pulito alla Bierut/Pentagram editorial print.
+ *
+ * Richiede <html lang="..."> impostato per attivare il dictionary hyphens
+ * (già presente in apps/sito-v3 via app/layout.tsx: <html lang={locale}>).
+ */
+.body-longform {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+  word-spacing: -0.01em;
+}
+/* Su mobile, justify non funziona bene (column troppo stretta → river di
+ * bianco). Forza ragged-right sotto md. */
+@media (max-width: 767px) {
+  .body-longform {
+    text-align: left;
+    word-spacing: 0;
+  }
+}

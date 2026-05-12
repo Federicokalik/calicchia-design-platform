@@ -1,0 +1,96 @@
+/*
+ * Caldes design tokens — Swiss Restraint + Pentagram signature
+ * Tailwind v4 @theme inline: tokens become utility classes (e.g. bg-bg, text-ink, font-display).
+ */
+@theme {
+  /* Surfaces */
+  --color-bg: #FAFAF7;
+  --color-bg-elev: #FFFFFF;
+  --color-line: #E6E4DC;
+  --color-line-strong: #C9C5B7;
+
+  /* Ink */
+  --color-ink: #111111;
+  --color-ink-muted: #5C5C58;
+  --color-ink-subtle: #8C8C86;
+
+  /* Accent ambra (lava) — single hue, no deep variant */
+  --color-accent: #F57F44;
+  --color-accent-deep: #F57F44;       /* alias of --color-accent (decisione utente: accent unico) */
+  --color-accent-ink: #FFFFFF;        /* fg over accent */
+
+  /* Type families */
+  --font-display: 'Funnel Display', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Funnel Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+  /* Easing curves (also exposed as JS via motion-tokens.ts) */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
+
+  /* Editorial type scale (clamp-based, fluid) */
+  --text-display-xl: clamp(3rem, 6vw + 0.75rem, 7rem);  /* internal hero */
+  --text-display-lg: clamp(2.75rem, 4.5vw + 0.75rem, 5.5rem);
+  --text-display-md: clamp(2.25rem, 3vw + 1rem, 4rem);
+  --text-display-sm: clamp(1.75rem, 2.4vw + 0.6rem, 2.75rem);
+  --text-card-title: clamp(1.5rem, 1.6vw + 0.6rem, 2.25rem);
+  --text-eyebrow: 0.78rem;
+  --text-mono-xs: 0.75rem;
+  --text-body-lg: 1.25rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+
+  /* Semantic color aliases — every consumer should reach for these, not the
+     primitives above. Adding a new alias is cheap; renaming a primitive isn't. */
+  --color-surface: var(--color-bg);
+  --color-surface-elev: var(--color-bg-elev);
+  --color-surface-hover: var(--color-bg-elev);
+  --color-border: var(--color-line);
+  --color-border-strong: var(--color-line-strong);
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-muted);
+  --color-text-tertiary: var(--color-ink-subtle);
+  --color-text-on-accent: var(--color-accent-ink);
+  --color-text-error: var(--color-accent-deep);
+  --color-link: var(--color-ink);
+  --color-link-hover: var(--color-accent-deep);
+  --color-cta-bg: var(--color-accent);
+  --color-cta-fg: var(--color-accent-ink);
+  --color-focus: var(--color-ink);
+
+  /* Motion durations — paired with --ease-* above. Kept in sync with
+     `src/lib/motion-tokens.ts` (JS exports for GSAP). */
+  --motion-micro: 180ms;
+  --motion-short: 320ms;
+  --motion-base: 600ms;
+  --motion-long: 900ms;
+  --motion-cinematic: 1400ms;
+
+  /* z-index scale — single source of truth */
+  --z-base: 0;
+  --z-sticky-content: 10;
+  --z-overlay-content: 20;
+  --z-progress: 70;
+  --z-menu: 80;
+  --z-header: 90;
+  --z-page-transition: 95;
+}
+
+/* Reduced-motion global backstop — wins over per-component edge cases */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Generic fade-in-up — used by per-key remounts (e.g. TrustBento captions) */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

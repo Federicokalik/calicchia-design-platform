@@ -1,0 +1,212 @@
+# =====================================================
+# DEPENDENCIES
+# =====================================================
+node_modules/
+.pnpm-store/
+
+# =====================================================
+# BUILD OUTPUT
+# =====================================================
+dist/
+build/
+.output/
+.vercel/
+.netlify/
+
+# =====================================================
+# ASTRO
+# =====================================================
+.astro/
+
+# =====================================================
+# SVELTE-KIT (build output)
+# =====================================================
+.svelte-kit/
+
+# =====================================================
+# ENVIRONMENT VARIABLES (SENSITIVE!)
+# =====================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+# Keep .env.example as template
+!.env.example
+
+# =====================================================
+# IDE & EDITORS
+# =====================================================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# =====================================================
+# AI TOOLING (local, machine-specific)
+# =====================================================
+.agents/
+.kiro/
+skills-lock.json
+
+# =====================================================
+# OS FILES
+# =====================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# =====================================================
+# LOGS
+# =====================================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# =====================================================
+# TESTING
+# =====================================================
+coverage/
+.nyc_output/
+
+# =====================================================
+# CACHE
+# =====================================================
+.cache/
+.parcel-cache/
+.turbo/
+*.tsbuildinfo
+
+# =====================================================
+# SENSITIVE/PRIVATE FILES
+# =====================================================
+# Preventivi e documenti privati
+Preventivo*.pdf
+preventivo*.pdf
+*.invoice.pdf
+fattura*.pdf
+
+# Certificati e chiavi
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Database locali
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+
+# Dump database (mai committare seed reali / export prod)
+*.dump
+*.sql.gz
+pg_dump*
+data/seed-private.sql
+data/private/
+
+# Knowledge base AI con dati clienti reali
+apps/api/src/lib/agent/pricing_knowledge_base.md
+apps/api/src/lib/agent/*_private.md
+customers_private*
+
+# Audit interni privacy/security (rivelano weakness — pubblicare solo dopo remediation)
+docs/sql-privacy-audit.md
+docs/sql-privacy-audit-codex.md
+docs/security-hardening-plan.md
+docs/codex-execution-report.md
+docs/codex-h1234-report.md
+
+# Prompt e TODO operativi storici (workflow interno, non documentazione pubblica)
+/AGENTS.md
+/CLIENT-PORTAL-PROMPT.md
+/MIGRATION_TODO.md
+/PROMPT_GENERATORE_PREVENTIVI.md
+/TODO_CONTACT_FORM.md
+
+# =====================================================
+# CLAUDE CODE & DEVELOPMENT NOTES
+# =====================================================
+.claude/
+backend.md
+CLAUDE.md
+*.claude.md
+notes.md
+TODO.md
+# AI-generated scratchpads, audit reports, MCP caches
+task.md
+.serena/
+audit/
+
+# =====================================================
+# TEMPORARY FILES
+# =====================================================
+tmp/
+temp/
+*.tmp
+*.temp
+
+# =====================================================
+# SUPABASE LOCAL
+# =====================================================
+supabase/.branches/
+supabase/.temp/
+
+# =====================================================
+# UPLOADS (if any local uploads folder exists)
+# =====================================================
+uploads/
+public/uploads/
+
+# =====================================================
+# TOOLS & MCP
+# =====================================================
+.playwright-mcp/
+
+# =====================================================
+# DESIGN REFERENCES & SCREENSHOTS
+# =====================================================
+insp/
+screenshots/
+contatti-check.png
+INTEGRATION_REPORT.md
+# Whitelist: gli screenshot del README pubblico stanno in docs/screenshots/
+!docs/screenshots/
+!docs/screenshots/*.png
+
+# =====================================================
+# MISC
+# =====================================================
+*.local
+.eslintcache
+.stylelintcache
+
+# =====================================================
+# TOOL CONFIG & TEMP FILES
+# =====================================================
+.1code/
+test-cover.png
+generatore_preventivi_specs.zip
+
+# =====================================================
+# PYTHON
+# =====================================================
+__pycache__/
+*.pyc

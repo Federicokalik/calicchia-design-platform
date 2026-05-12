@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+/* ========== PAGE SETUP ========== */
+@page {
+  size: A4;
+  margin: 18mm 18mm 24mm 18mm;
+  @top-left {
+    content: "Calicchia Design di Federico Calicchia · P.IVA {{ fornitore.piva }}";
+    font-size: 7.5pt;
+    color: #999;
+    font-family: {{ brand.font }};
+  }
+  @bottom-center {
+    content: "{{ regime.nota_iva[:80] }}…";
+    font-size: 6pt;
+    color: #aaa;
+    font-family: {{ brand.font }};
+    max-width: 80%;
+  }
+  @bottom-right {
+    content: "Pag. " counter(page) " di " counter(pages);
+    font-size: 7.5pt;
+    color: #999;
+    font-family: {{ brand.font }};
+  }
+}
+
+@page cover {
+  margin: 0;
+  @top-left { content: none; }
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}
+
+/* ========== BASE ========== */
+:root {
+  --brand: {{ brand.colore_primario }};
+  --success: {{ brand.colore_successo }};
+  --error: {{ brand.colore_errore }};
+  --info: {{ brand.colore_info }};
+  --text: #1a1a1a;
+  --muted: #666;
+  --light: #f7f7f8;
+  --border: #e5e5e5;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: {{ brand.font }};
+  font-size: 10pt;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+h1 { font-size: 22pt; font-weight: 700; line-height: 1.2; }
+h2 { font-size: 15pt; font-weight: 700; margin-bottom: 10pt; color: var(--text); }
+h3 { font-size: 12pt; font-weight: 600; margin-bottom: 6pt; }
+p { margin-bottom: 8pt; }
+
+a { color: var(--brand); text-decoration: none; }
+
+/* ========== COVER ========== */
+.cover {
+  page: cover;
+  width: 210mm;
+  height: 297mm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: #fff;
+}
+
+.cover::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--brand), #ff9a5c, var(--brand));
+}
+
+.cover-logo { width: 140px; margin-bottom: 40pt; }
+
+.cover-title {
+  font-size: 28pt;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8pt;
+  padding: 0 40pt;
+  line-height: 1.15;
+}
+
+.cover-subtitle {
+  font-size: 13pt;
+  color: var(--brand);
+  font-weight: 500;
+  margin-bottom: 50pt;
+}
+
+.cover-client {
+  font-size: 16pt;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cover-client-sub {
+  font-size: 11pt;
+  color: var(--muted);
+  margin-top: 4pt;
+}
+
+.cover-date {
+  position: absolute;
+  bottom: 40pt;
+  font-size: 10pt;
+  color: var(--muted);
+}
+
+.cover-number {
+  position: absolute;
+  bottom: 56pt;
+  font-size: 9pt;
+  color: var(--muted);
+  letter-spacing: 0.5pt;
+}
+
+/* ========== SECTIONS ========== */
+.page-break { page-break-before: always; }
+
+.section { margin-bottom: 20pt; }
+.section-title {
+  font-size: 15pt;
+  font-weight: 700;
+  color: var(--text);
+  padding-bottom: 6pt;
+  border-bottom: 2px solid var(--brand);
+  margin-bottom: 14pt;
+}
+
+/* ========== BOXES ========== */
+.box {
+  border: 1px solid var(--border);
+  border-radius: 6pt;
+  padding: 14pt;
+  margin-bottom: 12pt;
+  page-break-inside: avoid;
+}
+
+.box-light { background: var(--light); }
+.box-brand { border-left: 4px solid var(--brand); }
+.box-warning {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+.box-info {
+  border-left: 4px solid var(--info);
+  background: #eff6ff;
+}
+.box-success {
+  border-left: 4px solid var(--success);
+  background: #f0fdf4;
+}
+.box-error {
+  border-left: 4px solid var(--error);
+  background: #fef2f2;
+}
+
+.box-title {
+  font-size: 11pt;
+  font-weight: 700;
+  margin-bottom: 6pt;
+}
+
+/* ========== STATS GRID ========== */
+.stats-grid {
+  display: flex;
+  gap: 10pt;
+  margin: 14pt 0;
+}
+.stat-box {
+  flex: 1;
+  text-align: center;
+  background: var(--light);
+  border-radius: 6pt;
+  padding: 12pt 8pt;
+  border: 1px solid var(--border);
+}
+.stat-value {
+  font-size: 22pt;
+  font-weight: 800;
+  color: var(--brand);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 8pt;
+  color: var(--muted);
+  margin-top: 4pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+}
+
+/* ========== TABLES ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12pt;
+  font-size: 9.5pt;
+}
+th {
+  background: var(--light);
+  font-weight: 600;
+  text-align: left;
+  padding: 8pt 10pt;
+  border-bottom: 2px solid var(--border);
+  font-size: 8.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+  color: var(--muted);
+}
+td {
+  padding: 8pt 10pt;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:last-child td { border-bottom: none; }
+
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+
+.positive { color: var(--success); font-weight: 600; }
+.negative { color: var(--error); font-weight: 600; }
+
+/* ========== OFFER BOXES ========== */
+.offer-box {
+  border: 2px solid var(--border);
+  border-radius: 8pt;
+  padding: 18pt;
+  margin-bottom: 14pt;
+  page-break-inside: avoid;
+  position: relative;
+}
+.offer-box.recommended {
+  border-color: var(--brand);
+}
+
+.offer-badge {
+  position: absolute;
+  top: -10pt;
+  right: 16pt;
+  background: var(--brand);
+  color: #fff;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 3pt 10pt;
+  border-radius: 10pt;
+  text-transform: uppercase;
+  letter-spacing: 0.5pt;
+}
+
+.offer-name {
+  font-size: 14pt;
+  font-weight: 700;
+  margin-bottom: 4pt;
+}
+.offer-desc {
+  color: var(--muted);
+  font-size: 9.5pt;
+  margin-bottom: 10pt;
+}
+.offer-price {
+  font-size: 20pt;
+  font-weight: 800;
+  color: var(--brand);
+  margin-bottom: 12pt;
+}
+
+.offer-lists { display: flex; gap: 16pt; }
+.offer-list { flex: 1; }
+.offer-list h4 {
+  font-size: 9pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+  margin-bottom: 6pt;
+}
+.offer-list.include h4 { color: var(--success); }
+.offer-list.exclude h4 { color: var(--error); }
+
+.offer-list ul {
+  list-style: none;
+  padding: 0;
+  font-size: 9pt;
+}
+.offer-list ul li {
+  padding: 3pt 0 3pt 14pt;
+  position: relative;
+}
+.offer-list.include ul li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--success);
+  font-weight: 700;
+}
+.offer-list.exclude ul li::before {
+  content: "✗";
+  position: absolute;
+  left: 0;
+  color: var(--error);
+  font-weight: 700;
+}
+
+/* ========== CHECKBOX ITEMS ========== */
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10pt;
+  padding: 10pt;
+  border: 1px solid var(--border);
+  border-radius: 5pt;
+  margin-bottom: 8pt;
+  page-break-inside: avoid;
+}
+.checkbox-box {
+  width: 16pt;
+  height: 16pt;
+  border: 2px solid var(--border);
+  border-radius: 3pt;
+  flex-shrink: 0;
+  margin-top: 1pt;
+}
+.checkbox-label { font-weight: 600; font-size: 10pt; }
+.checkbox-detail { font-size: 9pt; color: var(--muted); }
+
+/* ========== SIGNATURES ========== */
+.signature-section {
+  page-break-inside: avoid;
+  margin-top: 30pt;
+}
+.signature-row {
+  display: flex;
+  gap: 30pt;
+  margin-top: 14pt;
+}
+.signature-block {
+  flex: 1;
+  border-top: 1px solid var(--text);
+  padding-top: 6pt;
+}
+.signature-label {
+  font-size: 8.5pt;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+}
+.signature-space {
+  height: 50pt;
+}
+
+/* ========== CONTRACT ========== */
+.article {
+  margin-bottom: 14pt;
+  page-break-inside: avoid;
+}
+.article-number {
+  font-size: 10pt;
+  font-weight: 700;
+  color: var(--brand);
+  text-transform: uppercase;
+  margin-bottom: 2pt;
+}
+.article-title {
+  font-size: 11pt;
+  font-weight: 700;
+  margin-bottom: 6pt;
+}
+.article p, .article li {
+  font-size: 9.5pt;
+  line-height: 1.65;
+}
+.article ul, .article ol {
+  padding-left: 16pt;
+  margin-bottom: 8pt;
+}
+.article li { margin-bottom: 3pt; }
+
+/* ========== PARTI TABLE ========== */
+.parti-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16pt;
+}
+.parti-table td {
+  width: 50%;
+  vertical-align: top;
+  padding: 12pt;
+}
+.parti-table .parti-header {
+  background: var(--light);
+  font-weight: 700;
+  font-size: 9pt;
+  text-transform: uppercase;
+  letter-spacing: 0.3pt;
+  padding: 8pt 12pt;
+  border-bottom: 2px solid var(--brand);
+}
+.parti-field {
+  display: flex;
+  justify-content: space-between;
+  padding: 4pt 0;
+  border-bottom: 1px dotted var(--border);
+  font-size: 9pt;
+}
+.parti-field-label { color: var(--muted); }
+.parti-field-value { font-weight: 500; text-align: right; }
+.parti-field-line {
+  border-bottom: 1px solid var(--border);
+  min-width: 120pt;
+  display: inline-block;
+}
+
+/* ========== BULLETS ========== */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+}
+.bullet-list li {
+  padding: 4pt 0 4pt 16pt;
+  position: relative;
+  font-size: 9.5pt;
+}
+.bullet-list li::before {
+  content: "▸";
+  position: absolute;
+  left: 0;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+/* ========== INDEX ========== */
+.index-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5pt 0;
+  border-bottom: 1px dotted var(--border);
+  font-size: 10pt;
+}
+.index-item.sub { padding-left: 16pt; font-size: 9.5pt; color: var(--muted); }
+.index-number { font-weight: 600; min-width: 24pt; }
+.index-title { flex: 1; }
+.index-dots { flex: 1; border-bottom: 1px dotted #ccc; margin: 0 6pt; }
+
+/* ========== PAYMENT OPTIONS ========== */
+.payment-option {
+  border: 1px solid var(--border);
+  border-radius: 6pt;
+  padding: 14pt;
+  margin-bottom: 10pt;
+  page-break-inside: avoid;
+}
+.payment-option-title { font-weight: 700; font-size: 11pt; margin-bottom: 4pt; }
+.payment-discount {
+  display: inline-block;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 2pt 8pt;
+  border-radius: 10pt;
+  margin-left: 6pt;
+}
+.payment-total { font-size: 14pt; font-weight: 800; color: var(--brand); }
+.payment-rate {
+  font-size: 9pt;
+  color: var(--muted);
+  padding: 2pt 0;
+}
+
+/* ========== UTILITIES ========== */
+.muted { color: var(--muted); }
+.small { font-size: 8.5pt; }
+.brand { color: var(--brand); }
+.bold { font-weight: 700; }
+.mt-sm { margin-top: 8pt; }
+.mt-md { margin-top: 16pt; }
+.mb-sm { margin-bottom: 8pt; }
+.mb-md { margin-bottom: 16pt; }
+</style>
+</head>
+<body>
+
+{# ==================== COPERTINA ==================== #}
+<div class="cover">
+  {% if logo_uri %}
+  <img src="{{ logo_uri }}" alt="Calicchia Design" class="cover-logo">
+  {% endif %}
+  <div class="cover-title">{{ preventivo.documento.titolo }}</div>
+  <div class="cover-subtitle">{{ preventivo.documento.sottotitolo }}</div>
+
+  <div class="cover-client">
+    {{ preventivo.cliente.nome_display or preventivo.cliente.ragione_sociale }}
+  </div>
+  {% if preventivo.cliente.sottotitolo %}
+  <div class="cover-client-sub">{{ preventivo.cliente.sottotitolo }}</div>
+  {% endif %}
+
+  <div class="cover-number">N. {{ preventivo.meta.numero_preventivo }}</div>
+  <div class="cover-date">{{ data_formattata }}</div>
+</div>
+
+{# ==================== INDICE ==================== #}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Indice</h2>
+
+  {% set ns = namespace(n=1) %}
+
+  {% if has_premessa %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Premessa</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endif %}
+
+  {% for sez in preventivo.sezioni_extra %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">{{ sez.titolo }}</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endfor %}
+
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Offerta Economica</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+
+  {% if has_problemi_risolti %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Problemi Risolti</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endif %}
+
+  {% if has_clausole %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Clausole e Condizioni Speciali</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endif %}
+
+  {% if has_materiali %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Materiali Necessari</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endif %}
+
+  {% if has_tempistiche %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Tempistiche</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+  {% endif %}
+
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Modalità di Pagamento</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Modulo di Selezione e Accettazione</span>
+  </div>
+  {% set ns.n = ns.n + 1 %}
+
+  {% if has_contratto %}
+  <div class="index-item">
+    <span class="index-number">{{ ns.n }}.</span>
+    <span class="index-title">Contratto di Incarico Professionale</span>
+  </div>
+  {% for i in range(1, 16) %}
+  <div class="index-item sub">
+    <span class="index-number"></span>
+    <span class="index-title">Art. {{ i }}</span>
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+
+{# ==================== PREMESSA ==================== #}
+{% if has_premessa %}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Premessa</h2>
+  <p>{{ preventivo.premessa.testo }}</p>
+
+  {% if has_statistiche %}
+  <div class="stats-grid">
+    {% for stat in preventivo.premessa.statistiche %}
+    <div class="stat-box">
+      <div class="stat-value">{{ stat.valore }}</div>
+      <div class="stat-label">{{ stat.label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if has_problemi_critici %}
+  <div class="box box-error mt-sm">
+    <div class="box-title">Criticità rilevate</div>
+    <ul class="bullet-list">
+      {% for p in preventivo.premessa.problemi_critici %}
+      <li>{{ p }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{# ==================== SEZIONI EXTRA ==================== #}
+{% for sez in preventivo.sezioni_extra %}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">{{ sez.titolo }}</h2>
+  {% if sez.intro %}
+  <p>{{ sez.intro }}</p>
+  {% endif %}
+
+  {% if sez.tipo == "comparativa" and sez.righe %}
+  <table>
+    <thead>
+      <tr>
+        <th>Caratteristica</th>
+        <th>{{ sez.intestazione_a }}</th>
+        <th>{{ sez.intestazione_b }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in sez.righe %}
+      <tr>
+        <td><strong>{{ r.caratteristica }}</strong></td>
+        <td class="{{ 'positive' if r.a_positivo else 'negative' }}">{{ r.colonna_a }}</td>
+        <td class="{{ 'negative' if r.a_positivo else 'positive' }}">{{ r.colonna_b }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endfor %}
+
+{# ==================== OFFERTE ==================== #}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Offerta Economica</h2>
+
+  {% for offerta in preventivo.offerte %}
+  <div class="offer-box {{ 'recommended' if offerta.consigliata }}">
+    {% if offerta.consigliata %}
+    <div class="offer-badge">Consigliata</div>
+    {% endif %}
+    <div class="offer-name">{{ offerta.nome }}</div>
+    {% if offerta.descrizione %}
+    <div class="offer-desc">{{ offerta.descrizione }}</div>
+    {% endif %}
+    <div class="offer-price">{{ format_currency(offerta.prezzo) }}</div>
+
+    {% if offerta.include or offerta.esclude %}
+    <div class="offer-lists">
+      {% if offerta.include %}
+      <div class="offer-list include">
+        <h4>Include</h4>
+        <ul>
+          {% for item in offerta.include %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if offerta.esclude %}
+      <div class="offer-list exclude">
+        <h4>Non include</h4>
+        <ul>
+          {% for item in offerta.esclude %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if offerta.note_extra %}
+    <p class="muted small mt-sm">{{ offerta.note_extra }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  {# Riepilogo #}
+  <div class="box box-light">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span class="bold">Totale</span>
+      <span style="font-size: 16pt; font-weight: 800; color: var(--brand);">{{ totale_offerte_fmt }}</span>
+    </div>
+    {% if bollo > 0 %}
+    <p class="small muted mt-sm">
+      Marca da bollo: {{ bollo_fmt }} — {{ regime.marca_bollo }}
+    </p>
+    {% endif %}
+    <p class="small muted mt-sm">{{ regime.nota_iva }}</p>
+  </div>
+</div>
+
+{# ==================== PROBLEMI RISOLTI ==================== #}
+{% if has_problemi_risolti %}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Problemi Risolti</h2>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30pt;">#</th>
+        <th>Problema Attuale</th>
+        <th>Soluzione</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pr in preventivo.problemi_risolti %}
+      <tr>
+        <td class="text-center bold">{{ pr.numero }}</td>
+        <td class="negative">{{ pr.problema }}</td>
+        <td class="positive">{{ pr.soluzione }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{# ==================== CLAUSOLE SPECIALI ==================== #}
+{% if has_clausole %}
+<div class="section">
+  <h2 class="section-title">Clausole e Condizioni Speciali</h2>
+  {% for cl in preventivo.clausole_speciali %}
+  <div class="box box-{{ cl.tipo }}">
+    <div class="box-title">{{ cl.titolo }}</div>
+    {% if cl.testo %}
+    <p>{{ cl.testo }}</p>
+    {% endif %}
+    {% if cl.lista %}
+    <ul class="bullet-list">
+      {% for item in cl.lista %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{# ==================== MATERIALI ==================== #}
+{% if has_materiali %}
+<div class="section">
+  <h2 class="section-title">Materiali Necessari</h2>
+  <p>Per procedere con il lavoro, sarà necessario fornire i seguenti materiali:</p>
+  <ul class="bullet-list">
+    {% for m in preventivo.materiali_necessari %}
+    <li>{{ m }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+{# ==================== TEMPISTICHE ==================== #}
+{% if has_tempistiche %}
+<div class="section">
+  <h2 class="section-title">Tempistiche</h2>
+  <div class="box box-brand">
+    <p><strong>Prima bozza:</strong> {{ preventivo.tempistiche.prima_bozza }}</p>
+    {% if preventivo.tempistiche.nota %}
+    <p class="small muted">{{ preventivo.tempistiche.nota }}</p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{# ==================== PAGAMENTO ==================== #}
+{% if modalita_calcolate %}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Modalità di Pagamento</h2>
+
+  {% for mod in modalita_calcolate %}
+  <div class="payment-option">
+    <div class="payment-option-title">
+      {{ mod.nome }}
+      {% if mod.sconto_percentuale %}
+      <span class="payment-discount">-{{ mod.sconto_percentuale|int }}%</span>
+      {% endif %}
+    </div>
+
+    {% if mod.descrizione %}
+    <p class="muted small">{{ mod.descrizione }}</p>
+    {% endif %}
+
+    {% if mod.sconto_fmt %}
+    <p class="small">Sconto: <strong>{{ mod.sconto_fmt }}</strong></p>
+    {% endif %}
+
+    <div class="payment-total mt-sm">{{ mod.totale_scontato_fmt }}</div>
+
+    {% if mod.rate_calcolate %}
+    <div class="mt-sm">
+      {% for r in mod.rate_calcolate %}
+      <div class="payment-rate">
+        {{ r.percentuale|int }}% — <strong>{{ r.importo_fmt }}</strong> {{ r.momento }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="box box-light mt-sm">
+    <p class="small"><strong>Coordinate bancarie:</strong></p>
+    <p class="small">{{ fornitore.banca }}</p>
+    <p class="small">IBAN: <strong>{{ fornitore.iban }}</strong></p>
+    <p class="small">BIC/SWIFT: {{ fornitore.bic }}</p>
+    <p class="small">Intestatario: {{ fornitore.ragione_sociale }}</p>
+  </div>
+</div>
+{% endif %}
+
+{# ==================== MODULO SELEZIONE ==================== #}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Modulo di Selezione e Accettazione</h2>
+
+  <p class="mb-md">Il/La sottoscritto/a seleziona le seguenti opzioni:</p>
+
+  <h3>Servizi selezionati</h3>
+  {% for offerta in preventivo.offerte %}
+  <div class="checkbox-item">
+    <div class="checkbox-box"></div>
+    <div>
+      <div class="checkbox-label">{{ offerta.nome }}</div>
+      <div class="checkbox-detail">{{ format_currency(offerta.prezzo) }}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <h3 class="mt-md">Modalità di pagamento</h3>
+  {% for mod in modalita_calcolate %}
+  <div class="checkbox-item">
+    <div class="checkbox-box"></div>
+    <div>
+      <div class="checkbox-label">{{ mod.nome }}</div>
+      <div class="checkbox-detail">Totale: {{ mod.totale_scontato_fmt }}{% if mod.sconto_percentuale %} (sconto {{ mod.sconto_percentuale|int }}% incluso){% endif %}</div>
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="box box-brand mt-md">
+    <p class="bold">Dichiarazione di accettazione</p>
+    <p class="small">
+      Con la sottoscrizione del presente modulo, il/la sottoscritto/a dichiara di aver preso visione
+      dell'intero documento, di accettare le condizioni ivi riportate e di voler procedere con
+      i servizi e la modalità di pagamento selezionati.
+    </p>
+    <p class="small muted mt-sm">
+      Il presente preventivo è valido fino al <strong>{{ scadenza_formattata }}</strong>.
+    </p>
+  </div>
+
+  <div class="signature-section">
+    <div class="signature-row">
+      <div class="signature-block">
+        <div class="signature-space"></div>
+        <div class="signature-label">Luogo e data</div>
+      </div>
+      <div class="signature-block">
+        <div class="signature-space"></div>
+        <div class="signature-label">Firma del Cliente</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ==================== CONTRATTO ==================== #}
+{% if has_contratto %}
+<div class="page-break"></div>
+<div class="section">
+  <h2 class="section-title">Contratto di Incarico Professionale</h2>
+
+  {# Parti contraenti #}
+  <table class="parti-table">
+    <tr>
+      <td class="parti-header">Il Fornitore</td>
+      <td class="parti-header">Il Cliente</td>
+    </tr>
+    <tr>
+      <td>
+        <div class="parti-field">
+          <span class="parti-field-label">Ragione Sociale</span>
+          <span class="parti-field-value">{{ fornitore.ragione_sociale }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Sede</span>
+          <span class="parti-field-value">{{ fornitore.indirizzo }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">P.IVA</span>
+          <span class="parti-field-value">{{ fornitore.piva }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Legale Rapp.</span>
+          <span class="parti-field-value">{{ fornitore.legale_rappresentante }}</span>
+        </div>
+      </td>
+      <td>
+        {% if is_azienda %}
+        <div class="parti-field">
+          <span class="parti-field-label">Ragione Sociale</span>
+          <span class="parti-field-value">{{ preventivo.cliente.ragione_sociale or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Sede Legale</span>
+          <span class="parti-field-value">{{ preventivo.cliente.sede_legale or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">P.IVA</span>
+          <span class="parti-field-value">{{ preventivo.cliente.piva or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">C.F.</span>
+          <span class="parti-field-value">{{ preventivo.cliente.codice_fiscale or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Cod. Univoco/PEC</span>
+          <span class="parti-field-value">{{ preventivo.cliente.codice_univoco_pec or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Legale Rapp.</span>
+          <span class="parti-field-value">{{ preventivo.cliente.legale_rappresentante or '________________________' }}</span>
+        </div>
+        {% else %}
+        <div class="parti-field">
+          <span class="parti-field-label">Nome e Cognome</span>
+          <span class="parti-field-value">{{ preventivo.cliente.ragione_sociale or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Indirizzo</span>
+          <span class="parti-field-value">{{ preventivo.cliente.sede_legale or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">C.F.</span>
+          <span class="parti-field-value">{{ preventivo.cliente.codice_fiscale or '________________________' }}</span>
+        </div>
+        {% endif %}
+        <div class="parti-field">
+          <span class="parti-field-label">Telefono</span>
+          <span class="parti-field-value">{{ preventivo.cliente.telefono or '________________________' }}</span>
+        </div>
+        <div class="parti-field">
+          <span class="parti-field-label">Email</span>
+          <span class="parti-field-value">{{ preventivo.cliente.email or '________________________' }}</span>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <p class="mb-md">
+    Tra le Parti sopra indicate, di seguito denominate "<strong>Fornitore</strong>" e "<strong>Cliente</strong>",
+    si conviene e si stipula il seguente contratto di incarico professionale.
+  </p>
+
+  {# Art. 1 — OGGETTO #}
+  <div class="article">
+    <div class="article-number">Art. 1</div>
+    <div class="article-title">OGGETTO DELL'INCARICO</div>
+    <p>Il Fornitore si impegna a svolgere per il Cliente i seguenti servizi professionali:</p>
+    <ul>
+      {% for s in preventivo.contratto_perimetro.servizi %}
+      <li>{{ s }}</li>
+      {% endfor %}
+    </ul>
+    {% if preventivo.contratto_perimetro.clausole %}
+    <p>Si precisa che:</p>
+    <ul>
+      {% for c in preventivo.contratto_perimetro.clausole %}
+      <li>{{ c }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  {# Art. 2 — COMPENSO #}
+  <div class="article">
+    <div class="article-number">Art. 2</div>
+    <div class="article-title">COMPENSO E MODALITÀ DI PAGAMENTO</div>
+    <p>
+      Il compenso per i servizi di cui all'Art. 1 è stabilito come da offerta economica
+      allegata al presente contratto.
+    </p>
+    <p>
+      Il pagamento dovrà avvenire secondo la modalità selezionata nel modulo di accettazione,
+      tramite bonifico bancario alle seguenti coordinate:
+    </p>
+    <div class="box box-light">
+      <p class="small"><strong>{{ fornitore.banca }}</strong></p>
+      <p class="small">IBAN: {{ fornitore.iban }}</p>
+      <p class="small">BIC/SWIFT: {{ fornitore.bic }}</p>
+      <p class="small">Intestatario: {{ fornitore.ragione_sociale }}</p>
+    </div>
+    <p>{{ regime.nota_iva }}</p>
+    {% if bollo > 0 %}
+    <p>{{ regime.marca_bollo }}</p>
+    {% endif %}
+  </div>
+
+  {# Art. 3 — DURATA #}
+  <div class="article">
+    <div class="article-number">Art. 3</div>
+    <div class="article-title">DURATA</div>
+    <p>
+      Il presente contratto ha durata di <strong>{{ contratto_config.durata_standard_mesi }} mesi</strong>
+      dalla data di sottoscrizione, salvo diverso accordo scritto tra le Parti.
+      Alla scadenza il contratto si intende concluso senza necessità di disdetta.
+    </p>
+  </div>
+
+  {# Art. 4 — OBBLIGHI DEL FORNITORE #}
+  <div class="article">
+    <div class="article-number">Art. 4</div>
+    <div class="article-title">OBBLIGHI DEL FORNITORE</div>
+    <p>Il Fornitore si impegna a:</p>
+    <ul>
+      <li>Eseguire i servizi con diligenza e professionalità, secondo le migliori pratiche del settore;</li>
+      <li>Rispettare le tempistiche concordate, salvo cause di forza maggiore o ritardi imputabili al Cliente;</li>
+      <li>Mantenere la riservatezza su tutte le informazioni ricevute dal Cliente;</li>
+      <li>Comunicare tempestivamente eventuali impedimenti o variazioni necessarie.</li>
+    </ul>
+  </div>
+
+  {# Art. 5 — OBBLIGHI DEL CLIENTE #}
+  <div class="article">
+    <div class="article-number">Art. 5</div>
+    <div class="article-title">OBBLIGHI DEL CLIENTE</div>
+    <p>Il Cliente si impegna a:</p>
+    <ul>
+      <li>Fornire tempestivamente i materiali e le informazioni necessarie per l'esecuzione dei servizi;</li>
+      <li>Collaborare attivamente con il Fornitore durante tutte le fasi del progetto;</li>
+      <li>Rispettare i termini di pagamento concordati;</li>
+      <li>Fornire feedback e approvazioni entro 5 giorni lavorativi dalla richiesta, salvo diverso accordo.</li>
+    </ul>
+  </div>
+
+  {# Art. 6 — REVISIONI #}
+  <div class="article">
+    <div class="article-number">Art. 6</div>
+    <div class="article-title">REVISIONI E MODIFICHE</div>
+    <p>
+      Il compenso include un numero ragionevole di revisioni come specificato nell'offerta economica.
+      Ulteriori revisioni o modifiche sostanziali rispetto al progetto concordato saranno
+      quotate separatamente e dovranno essere approvate per iscritto dal Cliente prima dell'esecuzione.
+    </p>
+  </div>
+
+  {# Art. 7 — PROPRIETÀ INTELLETTUALE #}
+  <div class="article">
+    <div class="article-number">Art. 7</div>
+    <div class="article-title">PROPRIETÀ INTELLETTUALE</div>
+    <p>
+      Il trasferimento della proprietà intellettuale dei lavori realizzati avverrà al completamento
+      del pagamento integrale del compenso pattuito. Fino a quel momento, tutti i diritti restano
+      in capo al Fornitore.
+    </p>
+    <p>
+      Il Fornitore si riserva il diritto di utilizzare i lavori realizzati a fini promozionali
+      e di portfolio, salvo diverso accordo scritto.
+    </p>
+  </div>
+
+  {# Art. 8 — RISERVATEZZA #}
+  <div class="article">
+    <div class="article-number">Art. 8</div>
+    <div class="article-title">RISERVATEZZA</div>
+    <p>
+      Le Parti si impegnano a mantenere la massima riservatezza su tutte le informazioni,
+      dati e documenti scambiati nell'ambito del presente contratto, anche dopo la cessazione
+      del rapporto contrattuale.
+    </p>
+  </div>
+
+  {# Art. 9 — RITARDI E FORZA MAGGIORE #}
+  <div class="article">
+    <div class="article-number">Art. 9</div>
+    <div class="article-title">RITARDI E FORZA MAGGIORE</div>
+    <p>
+      Le tempistiche indicate sono da intendersi come stima ragionevole e non come termine essenziale.
+      Nessuna delle Parti sarà responsabile per ritardi causati da eventi di forza maggiore.
+      I ritardi nella consegna di materiali o feedback da parte del Cliente comportano un
+      corrispondente slittamento delle tempistiche del progetto.
+    </p>
+  </div>
+
+  {# Art. 10 — RECESSO #}
+  <div class="article">
+    <div class="article-number">Art. 10</div>
+    <div class="article-title">RECESSO</div>
+    <p>
+      Il Cliente può recedere dal contratto in qualsiasi momento con comunicazione scritta.
+      In caso di recesso, il Cliente è tenuto al pagamento dei servizi già erogati e delle
+      spese sostenute dal Fornitore fino alla data di recesso. Gli importi già versati non
+      sono rimborsabili.
+    </p>
+    <p>
+      Il Fornitore può recedere dal contratto con preavviso scritto di 15 giorni in caso
+      di gravi inadempienze del Cliente, previa diffida ad adempiere.
+    </p>
+  </div>
+
+  {# Art. 11 — INADEMPIMENTO E PENALI #}
+  <div class="article">
+    <div class="article-number">Art. 11</div>
+    <div class="article-title">INADEMPIMENTO E PENALI</div>
+    <p>
+      In caso di mancato pagamento entro i termini concordati, il Fornitore si riserva il diritto
+      di sospendere l'erogazione dei servizi fino alla regolarizzazione dei pagamenti, senza che
+      ciò comporti responsabilità alcuna a suo carico.
+    </p>
+    <p>
+      Sul ritardato pagamento saranno applicati gli interessi moratori nella misura prevista
+      dal D.Lgs. 231/2002.
+    </p>
+  </div>
+
+  {# Art. 12 — LIMITAZIONE DI RESPONSABILITÀ #}
+  <div class="article">
+    <div class="article-number">Art. 12</div>
+    <div class="article-title">LIMITAZIONE DI RESPONSABILITÀ</div>
+    <p>
+      La responsabilità del Fornitore per danni derivanti dall'esecuzione del presente contratto
+      è limitata all'importo del compenso effettivamente percepito. Il Fornitore non sarà in
+      alcun caso responsabile per danni indiretti, perdita di profitto o danni consequenziali.
+    </p>
+  </div>
+
+  {# Art. 13 — TRATTAMENTO DATI PERSONALI #}
+  <div class="article">
+    <div class="article-number">Art. 13</div>
+    <div class="article-title">TRATTAMENTO DEI DATI PERSONALI</div>
+    <p>
+      Le Parti si impegnano al trattamento dei dati personali in conformità al Regolamento (UE) 2016/679
+      (GDPR) e alla normativa nazionale vigente. I dati raccolti saranno trattati esclusivamente
+      per le finalità connesse all'esecuzione del presente contratto.
+    </p>
+  </div>
+
+  {# Art. 14 — COMUNICAZIONI #}
+  <div class="article">
+    <div class="article-number">Art. 14</div>
+    <div class="article-title">COMUNICAZIONI</div>
+    <p>
+      Tutte le comunicazioni relative al presente contratto dovranno essere effettuate per iscritto
+      agli indirizzi indicati in intestazione. Le comunicazioni via email hanno pieno valore
+      ai fini del presente contratto.
+    </p>
+  </div>
+
+  {# Art. 15 — FORO COMPETENTE #}
+  <div class="article">
+    <div class="article-number">Art. 15</div>
+    <div class="article-title">FORO COMPETENTE E LEGGE APPLICABILE</div>
+    <p>
+      Il presente contratto è regolato dalla legge italiana. Per qualsiasi controversia derivante
+      dal presente contratto sarà competente in via esclusiva il <strong>{{ contratto_config.foro_competente }}</strong>.
+    </p>
+  </div>
+
+  {# Firma contratto #}
+  <div class="signature-section">
+    <p class="small muted">Letto, approvato e sottoscritto in data ____________________</p>
+    <div class="signature-row">
+      <div class="signature-block">
+        <div class="signature-space"></div>
+        <div class="signature-label">Il Fornitore — {{ fornitore.legale_rappresentante }}</div>
+      </div>
+      <div class="signature-block">
+        <div class="signature-space"></div>
+        <div class="signature-label">Il Cliente</div>
+      </div>
+    </div>
+  </div>
+
+  {# Clausole vessatorie #}
+  <div class="box box-warning mt-md">
+    <div class="box-title">Approvazione specifica ex artt. 1341 e 1342 C.C.</div>
+    <p class="small">
+      Il Cliente dichiara di aver letto e di approvare specificamente, ai sensi e per gli effetti
+      degli artt. 1341 e 1342 del Codice Civile, le seguenti clausole:
+      <strong>Art. {% for n in contratto_config.clausole_vessatorie %}{{ n }}{% if not loop.last %}, Art. {% endif %}{% endfor %}</strong>.
+    </p>
+    <div class="signature-row">
+      <div class="signature-block">
+        <div class="signature-space"></div>
+        <div class="signature-label">Firma del Cliente per approvazione specifica</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+</body>
+</html>

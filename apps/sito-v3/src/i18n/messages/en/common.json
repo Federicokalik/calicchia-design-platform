@@ -1,0 +1,50 @@
+{
+  "brand": "Caldes",
+  "tagline": "Freelance Web Designer & Developer",
+  "location": "Italy / Worldwide",
+  "cta": {
+    "primary": "Let's talk",
+    "secondary": "Get in touch",
+    "tertiary": "Learn more",
+    "back": "Back",
+    "more": "Find out more",
+    "close": "Close"
+  },
+  "actions": {
+    "readMore": "Continue reading",
+    "learnMore": "Learn more",
+    "viewProject": "View project",
+    "viewAll": "View all",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied"
+  },
+  "loading": "Loading…",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "footer": {
+    "copyright": "© {year} Federico Calicchia · {legalName}",
+    "copyrightLine": "© {year} {legalName}",
+    "navigationAriaLabel": "Footer navigation",
+    "index": "Index",
+    "findMe": "Where to find me",
+    "usefulLinks": "Useful links",
+    "manageCookies": "Cookie settings",
+    "social": "Social",
+    "madeIn": "Made with care in Ceccano (FR)",
+    "vat": "VAT IT03160480608",
+    "legal": {
+      "privacy": "Privacy Policy",
+      "cookie": "Cookie Policy",
+      "terms": "Terms & Conditions",
+      "request": "Personal Data Request"
+    },
+    "rights": "All rights reserved."
+  },
+  "languageSwitch": {
+    "label": "Language",
+    "switchToEn": "English",
+    "switchToIt": "Italiano",
+    "promptEn": "Prefer reading in English?",
+    "switchVerb": "Switch language"
+  }
+}

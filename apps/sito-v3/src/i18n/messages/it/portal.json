@@ -1,0 +1,410 @@
+{
+  "shell": {
+    "sessionLabel": "Sessione",
+    "logout": "Esci",
+    "openMenu": "Apri menu",
+    "closeMenu": "Chiudi menu",
+    "backToDashboard": "Torna alla dashboard",
+    "navAriaLabel": "Navigazione area clienti",
+    "userFallback": "Cliente",
+    "areaEyebrow": "Area clienti"
+  },
+  "nav": {
+    "groups": {
+      "work": "Lavoro",
+      "documents": "Documenti",
+      "account": "Account"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "projects": "Progetti",
+      "reports": "Report",
+      "files": "File",
+      "upload": "Carica file",
+      "billing": "Investimento",
+      "invoices": "Fatture",
+      "subscriptions": "Abbonamenti",
+      "renewals": "Rinnovi",
+      "logout": "Esci"
+    }
+  },
+  "card": {
+    "open": "Apri"
+  },
+  "login": {
+    "cover": {
+      "headline": "Il tuo lavoro, in un posto solo.",
+      "description": "Stato dei progetti, file, scadenze e fatture — tutto qui, sempre aggiornato. Niente email perse, niente \"te lo cerco e ti dico\".",
+      "bullets": {
+        "activeOnly": "Accesso solo per clienti attivi",
+        "noTracking": "Cookie HttpOnly, niente tracking"
+      }
+    },
+    "title": "Accedi",
+    "intro": "Inserisci la tua email: ti mando un link per entrare. Niente password, link valido 15 minuti.",
+    "fields": {
+      "email": "Email",
+      "emailPlaceholder": "tu@esempio.it",
+      "accessCode": "Codice di accesso",
+      "accessCodePlaceholder": "Es. PRJ-XXXXXXXX"
+    },
+    "submit": {
+      "idle": "Invia link di accesso",
+      "loading": "Invio…",
+      "codeIdle": "Entra con codice",
+      "codeLoading": "Verifica…"
+    },
+    "linkSent": {
+      "title": "Controlla la tua email.",
+      "body": "Se l'indirizzo è registrato come cliente, riceverai un link entro pochi secondi. Il link scade tra 15 minuti.",
+      "retry": "Invia un altro link"
+    },
+    "fallback": {
+      "toggleShow": "Hai un codice di accesso? Entra direttamente →",
+      "toggleHide": "← Torna al link via email",
+      "header": "Codice di accesso",
+      "subheader": "Per emergenze o se non ricevi l'email. Email + codice ricevuti dall'admin."
+    },
+    "errors": {
+      "emailRequired": "Email richiesta.",
+      "emailInvalid": "Formato email non valido.",
+      "accessCodeRequired": "Inserisci il codice di accesso.",
+      "credentialsInvalid": "Email o codice non validi.",
+      "codeInvalid": "Codice non valido o scaduto.",
+      "linkRequestFailed": "Non sono riuscito a inviare il link. Riprova fra un minuto.",
+      "connectionLost": "Connessione persa. Riprova.",
+      "connectionLostDetail": "Connessione persa: {message}",
+      "invalidLinkUrl": "Il link non è più valido o è scaduto. Richiedine uno nuovo."
+    },
+    "footer": {
+      "noAccess": "Non hai un account?",
+      "writeMe": "scrivimi",
+      "backToSite": "← Torna al sito"
+    },
+    "logoAriaLabel": "Torna alla home"
+  },
+  "dashboard": {
+    "eyebrow": "Bentornato",
+    "title": "Ecco a che punto siamo.",
+    "intro": "Progetti, scadenze, file e fatture aggiornati dal gestionale.",
+    "stats": {
+      "label": "Snapshot",
+      "activeProjects": "Progetti attivi",
+      "openInvoices": "Fatture aperte",
+      "pending": "Da saldare",
+      "paid": "Pagato"
+    },
+    "activeProjects": {
+      "title": "Progetti attivi",
+      "viewAll": "Tutti i progetti →",
+      "empty": {
+        "eyebrow": "Niente in corso",
+        "title": "Niente progetti attivi al momento.",
+        "description": "Quando avvieremo un nuovo lavoro insieme, lo troverai qui."
+      },
+      "fallbackDescription": "Progetto in gestione."
+    },
+    "renewals": {
+      "title": "Prossime scadenze",
+      "viewAll": "Calendario →",
+      "empty": {
+        "eyebrow": "Nessuna scadenza",
+        "title": "Non ci sono rinnovi imminenti.",
+        "description": "Domini, hosting e servizi ricorrenti compariranno qui."
+      }
+    },
+    "activity": {
+      "title": "Attività recente"
+    }
+  },
+  "projects": {
+    "list": {
+      "eyebrow": "Lavoro in corso",
+      "title": "I tuoi progetti.",
+      "columns": {
+        "project": "Progetto",
+        "status": "Stato",
+        "dueDate": "Consegna",
+        "messages": "Messaggi",
+        "progress": "Progresso"
+      },
+      "empty": {
+        "eyebrow": "Niente in corso",
+        "title": "Non ci sono progetti attivi al momento.",
+        "description": "Quando avvieremo un nuovo lavoro insieme, lo troverai qui."
+      }
+    },
+    "detail": {
+      "metaLabels": {
+        "type": "Tipo",
+        "start": "Inizio",
+        "due": "Consegna prevista",
+        "currentStep": "Step corrente"
+      },
+      "metaFallbacks": {
+        "type": "Progetto",
+        "step": "Da definire"
+      },
+      "stats": {
+        "label": "Snapshot",
+        "progress": "Progresso",
+        "milestones": "Milestone",
+        "deliverables": "Deliverable",
+        "daysToTarget": "Giorni al target"
+      },
+      "sections": {
+        "pipeline": "Pipeline",
+        "milestones": "Milestone",
+        "deliverables": "Deliverable",
+        "messages": "Messaggi"
+      },
+      "milestonesEmpty": {
+        "eyebrow": "Roadmap",
+        "title": "Milestone non ancora pubblicate.",
+        "description": "Appariranno qui quando la roadmap del progetto sarà visibile nel portale."
+      },
+      "openStaging": "Apri staging →",
+      "daysNotDefined": "N/D"
+    }
+  },
+  "files": {
+    "eyebrow": "Archivio",
+    "title": "File condivisi.",
+    "intro": "Brief, mockup, asset e documenti caricati nel portale.",
+    "uploadCta": "Carica",
+    "uploadFirstCta": "Carica il primo file",
+    "columns": {
+      "name": "Nome",
+      "type": "Tipo",
+      "project": "Progetto",
+      "size": "Dim.",
+      "uploadedAt": "Caricato"
+    },
+    "fallbackProject": "Archivio generale",
+    "types": {
+      "pdf": "PDF",
+      "image": "Immagine",
+      "video": "Video",
+      "archive": "Archivio",
+      "other": "File"
+    },
+    "empty": {
+      "eyebrow": "Archivio vuoto",
+      "title": "Nessun file caricato.",
+      "description": "Quando ci scambiamo qualcosa lo trovi qui."
+    }
+  },
+  "upload": {
+    "eyebrow": "Upload",
+    "title": "Carica file.",
+    "intro": "Seleziona il progetto, carica un file e lo troverai nell'archivio.",
+    "noteLabel": "Nota",
+    "noteText": "I file caricati sono visibili solo dentro la tua area clienti."
+  },
+  "billing": {
+    "eyebrow": "Numeri trasparenti",
+    "title": "Quanto stai investendo. Cosa stai ricevendo.",
+    "stats": {
+      "label": "Snapshot",
+      "total": "Totale",
+      "paid": "Pagato",
+      "pending": "In attesa",
+      "invoices": "Fatture"
+    },
+    "history": "Storico fatture",
+    "columns": {
+      "number": "Numero",
+      "issueDate": "Data",
+      "dueDate": "Scadenza",
+      "status": "Stato",
+      "total": "Importo"
+    },
+    "empty": {
+      "eyebrow": "Nessuna fattura",
+      "title": "Non ci sono fatture pubblicate.",
+      "description": "Quando una fattura sarà disponibile la vedrai in questo storico."
+    }
+  },
+  "renewals": {
+    "eyebrow": "Niente sorprese",
+    "title": "Domini, hosting, servizi. Tutte le scadenze.",
+    "intro": "Rinnovi automatici, costi e date pubblicati dal gestionale.",
+    "calendar": "Calendario scadenze",
+    "auto": "rinnovo automatico",
+    "manual": "rinnovo manuale",
+    "empty": {
+      "eyebrow": "Nessun rinnovo",
+      "title": "Non ci sono scadenze attive.",
+      "description": "Domini, hosting e servizi ricorrenti appariranno qui."
+    }
+  },
+  "invoices": {
+    "eyebrow": "Saldo e ricevute",
+    "title": "Fatture.",
+    "intro": "Pago una fattura, scarico la ricevuta, vedo lo storico.",
+    "stats": {
+      "label": "Snapshot",
+      "outstanding": "Da saldare",
+      "paid": "Saldato",
+      "count": "Fatture"
+    },
+    "columns": {
+      "number": "Numero",
+      "issueDate": "Data",
+      "dueDate": "Scadenza",
+      "status": "Stato",
+      "total": "Importo"
+    },
+    "table": {
+      "open": "Apri"
+    },
+    "detail": {
+      "back": "← Tutte le fatture",
+      "lineItems": "Voci",
+      "lineItemColumns": {
+        "description": "Descrizione",
+        "quantity": "Q.tà",
+        "unitPrice": "Prezzo unitario",
+        "total": "Totale"
+      },
+      "totals": {
+        "subtotal": "Subtotale",
+        "tax": "IVA",
+        "total": "Totale",
+        "paid": "Pagato",
+        "due": "Da pagare"
+      },
+      "paymentPlan": "Piano pagamenti",
+      "stripeInvoice": "Apri fattura Stripe",
+      "stripePdf": "Scarica PDF Stripe"
+    },
+    "empty": {
+      "eyebrow": "Nessuna fattura",
+      "title": "Non ci sono fatture pubblicate.",
+      "description": "Quando una fattura sarà disponibile la vedrai qui."
+    }
+  },
+  "payment": {
+    "payNow": "Paga ora",
+    "payWith": "Paga con",
+    "stripe": "Carta di credito (Stripe)",
+    "paypal": "PayPal",
+    "preparing": "Preparazione…",
+    "redirecting": "Reindirizzamento…",
+    "scheduleType": {
+      "deposit": "Acconto",
+      "milestone": "Milestone",
+      "balance": "Saldo",
+      "installment": "Rata"
+    },
+    "due": "Scade il {date}",
+    "noActiveLinks": "Nessun link di pagamento attivo. Contatta l'admin per generarne uno.",
+    "success": {
+      "eyebrow": "Pagamento ricevuto",
+      "title": "Grazie!",
+      "intro": "Il pagamento è stato registrato. Riceverai la conferma via email.",
+      "downloadReceipt": "Scarica ricevuta",
+      "viewInvoices": "Vai alle fatture",
+      "stripeProcessing": "Conferma in corso…",
+      "stripeProcessingHint": "Attendi qualche secondo: stiamo finalizzando con Stripe.",
+      "stripeTimeout": "Pagamento in elaborazione. Ti contatterò appena confermato.",
+      "paypalCapturing": "Cattura PayPal in corso…",
+      "paypalError": "Errore durante la cattura del pagamento PayPal. Riprova o contatta l'admin."
+    },
+    "cancelled": {
+      "eyebrow": "Pagamento annullato",
+      "title": "Pagamento non completato.",
+      "intro": "Nessun addebito è stato effettuato. Puoi riprovare quando vuoi.",
+      "tryAgain": "Riprova",
+      "viewInvoices": "Vai alle fatture"
+    }
+  },
+  "subscriptions": {
+    "eyebrow": "Servizi ricorrenti",
+    "title": "Abbonamenti attivi.",
+    "intro": "Hosting, manutenzione, retainer: tutti i servizi in addebito automatico.",
+    "columns": {
+      "name": "Servizio",
+      "provider": "Pagamento",
+      "amount": "Importo",
+      "interval": "Frequenza",
+      "next": "Prossima fattura",
+      "status": "Stato"
+    },
+    "interval": {
+      "month": "Mensile",
+      "year": "Annuale"
+    },
+    "manageHint": "Per cancellare un abbonamento, scrivimi: lo cancelliamo manualmente.",
+    "noAutoRenew": "Non si rinnova",
+    "empty": {
+      "eyebrow": "Nessun abbonamento",
+      "title": "Non hai servizi ricorrenti attivi.",
+      "description": "Hosting, manutenzione o retainer compariranno qui quando saranno attivati."
+    }
+  },
+  "reports": {
+    "list": {
+      "eyebrow": "Numeri verificabili",
+      "title": "Report mensili.",
+      "intro": "Analytics, performance e SEO: report pubblicati dal gestionale.",
+      "columns": {
+        "report": "Report",
+        "period": "Periodo",
+        "project": "Progetto",
+        "publishedAt": "Pubblicato"
+      },
+      "fallbackProject": "Generale",
+      "empty": {
+        "eyebrow": "Nessun report",
+        "title": "Il primo report arriva tra poco.",
+        "description": "I report mensili partono dal primo mese pieno di go-live del progetto."
+      }
+    },
+    "detail": {
+      "summary": "Sommario",
+      "data": "Dati",
+      "kpi": "KPI",
+      "downloadPdf": "PDF"
+    }
+  },
+  "format": {
+    "dateNotDefined": "Non definita",
+    "statusNotDefined": "Non definito"
+  },
+  "status": {
+    "draft": "Bozza",
+    "in_progress": "In corso",
+    "review": "In revisione",
+    "completed": "Completato",
+    "approved": "Approvato",
+    "cancelled": "Annullato",
+    "on_hold": "In pausa",
+    "open": "Aperta",
+    "paid": "Pagata",
+    "pending": "In attesa",
+    "overdue": "Scaduta",
+    "active": "Attivo",
+    "expiring_soon": "In scadenza",
+    "past_due": "Scaduto",
+    "expired": "Scaduto",
+    "renewing": "In rinnovo",
+    "partial": "Pagamento parziale",
+    "refunded": "Rimborsato",
+    "partially_refunded": "Rimborso parziale",
+    "void": "Annullata",
+    "trialing": "In prova",
+    "unpaid": "Non pagato",
+    "incomplete": "Da completare",
+    "incomplete_expired": "Scaduto",
+    "canceled": "Cancellato",
+    "APPROVAL_PENDING": "Attesa autorizzazione",
+    "ACTIVE": "Attivo",
+    "SUSPENDED": "Sospeso",
+    "CANCELLED": "Cancellato",
+    "deposit": "Acconto",
+    "milestone": "Milestone",
+    "balance": "Saldo",
+    "installment": "Rata"
+  }
+}

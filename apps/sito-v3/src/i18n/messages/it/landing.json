@@ -1,0 +1,33 @@
+{
+  "hero": {
+    "eyebrowFallback": "Landing",
+    "backFallback": "Indietro"
+  },
+  "microStory": {
+    "eyebrow": "Microstoria",
+    "caseStudyLink": "Vedi il progetto completo"
+  },
+  "comboAngle": {
+    "eyebrow": "Perché qui"
+  },
+  "features": {
+    "heading": "Cosa progetto per {profession}",
+    "fallbackHeading": "Cosa progetto per te",
+    "itemsCount": "{count, plural, one {# elemento} other {# elementi}}"
+  },
+  "problems": {
+    "eyebrow": "Consapevolezza",
+    "heading": "I problemi tipici"
+  },
+  "cta": {
+    "eyebrow": "Iniziamo?",
+    "button": "Parliamone"
+  },
+  "relatedProfessions": {
+    "heading": "Servizi correlati"
+  },
+  "relatedZones": {
+    "heading": "Zone servite · {region}",
+    "subheading": "Lavoro anche qui vicino."
+  }
+}

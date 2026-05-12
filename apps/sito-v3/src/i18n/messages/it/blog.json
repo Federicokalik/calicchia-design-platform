@@ -1,0 +1,54 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Blog · Web design, sviluppo, SEO senza fumo | Federico Calicchia",
+      "description": "Articoli su web design, sviluppo, SEO, performance, accessibilità. Niente listicle riciclate, niente trending topic SEO senza sostanza. Solo analisi e tutorial usabili.",
+      "ogTitle": "Blog · La verità sul web che le agenzie non ti dicono",
+      "ogDescription": "Web design, SEO, performance e business digitale — senza fronzoli."
+    },
+    "eyebrow": "Blog",
+    "title": "Articoli senza fumo.",
+    "lead": "Web design, sviluppo, SEO, performance, accessibilità.\nNiente listicle riciclate, niente click-bait.\nSolo cose che cambiano come fai il tuo lavoro.",
+    "eyebrowWithCount": "Blog - {count, plural, one {# articolo} other {# articoli}}",
+    "pageTitle": "Blog. La verità sul web che le agenzie non ti dicono.",
+    "pageLead": "Articoli su web design, e-commerce, SEO e performance.\nNiente \"10 trend del 2026\", niente buzzword. Solo interventi che muovono i numeri.",
+    "filters": {
+      "all": "Tutti",
+      "category": "Categoria",
+      "tag": "Tag"
+    },
+    "empty": "Nessun articolo trovato.",
+    "emptyState": {
+      "eyebrow": "In arrivo",
+      "title": "Il blog parte con il primo articolo a fine 2026.",
+      "lead": "Vuoi essere avvisato quando esce? Scrivimi due righe.\nti aggiungo a una lista email leggera, niente newsletter automatiche, niente spam.",
+      "ctaPrimary": "Scrivimi",
+      "ctaSecondary": "Leggi la pillar"
+    },
+    "readingTime": "{minutes} min di lettura",
+    "publishedAt": "Pubblicato il {date}",
+    "updatedAt": "Aggiornato il {date}"
+  },
+  "detail": {
+    "tableOfContents": {
+      "label": "Indice",
+      "ariaLabel": "Indice articolo",
+      "chapterFallback": "Capitolo {count}"
+    },
+    "share": "Condividi",
+    "copyLink": "Copia link",
+    "linkCopied": "Copiato ✓",
+    "readingTime": "{count} min",
+    "publishedAt": "{date}",
+    "sharePlatforms": {
+      "twitterX": "Twitter / X",
+      "linkedIn": "LinkedIn"
+    },
+    "author": "Autore",
+    "relatedPosts": "Articoli correlati",
+    "next": "Prossimo articolo",
+    "prev": "Articolo precedente",
+    "backToBlog": "Torna al blog",
+    "comments": "Commenti"
+  }
+}

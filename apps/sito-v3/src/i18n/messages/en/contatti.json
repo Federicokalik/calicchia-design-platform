@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "title": "Contact - No PowerPoint, no empty promises | Federico Calicchia",
+    "description": "Freelance Web Designer & Developer based in Italy. Drop a line or book a free 30-minute call. No PowerPoint, no empty promises, no agency middlemen.",
+    "ogTitle": "Contact - No PowerPoint, no empty promises",
+    "ogDescription": "Free 30-minute consultation. No commitment, no pitch deck."
+  },
+  "hero": {
+    "eyebrow": "Contact",
+    "title": "Contact. No PowerPoint, no empty promises.",
+    "lead": "A 30-minute call to see if it makes sense to work together.\nFreelance Web Designer & Developer — websites, e-commerce, development, SEO, WordPress.\nReply within 24 hours. No commitment, no PowerPoint pitches."
+  },
+  "form": {
+    "name": "Name",
+    "email": "Email",
+    "subject": "Subject",
+    "message": "Message",
+    "namePlaceholder": "What's your name?",
+    "emailPlaceholder": "Where do I reply?",
+    "messagePlaceholder": "What do you want to build? More specific is better.",
+    "submit": "Send message",
+    "submitting": "Sending…",
+    "success": {
+      "eyebrow": "Message received",
+      "heading": "I'll reply within 24 hours.",
+      "textBeforeEmail": "If you do not see anything, check your spam folder.\nIf it is urgent, write directly to",
+      "textAfterEmail": ".",
+      "sendAnother": "Send another message"
+    },
+    "error": "Sending failed. Try again in a few minutes or write to mail@calicchia.design.",
+    "errorWithMessage": "Sending failed: {message}",
+    "labels": {
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "company": "Company (optional)",
+      "requestType": "Request type",
+      "services": "Services of interest",
+      "message": "Message",
+      "wantsCall": "I prefer a phone call",
+      "wantsMeet": "I prefer Google Meet"
+    },
+    "auditRequestType": "Free 15min audit",
+    "services": {
+      "web-design": "Web Design",
+      "e-commerce": "E-commerce",
+      "sviluppo-web": "Web Development",
+      "seo": "SEO",
+      "branding": "Branding",
+      "home-maintenance": "Website maintenance",
+      "assistenza-wordpress": "WordPress support",
+      "wordpress-migrazione": "WordPress migration & hosting"
+    },
+    "gdpr": {
+      "beforeLink": "I have read the ",
+      "link": "privacy policy",
+      "afterLink": "and authorize the processing of my data to handle the request."
+    },
+    "turnstileDisabled": "Anti-bot disabled (missing env).",
+    "responseNote": "Reply within 24 hours · no bots, I write back",
+    "prefill": {
+      "greeting": "Hi Federico,",
+      "servicePlan": "I am interested in the \"{plan}\" package for \"{service}\".",
+      "service": "I am interested in \"{service}\".",
+      "plan": "I am interested in the \"{plan}\" package.",
+      "context": "Context: {context}."
+    },
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMin": "Enter your full name (at least 2 characters).",
+      "nameMax": "Name is too long (max 100 characters).",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Invalid email",
+      "emailMax": "Email is too long.",
+      "messageRequired": "Write a message",
+      "messageMin": "Write at least 20 characters about the project.",
+      "messageMax": "Message is too long (max 2000 characters).",
+      "phoneInvalid": "Invalid phone format (e.g. +39 3510000000).",
+      "companyMax": "Company name is too long (max 150 characters).",
+      "gdprRequired": "You must accept the privacy policy.",
+      "slotInvalid": "Invalid slot format.",
+      "turnstileRequired": "Anti-bot verification required."
+    }
+  },
+  "channels": {
+    "title": "Other channels",
+    "eyebrow": "Social - where to find me",
+    "heading": "Also outside this site.",
+    "email": "Email",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "calendar": "Calendar"
+  }
+}

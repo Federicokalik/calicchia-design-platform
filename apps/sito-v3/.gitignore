@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+.vercel
+
+# Monorepo pnpm: il lock file vive solo nel root del workspace.
+# Per-app lock files si generano se si lancia `pnpm` dentro la sub-app
+# invece di usare `pnpm --filter` dal root.
+pnpm-lock.yaml

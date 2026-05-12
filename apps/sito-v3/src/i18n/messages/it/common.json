@@ -1,0 +1,50 @@
+{
+  "brand": "Caldes",
+  "tagline": "Web Designer & Developer Freelance",
+  "location": "Frosinone · Italia + estero",
+  "cta": {
+    "primary": "Parliamone",
+    "secondary": "Scrivimi",
+    "tertiary": "Approfondisci",
+    "back": "Indietro",
+    "more": "Scopri di più",
+    "close": "Chiudi"
+  },
+  "actions": {
+    "readMore": "Continua a leggere",
+    "learnMore": "Approfondisci",
+    "viewProject": "Vedi il progetto",
+    "viewAll": "Vedi tutti",
+    "share": "Condividi",
+    "copyLink": "Copia link",
+    "linkCopied": "Link copiato"
+  },
+  "loading": "Caricamento…",
+  "errorGeneric": "Qualcosa non ha funzionato. Riprova tra poco.",
+  "footer": {
+    "copyright": "© {year} Federico Calicchia · {legalName}",
+    "copyrightLine": "© {year} {legalName}",
+    "navigationAriaLabel": "Navigazione footer",
+    "index": "Indice",
+    "findMe": "Dove trovarmi",
+    "usefulLinks": "Link utili",
+    "manageCookies": "Gestisci cookie",
+    "social": "Social",
+    "madeIn": "Made with care in Ceccano (FR)",
+    "vat": "P.IVA 03160480608",
+    "legal": {
+      "privacy": "Privacy Policy",
+      "cookie": "Cookie Policy",
+      "terms": "Termini e condizioni",
+      "request": "Richiesta dati personali"
+    },
+    "rights": "Tutti i diritti riservati."
+  },
+  "languageSwitch": {
+    "label": "Lingua",
+    "switchToEn": "English",
+    "switchToIt": "Italiano",
+    "promptEn": "Prefer reading in English?",
+    "switchVerb": "Cambia lingua"
+  }
+}

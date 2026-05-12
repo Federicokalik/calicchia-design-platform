@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "title": "Why pick a Freelance Web Designer & Developer · Stop paying 6 people for a one-person job | Federico Calicchia",
+    "description": "Freelance Web Designer & Developer: one contact for websites, e-commerce, development, SEO, maintenance and WordPress. No hand-offs, no agency middlemen. Manifesto, 5-pillar approach, FAQ.",
+    "ogTitle": "Why pick a Freelance Web Designer & Developer · Stop paying 6 people for a one-person job",
+    "ogDescription": "One contact, no blame shifting, measured results. Manifesto, approach, FAQ."
+  },
+  "hero": {
+    "eyebrow": "Why me",
+    "title": "Stop paying 6 people for a one-person job.",
+    "lead": "One contact for websites, e-commerce, development, SEO, maintenance and WordPress.\nNo hand-offs, no agency middlemen."
+  },
+  "manifesto": {
+    "title": "Manifesto",
+    "subtitle": "Seven non-negotiable principles",
+    "eyebrow": "04 - Manifesto",
+    "h2": "What a website has to do.",
+    "principles": {
+      "siteAsSalesperson": {
+        "label": "The website is a salesperson",
+        "text": "It works when you are not there.\nIt has to explain, reassure and bring the right person to contact."
+      },
+      "googlePositioning": {
+        "label": "It ranks on Google",
+        "text": "If people cannot find you, you do not exist.\nTechnical SEO, semantic structure, schema markup and performance: included, not sold as an extra."
+      },
+      "customerLanguage": {
+        "label": "It speaks your customers' language",
+        "text": "No jargon, no useless acronyms, no \"innovative solutions\".\nThe website is written for the person buying, not the person building it."
+      },
+      "visitToContact": {
+        "label": "It turns a visit into contact",
+        "text": "Every page has an outcome: an enquiry, a booking, a purchase.\nPages without an objective are flyers in a drawer."
+      },
+      "trustFollowsForm": {
+        "label": "Form follows trust",
+        "text": "A slow, confusing or over-decorated website does not just lose aesthetic quality.\nIt loses attention and credibility."
+      },
+      "noRecycledTemplates": {
+        "label": "No recycled templates",
+        "text": "Every page needs a reason to exist.\nContent, hierarchy and interactions have to be built around your real case."
+      },
+      "oneContact": {
+        "label": "One contact",
+        "text": "Fewer repeated briefings, fewer opaque hand-offs, more responsibility for decisions, timing and the final result."
+      }
+    }
+  },
+  "approach": {
+    "title": "5-pillar approach",
+    "subtitle": "How I actually work"
+  },
+  "team": {
+    "eyebrow": "Team",
+    "title": "I don't work alone.",
+    "lead": "When the project demands it, I bring in professionals I trust who share the same standard.\nYou always and only talk to me — but there is a team ready behind the scenes.",
+    "collaborators": "{count, plural, one {# collaborator} other {# collaborators}}",
+    "cta": "Contact me"
+  },
+  "faqs": {
+    "title": "Frequently asked questions"
+  },
+  "perChiLavoro": {
+    "eyebrowDefault": "Who I work with",
+    "titleDefault": "Who I work with.",
+    "subtitleDefault": "Pick the sector, then the activity, and I show you the services I do for you.\nNo buck-passing, no wasted time.",
+    "searchLabel": "Search directly",
+    "searchPlaceholder": "Sector, activity or category",
+    "servicesCount": "{count, plural, one {# service available} other {# services available}}",
+    "activitiesFound": "{count, plural, one {# activity found} other {# activities found}}",
+    "activitiesInCategory": "{count, plural, one {# activity in this sector} other {# activities in this sector}}",
+    "sectorsAndActivities": "{sectors} sectors · {activities} activities",
+    "sectorsListLabel": "Available sectors",
+    "activitiesListLabel": "Available activities",
+    "activitiesCountInCategory": "{count, plural, one {# activity} other {# activities}}",
+    "backToSector": "← Change sector",
+    "backToActivity": "← Change activity",
+    "youPicked": "You picked",
+    "openPage": "→ Open page",
+    "noActivitiesFound": "No activity found. Try a broader term.",
+    "noServicesYet": "I do not have a public page for this combination yet. Write me and I handle it as a custom case.",
+    "writeToMe": "→ Write me",
+    "servicesForActivity": "Services available for {activity}"
+  },
+  "perchiFaqs": {
+    "eyebrowDefault": "FAQ",
+    "titleDefault": "Got questions?",
+    "subtitleDefault": "Answers to the questions everyone asks me — even before we start.",
+    "questionsCount": "{count, plural, one {# question} other {# questions}}"
+  },
+  "approachStack": {
+    "eyebrowDefault": "Approach",
+    "pillarsCount": "{count, plural, one {# pillar} other {# pillars}}"
+  },
+  "heroNarrative": {
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Why pick me",
+    "eyebrowIndex": "01 — Manifesto",
+    "eyebrowRole": "Freelance web designer",
+    "h1": "One person,\naccountable for the whole site.",
+    "lead": "You are not looking for \"someone who builds a site\".\nYou need someone who understands the business, designs the experience, writes the code, and ships a system you can actually use.\nMess scatter, more accountability.",
+    "ctaPrimary": "Let's talk about the project",
+    "ctaSecondary": "See the work",
+    "portraitAlt": "Federico Calicchia, Freelance Web Designer & Developer"
+  },
+  "skillsOverride": {
+    "eyebrow": "Tech",
+    "title": "My tools.",
+    "subtitle": "Modern tech, AI, and the right tools for each phase of the project.\nThis is what I work with every day.",
+    "counterLabel": "tools"
+  },
+  "blogLatestOverride": {
+    "title": "From my journal."
+  },
+  "structuredData": {
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Why pick me"
+  },
+  "laScintilla": {
+    "eyebrowDefault": "How I work",
+    "h2": "No middlemen, less noise.",
+    "lead": "The point is not \"doing everything\".\nIt is keeping the decisions in one place: strategy, experience, code and launch speak the same language because they do not get passed from one department to the next.",
+    "workflow": {
+      "direzione": {
+        "label": "Direction",
+        "description": "Goals, priorities, content and user paths get sorted before any visual work begins."
+      },
+      "progetto": {
+        "label": "Design",
+        "description": "Layout, visual tone and components are built to support conversion, trust and readability."
+      },
+      "produzione": {
+        "label": "Production",
+        "description": "Development, performance, technical SEO and launch stay inside the same workflow."
+      }
+    },
+    "capabilities": {
+      "websites": "Websites",
+      "ecommerce": "E-commerce",
+      "landing": "Landing pages",
+      "seo": "SEO",
+      "branding": "Branding",
+      "uiux": "UI/UX",
+      "marketing": "Marketing",
+      "maintenance": "Maintenance"
+    }
+  }
+}

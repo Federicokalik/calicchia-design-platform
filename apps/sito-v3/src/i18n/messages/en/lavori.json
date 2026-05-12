@@ -1,0 +1,53 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Portfolio · Projects that made my clients money | Federico Calicchia",
+      "description": "Web design and e-commerce portfolio: real projects, verifiable numbers, real clients. No fake renders, no concept art. Only work that works.",
+      "ogTitle": "Portfolio · Projects that made real clients money",
+      "ogDescription": "Web design and e-commerce: real projects, verifiable numbers, real clients. No fake renders."
+    },
+    "eyebrow": "02 — Portfolio",
+    "title": "Work that works. No concept art.",
+    "lead": "Real shipped projects. Real clients, verifiable numbers.\nUnder every cover you'll find what was done and why.",
+    "eyebrowWithCount": "Portfolio — {count, plural, one {# project} other {# projects}}",
+    "pageTitle": "Portfolio. Projects that made real clients money.",
+    "pageLead": "Web design, e-commerce and development built from scratch.\nNo fake renders, no concept art for Behance.\nEvery project is online, works for the client, and the numbers are verifiable."
+  },
+  "detail": {
+    "stale": {
+      "single": "Project shipped over a year ago ({year})",
+      "multi": "Project shipped {years} years ago ({year})",
+      "warning": "The site may have changed or no longer be online",
+      "verify": "Check current state",
+      "ariaLabel": "Notice about project age",
+      "ageSingle": "over a year ago",
+      "ageMulti": "{years} years ago",
+      "publishedPrefix": "Project shipped"
+    },
+    "next": "Next project",
+    "prev": "Previous project",
+    "outcome": "Outcome",
+    "challenge": "The challenge",
+    "approach": "Approach",
+    "stack": "Tech stack",
+    "breadcrumbHome": "Home",
+    "breadcrumbLavori": "Work",
+    "backToAll": "All work",
+    "caseStudy": "Case study",
+    "client": "Client",
+    "tagLabel": "Tag",
+    "context": "Context",
+    "overview": "Overview",
+    "challengeFallbackHeading": "What needed fixing.",
+    "clientVoice": "Client voice",
+    "seeMore": "Want to see more?",
+    "allProjects": "All work",
+    "goToArchive": "Go to archive",
+    "goToCaseStudy": "Open case study",
+    "beforeAfterHeading": "Before and after, in numbers.",
+    "numbersHeading": "The numbers are clear.",
+    "gallery": "Gallery",
+    "longformTitle": "Deep dive",
+    "longformHeading": "Notes behind the project"
+  }
+}

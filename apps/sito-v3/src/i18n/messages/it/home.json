@@ -1,0 +1,144 @@
+{
+  "metadata": {
+    "title": "Web Designer & Developer Freelance a Frosinone · Siti, e-commerce, sviluppo, SEO, WordPress | Federico Calicchia",
+    "description": "Web Designer & Developer Freelance a Frosinone, in Ciociaria. Siti web, e-commerce, sviluppo, SEO, manutenzione e assistenza WordPress. Lavoro con clienti in tutta Italia e all'estero — un solo contatto, niente agenzie a sei mani.",
+    "ogTitle": "Web Designer & Developer Freelance a Frosinone · Siti, e-commerce, sviluppo, SEO, WordPress",
+    "ogDescription": "Freelance a Frosinone, in Ciociaria. Siti web, e-commerce, sviluppo, SEO, manutenzione e assistenza WordPress. Italia + estero, un solo contatto."
+  },
+  "hero": {
+    "eyebrow": "01 — Web Designer & Developer Freelance · Frosinone, Ciociaria · {year}",
+    "h1Prefix": "Realizzazione siti web",
+    "h1Connector": "e",
+    "h1Suffix": ".",
+    "meta": "A Frosinone, in Ciociaria.\nLavoro con clienti in tutta Italia e all'estero.",
+    "pitch": "Da {years}+ anni progetto siti, e-commerce e strategie digitali per professionisti che non hanno tempo da perdere con agenzie a sei mani.\nNiente agenzia, un unico contatto.",
+    "available": "Disponibile per nuovi progetti",
+    "cta": "Parliamone"
+  },
+  "portrait": {
+    "eyebrow": "02 — Federico",
+    "location": "Ceccano · FR",
+    "portraitAlt": "Federico Calicchia, Web Designer & Developer Freelance — ritratto in studio a Ceccano",
+    "h2": "Web Designer & Developer Freelance\nper chi non ha tempo da perdere\ncon agenzie a sei mani.",
+    "bio": "Web designer e developer freelance dal 2016.\nStudio a Ceccano (FR) e clienti in tutta Italia.\nNiente agenzia, niente passaggi di mano, nessuno scaricabarile.\nProgetto, sviluppo e seguo il sito anche dopo il lancio.\nUn solo contatto.",
+    "stats": {
+      "years": "anni di freelance",
+      "projects": "progetti completati",
+      "contact": "punto di contatto",
+      "agencies": "agenzie di mezzo"
+    }
+  },
+  "trust": {
+    "eyebrow": "04 — Fiducia",
+    "subtitle": "Recensioni Google verificate",
+    "h2": "Non fidarti di me. Fidati di chi mi ha già scelto.",
+    "reviewsLabel": "Recensioni",
+    "clientsLabel": "Alcuni clienti",
+    "logosAriaLabel": "Loghi clienti",
+    "logoAlt": "Logo {name}",
+    "openClientSite": "{name} — apri il sito",
+    "clientPaginationLabel": "Seleziona cliente",
+    "showClient": "Mostra {name}"
+  },
+  "services": {
+    "eyebrow": "Cosa faccio per te",
+    "h2": "Undici servizi, un solo standard.",
+    "viewAll": "Tutti i servizi →",
+    "readMore": "Approfondisci"
+  },
+  "finalCta": {
+    "eyebrow": "12 — Prossimo passo",
+    "h2Line1": "Hai un'idea?",
+    "h2Line2": "Vediamola insieme.",
+    "cta": "Scrivimi"
+  },
+  "howIWork": {
+    "eyebrow": "06 — Come lavoro",
+    "meta": "5 principi · 5 fasi · 1 contatto",
+    "h2": "Principi prima, applicazione subito dopo.",
+    "lead": "I miei cinque pilastri non sono uno slogan: sono le regole con cui prendo decisioni ogni giorno.\nSubito sotto, le cinque fasi in cui quei principi diventano lavoro concreto sul tuo progetto."
+  },
+  "manifestoLongform": {
+    "eyebrowSuffix": "Approccio",
+    "pillarsCount": "5 pilastri",
+    "pillars": {
+      "details": {
+        "title": "Ossessione per i dettagli",
+        "body": "Ogni pixel ha una ragione, ogni millisecondo conta.\nSe non sembra giusto, lo rifaccio.\nQuesta è la differenza fra un sito che si apre e un sito che vende."
+      },
+      "ahead": {
+        "title": "Sempre un passo avanti",
+        "body": "Le tecnologie cambiano ogni mese.\nStudio, sperimento, scarto.\nQuello che metto nel tuo progetto è già stato testato — non sei tu il banco di prova."
+      },
+      "crossSkills": {
+        "title": "Competenze trasversali",
+        "body": "Design, sviluppo, SEO, performance, copy.\nNon sono tre persone diverse: sono io.\nSignifica decisioni coerenti e nessun \"non è il mio reparto\"."
+      },
+      "oneContact": {
+        "title": "Un unico contatto",
+        "body": "Zero project manager, zero passaggi di mano.\nMi scrivi, rispondo io.\nUna richiesta semplice ha un mockup entro 48 ore."
+      },
+      "results": {
+        "title": "Risultati, non promesse",
+        "body": "Numeri verificabili: tempo di caricamento, posizioni Google, conversioni.\nNiente \"siamo creativi\".\nConta solo quello che si misura."
+      }
+    }
+  },
+  "processLongform": {
+    "eyebrowSuffix": "Come lavoro",
+    "phasesMeta": "5 fasi · 1 contatto",
+    "steps": {
+      "brief": {
+        "label": "Brief",
+        "title": "Ascolto.",
+        "body": "Una chiamata di 30 minuti per capire chi sei, cosa vendi e perché un cliente dovrebbe sceglierti.\nNiente questionari da agenzia, niente decisioni-pacchetto."
+      },
+      "strategy": {
+        "label": "Strategia",
+        "title": "Disegno il piano.",
+        "body": "Scelgo struttura, tono, palette e tecnologie.\nTi spiego perché in dieci minuti — senza filosofeggiare.\nIl piano è scritto, condiviso, modificabile."
+      },
+      "design": {
+        "label": "Design",
+        "title": "I pixel pesano.",
+        "body": "Mockup interattivi, non statici.\nVedi le animazioni, ascolti come si muove.\nCambiamo prima di scrivere codice — quando costa zero sistemare."
+      },
+      "build": {
+        "label": "Sviluppo",
+        "title": "Costruisco bene.",
+        "body": "Stack moderno, performance ossessive, SEO già configurata.\nOgni riga ha una ragione.\nCode review interno: io scrivo, io rileggo, io rompo per rifare meglio."
+      },
+      "launch": {
+        "label": "Lancio",
+        "title": "Sistemo, testo, rilascio.",
+        "body": "Test su dieci dispositivi reali, monitoraggio analytics, training di 30 minuti.\nPoi un anno di assistenza inclusa — perché i siti veri vivono dopo il lancio."
+      }
+    }
+  },
+  "stats": {
+    "linesOfCode": "Righe di codice scritte",
+    "coffeeCups": "Tazze di caffè bevute",
+    "yearsExperience": "Anni di esperienza",
+    "projectsDelivered": "Progetti consegnati"
+  },
+  "worksHorizontal": {
+    "eyebrow": "Lavori selezionati · {count}",
+    "viewAll": "Tutti i progetti →",
+    "h2": "Cose che ho costruito per chi ne aveva bisogno.",
+    "openLabel": "Apri"
+  },
+  "skillsGravity": {
+    "eyebrowDefault": "Strumenti",
+    "titleDefault": "Strumenti che padroneggio.",
+    "subtitleDefault": "Competenza tecnica potenziata dall'AI per risultati che si misurano.\nTrascinali, lanciali — tornano sempre dove devono.",
+    "counterLabel": "che uso ogni giorno",
+    "resetButton": "Rimetti tutto a posto",
+    "resetAriaLabel": "Rimetti gli strumenti nella posizione iniziale",
+    "stackListLabel": "Stack tecnico e AI"
+  },
+  "blogLatest": {
+    "eyebrowDefault": "Journal",
+    "titleDefault": "Dal mio journal.",
+    "viewAll": "Tutti gli articoli"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "list": {
+    "metadata": {
+      "title": "Services · Web Design, E-Commerce, Development, SEO, WordPress, Performance, Accessibility | Federico Calicchia",
+      "description": "Eleven services, one standard. Web design, e-commerce, custom development, SEO, WordPress, branding, maintenance, Core Web Vitals performance, WCAG accessibility, analytics. No pre-packaged bundles.",
+      "ogTitle": "Freelance web & WordPress services — No blame shifting, measured results",
+      "ogDescription": "Web design, e-commerce, development, SEO, branding, maintenance, WordPress. One contact, measured results."
+    },
+    "eyebrow": "What I do for you",
+    "title": "Eleven services, one standard.",
+    "lead": "No pre-packaged bundles, no fixed price lists.\nEvery service is built around the real project after a discovery call.",
+    "eyebrowWithCount": "{count} services · one standard",
+    "pageTitle": "Web & WordPress services. No blame shifting, measured results.",
+    "pageLead": "Four core verticals in the matrix (web design, e-commerce, web development, SEO), plus branding and three specific WordPress jobs (maintenance, support, migration).\nOne contact, no supplier chain, no project manager who cannot write code."
+  },
+  "detail": {
+    "eyebrow": "Service",
+    "deliverables": "What you get",
+    "process": "How I work",
+    "faqs": "Frequently asked questions",
+    "awareness": "What goes wrong without it",
+    "expandedScope": "After delivery",
+    "leadMagnet": "Free audit",
+    "relatedServices": "Related services",
+    "ctaTitle": "Ready to start?",
+    "ctaSubtitle": "A 30-minute call to figure out what's actually needed.\nNo PowerPoint.",
+    "allServices": "All services",
+    "talkAboutProject": "Talk about the project",
+    "featuresCount": "{count, plural, one {# feature} other {# features}}",
+    "processCount": "{count, plural, one {# phase} other {# phases}}",
+    "faqCount": "{count, plural, one {# answer} other {# answers}}",
+    "faqHeading": "The questions I hear all the time.",
+    "ctaEyebrow": "Start here?",
+    "ctaButton": "Discuss it",
+    "deliverablesHeading": "Deliverables",
+    "deliverablesTableNumber": "No.",
+    "deliverablesTableDeliverable": "Deliverable",
+    "deliverablesTableFormat": "Format",
+    "deliverablesTableTiming": "Timing",
+    "leadMagnetButton": "Book an audit",
+    "leadMagnetNote": "No obligation - reply within 24h",
+    "showcaseEyebrow": "{index} — Work · {service}",
+    "showcaseHeading": "Work shipped with this service.",
+    "projectFallback": "Project",
+    "openCaseStudy": "Open case study",
+    "coverAlt": "{title} — cover",
+    "awarenessEyebrow": "Awareness"
+  }
+}

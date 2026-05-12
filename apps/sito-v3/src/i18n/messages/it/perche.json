@@ -1,0 +1,148 @@
+{
+  "metadata": {
+    "title": "Perché scegliere un Web Designer & Developer Freelance · Smetti di pagare 6 persone per un lavoro da una | Federico Calicchia",
+    "description": "Web Designer & Developer Freelance: un solo contatto per siti, e-commerce, sviluppo, SEO, manutenzione e WordPress. Niente passaggi di mano, niente agenzia a sei mani. Manifesto, approccio in 5 pilastri, FAQ.",
+    "ogTitle": "Perché scegliere un Web Designer & Developer Freelance · Smetti di pagare 6 persone per un lavoro da una",
+    "ogDescription": "Un solo contatto, niente scaricabarile, risultati misurati. Manifesto, approccio, FAQ."
+  },
+  "hero": {
+    "eyebrow": "Perché me",
+    "title": "Smetti di pagare 6 persone\nper un lavoro da una.",
+    "lead": "Un solo contatto per siti, e-commerce, sviluppo, SEO, manutenzione e WordPress.\nNiente passaggi di mano, niente agenzia a sei mani."
+  },
+  "manifesto": {
+    "title": "Manifesto",
+    "subtitle": "Sette principi non negoziabili",
+    "eyebrow": "04 - Manifesto",
+    "h2": "Cosa deve fare un sito.",
+    "principles": {
+      "siteAsSalesperson": {
+        "label": "Il sito è un commerciale",
+        "text": "Lavora quando tu non ci sei.\ndeve spiegare, rassicurare e portare la persona giusta al contatto."
+      },
+      "googlePositioning": {
+        "label": "Si posiziona su Google",
+        "text": "Se non ti trovano, non esisti.\nSEO tecnico, struttura semantica, schema markup, performance: incluso, non opzione a parte."
+      },
+      "customerLanguage": {
+        "label": "Parla la lingua dei tuoi clienti",
+        "text": "Niente jargon, niente acronimi inutili, niente \"soluzioni innovative\".\nIl sito è scritto per chi compra, non per chi lo costruisce."
+      },
+      "visitToContact": {
+        "label": "Trasforma una visita in contatto",
+        "text": "Ogni pagina ha un esito: una richiesta, una prenotazione, un acquisto.\nLe pagine senza obiettivo sono volantini in un cassetto."
+      },
+      "trustFollowsForm": {
+        "label": "La forma segue la fiducia",
+        "text": "Un sito lento, confuso o troppo decorativo non perde solo estetica.\nPerde attenzione e credibilità."
+      },
+      "noRecycledTemplates": {
+        "label": "Niente template riciclati",
+        "text": "Ogni pagina deve avere una ragione.\nContenuto, gerarchia e interazioni vanno costruiti sul tuo caso reale."
+      },
+      "oneContact": {
+        "label": "Un referente",
+        "text": "Meno briefing ripetuti, meno passaggi opachi, più responsabilità su decisioni, tempi e risultato finale."
+      }
+    }
+  },
+  "approach": {
+    "title": "Approccio in 5 pilastri",
+    "subtitle": "Come lavoro davvero"
+  },
+  "team": {
+    "eyebrow": "Team",
+    "title": "Non lavoro da solo.",
+    "lead": "Quando il progetto lo richiede, mi affianco a professionisti che stimo e con cui condivido lo stesso standard.\nTu parli sempre e solo con me — ma dietro c'è un team pronto.",
+    "collaborators": "{count, plural, one {# collaboratore} other {# collaboratori}}",
+    "cta": "Contattami"
+  },
+  "faqs": {
+    "title": "Domande frequenti"
+  },
+  "perChiLavoro": {
+    "eyebrowDefault": "Per chi lavoro",
+    "titleDefault": "Per chi lavoro.",
+    "subtitleDefault": "Scegli il settore, poi l'attività, e ti mostro i servizi che faccio per te.\nNiente scaricabarile, niente perdita di tempo.",
+    "searchLabel": "Cerca diretto",
+    "searchPlaceholder": "Settore, attività o categoria",
+    "servicesCount": "{count, plural, one {# servizio disponibile} other {# servizi disponibili}}",
+    "activitiesFound": "{count, plural, one {# attività trovata} other {# attività trovate}}",
+    "activitiesInCategory": "{count, plural, one {# attività nel settore} other {# attività nel settore}}",
+    "sectorsAndActivities": "{sectors} settori · {activities} attività",
+    "sectorsListLabel": "Settori disponibili",
+    "activitiesListLabel": "Attività disponibili",
+    "activitiesCountInCategory": "{count, plural, one {# attività} other {# attività}}",
+    "backToSector": "← Cambia settore",
+    "backToActivity": "← Cambia attività",
+    "youPicked": "Hai scelto",
+    "openPage": "→ Apri pagina",
+    "noActivitiesFound": "Nessuna attività trovata. Prova con un termine più ampio.",
+    "noServicesYet": "Non ho ancora una pagina pubblica per questa combinazione. Scrivimi e la tratto come caso su misura.",
+    "writeToMe": "→ Scrivimi",
+    "servicesForActivity": "Servizi disponibili per {activity}"
+  },
+  "perchiFaqs": {
+    "eyebrowDefault": "FAQ",
+    "titleDefault": "Hai qualche dubbio?",
+    "subtitleDefault": "Le risposte alle domande che mi fanno tutti — prima ancora di iniziare.",
+    "questionsCount": "{count, plural, one {# domanda} other {# domande}}"
+  },
+  "approachStack": {
+    "eyebrowDefault": "Approccio",
+    "pillarsCount": "{count, plural, one {# pilastro} other {# pilastri}}"
+  },
+  "heroNarrative": {
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Perché scegliere me",
+    "eyebrowIndex": "01 — Manifesto",
+    "eyebrowRole": "Web designer freelance",
+    "h1": "Una persona sola,\nresponsabile di tutto il sito.",
+    "lead": "Non stai cercando «qualcuno che fa un sito».\nTi serve un interlocutore che capisca il business, progetti l'esperienza, scriva il codice e porti online un sistema che puoi usare davvero.\nMeno dispersione, più responsabilità.",
+    "ctaPrimary": "Parliamo del progetto",
+    "ctaSecondary": "Vedi i lavori",
+    "portraitAlt": "Federico Calicchia, Web Designer & Developer Freelance"
+  },
+  "skillsOverride": {
+    "eyebrow": "Tecnologie",
+    "title": "I miei strumenti.",
+    "subtitle": "Tecnologie moderne, intelligenza artificiale e gli strumenti giusti per ogni fase del progetto.\nEcco con cosa lavoro ogni giorno.",
+    "counterLabel": "strumenti"
+  },
+  "blogLatestOverride": {
+    "title": "Dal mio journal."
+  },
+  "structuredData": {
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Perché scegliere me"
+  },
+  "laScintilla": {
+    "eyebrowDefault": "Come lavoro",
+    "h2": "Zero intermediari, meno rumore.",
+    "lead": "La differenza non è \"fare tutto\".\nÈ tenere insieme le decisioni: strategia, esperienza, codice e messa online parlano la stessa lingua perché non passano da un reparto all'altro.",
+    "workflow": {
+      "direzione": {
+        "label": "Direzione",
+        "description": "Obiettivi, priorità, contenuti e percorso utente vengono messi in ordine prima della grafica."
+      },
+      "progetto": {
+        "label": "Progetto",
+        "description": "Layout, tono visivo e componenti nascono per sostenere conversione, fiducia e leggibilità."
+      },
+      "produzione": {
+        "label": "Produzione",
+        "description": "Sviluppo, performance, SEO tecnica e pubblicazione restano nello stesso flusso operativo."
+      }
+    },
+    "capabilities": {
+      "websites": "Siti web",
+      "ecommerce": "E-commerce",
+      "landing": "Landing page",
+      "seo": "SEO",
+      "branding": "Branding",
+      "uiux": "UI/UX",
+      "marketing": "Marketing",
+      "maintenance": "Manutenzione"
+    }
+  }
+}
