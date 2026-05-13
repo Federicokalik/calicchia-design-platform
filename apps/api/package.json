@@ -17,12 +17,14 @@
     "@aws-sdk/client-s3": "^3.992.0",
     "@aws-sdk/s3-request-presigner": "^3.992.0",
     "@hono/node-server": "^1.13.7",
+    "@maxmind/geoip2-node": "^6.3.4",
     "bcrypt": "^5.1.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.7",
     "hono": "^4.6.16",
     "imapflow": "^1.0.189",
+    "isbot": "^5.1.40",
     "jose": "^5.9.6",
     "mailparser": "^3.7.2",
     "marked": "^17.0.3",
@@ -35,6 +37,7 @@
     "rrule": "^2.8.1",
     "sanitize-html": "^2.14.0",
     "stripe": "^17.5.0",
+    "ua-parser-js": "^2.0.9",
     "zod": "^3.24.1"
   },
   "devDependencies": {

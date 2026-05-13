@@ -6,6 +6,28 @@
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "unaccent";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- gen_random_bytes() used by 008_client_portal
+
+-- Supabase-style role stubs (legacy migrations reference these as policy grantees).
+-- Created as NOLOGIN noop roles; security is enforced by the Hono auth middleware,
+-- not by RLS (which is disabled at the end of the migration runner).
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    CREATE ROLE anon NOLOGIN NOINHERIT;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    CREATE ROLE authenticated NOLOGIN NOINHERIT;
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+    CREATE ROLE service_role NOLOGIN NOINHERIT;
+  END IF;
+END $$;
 
 -- Auth schema stub (for FK compatibility with legacy migrations)
 CREATE SCHEMA IF NOT EXISTS auth;

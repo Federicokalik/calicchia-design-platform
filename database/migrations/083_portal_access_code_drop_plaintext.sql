@@ -28,9 +28,9 @@ DROP INDEX IF EXISTS public.idx_customers_portal_code;
 DROP INDEX IF EXISTS public.idx_collaborators_portal_code;
 
 ALTER TABLE public.customers
-  DROP COLUMN IF EXISTS portal_access_code;
+  DROP COLUMN IF EXISTS portal_access_code CASCADE;
 
 ALTER TABLE public.collaborators
-  DROP COLUMN IF EXISTS portal_access_code;
+  DROP COLUMN IF EXISTS portal_access_code CASCADE;
 
 COMMIT;

@@ -17,7 +17,9 @@ if (!DATABASE_URL) {
   process.exit(1);
 }
 
-const sql = postgres(DATABASE_URL, { onnotice: () => {} });
+// max: 1 so we can run migrations that contain their own BEGIN/COMMIT blocks
+// (postgres-js rejects multi-statement transactions on a pooled connection).
+const sql = postgres(DATABASE_URL, { onnotice: () => {}, max: 1 });
 
 // Skip these original migration files (replaced or Supabase-specific)
 const SKIP_ORIGINALS = new Set([

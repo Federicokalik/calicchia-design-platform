@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   User, Link2, Key, KeyRound, History, Palette, FileSignature, Brain, Sparkles,
   Trash2, CheckCircle2, XCircle, RefreshCw, Building2, CreditCard, MapPin,
-  Shield, Zap, Activity, ChevronDown, Scale,
+  Shield, Zap, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
 } from 'lucide-react';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, API_BASE } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -41,6 +41,7 @@ const NAV_ITEMS = [
   { id: 'ai-costs', label: 'Costi AI', icon: Activity },
   { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
+  { id: 'backup', label: 'Backup', icon: Database },
   { id: 'audit', label: 'Audit Log', icon: History },
 ];
 
@@ -554,6 +555,9 @@ export default function ImpostazioniPage() {
         {/* === TOKEN MCP === */}
         {activeTab === 'mcp-tokens' && <McpTokensSection />}
 
+        {/* === BACKUP === */}
+        {activeTab === 'backup' && <BackupSection />}
+
         {/* === AUDIT LOG === */}
         {activeTab === 'audit' && (
           <>
@@ -589,5 +593,170 @@ export default function ImpostazioniPage() {
         )}
       </div>
     </div>
+  );
+}
+
+const CONFIRM_TOKEN = 'RIPRISTINA-DATABASE';
+
+function BackupSection() {
+  const queryClient = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [confirmText, setConfirmText] = useState('');
+  const [exporting, setExporting] = useState(false);
+
+  const { data: info, isLoading } = useQuery({
+    queryKey: ['backup-info'],
+    queryFn: () => apiFetch('/api/backup/info'),
+  });
+
+  const exportBackup = async () => {
+    setExporting(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/backup/export`, { credentials: 'include' });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const disposition = res.headers.get('content-disposition') || '';
+      const match = disposition.match(/filename="([^"]+)"/);
+      const filename = match?.[1] ?? `caldes-backup-${Date.now()}.json`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast.success('Backup scaricato');
+      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+    } catch (err) {
+      toast.error((err as Error).message || 'Errore export');
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const restoreMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedFile) throw new Error('Seleziona un file di backup');
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+      fd.append('confirm', confirmText);
+      return apiFetch('/api/backup/import', { method: 'POST', body: fd });
+    },
+    onSuccess: (data: any) => {
+      toast.success(`Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe`);
+      setSelectedFile(null);
+      setConfirmText('');
+      if (fileRef.current) fileRef.current.value = '';
+      queryClient.invalidateQueries({ queryKey: ['backup-info'] });
+      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+    },
+    onError: (err: any) => toast.error(err?.message || 'Errore ripristino'),
+  });
+
+  const canRestore = !!selectedFile && confirmText === CONFIRM_TOKEN && !restoreMutation.isPending;
+
+  return (
+    <>
+      <div>
+        <h2 className="text-lg font-semibold">Backup database</h2>
+        <p className="text-sm text-muted-foreground">Esporta uno snapshot completo del database o ripristinalo da un file di backup.</p>
+      </div>
+
+      {/* Stats */}
+      <div className="rounded-xl border bg-card p-6 space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Database className="h-4 w-4 text-muted-foreground" /> Contenuto del database
+        </div>
+        {isLoading ? (
+          <p className="text-xs text-muted-foreground">Caricamento...</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-muted/40 p-4 text-center">
+              <p className="text-2xl font-bold">{info?.tableCount ?? 0}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Tabelle</p>
+            </div>
+            <div className="rounded-lg bg-muted/40 p-4 text-center">
+              <p className="text-2xl font-bold">{(info?.totalRows ?? 0).toLocaleString('it-IT')}</p>
+              <p className="text-[10px] text-muted-foreground mt-1">Righe totali</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Export */}
+      <div className="rounded-xl border bg-card p-6 space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Download className="h-4 w-4 text-muted-foreground" /> Esporta backup
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Scarica un file JSON contenente tutti i dati del database. Conservalo in un luogo sicuro:
+          contiene anche dati sensibili (hash password, secret cifrati, dati clienti).
+        </p>
+        <Button onClick={exportBackup} disabled={exporting}>
+          {exporting ? 'Esportazione...' : 'Scarica backup completo'}
+        </Button>
+      </div>
+
+      {/* Restore */}
+      <div className="rounded-xl border border-destructive/30 bg-destructive/[0.02] p-6 space-y-4">
+        <div className="flex items-center gap-2 text-sm font-medium text-destructive">
+          <Upload className="h-4 w-4" /> Ripristina da backup
+        </div>
+
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-xs text-destructive">
+          <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <div className="space-y-1">
+            <p className="font-medium">Operazione irreversibile</p>
+            <p className="text-destructive/80">
+              Il ripristino <strong>cancella tutti i dati attuali</strong> e li sostituisce con il contenuto del file.
+              Verrà creato automaticamente un backup di sicurezza in <code>uploads/backups/</code> prima di procedere.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-medium">File di backup (.json)</Label>
+          <Input
+            ref={fileRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
+            className="text-sm h-9"
+          />
+          {selectedFile && (
+            <p className="text-[10px] text-muted-foreground">
+              {selectedFile.name} · {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-xs font-medium">
+            Per confermare, digita <code className="text-destructive">{CONFIRM_TOKEN}</code>
+          </Label>
+          <Input
+            type="text"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder={CONFIRM_TOKEN}
+            className="text-sm h-9 font-mono"
+            autoComplete="off"
+          />
+        </div>
+
+        <Button
+          variant="destructive"
+          onClick={() => restoreMutation.mutate()}
+          disabled={!canRestore}
+        >
+          {restoreMutation.isPending ? 'Ripristino in corso...' : 'Ripristina database'}
+        </Button>
+      </div>
+    </>
   );
 }

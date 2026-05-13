@@ -83,6 +83,8 @@ import { myWork } from './routes/my-work';
 import { mail } from './routes/mail';
 import { mcp } from './routes/mcp';
 import { mcpTokens } from './routes/mcp-tokens';
+import { backup } from './routes/backup';
+import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
 
 // Ensure uploads directory exists
@@ -103,12 +105,23 @@ if (isDev) {
 app.use('*', bodyLimit({ maxSize: 10 * 1024 * 1024 }));
 app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
+// Full database restore uploads can be large; allow up to 200MB.
+app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
 // In production, refuse to start without an explicit allowlist —
 // silently falling back to localhost would either break browser
 // auth or accidentally expose dev origins.
 if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGINS) {
   throw new Error('CORS_ORIGINS environment variable is required in production');
 }
+
+// Outer middleware: strip Access-Control-Allow-Credentials from /api/track responses.
+// This guarantees the cookieless invariant — the browser never sends cookies on
+// tracker requests. Registered BEFORE the global cors so its post-next runs LAST.
+app.use('/api/track', async (c, next) => {
+  await next();
+  c.res.headers.delete('Access-Control-Allow-Credentials');
+});
+
 app.use('*', cors({
   origin: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').filter(Boolean),
   credentials: true,
@@ -207,6 +220,11 @@ app.route('/api/cookie-consent', cookieConsent);
 app.use('/api/gdpr-requests', publicFormRateLimit);
 app.route('/api/gdpr-requests', gdprRequests);
 
+// Public cookieless analytics tracker — rate-limited to 60 req/min per IP.
+const trackRateLimit = createRateLimit(60, 60 * 1000);
+app.use('/api/track', trackRateLimit);
+app.route('/api/track', analyticsTrack);
+
 // Protected routes (auth required — admin gestionale)
 const protectedPaths = [
   '/api/customers',
@@ -256,7 +274,11 @@ const protectedPaths = [
   '/api/my-work',
   '/api/mail',
   '/api/mcp-tokens',
+  '/api/backup',
 ];
+
+// /api/track is intentionally NOT in protectedPaths — it's the cookieless
+// ingestion endpoint; auth would defeat the purpose. See analytics-track.ts.
 
 for (const path of protectedPaths) {
   app.use(`${path}`, authMiddleware);
@@ -312,6 +334,12 @@ app.route('/api/inbox', inbox);
 app.route('/api/my-work', myWork);
 app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
+
+// Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
+const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);
+app.use('/api/backup', backupRateLimit);
+app.use('/api/backup/*', backupRateLimit);
+app.route('/api/backup', backup);
 
 // MCP endpoints (service-token auth, separato dal JWT admin)
 app.use('/api/mcp', mcpAuthMiddleware);

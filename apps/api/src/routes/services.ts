@@ -187,7 +187,7 @@ services.post('/bulk-delete', zValidator('json', bulkDeleteSchema), async (c) =>
     SELECT DISTINCT s.id, s.name
     FROM services s
     JOIN subscriptions sub ON sub.stripe_price_id = s.stripe_price_id
-    WHERE s.id = ANY(${sql.array(ids)})
+    WHERE s.id = ANY(${sql.array(ids)}::uuid[])
       AND s.stripe_price_id IS NOT NULL
       AND sub.status IN ('active', 'trialing', 'past_due')
   ` as Array<{ id: string; name: string }>;
@@ -197,7 +197,7 @@ services.post('/bulk-delete', zValidator('json', bulkDeleteSchema), async (c) =>
 
   let deleted = 0;
   if (deletable.length > 0) {
-    const result = await sql`DELETE FROM services WHERE id = ANY(${sql.array(deletable)}) RETURNING id` as Array<{ id: string }>;
+    const result = await sql`DELETE FROM services WHERE id = ANY(${sql.array(deletable)}::uuid[]) RETURNING id` as Array<{ id: string }>;
     deleted = result.length;
   }
 

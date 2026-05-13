@@ -11,6 +11,9 @@ import { runWorkflowScheduler } from './workflow-scheduler';
 import { runMailSync } from './mail-sync';
 import { runBookingReminders } from './booking-reminders';
 import { runLeadAuditSequence } from '../jobs/lead-audit-sequence';
+import { runAnalyticsRetention } from './analytics-retention';
+import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintenance';
+import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 
 interface CronJob {
   name: string;
@@ -64,6 +67,24 @@ const jobs: CronJob[] = [
     name: 'booking-reminders',
     intervalMs: 15 * 60 * 1000,
     run: runBookingReminders,
+  },
+  {
+    name: 'analytics-retention',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 3,
+    run: runAnalyticsRetention,
+  },
+  {
+    name: 'analytics-partition-maintenance',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 2,
+    run: runAnalyticsPartitionMaintenance,
+  },
+  {
+    name: 'analytics-geo-refresh',
+    intervalMs: 30 * 24 * 60 * 60 * 1000, // ~monthly
+    runAtHour: 4,
+    run: runAnalyticsGeoRefresh,
   },
 ];
 

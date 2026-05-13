@@ -117,6 +117,10 @@ fattura*.pdf
 
 # Dump database (mai committare seed reali / export prod)
 *.dump
+
+# MaxMind GeoLite2 (scaricato a setup, non versionato)
+apps/api/data/*.mmdb
+apps/api/data/*.mmdb.gz
 *.sql.gz
 pg_dump*
 data/seed-private.sql
