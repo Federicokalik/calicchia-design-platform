@@ -35,6 +35,8 @@ import { exportRoutes } from './routes/export';
 import { importRoutes } from './routes/import';
 import { stripeWebhook } from './routes/stripe-webhook';
 import { paypalWebhook } from './routes/paypal-webhook';
+import { paypal } from './routes/paypal';
+import { publicPay } from './routes/public-pay';
 import { clientProjects } from './routes/client-projects';
 import { projectTasks } from './routes/project-tasks';
 import { milestones } from './routes/milestones';
@@ -152,6 +154,8 @@ app.route('/api/cron/domains', domainCron);
 app.route('/api/public', publicRoutes);
 // Quote public signing endpoints (no auth)
 app.route('/api/quote-sign', quotePublic);
+app.route('/api/paypal', paypal);
+app.route('/api/public-pay', publicPay);
 // Telegram webhook (no auth — verified by bot token)
 app.route('/api/telegram', telegram);
 // Workflow webhook (no auth — identified by webhookId + HMAC signature)

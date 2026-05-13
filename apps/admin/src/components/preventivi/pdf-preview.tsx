@@ -34,14 +34,14 @@ function buildHtml(data: QuotePreviewData): string {
   const scadenza = data.validUntil ? formatDate(data.validUntil) : '';
   const bollo = data.totale > 77.47 ? 2 : 0;
 
-  let offerte: any[] = [];
+  const offerte: any[] = [];
   let materiali: string[] = [];
   let tempistiche: any = null;
   let pagamento: any[] = [];
   let premessa: any = null;
-  let comparativa: any[] = [];
+  const comparativa: any[] = [];
   let problemi: any[] = [];
-  let clausole: any[] = [];
+  const clausole: any[] = [];
 
   for (const s of data.sections) {
     if (s.type === 'offerte') offerte.push(...(s.data.offerte || []));

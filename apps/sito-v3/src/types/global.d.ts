@@ -54,15 +54,27 @@ type GoogleMarkerLibrary = {
 type GoogleMapsImportLibrary = ((name: 'maps') => Promise<GoogleMapsLibrary>) &
   ((name: 'marker') => Promise<GoogleMarkerLibrary>);
 
+type MouseflowApi = {
+  start?: () => void;
+  stop?: () => void;
+  stopSession?: () => void;
+  isRecording?: () => boolean;
+};
+
 declare global {
   interface Window {
+    [key: `ga-disable-${string}`]: boolean | undefined;
     __cookieConsent?: {
       read: () => ConsentRecord | null;
       has: (category: keyof CookiePreferences) => boolean;
       save: (preferences: Partial<CookiePreferences>) => ConsentRecord;
     };
+    __googleAnalyticsConfigured?: boolean;
+    __lastGoogleAnalyticsPageView?: string;
     __openCookiePreferences?: () => void;
     __resolveGoogleMapsFooter?: () => void;
+    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void;
     google?: {
       maps: {
         importLibrary: GoogleMapsImportLibrary;
@@ -70,6 +82,8 @@ declare global {
         Point: GoogleMapsPoint;
       };
     };
+    mouseflow?: MouseflowApi;
+    _mfq?: unknown[];
   }
 
   interface WindowEventMap {

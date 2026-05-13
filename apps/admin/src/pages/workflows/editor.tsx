@@ -135,7 +135,9 @@ function WorkflowEditorInner() {
         if (res.execution_status === 'running') {
           setTimeout(poll, 1000);
         }
-      } catch {}
+      } catch {
+        // poll failed (network or auth) — stop silently, next user action will retry
+      }
     };
     poll();
   }, [id]);

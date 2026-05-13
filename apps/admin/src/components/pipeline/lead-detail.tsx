@@ -31,19 +31,20 @@ interface LeadDetailProps {
 
 export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert }: LeadDetailProps) {
   const { t, formatDate } = useI18n();
-  if (!lead) return null;
 
   const [form, setForm] = useState({
-    name: lead.name,
-    email: lead.email || '',
-    phone: lead.phone || '',
-    company: lead.company || '',
-    source: lead.source,
-    status: lead.status,
-    estimated_value: lead.estimated_value?.toString() || '',
-    notes: lead.notes || '',
-    lost_reason: lead.lost_reason || '',
+    name: lead?.name ?? '',
+    email: lead?.email || '',
+    phone: lead?.phone || '',
+    company: lead?.company || '',
+    source: lead?.source ?? 'manual',
+    status: lead?.status ?? 'new',
+    estimated_value: lead?.estimated_value?.toString() || '',
+    notes: lead?.notes || '',
+    lost_reason: lead?.lost_reason || '',
   });
+
+  if (!lead) return null;
 
   const handleSave = () => {
     onSave({

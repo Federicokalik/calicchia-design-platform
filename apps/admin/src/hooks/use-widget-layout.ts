@@ -42,7 +42,9 @@ function loadLayout(): WidgetConfig[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return migrateLayout(JSON.parse(stored));
-  } catch {}
+  } catch {
+    // localStorage unavailable or stored JSON malformed — fall through to defaults
+  }
   return DEFAULT_LAYOUT;
 }
 

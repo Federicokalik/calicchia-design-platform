@@ -1,12 +1,26 @@
-import { FlatCompat } from '@eslint/eslintrc';
-
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
+import nextConfig from 'eslint-config-next';
 
 export default [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...nextConfig,
+  // Downgrade delle regole troppo strict introdotte da eslint-plugin-react-hooks v7
+  // e eslint-config-next 16 — manteniamo la visibilità (warning) ma non blocchiamo
+  // CI su patterns legacy che andranno ripuliti gradualmente.
   {
     rules: {
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'react/no-unescaped-entities': 'warn',
+      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/error-boundaries': 'warn',
+      // React Compiler rules (eslint-plugin-react-hooks v7): keep visibility
+      // as warnings instead of CI-blocking errors until codebase is audited.
+      'react-hooks/refs': 'warn',
+      'react-hooks/purity': 'warn',
+      'react-hooks/globals': 'warn',
+      'react-hooks/set-state-in-render': 'warn',
+      'react-hooks/static-components': 'warn',
+      'react-hooks/immutability': 'warn',
+      '@next/next/no-html-link-for-pages': 'warn',
+      '@next/next/no-img-element': 'warn',
     },
   },
   // shadcn/Radix è scopato al solo route group `(portal)/clienti/*` per
@@ -14,7 +28,14 @@ export default [
   // ovunque tranne dentro `app/[locale]/(portal)/**`.
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['src/app/[locale]/(portal)/**', 'src/components/portal/**'],
+    // Note: `[locale]` is escaped because minimatch otherwise treats `[...]` as a
+    // character class. The pay flow re-uses the portal design system for visual
+    // coherence and is therefore also exempted.
+    ignores: [
+      'src/app/\\[locale\\]/\\(portal\\)/**',
+      'src/app/\\[locale\\]/pay/**',
+      'src/components/portal/**',
+    ],
     rules: {
       'no-restricted-imports': [
         'error',

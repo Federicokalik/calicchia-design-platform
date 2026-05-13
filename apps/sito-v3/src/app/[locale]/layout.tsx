@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { isLocale, LOCALES } from '@/lib/i18n';
+import { PublicAnalytics } from '@/components/analytics/PublicAnalytics';
 
 export const dynamicParams = false;
 
@@ -16,5 +17,10 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
-  return children;
+  return (
+    <>
+      <PublicAnalytics />
+      {children}
+    </>
+  );
 }

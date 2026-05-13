@@ -89,7 +89,8 @@ export default function ImpostazioniPage() {
   const [openArticles, setOpenArticles] = useState<Set<number>>(new Set());
   const toggleArticle = (i: number) => setOpenArticles((prev) => {
     const next = new Set(prev);
-    next.has(i) ? next.delete(i) : next.add(i);
+    if (next.has(i)) next.delete(i);
+    else next.add(i);
     return next;
   });
 

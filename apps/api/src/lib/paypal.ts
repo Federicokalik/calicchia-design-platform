@@ -43,6 +43,89 @@ export async function isPaypalReady(): Promise<boolean> {
   return !!(creds.client_id && creds.client_secret);
 }
 
+/**
+ * Generate a short-lived client token for the JS SDK (PayPal Buttons + Card Fields).
+ * Cached in-process for ~50 minutes (PayPal tokens last 3h but we err on the safe side).
+ * Required to enable Advanced Credit/Debit Card Payments in the browser SDK.
+ */
+let cachedClientToken: { token: string; expiresAt: number } | null = null;
+
+export async function generatePaypalClientToken(): Promise<string> {
+  if (cachedClientToken && Date.now() < cachedClientToken.expiresAt) {
+    return cachedClientToken.token;
+  }
+
+  const accessToken = await getAccessToken();
+  const baseUrl = await getBaseUrl();
+
+  const res = await fetch(`${baseUrl}/v1/identity/generate-token`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+      'Accept-Language': 'it_IT',
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`PayPal generate client_token failed: ${res.status} ${text}`);
+  }
+
+  const data = (await res.json()) as { client_token: string };
+  cachedClientToken = {
+    token: data.client_token,
+    expiresAt: Date.now() + 50 * 60 * 1000, // 50 minutes
+  };
+  return data.client_token;
+}
+
+/**
+ * Create a PayPal order WITHOUT redirect URLs — for use with the JS SDK
+ * (PayPal Buttons popup / Card Fields inline). The SDK handles approval client-side,
+ * the route handler then calls `capturePaypalOrder(orderId)` to finalize.
+ *
+ * Use `createPaypalOrder` (legacy) when you need a hosted `payer-action` URL.
+ */
+export async function createPaypalOrderEmbedded(opts: {
+  amount: number;
+  currency: string;
+  description: string;
+  reference_id?: string;
+}): Promise<{ id: string; status: string }> {
+  const token = await getAccessToken();
+  const baseUrl = await getBaseUrl();
+
+  const res = await fetch(`${baseUrl}/v2/checkout/orders`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify({
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          reference_id: opts.reference_id || undefined,
+          description: opts.description,
+          amount: {
+            currency_code: opts.currency.toUpperCase(),
+            value: opts.amount.toFixed(2),
+          },
+        },
+      ],
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`PayPal create order (embedded) failed: ${res.status} ${text}`);
+  }
+
+  return (await res.json()) as { id: string; status: string };
+}
+
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 async function getAccessToken(): Promise<string> {
