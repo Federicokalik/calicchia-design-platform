@@ -13,6 +13,9 @@
     "meta": "Based in Italy.\nWorking with European, UK, and US businesses.",
     "pitch": "{years}+ years designing websites, e-commerce and digital systems for professionals who do not have time to manage a six-person agency.\nNo agency, one single contact.",
     "available": "Open to new projects",
+    "availableCount": "Available · {used}/{max} spots this month",
+    "lastSlot": "Last spot available",
+    "fullUntil": "Booked · Available from {month}",
     "cta": "Let's talk"
   },
   "portrait": {

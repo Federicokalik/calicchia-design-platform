@@ -38,6 +38,118 @@ function portalEmailHtml(body: string): string {
 </body></html>`;
 }
 
+// Preview aggregated customer portal data for admin
+portalAdmin.get('/preview/:customer_id', async (c) => {
+  const customerId = c.req.param('customer_id');
+  if (!/^[a-f0-9-]{36}$/i.test(customerId)) {
+    return c.json({ error: 'customer_id non valido' }, 400);
+  }
+
+  const [customer] = await sql`
+    SELECT id, email, contact_name, company_name, status, created_at
+    FROM customers
+    WHERE id = ${customerId}
+    LIMIT 1
+  ` as Array<Record<string, unknown>>;
+
+  if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
+
+  const projectRows = await sql`
+    SELECT
+      cp.id, cp.name, cp.status, cp.progress_percentage,
+      cp.client_notes, cp.project_category, cp.visible_to_client,
+      cp.created_at
+    FROM client_projects cp
+    WHERE cp.customer_id = ${customerId}
+    ORDER BY cp.created_at DESC
+  ` as Array<Record<string, unknown>>;
+
+  const scheduleRows = await sql`
+    SELECT
+      ps.id, ps.title, ps.schedule_type, ps.amount, ps.currency,
+      ps.due_date, ps.status, ps.paid_amount, ps.paid_at,
+      jsonb_build_object('id', cp.id, 'name', cp.name) AS project,
+      jsonb_build_object('id', q.id, 'quote_number', q.quote_number, 'title', q.title) AS quote,
+      COALESCE(
+        jsonb_agg(
+          jsonb_build_object(
+            'id', pl.id, 'provider', pl.provider,
+            'checkout_url', pl.checkout_url, 'status', pl.status,
+            'amount', pl.amount, 'currency', pl.currency
+          )
+        ) FILTER (WHERE pl.id IS NOT NULL AND pl.status = 'active'),
+        '[]'
+      ) AS payment_links
+    FROM payment_schedules ps
+    LEFT JOIN quotes q ON q.id = ps.quote_id
+    LEFT JOIN client_projects cp ON cp.id = ps.project_id
+    LEFT JOIN payment_links pl ON pl.payment_schedule_id = ps.id
+    WHERE ps.status NOT IN ('cancelled')
+      AND (
+        ps.project_id IN (SELECT id FROM client_projects WHERE customer_id = ${customerId})
+        OR ps.quote_id IN (SELECT id FROM quotes WHERE customer_id = ${customerId})
+      )
+    GROUP BY ps.id, cp.id, q.id
+    ORDER BY ps.due_date ASC NULLS LAST
+  ` as Array<Record<string, unknown>>;
+
+  const invoiceRows = await sql`
+    SELECT id, invoice_number, status, subtotal, tax_amount, total,
+           issue_date, due_date, payment_status, line_items, created_at
+    FROM invoices
+    WHERE customer_id = ${customerId}
+    ORDER BY issue_date DESC NULLS LAST
+  ` as Array<Record<string, unknown>>;
+
+  const numberOrNull = (value: unknown): number | null => (
+    value === null || value === undefined ? null : Number(value)
+  );
+
+  const projects = projectRows.map((project) => ({
+    ...project,
+    progress_percentage: numberOrNull(project.progress_percentage),
+  }));
+
+  const schedules = scheduleRows.map((schedule) => ({
+    ...schedule,
+    amount: numberOrNull(schedule.amount),
+    paid_amount: numberOrNull(schedule.paid_amount),
+    payment_links: Array.isArray(schedule.payment_links)
+      ? schedule.payment_links.map((link) => {
+        const paymentLink = link as Record<string, unknown>;
+        return {
+          ...paymentLink,
+          amount: numberOrNull(paymentLink.amount),
+        };
+      })
+      : [],
+  }));
+
+  const invoices = invoiceRows.map((invoice) => ({
+    ...invoice,
+    subtotal: numberOrNull(invoice.subtotal),
+    tax_amount: numberOrNull(invoice.tax_amount),
+    total: numberOrNull(invoice.total),
+  }));
+
+  const summary = {
+    projects_total: projects.length,
+    projects_visible: projects.filter((p: Record<string, unknown>) => p.visible_to_client).length,
+    schedules_total: schedules.length,
+    schedules_paid: schedules.filter((s: Record<string, unknown>) => s.status === 'paid').length,
+    invoices_total: invoices.length,
+    invoices_total_amount: invoices.reduce((sum: number, i: Record<string, unknown>) => sum + Number(i.total || 0), 0),
+  };
+
+  return c.json({
+    customer,
+    projects,
+    schedules,
+    invoices,
+    summary,
+  });
+});
+
 // ── Create timeline event manually ───────────────────────
 portalAdmin.post('/timeline-event', async (c) => {
   const { project_id, customer_id, type, title, description, action_required, action_type, action_target_id } = await c.req.json();

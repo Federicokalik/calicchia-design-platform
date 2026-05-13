@@ -29,6 +29,8 @@ const settingsSchemas = {
     legal_name: z.string().default(''),
     vat_number: z.string().default(''),
     fiscal_code: z.string().default(''),
+    pec_email: z.string().default(''),
+    sdi_code: z.string().default(''),
     email: z.string().default(''),
     phone: z.string().default(''),
     website: z.string().default(''),
@@ -44,6 +46,17 @@ const settingsSchemas = {
       postal_code: z.string().default(''),
       country: z.string().default('IT'),
     }).default({}),
+  }).passthrough(),
+
+  'freelancer.studio': z.object({
+    max_clients_per_month: z.number().int().nonnegative().default(3),
+    weekly_capacity_hours: z.number().int().nonnegative().default(40),
+    default_hourly_rate_cents: z.number().int().nonnegative().default(5000),
+    vat_regime: z.enum(['forfettario', 'ordinario', 'none']).default('forfettario'),
+    forfettario_coefficient: z.number().min(0).max(1).default(0.78),
+    inps_rate: z.number().min(0).max(1).default(0.2607),
+    irpef_substitute_rate: z.number().min(0).max(1).default(0.05),
+    forfettario_plafond_eur: z.number().nonnegative().default(85000),
   }).passthrough(),
 
   'billing.defaults': z.object({

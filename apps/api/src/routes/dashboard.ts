@@ -207,6 +207,109 @@ dashboard.get('/upcoming-bookings', async (c) => {
   return c.json({ bookings });
 });
 
+dashboard.get('/capacity-week', async (c) => {
+  const [
+    settingsRows,
+    boundsRows,
+    timeEntries,
+    events,
+    eventsBySource,
+  ] = await Promise.all([
+    sql`
+      SELECT (value->>'weekly_capacity_hours')::int AS hours
+      FROM site_settings WHERE key = 'freelancer.studio' LIMIT 1
+    ` as Promise<Array<{ hours: number | string | null }>>,
+    sql`
+      SELECT
+        (date_trunc('week', now() AT TIME ZONE 'Europe/Rome'))::date AS start_date,
+        ((date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '6 days'))::date AS end_date
+    ` as Promise<Array<{ start_date: string | Date; end_date: string | Date }>>,
+    sql`
+      SELECT
+        COALESCE(SUM(CASE WHEN end_time IS NOT NULL THEN COALESCE(duration_minutes, 0) ELSE 0 END), 0)::int AS minutes,
+        COALESCE(SUM(CASE WHEN end_time IS NOT NULL AND is_billable THEN COALESCE(duration_minutes, 0) ELSE 0 END), 0)::int AS billable_minutes,
+        COUNT(*) FILTER (WHERE end_time IS NULL)::int AS running_count,
+        COUNT(*) FILTER (WHERE end_time IS NOT NULL)::int AS entries_count
+      FROM time_entries
+      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
+        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
+    ` as Promise<Array<{
+      minutes: number | string;
+      billable_minutes: number | string;
+      running_count: number | string;
+      entries_count: number | string;
+    }>>,
+    sql`
+      SELECT
+        COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 0)::int AS minutes,
+        COUNT(*)::int AS events_count
+      FROM calendar_events
+      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
+        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
+        AND status = 'confirmed'
+        AND rrule IS NULL
+        AND all_day = false
+    ` as Promise<Array<{ minutes: number | string; events_count: number | string }>>,
+    sql`
+      SELECT
+        source,
+        COUNT(*)::int AS count,
+        COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 0)::int AS minutes
+      FROM calendar_events
+      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
+        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
+        AND status = 'confirmed'
+        AND rrule IS NULL
+        AND all_day = false
+      GROUP BY source
+      ORDER BY minutes DESC
+    ` as Promise<Array<{ source: string; count: number | string; minutes: number | string }>>,
+  ]);
+
+  const cfg = settingsRows[0];
+  const hoursAvailable = cfg && Number.isFinite(Number(cfg.hours)) ? Number(cfg.hours) : 40;
+  const timeMinutes = Number(timeEntries[0]?.minutes ?? 0);
+  const eventMinutes = Number(events[0]?.minutes ?? 0);
+  const totalMinutes = timeMinutes + eventMinutes;
+  const hoursPlanned = Math.round((totalMinutes / 60) * 100) / 100;
+  const ratio = hoursAvailable > 0 ? hoursPlanned / hoursAvailable : 0;
+
+  let status: 'light' | 'optimal' | 'overbooked';
+  if (ratio < 0.8) status = 'light';
+  else if (ratio <= 1.0) status = 'optimal';
+  else status = 'overbooked';
+
+  const toIsoDate = (value: string | Date | undefined): string => {
+    if (value instanceof Date) return value.toISOString().slice(0, 10);
+    return (value ?? '').slice(0, 10);
+  };
+
+  const breakdown = [
+    {
+      source: 'time_entries',
+      hours: Math.round((timeMinutes / 60) * 100) / 100,
+      count: Number(timeEntries[0]?.entries_count ?? 0),
+    },
+    ...eventsBySource.map((row) => ({
+      source: `calendar:${row.source}`,
+      hours: Math.round((Number(row.minutes) / 60) * 100) / 100,
+      count: Number(row.count),
+    })),
+  ];
+
+  return c.json({
+    week_start: toIsoDate(boundsRows[0]?.start_date),
+    week_end: toIsoDate(boundsRows[0]?.end_date),
+    hours_planned: hoursPlanned,
+    hours_available: hoursAvailable,
+    ratio: Math.round(ratio * 100) / 100,
+    status,
+    billable_hours: Math.round((Number(timeEntries[0]?.billable_minutes ?? 0) / 60) * 100) / 100,
+    running_timers: Number(timeEntries[0]?.running_count ?? 0),
+    breakdown,
+  });
+});
+
 dashboard.get('/task-stats', async (c) => {
   const rows = await sql`
     SELECT status, COUNT(*)::int AS count

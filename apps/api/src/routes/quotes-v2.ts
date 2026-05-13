@@ -97,6 +97,85 @@ quotesV2.post('/', async (c) => {
   return c.json({ quote: rows[0] }, 201);
 });
 
+// POST /api/quotes-v2/:id/convert-to-project — convert quote to project
+quotesV2.post('/:id/convert-to-project', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json().catch(() => ({}));
+
+  const result = await sql.begin(async (txSql: any) => {
+    const [quote] = await txSql`SELECT * FROM quotes_v2 WHERE id = ${id}`;
+    if (!quote) return { __error: 'Preventivo non trovato', __status: 404 };
+
+    if (!['signed', 'accepted', 'sent'].includes(quote.status)) {
+      return {
+        __error: 'Preventivo non in stato convertibile',
+        __status: 409,
+        current_status: quote.status,
+      };
+    }
+
+    if (!quote.customer_id) {
+      return { __error: 'Preventivo senza cliente associato', __status: 422 };
+    }
+
+    if (quote.project_id) {
+      return {
+        __error: 'Preventivo già convertito',
+        __status: 409,
+        project_id: quote.project_id,
+      };
+    }
+
+    const [project] = await txSql`
+      INSERT INTO client_projects (
+        customer_id, name, description, project_type,
+        status, budget_amount, currency
+      )
+      VALUES (
+        ${quote.customer_id},
+        ${body.name ?? quote.title},
+        ${quote.description},
+        ${body.project_type ?? 'website'},
+        'approved',
+        ${quote.total},
+        ${quote.currency}
+      )
+      RETURNING *
+    `;
+
+    await txSql`
+      UPDATE quotes_v2
+      SET project_id = ${project.id}, updated_at = now()
+      WHERE id = ${quote.id}
+    `;
+
+    if (quote.lead_id) {
+      await txSql`
+        UPDATE leads
+        SET status = 'won',
+            converted_project_id = ${project.id},
+            updated_at = now()
+        WHERE id = ${quote.lead_id}
+      `;
+    }
+
+    return { project, quote: { ...quote, project_id: project.id } };
+  });
+
+  if (result.__error) {
+    if (result.current_status) {
+      return c.json({ error: result.__error, current_status: result.current_status }, 409);
+    }
+    if (result.project_id) {
+      return c.json({ error: result.__error, project_id: result.project_id }, 409);
+    }
+    if (result.__status === 422) return c.json({ error: result.__error }, 422);
+    return c.json({ error: result.__error }, 404);
+  }
+
+  return c.json(result, 201);
+});
+
 // PUT /api/quotes-v2/:id — update quote
 quotesV2.put('/:id', async (c) => {
   const { id } = c.req.param();

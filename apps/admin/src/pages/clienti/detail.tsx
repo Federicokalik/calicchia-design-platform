@@ -6,7 +6,7 @@ import {
   ArrowLeft, Building2, Mail, Phone, Globe,
   FolderKanban, Receipt, MessageSquare,
   Send, KeyRound, Copy, Check, RefreshCw, ExternalLink,
-  FileBarChart, Plus, ShieldOff,
+  FileBarChart, Plus, ShieldOff, Eye, EyeOff,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import { EmptyState } from '@/components/shared/empty-state';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 import type { Customer, CustomerNote } from '@/types/customer';
 import { CUSTOMER_STATUS_CONFIG, NOTE_TYPE_CONFIG } from '@/types/customer';
@@ -68,6 +69,37 @@ export default function ClienteDetailPage() {
     queryKey: ['customer-payments', id],
     queryFn: () => apiFetch(`/api/payment-tracker?customer_id=${id}`),
     enabled: !!id,
+  });
+
+  // Fetch portal preview (lazy: only when tab opens)
+  const [portalTabActive, setPortalTabActive] = useState(false);
+  const { data: portalPreviewData, isLoading: portalPreviewLoading } = useQuery<{
+    customer: { id: string; email: string | null; contact_name: string | null; company_name: string | null };
+    projects: Array<{
+      id: string; name: string; status: string;
+      progress_percentage: number | null; client_notes: string | null;
+      project_category: string | null; visible_to_client: boolean;
+    }>;
+    schedules: Array<{
+      id: string; title: string; schedule_type: string;
+      amount: number | string; currency: string; due_date: string | null;
+      status: string; paid_amount: number | string | null;
+      project: { id: string; name: string } | null;
+    }>;
+    invoices: Array<{
+      id: string; invoice_number: string | null; status: string;
+      total: number | string; issue_date: string | null;
+      due_date: string | null; payment_status: string | null;
+    }>;
+    summary: {
+      projects_total: number; projects_visible: number;
+      schedules_total: number; schedules_paid: number;
+      invoices_total: number; invoices_total_amount: number;
+    };
+  }>({
+    queryKey: ['portal-preview', id],
+    queryFn: () => apiFetch(`/api/portal-admin/preview/${id}`),
+    enabled: !!id && portalTabActive,
   });
 
   const customer: Customer | null = data?.customer || null;
@@ -207,7 +239,11 @@ export default function ClienteDetailPage() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs
+        defaultValue="overview"
+        className="space-y-4"
+        onValueChange={(v) => setPortalTabActive(v === 'portal-preview')}
+      >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="projects" className="gap-1.5">
@@ -238,6 +274,10 @@ export default function ClienteDetailPage() {
             {notes.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{notes.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="portal-preview" className="gap-1.5">
+            <Eye className="h-3.5 w-3.5" />
+            Anteprima portale
           </TabsTrigger>
         </TabsList>
 
@@ -612,6 +652,154 @@ export default function ClienteDetailPage() {
                   );
                 })}
               </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Portal preview — what the customer sees when logged into /portal */}
+        <TabsContent value="portal-preview">
+          <div className="space-y-4">
+            <div className="rounded-lg border bg-muted/30 border-dashed p-3 flex items-start gap-3">
+              <Eye className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="text-xs text-muted-foreground">
+                <p className="font-medium text-foreground">Vista del cliente</p>
+                <p>Mostra le entità così come le vede {customer?.contact_name || 'il cliente'} nel proprio portale.
+                Le voci con badge <span className="text-foreground font-medium">"nascosto"</span> sono
+                presenti in admin ma non vengono mostrate al cliente.</p>
+              </div>
+            </div>
+
+            {portalPreviewLoading ? (
+              <LoadingState />
+            ) : !portalPreviewData ? (
+              <EmptyState
+                title="Nessun dato"
+                description="L'anteprima non è ancora stata caricata."
+                icon={Eye}
+              />
+            ) : (
+              <>
+                {/* Summary KPIs */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                  <div className="rounded-lg border bg-card p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Progetti visibili</p>
+                    <p className="text-xl font-semibold mt-1 tabular-nums">
+                      {portalPreviewData.summary.projects_visible} <span className="text-xs text-muted-foreground">/ {portalPreviewData.summary.projects_total}</span>
+                    </p>
+                  </div>
+                  <div className="rounded-lg border bg-card p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Schedule pagate</p>
+                    <p className="text-xl font-semibold mt-1 tabular-nums">
+                      {portalPreviewData.summary.schedules_paid} <span className="text-xs text-muted-foreground">/ {portalPreviewData.summary.schedules_total}</span>
+                    </p>
+                  </div>
+                  <div className="rounded-lg border bg-card p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Fatture</p>
+                    <p className="text-xl font-semibold mt-1 tabular-nums">{portalPreviewData.summary.invoices_total}</p>
+                  </div>
+                  <div className="rounded-lg border bg-card p-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Totale fatturato</p>
+                    <p className="text-xl font-semibold mt-1 tabular-nums">
+                      €{Number(portalPreviewData.summary.invoices_total_amount).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Projects */}
+                <div className="rounded-lg border bg-card overflow-hidden">
+                  <div className="px-4 py-2.5 border-b bg-muted/20 flex items-center gap-2">
+                    <FolderKanban className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-wider">Progetti</p>
+                  </div>
+                  {portalPreviewData.projects.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-4 py-3">Nessun progetto.</p>
+                  ) : (
+                    <div className="divide-y">
+                      {portalPreviewData.projects.map((p) => (
+                        <div key={p.id} className="px-4 py-2.5 flex items-center gap-3">
+                          {!p.visible_to_client && (
+                            <EyeOff className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              'text-sm font-medium truncate',
+                              !p.visible_to_client && 'text-muted-foreground italic',
+                            )}>{p.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {p.status}{p.project_category ? ` · ${p.project_category}` : ''}
+                            </p>
+                          </div>
+                          {p.progress_percentage != null && (
+                            <span className="text-xs tabular-nums text-muted-foreground shrink-0">
+                              {p.progress_percentage}%
+                            </span>
+                          )}
+                          {!p.visible_to_client && (
+                            <Badge variant="outline" className="text-[10px] shrink-0">nascosto</Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Payment schedules */}
+                <div className="rounded-lg border bg-card overflow-hidden">
+                  <div className="px-4 py-2.5 border-b bg-muted/20 flex items-center gap-2">
+                    <Receipt className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-wider">Pagamenti pianificati</p>
+                  </div>
+                  {portalPreviewData.schedules.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-4 py-3">Nessuna schedule attiva.</p>
+                  ) : (
+                    <div className="divide-y">
+                      {portalPreviewData.schedules.map((s) => (
+                        <div key={s.id} className="px-4 py-2.5 flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{s.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {s.project?.name ? `${s.project.name} · ` : ''}
+                              {s.due_date ? new Date(s.due_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : 'senza scadenza'}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] shrink-0">{s.status}</Badge>
+                          <span className="text-sm font-semibold tabular-nums shrink-0">
+                            €{Number(s.amount || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Invoices */}
+                <div className="rounded-lg border bg-card overflow-hidden">
+                  <div className="px-4 py-2.5 border-b bg-muted/20 flex items-center gap-2">
+                    <FileBarChart className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs font-semibold uppercase tracking-wider">Fatture</p>
+                  </div>
+                  {portalPreviewData.invoices.length === 0 ? (
+                    <p className="text-xs text-muted-foreground px-4 py-3">Nessuna fattura.</p>
+                  ) : (
+                    <div className="divide-y">
+                      {portalPreviewData.invoices.map((i) => (
+                        <div key={i.id} className="px-4 py-2.5 flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{i.invoice_number || 'Bozza'}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {i.issue_date ? new Date(i.issue_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="text-[10px] shrink-0">{i.status}</Badge>
+                          <span className="text-sm font-semibold tabular-nums shrink-0">
+                            €{Number(i.total || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </TabsContent>

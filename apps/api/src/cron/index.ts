@@ -14,6 +14,7 @@ import { runLeadAuditSequence } from '../jobs/lead-audit-sequence';
 import { runAnalyticsRetention } from './analytics-retention';
 import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintenance';
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
+import { runDunningEngine } from './dunning-engine';
 
 interface CronJob {
   name: string;
@@ -85,6 +86,12 @@ const jobs: CronJob[] = [
     intervalMs: 30 * 24 * 60 * 60 * 1000, // ~monthly
     runAtHour: 4,
     run: runAnalyticsGeoRefresh,
+  },
+  {
+    name: 'dunning-engine',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 9, // 9:00 italiana
+    run: runDunningEngine,
   },
 ];
 

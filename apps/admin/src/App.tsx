@@ -19,6 +19,10 @@ import ClientiPage from '@/pages/clienti';
 import ClienteDetailPage from '@/pages/clienti/detail';
 import ProgettiPage from '@/pages/progetti';
 import ProgettoDetailPage from '@/pages/progetti/detail';
+import TimeTrackingPage from '@/pages/time-tracking';
+import TassePage from '@/pages/tasse';
+import SpesePage from '@/pages/spese';
+import FirmePage from '@/pages/firme';
 import CalendarioPage from '@/pages/calendario';
 import EventTypesPage from '@/pages/calendario/event-types';
 import EventTypeEditPage from '@/pages/calendario/event-type-edit';
@@ -145,6 +149,19 @@ export default function App() {
         <Route path="progetti/:id" element={<ProgettoDetailPage />} />
         <Route path="projects" element={<ProgettiPage />} />
         <Route path="projects/:id" element={<ProgettoDetailPage />} />
+
+        {/* Time tracking */}
+        <Route path="time-tracking" element={<TimeTrackingPage />} />
+
+        {/* Tasse / fiscal */}
+        <Route path="tasse" element={<TassePage />} />
+        <Route path="taxes" element={<TassePage />} />
+        <Route path="spese" element={<SpesePage />} />
+        <Route path="expenses" element={<SpesePage />} />
+
+        {/* Firme / e-sign */}
+        <Route path="firme" element={<FirmePage />} />
+        <Route path="signatures" element={<FirmePage />} />
 
         {/* Calendar */}
         <Route path="calendario" element={<CalendarioPage />} />

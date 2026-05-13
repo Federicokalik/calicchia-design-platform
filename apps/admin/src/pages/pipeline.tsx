@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
@@ -78,6 +79,7 @@ function PipelineColumn({
 export default function PipelinePage() {
   const { t, formatCurrency } = useI18n();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -228,7 +230,7 @@ export default function PipelinePage() {
     }
   };
 
-  // Convert lead to customer + project
+  // Convert lead to customer + project (legacy fast path — skips quote)
   const convertMutation = useMutation({
     mutationFn: async ({ id, project_name }: { id: string; project_name?: string }) => {
       return apiFetch(`/api/leads/${id}/convert`, {
@@ -247,6 +249,29 @@ export default function PipelinePage() {
   const handleConvert = (lead: Lead) => {
     const projectName = window.prompt(t('lead.projectNamePrompt'));
     convertMutation.mutate({ id: lead.id, project_name: projectName || undefined });
+  };
+
+  // Convert lead → quote draft (passa da preventivo, flusso commerciale standard)
+  const convertToQuoteMutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      return apiFetch(`/api/leads/${id}/convert-to-quote`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['leads'] });
+      setSelectedLead(null);
+      toast.success('Preventivo creato');
+      if (res?.quote?.id) {
+        navigate(`/preventivi/${res.quote.id}/edit`);
+      }
+    },
+    onError: () => toast.error('Errore creazione preventivo'),
+  });
+
+  const handleCreateQuote = (lead: Lead) => {
+    convertToQuoteMutation.mutate({ id: lead.id });
   };
 
   // Pipeline value
@@ -336,6 +361,7 @@ export default function PipelinePage() {
         onSave={(data) => updateMutation.mutate(data)}
         onDelete={(id) => deleteMutation.mutate(id)}
         onConvert={handleConvert}
+        onCreateQuote={handleCreateQuote}
       />
 
       {/* New lead form */}

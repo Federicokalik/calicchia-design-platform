@@ -4,9 +4,31 @@ import { getTranslations } from 'next-intl/server';
 import { TrustBadge } from '@/components/common/TrustBadge';
 import { Heading } from '@/components/ui/Heading';
 import { HeroCycle } from './HeroCycle';
+import { AvailabilityBadge, type AvailabilitySnapshot } from './AvailabilityBadge';
 
 interface HeroProps {
   years: number;
+}
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE);
+const IS_PRODUCTION_BUILD =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.npm_lifecycle_event === 'build';
+
+async function fetchAvailability(): Promise<AvailabilitySnapshot | null> {
+  // Evita 5xx in build statico quando l'API locale non gira (stesso pattern di blog-api.ts).
+  if (IS_LOCAL_API && IS_PRODUCTION_BUILD) return null;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/public/capacity`, {
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as AvailabilitySnapshot;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -21,7 +43,10 @@ interface HeroProps {
  * hierarchy readable on first paint.
  */
 export async function Hero({ years }: HeroProps) {
-  const t = await getTranslations('home.hero');
+  const [t, availability] = await Promise.all([
+    getTranslations('home.hero'),
+    fetchAvailability(),
+  ]);
 
   return (
     <section
@@ -76,17 +101,7 @@ export async function Hero({ years }: HeroProps) {
 
           <div className="md:col-span-5 md:justify-self-end flex flex-col gap-5 md:items-end">
             <TrustBadge className="self-start md:self-end" />
-            <span
-              className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.2em]"
-              style={{ color: 'var(--color-ink-muted)' }}
-            >
-              <span
-                aria-hidden="true"
-                className="inline-block size-1.5"
-                style={{ background: 'var(--color-accent)' }}
-              />
-              {t('available')}
-            </span>
+            <AvailabilityBadge snapshot={availability} />
             <Link
               href="/contatti"
               className="inline-flex items-center gap-3 text-base uppercase tracking-[0.18em] font-medium border-b transition-[gap] hover:gap-4 min-h-[44px] pb-2"

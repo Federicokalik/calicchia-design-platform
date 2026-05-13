@@ -19,6 +19,13 @@ const cancelSubscriptionSchema = z.object({
   reason: z.string().optional(),
   at_period_end: z.boolean().optional(),
 });
+const updateSubscriptionSchema = z.object({
+  next_billing_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  auto_renew: z.boolean().optional(),
+  dunning_grace_days: z.number().int().min(0).max(90).optional(),
+  dunning_reminder_days: z.array(z.number().int().min(1).max(90)).max(10).optional(),
+  dunning_suspend_days: z.number().int().min(0).max(365).optional(),
+});
 
 subscriptions.get('/', async (c) => {
   const customerId = c.req.query('customer_id');
@@ -177,6 +184,50 @@ subscriptions.post('/', zValidator('json', createSubscriptionSchema), async (c) 
     subscription: { ...subscription, paypal_subscription_id: paypal.id, checkout_url: paypal.approve_url },
     checkout_url: paypal.approve_url,
   }, 201);
+});
+
+subscriptions.patch('/:id', async (c) => {
+  const id = c.req.param('id');
+
+  let payload: unknown;
+  try {
+    payload = await c.req.json();
+  } catch {
+    return c.json({ error: 'Invalid JSON' }, 400);
+  }
+
+  const parsed = updateSubscriptionSchema.safeParse(payload);
+  if (!parsed.success) {
+    return c.json({
+      error: 'Validation failed',
+      details: parsed.error.issues.map((issue) => ({
+        path: issue.path.join('.') || 'root',
+        message: issue.message,
+      })),
+    }, 400);
+  }
+
+  const body = parsed.data;
+  const fields: Record<string, unknown> = {};
+  if (body.next_billing_date !== undefined) fields.next_billing_date = body.next_billing_date;
+  if (body.auto_renew !== undefined) fields.auto_renew = body.auto_renew;
+  if (body.dunning_grace_days !== undefined) fields.dunning_grace_days = body.dunning_grace_days;
+  if (body.dunning_reminder_days !== undefined) fields.dunning_reminder_days = body.dunning_reminder_days;
+  if (body.dunning_suspend_days !== undefined) fields.dunning_suspend_days = body.dunning_suspend_days;
+
+  if (Object.keys(fields).length === 0) {
+    return c.json({ error: 'No fields to update' }, 400);
+  }
+
+  const [subscription] = await sql`
+    UPDATE subscriptions
+    SET ${sql(fields)}, updated_at = NOW()
+    WHERE id = ${id}
+    RETURNING *
+  ` as Array<Record<string, unknown>>;
+
+  if (!subscription) return c.json({ error: 'Subscription not found' }, 404);
+  return c.json({ subscription });
 });
 
 subscriptions.post(

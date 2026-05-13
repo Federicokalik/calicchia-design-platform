@@ -164,3 +164,54 @@ leads.post('/:id/convert', async (c) => {
 
   return c.json({ customer, project });
 });
+
+leads.post('/:id/convert-to-quote', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json().catch(() => ({}));
+
+  const result = await sql.begin(async (txSql: any) => {
+    const [lead] = await txSql`SELECT * FROM leads WHERE id = ${id}`;
+    if (!lead) return { __error: 'Lead non trovato', __status: 404 };
+
+    let customer;
+    if (lead.converted_customer_id) {
+      const [existingCustomer] = await txSql`
+        SELECT * FROM customers WHERE id = ${lead.converted_customer_id}
+      `;
+      customer = existingCustomer;
+    } else {
+      const [createdCustomer] = await txSql`
+        INSERT INTO customers (name, email, phone, company, lead_id, status)
+        VALUES (${lead.name}, ${lead.email}, ${lead.phone}, ${lead.company}, ${lead.id}, 'active')
+        RETURNING *
+      `;
+      customer = createdCustomer;
+    }
+
+    const [quote] = await txSql`
+      INSERT INTO quotes_v2 (customer_id, lead_id, title, items, valid_until, status)
+      VALUES (
+        ${customer.id},
+        ${lead.id},
+        ${body.title ?? 'Preventivo per ' + lead.name},
+        ${body.items ?? []},
+        ${body.valid_until ?? null},
+        'draft'
+      )
+      RETURNING *
+    `;
+
+    await txSql`
+      UPDATE leads
+      SET status = 'quoted',
+          converted_customer_id = ${customer.id},
+          updated_at = now()
+      WHERE id = ${lead.id}
+    `;
+
+    return { customer, quote };
+  });
+
+  if (result.__error) return c.json({ error: result.__error }, 404);
+  return c.json(result, 201);
+});

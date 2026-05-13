@@ -13,6 +13,9 @@
     "meta": "A Frosinone, in Ciociaria.\nLavoro con clienti in tutta Italia e all'estero.",
     "pitch": "Da {years}+ anni progetto siti, e-commerce e strategie digitali per professionisti che non hanno tempo da perdere con agenzie a sei mani.\nNiente agenzia, un unico contatto.",
     "available": "Disponibile per nuovi progetti",
+    "availableCount": "Disponibile · {used}/{max} posti questo mese",
+    "lastSlot": "Ultimo posto disponibile",
+    "fullUntil": "Pieno · Disponibile da {month}",
     "cta": "Parliamone"
   },
   "portrait": {

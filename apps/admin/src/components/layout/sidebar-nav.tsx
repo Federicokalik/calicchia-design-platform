@@ -22,6 +22,9 @@ import {
   StickyNote,
   PenTool,
   GitBranch,
+  Timer,
+  Calculator,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -66,12 +69,14 @@ const navigation: NavGroup[] = [
     labelKey: 'nav.sales',
     items: [
       { labelKey: 'nav.quotes', icon: FileSignature, path: '/preventivi' },
+      { labelKey: 'nav.signatures', icon: FileSignature, path: '/firme' },
     ],
   },
   {
     labelKey: 'nav.work',
     items: [
       { labelKey: 'nav.projects', icon: FolderKanban, path: '/progetti' },
+      { labelKey: 'nav.timeTracking', icon: Timer, path: '/time-tracking' },
       { labelKey: 'nav.calendar', icon: Calendar, path: '/calendario', end: true },
       { labelKey: 'nav.calendar.calendars', icon: Calendar, path: '/calendario/calendari' },
       { labelKey: 'nav.calendar.bookings', icon: Calendar, path: '/calendario/prenotazioni' },
@@ -108,6 +113,8 @@ const bottomNavigation: NavGroup[] = [
     items: [
       { labelKey: 'nav.domains', icon: Globe, path: '/domini' },
       { labelKey: 'nav.billing', icon: Receipt, path: '/fatturazione' },
+      { labelKey: 'nav.expenses', icon: Wallet, path: '/spese' },
+      { labelKey: 'nav.taxes', icon: Calculator, path: '/tasse' },
       { labelKey: 'nav.services', icon: Package, path: '/servizi' },
       { labelKey: 'nav.analytics', icon: BarChart3, path: '/analytics' },
     ],

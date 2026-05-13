@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  ArrowRightCircle, Trash2,
+  ArrowRightCircle, Trash2, FileSignature,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,9 +27,10 @@ interface LeadDetailProps {
   onSave: (lead: Partial<Lead> & { id: string }) => void;
   onDelete: (id: string) => void;
   onConvert: (lead: Lead) => void;
+  onCreateQuote?: (lead: Lead) => void;
 }
 
-export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert }: LeadDetailProps) {
+export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert, onCreateQuote }: LeadDetailProps) {
   const { t, formatDate } = useI18n();
 
   const [form, setForm] = useState({
@@ -194,8 +195,14 @@ export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert }:
             <Button onClick={handleSave} className="flex-1">
               {t('common.save')}
             </Button>
+            {lead.status !== 'won' && lead.status !== 'lost' && onCreateQuote && (
+              <Button variant="outline" onClick={() => onCreateQuote(lead)}>
+                <FileSignature className="h-4 w-4 mr-1.5" />
+                {t('lead.createQuote')}
+              </Button>
+            )}
             {lead.status !== 'won' && lead.status !== 'lost' && (
-              <Button variant="outline" onClick={() => onConvert(lead)}>
+              <Button variant="ghost" onClick={() => onConvert(lead)}>
                 <ArrowRightCircle className="h-4 w-4 mr-1.5" />
                 {t('lead.convert')}
               </Button>

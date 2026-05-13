@@ -44,6 +44,151 @@ clientProjects.get('/', async (c) => {
   return c.json({ projects: cleaned, count, stats });
 });
 
+clientProjects.get('/:id/profitability', async (c) => {
+  const id = c.req.param('id');
+
+  const projectRows = await sql`
+    SELECT id, budget_amount, hourly_rate, currency
+    FROM client_projects
+    WHERE id = ${id}
+  `;
+  const project = projectRows[0];
+  if (!project) return c.json({ error: 'Project not found' }, 404);
+
+  const [settingsRows, timeRows] = await Promise.all([
+    sql`
+      SELECT (value->>'default_hourly_rate_cents')::int AS cents
+      FROM site_settings
+      WHERE key = 'freelancer.studio'
+    `,
+    sql`
+      SELECT
+        COALESCE(SUM(duration_minutes) FILTER (WHERE is_billable AND end_time IS NOT NULL), 0)::int AS billable_minutes,
+        COALESCE(SUM(duration_minutes) FILTER (WHERE NOT is_billable AND end_time IS NOT NULL), 0)::int AS non_billable_minutes,
+        COUNT(*) FILTER (WHERE end_time IS NULL)::int AS running_count
+      FROM time_entries
+      WHERE project_id = ${id}
+    `,
+  ]);
+
+  const round2 = (value: number) => Math.round(value * 100) / 100;
+  const projectHourlyRate = project.hourly_rate === null ? null : Number(project.hourly_rate);
+  const defaultCents =
+    settingsRows[0]?.cents === null || settingsRows[0]?.cents === undefined
+      ? 5000
+      : Number(settingsRows[0].cents);
+  const defaultHourlyRate = defaultCents / 100;
+
+  const hourlyRateSource =
+    projectHourlyRate !== null
+      ? 'project'
+      : settingsRows[0]?.cents !== null && settingsRows[0]?.cents !== undefined
+        ? 'freelancer_default'
+        : 'hardcoded_fallback';
+  const rateEur = round2(projectHourlyRate ?? defaultHourlyRate ?? 50);
+
+  const timeMetrics = timeRows[0];
+  const billableMinutes = Number(timeMetrics?.billable_minutes ?? 0);
+  const nonBillableMinutes = Number(timeMetrics?.non_billable_minutes ?? 0);
+  const hoursBillable = round2(billableMinutes / 60);
+  const hoursNonBillable = round2(nonBillableMinutes / 60);
+  const hoursTotal = round2(hoursBillable + hoursNonBillable);
+  const timeCostEur = round2(hoursBillable * rateEur);
+  const quotedEur = round2(project.budget_amount === null ? 0 : Number(project.budget_amount));
+  const expensesEur = 0;
+  const netEur = round2(quotedEur - timeCostEur - expensesEur);
+
+  return c.json({
+    project_id: project.id,
+    currency: project.currency,
+    hourly_rate_eur: rateEur,
+    hourly_rate_source: hourlyRateSource,
+    quoted_eur: quotedEur,
+    time_cost_eur: timeCostEur,
+    expenses_eur: expensesEur,
+    net_eur: netEur,
+    hours_billable: hoursBillable,
+    hours_non_billable: hoursNonBillable,
+    hours_total: hoursTotal,
+    running_timers: Number(timeMetrics?.running_count ?? 0),
+  });
+});
+
+clientProjects.post('/:id/create-invoice', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json().catch(() => ({}));
+
+  if (
+    typeof body.amount !== 'number' ||
+    body.amount <= 0 ||
+    typeof body.milestone_name !== 'string' ||
+    !body.milestone_name.trim()
+  ) {
+    return c.json({ error: 'amount e milestone_name richiesti' }, 400);
+  }
+
+  const dueInDays =
+    Number.isInteger(body.due_in_days) && body.due_in_days >= 0 ? body.due_in_days : 30;
+
+  const result = await sql.begin(async (txSql: any) => {
+    const [project] = await txSql`SELECT * FROM client_projects WHERE id = ${id}`;
+    if (!project) return { __error: 'Progetto non trovato', __status: 404 };
+
+    if (!project.customer_id) {
+      return { __error: 'Progetto senza cliente', __status: 422 };
+    }
+
+    const [settings] = await txSql`
+      SELECT (value->>'vat_regime') AS regime
+      FROM site_settings
+      WHERE key = 'freelancer.studio'
+      LIMIT 1
+    `;
+    const regime = settings?.regime ?? 'forfettario';
+    const subtotal = body.amount;
+    const tax = regime === 'forfettario' || regime === 'none' ? 0 : Math.round(body.amount * 0.22 * 100) / 100;
+    const total = subtotal + tax;
+    const lineItems = [
+      {
+        description: body.milestone_name.trim(),
+        quantity: 1,
+        unit_price: body.amount,
+        amount: body.amount,
+      },
+    ];
+
+    const [invoice] = await txSql`
+      INSERT INTO invoices (
+        customer_id, project_id, subtotal, tax, total, amount_due,
+        currency, status, issue_date, due_date, line_items, notes
+      )
+      VALUES (
+        ${project.customer_id},
+        ${project.id},
+        ${subtotal},
+        ${tax},
+        ${total},
+        ${total},
+        COALESCE(${project.currency}, 'EUR'),
+        'draft',
+        CURRENT_DATE,
+        CURRENT_DATE + (${dueInDays}::int || ' days')::interval,
+        ${lineItems},
+        ${body.notes ?? null}
+      )
+      RETURNING *
+    `;
+
+    return { invoice };
+  });
+
+  if (result.__error) {
+    if (result.__status === 422) return c.json({ error: result.__error }, 422);
+    return c.json({ error: result.__error }, 404);
+  }
+  return c.json(result, 201);
+});
+
 clientProjects.get('/:id', async (c) => {
   const id = c.req.param('id');
 

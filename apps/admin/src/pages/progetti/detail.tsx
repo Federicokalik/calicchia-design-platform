@@ -18,7 +18,7 @@ const restrictToVerticalAxis = ({ transform }: { transform: { x: number; y: numb
 import {
   ArrowLeft, CheckSquare, Milestone, StickyNote,
   Plus, Calendar, Clock, User, LayoutList, X, GripVertical,
-  Activity, Send, Languages,
+  Activity, Send, Languages, TrendingUp, Receipt,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { EmptyState } from '@/components/shared/empty-state';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { EntityView } from '@/components/entity-view';
@@ -36,6 +41,7 @@ import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
+import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 import type { ProjectTask, ProjectMilestone, TaskStatus } from '@/types/projects';
 import { PROJECT_STATUS_CONFIG } from '@/types/projects';
@@ -155,6 +161,28 @@ export default function ProgettoDetailPage() {
   });
   const timelineEvents = timelineData?.events || [];
 
+  // Profittabilità
+  const { data: profitabilityData } = useQuery({
+    queryKey: ['project-profitability', id],
+    queryFn: () => apiFetch(`/api/client-projects/${id}/profitability`),
+    enabled: !!id,
+  });
+  const profitability = profitabilityData as
+    | {
+        currency: string;
+        hourly_rate_eur: number;
+        hourly_rate_source: 'project' | 'freelancer_default' | 'hardcoded_fallback';
+        quoted_eur: number;
+        time_cost_eur: number;
+        expenses_eur: number;
+        net_eur: number;
+        hours_billable: number;
+        hours_non_billable: number;
+        hours_total: number;
+        running_timers: number;
+      }
+    | undefined;
+
   // Translations (bilingual portal content)
   const { data: translationsData } = useQuery<{
     it?: Record<string, string>;
@@ -200,6 +228,36 @@ export default function ProgettoDetailPage() {
       setNewEventTitle('');
       toast.success('Evento aggiunto alla timeline');
     },
+  });
+
+  // Invoice milestone dialog
+  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
+  const [invoiceForm, setInvoiceForm] = useState({
+    amount: '',
+    milestone_name: '',
+    due_in_days: '30',
+    notes: '',
+  });
+
+  const createInvoiceMutation = useMutation({
+    mutationFn: () =>
+      apiFetch(`/api/client-projects/${id}/create-invoice`, {
+        method: 'POST',
+        body: JSON.stringify({
+          amount: parseFloat(invoiceForm.amount) || 0,
+          milestone_name: invoiceForm.milestone_name.trim(),
+          due_in_days: parseInt(invoiceForm.due_in_days, 10) || 30,
+          notes: invoiceForm.notes.trim() || undefined,
+        }),
+      }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['project-profitability', id] });
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      setInvoiceDialogOpen(false);
+      setInvoiceForm({ amount: '', milestone_name: '', due_in_days: '30', notes: '' });
+      toast.success(`Fattura creata · €${res?.invoice?.total ?? ''}`);
+    },
+    onError: (err: any) => toast.error(err?.message || 'Errore creazione fattura'),
   });
 
   // Pipeline steps state
@@ -296,6 +354,10 @@ export default function ProgettoDetailPage() {
             {timelineEvents.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{timelineEvents.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="profittabilita" className="gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5" />
+            Profittabilità
           </TabsTrigger>
           <TabsTrigger value="notes" className="gap-1.5">
             <StickyNote className="h-3.5 w-3.5" />
@@ -551,6 +613,184 @@ export default function ProgettoDetailPage() {
                 ))}
               </div>
             )}
+          </div>
+        </TabsContent>
+
+        {/* Profittabilità — KPI economici basati su time_entries + budget */}
+        <TabsContent value="profittabilita">
+          <div className="space-y-6">
+            <div className="flex items-center justify-end">
+              <Dialog open={invoiceDialogOpen} onOpenChange={setInvoiceDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="default">
+                    <Receipt className="h-3.5 w-3.5 mr-1.5" /> Crea fattura milestone
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Nuova fattura milestone</DialogTitle>
+                    <DialogDescription>
+                      Crea una fattura draft collegata a questo progetto. L'IVA viene calcolata in base al regime fiscale impostato in Studio freelance.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-3 py-2">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium">Nome milestone *</Label>
+                      <Input
+                        value={invoiceForm.milestone_name}
+                        onChange={(e) => setInvoiceForm({ ...invoiceForm, milestone_name: e.target.value })}
+                        placeholder="Es. Acconto 30% · Consegna design"
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium">Importo (€) *</Label>
+                        <Input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={invoiceForm.amount}
+                          onChange={(e) => setInvoiceForm({ ...invoiceForm, amount: e.target.value })}
+                          placeholder="0,00"
+                          className="h-9 text-sm tabular-nums"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs font-medium">Scadenza (giorni)</Label>
+                        <Input
+                          type="number"
+                          step="1"
+                          min="0"
+                          value={invoiceForm.due_in_days}
+                          onChange={(e) => setInvoiceForm({ ...invoiceForm, due_in_days: e.target.value })}
+                          className="h-9 text-sm tabular-nums"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium">Note (opzionali)</Label>
+                      <Textarea
+                        value={invoiceForm.notes}
+                        onChange={(e) => setInvoiceForm({ ...invoiceForm, notes: e.target.value })}
+                        rows={2}
+                        className="text-sm"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setInvoiceDialogOpen(false)}>Annulla</Button>
+                    <Button
+                      onClick={() => createInvoiceMutation.mutate()}
+                      disabled={
+                        createInvoiceMutation.isPending
+                        || !invoiceForm.milestone_name.trim()
+                        || !invoiceForm.amount
+                        || parseFloat(invoiceForm.amount) <= 0
+                      }
+                    >
+                      {createInvoiceMutation.isPending ? 'Creazione...' : 'Crea fattura'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Quotato
+                </p>
+                <p className="text-2xl font-semibold mt-1 tabular-nums">
+                  € {profitability ? profitability.quoted_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '—'}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">budget progetto</p>
+              </div>
+
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Ore lavorate
+                </p>
+                <p className="text-2xl font-semibold mt-1 tabular-nums">
+                  {profitability ? `${profitability.hours_total}h` : '—'}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {profitability
+                    ? `${profitability.hours_billable}h fatturabili · ${profitability.hours_non_billable}h non`
+                    : ''}
+                </p>
+              </div>
+
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Costo tempo
+                </p>
+                <p className="text-2xl font-semibold mt-1 tabular-nums">
+                  € {profitability ? profitability.time_cost_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '—'}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {profitability ? `tariffa €${profitability.hourly_rate_eur}/h` : ''}
+                </p>
+              </div>
+
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Margine netto
+                </p>
+                <p
+                  className={cn(
+                    'text-2xl font-semibold mt-1 tabular-nums',
+                    profitability && profitability.net_eur < 0
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-emerald-600 dark:text-emerald-400',
+                  )}
+                >
+                  € {profitability ? profitability.net_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '—'}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-1">quotato − costo tempo</p>
+              </div>
+            </div>
+
+            <div className="rounded-lg border bg-card p-4 space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold">Dettagli calcolo</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Le spese (€ {profitability ? profitability.expenses_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}) verranno integrate dalla Fase 5 (OCR ricevute).
+                  </p>
+                </div>
+                {profitability && profitability.running_timers > 0 && (
+                  <Badge variant="outline" className="shrink-0 gap-1.5">
+                    <Activity className="h-3 w-3" />
+                    {profitability.running_timers} timer in corso
+                  </Badge>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t text-xs">
+                <div>
+                  <p className="text-muted-foreground">Sorgente tariffa</p>
+                  <p className="font-medium mt-0.5">
+                    {profitability?.hourly_rate_source === 'project' && 'Progetto'}
+                    {profitability?.hourly_rate_source === 'freelancer_default' && 'Default studio'}
+                    {profitability?.hourly_rate_source === 'hardcoded_fallback' && 'Fallback hardcoded'}
+                    {!profitability && '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Valuta</p>
+                  <p className="font-medium mt-0.5">{profitability?.currency ?? '—'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Ore stimate vs reali</p>
+                  <p className="font-medium mt-0.5">
+                    {project.estimated_hours
+                      ? `${profitability?.hours_total ?? 0}h / ${project.estimated_hours}h`
+                      : '—'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
 

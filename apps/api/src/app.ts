@@ -27,6 +27,7 @@ import { newsletter } from './routes/newsletter';
 import { blog } from './routes/blog';
 import { projects } from './routes/projects';
 import { contacts } from './routes/contacts';
+import { publicLeads } from './routes/public-leads';
 import { analytics } from './routes/analytics';
 import { keys } from './routes/keys';
 import { health } from './routes/health';
@@ -53,6 +54,7 @@ import { quotes } from './routes/quotes';
 import { auditLogs } from './routes/audit-logs';
 import { collaborators } from './routes/collaborators';
 import { publicRoutes } from './routes/public';
+import { publicCapacity } from './routes/public-capacity';
 import { settings } from './routes/settings';
 import { payments } from './routes/payments';
 import { services } from './routes/services';
@@ -64,8 +66,12 @@ import { customerNotes } from './routes/customer-notes';
 import { paymentTracker } from './routes/payment-tracker';
 import { quotesV2 } from './routes/quotes-v2';
 import { quotePublic } from './routes/quote-public';
+import { signables } from './routes/signables';
+import { signablesPublic } from './routes/signables-public';
+import { tax } from './routes/tax';
 import { ai } from './routes/ai';
 import { invoiceOcr } from './routes/invoice-ocr';
+import { expenses } from './routes/expenses';
 import { telegram } from './routes/telegram';
 import { workflows } from './routes/workflows';
 import { notes as notesRoutes } from './routes/notes';
@@ -154,10 +160,12 @@ app.route('/api/auth', auth);
 // Public routes (no auth required)
 const publicFormRateLimit = createRateLimit(3, 10 * 60 * 1000);
 app.use('/api/contacts', publicFormRateLimit);
+app.use('/api/public-leads', publicFormRateLimit);
 app.use('/api/newsletter', publicFormRateLimit);
 app.use('/api/calendar/bookings', publicFormRateLimit);
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
+app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);
 // ICS feed pubblico per subscription esterne (iPhone/macOS Calendar/Outlook)
 app.route('/api/calendar/feed', calendarFeed);
@@ -165,8 +173,14 @@ app.route('/api/stripe/webhook', stripeWebhook);
 app.route('/api/paypal-webhook', paypalWebhook);
 app.route('/api/cron/domains', domainCron);
 app.route('/api/public', publicRoutes);
+const capacityRateLimit = createRateLimit(10, 60 * 1000);
+app.use('/api/public/capacity', capacityRateLimit);
+app.route('/api/public/capacity', publicCapacity);
 // Quote public signing endpoints (no auth)
 app.route('/api/quote-sign', quotePublic);
+const signRateLimit = createRateLimit(10, 60 * 1000);
+app.use('/api/sign/*', signRateLimit);
+app.route('/api/sign', signablesPublic);
 app.route('/api/paypal', paypal);
 app.route('/api/public-pay', publicPay);
 // Telegram webhook (no auth — verified by bot token)
@@ -230,6 +244,8 @@ const protectedPaths = [
   '/api/customers',
   '/api/subscriptions',
   '/api/invoices',
+  '/api/expenses',
+  '/api/tax',
   '/api/domains',
   '/api/media',
   '/api/blog',
@@ -260,6 +276,7 @@ const protectedPaths = [
   '/api/customer-notes',
   '/api/payment-tracker',
   '/api/quotes-v2',
+  '/api/signables',
   '/api/ai',
   '/api/workflows',
   '/api/collaborators-v2',
@@ -289,6 +306,8 @@ for (const path of protectedPaths) {
 app.route('/api/customers', customers);
 app.route('/api/subscriptions', subscriptions);
 app.route('/api/invoices', invoices);
+app.route('/api/expenses', expenses);
+app.route('/api/tax', tax);
 app.route('/api/domains', domains);
 app.route('/api/media', media);
 app.route('/api/blog', blog);
@@ -319,6 +338,7 @@ app.route('/api/leads', leads);
 app.route('/api/customer-notes', customerNotes);
 app.route('/api/payment-tracker', paymentTracker);
 app.route('/api/quotes-v2', quotesV2);
+app.route('/api/signables', signables);
 app.route('/api/ai', ai);
 app.route('/api/ai', invoiceOcr);
 app.route('/api/workflows', workflows);

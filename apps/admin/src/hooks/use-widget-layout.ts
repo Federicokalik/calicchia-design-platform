@@ -19,6 +19,8 @@ const DEFAULT_LAYOUT: WidgetConfig[] = [
   { id: 'pipeline', type: 'pipeline', title: 'Pipeline', titleKey: 'dashboard.widgets.pipeline.title', w: 1, h: 1, visible: true },
   { id: 'deadlines', type: 'deadlines', title: 'Scadenze', titleKey: 'dashboard.widgets.deadlines.title', w: 1, h: 1, visible: true },
   { id: 'revenue', type: 'revenue', title: 'Revenue', titleKey: 'dashboard.widgets.revenue.title', w: 2, h: 2, visible: true },
+  { id: 'tasse', type: 'tasse', title: 'Tasse stimate', titleKey: 'dashboard.widgets.tasse.title', w: 2, h: 1, visible: true },
+  { id: 'capacity', type: 'capacity', title: 'Capacità settimanale', titleKey: 'dashboard.widgets.capacity.title', w: 2, h: 1, visible: true },
   { id: 'feed', type: 'feed', title: 'Attività Recente', titleKey: 'dashboard.widgets.feed.title', w: 2, h: 2, visible: true },
   { id: 'knowledge', type: 'knowledge', title: 'Knowledge Base', titleKey: 'dashboard.widgets.knowledge.title', w: 2, h: 2, visible: true },
 ];

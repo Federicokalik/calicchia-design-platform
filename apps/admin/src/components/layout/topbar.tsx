@@ -6,6 +6,7 @@ import { CopyLinkButton } from '@/components/shared/copy-link-button';
 import { useTopbarState } from '@/hooks/use-topbar';
 import { cn } from '@/lib/utils';
 import { LanguageToggle } from './language-toggle';
+import { TimerWidget } from './timer-widget';
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -62,6 +63,7 @@ export function Topbar({ onMenuClick, onSearchClick, sidebarCollapsed }: TopbarP
           <Search className="h-4 w-4" />
         </Button>
         <CopyLinkButton />
+        <TimerWidget />
         <InboxDropdown />
         <LanguageToggle />
         <ThemeToggle />

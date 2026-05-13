@@ -9,6 +9,8 @@ import { WidgetDeadlines } from '@/components/dashboard/widget-deadlines';
 import { WidgetRevenue } from '@/components/dashboard/widget-revenue';
 import { WidgetFeed } from '@/components/dashboard/widget-feed';
 import { WidgetKnowledge } from '@/components/dashboard/widget-knowledge';
+import { WidgetTasse } from '@/components/dashboard/widget-tasse';
+import { WidgetCapacity } from '@/components/dashboard/widget-capacity';
 import { useI18n } from '@/hooks/use-i18n';
 
 const widgetComponents: Record<string, React.ComponentType> = {
@@ -20,6 +22,8 @@ const widgetComponents: Record<string, React.ComponentType> = {
   revenue: WidgetRevenue,
   feed: WidgetFeed,
   knowledge: WidgetKnowledge,
+  tasse: WidgetTasse,
+  capacity: WidgetCapacity,
 };
 
 function renderWidget(widget: WidgetConfig) {

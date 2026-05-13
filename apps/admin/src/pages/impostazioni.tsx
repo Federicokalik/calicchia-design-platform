@@ -5,6 +5,7 @@ import {
   User, Link2, Key, KeyRound, History, Palette, FileSignature, Brain, Sparkles,
   Trash2, CheckCircle2, XCircle, RefreshCw, Building2, CreditCard, MapPin,
   Shield, Zap, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
+  Briefcase, Users, Calculator, Coins, Copy,
 } from 'lucide-react';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ function Field({ label, value, onChange, type = 'text', placeholder = '', rows, 
 
 const NAV_ITEMS = [
   { id: 'profilo', label: 'Profilo', icon: User },
+  { id: 'studio-freelance', label: 'Studio freelance', icon: Briefcase },
   { id: 'preventivi', label: 'Preventivi & PDF', icon: FileSignature },
   { id: 'integrazioni', label: 'Integrazioni', icon: Link2 },
   { id: 'brain', label: 'Second Brain', icon: Brain },
@@ -65,9 +67,11 @@ export default function ImpostazioniPage() {
     queryFn: async () => { try { return await apiFetch('/api/settings/ai-usage'); } catch { return { totals: {}, byProvider: [], byDay: [], recentCalls: [] }; } },
   });
 
-  const settings = (settingsData || {}) as Record<string, any>;
+  // /api/settings risponde con { settings: {...keys} } — unwrap se presente.
+  const settings = (((settingsData as any)?.settings ?? settingsData) || {}) as Record<string, any>;
   const businessProfile = settings['business.profile'] || {};
   const quoteSettings = settings['quote.settings'] || {};
+  const freelancerStudio = settings['freelancer.studio'] || {};
   const apiKeys = keysData?.keys || [];
   const auditLogs = auditData?.logs || auditData?.entries || [];
 
@@ -99,8 +103,14 @@ export default function ImpostazioniPage() {
   const getBp = (key: string) => bp[key] !== undefined ? bp[key] : businessProfile[key] ?? '';
   const setBpField = (key: string, value: any) => setBp((prev) => ({ ...prev, [key]: value }));
 
+  const [fs, setFs] = useState<Record<string, any>>({});
+  const getFs = (key: string, fallback: any = '') =>
+    fs[key] !== undefined ? fs[key] : freelancerStudio[key] ?? fallback;
+  const setFsField = (key: string, value: any) => setFs((prev) => ({ ...prev, [key]: value }));
+
   const saveQs = () => { saveMutation.mutate({ key: 'quote.settings', value: { ...quoteSettings, ...qs } }); setQs({}); };
   const saveBp = () => { saveMutation.mutate({ key: 'business.profile', value: { ...businessProfile, ...bp } }); setBp({}); };
+  const saveFs = () => { saveMutation.mutate({ key: 'freelancer.studio', value: { ...freelancerStudio, ...fs } }); setFs({}); };
 
   useTopbar({ title: 'Impostazioni', subtitle: 'Profilo, integrazioni, preventivi, preferenze' });
 
@@ -174,6 +184,183 @@ export default function ImpostazioniPage() {
             <Button onClick={saveBp} disabled={saveMutation.isPending || Object.keys(bp).length === 0}>
               {saveMutation.isPending ? 'Salvataggio...' : 'Salva profilo'}
             </Button>
+          </>
+        )}
+
+        {/* === STUDIO FREELANCE === */}
+        {activeTab === 'studio-freelance' && (
+          <>
+            <div>
+              <h2 className="text-lg font-semibold">Studio freelance</h2>
+              <p className="text-sm text-muted-foreground">
+                Capacità mensile, tariffa di default e regime fiscale.
+                Determinano badge disponibilità del sito, calcoli profittabilità e tasse stimate.
+              </p>
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Users className="h-4 w-4 text-muted-foreground" /> Capacità
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Max clienti / mese"
+                  value={String(getFs('max_clients_per_month', 3))}
+                  onChange={(v) => setFsField('max_clients_per_month', parseInt(v, 10) || 0)}
+                  type="number"
+                  description="Soglia mostrata nel badge 'Disponibile' della home"
+                />
+                <Field
+                  label="Ore disponibili / settimana"
+                  value={String(getFs('weekly_capacity_hours', 40))}
+                  onChange={(v) => setFsField('weekly_capacity_hours', parseInt(v, 10) || 0)}
+                  type="number"
+                  description="Usato dal widget capacity nel dashboard"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Coins className="h-4 w-4 text-muted-foreground" /> Tariffa
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Field
+                  label="Tariffa oraria default (€)"
+                  value={String((getFs('default_hourly_rate_cents', 5000) || 0) / 100)}
+                  onChange={(v) => setFsField('default_hourly_rate_cents', Math.round((parseFloat(v) || 0) * 100))}
+                  type="number"
+                  description="Usata quando un progetto non ha una tariffa propria"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Calculator className="h-4 w-4 text-muted-foreground" /> Regime fiscale
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium">Regime</Label>
+                  <select
+                    value={getFs('vat_regime', 'forfettario')}
+                    onChange={(e) => setFsField('vat_regime', e.target.value)}
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+                  >
+                    <option value="forfettario">Forfettario</option>
+                    <option value="ordinario">Ordinario</option>
+                    <option value="none">Nessuno (non applicabile)</option>
+                  </select>
+                </div>
+                <Field
+                  label="Coefficiente redditività"
+                  value={String(getFs('forfettario_coefficient', 0.78))}
+                  onChange={(v) => setFsField('forfettario_coefficient', parseFloat(v) || 0)}
+                  type="number"
+                  description="Default 0.78 per codici ATECO web/IT"
+                />
+                <Field
+                  label="Aliquota INPS gest. separata"
+                  value={String(getFs('inps_rate', 0.2607))}
+                  onChange={(v) => setFsField('inps_rate', parseFloat(v) || 0)}
+                  type="number"
+                  description="Es. 0.2607 = 26.07%"
+                />
+                <Field
+                  label="Imposta sostitutiva IRPEF"
+                  value={String(getFs('irpef_substitute_rate', 0.05))}
+                  onChange={(v) => setFsField('irpef_substitute_rate', parseFloat(v) || 0)}
+                  type="number"
+                  description="5% primi 5 anni, poi 15%"
+                />
+                <Field
+                  label="Plafond forfettario (€)"
+                  value={String(getFs('forfettario_plafond_eur', 85000))}
+                  onChange={(v) => setFsField('forfettario_plafond_eur', parseFloat(v) || 0)}
+                  type="number"
+                  description="Tetto ricavi annui (85.000€ dal 2023)"
+                />
+              </div>
+            </div>
+
+            <Button onClick={saveFs} disabled={saveMutation.isPending || Object.keys(fs).length === 0}>
+              {saveMutation.isPending ? 'Salvataggio...' : 'Salva impostazioni studio'}
+            </Button>
+
+            {/* Embed lead form */}
+            <div className="rounded-xl border bg-card p-6 space-y-4 mt-6">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Sparkles className="h-4 w-4 text-muted-foreground" /> Embed form lead
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Genera uno snippet iframe da incollare su siti partner, landing esterne o newsletter.
+                Le lead vengono inserite con sorgente <code className="text-[10px] bg-muted px-1 rounded">embed_form</code>
+                e UTM tracking automatico.
+              </p>
+              {(() => {
+                const baseUrl = (typeof window !== 'undefined'
+                  ? `${window.location.protocol}//calicchia.design`
+                  : 'https://calicchia.design');
+                const sourceToken = (businessProfile.company_name || 'embed').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 32) || 'embed';
+                const iframeSrc = `${baseUrl}/it/embed/lead?source=${sourceToken}`;
+                const snippet = `<iframe
+  src="${iframeSrc}"
+  width="100%"
+  height="640"
+  frameborder="0"
+  style="border:0;max-width:560px;"
+  title="Richiedi un preventivo"
+></iframe>
+<script>
+  window.addEventListener('message', function(e) {
+    if (e.data?.type === 'calicchia:lead-embed:resize') {
+      var iframe = document.querySelector('iframe[src*="${baseUrl.replace(/^https?:\/\//, '')}/it/embed/lead"]');
+      if (iframe) iframe.style.height = e.data.height + 'px';
+    }
+  });
+</script>`;
+                return (
+                  <>
+                    <Textarea
+                      readOnly
+                      value={snippet}
+                      rows={12}
+                      className="text-[10px] font-mono"
+                      onFocus={(e) => e.currentTarget.select()}
+                    />
+                    <div className="flex items-center justify-between">
+                      <a
+                        href={iframeSrc}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-primary hover:underline"
+                      >
+                        Anteprima form →
+                      </a>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(snippet);
+                            toast.success('Snippet copiato');
+                          } catch {
+                            toast.error('Impossibile copiare');
+                          }
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1.5" /> Copia snippet
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      Token sorgente: <code className="bg-muted px-1 rounded">{sourceToken}</code>
+                      (deriva dal nome azienda — modifica in alto per cambiarlo).
+                      Aggiungi parametri UTM allo URL per tracciare campagne: <code className="bg-muted px-1 rounded">&amp;utm_source=...</code>
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
           </>
         )}
 

@@ -91,26 +91,33 @@ export default function PreventivoDetailPage() {
         >
           <FileDown className="h-4 w-4 mr-1.5" /> PDF
         </Button>
-        {quote.status === 'signed' && !quote.project_id && (
+        {['signed', 'accepted', 'sent'].includes(quote.status) && !quote.project_id && (
           <Button
             variant="outline"
             size="sm"
             onClick={async () => {
               try {
-                toast.info('Creazione progetto con task AI...');
-                await apiFetch('/api/ai/chat', {
+                const res: any = await apiFetch(`/api/quotes-v2/${id}/convert-to-project`, {
                   method: 'POST',
-                  body: JSON.stringify({
-                    message: `Crea un progetto dal preventivo ${id}`,
-                    context: 'preventivi',
-                  }),
+                  body: JSON.stringify({}),
                 });
-                toast.success('Progetto creato! Controlla la sezione Progetti.');
+                toast.success('Progetto creato dal preventivo');
                 queryClient.invalidateQueries({ queryKey: ['quote-v2', id] });
-              } catch { toast.error('Errore creazione progetto'); }
+                queryClient.invalidateQueries({ queryKey: ['client-projects'] });
+                if (res?.project?.id) {
+                  navigate(`/progetti/${res.project.id}`);
+                }
+              } catch (err: any) {
+                toast.error(err?.message || 'Errore creazione progetto');
+              }
             }}
           >
-            <FolderKanban className="h-4 w-4 mr-1.5" /> Crea Progetto + Task
+            <FolderKanban className="h-4 w-4 mr-1.5" /> Crea progetto
+          </Button>
+        )}
+        {quote.project_id && (
+          <Button variant="ghost" size="sm" onClick={() => navigate(`/progetti/${quote.project_id}`)}>
+            <FolderKanban className="h-4 w-4 mr-1.5" /> Vai al progetto
           </Button>
         )}
         {quote.status === 'draft' && (
