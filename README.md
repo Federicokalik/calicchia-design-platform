@@ -294,7 +294,7 @@ sito-v3 ships to a Node host (SSR), the admin as a static SPA, the api behind a 
 
 ### License
 
-GPLv3 — see [LICENSE](LICENSE).
+AGPL-3.0-or-later — see [LICENSE](LICENSE).
 
 ---
 

@@ -20,7 +20,7 @@
     "build:admin": "npm run build --workspace=@caldes/admin"
   },
   "author": "Federico",
-  "license": "GPL-3.0-or-later",
+  "license": "AGPL-3.0-or-later",
   "devDependencies": {
     "tsx": "^4.21.0"
   },
