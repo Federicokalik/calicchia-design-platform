@@ -1756,6 +1756,228 @@ Rispondi SOLO con JSON valido:
       return JSON.stringify({ success: ok });
     },
   },
+
+  // ─── ANALYTICS (cookieless internal tracker) ────────────────────────────────
+
+  {
+    name: 'get_traffic_summary',
+    description: 'KPI overview del traffico del sito: pageviews, visitatori unici, sessioni, bounce rate, durata media. Periodo: 24h | 7d | 30d | 90d | 12m (default 30d).',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const [row] = await sql`
+        WITH base AS (
+          SELECT session_id, visit_id, event_type, duration_ms
+          FROM analytics
+          WHERE website_id = 'main' AND created_at >= NOW() - CAST(${interval} AS INTERVAL)
+        ),
+        visits AS (
+          SELECT visit_id, COUNT(*) FILTER (WHERE event_type='pageview') AS pv, SUM(duration_ms) AS dur
+          FROM base WHERE visit_id IS NOT NULL GROUP BY visit_id
+        )
+        SELECT
+          (SELECT COUNT(*) FROM base WHERE event_type='pageview')::int AS pageviews,
+          (SELECT COUNT(DISTINCT session_id) FROM base WHERE session_id IS NOT NULL)::int AS visitors,
+          (SELECT COUNT(*) FROM visits)::int AS sessions,
+          COALESCE(ROUND(100.0*(SELECT COUNT(*) FROM visits WHERE pv<=1)/NULLIF((SELECT COUNT(*) FROM visits),0),1),0)::float AS bounce_rate,
+          COALESCE(ROUND(AVG(dur) FILTER (WHERE dur>0)),0)::int AS avg_duration_ms
+        FROM visits
+      `;
+      return JSON.stringify({ period: args.period || '30d', ...(row || { pageviews: 0, visitors: 0, sessions: 0, bounce_rate: 0, avg_duration_ms: 0 }) });
+    },
+  },
+
+  {
+    name: 'get_top_pages',
+    description: 'Top pagine per pageviews. Restituisce path, pageviews, visitatori unici, sessioni.',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+        limit: { type: 'number', description: 'Default 10, max 50' },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const limit = Math.min(Math.max((args.limit as number) || 10, 1), 50);
+      const rows = await sql`
+        SELECT page_path AS path,
+          COUNT(*)::int AS pageviews,
+          COUNT(DISTINCT session_id)::int AS visitors,
+          COUNT(DISTINCT visit_id)::int AS sessions
+        FROM analytics
+        WHERE website_id = 'main'
+          AND created_at >= NOW() - CAST(${interval} AS INTERVAL)
+          AND event_type = 'pageview'
+          AND page_path IS NOT NULL
+        GROUP BY page_path
+        ORDER BY pageviews DESC
+        LIMIT ${limit}
+      `;
+      return JSON.stringify({ period: args.period || '30d', pages: rows });
+    },
+  },
+
+  {
+    name: 'get_traffic_sources',
+    description: 'Sorgenti di traffico: referrer domain, UTM source, UTM medium o UTM campaign. Specifica `kind` per scegliere.',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+        kind: { type: 'string', enum: ['referrer', 'utm_source', 'utm_medium', 'utm_campaign'], description: 'Dimensione (default referrer)' },
+        limit: { type: 'number' },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const kindMap: Record<string, string> = {
+        referrer: 'referrer_domain',
+        utm_source: 'utm_source',
+        utm_medium: 'utm_medium',
+        utm_campaign: 'utm_campaign',
+      };
+      const col = kindMap[(args.kind as string) || 'referrer'] || 'referrer_domain';
+      const limit = Math.min(Math.max((args.limit as number) || 10, 1), 50);
+      const rows = await sql`
+        SELECT ${sql(col)} AS source,
+          COUNT(*)::int AS pageviews,
+          COUNT(DISTINCT session_id)::int AS visitors
+        FROM analytics
+        WHERE website_id = 'main'
+          AND created_at >= NOW() - CAST(${interval} AS INTERVAL)
+          AND event_type = 'pageview'
+        GROUP BY ${sql(col)}
+        ORDER BY pageviews DESC NULLS LAST
+        LIMIT ${limit}
+      `;
+      return JSON.stringify({ period: args.period || '30d', kind: args.kind || 'referrer', sources: rows });
+    },
+  },
+
+  {
+    name: 'get_realtime_visitors',
+    description: 'Visitatori attivi sul sito negli ultimi 5 minuti + top 5 pagine attive + ultimi eventi.',
+    parameters: { type: 'object', properties: {} },
+    execute: async () => {
+      const [visitors] = await sql`SELECT COUNT(DISTINCT visit_id)::int AS c FROM analytics WHERE website_id='main' AND created_at >= NOW() - INTERVAL '5 minutes' AND visit_id IS NOT NULL`;
+      const topPages = await sql`
+        SELECT page_path AS path, COUNT(DISTINCT visit_id)::int AS visitors
+        FROM analytics
+        WHERE website_id='main' AND event_type='pageview'
+          AND created_at >= NOW() - INTERVAL '5 minutes' AND page_path IS NOT NULL
+        GROUP BY page_path ORDER BY visitors DESC LIMIT 5
+      `;
+      const recentEvents = await sql`
+        SELECT event_type AS type, event_name, page_path AS page, country, created_at
+        FROM analytics
+        WHERE website_id='main' AND created_at >= NOW() - INTERVAL '5 minutes'
+        ORDER BY created_at DESC LIMIT 10
+      `;
+      return JSON.stringify({ visitorsNow: visitors?.c ?? 0, topPages, recentEvents });
+    },
+  },
+
+  {
+    name: 'get_web_vitals',
+    description: 'Core Web Vitals (LCP, CLS, INP, FCP, TTFB) p75 e p95 dal browser dei visitatori, con rating.',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+        page: { type: 'string', description: 'Path opzionale per filtrare a una pagina specifica' },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const pageFilter = args.page ? sql`AND page_path = ${args.page as string}` : sql``;
+      const rows = await sql`
+        SELECT event_name AS metric, COUNT(*)::int AS count,
+          percentile_cont(0.75) WITHIN GROUP (ORDER BY event_value) AS p75,
+          percentile_cont(0.95) WITHIN GROUP (ORDER BY event_value) AS p95
+        FROM analytics
+        WHERE website_id='main' AND event_type='web_vital' AND event_value IS NOT NULL
+          AND created_at >= NOW() - CAST(${interval} AS INTERVAL)
+          ${pageFilter}
+        GROUP BY event_name ORDER BY metric
+      ` as Array<{ metric: string; count: number; p75: number; p95: number }>;
+      const thresholds: Record<string, { good: number; poor: number }> = {
+        LCP: { good: 2500, poor: 4000 }, INP: { good: 200, poor: 500 },
+        CLS: { good: 0.1, poor: 0.25 }, FCP: { good: 1800, poor: 3000 },
+        TTFB: { good: 800, poor: 1800 },
+      };
+      const enriched = rows.map((m) => {
+        const t = thresholds[m.metric];
+        const rating = t ? (m.p75 <= t.good ? 'good' : m.p75 <= t.poor ? 'needs_improvement' : 'poor') : 'unknown';
+        return { ...m, rating };
+      });
+      return JSON.stringify({ period: args.period || '30d', metrics: enriched });
+    },
+  },
+
+  {
+    name: 'get_goal_conversions',
+    description: 'Lista i goal di analytics con il numero di conversioni nel periodo richiesto.',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const goals = await sql`SELECT id, name, type, conditions, active FROM analytics_goals WHERE active = TRUE ORDER BY created_at DESC` as Array<{
+        id: string; name: string; type: string; conditions: { path?: string; event_name?: string }; active: boolean;
+      }>;
+      const out = await Promise.all(goals.map(async (g) => {
+        let count = 0;
+        if (g.type === 'pageview' && g.conditions?.path) {
+          const [r] = await sql`SELECT COUNT(DISTINCT session_id)::int AS c FROM analytics WHERE website_id='main' AND event_type='pageview' AND page_path=${g.conditions.path} AND created_at >= NOW() - CAST(${interval} AS INTERVAL)`;
+          count = r?.c ?? 0;
+        } else if (g.type === 'event' && g.conditions?.event_name) {
+          const [r] = await sql`SELECT COUNT(DISTINCT session_id)::int AS c FROM analytics WHERE website_id='main' AND event_type='event' AND event_name=${g.conditions.event_name} AND created_at >= NOW() - CAST(${interval} AS INTERVAL)`;
+          count = r?.c ?? 0;
+        }
+        return { name: g.name, type: g.type, conversions: count };
+      }));
+      return JSON.stringify({ period: args.period || '30d', goals: out });
+    },
+  },
+
+  {
+    name: 'get_traffic_geo',
+    description: 'Breakdown geografico del traffico: top paesi con pageviews e visitatori unici.',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', enum: ['24h', '7d', '30d', '90d', '12m'] },
+        limit: { type: 'number' },
+      },
+    },
+    execute: async (args) => {
+      const periodMap: Record<string, string> = { '24h': '24 hours', '7d': '7 days', '30d': '30 days', '90d': '90 days', '12m': '1 year' };
+      const interval = periodMap[(args.period as string) || '30d'] || '30 days';
+      const limit = Math.min(Math.max((args.limit as number) || 15, 1), 50);
+      const rows = await sql`
+        SELECT country, COUNT(*)::int AS pageviews, COUNT(DISTINCT session_id)::int AS visitors
+        FROM analytics
+        WHERE website_id='main' AND event_type='pageview' AND country IS NOT NULL
+          AND created_at >= NOW() - CAST(${interval} AS INTERVAL)
+        GROUP BY country ORDER BY pageviews DESC LIMIT ${limit}
+      `;
+      return JSON.stringify({ period: args.period || '30d', countries: rows });
+    },
+  },
 ];
 
 /**
