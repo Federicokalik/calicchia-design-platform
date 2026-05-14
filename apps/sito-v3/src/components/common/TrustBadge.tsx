@@ -78,48 +78,27 @@ export function TrustBadge({
     return () => window.clearInterval(interval);
   }, [reuseExistingLoader]);
 
+  // Le regole CSS che compattano il footprint del widget (margin-bottom: -5px,
+  // reset margin sui figli, transparent borders) vivono in globals.css cosi'
+  // sono nell'HTML al primo paint. Tenerle in <style jsx global> faceva sparire
+  // la patch sul cold load: lo styled-jsx di un client component viene iniettato
+  // dopo l'idratazione, e Trustindex monta il DOM prima.
   return (
-    <>
-      <style jsx global>{`
-        [data-trustindex-badge] > * {
-          margin: 0 !important;
-        }
-
-        [data-trustindex-badge] iframe,
-        [data-trustindex-badge] table,
-        [data-trustindex-badge] tbody,
-        [data-trustindex-badge] tr,
-        [data-trustindex-badge] td,
-        [data-trustindex-badge] div {
-          border-bottom-color: transparent !important;
-          box-shadow: none !important;
-        }
-
-        /* Compatta il footprint del widget Trustindex layout 104 dark-minimal:
-           rimuove i 5px residui in fondo che generano la banda nera. */
-        .ti-widget[data-layout-id='104'][data-set-id='dark-minimal']
-          .ti-widget-container {
-          display: block;
-          color: #ffffff;
-          margin-bottom: -5px;
-        }
-      `}</style>
-      <div
-        ref={containerRef}
-        data-trustindex-badge
-        className={className}
-        // Shrink-fit alla width naturale del widget Trustindex (no stretch
-        // verso il parent). Background nero + overflow hidden sui residui.
-        style={{
-          display: 'inline-block',
-          width: 'fit-content',
-          maxWidth: 360,
-          background: 'var(--color-ink)',
-          overflow: 'hidden',
-          lineHeight: 0,
-        }}
-        aria-label="Badge recensioni Google verificate da Trustindex"
-      />
-    </>
+    <div
+      ref={containerRef}
+      data-trustindex-badge
+      className={className}
+      // Shrink-fit alla width naturale del widget Trustindex (no stretch
+      // verso il parent). Background nero + overflow hidden sui residui.
+      style={{
+        display: 'inline-block',
+        width: 'fit-content',
+        maxWidth: 360,
+        background: 'var(--color-ink)',
+        overflow: 'hidden',
+        lineHeight: 0,
+      }}
+      aria-label="Badge recensioni Google verificate da Trustindex"
+    />
   );
 }
