@@ -18,6 +18,19 @@ for (const key of REQUIRED_ENV) {
 import { serve } from '@hono/node-server';
 import { app } from './app';
 import { startCronEngine, stopCronEngine } from './cron';
+import { assertKBsValid } from './lib/quotes/generate';
+
+// Validate AI knowledge bases are present and well-formed (fail-fast).
+// Without these files the AI quote generator cannot run; refusing to start
+// here is better than failing silently per-request or, worse, falling back
+// to a stale or hardcoded price list.
+try {
+  assertKBsValid();
+} catch (err) {
+  console.error(`FATAL: AI knowledge base validation failed: ${(err as Error).message}`);
+  console.error('Hint: copy *.example.md templates from apps/api/src/lib/agent/ to *_knowledge_base.md and fill with real data.');
+  process.exit(1);
+}
 
 const port = parseInt(process.env.PORT || '3001');
 

@@ -158,16 +158,19 @@ const settingsSchemas = {
     colore_info: z.string().default('#2563eb'),
     font: z.string().default('Inter, Arial, sans-serif'),
 
-    // Fornitore
-    ragione_sociale: z.string().default('Calicchia Design di Federico Calicchia'),
-    indirizzo: z.string().default('Via Scifelli 74, 03023 Ceccano (FR)'),
-    piva: z.string().default('03160480608'),
-    legale_rappresentante: z.string().default('Federico Calicchia'),
-    telefono: z.string().default('351 777 3467'),
-    email_fornitore: z.string().default('info@calicchia.design'),
-    banca: z.string().default('Revolut Bank UAB — Via Dante 7, 20123 Milano (MI)'),
-    iban: z.string().default('IT79 Z036 6901 6009 8955 1082 080'),
-    bic: z.string().default('REVOITM2'),
+    // Fornitore — populate via admin UI ("Impostazioni / Preventivi").
+    // Defaults are intentionally empty: this file ships in a public repo,
+    // so personal data (address, IBAN, phone, email) must not live here.
+    // Real values are stored in the `site_settings` table.
+    ragione_sociale: z.string().default(''),
+    indirizzo: z.string().default(''),
+    piva: z.string().default(''),
+    legale_rappresentante: z.string().default(''),
+    telefono: z.string().default(''),
+    email_fornitore: z.string().default(''),
+    banca: z.string().default(''),
+    iban: z.string().default(''),
+    bic: z.string().default(''),
 
     // Regime fiscale
     regime_tipo: z.string().default('forfettario'),

@@ -383,14 +383,14 @@ export default function ImpostazioniPage() {
             <div className="rounded-xl border bg-card p-6 space-y-5">
               <div className="flex items-center gap-2 text-sm font-medium"><FileSignature className="h-4 w-4 text-muted-foreground" /> Intestazione PDF</div>
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Ragione sociale" value={getQs('ragione_sociale', 'Calicchia Design di Federico Calicchia')} onChange={(v) => setQsField('ragione_sociale', v)} />
-                <Field label="P.IVA" value={getQs('piva', '03160480608')} onChange={(v) => setQsField('piva', v)} />
-                <Field label="Indirizzo" value={getQs('indirizzo', 'Via Scifelli 74, 03023 Ceccano (FR)')} onChange={(v) => setQsField('indirizzo', v)} />
-                <Field label="Rappresentante" value={getQs('legale_rappresentante', 'Federico Calicchia')} onChange={(v) => setQsField('legale_rappresentante', v)} />
-                <Field label="Telefono" value={getQs('telefono', '351 777 3467')} onChange={(v) => setQsField('telefono', v)} />
-                <Field label="Email" value={getQs('email_fornitore', 'info@calicchia.design')} onChange={(v) => setQsField('email_fornitore', v)} />
-                <Field label="Banca" value={getQs('banca', 'Revolut Bank UAB')} onChange={(v) => setQsField('banca', v)} />
-                <Field label="IBAN" value={getQs('iban', 'LT84 3250 0216 2701 8744')} onChange={(v) => setQsField('iban', v)} />
+                <Field label="Ragione sociale" value={getQs('ragione_sociale', '')} onChange={(v) => setQsField('ragione_sociale', v)} />
+                <Field label="P.IVA" value={getQs('piva', '')} onChange={(v) => setQsField('piva', v)} />
+                <Field label="Indirizzo" value={getQs('indirizzo', '')} onChange={(v) => setQsField('indirizzo', v)} />
+                <Field label="Rappresentante" value={getQs('legale_rappresentante', '')} onChange={(v) => setQsField('legale_rappresentante', v)} />
+                <Field label="Telefono" value={getQs('telefono', '')} onChange={(v) => setQsField('telefono', v)} />
+                <Field label="Email" value={getQs('email_fornitore', '')} onChange={(v) => setQsField('email_fornitore', v)} />
+                <Field label="Banca" value={getQs('banca', '')} onChange={(v) => setQsField('banca', v)} />
+                <Field label="IBAN" value={getQs('iban', '')} onChange={(v) => setQsField('iban', v)} />
               </div>
             </div>
 

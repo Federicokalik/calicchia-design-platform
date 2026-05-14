@@ -5,6 +5,7 @@ import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
 import { renderQuoteHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
+import { generateQuoteDraft, GenerateQuoteInputSchema } from '../lib/quotes/generate';
 
 export const quotesV2 = new Hono();
 
@@ -62,6 +63,35 @@ quotesV2.get('/:id', async (c) => {
   `;
 
   return c.json({ quote: rows[0], audit });
+});
+
+// POST /api/quotes-v2/generate — AI-assisted quote generation
+// Auth: admin only (enforced by middleware on /api/quotes-v2 in app.ts).
+// Privacy invariant: only services/budget/notes reach the LLM. Client identity
+// (customer_id, names) is stored as metadata and never sent to the model.
+// Idempotency: optional Idempotency-Key header, in-memory 10 min TTL.
+quotesV2.post('/generate', async (c) => {
+  const idempotencyKey = c.req.header('Idempotency-Key') || undefined;
+  let rawBody: unknown;
+  try {
+    rawBody = await c.req.json();
+  } catch {
+    return c.json({ error: 'Body JSON non valido' }, 400);
+  }
+  const parseResult = GenerateQuoteInputSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    return c.json({ error: 'Input non valido', details: parseResult.error.flatten() }, 400);
+  }
+  try {
+    const draft = await generateQuoteDraft(parseResult.data, { idempotencyKey });
+    return c.json(draft, 201);
+  } catch (err) {
+    console.error('quotes-v2 generate error:', err);
+    return c.json(
+      { error: 'Generazione preventivo fallita', detail: (err as Error).message },
+      502,
+    );
+  }
 });
 
 // POST /api/quotes-v2 — create quote

@@ -635,75 +635,31 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       required: ['client_name', 'services'],
     },
     execute: async (args) => {
-      const { generateText } = await import('./llm-router');
+      const { generateQuoteDraft } = await import('../quotes/generate');
+      // Client identity (name, company, website) is kept as internal metadata
+      // and never passed to the LLM prompt. Only services / budget / notes
+      // (free-text, user's responsibility) reach the model.
+      const internalMetadata: Record<string, string> = {};
+      if (typeof args.client_name === 'string' && args.client_name) internalMetadata.client_name = args.client_name;
+      if (typeof args.company === 'string' && args.company) internalMetadata.company = args.company;
+      if (typeof args.website === 'string' && args.website) internalMetadata.website = args.website;
 
-      // Load pricing KB for accurate prices
-      let pricingContext = '';
-      try {
-        const { readFileSync } = await import('fs');
-        const { resolve, dirname } = await import('path');
-        const { fileURLToPath } = await import('url');
-        const __dir = dirname(fileURLToPath(import.meta.url));
-        pricingContext = readFileSync(resolve(__dir, 'pricing_knowledge_base.md'), 'utf-8').slice(0, 4000);
-      } catch {}
-
-      const prompt = `Sei Federico Calicchia, web designer freelance. Genera un preventivo usando i prezzi ESATTI dal listino.
-
-LISTINO PREZZI (usa QUESTI prezzi, non inventare):
-${pricingContext || 'One Page: da €799 | Multipage: da €1.199 | Taylored: da €1.579 | E-commerce: da €3.799 | Web App: €4.500-6.000 | SEO: €149-299 | Hosting VPS: €169-249/anno'}
-
-Cliente: ${args.client_name} (${args.company || ''})
-Servizi richiesti: ${args.services}
-Budget indicativo: ${args.budget || 'da definire'}
-Note: ${args.notes || 'nessuna'}
-
-REGOLE PRICING:
-- Usa i prezzi del listino, NON inventare
-- Includi sempre hosting se è un sito nuovo
-- Mostra sconto 10% per pagamento anticipato
-- MINIMI 2026: One Page €799, Multipage €1.199
-
-Rispondi SOLO con JSON valido:
-{"title":"Titolo preventivo","description":"Preventivo e Contratto di Incarico","items":[{"description":"Nome servizio","quantity":1,"unit_price":749,"total":749}],"notes":"Note per il cliente (regime forfettario, marca da bollo se >77.47€)","premessa":"Premessa personalizzata 2-3 righe"}`;
-
-      const result = await generateText('task_breakdown', [
-        { role: 'system', content: 'Rispondi SOLO con JSON valido, niente altro testo.' },
-        { role: 'user', content: prompt },
-      ], { temperature: 0.5 });
-
-      // Parse JSON
-      let quoteData: any;
-      try {
-        const jsonMatch = result.match(/\{[\s\S]*\}/);
-        quoteData = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
-      } catch { quoteData = null; }
-
-      if (!quoteData) return JSON.stringify({ error: 'AI non ha generato JSON valido', raw: result.slice(0, 500) });
-
-      // Step 2: Save to DB
-      const items = quoteData.items || [];
-      const total = items.reduce((s: number, i: any) => s + (i.total || 0), 0);
-
-      const rows = await sql`
-        INSERT INTO quotes_v2 (title, description, items, subtotal, total, notes, internal_notes)
-        VALUES (
-          ${quoteData.title || `Preventivo ${args.client_name}`},
-          ${quoteData.description || 'Preventivo e Contratto di Incarico'},
-          ${JSON.stringify(items)},
-          ${total}, ${total},
-          ${quoteData.notes || null},
-          ${'Generato da AI. Premessa: ' + (quoteData.premessa || '')}
-        )
-        RETURNING id, title, total
-      `;
+      const draft = await generateQuoteDraft({
+        services: args.services as string,
+        budget: args.budget as string | undefined,
+        notes: args.notes as string | undefined,
+        internal_metadata: Object.keys(internalMetadata).length ? internalMetadata : undefined,
+      });
 
       return JSON.stringify({
         created: true,
-        quote_id: rows[0].id,
-        title: rows[0].title,
-        total: rows[0].total,
-        items_count: items.length,
-        message: `Preventivo "${rows[0].title}" creato come bozza (€${total}). Vai su /preventivi/${rows[0].id} per revisione.`,
+        quote_id: draft.quote_id,
+        title: draft.title,
+        total: draft.total,
+        subtotal: draft.subtotal,
+        stamp_duty: draft.stamp_duty,
+        items_count: draft.items.length,
+        message: `Preventivo "${draft.title}" creato come bozza (€${draft.total}). Vai su /preventivi/${draft.quote_id} per revisione.`,
       });
     },
   },
