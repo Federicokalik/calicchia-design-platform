@@ -351,25 +351,6 @@ body[data-menu-open='true'] [data-morph-ticker] {
   font-weight: 600;
 }
 
-/* ── Case study fade-in entry — Bierut austerity ───────────────────── */
-/* Opacity + small Y translation. Niente SplitText, niente word-reveal,
-   niente parallax. Solo soft entrance. Reduce-motion-aware. */
-@keyframes case-fade-in {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.case-fade-in {
-  animation: case-fade-in 320ms ease-out both;
-  will-change: opacity, transform;
-}
-@media (prefers-reduced-motion: reduce) {
-  .case-fade-in {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* ── Body longform tipografia editoriale Swiss/Pentagram ───────────────── */
 /* Per body lunghi (services intro, pillar SEO, pagine info) che altrimenti
  * risultano "seghettati" sul lato destro. Justify + auto-hyphens + text-wrap
@@ -395,31 +376,3 @@ body[data-menu-open='true'] [data-morph-ticker] {
   }
 }
 
-/* Trustindex badge — patch globale.
- * Le regole vivono in globals.css (non in <style jsx global> nel componente)
- * perche' altrimenti vengono iniettate solo dopo l'idratazione client; sul
- * cold load del sito il widget Trustindex monta il proprio DOM prima che la
- * patch sia nel documento, e i 5px residui in fondo restano visibili. In
- * navigazione client-side lo style tag e' gia' presente e la patch funziona.
- * Tenendo il CSS qui e' sempre nell'HTML al primo paint. */
-[data-trustindex-badge] > * {
-  margin: 0 !important;
-}
-
-[data-trustindex-badge] iframe,
-[data-trustindex-badge] table,
-[data-trustindex-badge] tbody,
-[data-trustindex-badge] tr,
-[data-trustindex-badge] td,
-[data-trustindex-badge] div {
-  border-bottom-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* Compatta il footprint del widget Trustindex layout 104 dark-minimal:
-   rimuove i 5px residui in fondo che generano la banda nera. */
-.ti-widget[data-layout-id='104'][data-set-id='dark-minimal'] .ti-widget-container {
-  display: block;
-  color: #ffffff;
-  margin-bottom: -5px;
-}

@@ -1,9 +1,5 @@
-'use client';
-
 import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
 import { Section } from '@/components/ui/Section';
-import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
 
 const PRINCIPLES = [
   'siteAsSalesperson',
@@ -17,58 +13,9 @@ const PRINCIPLES = [
 
 export function ManifestoSlides() {
   const t = useTranslations('perche.manifesto');
-  const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      const section = root.current;
-      if (!section) return;
-
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-        },
-        (ctx) => {
-          const rows = gsap.utils.toArray<HTMLElement>('[data-manifesto-row]', section);
-
-          if (ctx.conditions?.reduced) {
-            gsap.set(rows, { autoAlpha: 1, y: 0 });
-            return;
-          }
-
-          rows.forEach((row) => {
-            gsap.fromTo(
-              row,
-              { autoAlpha: 0, y: 28 },
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: 0.85,
-                ease: 'power3.out',
-                scrollTrigger: {
-                  trigger: row,
-                  start: 'top 82%',
-                  once: true,
-                },
-              }
-            );
-          });
-
-          if (document.fonts?.ready) {
-            document.fonts.ready.then(() => ScrollTrigger.refresh());
-          }
-        }
-      );
-
-      return () => mm.revert();
-    },
-    { scope: root }
-  );
 
   return (
-    <Section ref={root} spacing="compact" bordered="top">
+    <Section spacing="compact" bordered="top">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-12 gap-y-10">
         <div className="lg:col-span-4">
           {/* Swiss compliance 2026-05-09: rimosso 'lg:sticky lg:top-28' */}
@@ -101,7 +48,6 @@ export function ManifestoSlides() {
             {PRINCIPLES.map((item, idx) => (
               <article
                 key={item}
-                data-manifesto-row
                 className="grid grid-cols-1 md:grid-cols-[8rem_1fr] gap-5 py-9 md:py-11"
               >
                 <span

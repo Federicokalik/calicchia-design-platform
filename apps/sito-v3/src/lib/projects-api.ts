@@ -19,18 +19,6 @@ export interface ApiProjectListItem {
 }
 
 /** Strutture JSONB esposte dal backend Hono. */
-export interface ApiProjectChallenge {
-  text?: string;
-  detail?: string;
-  title?: string;
-  description?: string;
-}
-export interface ApiProjectSolution {
-  text?: string;
-  detail?: string;
-  title?: string;
-  description?: string;
-}
 export interface ApiProjectFeedback {
   quote?: string;
   name?: string;
@@ -63,18 +51,14 @@ export interface ApiProjectDetail {
   slug: string;
   title: string;
   description: string | null;
-  /** Long-form markdown editorial (admin Rich Text TipTap → markdown). */
-  content: string | null;
+  /** Migration 090 — body unico markdown del case study (admin Rich Text TipTap → markdown). */
+  brief: string | null;
   client: string | null;
   services: string | null;
   industries: string | null;
   cover_image: string | null;
   gallery: ApiProjectGalleryItem[];
   technologies: string[];
-  challenge: ApiProjectChallenge | string | null;
-  challenge_images: ApiProjectGalleryItem[] | string[] | null;
-  solution: ApiProjectSolution | string | null;
-  solution_image: string | null;
   feedback: ApiProjectFeedback | string | null;
   // Migration 075 — case study extension
   year: number | null;

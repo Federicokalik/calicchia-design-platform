@@ -1,10 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { gsap, useGSAP, ScrollTrigger } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
 import type { ShowcaseTile } from '@/data/showcase';
@@ -64,48 +64,6 @@ export function WorksHorizontal({ showcase }: WorksHorizontalProps) {
               anticipatePin: 0,
               invalidateOnRefresh: true,
             },
-          });
-
-          const cards = gsap.utils.toArray<HTMLElement>('.work-card', t);
-          cards.forEach((card) => {
-            const img = card.querySelector<HTMLElement>('.work-card__img');
-            const meta = card.querySelector<HTMLElement>('.work-card__meta');
-            if (img) {
-              gsap.fromTo(
-                img,
-                { scale: 1.18, opacity: 0.8 },
-                {
-                  scale: 1,
-                  opacity: 1,
-                  ease: 'none',
-                  scrollTrigger: {
-                    containerAnimation: scrubTween,
-                    trigger: card,
-                    start: 'left right',
-                    end: 'right left',
-                    scrub: true,
-                  },
-                }
-              );
-            }
-            if (meta) {
-              gsap.fromTo(
-                meta,
-                { y: 30, opacity: 0 },
-                {
-                  y: 0,
-                  opacity: 1,
-                  ease: 'none',
-                  scrollTrigger: {
-                    containerAnimation: scrubTween,
-                    trigger: card,
-                    start: 'left 80%',
-                    end: 'left 30%',
-                    scrub: true,
-                  },
-                }
-              );
-            }
           });
 
           ScrollTrigger.refresh();

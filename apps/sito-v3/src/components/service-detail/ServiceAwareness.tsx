@@ -1,13 +1,8 @@
-'use client';
-
-import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { gsap, useGSAP } from '@/lib/gsap';
 import { Body } from '@/components/ui/Body';
 import { Heading } from '@/components/ui/Heading';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Section } from '@/components/ui/Section';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import type { ServiceAwareness as ServiceAwarenessData } from '@/data/services-detail';
 
 interface ServiceAwarenessProps {
@@ -18,36 +13,9 @@ interface ServiceAwarenessProps {
 
 export function ServiceAwareness({ data, index = '01' }: ServiceAwarenessProps) {
   const t = useTranslations('servizi.detail');
-  const root = useRef<HTMLElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const items = gsap.utils.toArray<HTMLElement>('[data-awareness-item]', r);
-      if (!items.length) return;
-      if (
-        prefersReducedMotion ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ) {
-        gsap.set(items, { opacity: 1, y: 0 });
-        return;
-      }
-      gsap.from(items, {
-        y: 16,
-        opacity: 0,
-        duration: 0.2,
-        stagger: 0.06,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: r, start: 'top 75%', once: true },
-      });
-    },
-    { scope: root, dependencies: [prefersReducedMotion], revertOnUpdate: true }
-  );
 
   return (
-    <Section ref={root} spacing="default" bordered="top">
+    <Section spacing="default" bordered="top">
       <div className="flex items-baseline justify-between gap-6 mb-16 md:mb-24">
         <p
           className="font-mono text-[length:var(--text-eyebrow)] uppercase tracking-[0.25em]"

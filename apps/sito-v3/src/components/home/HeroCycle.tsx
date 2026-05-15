@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSlotCycle } from '@/hooks/useSlotCycle';
-
-const SERVICES = ['e-commerce', 'sviluppo', 'SEO', 'WordPress'] as const;
 
 interface HeroCycleProps {
   /** Pause flag for contexts that need to freeze the rotating token. */
@@ -27,8 +26,18 @@ const useIsoEffect =
  * via il hook (frozen on first item).
  */
 export function HeroCycle({ paused = false, intervalMs = 2600 }: HeroCycleProps) {
+  const t = useTranslations('home.hero');
+  // `cycleItems` è un array nei file i18n (home.json) — uso `raw` per ottenerlo
+  // intero; memoizzato per evitare ri-render del cycle hook ad ogni paint.
+  const services = useMemo<readonly string[]>(() => {
+    const raw = t.raw('cycleItems');
+    return Array.isArray(raw) && raw.length > 0
+      ? (raw as string[])
+      : ['e-commerce'];
+  }, [t]);
+
   const { current, next, isAdvancing } = useSlotCycle({
-    items: SERVICES,
+    items: services,
     intervalMs,
     paused,
   });

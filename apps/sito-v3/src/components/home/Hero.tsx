@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import { getTranslations } from 'next-intl/server';
-import { TrustBadge } from '@/components/common/TrustBadge';
+import { Link } from '@/i18n/navigation';
 import { Heading } from '@/components/ui/Heading';
 import { HeroCycle } from './HeroCycle';
 import { AvailabilityBadge, type AvailabilitySnapshot } from './AvailabilityBadge';
@@ -71,8 +70,7 @@ export async function Hero({ years }: HeroProps) {
             lineHeight: 0.95,
           }}
         >
-          <span data-split="static">{t('h1Prefix')}</span>
-          <br />
+          <span data-split="static">{t('h1Prefix')}</span>{' '}
           <span data-split="static">{t('h1Connector')}</span>{' '}
           <span className="inline-block align-baseline">
             <HeroCycle />
@@ -100,7 +98,6 @@ export async function Hero({ years }: HeroProps) {
           </div>
 
           <div className="md:col-span-5 md:justify-self-end flex flex-col gap-5 md:items-end">
-            <TrustBadge className="self-start md:self-end" />
             <AvailabilityBadge snapshot={availability} />
             <Link
               href="/contatti"

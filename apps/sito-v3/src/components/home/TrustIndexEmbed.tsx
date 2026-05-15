@@ -12,6 +12,16 @@ declare global {
   }
 }
 
+interface TrustIndexEmbedProps {
+  /**
+   * BCP-47 / Trustindex locale code. Forwarded as `data-language` so the
+   * widget localizes its UI strings (button labels, relative dates, etc.).
+   * The review text itself stays in the original Google Business Profile
+   * language: Trustindex does not auto-translate review bodies.
+   */
+  locale?: string;
+}
+
 /**
  * Embeds the TrustIndex (Google Reviews) widget on the home page.
  * Wraps the external widget script so React controls its lifecycle:
@@ -27,7 +37,7 @@ declare global {
  * sito-v3 yet). When the consent layer is added, gate this component behind
  * a marketing-consent check and offer a click-to-load placeholder.
  */
-export function TrustIndexEmbed() {
+export function TrustIndexEmbed({ locale = 'it' }: TrustIndexEmbedProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,6 +81,7 @@ export function TrustIndexEmbed() {
       ref={containerRef}
       id="trustindex-widget"
       data-trustindex
+      data-language={locale}
       className="w-full"
       // Reserve a baseline height so the section doesn't reflow when the
       // widget injects its DOM. Trustindex itself paints the carousel

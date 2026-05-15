@@ -2,7 +2,6 @@
 
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { gsap, useGSAP, SplitText } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
 
 const PILLAR_KEYS = ['details', 'ahead', 'crossSkills', 'oneContact', 'results'] as const;
@@ -17,7 +16,6 @@ interface ManifestoLongformProps {
 /**
  * Editorial long-form — 5 pillars without pin/sticky.
  * Each block: numero ordinale + titolo + body, hairline 1px tra blocchi.
- * Reveal: SplitText words on scroll-trigger per blocco.
  */
 export function ManifestoLongform({ hideHeader = false, index = '06' }: ManifestoLongformProps = {}) {
   const root = useRef<HTMLElement>(null);
@@ -29,45 +27,6 @@ export function ManifestoLongform({ hideHeader = false, index = '06' }: Manifest
     title: t(`pillars.${key}.title`),
     body: t(`pillars.${key}.body`),
   }));
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-        },
-        (ctx) => {
-          if (ctx.conditions?.reduced) return;
-          const blocks = gsap.utils.toArray<HTMLElement>('[data-pillar]', r);
-          blocks.forEach((block) => {
-            const title = block.querySelector<HTMLElement>('[data-title]');
-            const body = block.querySelector<HTMLElement>('[data-body]');
-            const num = block.querySelector<HTMLElement>('[data-num]');
-            if (!title || !body || !num) return;
-
-            const titleSplit = new SplitText(title, { type: 'lines,words', mask: 'lines' });
-            const bodySplit = new SplitText(body, { type: 'lines', mask: 'lines' });
-            gsap.set(num, { yPercent: 110, opacity: 0 });
-            gsap.set(titleSplit.words, { yPercent: 110 });
-            gsap.set(bodySplit.lines, { yPercent: 110 });
-
-            const tl = gsap.timeline({
-              scrollTrigger: { trigger: block, start: 'top 80%', once: true },
-              defaults: { ease: 'expo.out' },
-            });
-            tl.to(num, { yPercent: 0, opacity: 1, duration: 0.7 })
-              .to(titleSplit.words, { yPercent: 0, duration: 0.9, stagger: 0.04 }, '<0.05')
-              .to(bodySplit.lines, { yPercent: 0, duration: 0.8, stagger: 0.06 }, '<0.2');
-          });
-        }
-      );
-    },
-    { scope: root }
-  );
 
   return (
     <Section ref={root} spacing={hideHeader ? 'none' : 'default'}>

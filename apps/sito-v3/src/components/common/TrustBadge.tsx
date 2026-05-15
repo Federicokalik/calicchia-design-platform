@@ -15,13 +15,17 @@ declare global {
 interface TrustBadgeProps {
   /** Optional className applied to the wrapper (alignment, margin). */
   className?: string;
-  /** @deprecated Every badge now uses the controlled dark Trustindex-sized surface. */
-  surface?: 'plain' | 'solid';
   /**
    * When the loader is already mounted by a parent widget, skip appending
    * another placement script and just drain the Trustindex activation queue.
    */
   reuseExistingLoader?: boolean;
+  /**
+   * BCP-47 / Trustindex locale code (`it`, `en`, ...). Passed as `data-language`
+   * on the wrapper so Trustindex localizes the widget UI ("5.0 · See reviews").
+   * Note: review TEXT comes from Google Business Profile and is NOT auto-translated.
+   */
+  locale?: string;
 }
 
 /**
@@ -31,11 +35,14 @@ interface TrustBadgeProps {
  * as `TrustIndexEmbed` — without it, `data-delay-load="1"` widgets never
  * activate because Lenis intercepts native scroll/resize on window.
  *
- * Same widget id stays consistent across the whole site.
+ * Mounted on the dark footer of the site, so the wrapper drops the inline
+ * dark background that used to compensate cream pages — l'hack CSS globale
+ * è stato rimosso insieme.
  */
 export function TrustBadge({
   className = '',
   reuseExistingLoader = false,
+  locale = 'it',
 }: TrustBadgeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -78,24 +85,19 @@ export function TrustBadge({
     return () => window.clearInterval(interval);
   }, [reuseExistingLoader]);
 
-  // Le regole CSS che compattano il footprint del widget (margin-bottom: -5px,
-  // reset margin sui figli, transparent borders) vivono in globals.css cosi'
-  // sono nell'HTML al primo paint. Tenerle in <style jsx global> faceva sparire
-  // la patch sul cold load: lo styled-jsx di un client component viene iniettato
-  // dopo l'idratazione, e Trustindex monta il DOM prima.
   return (
     <div
       ref={containerRef}
       data-trustindex-badge
+      data-language={locale}
       className={className}
-      // Shrink-fit alla width naturale del widget Trustindex (no stretch
-      // verso il parent). Background nero + overflow hidden sui residui.
+      // Shrink-fit alla width naturale del widget Trustindex. Su sfondo dark
+      // del footer non serve forzare un background o nascondere i residui:
+      // il widget si fonde col contesto.
       style={{
         display: 'inline-block',
         width: 'fit-content',
         maxWidth: 360,
-        background: 'var(--color-ink)',
-        overflow: 'hidden',
         lineHeight: 0,
       }}
       aria-label="Badge recensioni Google verificate da Trustindex"

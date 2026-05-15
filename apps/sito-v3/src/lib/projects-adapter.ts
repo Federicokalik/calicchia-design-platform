@@ -1,29 +1,18 @@
 /**
  * Adapter — converts the flat `ApiProjectDetail` shape returned by
- * `apps/api` into the legacy editorial `Project` / `ProjectSection` shape
- * consumed by the existing case-study components (`CaseHero`,
- * `CaseOverview`, `CaseChallenge`, `CaseGallery`, `CaseOutcome`,
- * `CaseLongform`, `CaseNext`). This keeps the components untouched while
- * routing data through the DB.
+ * `apps/api` into the legacy editorial `Project` shape consumed by the
+ * remaining case-study components (`CaseHeroOverlay`, `CaseGallery`,
+ * `CaseOutcome`, `CaseQuote`, `CaseNext`).
  *
- * Migration 075 (case-study fields): challenge/solution/feedback are now
- * JSONB structs and year/tags/metrics/outcome/seo are dedicated columns.
- * Helpers normalise back-compat with legacy string values.
- *
- * Decisions:
- *   - `next` is intentionally left as `''` here. The page component
- *     fetches `prev/next` via `fetchAdjacentProjects` (anti self-loop)
- *     and passes them to `<CaseNext>` directly, NOT via `project.next`.
- *   - `cover_image` is already a resolved URL (server `resolveImageUrl`).
- *     Gallery URLs (`challenge_images`, `solution_image`) are NOT
- *     resolved by the public route — we apply a defensive resolver here.
+ * Migration 090 (detail redesign 2026-05-14): rimosse le sezioni editorial
+ * derivate (Contesto/Sfida/Approccio + Longform). Resta un singolo blocco
+ * `brief` markdown. La galleria viene letta solo dal campo `gallery`
+ * (challenge_images / solution_image deprecate).
  */
 
 import type {
   ApiProjectDetail,
   ApiProjectListItem,
-  ApiProjectChallenge,
-  ApiProjectSolution,
   ApiProjectFeedback,
   ApiProjectMetric,
 } from './projects-api';
@@ -39,8 +28,7 @@ const API_BASE =
  *   - Absolute URL (http/https) → passthrough
  *   - Path starting with `/media/...` or `/uploads/...` → API_BASE + path
  *   - Path starting with `/` (other) → frontend-relative (es. `/img/...`)
- *   - Bare key (es. `works/pooltech/hero.webp`) → API_BASE/media/<key>,
- *     coerente con apps/api/src/lib/s3.ts (UPLOAD_DIR served on /media/)
+ *   - Bare key (es. `works/pooltech/hero.webp`) → API_BASE/media/<key>
  */
 function resolveImageUrl(url: string | null | undefined): string | null {
   if (!url) return null;
@@ -49,14 +37,12 @@ function resolveImageUrl(url: string | null | undefined): string | null {
     return `${API_BASE}${url}`;
   }
   if (url.startsWith('/')) return url; // frontend-relative
-  // Bare key — assume it's an UPLOAD_DIR key (apps/api uploads served on /media/)
   return `${API_BASE}/media/${url}`;
 }
 
 /**
  * Year priority: explicit `api.year` (migration 075) > `published_at` >
- * `created_at` > current year. The explicit field gives the editor full
- * control (es. progetti pubblicati ora che si riferiscono a lavori del 2022).
+ * `created_at` > current year.
  */
 function deriveYear(api: ApiProjectDetail): number {
   if (typeof api.year === 'number' && api.year > 1990) return api.year;
@@ -67,10 +53,8 @@ function deriveYear(api: ApiProjectDetail): number {
 }
 
 /**
- * Tags priority (migration 075): dedicated `tags` column > `technologies`
- * > comma-separated `services`. Tags are filterable categories ("e-commerce",
- * "wordpress", "b2b"), distinct from technologies (stack like "Next.js, Stripe")
- * and services (free-text servizi prestati like "Web design, SEO").
+ * Tags priority (migration 075): `tags` column > `technologies` >
+ * comma-separated `services`.
  */
 function deriveTags(api: ApiProjectDetail): string[] {
   if (api.tags && api.tags.length > 0) return api.tags;
@@ -85,9 +69,7 @@ function deriveTags(api: ApiProjectDetail): string[] {
 }
 
 /**
- * Stale flag: case study più vecchi di 1 anno mostrano un avviso
- * ("il sito potrebbe essere cambiato o non più online"). Threshold: year
- * < currentYear - 1. Esempi: nel 2026, year=2024 → stale; year=2025 → fresh.
+ * Stale flag: case study più vecchi di 1 anno mostrano un avviso opzionale.
  */
 export function getStaleStatus(year: number | null | undefined): {
   isStale: boolean;
@@ -99,22 +81,6 @@ export function getStaleStatus(year: number | null | undefined): {
   const current = new Date().getFullYear();
   const yearsAgo = current - year;
   return { isStale: yearsAgo > 1, yearsAgo };
-}
-
-/** Estrae body principale + dettaglio da challenge/solution JSONB o string. */
-function extractRichText(
-  field: ApiProjectChallenge | ApiProjectSolution | string | null,
-): { text: string; detail: string | null } | null {
-  if (!field) return null;
-  if (typeof field === 'string') {
-    return field.trim() ? { text: field, detail: null } : null;
-  }
-  // JSONB struct: prefer `text/detail` (rayo schema), fallback to
-  // `description/title` (admin form schema).
-  const text = field.text ?? field.description ?? '';
-  const detail = field.detail ?? null;
-  if (!text || !text.trim()) return null;
-  return { text, detail };
 }
 
 /** Estrae quote da feedback JSONB o string. Vuoto → null. */
@@ -147,42 +113,8 @@ function deriveHero(api: ApiProjectDetail): Asset {
   };
 }
 
-/** Build the editorial `sections[]` array from the flat API shape. */
-function deriveSections(api: ApiProjectDetail): ProjectSection[] {
-  const sections: ProjectSection[] = [];
-
-  if (api.description) {
-    sections.push({
-      kind: 'overview',
-      title: 'Il contesto',
-      body: api.description,
-    });
-  }
-
-  const challenge = extractRichText(api.challenge);
-  if (challenge) {
-    sections.push({
-      kind: 'challenge',
-      title: 'La sfida',
-      body: challenge.detail
-        ? `${challenge.text}\n\n${challenge.detail}`
-        : challenge.text,
-    });
-  }
-
-  const solution = extractRichText(api.solution);
-  if (solution) {
-    sections.push({
-      kind: 'overview',
-      title: "L'approccio",
-      body: solution.detail
-        ? `${solution.text}\n\n${solution.detail}`
-        : solution.text,
-    });
-  }
-
-  // Gallery: prefer dedicated `api.gallery` (JSONB array of objects), fallback
-  // to legacy challenge_images + solution_image (string[]). De-duplicated.
+/** Gallery section (l'unica sezione editorial residua dopo il redesign). */
+function deriveGallerySection(api: ApiProjectDetail): ProjectSection | null {
   const galleryAssets: Asset[] = [];
   const seenSrc = new Set<string>();
 
@@ -205,52 +137,21 @@ function deriveSections(api: ApiProjectDetail): ProjectSection[] {
     }
   }
 
-  const challengeImages = api.challenge_images;
-  if (Array.isArray(challengeImages)) {
-    for (const img of challengeImages) {
-      const src = typeof img === 'string' ? img : (img as { src?: string }).src;
-      const resolved = resolveImageUrl(src ?? null);
-      if (resolved && !seenSrc.has(resolved)) {
-        seenSrc.add(resolved);
-        galleryAssets.push({
-          src: resolved,
-          alt: `${api.title} — immagine ${galleryAssets.length + 1}`,
-          width: 2200,
-          height: 1650,
-        });
-      }
-    }
-  }
-  if (api.solution_image) {
-    const resolved = resolveImageUrl(api.solution_image);
-    if (resolved && !seenSrc.has(resolved)) {
-      seenSrc.add(resolved);
-      galleryAssets.push({
-        src: resolved,
-        alt: `${api.title} — design`,
-        width: 2200,
-        height: 1650,
-      });
-    }
-  }
-
-  if (galleryAssets.length > 0) {
-    sections.push({
-      kind: 'gallery',
-      title: 'Il design',
-      assets: galleryAssets,
-    });
-  }
-
-  return sections;
+  if (galleryAssets.length === 0) return null;
+  return {
+    kind: 'gallery',
+    title: 'Il design',
+    assets: galleryAssets,
+  };
 }
 
 /**
- * Convert API detail → legacy `Project` so existing Case* components keep
- * working untouched. `next` is set to empty string; page component handles
- * prev/next via `fetchAdjacentProjects`.
+ * Convert API detail → legacy `Project`. Migration 090: `sections` ora
+ * contiene solo la galleria (eventualmente vuoto). Il body editorial vive
+ * in `brief` esposto via `deriveCaseStudyExtension`.
  */
 export function adaptApiProjectToLegacy(api: ApiProjectDetail): Project {
+  const gallery = deriveGallerySection(api);
   return {
     slug: api.slug,
     title: api.title,
@@ -259,7 +160,7 @@ export function adaptApiProjectToLegacy(api: ApiProjectDetail): Project {
     tags: deriveTags(api),
     excerpt: api.description ?? '',
     hero: deriveHero(api),
-    sections: deriveSections(api),
+    sections: gallery ? [gallery] : [],
     next: '', // unused — handled via fetchAdjacentProjects
   };
 }
@@ -304,10 +205,9 @@ export function deriveFeedbackQuote(api: ApiProjectDetail): {
 }
 
 /**
- * Case study extension data — fields exposed by migration 075 + helpers.
- * Returned alongside the legacy `Project` shape so the page component
- * can wire new sections (Outcome+Metrics, StaleNotice, SEO override)
- * without refactoring the existing Case* components.
+ * Case study extension data — campi addizionali esposti dal backend
+ * (migration 075 + 090). Restituiti accanto al Project legacy così la
+ * page può comporre CaseHeroOverlay + CaseBrief + CaseOutcome + Quote.
  */
 export interface CaseStudyExtensionData {
   year: number;
@@ -315,8 +215,8 @@ export interface CaseStudyExtensionData {
   yearsAgo: number;
   metrics: ApiProjectMetric[];
   outcome: string | null;
-  /** Long-form markdown editorial dal campo `content` (admin Rich Text). */
-  longformMarkdown: string | null;
+  /** Migration 090 — body unico markdown del case study. */
+  brief: string | null;
   liveUrl: string | null;
   seoTitleOverride: string | null;
   seoDescriptionOverride: string | null;
@@ -326,7 +226,7 @@ export interface CaseStudyExtensionData {
 }
 
 export function deriveCaseStudyExtension(
-  api: ApiProjectDetail & { content?: string | null },
+  api: ApiProjectDetail,
 ): CaseStudyExtensionData {
   const year = deriveYear(api);
   const stale = getStaleStatus(year);
@@ -336,10 +236,8 @@ export function deriveCaseStudyExtension(
     yearsAgo: stale.yearsAgo,
     metrics: Array.isArray(api.metrics) ? api.metrics : [],
     outcome: api.outcome,
-    longformMarkdown:
-      typeof api.content === 'string' && api.content.trim()
-        ? api.content
-        : null,
+    brief:
+      typeof api.brief === 'string' && api.brief.trim() ? api.brief : null,
     liveUrl: api.live_url,
     seoTitleOverride: api.seo_title,
     seoDescriptionOverride: api.seo_description,

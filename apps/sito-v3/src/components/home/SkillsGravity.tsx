@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Gravity, MatterBody, type GravityRef } from '@/components/motion/Gravity';
-import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
 
 /**
  * "Strumenti che padroneggio" — gravity playground edition.
@@ -143,14 +142,9 @@ export function SkillsGravity({
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-12 md:mb-16 items-end">
         <div className="md:col-span-7">
-          <SplitTextReveal
-            as="h2"
-            split="lines,words"
-            scroll
-            className="font-[family-name:var(--font-display)] max-w-[18ch]"
-          >
+          <h2 className="font-[family-name:var(--font-display)] max-w-[18ch]">
             {titleText}
-          </SplitTextReveal>
+          </h2>
         </div>
         <div className="md:col-span-5 md:justify-self-end flex flex-col gap-3 md:items-end">
           <p

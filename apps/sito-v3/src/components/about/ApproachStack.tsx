@@ -2,7 +2,6 @@
 
 import { useRef } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { gsap, useGSAP, SplitText } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
 import { getApproach } from '@/data/approach';
 import type { Locale } from '@/lib/i18n';
@@ -29,46 +28,6 @@ export function ApproachStack({
   const items = getApproach(locale);
 
   const eyebrowText = eyebrow ?? t('eyebrowDefault');
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-        },
-        (ctx) => {
-          if (ctx.conditions?.reduced) return;
-          const blocks = gsap.utils.toArray<HTMLElement>('[data-claim]', r);
-          blocks.forEach((block) => {
-            const num = block.querySelector<HTMLElement>('[data-num]');
-            const icon = block.querySelector<HTMLElement>('[data-icon]');
-            const title = block.querySelector<HTMLElement>('[data-title]');
-            const body = block.querySelector<HTMLElement>('[data-body]');
-            if (!num || !title || !body) return;
-            const ts = new SplitText(title, { type: 'lines,words', mask: 'lines' });
-            const bs = new SplitText(body, { type: 'lines', mask: 'lines' });
-            gsap.set(num, { yPercent: 110, opacity: 0 });
-            if (icon) gsap.set(icon, { scale: 0.6, opacity: 0 });
-            gsap.set(ts.words, { yPercent: 110 });
-            gsap.set(bs.lines, { yPercent: 110 });
-            const tl = gsap.timeline({
-              scrollTrigger: { trigger: block, start: 'top 80%', once: true },
-              defaults: { ease: 'expo.out' },
-            });
-            tl.to(num, { yPercent: 0, opacity: 1, duration: 0.7 });
-            if (icon) tl.to(icon, { scale: 1, opacity: 1, duration: 0.7 }, '<0.1');
-            tl.to(ts.words, { yPercent: 0, duration: 0.9, stagger: 0.04 }, '<0.05')
-              .to(bs.lines, { yPercent: 0, duration: 0.8, stagger: 0.06 }, '<0.2');
-          });
-        }
-      );
-    },
-    { scope: root }
-  );
 
   return (
     <Section ref={root} spacing="default" bordered="top">

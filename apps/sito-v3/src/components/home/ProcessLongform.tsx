@@ -3,7 +3,6 @@
 import Image from 'next/image';
 import { useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { gsap, useGSAP, SplitText } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
 
 const STEP_KEYS = ['brief', 'strategy', 'design', 'build', 'launch'] as const;
@@ -26,7 +25,6 @@ interface ProcessLongformProps {
 /**
  * Editorial long-form — 5 fasi senza sticky-stack.
  * Layout asimmetrico per fase: alternate img sx/dx per ritmo.
- * Reveal: SplitText words su scroll-trigger.
  */
 export function ProcessLongform({ hideHeader = false, index = '07' }: ProcessLongformProps = {}) {
   const root = useRef<HTMLElement>(null);
@@ -40,57 +38,6 @@ export function ProcessLongform({ hideHeader = false, index = '07' }: ProcessLon
     body: t(`steps.${key}.body`),
     img: STEP_IMAGES[key],
   }));
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-        },
-        (ctx) => {
-          if (ctx.conditions?.reduced) return;
-          const blocks = gsap.utils.toArray<HTMLElement>('[data-step]', r);
-          blocks.forEach((block) => {
-            const num = block.querySelector<HTMLElement>('[data-num]');
-            const title = block.querySelector<HTMLElement>('[data-title]');
-            const body = block.querySelector<HTMLElement>('[data-body]');
-            const img = block.querySelector<HTMLElement>('[data-img]');
-            if (!num || !title || !body) return;
-
-            const titleSplit = new SplitText(title, { type: 'lines,words', mask: 'lines' });
-            const bodySplit = new SplitText(body, { type: 'lines', mask: 'lines' });
-            gsap.set(num, { yPercent: 110, opacity: 0 });
-            gsap.set(titleSplit.words, { yPercent: 110 });
-            gsap.set(bodySplit.lines, { yPercent: 110 });
-            if (img) gsap.set(img, { scale: 1.08, opacity: 0.6 });
-
-            const tl = gsap.timeline({
-              scrollTrigger: { trigger: block, start: 'top 78%', once: true },
-              defaults: { ease: 'expo.out' },
-            });
-            tl.to(num, { yPercent: 0, opacity: 1, duration: 0.7 })
-              .to(titleSplit.words, { yPercent: 0, duration: 0.9, stagger: 0.04 }, '<0.05')
-              .to(bodySplit.lines, { yPercent: 0, duration: 0.8, stagger: 0.06 }, '<0.2');
-
-            if (img) {
-              gsap.to(img, {
-                scale: 1,
-                opacity: 1,
-                duration: 1.4,
-                ease: 'expo.out',
-                scrollTrigger: { trigger: block, start: 'top 80%', once: true },
-              });
-            }
-          });
-        }
-      );
-    },
-    { scope: root }
-  );
 
   return (
     <Section ref={root} spacing={hideHeader ? 'none' : 'default'}>

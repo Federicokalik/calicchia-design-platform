@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
 import { gsap, useGSAP } from '@/lib/gsap';
-import { SplitTextReveal } from '@/components/motion/SplitTextReveal';
 import { Section } from '@/components/ui/Section';
 
 interface PortraitBlockProps {
@@ -87,14 +86,9 @@ export function PortraitBlock({ years }: PortraitBlockProps) {
         </div>
 
         <div className="md:col-span-6 md:col-start-7 flex flex-col justify-center gap-10">
-          <SplitTextReveal
-            as="h2"
-            split="lines,words"
-            scroll
-            className="font-[family-name:var(--font-display)] max-w-[52ch] whitespace-pre-line text-justify"
-          >
+          <h2 className="font-[family-name:var(--font-display)] max-w-[52ch] whitespace-pre-line text-justify">
             {t('h2')}
-          </SplitTextReveal>
+          </h2>
 
           <p className="text-base md:text-lg leading-relaxed max-w-[52ch] whitespace-pre-line text-justify"
              style={{ color: 'var(--color-ink-muted)' }}>

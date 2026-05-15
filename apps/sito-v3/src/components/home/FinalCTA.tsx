@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import { gsap, useGSAP, SplitText } from '@/lib/gsap';
+import { Link } from '@/i18n/navigation';
+import { gsap, useGSAP } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
 
 /**
@@ -15,65 +15,37 @@ import { Section } from '@/components/ui/Section';
 export function FinalCTA() {
   const t = useTranslations('home.finalCta');
   const root = useRef<HTMLElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
   const buttonRef = useRef<HTMLAnchorElement>(null);
 
   useGSAP(
     (_ctx, contextSafe) => {
-      const headline = headlineRef.current;
       const btn = buttonRef.current;
-      if (!headline || !btn) return;
+      if (!btn) return;
 
       const mm = gsap.matchMedia();
       mm.add(
         {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-          hover: '(hover: hover)',
+          hover: '(hover: hover) and (prefers-reduced-motion: no-preference)',
         },
         (ctx) => {
-          if (ctx.conditions?.reduced) {
-            gsap.set(headline, { opacity: 1 });
-            return;
-          }
-
-          const split = new SplitText(headline, {
-            type: 'lines,words',
-            mask: 'lines',
+          if (!ctx.conditions?.hover) return;
+          const xTo = gsap.quickTo(btn, 'x', { duration: 0.5, ease: 'expo.out' });
+          const yTo = gsap.quickTo(btn, 'y', { duration: 0.5, ease: 'expo.out' });
+          const onMove = contextSafe!((e: MouseEvent) => {
+            const rect = btn.getBoundingClientRect();
+            xTo((e.clientX - (rect.left + rect.width / 2)) * 0.25);
+            yTo((e.clientY - (rect.top + rect.height / 2)) * 0.25);
           });
-          gsap.fromTo(
-            split.words,
-            { yPercent: 110 },
-            {
-              yPercent: 0,
-              duration: 0.9,
-              ease: 'expo.out',
-              stagger: 0.04,
-              scrollTrigger: { trigger: headline, start: 'top 80%', once: true },
-            }
-          );
-
-          if (ctx.conditions?.hover) {
-            const xTo = gsap.quickTo(btn, 'x', { duration: 0.5, ease: 'expo.out' });
-            const yTo = gsap.quickTo(btn, 'y', { duration: 0.5, ease: 'expo.out' });
-            const onMove = contextSafe!((e: MouseEvent) => {
-              const rect = btn.getBoundingClientRect();
-              xTo((e.clientX - (rect.left + rect.width / 2)) * 0.25);
-              yTo((e.clientY - (rect.top + rect.height / 2)) * 0.25);
-            });
-            const onLeave = contextSafe!(() => {
-              xTo(0);
-              yTo(0);
-            });
-            btn.addEventListener('mousemove', onMove);
-            btn.addEventListener('mouseleave', onLeave);
-            return () => {
-              btn.removeEventListener('mousemove', onMove);
-              btn.removeEventListener('mouseleave', onLeave);
-              split.revert();
-            };
-          }
-          return () => split.revert();
+          const onLeave = contextSafe!(() => {
+            xTo(0);
+            yTo(0);
+          });
+          btn.addEventListener('mousemove', onMove);
+          btn.addEventListener('mouseleave', onLeave);
+          return () => {
+            btn.removeEventListener('mousemove', onMove);
+            btn.removeEventListener('mouseleave', onLeave);
+          };
         }
       );
     },
@@ -97,7 +69,6 @@ export function FinalCTA() {
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-end">
         <h2
-          ref={headlineRef}
           className="md:col-span-9 font-[family-name:var(--font-display)] max-w-[14ch]"
           style={{
             fontSize: 'clamp(3.25rem, 9vw, 11rem)',

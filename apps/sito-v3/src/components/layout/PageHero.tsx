@@ -1,7 +1,6 @@
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import type { CSSProperties, ReactNode } from 'react';
-import { TrustBadge } from '@/components/common/TrustBadge';
+import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import type { BreadcrumbItem } from '@/data/structured-data';
 import { cn } from '@/lib/utils';
@@ -23,7 +22,6 @@ interface PageHeroProps {
     href: string;
     label: string;
   };
-  trustBadge?: boolean;
   compact?: boolean;
   className?: string;
   titleClassName?: string;
@@ -49,7 +47,6 @@ export function PageHero({
   tagline,
   actions = [],
   backLink,
-  trustBadge = true,
   compact = false,
   className,
   titleClassName,
@@ -160,13 +157,6 @@ export function PageHero({
       </div>
 
       {children && <div className="mt-14 md:mt-18">{children}</div>}
-
-      {/* TrustBadge in basso a destra del hero, come pattern home. */}
-      {trustBadge && (
-        <div className="hidden md:block absolute right-10 lg:right-14 bottom-10 lg:bottom-14 pointer-events-auto">
-          <TrustBadge />
-        </div>
-      )}
     </section>
   );
 }

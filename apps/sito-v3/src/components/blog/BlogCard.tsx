@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useLocale } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { buildBlogUrl, formatBlogDate, type BlogPostMeta } from '@/lib/blog-api';
 import type { Locale } from '@/lib/i18n';
 

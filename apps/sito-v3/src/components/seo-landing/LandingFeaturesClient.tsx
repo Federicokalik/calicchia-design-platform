@@ -1,9 +1,4 @@
-'use client';
-
-import { useRef } from 'react';
-import { gsap, useGSAP } from '@/lib/gsap';
 import { Section } from '@/components/ui/Section';
-import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 interface Feature {
   title: string;
@@ -23,42 +18,8 @@ export function LandingFeaturesClient({
   heading,
   countLabel,
 }: LandingFeaturesClientProps) {
-  const root = useRef<HTMLElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const items = gsap.utils.toArray<HTMLElement>('[data-feature]', r);
-      if (
-        prefersReducedMotion ||
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ) {
-        gsap.set([r, ...items], { opacity: 1, y: 0 });
-        return;
-      }
-      gsap.from(r, {
-        opacity: 0,
-        y: 16,
-        duration: 0.2,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: r, start: 'top 80%', once: true },
-      });
-      gsap.from(items, {
-        opacity: 0,
-        y: 12,
-        duration: 0.18,
-        stagger: 0.06,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: r, start: 'top 78%', once: true },
-      });
-    },
-    { scope: root, dependencies: [prefersReducedMotion], revertOnUpdate: true }
-  );
-
   return (
-    <Section ref={root} spacing="default" bordered="top">
+    <Section spacing="default" bordered="top">
       <div className="flex items-baseline justify-between gap-6 mb-16 md:mb-24">
         <p
           className="font-mono text-[length:var(--text-eyebrow)] uppercase tracking-[0.25em]"

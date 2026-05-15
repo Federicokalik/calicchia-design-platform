@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';

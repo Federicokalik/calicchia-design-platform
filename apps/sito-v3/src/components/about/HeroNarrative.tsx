@@ -1,7 +1,7 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { localizedPath } from '@/lib/i18n';
 import type { Locale } from '@/lib/i18n';

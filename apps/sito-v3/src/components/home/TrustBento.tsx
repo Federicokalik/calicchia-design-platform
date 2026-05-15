@@ -1,9 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { gsap, useGSAP } from '@/lib/gsap';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';
 import { CLIENTS } from '@/data/clients';
@@ -23,6 +22,7 @@ const ROTATION_MS = 4500;
  */
 export function TrustBento() {
   const t = useTranslations('home.trust');
+  const locale = useLocale();
   const root = useRef<HTMLElement>(null);
   const [activeClient, setActiveClient] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -50,35 +50,6 @@ export function TrustBento() {
         }
       })()
     : '';
-
-  useGSAP(
-    () => {
-      const r = root.current;
-      if (!r) return;
-      const mm = gsap.matchMedia();
-      mm.add(
-        {
-          motion: '(prefers-reduced-motion: no-preference)',
-          reduced: '(prefers-reduced-motion: reduce)',
-        },
-        (ctx) => {
-          if (ctx.conditions?.reduced) return;
-          const blocks = gsap.utils.toArray<HTMLElement>('[data-trust-block]', r);
-          if (!blocks.length) return;
-          gsap.set(blocks, { y: 32, opacity: 0 });
-          gsap.to(blocks, {
-            y: 0,
-            opacity: 1,
-            duration: 0.85,
-            ease: 'expo.out',
-            stagger: 0.1,
-            scrollTrigger: { trigger: r, start: 'top 75%', once: true },
-          });
-        }
-      );
-    },
-    { scope: root }
-  );
 
   return (
     <Section
@@ -132,7 +103,7 @@ export function TrustBento() {
           >
             {t('reviewsLabel')}
           </p>
-          <TrustIndexEmbed />
+          <TrustIndexEmbed locale={locale} />
         </div>
 
         {/* Clients sample — one visible at a time, project preview + meta */}
