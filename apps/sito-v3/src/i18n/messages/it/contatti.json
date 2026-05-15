@@ -90,5 +90,18 @@
     "phone": "Telefono",
     "whatsapp": "WhatsApp",
     "calendar": "Calendario"
+  },
+  "page": {
+    "eyebrow": "Studio - Ceccano FR",
+    "intro": "Una chiamata di 30 minuti per capire se ha senso lavorare insieme. Web Designer & Developer Freelance a Ceccano (FR) — siti, e-commerce, sviluppo, SEO, WordPress. Risposta entro 24 ore. Niente impegno, niente presentazioni in PowerPoint.",
+    "actions": {
+      "bookCall": "Prenota una call",
+      "writeMe": "Scrivimi"
+    },
+    "sidebar": {
+      "emailLabel": "Email",
+      "phoneLabel": "Telefono",
+      "addressLabel": "Indirizzo"
+    }
   }
 }

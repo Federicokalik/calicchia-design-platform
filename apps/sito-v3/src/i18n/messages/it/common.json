@@ -30,6 +30,7 @@
     "usefulLinks": "Link utili",
     "manageCookies": "Gestisci cookie",
     "social": "Social",
+    "reviewsLabel": "Recensioni verificate",
     "madeIn": "Made with care in Ceccano (FR)",
     "vat": "P.IVA 03160480608",
     "legal": {
@@ -46,5 +47,22 @@
     "switchToIt": "Italiano",
     "promptEn": "Prefer reading in English?",
     "switchVerb": "Cambia lingua"
+  },
+  "availabilityBanner": {
+    "regionLabel": "Disponibilità nuovi progetti",
+    "cta": "Scrivimi",
+    "dismiss": "Chiudi",
+    "dismissAria": "Chiudi banner disponibilità"
+  },
+  "errors": {
+    "serverErrorLabel": "ERRORE 500 · SERVER",
+    "serverErrorTitle": "Qualcosa è esploso.",
+    "serverErrorBody": "Stavo facendo qualcosa, qualcosa si è rotto. Posso provare a ricaricare oppure scrivermi: di solito rispondo entro qualche ora.",
+    "backHome": "Torna alla home",
+    "retry": "Riprova",
+    "writeMe": "Scrivimi",
+    "notFoundLabel": "404",
+    "notFoundTitle": "Niente da vedere qui.",
+    "notFoundBody": "Hai seguito un link rotto, oppure ho cambiato qualcosa senza dirtelo. Dai un'occhiata alla home."
   }
 }

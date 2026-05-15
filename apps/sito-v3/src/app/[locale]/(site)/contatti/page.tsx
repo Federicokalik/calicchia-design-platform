@@ -6,7 +6,7 @@ import { ContactFormClient } from '@/components/forms/ContactFormClient';
 import { ContactSocials } from '@/components/contatti/ContactSocials';
 import { PageHero } from '@/components/layout/PageHero';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contatti.metadata');
@@ -22,24 +22,29 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/contatti', locale),
+      ...buildOgLocale(locale),
     },
   };
 }
 
-export default function ContattiPage() {
+export default async function ContattiPage() {
+  const tPage = await getTranslations('contatti.page');
+  const tHero = await getTranslations('contatti.hero');
+  const tNav = await getTranslations('navigation');
+
   return (
     <>
       <PageHero
         breadcrumbs={[
-          { name: 'Home', url: '/' },
-          { name: 'Contatti', url: '/contatti' },
+          { name: tNav('nav.home'), url: '/' },
+          { name: tNav('nav.contatti'), url: '/contatti' },
         ]}
-        eyebrow="Studio - Ceccano FR"
-        title="Contatti. Niente PowerPoint, niente promesse vuote."
-        intro="Una chiamata di 30 minuti per capire se ha senso lavorare insieme. Web Designer & Developer Freelance a Ceccano (FR) — siti, e-commerce, sviluppo, SEO, WordPress. Risposta entro 24 ore. Niente impegno, niente presentazioni in PowerPoint."
+        eyebrow={tPage('eyebrow')}
+        title={tHero('title')}
+        intro={tPage('intro')}
         actions={[
-          { label: 'Prenota una call', href: SITE.contact.cal, variant: 'primary' },
-          { label: 'Scrivimi', href: `mailto:${SITE.contact.email}`, variant: 'underline' },
+          { label: tPage('actions.bookCall'), href: SITE.contact.cal, variant: 'primary' },
+          { label: tPage('actions.writeMe'), href: `mailto:${SITE.contact.email}`, variant: 'underline' },
         ]}
       />
 
@@ -57,7 +62,7 @@ export default function ContattiPage() {
                 className="text-xs uppercase tracking-[0.18em]"
                 style={{ color: 'var(--color-ink-subtle)' }}
               >
-                Email
+                {tPage('sidebar.emailLabel')}
               </span>
               <a
                 href={`mailto:${SITE.contact.email}`}
@@ -71,7 +76,7 @@ export default function ContattiPage() {
                 className="text-xs uppercase tracking-[0.18em]"
                 style={{ color: 'var(--color-ink-subtle)' }}
               >
-                Telefono
+                {tPage('sidebar.phoneLabel')}
               </span>
               <a
                 href={`tel:${SITE.contact.phone.replace(/\s/g, '')}`}
@@ -85,7 +90,7 @@ export default function ContattiPage() {
                 className="text-xs uppercase tracking-[0.18em]"
                 style={{ color: 'var(--color-ink-subtle)' }}
               >
-                Indirizzo
+                {tPage('sidebar.addressLabel')}
               </span>
               <p className="text-base" style={{ color: 'var(--color-ink-muted)' }}>
                 {SITE.contact.address}

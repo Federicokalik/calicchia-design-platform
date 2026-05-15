@@ -90,5 +90,18 @@
     "phone": "Phone",
     "whatsapp": "WhatsApp",
     "calendar": "Calendar"
+  },
+  "page": {
+    "eyebrow": "Studio - Ceccano FR",
+    "intro": "A 30-minute call to see if it makes sense to work together. Freelance Web Designer & Developer based in Ceccano (FR) — websites, e-commerce, development, SEO, WordPress. Reply within 24 hours. No commitment, no PowerPoint pitches.",
+    "actions": {
+      "bookCall": "Book a call",
+      "writeMe": "Write to me"
+    },
+    "sidebar": {
+      "emailLabel": "Email",
+      "phoneLabel": "Phone",
+      "addressLabel": "Address"
+    }
   }
 }

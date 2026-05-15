@@ -30,6 +30,7 @@
     "usefulLinks": "Useful links",
     "manageCookies": "Cookie settings",
     "social": "Social",
+    "reviewsLabel": "Verified reviews",
     "madeIn": "Made with care in Ceccano (FR)",
     "vat": "VAT IT03160480608",
     "legal": {
@@ -46,5 +47,22 @@
     "switchToIt": "Italiano",
     "promptEn": "Prefer reading in English?",
     "switchVerb": "Switch language"
+  },
+  "availabilityBanner": {
+    "regionLabel": "New projects availability",
+    "cta": "Get in touch",
+    "dismiss": "Dismiss",
+    "dismissAria": "Dismiss availability banner"
+  },
+  "errors": {
+    "serverErrorLabel": "ERROR 500 · SERVER",
+    "serverErrorTitle": "Something broke.",
+    "serverErrorBody": "I was doing something and something broke. I can try reloading, or you can write to me — I usually reply within a few hours.",
+    "backHome": "Back to home",
+    "retry": "Try again",
+    "writeMe": "Write to me",
+    "notFoundLabel": "404",
+    "notFoundTitle": "Nothing to see here.",
+    "notFoundBody": "You followed a broken link, or I changed something without telling you. Try the home page."
   }
 }

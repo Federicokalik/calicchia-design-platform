@@ -1,100 +1,63 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';
 
-/**
- * Root-level error boundary.
- *
- * Catches errors that bubble above `[locale]/layout.tsx` (i.e., errors in the
- * locale layout itself or the root layout). Since this renders OUTSIDE
- * NextIntlClientProvider, we can't use `useTranslations`; instead we detect
- * locale from URL and render bilingual strings inline.
- *
- * Normal page errors are caught by `[locale]/error.tsx` (i18n-aware version).
- */
-const STRINGS = {
-  it: {
-    label: 'ERRORE 500 · SERVER',
-    title: 'Qualcosa è esploso.',
-    body: 'Stavo facendo qualcosa, qualcosa si è rotto. Posso provare a ricaricare oppure scrivermi: di solito rispondo entro qualche ora.',
-    backHome: 'Torna alla home',
-    retry: 'Riprova',
-    writeMe: 'Scrivimi',
-    contactHref: '/contatti',
-  },
-  en: {
-    label: 'ERROR 500 · SERVER',
-    title: 'Something broke.',
-    body: 'I was doing something and something broke. I can try reloading, or you can write to me — I usually reply within a few hours.',
-    backHome: 'Back to home',
-    retry: 'Try again',
-    writeMe: 'Write to me',
-    contactHref: '/en/contact',
-  },
-} as const;
-
-export default function Error({
+export default function LocaleError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
   const isDev = process.env.NODE_ENV !== 'production';
-  const [locale, setLocale] = useState<'it' | 'en'>('it');
 
   useEffect(() => {
     Sentry.captureException(error);
-    if (typeof window !== 'undefined') {
-      const seg = window.location.pathname.split('/')[1];
-      if (seg === 'en') setLocale('en');
-    }
   }, [error]);
-
-  const s = STRINGS[locale];
-  const homeHref = locale === 'en' ? '/en' : '/';
 
   return (
     <Section spacingTop="epic" spacingBottom="epic">
       <div className="grid grid-cols-12 gap-x-6 gap-y-12">
         <div className="col-span-12 md:col-span-2">
-          <Eyebrow mono>{s.label}</Eyebrow>
+          <Eyebrow mono>{t('serverErrorLabel')}</Eyebrow>
         </div>
 
         <div className="col-span-12 md:col-span-7 md:col-start-4">
           <Heading as="h1" size="display-xl">
-            {s.title}
+            {t('serverErrorTitle')}
           </Heading>
 
           <p
             className="mt-8 max-w-[55ch] text-lg leading-relaxed md:text-xl"
             style={{ color: 'var(--color-text-secondary)' }}
           >
-            {s.body}
+            {t('serverErrorBody')}
           </p>
 
           <div className="mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center">
-            <Button href={homeHref} variant="solid">
-              {s.backHome}
+            <Button href="/" variant="solid">
+              {t('backHome')}
             </Button>
             <button
               type="button"
               onClick={reset}
               className="border-b border-current px-0 py-2 text-sm font-medium uppercase tracking-[0.15em] transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-3"
             >
-              {s.retry}
+              {t('retry')}
             </button>
             <Link
-              href={s.contactHref}
+              href="/contatti"
               className="border-b border-current px-0 py-2 text-sm font-medium uppercase tracking-[0.15em] transition-opacity hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-3"
             >
-              {s.writeMe}
+              {t('writeMe')}
             </Link>
           </div>
 
