@@ -207,6 +207,7 @@ INTEGRATION_REPORT.md
 # TOOL CONFIG & TEMP FILES
 # =====================================================
 .1code/
+.codex/
 test-cover.png
 generatore_preventivi_specs.zip
 
