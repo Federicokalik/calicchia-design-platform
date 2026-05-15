@@ -1,10 +1,28 @@
 // EN translation of seo-professions.ts → PROFESSION_CATEGORIES only.
 // Voice anti-marketing preserved. NO PRICES anywhere (memory: feedback_no_prezzi_in_copy).
 //
-// SEO_PROFESSIONS[].label and PROFESSION_CONTENT are NOT translated: matrix
-// pages /sito-web-per-* are blocked from EN routes by middleware. Profession
-// labels rendered inside PerChiLavoro on EN pages keep their IT slug-based
-// label (e.g. "Parrucchieri") since those are Italian-market-targeted.
+// EN translation status (audit 2026-05-15):
+//   - Category labels + descriptions: HERE (PROFESSION_CATEGORIES_EN).
+//   - Profession `label`: seo-professions-labels-en.ts (PROFESSION_LABELS_EN).
+//   - Profession tagline/searchExample: seo-profession-content-en.ts
+//     (PROFESSION_CONTENT_EN).
+//   All three are exposed via locale-aware getters in seo-professions.ts
+//   (getProfessionCategories, getAllProfessionsLocalized,
+//   getProfessionContentLocalized). Consumers MUST use those getters; do not
+//   import the EN constants directly outside of the getters.
+//
+// EN route availability for the SEO matrix:
+//   - /sito-web-per-<professione>            → works (EN rendered as
+//     /en/website-for-<prof-en> via [...matrix] page; content + metadata are
+//     locale-aware).
+//   - /sito-web-per-<professione>-a-<città>  → BLOCKED on EN (notFound in
+//     [...matrix]/page.tsx parseMatrix — matrix+città IT-only).
+//   - /zone/<comune>/<service>               → BLOCKED on EN (notFound guard
+//     in /zone/[comune]/[service]/page.tsx — zone+service IT-only).
+//   - /zone/<comune>                         → accessible on EN routing-wise
+//     but content is still hardcoded IT (not yet translated).
+// There is NO Next.js middleware in this app; the blocks above are explicit
+// notFound() guards inside the page modules.
 
 import type { ProfessionCategory } from './seo-professions';
 

@@ -42,6 +42,10 @@ export const PATHNAMES = {
   '/lavori/[slug]': { it: '/lavori/[slug]', en: '/works/[slug]' },
   '/servizi': { it: '/servizi', en: '/services' },
   '/servizi/[slug]': { it: '/servizi/[slug]', en: '/services/[slug]' },
+  '/servizi-per-professioni': {
+    it: '/servizi-per-professioni',
+    en: '/services-by-profession',
+  },
   '/contatti': { it: '/contatti', en: '/contact' },
   '/perche-scegliere-me': {
     it: '/perche-scegliere-me',

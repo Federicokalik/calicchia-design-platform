@@ -98,7 +98,7 @@ const EN_ONLY_PATHS = new Set<string>([
 const IT_ONLY_PATHS = new Set<string>([
   '/web-design-freelance-ciociaria',
   '/sito-web-per-pmi',
-  '/servizi-per-professioni',
+  // NB: /servizi-per-professioni rimosso (2026-05-15) — ora bilingual.
   '/quanto-costa-sito-web',
   // Pillar bilingual con EN attiva: rimossi da IT_ONLY (web-designer-vs-developer, EAA, CWV)
   '/glossario-web-design',

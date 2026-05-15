@@ -45,5 +45,32 @@
     "openCaseStudy": "Open case study",
     "coverAlt": "{title} — cover",
     "awarenessEyebrow": "Awareness"
+  },
+  "perProfessione": {
+    "metadata": {
+      "title": "Services by profession · Website for every trade | Federico Calicchia",
+      "description": "Freelance web design for professions and categories: dentists, lawyers, restaurateurs, craftsmen, hotels, e-commerce. Tailored services for your industry — clients don't search \"web designer\", they search \"website for [profession]\".",
+      "ogTitle": "Services by profession · Website for every trade",
+      "ogDescription": "Web design for professions and categories. A landing page for every service × trade combination."
+    },
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Services by profession",
+    "collectionName": "Services by profession",
+    "collectionDescription": "Service × profession combinations with a dedicated landing: SEO copy, common industry problems, FAQs, pricing.",
+    "eyebrowCounts": "Matrix — {categoryCount} categories · {professionCount} professions",
+    "h1": "Services by profession.",
+    "intro": "Your client isn't searching for \"web designer\". They search for \"dentist website\", \"lawyer website quote\", \"craftsman e-commerce\". For each trade the website has different priorities: online bookings, portfolio gallery, client area, price list. Below, the matrix of categories and professions with dedicated landings.",
+    "categoriesLabel": "01 — Categories",
+    "categoriesHeading": "By trade category.",
+    "categoriesLead": "Each category has different problems and priorities — from a showcase site with a gallery to a booking portal with backend.",
+    "servicesLabel": "02 — Services",
+    "servicesHeading": "Five services, one standard.",
+    "servicesLead": "Web design, development, branding, e-commerce, SEO. Every service pairs with every profession, every combination has its own landing.",
+    "categoryMonoLabel": "{label} · {count} professions",
+    "professionsCount": "{count} professions →",
+    "ctaLabel": "{index} — Don't see your trade?",
+    "ctaHeading": "The matrix covers the most in-demand trades. For the rest, write to me.",
+    "ctaLead": "The matrix covers {count} professions with indexed landings. If your trade is long-tail, we work directly on a quote. A 30-minute call clears up whether it makes sense.",
+    "ctaButton": "Let's talk"
   }
 }

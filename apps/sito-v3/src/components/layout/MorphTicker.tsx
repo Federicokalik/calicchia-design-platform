@@ -36,7 +36,14 @@ function isMatrixPathname(pathname: string | null): boolean {
   // Strip leading locale segment (es. /it/...).
   const stripped = pathname.replace(/^\/(it|en)(?=\/|$)/, '') || '/';
   if (stripped.startsWith('/zone/')) return true;
-  if (stripped === '/servizi-per-professioni') return true;
+  // IT canonical + EN translated slug (PATHNAMES: /servizi-per-professioni →
+  // /services-by-profession). Match both so the MorphTicker hides on the hub
+  // in both locales.
+  if (
+    stripped === '/servizi-per-professioni' ||
+    stripped === '/services-by-profession'
+  )
+    return true;
   if (stripped === '/sito-web-per-pmi') return true;
   // Match `/{service-prefix}-...`
   for (const prefix of MATRIX_SERVICE_PREFIXES) {
@@ -101,6 +108,9 @@ export function MorphTicker() {
   const [matrixSectionVisible, setMatrixSectionVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Hidden until the user scrolls past the hero (~60% of the viewport).
+  // Reset on route change so each landing page restarts with the widget hidden.
+  const [scrolledPastHero, setScrolledPastHero] = useState(false);
 
   // Restore dismissal from session
   useEffect(() => {
@@ -161,11 +171,37 @@ export function MorphTicker() {
     };
   }, [openMenu, phase, service, profession]);
 
+  // Hide on hero — reveal once the user scrolls past ~60% of the viewport.
+  // Threshold is viewport-relative so it works across all page heroes (home,
+  // matrix, blog, zone, etc.) without per-page tagging.
   useEffect(() => {
-    const footer = document.querySelector('footer');
-    if (!footer) return;
+    if (typeof window === 'undefined') return;
+    setScrolledPastHero(false);
+    const threshold = () => Math.max(240, window.innerHeight * 0.6);
+    const check = () => {
+      setScrolledPastHero(window.scrollY > threshold());
+    };
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    return () => {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+  }, [pathname]);
 
-    const observer = new IntersectionObserver(
+  // Footer observer — robust against late mounts, locale switches, and
+  // client-side navigation across (site) pages. Same MutationObserver +
+  // pathname dep pattern as the matrix-section observer below: the previous
+  // setup (empty deps + single querySelector at mount) attached to a stale
+  // footer node when navigating between EN/IT or pages within the same
+  // locale, causing the badge to ignore the footer.
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    let currentFooter: Element | null = null;
+
+    const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
         const visible = entry.isIntersecting;
         setFooterVisible(visible);
@@ -174,12 +210,32 @@ export function MorphTicker() {
           setPhase('idle');
         }
       },
-      { root: null, threshold: 0.04 }
+      { root: null, threshold: 0.04 },
     );
 
-    observer.observe(footer);
-    return () => observer.disconnect();
-  }, []);
+    const attach = (footer: Element | null) => {
+      if (footer === currentFooter) return;
+      if (currentFooter) intersectionObserver.unobserve(currentFooter);
+      currentFooter = footer;
+      if (footer) intersectionObserver.observe(footer);
+      else setFooterVisible(false);
+    };
+
+    attach(document.querySelector('footer'));
+
+    const mutationObserver = new MutationObserver(() => {
+      attach(document.querySelector('footer'));
+    });
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      intersectionObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [pathname]);
 
   // Hide quando una sezione marcata `data-matrix-section` è visibile
   // (es. PerChiLavoro funnel — duplica funzione del MorphTicker).
@@ -269,7 +325,14 @@ export function MorphTicker() {
     setDismissed(true);
   };
 
-  if (footerVisible || matrixSectionVisible || onMatrixRoute || onBlogPostRoute || onPortalRoute || dismissed)
+  if (
+    footerVisible ||
+    matrixSectionVisible ||
+    onMatrixRoute ||
+    onBlogPostRoute ||
+    onPortalRoute ||
+    dismissed
+  )
     return null;
 
   // Mobile + active: render full-width bottom sheet (Swiss compliance unification).
@@ -294,8 +357,23 @@ export function MorphTicker() {
       ref={rootRef}
       role="presentation"
       data-morph-ticker
+      aria-hidden={!scrolledPastHero || undefined}
       className="fixed right-4 bottom-[10px] pointer-events-none"
-      style={{ zIndex: 50 }}
+      style={{
+        zIndex: 50,
+        // Pure-translate slide — mirrors the Logo "Calicchia" exit motion
+        // (translateX + opacity, no scaling). The pill slides off the right
+        // edge of the viewport and fades. Power3.out matches header chrome.
+        opacity: scrolledPastHero ? 1 : 0,
+        transform: scrolledPastHero
+          ? 'translateX(0)'
+          : 'translateX(calc(100% + 1rem))',
+        visibility: scrolledPastHero ? 'visible' : 'hidden',
+        willChange: 'transform, opacity',
+        transition: scrolledPastHero
+          ? 'opacity 450ms cubic-bezier(0.215, 0.61, 0.355, 1), transform 450ms cubic-bezier(0.215, 0.61, 0.355, 1), visibility 0s linear 0s'
+          : 'opacity 400ms cubic-bezier(0.215, 0.61, 0.355, 1), transform 400ms cubic-bezier(0.215, 0.61, 0.355, 1), visibility 0s linear 400ms',
+      }}
     >
       {/* IDLE TAB — pill with dismiss button */}
       {phase === 'idle' && (

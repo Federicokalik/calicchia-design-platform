@@ -46,17 +46,14 @@ const EN_PATH_DISALLOWED_PREFIXES = [
   '/web-design-freelance-ciociaria',
   '/sito-web-per-pmi',
   '/zone',
-  '/servizi-per-professioni',
+  // NB: /servizi-per-professioni rimosso (2026-05-15) — l'hub è ora bilingual,
+  // EN serve come /en/services-by-profession via PATHNAMES rewrite.
   '/quanto-costa-sito-web',
-  // Legal IT-only (giurisdizione)
-  '/privacy-policy',
-  '/cookie-policy',
-  '/termini-e-condizioni',
-  '/privacy-request',
-  '/faq',
-  // Booking IT-only MVP
-  '/prenota',
-  '/prenotazione',
+  // NB (2026-05-15): /privacy-policy, /cookie-policy, /termini-e-condizioni,
+  // /privacy-request, /faq, /prenota, /prenotazione rimossi da DISALLOWED.
+  // Devono esistere anche su EN (traduzioni deferred Phase 2). Pattern come
+  // /clienti: route risponde 200 con IT fallback, robots.txt disallow nasconde
+  // ai crawler finché la traduzione non è pubblicata.
   // NB: /clienti rimosso da DISALLOWED. Next-intl localeDetection redirect i
   // browser EN su /en/clienti/* → bloccarlo causerebbe 404 al login. Portal
   // content è IT-only (deferred Phase 2 traduzione full), ma le route devono

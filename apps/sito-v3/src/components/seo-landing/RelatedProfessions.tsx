@@ -1,9 +1,15 @@
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import {
-  SEO_PROFESSIONS,
-  PROFESSION_CATEGORIES,
+  getAllProfessionsLocalized,
+  getProfessionCategories,
 } from '@/data/seo-professions';
+import {
+  getProfessionSlugForLocale,
+  getServiceByLandingSlug,
+  getServiceUrlPrefix,
+} from '@/data/seo-service-matrix';
+import type { Locale } from '@/lib/i18n';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';
@@ -34,24 +40,48 @@ export async function RelatedProfessions({
   categoryId,
   limit = 5,
 }: RelatedProfessionsProps) {
-  const t = await getTranslations('landing.relatedProfessions');
+  const [locale, t] = await Promise.all([
+    getLocale() as Promise<Locale>,
+    getTranslations('landing.relatedProfessions'),
+  ]);
+
+  // Locale-aware lookups so EN pages show "Healthcare" / "Dentists" instead of
+  // "Sanità e Salute" / "Dentisti". Matrix landing routes themselves are
+  // IT-only (blocked by middleware on EN), but the labels rendered here are
+  // chrome and must follow the page locale.
+  const allProfessions = getAllProfessionsLocalized(locale);
+  const categories = getProfessionCategories(locale);
+
   const current = currentSlug
-    ? SEO_PROFESSIONS.find((p) => p.slug === currentSlug)
+    ? allProfessions.find((p) => p.slug === currentSlug)
     : undefined;
   const targetCategoryId = categoryId ?? current?.categoryId;
   if (!targetCategoryId) return null;
 
-  const category = PROFESSION_CATEGORIES[targetCategoryId];
+  const category = categories[targetCategoryId];
   if (!category) return null;
 
-  const related = SEO_PROFESSIONS.filter(
-    (p) =>
-      p.categoryId === targetCategoryId &&
-      p.slug !== currentSlug &&
-      p.tier <= 2
-  ).slice(0, limit);
+  const related = allProfessions
+    .filter(
+      (p) =>
+        p.categoryId === targetCategoryId &&
+        p.slug !== currentSlug &&
+        p.tier <= 2,
+    )
+    .slice(0, limit);
 
   if (related.length === 0) return null;
+
+  // Locale-aware href: on EN we build /website-for-<en-slug>; the @/i18n
+  // Link auto-prefixes /en. The catch-all [...matrix] page parses both
+  // IT and EN url prefixes, but using the canonical EN URL keeps SEO clean
+  // and avoids redirects.
+  const sitoWebService = getServiceByLandingSlug('sito-web');
+  const matrixPrefix = sitoWebService
+    ? getServiceUrlPrefix(sitoWebService, locale)
+    : 'sito-web-per';
+  const matrixHref = (profSlug: string) =>
+    `/${matrixPrefix}-${getProfessionSlugForLocale(profSlug, locale)}`;
 
   return (
     <Section spacing="compact" bordered="top">
@@ -77,7 +107,7 @@ export async function RelatedProfessions({
               style={{ borderColor: 'var(--color-border)' }}
             >
               <Link
-                href={`/sito-web-per-${p.slug}`}
+                href={matrixHref(p.slug)}
                 className="grid grid-cols-12 gap-4 py-5 transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2"
               >
                 <span

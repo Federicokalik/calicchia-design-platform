@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { StructuredData } from '@/components/seo/StructuredData';
@@ -14,51 +15,84 @@ import { Section } from '@/components/ui/Section';
 import { FinalCTA } from '@/components/home/FinalCTA';
 import { SERVICES } from '@/data/services';
 import {
-  PROFESSION_CATEGORIES,
-  SEO_PROFESSIONS,
+  getAllProfessionsLocalized,
+  getProfessionCategories,
 } from '@/data/seo-professions';
-import { SITE } from '@/data/site';
+import {
+  getProfessionSlugForLocale,
+  getServiceByLandingSlug,
+  getServiceUrlPrefix,
+} from '@/data/seo-service-matrix';
+import {
+  buildCanonical,
+  buildI18nAlternates,
+  buildOgLocale,
+} from '@/lib/canonical';
+import type { Locale } from '@/lib/i18n';
 
+// IT-canonical path. EN is translated to /services-by-profession via PATHNAMES;
+// buildCanonical / buildI18nAlternates handle the rewrite automatically.
 const PATH = '/servizi-per-professioni';
-const SITE_URL = SITE.url.replace(/\/$/, '');
 
-const indexableProfessions = SEO_PROFESSIONS.filter((p) => p.tier <= 2);
+export async function generateMetadata(): Promise<Metadata> {
+  const [locale, t] = await Promise.all([
+    getLocale() as Promise<Locale>,
+    getTranslations('servizi.perProfessione.metadata'),
+  ]);
+  return {
+    title: { absolute: t('title') },
+    description: t('description'),
+    alternates: buildI18nAlternates(PATH, locale),
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      url: buildCanonical(PATH, locale),
+      ...buildOgLocale(locale),
+    },
+  };
+}
 
-const categoriesOrdered = Object.values(PROFESSION_CATEGORIES);
-const professionsByCategory = new Map(
-  categoriesOrdered.map((cat) => [
-    cat.id,
-    indexableProfessions
-      .filter((p) => p.categoryId === cat.id)
-      .sort((a, b) => a.label.localeCompare(b.label, 'it')),
-  ])
-);
+export default async function ServiziPerProfessioniHubPage() {
+  const [locale, t] = await Promise.all([
+    getLocale() as Promise<Locale>,
+    getTranslations('servizi.perProfessione'),
+  ]);
 
-export const metadata: Metadata = {
-  title: {
-    absolute:
-      'Servizi per professione · Sito web per ogni mestiere | Federico Calicchia',
-  },
-  description:
-    'Web design freelance per professioni e categorie: dentisti, avvocati, ristoratori, artigiani, hotel, e-commerce. Servizi su misura per il tuo settore — il cliente non cerca "web designer", cerca "sito per [professione]".',
-  alternates: { canonical: `${SITE_URL}${PATH}` },
-  openGraph: {
-    title: 'Servizi per professione · Sito web per ogni mestiere',
-    description:
-      'Web design per professioni e categorie. Landing per ogni combinazione servizio × mestiere.',
-    url: PATH,
-  },
-};
+  // Locale-aware professions + categories. Matrix landing pages /sito-web-per-*
+  // remain IT-only (route guard), but the hub itself must follow the page
+  // locale — chrome labels, headings, and category names are now translated.
+  const allProfessions = getAllProfessionsLocalized(locale);
+  const categories = getProfessionCategories(locale);
+  const indexableProfessions = allProfessions.filter((p) => p.tier <= 2);
+  const categoriesOrdered = Object.values(categories);
+  const professionsByCategory = new Map(
+    categoriesOrdered.map((cat) => [
+      cat.id,
+      indexableProfessions
+        .filter((p) => p.categoryId === cat.id)
+        .sort((a, b) => a.label.localeCompare(b.label, locale)),
+    ]),
+  );
 
-export default function ServiziPerProfessioniHubPage() {
+  const homeLabel = t('breadcrumbHome');
+  const currentLabel = t('breadcrumbCurrent');
+
+  // Locale-aware matrix link builder (same logic as RelatedProfessions).
+  const sitoWebService = getServiceByLandingSlug('sito-web');
+  const matrixPrefix = sitoWebService
+    ? getServiceUrlPrefix(sitoWebService, locale)
+    : 'sito-web-per';
+  const matrixHref = (profSlug: string) =>
+    `/${matrixPrefix}-${getProfessionSlugForLocale(profSlug, locale)}`;
+
+  const canonicalUrl = buildCanonical(PATH, locale);
   const collection = collectionPageSchema({
-    name: 'Servizi per professione',
-    description:
-      'Combinazioni servizio × professione con landing dedicata: copywriter SEO, problemi tipici del settore, FAQ, pricing.',
-    url: `${SITE_URL}${PATH}`,
+    name: t('collectionName'),
+    description: t('collectionDescription'),
+    url: canonicalUrl,
     items: categoriesOrdered.map((cat) => ({
       name: cat.label,
-      url: `${SITE_URL}${PATH}#${cat.id}`,
+      url: `${canonicalUrl}#${cat.id}`,
     })),
   });
 
@@ -68,8 +102,8 @@ export default function ServiziPerProfessioniHubPage() {
         json={[
           collection,
           breadcrumbSchema([
-            { name: 'Home', url: '/' },
-            { name: 'Servizi per professione', url: PATH },
+            { name: homeLabel, url: buildCanonical('/', locale) },
+            { name: currentLabel, url: canonicalUrl },
           ]),
         ]}
       />
@@ -79,13 +113,16 @@ export default function ServiziPerProfessioniHubPage() {
           <div className="col-span-12 md:col-span-9">
             <Breadcrumbs
               items={[
-                { name: 'Home', url: '/' },
-                { name: 'Servizi per professione', url: PATH },
+                { name: homeLabel, url: '/' },
+                { name: currentLabel, url: PATH },
               ]}
               className="mb-8"
             />
             <Eyebrow as="p" mono className="mb-6">
-              {`Matrice — ${categoriesOrdered.length} categorie · ${indexableProfessions.length} professioni`}
+              {t('eyebrowCounts', {
+                categoryCount: categoriesOrdered.length,
+                professionCount: indexableProfessions.length,
+              })}
             </Eyebrow>
             <Heading
               as="h1"
@@ -93,17 +130,13 @@ export default function ServiziPerProfessioniHubPage() {
               className="mb-8"
               style={{ maxWidth: '20ch' }}
             >
-              Servizi per professione.
+              {t('h1')}
             </Heading>
             <p
               className="text-[length:var(--text-body-lg)] leading-relaxed"
               style={{ maxWidth: '60ch', color: 'var(--color-text-secondary)' }}
             >
-              Il tuo cliente non cerca "web designer". Cerca "sito per dentista",
-              "preventivo sito per avvocato", "e-commerce per artigiano".
-              Per ogni mestiere il sito ha priorità diverse: prenotazioni online,
-              vetrina lavori, area riservata, listino prezzi. Sotto, la matrice di
-              categorie e professioni con landing dedicate.
+              {t('intro')}
             </p>
           </div>
         </div>
@@ -114,17 +147,16 @@ export default function ServiziPerProfessioniHubPage() {
         <div className="grid grid-cols-12 gap-6 md:gap-8">
           <div className="col-span-12 md:col-span-4">
             <MonoLabel as="p" className="mb-4">
-              01 — Categorie
+              {t('categoriesLabel')}
             </MonoLabel>
             <Heading as="h2" size="display-md" style={{ maxWidth: '20ch' }}>
-              Per categoria di mestiere.
+              {t('categoriesHeading')}
             </Heading>
             <p
               className="mt-4 text-base md:text-lg leading-relaxed"
               style={{ maxWidth: '50ch', color: 'var(--color-text-secondary)' }}
             >
-              Ogni categoria ha problematiche e priorità diverse — dal sito
-              vetrina con galleria al portale prenotazioni con gestionale.
+              {t('categoriesLead')}
             </p>
           </div>
 
@@ -177,7 +209,7 @@ export default function ServiziPerProfessioniHubPage() {
                         color: 'var(--color-text-secondary)',
                       }}
                     >
-                      {count} professioni →
+                      {t('professionsCount', { count })}
                     </span>
                   </a>
                 </li>
@@ -192,17 +224,16 @@ export default function ServiziPerProfessioniHubPage() {
         <div className="grid grid-cols-12 gap-6 md:gap-8">
           <div className="col-span-12 md:col-span-4">
             <MonoLabel as="p" className="mb-4">
-              02 — Servizi
+              {t('servicesLabel')}
             </MonoLabel>
             <Heading as="h2" size="display-md" style={{ maxWidth: '20ch' }}>
-              Cinque servizi, un solo standard.
+              {t('servicesHeading')}
             </Heading>
             <p
               className="mt-4 text-base md:text-lg leading-relaxed"
               style={{ maxWidth: '50ch', color: 'var(--color-text-secondary)' }}
             >
-              Web design, sviluppo, branding, e-commerce, SEO. Ogni servizio si
-              combina con ogni professione, ogni combinazione ha la sua landing.
+              {t('servicesLead')}
             </p>
           </div>
 
@@ -275,10 +306,13 @@ export default function ServiziPerProfessioniHubPage() {
             <div className="grid grid-cols-12 gap-6 md:gap-8 scroll-mt-32">
               <div className="col-span-12 md:col-span-4">
                 <MonoLabel as="p" className="mb-4">
-                  {`${cat.label} · ${list.length} professioni`}
+                  {t('categoryMonoLabel', {
+                    label: cat.label,
+                    count: list.length,
+                  })}
                 </MonoLabel>
                 <Heading as="h2" size="display-md" style={{ maxWidth: '20ch' }}>
-                  {cat.label}.
+                  {`${cat.label}.`}
                 </Heading>
                 <p
                   className="mt-4 text-base md:text-lg leading-relaxed"
@@ -299,7 +333,7 @@ export default function ServiziPerProfessioniHubPage() {
                     style={{ borderColor: 'var(--color-border)' }}
                   >
                     <Link
-                      href={`/sito-web-per-${p.slug}`}
+                      href={matrixHref(p.slug)}
                       className="grid grid-cols-12 gap-3 py-4 transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:outline-offset-2"
                     >
                       <span
@@ -350,7 +384,7 @@ export default function ServiziPerProfessioniHubPage() {
         <div className="grid grid-cols-12 gap-6 md:gap-8">
           <div className="col-span-12 md:col-span-7 md:col-start-3">
             <MonoLabel as="p" className="mb-4">
-              {`${categoriesOrdered.length + 2} — Non vedi il tuo mestiere?`}
+              {t('ctaLabel', { index: categoriesOrdered.length + 2 })}
             </MonoLabel>
             <Heading
               as="h2"
@@ -358,18 +392,16 @@ export default function ServiziPerProfessioniHubPage() {
               className="mb-6"
               style={{ maxWidth: '24ch' }}
             >
-              La matrice copre i mestieri più richiesti. Per gli altri, scrivimi.
+              {t('ctaHeading')}
             </Heading>
             <p
               className="text-base md:text-lg leading-relaxed mb-6"
               style={{ maxWidth: '60ch', color: 'var(--color-text-secondary)' }}
             >
-              Il sito copre {indexableProfessions.length} professioni con landing
-              indicizzate. Se il tuo mestiere è long-tail, lavoriamo direttamente
-              su preventivo. Una chiamata di 30 minuti chiarisce se ha senso.
+              {t('ctaLead', { count: indexableProfessions.length })}
             </p>
             <Button href="/contatti" variant="solid" size="md">
-              Parliamone
+              {t('ctaButton')}
               <span aria-hidden="true">→</span>
             </Button>
           </div>

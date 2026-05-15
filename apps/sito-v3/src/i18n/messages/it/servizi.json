@@ -45,5 +45,32 @@
     "openCaseStudy": "Apri il case study",
     "coverAlt": "{title} — cover",
     "awarenessEyebrow": "Consapevolezza"
+  },
+  "perProfessione": {
+    "metadata": {
+      "title": "Servizi per professione · Sito web per ogni mestiere | Federico Calicchia",
+      "description": "Web design freelance per professioni e categorie: dentisti, avvocati, ristoratori, artigiani, hotel, e-commerce. Servizi su misura per il tuo settore — il cliente non cerca \"web designer\", cerca \"sito per [professione]\".",
+      "ogTitle": "Servizi per professione · Sito web per ogni mestiere",
+      "ogDescription": "Web design per professioni e categorie. Landing per ogni combinazione servizio × mestiere."
+    },
+    "breadcrumbHome": "Home",
+    "breadcrumbCurrent": "Servizi per professione",
+    "collectionName": "Servizi per professione",
+    "collectionDescription": "Combinazioni servizio × professione con landing dedicata: copywriter SEO, problemi tipici del settore, FAQ, pricing.",
+    "eyebrowCounts": "Matrice — {categoryCount} categorie · {professionCount} professioni",
+    "h1": "Servizi per professione.",
+    "intro": "Il tuo cliente non cerca \"web designer\". Cerca \"sito per dentista\", \"preventivo sito per avvocato\", \"e-commerce per artigiano\". Per ogni mestiere il sito ha priorità diverse: prenotazioni online, vetrina lavori, area riservata, listino prezzi. Sotto, la matrice di categorie e professioni con landing dedicate.",
+    "categoriesLabel": "01 — Categorie",
+    "categoriesHeading": "Per categoria di mestiere.",
+    "categoriesLead": "Ogni categoria ha problematiche e priorità diverse — dal sito vetrina con galleria al portale prenotazioni con gestionale.",
+    "servicesLabel": "02 — Servizi",
+    "servicesHeading": "Cinque servizi, un solo standard.",
+    "servicesLead": "Web design, sviluppo, branding, e-commerce, SEO. Ogni servizio si combina con ogni professione, ogni combinazione ha la sua landing.",
+    "categoryMonoLabel": "{label} · {count} professioni",
+    "professionsCount": "{count} professioni →",
+    "ctaLabel": "{index} — Non vedi il tuo mestiere?",
+    "ctaHeading": "La matrice copre i mestieri più richiesti. Per gli altri, scrivimi.",
+    "ctaLead": "Il sito copre {count} professioni con landing indicizzate. Se il tuo mestiere è long-tail, lavoriamo direttamente su preventivo. Una chiamata di 30 minuti chiarisce se ha senso.",
+    "ctaButton": "Parliamone"
   }
 }

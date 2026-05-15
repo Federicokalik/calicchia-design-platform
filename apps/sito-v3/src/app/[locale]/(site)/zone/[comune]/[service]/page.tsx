@@ -47,6 +47,10 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { comune, service, locale = DEFAULT_LOCALE } = await params;
+  // zone + comune + service è IT-only (decisione 2026-05-15, in linea col blocco
+  // matrix+città). I contenuti sono hardcoded IT e i target sono attività della
+  // zona italiana — niente fallback EN.
+  if (locale === 'en') return { title: 'Page not found' };
   const city = getCityBySlug(comune);
   const svc = getServiceByLandingSlug(service as ServiceSlug);
   if (!city || !svc) return { title: 'Combinazione non trovata' };
@@ -65,6 +69,8 @@ export default async function ZonaComuneServicePage({
   params: Promise<Params>;
 }) {
   const { comune, service, locale = DEFAULT_LOCALE } = await params;
+  // EN guard — vedi nota in generateMetadata.
+  if (locale === 'en') notFound();
   const city = getCityBySlug(comune);
   const svc = getServiceByLandingSlug(service as ServiceSlug);
   if (!city || !svc) notFound();

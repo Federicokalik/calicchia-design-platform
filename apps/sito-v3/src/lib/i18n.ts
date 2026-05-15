@@ -25,6 +25,11 @@ export const PATH_SEGMENTS_IT_TO_EN = {
   servizi: 'services',
   contatti: 'contact',
   'perche-scegliere-me': 'why-choose-me',
+  // Hub bilingual (PATHNAMES entry added 2026-05-15). Mantieni in sync con
+  // PATHNAMES in i18n/routing.ts — quella mappa è usata da next-intl per il
+  // routing, questa da buildCanonical/buildI18nAlternates per gli URL nel
+  // metadata (canonical, hreflang).
+  'servizi-per-professioni': 'services-by-profession',
 } as const satisfies Record<string, string>;
 
 /** Reverse map per normalizzare URL EN → IT canonical (middleware, routing). */

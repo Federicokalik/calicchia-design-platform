@@ -65,17 +65,19 @@ export async function Hero({ years }: HeroProps) {
           as="h1"
           size="display-xl"
           style={{
-            maxWidth: '18ch',
+            maxWidth: '100%',
             fontSize: 'clamp(2.75rem, 7vw, 8.5rem)',
             lineHeight: 0.95,
           }}
         >
-          <span data-split="static">{t('h1Prefix')}</span>{' '}
-          <span data-split="static">{t('h1Connector')}</span>{' '}
-          <span className="inline-block align-baseline">
-            <HeroCycle />
+          <span data-split="static">{t('h1Prefix')}</span>
+          <span style={{ display: 'block' }}>
+            <span data-split="static">{t('h1Connector')}</span>{' '}
+            <span className="inline-block align-baseline">
+              <HeroCycle />
+            </span>
+            <span aria-hidden="true">{t('h1Suffix')}</span>
           </span>
-          <span aria-hidden="true">{t('h1Suffix')}</span>
         </Heading>
       </div>
 

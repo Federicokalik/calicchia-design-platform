@@ -2,23 +2,20 @@ import type { MetadataRoute } from 'next';
 import { SITE } from '@/data/site';
 
 /**
- * robots.txt — coordinato con proxy.ts EN-availability route guard.
+ * robots.txt — only paths that actually serve content but should NOT be indexed
+ * are listed here.
  *
- * Convenzione: i path `/en/...` listati in `disallow` corrispondono a route
- * che il middleware (`apps/sito-v3/src/proxy.ts`) restituisce 404 per locale
- * EN (paths in `EN_PATH_DISALLOWED_PREFIXES` o IT-only landing). Robots aiuta
- * i crawler a non sprecare budget su 404. Le route in `EN_PATH_PREFIXES_ENABLED`
- * (bilingual con content EN reale) NON sono qui — devono essere crawlable in
- * entrambi i locale.
+ * Two kinds of entries:
+ *   1. Always-private content (e.g. `/clienti/`, `/api/`) — IT + EN both
+ *      respond 200 but must stay out of the index.
+ *   2. EN routes serving IT-content fallback (e.g. `/en/privacy-policy`) —
+ *      translation deferred Phase 2. The route 200s so the link doesn't break,
+ *      but we hide it from crawlers until the EN copy ships. Remove the entry
+ *      when its translated version is published.
  *
- * Update flow: quando un nuovo path viene aggiunto a EN_PATH_DISALLOWED_PREFIXES,
- * aggiungere anche qui. Quando un path passa da DISALLOWED → ENABLED (es. EN
- * content tradotto), rimuoverlo da qui.
- *
- * NOTA: i path usano slug IT canonical (es. `/en/zone`) perché next-intl fa
- * rewrite EN→IT internal: l'URL pubblico `/en/zone` matcha il filesystem
- * `[locale]/(site)/zone/`. Non normalizzare a slug EN tradotti se il path
- * non è in PATHNAMES.
+ * 404-only paths (IT-only pillars where `proxy.ts` returns 404 on EN) do NOT
+ * belong here — listing them would imply existence and waste signal. Manage
+ * those exclusively via `EN_PATH_DISALLOWED_PREFIXES` in `proxy.ts`.
  */
 export default function robots(): MetadataRoute.Robots {
   const base = SITE.url.replace(/\/$/, '');
@@ -29,20 +26,16 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/api/',
-          // Portal: content IT-only (Phase 2 traduzione full deferred); le route
-          // EN rispondono 200 per evitare 404 al login da redirect Accept-Language
-          // ma sono nascoste ai crawler.
+          // Portal: serves 200 with IT content on EN (Phase 2 traduzione full
+          // deferred). Routes respond to avoid 404 at login from
+          // Accept-Language redirects, but stay hidden from crawlers.
           '/clienti/',
           '/en/clienti/',
-          // EN paths esplicitamente IT-only — il middleware ritorna 404 ma il
-          // disallow risparmia crawl budget.
-          // Tieni sincronizzato con EN_PATH_DISALLOWED_PREFIXES in proxy.ts.
-          '/en/zone',
-          '/en/zone/',
-          '/en/servizi-per-professioni',
-          '/en/web-design-freelance-ciociaria',
-          '/en/sito-web-per-pmi',
-          '/en/quanto-costa-sito-web',
+          // EN routes that serve 200 with IT-content fallback (translation
+          // deferred Phase 2 — legal docs, FAQ, booking flow). The IT versions
+          // are intentionally indexable; only the /en/* variants are hidden
+          // until properly translated. Remove an entry when its EN version
+          // ships.
           '/en/privacy-policy',
           '/en/cookie-policy',
           '/en/termini-e-condizioni',
