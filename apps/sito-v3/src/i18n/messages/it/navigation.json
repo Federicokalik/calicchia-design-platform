@@ -81,7 +81,10 @@
     "ariaServicesAvailable": "Servizi disponibili",
     "ariaForWhom": "Per chi",
     "ariaForWhomWithService": "Per chi ({count} compatibili con {service})",
-    "ariaCloseFilter": "Chiudi il filtro"
+    "ariaCloseFilter": "Chiudi il filtro",
+    "serviceDropdownHeader": "Servizio · {count} disponibili",
+    "professionDropdownHeader": "Per chi · {count}",
+    "professionDropdownHeaderCompatible": "compatibili con"
   },
   "breadcrumb": {
     "home": "Home",

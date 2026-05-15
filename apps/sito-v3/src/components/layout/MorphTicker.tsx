@@ -1,19 +1,19 @@
 'use client';
 
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react';
-import { usePathname } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/navigation';
 import {
-  SERVICES,
-  PROFESSIONS,
+  getMatrixServices,
+  getMatrixProfessions,
   getValidProfessions,
   groupProfessionsByCategory,
   buildMatrixUrl,
   type MatrixService,
   type MatrixProfession,
 } from '@/data/service-matrix';
+import type { Locale } from '@/lib/i18n';
 
 /**
  * Routes "matrice" che già forniscono il funnel servizio×professione —
@@ -80,7 +80,13 @@ const DISMISS_KEY = 'morph-ticker-dismissed';
 
 export function MorphTicker() {
   const t = useTranslations('navigation.morphTicker');
+  const locale = useLocale() as Locale;
   const rootRef = useRef<HTMLDivElement>(null);
+
+  // Locale-aware liste: servizi + professioni con label tradotte. Memoized
+  // per evitare ricomputazioni inutili.
+  const SERVICES = useMemo(() => getMatrixServices(locale), [locale]);
+  const PROFESSIONS = useMemo(() => getMatrixProfessions(locale), [locale]);
 
   const pathname = usePathname();
   const onMatrixRoute = useMemo(() => isMatrixPathname(pathname), [pathname]);
@@ -129,11 +135,11 @@ export function MorphTicker() {
   // Reset profession if service change makes it invalid
   useEffect(() => {
     if (!service || !profession) return;
-    const validList = getValidProfessions(service.slug);
+    const validList = getValidProfessions(service.slug, locale);
     if (!validList.find((p) => p.slug === profession.slug)) {
       setProfession(null);
     }
-  }, [service, profession]);
+  }, [service, profession, locale]);
 
   // Click outside / Esc closes dropdowns + collapses to idle on Esc when empty
   useEffect(() => {
@@ -238,10 +244,16 @@ export function MorphTicker() {
     };
   }, [pathname]);
 
-  const validProfessions = getValidProfessions(service?.slug ?? null);
-  const grouped = groupProfessionsByCategory(validProfessions);
+  const validProfessions = useMemo(
+    () => getValidProfessions(service?.slug ?? null, locale),
+    [service?.slug, locale],
+  );
+  const grouped = useMemo(
+    () => groupProfessionsByCategory(validProfessions, locale),
+    [validProfessions, locale],
+  );
   const matrixUrl =
-    service && profession ? buildMatrixUrl(service.slug, profession.slug) : null;
+    service && profession ? buildMatrixUrl(service.slug, profession.slug, locale) : null;
 
   const reset = () => {
     setService(null);
@@ -266,6 +278,7 @@ export function MorphTicker() {
       <MobileMatrixSheet
         service={service}
         profession={profession}
+        services={SERVICES}
         validProfessions={validProfessions}
         grouped={grouped}
         matrixUrl={matrixUrl}
@@ -463,7 +476,7 @@ export function MorphTicker() {
                     className="font-mono text-[10px] uppercase tracking-[0.22em] mb-3"
                     style={{ color: 'rgba(250,250,247,0.4)' }}
                   >
-                    Servizio · {SERVICES.length} disponibili
+                    {t('serviceDropdownHeader', { count: SERVICES.length })}
                   </div>
                   <div className="grid grid-cols-4 gap-x-6 gap-y-1">
                     {SERVICES.map((s) => (
@@ -492,8 +505,8 @@ export function MorphTicker() {
                     style={{ color: 'rgba(250,250,247,0.4)' }}
                   >
                     <span>
-                      Per chi · {validProfessions.length}
-                      {service && ' compatibili con '}
+                      {t('professionDropdownHeader', { count: validProfessions.length })}
+                      {service && ` ${t('professionDropdownHeaderCompatible')} `}
                       {service && (
                         <span style={{ color: 'var(--color-accent)' }}>
                           {service.label}
@@ -789,6 +802,7 @@ function GridOption({
 interface MobileMatrixSheetProps {
   service: MatrixService | null;
   profession: MatrixProfession | null;
+  services: MatrixService[];
   validProfessions: MatrixProfession[];
   grouped: ReturnType<typeof groupProfessionsByCategory>;
   matrixUrl: string | null;
@@ -800,6 +814,7 @@ interface MobileMatrixSheetProps {
 function MobileMatrixSheet({
   service,
   profession,
+  services,
   validProfessions,
   grouped,
   matrixUrl,
@@ -926,10 +941,10 @@ function MobileMatrixSheet({
               className="font-mono text-[10px] uppercase tracking-[0.22em] mb-3"
               style={{ color: 'rgba(250,250,247,0.4)' }}
             >
-              {t('iNeedCount', { count: SERVICES.length })}
+              {t('iNeedCount', { count: services.length })}
             </p>
             <ul role="list" className="flex flex-col">
-              {SERVICES.map((s) => {
+              {services.map((s) => {
                 const active = service?.slug === s.slug;
                 return (
                   <li

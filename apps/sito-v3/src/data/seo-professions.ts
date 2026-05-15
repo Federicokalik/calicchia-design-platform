@@ -609,15 +609,66 @@ export function getSitemapPriority(profession: SeoProfession, city?: { tier: 1 |
 
 // ─── EN locale helper (Round 5b, 2026-05-08) ─────────────────────────
 import { PROFESSION_CATEGORIES_EN } from './seo-professions-en';
+import { PROFESSION_LABELS_EN } from './seo-professions-labels-en';
+import { PROFESSION_CONTENT_EN } from './seo-profession-content-en';
 import type { Locale } from '@/lib/i18n';
 
 /**
  * Locale-aware getter for PROFESSION_CATEGORIES.
- * SEO_PROFESSIONS[].label and PROFESSION_CONTENT stay IT-only — matrix
- * pages are blocked from EN routes by middleware.
+ * Le label individuali delle professioni (parrucchieri, dentisti, ecc.) sono
+ * tradotte via `PROFESSION_LABELS_EN`. Le matrix landing pages restano IT-only
+ * per il body content (bloccate dal route guard EN), ma il selettore matrix
+ * (PerChiLavoro, MorphTicker) appare su pagine EN e deve mostrare le voci
+ * tradotte. Dal 2026-05-15 anche le matrix profession-only sono EN-accessible
+ * con content tradotto via PROFESSION_CONTENT_EN + WEB_DESIGN_CONTENT_EN etc.
  */
 export function getProfessionCategories(
   locale: Locale = 'it',
 ): Record<string, ProfessionCategory> {
   return locale === 'en' ? PROFESSION_CATEGORIES_EN : PROFESSION_CATEGORIES;
+}
+
+/**
+ * Locale-aware variant di getCategoryForProfession.
+ */
+export function getCategoryForProfessionLocalized(
+  profession: SeoProfession,
+  locale: Locale = 'it',
+): ProfessionCategory {
+  const map = locale === 'en' ? PROFESSION_CATEGORIES_EN : PROFESSION_CATEGORIES;
+  return map[profession.categoryId];
+}
+
+/**
+ * Locale-aware variant di getProfessionContent (tagline + searchExample).
+ */
+export function getProfessionContentLocalized(
+  slug: string,
+  locale: Locale = 'it',
+): ProfessionContent | undefined {
+  const map = locale === 'en' ? PROFESSION_CONTENT_EN : PROFESSION_CONTENT;
+  return map[slug];
+}
+
+/**
+ * Locale-aware label per una profession. Fallback: il label IT canonical.
+ */
+export function getProfessionLabel(profession: SeoProfession, locale: Locale = 'it'): string {
+  if (locale === 'en') {
+    return PROFESSION_LABELS_EN[profession.slug] ?? profession.label;
+  }
+  return profession.label;
+}
+
+/**
+ * Locale-aware getter for all professions con label tradotta. Ritorna nuovi
+ * oggetti (non mutua i SEO_PROFESSIONS originali) per non rompere consumer
+ * che si aspettano IT canonical.
+ */
+export function getAllProfessionsLocalized(locale: Locale = 'it'): SeoProfession[] {
+  if (locale === 'it') return SEO_PROFESSIONS;
+  return SEO_PROFESSIONS.map((p) => ({
+    ...p,
+    label: PROFESSION_LABELS_EN[p.slug] ?? p.label,
+  }));
 }

@@ -81,7 +81,10 @@
     "ariaServicesAvailable": "Available services",
     "ariaForWhom": "For whom",
     "ariaForWhomWithService": "For whom ({count} compatible with {service})",
-    "ariaCloseFilter": "Close filter"
+    "ariaCloseFilter": "Close filter",
+    "serviceDropdownHeader": "Service · {count} available",
+    "professionDropdownHeader": "For whom · {count}",
+    "professionDropdownHeaderCompatible": "compatible with"
   },
   "breadcrumb": {
     "home": "Home",

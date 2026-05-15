@@ -1,15 +1,15 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import {
-  getAllSeoServices,
+  getAllSeoServicesLocalized,
   getServicesForProfession,
   type SeoService,
 } from '@/data/seo-service-matrix';
 import {
-  getAllProfessions,
+  getAllProfessionsLocalized,
   getProfessionCategories,
   type SeoProfession,
 } from '@/data/seo-professions';
@@ -25,14 +25,11 @@ interface PerChiLavoroProps {
   subtitle?: string;
 }
 
-const ALL_PROFESSIONS = getAllProfessions();
-const ALL_SERVICES = getAllSeoServices();
-// NB: profession labels (parrucchieri, dentisti, ecc.) restano IT-only.
-// Le pagine matrice /sito-web-per-* sono bloccate dal middleware su EN routes,
-// quindi le label italiane sono coerenti con il targeting Italia.
-const PROFESSION_BY_SLUG = new Map(
-  ALL_PROFESSIONS.map((profession) => [profession.slug, profession]),
-);
+// Profession + service labels sono locale-aware (vedi seo-professions-labels-en.ts
+// e SERVICE_LABELS_EN in seo-service-matrix.ts). Le pagine matrice
+// /sito-web-per-* restano IT-only (route guard EN), ma il SELETTORE qui
+// appare anche su pagine EN bilingual e deve mostrare label tradotte.
+// Le liste vengono lette dentro al component con `useMemo([locale])`.
 
 function normalizeSearch(value: string): string {
   return value
@@ -55,7 +52,13 @@ export function PerChiLavoro({
   const locale = useLocale() as Locale;
   const t = useTranslations('perChiLavoro');
 
-  // Locale-aware category data (label, etc.).
+  // Locale-aware data (label, categorie, etc.) — derived da locale corrente.
+  const ALL_PROFESSIONS = useMemo(() => getAllProfessionsLocalized(locale), [locale]);
+  const ALL_SERVICES = useMemo(() => getAllSeoServicesLocalized(locale), [locale]);
+  const PROFESSION_BY_SLUG = useMemo(
+    () => new Map(ALL_PROFESSIONS.map((p) => [p.slug, p])),
+    [ALL_PROFESSIONS],
+  );
   const PROFESSION_CATEGORIES = getProfessionCategories(locale);
   const CATEGORY_ORDER = useMemo(
     () => Object.values(PROFESSION_CATEGORIES),
@@ -67,7 +70,7 @@ export function PerChiLavoro({
       out[cat.id] = ALL_PROFESSIONS.filter((p) => p.categoryId === cat.id);
     }
     return out;
-  }, [CATEGORY_ORDER]);
+  }, [CATEGORY_ORDER, ALL_PROFESSIONS]);
 
   const getCategoryLabel = (profession: SeoProfession): string =>
     PROFESSION_CATEGORIES[profession.categoryId]?.label ?? profession.categoryId;
@@ -117,8 +120,12 @@ export function PerChiLavoro({
 
   const validServices = useMemo<SeoService[]>(() => {
     if (!selectedProfession) return ALL_SERVICES;
-    return getServicesForProfession(selectedProfession.slug);
-  }, [selectedProfession]);
+    // getServicesForProfession ritorna SEO_SERVICES IT — applichiamo locale.
+    const itServices = getServicesForProfession(selectedProfession.slug);
+    if (locale === 'it') return itServices;
+    const bySlug = new Map(ALL_SERVICES.map((s) => [s.slug, s]));
+    return itServices.map((s) => bySlug.get(s.slug) ?? s);
+  }, [selectedProfession, ALL_SERVICES, locale]);
 
   useEffect(() => {
     if (step === 'service' && selectedProfession) {

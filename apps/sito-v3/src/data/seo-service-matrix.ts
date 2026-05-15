@@ -2,6 +2,46 @@
 // Maps each service to valid professions (by slug or '*' for all)
 
 import { getAllProfessions, getProfessionBySlug, type SeoProfession } from './seo-professions';
+import { PROFESSION_LABELS_EN } from './seo-professions-labels-en';
+import type { Locale } from '@/lib/i18n';
+
+const SERVICE_LABELS_EN: Record<ServiceSlug, { label: string; labelPlural: string; urlPrefix: string }> = {
+  'sito-web': { label: 'Web Design', labelPlural: 'Websites', urlPrefix: 'website-for' },
+  'e-commerce': { label: 'E-Commerce', labelPlural: 'E-Commerce', urlPrefix: 'e-commerce-for' },
+  'sviluppo-web': { label: 'Web Development', labelPlural: 'Web Development', urlPrefix: 'web-development-for' },
+  'seo': { label: 'SEO', labelPlural: 'SEO', urlPrefix: 'seo-for' },
+};
+
+/**
+ * Slug-ify utility: "Hair Salons" → "hair-salons", "B&Bs" → "b-bs".
+ * Usato per derivare profession slug EN dai label EN.
+ */
+function slugifyEn(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+// Cache: IT slug → EN slug derivato dai PROFESSION_LABELS_EN.
+const PROFESSION_SLUG_IT_TO_EN = new Map<string, string>();
+const PROFESSION_SLUG_EN_TO_IT = new Map<string, string>();
+for (const [itSlug, enLabel] of Object.entries(PROFESSION_LABELS_EN)) {
+  const enSlug = slugifyEn(enLabel);
+  PROFESSION_SLUG_IT_TO_EN.set(itSlug, enSlug);
+  PROFESSION_SLUG_EN_TO_IT.set(enSlug, itSlug);
+}
+
+export function getProfessionSlugForLocale(itSlug: string, locale: Locale = 'it'): string {
+  if (locale === 'en') return PROFESSION_SLUG_IT_TO_EN.get(itSlug) ?? itSlug;
+  return itSlug;
+}
+
+/** Reverse lookup: dato uno slug EN, ritorna lo slug IT canonical (per data lookup). */
+export function getProfessionSlugFromEn(enSlug: string): string | undefined {
+  return PROFESSION_SLUG_EN_TO_IT.get(enSlug);
+}
 
 // ─── Service definitions ───────────────────────────────
 
@@ -116,6 +156,18 @@ for (const s of SEO_SERVICES) serviceBySlug.set(s.slug, s);
 const serviceByPrefix = new Map<string, SeoService>();
 for (const s of SEO_SERVICES) serviceByPrefix.set(s.urlPrefix, s);
 
+// EN url prefix → service (es. 'website-for' → sito-web service object).
+const serviceByPrefixEn = new Map<string, SeoService>();
+for (const s of SEO_SERVICES) {
+  const enPrefix = SERVICE_LABELS_EN[s.slug]?.urlPrefix;
+  if (enPrefix) serviceByPrefixEn.set(enPrefix, s);
+}
+
+export function getServiceUrlPrefix(service: SeoService, locale: Locale = 'it'): string {
+  if (locale === 'en') return SERVICE_LABELS_EN[service.slug]?.urlPrefix ?? service.urlPrefix;
+  return service.urlPrefix;
+}
+
 // ─── Public API ───────────────────────────────
 
 export function getServiceByLandingSlug(slug: ServiceSlug): SeoService | undefined {
@@ -128,6 +180,21 @@ export function getServiceByUrlPrefix(prefix: string): SeoService | undefined {
 
 export function getAllSeoServices(): SeoService[] {
   return SEO_SERVICES;
+}
+
+/**
+ * Locale-aware variant of `getAllSeoServices` — sostituisce `label` e
+ * `labelPlural` con la versione EN per il selettore matrix su pagine EN.
+ * Il `slug` / `urlPrefix` / `serviceDetailSlug` restano IT-canonical perché
+ * le pagine matrix sono IT-only (route guard EN su /sito-web-per-*).
+ */
+export function getAllSeoServicesLocalized(locale: Locale = 'it'): SeoService[] {
+  if (locale === 'it') return SEO_SERVICES;
+  return SEO_SERVICES.map((s) => ({
+    ...s,
+    label: SERVICE_LABELS_EN[s.slug]?.label ?? s.label,
+    labelPlural: SERVICE_LABELS_EN[s.slug]?.labelPlural ?? s.labelPlural,
+  }));
 }
 
 /** Check if a profession is valid for a given service */
@@ -161,21 +228,49 @@ export function getOtherServicesForProfession(profSlug: string, currentServiceSl
 }
 
 /**
- * Parse a URL segment like "e-commerce-per-dentisti-a-roma" into service + profession + city parts.
+ * Parse a URL segment like "e-commerce-per-dentisti-a-roma" (IT) or
+ * "e-commerce-for-dentists" (EN) into service + profession + city parts.
+ * Auto-detects locale via the prefix matched. La `remainder` ritornata è
+ * normalizzata a slug IT canonical (es. EN "lawyers" → IT "avvocati").
  * Returns null if no service prefix matches.
  */
-export function parseServiceUrl(rawSlug: string): { service: SeoService; remainder: string } | null {
-  // Sort prefixes by length desc to match longer first
-  const prefixes = SEO_SERVICES
-    .map(s => ({ prefix: s.urlPrefix, service: s }))
-    .sort((a, b) => b.prefix.length - a.prefix.length);
+export function parseServiceUrl(rawSlug: string): { service: SeoService; remainder: string; locale: Locale } | null {
+  // Combina prefissi IT + EN, ordinati per lunghezza desc (long-first match).
+  const candidates: Array<{ prefix: string; service: SeoService; locale: Locale }> = [];
+  for (const s of SEO_SERVICES) {
+    candidates.push({ prefix: s.urlPrefix, service: s, locale: 'it' });
+    const enPrefix = SERVICE_LABELS_EN[s.slug]?.urlPrefix;
+    if (enPrefix) candidates.push({ prefix: enPrefix, service: s, locale: 'en' });
+  }
+  candidates.sort((a, b) => b.prefix.length - a.prefix.length);
 
-  for (const { prefix, service } of prefixes) {
+  for (const { prefix, service, locale } of candidates) {
     if (rawSlug.startsWith(prefix + '-')) {
-      return {
-        service,
-        remainder: rawSlug.slice(prefix.length + 1), // +1 for the '-' after prefix
-      };
+      const remainderRaw = rawSlug.slice(prefix.length + 1);
+      // Su URL EN, prova a normalizzare la testa del remainder allo slug IT.
+      // Strategia: split greedy — il remainder contiene profession[-a-city].
+      // Tenta prima il match dell'intero remainder come EN profession slug,
+      // poi prova split su "-" progressivamente.
+      let remainder = remainderRaw;
+      if (locale === 'en') {
+        const itProfession = PROFESSION_SLUG_EN_TO_IT.get(remainderRaw);
+        if (itProfession) {
+          remainder = itProfession;
+        } else {
+          // Tenta split a "-" per gestire eventuali suffix (es. "lawyers-in-rome")
+          const parts = remainderRaw.split('-');
+          for (let i = parts.length; i > 0; i--) {
+            const head = parts.slice(0, i).join('-');
+            const tail = parts.slice(i).join('-');
+            const it = PROFESSION_SLUG_EN_TO_IT.get(head);
+            if (it) {
+              remainder = tail ? `${it}-${tail}` : it;
+              break;
+            }
+          }
+        }
+      }
+      return { service, remainder, locale };
     }
   }
   return null;
