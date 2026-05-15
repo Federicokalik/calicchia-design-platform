@@ -3,6 +3,7 @@
 // Niente prezzi pubblici (vincolo permanente).
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const ANALYTICS_SETUP_SERVICE: ServiceDetail = {
   slug: 'analytics-setup',
@@ -51,38 +52,7 @@ export const ANALYTICS_SETUP_SERVICE: ServiceDetail = {
     'Dashboard Looker Studio leggibile in 5 minuti, condivisa col team.',
     'Documentazione che evita \"ma cosa fa questo evento?\" nei mesi successivi.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Audit setup attuale',
-      description:
-        'Verifico GA4 esistente (se c\'è): tag duplicati, eventi spam, filtri sbagliati, conversioni rotte.\nIdentifico cosa salvare e cosa ricostruire.\nSpesso conviene partire da zero su GTM, mantenere GA4 property e ripulirla.'
-    },
-    {
-      step: 2,
-      title: 'Mappa eventi business-driven',
-      description:
-        'Sessione 30 minuti per capire cosa conta per te: macro-conversioni (purchase, lead form), micro-conversioni (add_to_cart, scroll 75%, time on key page), traffic sources critici.\nMappa eventi prima di toccare codice.'
-    },
-    {
-      step: 3,
-      title: 'Implementazione GTM + GA4',
-      description:
-        'Setup container GTM, configurazione tag analytics + Google Ads conversion + Meta CAPI (se serve), variables condivise, trigger sui touchpoint mappati.\nTest in preview mode per ogni evento.\nNiente push in production senza preview check.'
-    },
-    {
-      step: 4,
-      title: 'Consent Mode + GDPR',
-      description:
-        'Integrazione banner cookie con Consent Mode v2.\nTest che senza consenso i dati arrivano in modeled mode (Google ricostruisce le conversioni mancanti).\nTest che con consenso pieno tutto si attiva. Verifica con DebugView GA4.'
-    },
-    {
-      step: 5,
-      title: 'Dashboard + documentation + handoff',
-      description:
-        'Dashboard Looker Studio configurata sui KPI mappati.\nSpreadsheet di documentazione completo.\nSessione handoff 30 minuti per spiegarti come leggere la dashboard e quali numeri usare per decidere.\nNiente \"rimani da solo dopo\".'
-    }
-  ],
+  process: PROCESS_STEPS_IT,
   faqs: [
     {
       question: 'Universal Analytics è ancora utile?',

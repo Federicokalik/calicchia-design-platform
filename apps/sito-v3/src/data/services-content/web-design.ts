@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const WEB_DESIGN_SERVICE: ServiceDetail = {
   "slug": "web-design",
@@ -42,33 +43,7 @@ export const WEB_DESIGN_SERVICE: ServiceDetail = {
     "Asset tecnici impostati bene fin dal lancio.",
     "Un riferimento unico anche dopo la pubblicazione."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Analisi iniziale",
-      "description": "Guardo sito attuale, obiettivi, contenuti, dominio, hosting e tracciamenti.\nPrima si capisce dove si blocca tutto, poi si decide cosa rifare davvero."
-    },
-    {
-      "step": 2,
-      "title": "Struttura contenuti",
-      "description": "Definisco pagine, gerarchia, messaggi principali e percorsi di contatto.\nIl sito non nasce da una home bella: nasce da informazioni ordinate."
-    },
-    {
-      "step": 3,
-      "title": "Design operativo",
-      "description": "Creo un’interfaccia riconoscibile, coerente con il tuo settore e leggibile senza frasi gonfiate.\nOgni sezione deve avere un motivo preciso: informare, filtrare, portare al contatto."
-    },
-    {
-      "step": 4,
-      "title": "Sviluppo tecnico",
-      "description": "Costruisco il sito in WordPress o custom, con responsive, performance, SEO tecnica base, privacy, cookie e strumenti Google configurati."
-    },
-    {
-      "step": 5,
-      "title": "Lancio e cura",
-      "description": "Pubblico, controllo indicizzazione, form, analytics, console e dettagli tecnici.\nPoi resta attiva l’assistenza inclusa per dodici mesi."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Il mio sito è vecchio: conviene rifarlo o sistemarlo?",

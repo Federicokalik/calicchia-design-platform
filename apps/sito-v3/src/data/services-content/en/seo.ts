@@ -1,6 +1,7 @@
 // EN translation of seo.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const SEO_SERVICE_EN: ServiceDetail = {
   slug: 'seo',
@@ -49,38 +50,7 @@ export const SEO_SERVICE_EN: ServiceDetail = {
     "You see readable metrics, not screenshots without context.",
     "You build organic visibility without theatrical-agency promises."
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Initial analysis',
-      description:
-        "I gather access, GSC data, GA4, CMS, hosting and Google Business.\nIf data is missing, we say so right away. The first problem is often disorder."
-    },
-    {
-      step: 2,
-      title: 'Technical audit',
-      description:
-        'I check performance, crawl, indexing, errors, templates, duplicate content, schema and configurations.\nEvery issue gets ordered by real impact, not by stage decoration.'
-    },
-    {
-      step: 3,
-      title: 'Keyword map',
-      description:
-        "I build the keyword map based on services, territory, competition and search intents.\nEvery page has to have a role, otherwise it becomes noise."
-    },
-    {
-      step: 4,
-      title: 'Targeted interventions',
-      description:
-        "We fix pages, markup, content, internal linking, Google Business and citations.\nNo SEO rituals: only verifiable interventions on what blocks traffic and conversions."
-    },
-    {
-      step: 5,
-      title: 'Monthly check',
-      description:
-        "Every month we read rankings, queries, clicks, impressions, conversions and anomalies.\nIf a choice doesn't move anything, we change route. End of story."
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'Do you guarantee page one on Google?',

@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const MANUTENZIONE_SITI_SERVICE: ServiceDetail = {
   "slug": "manutenzione-siti",
@@ -42,33 +43,7 @@ export const MANUTENZIONE_SITI_SERVICE: ServiceDetail = {
     "Sai chi interviene quando il sito si rompe.",
     "Ricevi un quadro tecnico mensile chiaro e leggibile."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Audit iniziale",
-      "description": "Controllo CMS, hosting, plugin, dominio, SSL, backup esistenti e accessi.\nPrima di toccare qualcosa, si capisce quanto caos tecnico c’è davvero sotto il sito."
-    },
-    {
-      "step": 2,
-      "title": "Messa in sicurezza",
-      "description": "Si attivano backup, monitoring, alert e controlli base.\nLe credenziali vengono ordinate, i punti fragili segnati, le urgenze separate dai lavori rimandabili."
-    },
-    {
-      "step": 3,
-      "title": "Update controllati",
-      "description": "Aggiornamenti e patch vengono gestiti con attenzione, verificando compatibilità e impatto.\nIl punto non è aggiornare tutto a occhi chiusi: è non rompere produzione."
-    },
-    {
-      "step": 4,
-      "title": "Presidio mensile",
-      "description": "Ogni mese si controllano stato tecnico, uptime, errori, sicurezza e rinnovi.\nDominio e SSL non devono diventare emergenze perché qualcuno ha ignorato una mail."
-    },
-    {
-      "step": 5,
-      "title": "Intervento rapido",
-      "description": "Quando qualcosa si rompe, c’è un canale operativo e una priorità definita.\nDiagnosi, fix, verifica e nota finale. Niente staffette infinite tra fornitori."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Cosa succede se il sito va offline?",

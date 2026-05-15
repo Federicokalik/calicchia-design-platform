@@ -2,6 +2,7 @@
 // Voice anti-marketing preserved.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const WEB_DESIGN_SERVICE_EN: ServiceDetail = {
   slug: 'web-design',
@@ -50,38 +51,7 @@ export const WEB_DESIGN_SERVICE_EN: ServiceDetail = {
     'Technical assets set up properly from launch day.',
     'A single point of contact even after publication.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Initial analysis',
-      description:
-        "I look at the current site, goals, content, domain, hosting and tracking.\nFirst we understand where everything stalls, then we decide what to actually rebuild."
-    },
-    {
-      step: 2,
-      title: 'Content structure',
-      description:
-        "I define pages, hierarchy, main messages and contact paths.\nThe site doesn't start from a pretty homepage: it starts from organized information."
-    },
-    {
-      step: 3,
-      title: 'Operational design',
-      description:
-        "I build a recognizable interface, consistent with your industry and readable without inflated phrases.\nEvery section has to have a precise reason: inform, filter, lead to contact."
-    },
-    {
-      step: 4,
-      title: 'Technical development',
-      description:
-        'I build the site in WordPress or custom, with responsive, performance, base technical SEO, privacy, cookies and Google tools configured.'
-    },
-    {
-      step: 5,
-      title: 'Launch and care',
-      description:
-        'I publish, verify indexing, forms, analytics, Search Console and technical details.\nThen the included support stays active for twelve months.'
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'My site is old: should I rebuild it or fix it?',

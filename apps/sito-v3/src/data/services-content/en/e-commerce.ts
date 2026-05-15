@@ -1,6 +1,7 @@
 // EN translation of e-commerce.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const E_COMMERCE_SERVICE_EN: ServiceDetail = {
   slug: 'e-commerce',
@@ -49,38 +50,7 @@ export const E_COMMERCE_SERVICE_EN: ServiceDetail = {
     'You reduce abandoned carts from slow or confusing checkout.',
     'You prepare the catalog for Google Shopping and targeted campaigns.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Catalog analysis',
-      description:
-        "We start from products, variants, margins, shipping and sales modes.\nThe cart is designed around real work, not around the most convenient theme."
-    },
-    {
-      step: 2,
-      title: 'Stack choice',
-      description:
-        'WooCommerce or headless is decided on the case: number of products, integrations, internal management, performance and growth margin.\nNo platform chosen for fashion.'
-    },
-    {
-      step: 3,
-      title: 'Sales setup',
-      description:
-        'We configure catalog, payment gateway, shipping, taxes, transactional emails and cart recovery.\nEvery critical point gets tested before going live.'
-    },
-    {
-      step: 4,
-      title: 'Order testing',
-      description:
-        'We simulate at least 12 scenarios: purchases, errors, failed payments, sold-out variants, coupons, notifications and mobile orders.\nIf a customer can get stuck, we find out before launch.'
-    },
-    {
-      step: 5,
-      title: 'Controlled launch',
-      description:
-        "After go-live we monitor checkout, emails, carts, feeds and tracking.\nThe e-commerce doesn't get abandoned in the most delicate moment."
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'Better WooCommerce or headless e-commerce?',

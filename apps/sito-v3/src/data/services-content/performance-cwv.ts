@@ -3,6 +3,7 @@
 // Niente prezzi pubblici (vincolo permanente).
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const PERFORMANCE_CWV_SERVICE: ServiceDetail = {
   slug: 'performance-cwv',
@@ -51,38 +52,7 @@ export const PERFORMANCE_CWV_SERVICE: ServiceDetail = {
     'Il TTFB scende sotto 600ms, percepito istantaneo.',
     'Il report è leggibile da chi non è tecnico, con prima/dopo confrontabili.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Audit baseline',
-      description:
-        'Misuro lo stato attuale su 5-10 page critiche: home, lista prodotti/lavori, dettaglio, checkout (se e-commerce), landing principale.\nLighthouse + WebPageTest + CrUX.\nIdentifico i bottleneck per metrica.'
-    },
-    {
-      step: 2,
-      title: 'Diagnosi prioritaria',
-      description:
-        'Ordino i fix per impatto/effort.\nLCP è quasi sempre il primo target perché sblocca ranking. CLS e INP arrivano dopo.\nNiente refactor full-stack: solo fix che spostano l\'ago.'
-    },
-    {
-      step: 3,
-      title: 'Implementazione fix',
-      description:
-        'Applico i fix in ordine: image pipeline, font loading, render-blocking cleanup, JavaScript splitting, layout reservation.\nOgni fix viene testato in isolation per evitare regressioni.'
-    },
-    {
-      step: 4,
-      title: 'Verifica + re-audit',
-      description:
-        'Rimisuro su Lighthouse + WebPageTest.\nConfronto i numeri prima/dopo. Se una metrica non passa, identifico perché e itero.\nNiente \"abbiamo fatto del nostro meglio\": il check passa.'
-    },
-    {
-      step: 5,
-      title: 'Handoff + monitoring',
-      description:
-        'Consegna del report con numeri, snapshot delle waterfall, e checklist di manutenzione.\nSetup opzionale di un monitoring continuo (PageSpeed Insights API o equivalente) per intercettare regressioni prima che le veda Google.'
-    }
-  ],
+  process: PROCESS_STEPS_IT,
   faqs: [
     {
       question: 'Quanto tempo serve per far passare il check Core Web Vitals?',

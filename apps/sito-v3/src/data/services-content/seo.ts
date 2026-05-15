@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const SEO_SERVICE: ServiceDetail = {
   "slug": "seo",
@@ -42,33 +43,7 @@ export const SEO_SERVICE: ServiceDetail = {
     "Vedi metriche leggibili, non screenshot senza contesto.",
     "Costruisci visibilità organica senza promesse da agenzia teatrale."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Analisi iniziale",
-      "description": "Raccolgo accessi, dati GSC, GA4, CMS, hosting e Google Business.\nSe mancano dati, lo si dice subito. Il primo problema è spesso il disordine."
-    },
-    {
-      "step": 2,
-      "title": "Audit tecnico",
-      "description": "Controllo performance, crawl, indexing, errori, template, contenuti duplicati, schema e configurazioni.\nOgni criticità viene ordinata per impatto reale, non per scenografia."
-    },
-    {
-      "step": 3,
-      "title": "Mappa keyword",
-      "description": "Costruisco la mappa keyword in base a servizi, territorio, concorrenza e intenti di ricerca.\nOgni pagina deve avere un ruolo, altrimenti diventa rumore."
-    },
-    {
-      "step": 4,
-      "title": "Interventi mirati",
-      "description": "Si sistemano pagine, markup, contenuti, internal linking, Google Business e citation.\nNiente riti SEO: solo interventi verificabili su ciò che blocca traffico e conversioni."
-    },
-    {
-      "step": 5,
-      "title": "Controllo mensile",
-      "description": "Ogni mese si leggono ranking, query, clic, impression, conversioni e anomalie.\nSe una scelta non muove nulla, si cambia strada. Fine della storia."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Mi garantisci la prima pagina su Google?",

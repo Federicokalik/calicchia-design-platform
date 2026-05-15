@@ -1,6 +1,7 @@
 // EN translation of sviluppo-web.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const SVILUPPO_WEB_SERVICE_EN: ServiceDetail = {
   slug: 'sviluppo-web',
@@ -49,38 +50,7 @@ export const SVILUPPO_WEB_SERVICE_EN: ServiceDetail = {
     'Internal processes faster, measurable and easier to correct.',
     'Maintainable code without depending on random plugins.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Process mapping',
-      description:
-        "I start from real flows: who does what, where data gets lost, which steps get repeated by hand, which tools are creating friction."
-    },
-    {
-      step: 2,
-      title: 'Technical design',
-      description:
-        "I define architecture, database, roles, integrations, APIs and priorities.\nFirst clarify the system, then write code. Not the other way around."
-    },
-    {
-      step: 3,
-      title: 'Modular development',
-      description:
-        "I build in verifiable blocks: login, dashboard, workflow, integrations, automations.\nEach part gets tested on the real use case, not on a clean demo."
-    },
-    {
-      step: 4,
-      title: 'Operational testing',
-      description:
-        'I simulate data, errors, users, permissions and edge cases: duplicate requests, slow connections, wrong inputs, unauthorized roles.\nA web app has to handle dirty work, not just a clean demo.'
-    },
-    {
-      step: 5,
-      title: 'Controlled deployment',
-      description:
-        "Publication, monitoring, backups, logs and operational handoff.\nAfter launch nobody disappears: we measure, correct, keep the system under control."
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'When do I need a custom web app instead of an off-the-shelf SaaS?',

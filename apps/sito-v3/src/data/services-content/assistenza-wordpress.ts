@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const ASSISTENZA_WORDPRESS_SERVICE: ServiceDetail = {
   "slug": "assistenza-wordpress",
@@ -42,33 +43,7 @@ export const ASSISTENZA_WORDPRESS_SERVICE: ServiceDetail = {
     "Meno rischio di ricadute dopo aggiornamenti o interventi improvvisati.",
     "Report chiaro per decidere cosa tenere, cambiare o rimuovere."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Accesso sicuro",
-      "description": "Raccolgo accessi, sintomi, log disponibili e contesto tecnico.\nPrima di toccare file o database, si capisce dove può essere il danno."
-    },
-    {
-      "step": 2,
-      "title": "Diagnosi tecnica",
-      "description": "Analizzo malware, errori PHP, plugin, tema, performance, permessi e configurazione.\nIl problema viene isolato prima di aprire il cantiere."
-    },
-    {
-      "step": 3,
-      "title": "Intervento mirato",
-      "description": "Pulizia, ripristino, hardening, correzione conflitti o tuning vengono applicati in modo tracciabile.\nOgni modifica deve avere un motivo."
-    },
-    {
-      "step": 4,
-      "title": "Test post-fix",
-      "description": "Verifico admin, front-end, form, checkout se presente, HTTPS, login, caricamenti e console.\nUn sito riparato solo in apparenza non serve: dopo 20 minuti torna rotto e nessuno sa perché."
-    },
-    {
-      "step": 5,
-      "title": "Report finale",
-      "description": "Consegno riepilogo tecnico, cause probabili, interventi eseguiti e prossimi rischi.\nCosì la prossima decisione non parte dal buio."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Il mio sito WordPress mostra redirect strani: cosa devo fare subito?",

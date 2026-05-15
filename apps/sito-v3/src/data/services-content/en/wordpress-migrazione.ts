@@ -1,6 +1,7 @@
 // EN translation of wordpress-migrazione.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const WORDPRESS_MIGRAZIONE_SERVICE_EN: ServiceDetail = {
   slug: 'wordpress-migrazione',
@@ -49,38 +50,7 @@ export const WORDPRESS_MIGRAZIONE_SERVICE_EN: ServiceDetail = {
     'Redirects and links checked before Google finds errors.',
     'Fewer hand-offs between hosting, agency and technician.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Technical audit',
-      description:
-        "I check current hosting, site weight, plugins, DNS, SSL, redirects and SEO criticalities.\nFirst we understand where the system loses time, then we touch production."
-    },
-    {
-      step: 2,
-      title: 'Verified staging',
-      description:
-        "I create a copy on a separate environment with files, database, media and configurations.\nHere we run tests, corrections and measurements without risking the live site or losing orders during the switch."
-    },
-    {
-      step: 3,
-      title: 'New hosting',
-      description:
-        'I prepare server, PHP, database, cache, backups, SSL and main rules.\nThe site arrives on a base already prepared, not on a half-finished panel.'
-    },
-    {
-      step: 4,
-      title: 'Controlled switch',
-      description:
-        "I run final sync, freeze critical changes, update DNS and verify propagation.\nThe transition gets followed as it happens, not read about the next day."
-    },
-    {
-      step: 5,
-      title: 'Final tests',
-      description:
-        'I check pages, images, forms, redirects, speed, cache and certificates.\nThen I deliver technical notes and tidy access. End of story.'
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'Does the site stay online during migration?',

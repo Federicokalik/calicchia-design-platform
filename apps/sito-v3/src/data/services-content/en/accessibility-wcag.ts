@@ -1,6 +1,7 @@
 // EN translation of accessibility-wcag.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const ACCESSIBILITY_WCAG_SERVICE_EN: ServiceDetail = {
   slug: 'accessibility-wcag',
@@ -49,38 +50,7 @@ export const ACCESSIBILITY_WCAG_SERVICE_EN: ServiceDetail = {
     'The accessibility statement is linkable from the footer and demonstrates compliance.',
     'The site is auditable by third parties without fear.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Automatic + manual audit',
-      description:
-        'Scan with axe DevTools, WAVE, Lighthouse on 5-10 typical pages (home, list, detail, form, checkout).\nThen manual audit with NVDA + VoiceOver.\nReal violations emerge only by combining the two layers.'
-    },
-    {
-      step: 2,
-      title: 'Report + prioritization',
-      description:
-        'Map of violations divided by Level (A blocking, AA mandatory).\nFor each: how to reproduce, why it violates WCAG 2.1, specific criterion (e.g. SC 1.4.3 Contrast Minimum), proposed fix.\nNo alphabetical 200-item list: priority.'
-    },
-    {
-      step: 3,
-      title: 'Priority remediation',
-      description:
-        'I apply fixes in severity order.\nLevel A first (blocking — site unusable for those with disabilities).\nLevel AA after (mandatory for EAA compliance).\nLevel AAA optional, evaluated case by case.'
-    },
-    {
-      step: 4,
-      title: 'Re-audit + verification',
-      description:
-        'Automatic re-scan + manual re-test with screen reader. Pre/post comparison.\nIf a violation remains, documented decision: fixed, accepted with alternatives, deferred to Phase 2 with motivation.\nNo \"we did our best\".'
-    },
-    {
-      step: 5,
-      title: 'Statement + handoff',
-      description:
-        "Drafting of compliant accessibility statement.\nOperational checklist for the team that manages the site afterwards: how to verify new content, how to write sensible text alternatives, how to test before publishing.\nThe site stays accessible after my handoff too."
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'Is my site really required to be accessible?',

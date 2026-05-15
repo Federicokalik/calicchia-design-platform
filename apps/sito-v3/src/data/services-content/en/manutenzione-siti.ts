@@ -1,6 +1,7 @@
 // EN translation of manutenzione-siti.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const MANUTENZIONE_SITI_SERVICE_EN: ServiceDetail = {
   slug: 'manutenzione-siti',
@@ -49,38 +50,7 @@ export const MANUTENZIONE_SITI_SERVICE_EN: ServiceDetail = {
     'You know who intervenes when the site breaks.',
     'You receive a clear, readable monthly technical picture.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Initial audit',
-      description:
-        "I check CMS, hosting, plugins, domain, SSL, existing backups and access.\nBefore touching anything, we understand how much technical chaos is really under the site."
-    },
-    {
-      step: 2,
-      title: 'Securing the foundation',
-      description:
-        'Backups, monitoring, alerts and base checks get activated.\nCredentials get organized, fragile points marked, urgencies separated from deferrable work.'
-    },
-    {
-      step: 3,
-      title: 'Controlled updates',
-      description:
-        "Updates and patches get handled with attention, verifying compatibility and impact.\nThe point isn't to update everything blindly: it's not breaking production."
-    },
-    {
-      step: 4,
-      title: 'Monthly oversight',
-      description:
-        "Every month we check technical state, uptime, errors, security and renewals.\nDomain and SSL shouldn't become emergencies because somebody ignored an email."
-    },
-    {
-      step: 5,
-      title: 'Rapid intervention',
-      description:
-        'When something breaks, there\'s an operational channel and defined priority.\nDiagnosis, fix, verification, final note. No endless relay races between providers.'
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'What happens if the site goes offline?',

@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const WORDPRESS_MIGRAZIONE_SERVICE: ServiceDetail = {
   "slug": "wordpress-migrazione",
@@ -42,33 +43,7 @@ export const WORDPRESS_MIGRAZIONE_SERVICE: ServiceDetail = {
     "Redirect e link controllati prima che Google trovi errori.",
     "Meno passaggi di mano tra hosting, agenzia e tecnico."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Audit tecnico",
-      "description": "Controllo hosting attuale, peso del sito, plugin, DNS, SSL, redirect e criticità SEO.\nPrima si capisce dove il sistema perde tempo, poi si tocca produzione."
-    },
-    {
-      "step": 2,
-      "title": "Staging verificato",
-      "description": "Creo una copia su ambiente separato con file, database, media e configurazioni.\nQui si fanno prove, correzioni e misure senza mettere a rischio il sito live o perdere ordini durante il cambio."
-    },
-    {
-      "step": 3,
-      "title": "Hosting nuovo",
-      "description": "Preparo server, PHP, database, cache, backup, SSL e regole principali.\nIl sito arriva su una base già pronta, non su un pannello lasciato a metà."
-    },
-    {
-      "step": 4,
-      "title": "Cambio controllato",
-      "description": "Eseguo sincronizzazione finale, blocco modifiche critiche, aggiorno DNS e verifico propagazione.\nIl passaggio viene seguito mentre accade, non letto il giorno dopo."
-    },
-    {
-      "step": 5,
-      "title": "Test finali",
-      "description": "Controllo pagine, immagini, form, redirect, velocità, cache e certificati.\nPoi consegno note tecniche e accessi ordinati. Fine della storia."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Il sito resta online durante la migrazione?",

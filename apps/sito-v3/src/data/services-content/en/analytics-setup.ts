@@ -1,6 +1,7 @@
 // EN translation of analytics-setup.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const ANALYTICS_SETUP_SERVICE_EN: ServiceDetail = {
   slug: 'analytics-setup',
@@ -49,38 +50,7 @@ export const ANALYTICS_SETUP_SERVICE_EN: ServiceDetail = {
     'Looker Studio dashboard readable in 5 minutes, shared with the team.',
     'Documentation that avoids \"but what does this event do?\" in the months after.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Current setup audit',
-      description:
-        "I verify existing GA4 (if any): duplicate tags, spam events, wrong filters, broken conversions.\nI identify what to save and what to rebuild.\nOften it's worth starting from scratch on GTM, keeping GA4 property and cleaning it."
-    },
-    {
-      step: 2,
-      title: 'Business-driven event map',
-      description:
-        '30-minute session to understand what matters to you: macro-conversions (purchase, lead form), micro-conversions (add_to_cart, scroll 75%, time on key page), critical traffic sources.\nMap events before touching code.'
-    },
-    {
-      step: 3,
-      title: 'GTM + GA4 implementation',
-      description:
-        'GTM container setup, analytics tag configuration + Google Ads conversion + Meta CAPI (if needed), shared variables, triggers on mapped touchpoints.\nTest in preview mode for every event.\nNo push to production without preview check.'
-    },
-    {
-      step: 4,
-      title: 'Consent Mode + GDPR',
-      description:
-        "Cookie banner integration with Consent Mode v2.\nTest that without consent data arrives in modeled mode (Google reconstructs missing conversions).\nTest that with full consent everything activates. Verify with GA4 DebugView."
-    },
-    {
-      step: 5,
-      title: 'Dashboard + documentation + handoff',
-      description:
-        'Looker Studio dashboard configured on mapped KPIs.\nComplete documentation spreadsheet.\n30-minute handoff session to explain how to read the dashboard and which numbers to use to decide.\nNo \"you stay alone after\".'
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'Is Universal Analytics still useful?',

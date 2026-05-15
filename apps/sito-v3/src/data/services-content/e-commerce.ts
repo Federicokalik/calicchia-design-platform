@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const E_COMMERCE_SERVICE: ServiceDetail = {
   "slug": "e-commerce",
@@ -42,33 +43,7 @@ export const E_COMMERCE_SERVICE: ServiceDetail = {
     "Riduci carrelli persi per checkout lento o confuso.",
     "Prepari il catalogo per Google Shopping e campagne mirate."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Analisi catalogo",
-      "description": "Si parte da prodotti, varianti, margini, spedizioni e modalità di vendita.\nIl carrello viene progettato intorno al lavoro reale, non intorno al tema più comodo."
-    },
-    {
-      "step": 2,
-      "title": "Scelta stack",
-      "description": "WooCommerce o headless si decide sul caso: numero prodotti, integrazioni, gestione interna, performance e margine di crescita.\nNessuna piattaforma scelta per moda."
-    },
-    {
-      "step": 3,
-      "title": "Setup vendita",
-      "description": "Si configurano catalogo, gateway pagamento, spedizioni, tasse, email transazionali e recupero carrello.\nOgni punto critico viene provato prima di andare online."
-    },
-    {
-      "step": 4,
-      "title": "Test ordini",
-      "description": "Si simulano almeno 12 scenari: acquisti, errori, pagamenti falliti, varianti esaurite, coupon, notifiche e ordini da mobile.\nSe un cliente può bloccarsi, lo scopriamo prima del lancio."
-    },
-    {
-      "step": 5,
-      "title": "Lancio controllato",
-      "description": "Dopo il go-live si monitorano checkout, email, carrelli, feed e tracciamenti.\nL’e-commerce non viene abbandonato nel momento più delicato."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Meglio WooCommerce o un e-commerce headless?",

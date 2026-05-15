@@ -2,6 +2,7 @@
 // Do not edit by hand; regenerate via the script for full coherence.
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const SVILUPPO_WEB_SERVICE: ServiceDetail = {
   "slug": "sviluppo-web",
@@ -42,33 +43,7 @@ export const SVILUPPO_WEB_SERVICE: ServiceDetail = {
     "Processi interni più rapidi, misurabili e facili da correggere.",
     "Codice mantenibile senza dipendere da plugin casuali."
   ],
-  "process": [
-    {
-      "step": 1,
-      "title": "Mappa processi",
-      "description": "Parto dai flussi reali: chi fa cosa, dove si perdono dati, quali passaggi vengono ripetuti a mano e quali tool stanno creando attrito."
-    },
-    {
-      "step": 2,
-      "title": "Disegno tecnico",
-      "description": "Definisco architettura, database, ruoli, integrazioni, API e priorità.\nPrima si chiarisce il sistema, poi si scrive codice. Non il contrario."
-    },
-    {
-      "step": 3,
-      "title": "Sviluppo modulare",
-      "description": "Costruisco per blocchi verificabili: login, dashboard, workflow, integrazioni, automazioni.\nOgni parte viene testata sul caso d’uso reale, non su una demo pulita."
-    },
-    {
-      "step": 4,
-      "title": "Test operativi",
-      "description": "Simulo dati, errori, utenti, permessi e casi limite: richieste doppie, connessioni lente, input sbagliati, ruoli non autorizzati.\nUna web app deve reggere il lavoro sporco, non solo una demo pulita."
-    },
-    {
-      "step": 5,
-      "title": "Deploy controllato",
-      "description": "Pubblicazione, monitoraggio, backup, log e passaggio operativo.\nDopo il lancio non sparisce nessuno: si misura, si corregge, si mantiene il sistema sotto controllo."
-    }
-  ],
+  "process": PROCESS_STEPS_IT,
   "faqs": [
     {
       "question": "Quando serve una web app custom invece di un SaaS già pronto?",

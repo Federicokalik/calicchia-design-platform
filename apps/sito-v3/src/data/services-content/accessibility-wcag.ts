@@ -4,6 +4,7 @@
 // Niente prezzi pubblici (vincolo permanente).
 
 import type { ServiceDetail } from '../services-detail';
+import { PROCESS_STEPS_IT } from './_shared/process';
 
 export const ACCESSIBILITY_WCAG_SERVICE: ServiceDetail = {
   slug: 'accessibility-wcag',
@@ -52,38 +53,7 @@ export const ACCESSIBILITY_WCAG_SERVICE: ServiceDetail = {
     'L\'accessibility statement è linkabile dal footer e dimostra compliance.',
     'Il sito è auditabile da terze parti senza paura.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Audit automatico + manuale',
-      description:
-        'Scan con axe DevTools, WAVE, Lighthouse su 5-10 page tipo (home, lista, dettaglio, form, checkout).\nPoi audit manuale con NVDA + VoiceOver.\nLe violazioni reali emergono solo unendo i due strati.'
-    },
-    {
-      step: 2,
-      title: 'Report + prioritizzazione',
-      description:
-        'Mappa delle violazioni divise per Level (A blocking, AA mandatory).\nPer ognuna: come riprodurla, perché viola WCAG 2.1, criterio specifico (es. SC 1.4.3 Contrast Minimum), fix proposto.\nNiente lista da 200 voci alfabetiche: priorità.'
-    },
-    {
-      step: 3,
-      title: 'Remediation prioritaria',
-      description:
-        'Applico i fix in ordine di severity.\nLevel A prima (blocking — sito non utilizzabile da chi ha disabilità).\nLevel AA dopo (mandatory per EAA compliance).\nLevel AAA opzionale, valutato caso per caso.'
-    },
-    {
-      step: 4,
-      title: 'Re-audit + verifica',
-      description:
-        'Riscan automatico + ri-test manuale con screen reader. Confronto pre/post.\nSe una violazione resta, decisione documentata: fixata, accettata con alternative, deferred a Phase 2 con motivazione.\nNiente \"abbiamo fatto del nostro meglio\".'
-    },
-    {
-      step: 5,
-      title: 'Statement + handoff',
-      description:
-        'Redazione dell\'accessibility statement conforme.\nChecklist operativa per il team che gestisce il sito dopo: come verificare un nuovo contenuto, come scrivere alternative testuali sensate, come testare prima di pubblicare.\nIl sito resta accessibile anche dopo il mio handoff.'
-    }
-  ],
+  process: PROCESS_STEPS_IT,
   faqs: [
     {
       question: 'Il mio sito è davvero obbligato a essere accessibile?',

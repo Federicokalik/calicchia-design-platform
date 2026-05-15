@@ -1,6 +1,7 @@
 // EN translation of performance-cwv.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const PERFORMANCE_CWV_SERVICE_EN: ServiceDetail = {
   slug: 'performance-cwv',
@@ -49,38 +50,7 @@ export const PERFORMANCE_CWV_SERVICE_EN: ServiceDetail = {
     'TTFB drops below 600ms, perceived as instant.',
     'The report is readable by non-technical people, with comparable before/after.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Baseline audit',
-      description:
-        "I measure current state on 5-10 critical pages: home, products/work list, detail, checkout (if e-commerce), main landing.\nLighthouse + WebPageTest + CrUX.\nI identify bottlenecks per metric."
-    },
-    {
-      step: 2,
-      title: 'Priority diagnosis',
-      description:
-        "I order fixes by impact/effort.\nLCP is almost always the first target because it unlocks ranking. CLS and INP come later.\nNo full-stack refactor: only fixes that move the needle."
-    },
-    {
-      step: 3,
-      title: 'Fix implementation',
-      description:
-        'I apply fixes in order: image pipeline, font loading, render-blocking cleanup, JavaScript splitting, layout reservation.\nEvery fix gets tested in isolation to avoid regressions.'
-    },
-    {
-      step: 4,
-      title: 'Verification + re-audit',
-      description:
-        "I re-measure on Lighthouse + WebPageTest.\nCompare numbers before/after. If a metric doesn't pass, I identify why and iterate.\nNo \"we did our best\": the check passes."
-    },
-    {
-      step: 5,
-      title: 'Handoff + monitoring',
-      description:
-        'Delivery of report with numbers, waterfall snapshots and maintenance checklist.\nOptional setup of continuous monitoring (PageSpeed Insights API or equivalent) to catch regressions before Google sees them.'
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'How long does it take to pass the Core Web Vitals check?',

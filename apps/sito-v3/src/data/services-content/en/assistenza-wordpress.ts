@@ -1,6 +1,7 @@
 // EN translation of assistenza-wordpress.ts — Round 5a manual continuation.
 
 import type { ServiceDetail } from '../../services-detail';
+import { PROCESS_STEPS_EN } from '../_shared/process';
 
 export const ASSISTENZA_WORDPRESS_SERVICE_EN: ServiceDetail = {
   slug: 'assistenza-wordpress',
@@ -49,38 +50,7 @@ export const ASSISTENZA_WORDPRESS_SERVICE_EN: ServiceDetail = {
     'Less risk of relapses after updates or improvised interventions.',
     'Clear report to decide what to keep, change, or remove.'
   ],
-  process: [
-    {
-      step: 1,
-      title: 'Secure access',
-      description:
-        "I gather access, symptoms, available logs and technical context.\nBefore touching files or database, we understand where the damage might be."
-    },
-    {
-      step: 2,
-      title: 'Technical diagnosis',
-      description:
-        'I analyze malware, PHP errors, plugins, theme, performance, permissions and configuration.\nThe problem gets isolated before the construction site opens.'
-    },
-    {
-      step: 3,
-      title: 'Targeted intervention',
-      description:
-        "Cleanup, restore, hardening, conflict correction or tuning get applied in a traceable way.\nEvery change has to have a reason."
-    },
-    {
-      step: 4,
-      title: 'Post-fix testing',
-      description:
-        "I verify admin, front-end, forms, checkout if present, HTTPS, login, uploads and console.\nA site repaired only in appearance is useless: after 20 minutes it's broken again and nobody knows why."
-    },
-    {
-      step: 5,
-      title: 'Final report',
-      description:
-        "I deliver technical summary, probable causes, executed interventions and next risks.\nSo the next decision doesn't start in the dark."
-    }
-  ],
+  process: PROCESS_STEPS_EN,
   faqs: [
     {
       question: 'My WordPress site shows strange redirects: what do I do right now?',
