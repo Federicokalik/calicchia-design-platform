@@ -11,9 +11,6 @@ interface CaseQuoteProps {
  * Bierut purist: niente big quote-mark ornamentale, niente SplitText
  * line-reveal, niente decorativismo. La quote È il visual; la sua
  * tipografia gigante + attribution mono è il pattern sufficiente.
- *
- * Server component — fade-in entry minimal via CSS .case-fade-in
- * (reduced-motion guard incluso).
  */
 export async function CaseQuote({ quote, attribution }: CaseQuoteProps) {
   const t = await getTranslations('lavori.detail');
@@ -28,7 +25,7 @@ export async function CaseQuote({ quote, attribution }: CaseQuoteProps) {
           {t('clientVoice')}
         </p>
         <p
-          className="case-fade-in md:col-span-9 font-[family-name:var(--font-display)]"
+          className="md:col-span-9 font-[family-name:var(--font-display)]"
           style={{
             fontSize: 'clamp(2rem, 4.6vw, 4rem)',
             fontWeight: 500,

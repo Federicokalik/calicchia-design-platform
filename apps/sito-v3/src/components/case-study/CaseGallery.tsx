@@ -14,9 +14,6 @@ interface CaseGalleryProps {
  * niente cinematica scroll-tied. Le immagini stanno ferme — il visual si
  * costruisce dall'alternanza dei col-span (8/4/7) e dallo whitespace
  * intenzionale tra tile.
- *
- * Server component — fade-in entry minimal via CSS .case-fade-in
- * (reduced-motion guard incluso).
  */
 export async function CaseGallery({ section, index = '06' }: CaseGalleryProps) {
   const t = await getTranslations('lavori.detail');
@@ -42,8 +39,7 @@ export async function CaseGallery({ section, index = '06' }: CaseGalleryProps) {
           return (
             <figure
               key={a.src + idx}
-              className={`case-fade-in relative overflow-hidden ${layouts[idx % layouts.length]}`}
-              style={{ animationDelay: `${idx * 60}ms` }}
+              className={`relative overflow-hidden ${layouts[idx % layouts.length]}`}
             >
               <div
                 className="aspect-[16/10] overflow-hidden"

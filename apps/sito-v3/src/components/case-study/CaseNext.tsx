@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { Section } from '@/components/ui/Section';
 import type { Project } from '@/data/types';
 
@@ -15,8 +15,6 @@ interface CaseNextProps {
  *
  * v1: when next === current (self-loop) we render the "back to all" CTA
  * instead — avoids dead-link feeling on solo-project showcase.
- *
- * Server component — fade-in entry minimal via CSS .case-fade-in.
  */
 export async function CaseNext({ next }: CaseNextProps) {
   const t = await getTranslations('lavori.detail');
@@ -40,7 +38,7 @@ export async function CaseNext({ next }: CaseNextProps) {
             className="group block"
           >
             <h2
-              className="case-fade-in font-[family-name:var(--font-display)]"
+              className="font-[family-name:var(--font-display)]"
               style={{
                 fontSize: 'var(--text-display-xl)',
                 fontWeight: 500,

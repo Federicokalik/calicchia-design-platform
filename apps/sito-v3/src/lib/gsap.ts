@@ -9,7 +9,6 @@
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { SplitText } from 'gsap/SplitText';
 import { Flip } from 'gsap/Flip';
 import { Observer } from 'gsap/Observer';
 
@@ -20,10 +19,10 @@ declare global {
 }
 
 if (typeof window !== 'undefined' && !window.__gsap_registered) {
-  gsap.registerPlugin(useGSAP, ScrollTrigger, SplitText, Flip, Observer);
+  gsap.registerPlugin(useGSAP, ScrollTrigger, Flip, Observer);
   // Project-wide tween defaults — keep micro-interactions in 150–300ms band per UX guidelines.
   gsap.defaults({ duration: 0.6, ease: 'power2.out' });
   window.__gsap_registered = true;
 }
 
-export { gsap, useGSAP, ScrollTrigger, SplitText, Flip, Observer };
+export { gsap, useGSAP, ScrollTrigger, Flip, Observer };

@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Link } from '@/i18n/navigation';
 
 interface Props {
   href: string;
