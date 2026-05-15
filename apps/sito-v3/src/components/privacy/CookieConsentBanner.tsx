@@ -99,7 +99,7 @@ export function CookieConsentBanner() {
       aria-label="Preferenze cookie"
       className="fixed inset-0 z-[120] flex items-center justify-center px-4 py-6"
     >
-      <div className="absolute inset-0 bg-[rgba(10,10,9,0.72)] backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-[var(--color-scrim)]" />
       <div
         className="relative w-full max-w-[720px] border p-6 md:p-8"
         style={{

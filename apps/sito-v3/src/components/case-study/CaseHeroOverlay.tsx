@@ -100,9 +100,8 @@ export async function CaseHeroOverlay({
             <span
               className="inline-block px-2.5 py-1 rounded-full"
               style={{
-                background: 'rgba(255,255,255,0.14)',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
+                background: 'var(--color-ink)',
+                border: '1px solid var(--color-border-inverse)',
               }}
             >
               {t('caseStudy')}

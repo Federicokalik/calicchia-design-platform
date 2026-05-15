@@ -383,17 +383,15 @@ export function MorphTicker() {
           onClick={() => setPhase('active')}
           className="inline-flex items-center gap-3 px-5 py-3 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/40"
           style={{
-            background: 'rgba(17, 17, 17, 0.92)',
+            background: 'var(--color-ink)',
             color: '#FAFAF7',
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(0.85rem, 1vw, 1rem)',
             fontWeight: 500,
             letterSpacing: '-0.005em',
             lineHeight: 1,
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(250, 250, 247, 0.12)',
-            boxShadow: '0 8px 30px rgba(17, 17, 17, 0.18)',
+            border: '1px solid var(--color-border-inverse)',
+            boxShadow: 'var(--color-shadow-elevated)',
             borderRadius: 2,
             minHeight: 44,
             animation: 'caldes-morph-pop 0.4s ease-out',
@@ -427,13 +425,11 @@ export function MorphTicker() {
           aria-label={t('dismissLabel')}
           className="inline-flex items-center justify-center w-9 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-white/40 transition-opacity opacity-50 hover:opacity-100"
           style={{
-            background: 'rgba(17, 17, 17, 0.92)',
+            background: 'var(--color-ink)',
             color: '#FAFAF7',
-            border: '1px solid rgba(250, 250, 247, 0.12)',
+            border: '1px solid var(--color-border-inverse)',
             borderLeft: '1px solid rgba(250, 250, 247, 0.06)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            boxShadow: '0 8px 30px rgba(17, 17, 17, 0.18)',
+            boxShadow: 'var(--color-shadow-elevated)',
             borderRadius: 2,
             minHeight: 44,
           }}
@@ -452,17 +448,15 @@ export function MorphTicker() {
           <div
             className="relative inline-flex items-stretch whitespace-nowrap"
             style={{
-              background: 'rgba(17, 17, 17, 0.92)',
+              background: 'var(--color-ink)',
               color: '#FAFAF7',
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(0.85rem, 1vw, 1rem)',
               fontWeight: 500,
               letterSpacing: '-0.005em',
               lineHeight: 1,
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              border: '1px solid rgba(250, 250, 247, 0.12)',
-              boxShadow: '0 8px 30px rgba(17, 17, 17, 0.18)',
+              border: '1px solid var(--color-border-inverse)',
+              boxShadow: 'var(--color-shadow-elevated)',
               borderRadius: 2,
               minHeight: 48,
             }}
@@ -821,9 +815,9 @@ function FullWidthMenu({ children }: { children: React.ReactNode }) {
       className="absolute left-0 right-0 caldes-menu-scroll"
       style={{
         bottom: 'calc(100% + 12px)',
-        background: '#111111',
-        border: '1px solid rgba(250, 250, 247, 0.12)',
-        boxShadow: '0 12px 40px rgba(17, 17, 17, 0.35)',
+        background: 'var(--color-ink)',
+        border: '1px solid var(--color-border-inverse)',
+        boxShadow: 'var(--color-shadow-elevated)',
         borderRadius: 2,
         zIndex: 60,
         maxHeight: 'min(60vh, 480px)',
@@ -970,7 +964,7 @@ function MobileMatrixSheet({
         tabIndex={-1}
         className="absolute inset-0"
         style={{
-          background: 'rgba(17, 17, 17, 0.45)',
+          background: 'var(--color-scrim)',
           animation: 'caldes-fade-in 200ms ease-out',
         }}
       />
@@ -980,9 +974,9 @@ function MobileMatrixSheet({
         ref={sheetRef}
         className="absolute inset-x-0 bottom-0 flex flex-col"
         style={{
-          background: '#111111',
+          background: 'var(--color-ink)',
           color: '#FAFAF7',
-          borderTop: '1px solid rgba(250, 250, 247, 0.12)',
+          borderTop: '1px solid var(--color-border-inverse)',
           maxHeight: 'min(88vh, 760px)',
           animation: 'caldes-sheet-up 280ms cubic-bezier(0.16, 1, 0.3, 1)',
         }}

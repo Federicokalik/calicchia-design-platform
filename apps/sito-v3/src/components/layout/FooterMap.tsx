@@ -239,9 +239,8 @@ export function FooterMap() {
       <div
         className="absolute left-4 right-4 top-4 flex flex-col gap-1 border p-4 md:flex-row md:items-center md:justify-between"
         style={{
-          background: 'rgba(17,17,15,0.86)',
-          borderColor: 'rgba(250,250,247,0.14)',
-          backdropFilter: 'blur(10px)',
+          background: 'var(--color-ink)',
+          borderColor: 'var(--color-border-inverse)',
         }}
       >
         <div>

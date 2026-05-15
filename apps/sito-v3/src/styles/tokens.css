@@ -59,6 +59,15 @@
   --color-cta-fg: var(--color-accent-ink);
   --color-focus: var(--color-ink);
 
+  /* Surfaces on dark — hairline borders, elevation shadow, modal scrim.
+     Centralize the magic-number rgba values previously hardcoded inline in
+     MorphTicker / FooterMap / CookieConsent. Glassmorph (backdrop-filter) is
+     intentionally NOT a token: it was removed sitewide for Swiss coherence
+     (decisione 2026-05-16). */
+  --color-border-inverse: rgba(250, 250, 247, 0.12);
+  --color-shadow-elevated: 0 8px 30px rgba(17, 17, 17, 0.18);
+  --color-scrim: rgba(17, 17, 17, 0.72);
+
   /* Motion durations — paired with --ease-* above. Kept in sync with
      `src/lib/motion-tokens.ts` (JS exports for GSAP). */
   --motion-micro: 180ms;

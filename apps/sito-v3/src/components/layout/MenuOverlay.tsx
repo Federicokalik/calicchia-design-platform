@@ -357,7 +357,7 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
           <aside
             data-band="right"
             className="caldes-menu-band border-t lg:border-l lg:border-t-0"
-            style={{ borderColor: 'rgba(250,250,247,0.12)', background: '#11110F' }}
+            style={{ borderColor: 'var(--color-border-inverse)', background: 'var(--color-ink)' }}
           >
             <div className="flex flex-col px-6 pb-12 pt-8 md:px-10 lg:px-10 lg:pt-32">
               <div data-menu-panel className="border-y py-6" style={{ borderColor: 'rgba(250,250,247,0.14)' }}>
