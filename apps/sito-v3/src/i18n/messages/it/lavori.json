@@ -25,20 +25,13 @@
       "publishedPrefix": "Lavoro pubblicato"
     },
     "next": "Prossimo progetto",
-    "prev": "Progetto precedente",
     "outcome": "Risultati",
-    "challenge": "La sfida",
-    "approach": "Approccio",
-    "stack": "Stack tecnico",
     "breadcrumbHome": "Home",
     "breadcrumbLavori": "Lavori",
     "backToAll": "Tutti i lavori",
     "caseStudy": "Case study",
-    "client": "Cliente",
-    "tagLabel": "Tag",
-    "context": "Il contesto",
-    "overview": "Overview",
-    "challengeFallbackHeading": "Quello che andava risolto.",
+    "brief": "Brief",
+    "briefHeading": "Cosa abbiamo fatto, in breve.",
     "clientVoice": "Voce del cliente",
     "seeMore": "Vuoi vederne altri?",
     "allProjects": "Tutti i lavori",
@@ -46,8 +39,6 @@
     "goToCaseStudy": "Vai al case study",
     "beforeAfterHeading": "Prima e dopo, in numeri.",
     "numbersHeading": "I numeri parlano.",
-    "gallery": "Galleria",
-    "longformTitle": "Approfondimento",
-    "longformHeading": "Note dietro al progetto"
+    "gallery": "Galleria"
   }
 }

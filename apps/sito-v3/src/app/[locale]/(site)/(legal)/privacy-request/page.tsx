@@ -6,20 +6,23 @@ import { MonoLabel } from '@/components/ui/MonoLabel';
 import { PrivacyRequestForm } from '@/components/forms/PrivacyRequestForm';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
+import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 
+// Pagina IT-only (route guard blocca /en/privacy-request con 404). No hreflang.
 export const metadata: Metadata = {
   title: {
     absolute: 'Richiesta dati personali · GDPR',
   },
   description:
     "Esercita i tuoi diritti GDPR: accesso, cancellazione, portabilità, rettifica, opposizione, limitazione del trattamento. Risposta entro 30 giorni come previsto dall'art. 12 GDPR.",
-  alternates: { canonical: '/privacy-request' },
+  alternates: { canonical: buildCanonical('/privacy-request', 'it') },
   robots: { index: false, follow: true },
   openGraph: {
     title: 'Richiesta dati personali · GDPR',
     description:
       "Esercita i tuoi diritti GDPR (accesso, cancellazione, portabilità, rettifica, opposizione, limitazione).",
-    url: '/privacy-request',
+    url: buildCanonical('/privacy-request', 'it'),
+    ...buildOgLocale('it'),
   },
 };
 

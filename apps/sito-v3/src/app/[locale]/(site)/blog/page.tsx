@@ -4,7 +4,7 @@ import { fetchBlogList } from '@/lib/blog-api';
 import { BlogList } from '@/components/blog/BlogList';
 import { PageHero } from '@/components/layout/PageHero';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('blog.list.metadata');
@@ -22,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/blog', locale),
+      ...buildOgLocale(locale),
     },
   };
 }
@@ -40,7 +41,6 @@ export default async function BlogIndexPage() {
         eyebrow={t('eyebrowWithCount', { count: posts.length })}
         title={t('pageTitle')}
         intro={t('pageLead')}
-        trustBadge={false}
       />
 
       <section className="px-6 md:px-10 lg:px-14 pb-32 max-w-[1600px] mx-auto">

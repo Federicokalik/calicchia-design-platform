@@ -6,9 +6,11 @@ import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvide
 import { ViewTransitionsBootstrap } from '@/components/providers/ViewTransitionsBootstrap';
 import { MorphTicker } from '@/components/layout/MorphTicker';
 import { LanguagePromptBanner } from '@/components/layout/LanguagePromptBanner';
+import { AvailabilityTopbar } from '@/components/layout/AvailabilityTopbar';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { personSchema, localBusinessSchema, websiteSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
+import type { Locale } from '@/lib/i18n';
 import './globals.css';
 
 // next/font/local — Funnel Display + Funnel Sans self-hosted con preload
@@ -88,7 +90,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Locale + messages letti da next-intl (configurato in src/i18n/request.ts).
   // `getLocale()` legge il segment `[locale]` del path corrente o default.
-  const locale = await getLocale();
+  const locale = (await getLocale()) as Locale;
   const messages = await getMessages();
 
   return (
@@ -105,9 +107,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Schema globali — Person, ProfessionalService (LocalBusiness),
             WebSite. Iniettati una volta sola per tutto il sito; le pagine
             specifiche aggiungono i propri schemi (Article, FAQPage, Breadcrumb). */}
-        <StructuredData json={[personSchema(), localBusinessSchema(), websiteSchema()]} />
+        <StructuredData json={[personSchema(locale), localBusinessSchema({ locale }), websiteSchema(locale)]} />
 
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <AvailabilityTopbar />
           <LanguagePromptBanner />
           <SmoothScrollProvider>
             <ViewTransitionsBootstrap />

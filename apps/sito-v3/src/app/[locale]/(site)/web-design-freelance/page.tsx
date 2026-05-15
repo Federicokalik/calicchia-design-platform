@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { getLocale } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { StructuredData } from '@/components/seo/StructuredData';
 import {
@@ -19,7 +19,7 @@ import {
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -36,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         'Cosa fa, quanto costa, come riconoscerlo. Niente fumo, niente promesse vuote.',
       url: buildCanonical('/web-design-freelance', locale),
+      ...buildOgLocale(locale),
     },
   };
 }

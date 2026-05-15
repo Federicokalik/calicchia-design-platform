@@ -63,3 +63,22 @@ export function buildI18nAlternates(
     languages,
   };
 }
+
+/**
+ * OpenGraph locale tag (OG spec: `og:locale` BCP47-ish like `it_IT`, `en_US`)
+ * plus the cross-locale alternate list. Spread into `openGraph` of a page's
+ * `generateMetadata()` to make per-page OG locale-aware.
+ *
+ * Example:
+ *   buildOgLocale('en') -> { locale: 'en_US', alternateLocale: ['it_IT'] }
+ */
+export function buildOgLocale(locale: Locale = DEFAULT_LOCALE): {
+  locale: string;
+  alternateLocale: string[];
+} {
+  const tagOf = (l: Locale): string => (l === 'en' ? 'en_US' : 'it_IT');
+  return {
+    locale: tagOf(locale),
+    alternateLocale: LOCALES.filter((l) => l !== locale).map((l) => tagOf(l as Locale)),
+  };
+}

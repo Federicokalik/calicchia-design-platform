@@ -18,7 +18,7 @@ import { breadcrumbSchema, faqPageSchema } from '@/data/structured-data';
 import { getPerchiFaqs } from '@/data/perchi-faqs';
 import { getServices } from '@/data/services';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('perche.metadata');
@@ -34,6 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/perche-scegliere-me', locale),
+      ...buildOgLocale(locale),
     },
   };
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 import { Hero } from '@/components/home/Hero';
 import { PortraitBlock } from '@/components/home/PortraitBlock';
 import { WorksHorizontal } from '@/components/home/WorksHorizontal';
@@ -30,6 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/', locale),
+      ...buildOgLocale(locale),
     },
   };
 }

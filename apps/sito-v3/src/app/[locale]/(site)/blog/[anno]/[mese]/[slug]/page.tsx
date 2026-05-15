@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
 import type { Metadata } from 'next';
+import { Link } from '@/i18n/navigation';
 import { fetchBlogArticle, buildBlogUrl, fetchBlogList } from '@/lib/blog-api';
 import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogBody } from '@/components/blog/BlogBody';
@@ -9,7 +9,7 @@ import { BlogShare } from '@/components/blog/BlogShare';
 import { BlogComments } from '@/components/blog/BlogComments';
 import { SITE } from '@/data/site';
 import { LOCALES, type Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 interface Params {
   locale: string;
@@ -65,6 +65,7 @@ export async function generateMetadata({
       url: buildCanonical(blogPath, locale),
       images: post.cover_image ? [{ url: post.cover_image }] : undefined,
       publishedTime: post.published_at ?? undefined,
+      ...buildOgLocale(locale),
     },
   };
 }

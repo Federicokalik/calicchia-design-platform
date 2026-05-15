@@ -14,7 +14,7 @@ import { ServiceLeadMagnet } from '@/components/service-detail/ServiceLeadMagnet
 import { ServiceShowcase } from '@/components/service-detail/ServiceShowcase';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
-import { buildCanonical, buildI18nAlternates } from '@/lib/canonical';
+import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 import { serviceOfferCatalogSchema } from '@/lib/seo/service-schemas';
 
@@ -44,6 +44,7 @@ export async function generateMetadata({
       description: svc.description,
       type: 'article',
       url: buildCanonical(`/servizi/${slug}`, locale),
+      ...buildOgLocale(locale),
     },
   };
 }
@@ -81,6 +82,7 @@ export default async function ServiceDetailPage({
             description: svc.description,
             url: canonical,
             serviceType: svc.title,
+            locale,
           }),
           ...(hasDeliverables ? [serviceOfferCatalogSchema(deliverables)] : []),
           faqPageSchema(svc.faqs),

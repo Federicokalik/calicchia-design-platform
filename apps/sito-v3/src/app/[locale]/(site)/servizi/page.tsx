@@ -5,7 +5,7 @@ import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { PageHero } from '@/components/layout/PageHero';
 import { ServiziCardLink } from '@/components/service-detail/ServiziCardLink';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('servizi.list.metadata');
@@ -21,6 +21,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/servizi', locale),
+      ...buildOgLocale(locale),
     },
   };
 }
@@ -43,7 +44,6 @@ export default async function ServiziIndexPage() {
         eyebrow={t('eyebrowWithCount', { count: ALL_SERVICES.length })}
         title={t('pageTitle')}
         intro={t('pageLead')}
-        trustBadge={false}
       />
 
       <section className="px-6 md:px-10 lg:px-14 pb-32 max-w-[1600px] mx-auto">

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
-import Link from 'next/link';
 import Image from 'next/image';
+import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, collectionPageSchema } from '@/data/structured-data';
@@ -15,7 +15,7 @@ import { fetchAllPublishedProjects } from '@/lib/projects-api';
 import { adaptApiListItem } from '@/lib/projects-adapter';
 import { SITE } from '@/data/site';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 const PATH = '/lavori';
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -34,12 +34,14 @@ export async function generateMetadata(): Promise<Metadata> {
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical(PATH, locale),
+      ...buildOgLocale(locale),
     },
   };
 }
 
 export default async function LavoriIndexPage() {
   const t = await getTranslations('lavori.list');
+  const locale = (await getLocale()) as Locale;
   const apiList = await fetchAllPublishedProjects();
   const projects = apiList.map((p) => adaptApiListItem(p));
   const count = projects.length;
@@ -57,6 +59,7 @@ export default async function LavoriIndexPage() {
               name: p.title,
               url: `${SITE_URL}/lavori/${p.slug}`,
             })),
+            locale,
           }),
           breadcrumbSchema([
             { name: 'Home', url: '/' },

@@ -3,7 +3,7 @@ import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { EditorialArticleLayout } from '@/components/layout/EditorialArticleLayout';
-import { buildCanonical, buildI18nAlternates } from '@/lib/canonical';
+import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import type { Locale } from '@/lib/i18n';
 import { MIGRAZIONE_GA4_CONTENT, chapterEntries } from './content';
 
@@ -20,6 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: c.ogTitle,
       description: c.ogDescription,
       url: buildCanonical(PATH, locale),
+      ...buildOgLocale(locale),
     },
   };
 }
@@ -38,6 +39,7 @@ export default async function MigrazioneGA4Page() {
             url: PATH,
             section: c.schemaSection,
             datePublished: '2026-05-08',
+            locale,
           }),
           breadcrumbSchema(c.breadcrumbs),
         ]}

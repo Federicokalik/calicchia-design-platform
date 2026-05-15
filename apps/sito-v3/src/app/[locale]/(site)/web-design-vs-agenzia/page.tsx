@@ -12,7 +12,7 @@ import {
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -29,6 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         'Confronto onesto: costi reali, tempi, responsabilità, rischi. Senza vendere niente.',
       url: buildCanonical('/web-design-vs-agenzia', locale),
+      ...buildOgLocale(locale),
     },
   };
 }

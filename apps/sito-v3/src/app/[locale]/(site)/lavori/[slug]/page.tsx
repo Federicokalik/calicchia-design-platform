@@ -1,13 +1,11 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { CaseHero } from '@/components/case-study/CaseHero';
+import { CaseHeroOverlay } from '@/components/case-study/CaseHeroOverlay';
 import { CaseStaleNotice } from '@/components/case-study/CaseStaleNotice';
-import { CaseOverview } from '@/components/case-study/CaseOverview';
-import { CaseQuote } from '@/components/case-study/CaseQuote';
-import { CaseChallenge } from '@/components/case-study/CaseChallenge';
+import { CaseBrief } from '@/components/case-study/CaseBrief';
 import { CaseGallery } from '@/components/case-study/CaseGallery';
 import { CaseOutcome } from '@/components/case-study/CaseOutcome';
-import { CaseLongform } from '@/components/case-study/CaseLongform';
+import { CaseQuote } from '@/components/case-study/CaseQuote';
 import { CaseNext } from '@/components/case-study/CaseNext';
 import {
   fetchAllPublishedProjects,
@@ -22,7 +20,7 @@ import type { Project } from '@/data/types';
 import { SITE } from '@/data/site';
 import { breadcrumbSchema as buildBreadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
-import { buildI18nAlternates, buildCanonical } from '@/lib/canonical';
+import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 import { getLocale } from 'next-intl/server';
 
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -67,6 +65,7 @@ export async function generateMetadata({
       description,
       url: buildCanonical(url, locale),
       images: project.cover_image ? [{ url: project.cover_image }] : undefined,
+      ...buildOgLocale(locale),
     },
   };
 }
@@ -108,27 +107,10 @@ export default async function CaseStudyPage({
       }
     : undefined;
 
-  // Estrazione sezioni dal Project legacy (mantenute per back-compat
-  // con CaseHero/CaseOverview/CaseChallenge/CaseGallery).
-  const overview = project.sections.find(
-    (s) => s.kind === 'overview' && s.title === 'Il contesto',
-  );
-  const solution = project.sections.find(
-    (s) => s.kind === 'overview' && s.title === "L'approccio",
-  );
-  const challenge = project.sections.find((s) => s.kind === 'challenge');
+  // Gallery: l'unica sezione editorial residua dopo il redesign 090.
   const gallery = project.sections.find((s) => s.kind === 'gallery');
 
   // ── JSON-LD CreativeWork esteso ───────────────────────────────────
-  // Schema migliorato (decision lock #5: lavori da DB) con:
-  //   - dateCreated dal campo year (migration 075) o created_at
-  //   - inLanguage it-IT
-  //   - author/creator riferito al Person (Federico)
-  //   - mainEntityOfPage: la URL canonica
-  //   - keywords: tags + technologies + services concatenati
-  //   - workExample: live_url (se presente)
-  // Niente Review/AggregateRating per coerenza con TrustIndex unico
-  // fornitore recensioni (decision lock P2-11 #3).
   const dateCreated = ext.year
     ? `${ext.year}-01-01`
     : detail.project.published_at ?? detail.project.created_at;
@@ -177,7 +159,11 @@ export default async function CaseStudyPage({
         }}
       />
 
-      <CaseHero project={project} />
+      <CaseHeroOverlay
+        project={project}
+        client={ext.client}
+        services={ext.servicesLine}
+      />
 
       {ext.isStale ? (
         <CaseStaleNotice
@@ -187,24 +173,14 @@ export default async function CaseStudyPage({
         />
       ) : null}
 
-      {/* Numbering sequenziale Pentagram-style: ogni sezione editorial ha
-          il suo prefisso 01..06. Hero/StaleNotice/Quote/Next sono "no number"
-          (intro, metadata, pausa, navigation). */}
-      {overview ? (
-        <CaseOverview section={overview} index="01" eyebrowLabel="Il contesto" />
-      ) : null}
-      {challenge ? <CaseChallenge section={challenge} index="02" /> : null}
-      {solution ? (
-        <CaseOverview section={solution} index="03" eyebrowLabel="L'approccio" />
-      ) : null}
+      {/* Detail redesign 2026-05-14: la sequenza scende da 8 a 5 sezioni.
+          Brief unico (markdown) sostituisce Contesto + Sfida + Approccio +
+          Longform. Galleria, Outcome, Quote, Next invariati. */}
+      <CaseBrief markdown={ext.brief} index="01" />
 
-      <CaseOutcome
-        outcome={ext.outcome}
-        metrics={ext.metrics}
-        index="04"
-      />
+      {gallery ? <CaseGallery section={gallery} index="02" /> : null}
 
-      <CaseLongform markdown={ext.longformMarkdown} index="05" />
+      <CaseOutcome outcome={ext.outcome} metrics={ext.metrics} index="03" />
 
       {feedback ? (
         <CaseQuote
@@ -212,8 +188,6 @@ export default async function CaseStudyPage({
           attribution={feedback.attribution}
         />
       ) : null}
-
-      {gallery ? <CaseGallery section={gallery} index="06" /> : null}
 
       <CaseNext next={nextProject} />
     </article>

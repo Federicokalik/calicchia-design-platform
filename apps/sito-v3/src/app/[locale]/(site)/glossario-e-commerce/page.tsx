@@ -15,7 +15,7 @@ import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
-import { buildCanonical, buildI18nAlternates } from '@/lib/canonical';
+import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import type { Locale } from '@/lib/i18n';
 
 const PATH = '/glossario-e-commerce';
@@ -31,6 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: m.ogTitle,
       description: m.ogDescription,
       url: buildCanonical(PATH, locale),
+      ...buildOgLocale(locale),
     },
   };
 }

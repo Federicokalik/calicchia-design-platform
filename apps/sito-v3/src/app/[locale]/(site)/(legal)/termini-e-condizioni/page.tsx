@@ -3,19 +3,22 @@ import { LegalDocumentLayout } from '@/components/layout/LegalDocumentLayout';
 import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
+import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 
+// Pagina IT-only (route guard blocca /en/termini-e-condizioni con 404). No hreflang.
 export const metadata: Metadata = {
   title: {
     absolute: 'Termini e Condizioni · Caldes / Calicchia Design',
   },
   description:
     "Termini e condizioni d'uso del sito e dei rapporti contrattuali per i servizi professionali: preventivi, pagamenti, tempistiche, proprietà intellettuale, recesso, foro competente.",
-  alternates: { canonical: '/termini-e-condizioni' },
+  alternates: { canonical: buildCanonical('/termini-e-condizioni', 'it') },
   openGraph: {
     title: 'Termini e Condizioni · Caldes / Calicchia Design',
     description:
       "Condizioni generali per uso sito e rapporti contrattuali con il prestatore.",
-    url: '/termini-e-condizioni',
+    url: buildCanonical('/termini-e-condizioni', 'it'),
+    ...buildOgLocale('it'),
   },
 };
 

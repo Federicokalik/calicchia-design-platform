@@ -25,20 +25,13 @@
       "publishedPrefix": "Project shipped"
     },
     "next": "Next project",
-    "prev": "Previous project",
     "outcome": "Outcome",
-    "challenge": "The challenge",
-    "approach": "Approach",
-    "stack": "Tech stack",
     "breadcrumbHome": "Home",
     "breadcrumbLavori": "Work",
     "backToAll": "All work",
     "caseStudy": "Case study",
-    "client": "Client",
-    "tagLabel": "Tag",
-    "context": "Context",
-    "overview": "Overview",
-    "challengeFallbackHeading": "What needed fixing.",
+    "brief": "Brief",
+    "briefHeading": "What we built, in short.",
     "clientVoice": "Client voice",
     "seeMore": "Want to see more?",
     "allProjects": "All work",
@@ -46,8 +39,6 @@
     "goToCaseStudy": "Open case study",
     "beforeAfterHeading": "Before and after, in numbers.",
     "numbersHeading": "The numbers are clear.",
-    "gallery": "Gallery",
-    "longformTitle": "Deep dive",
-    "longformHeading": "Notes behind the project"
+    "gallery": "Gallery"
   }
 }

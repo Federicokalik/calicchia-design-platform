@@ -5,13 +5,72 @@
  *
  * Pattern: ogni helper torna un oggetto plain JSON. Lo wrappiamo in
  * `<StructuredData json={...}/>` (vedi components/seo/StructuredData.tsx).
+ *
+ * Locale awareness: helper accettano `locale` opzionale (default 'it'). Setta
+ * `inLanguage` BCP-47 (it-IT / en-US) e seleziona descrizioni/knowsAbout
+ * tradotti dalle costanti sottostanti. Per caso d'uso bilingual, callers
+ * passano locale corrente da `getLocale()` / `useLocale()`.
  */
 
 import { SITE } from './site';
+import type { Locale } from '@/lib/i18n';
 
 const PERSON_ID = `${SITE.url}/#federico`;
 const BUSINESS_ID = `${SITE.url}/#business`;
 const WEBSITE_ID = `${SITE.url}/#website`;
+
+function bcp47(locale: Locale): string {
+  return locale === 'en' ? 'en-US' : 'it-IT';
+}
+
+const PERSON_DESCRIPTION: Record<Locale, string> = {
+  it: 'Web Designer & Developer Freelance.\nFaccio siti, e-commerce, sviluppo web, SEO, manutenzione e assistenza WordPress per professionisti e PMI.\nUn solo contatto, design + codice + SEO in casa.',
+  en: 'Freelance Web Designer & Developer.\nI build websites, e-commerce, web development, SEO, WordPress maintenance and support for professionals and SMBs.\nOne point of contact, design + code + SEO in-house.',
+};
+
+const PERSON_JOB_TITLE: Record<Locale, string> = {
+  it: 'Web Designer & Developer Freelance',
+  en: 'Freelance Web Designer & Developer',
+};
+
+const PERSON_KNOWS_ABOUT: Record<Locale, readonly string[]> = {
+  it: [
+    'Web Design',
+    'Web Development',
+    'E-Commerce',
+    'SEO',
+    'WordPress',
+    'Manutenzione siti',
+    'Assistenza WordPress',
+    'Brand Identity',
+    'Performance Web',
+    'Next.js',
+    'React',
+  ],
+  en: [
+    'Web Design',
+    'Web Development',
+    'E-Commerce',
+    'SEO',
+    'WordPress',
+    'Website maintenance',
+    'WordPress support',
+    'Brand Identity',
+    'Web Performance',
+    'Next.js',
+    'React',
+  ],
+};
+
+const SERVICE_CATALOG_NAME: Record<Locale, string> = {
+  it: 'Servizi web',
+  en: 'Web services',
+};
+
+const SERVICE_CATALOG_ITEMS: Record<Locale, readonly string[]> = {
+  it: ['Web Design', 'E-Commerce', 'Sviluppo Web', 'SEO', 'Branding'],
+  en: ['Web Design', 'E-Commerce', 'Web Development', 'SEO', 'Branding'],
+};
 
 type AreaServedInput = string | string[];
 
@@ -24,7 +83,7 @@ function normalizeAreaServed(area?: AreaServedInput) {
 /* ------------------------------------------------------------------ */
 /* Person — Federico Calicchia                                         */
 /* ------------------------------------------------------------------ */
-export function personSchema() {
+export function personSchema(locale: Locale = 'it') {
   return {
     '@context': 'https://schema.org',
     '@type': 'Person',
@@ -33,28 +92,15 @@ export function personSchema() {
     alternateName: 'Calicchia Design',
     url: SITE.url,
     image: `${SITE.url}/img/federico-calicchia-ritratto-web-designer.webp`,
-    jobTitle: 'Web Designer & Developer Freelance',
-    description:
-      'Web Designer & Developer Freelance.\nFaccio siti, e-commerce, sviluppo web, SEO, manutenzione e assistenza WordPress per professionisti e PMI.\nUn solo contatto, design + codice + SEO in casa.',
+    jobTitle: PERSON_JOB_TITLE[locale],
+    description: PERSON_DESCRIPTION[locale],
     worksFor: { '@id': BUSINESS_ID },
     sameAs: [
       'https://instagram.com/calicchia.design',
       'https://linkedin.com/in/federicocalicchia',
       'https://github.com/calicchiadesign'
     ],
-    knowsAbout: [
-      'Web Design',
-      'Web Development',
-      'E-Commerce',
-      'SEO',
-      'WordPress',
-      'Manutenzione siti',
-      'Assistenza WordPress',
-      'Brand Identity',
-      'Performance Web',
-      'Next.js',
-      'React'
-    ],
+    knowsAbout: PERSON_KNOWS_ABOUT[locale],
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Via Scifelli 74',
@@ -72,9 +118,11 @@ export function personSchema() {
 export interface LocalBusinessArgs {
   comune?: string;
   areaServed?: string[];
+  locale?: Locale;
 }
 
 export function localBusinessSchema(args: LocalBusinessArgs = {}) {
+  const locale = args.locale ?? 'it';
   const areaServed =
     args.areaServed && args.areaServed.length > 0
       ? args.areaServed
@@ -121,22 +169,20 @@ export function localBusinessSchema(args: LocalBusinessArgs = {}) {
     ],
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
-      name: 'Servizi web',
-      itemListElement: [
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Web Design' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'E-Commerce' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Sviluppo Web' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'SEO' } },
-        { '@type': 'Offer', itemOffered: { '@type': 'Service', name: 'Branding' } }
-      ]
-    }
+      name: SERVICE_CATALOG_NAME[locale],
+      itemListElement: SERVICE_CATALOG_ITEMS[locale].map((name) => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name },
+      })),
+    },
+    inLanguage: bcp47(locale),
   } as const;
 }
 
 /* ------------------------------------------------------------------ */
 /* WebSite + SearchAction (sitelinks searchbox eligibility)            */
 /* ------------------------------------------------------------------ */
-export function websiteSchema() {
+export function websiteSchema(locale: Locale = 'it') {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -145,7 +191,7 @@ export function websiteSchema() {
     name: SITE.brand,
     description: SITE.description,
     publisher: { '@id': BUSINESS_ID },
-    inLanguage: 'it-IT'
+    inLanguage: bcp47(locale),
   } as const;
 }
 
@@ -201,6 +247,7 @@ export interface ArticleArgs {
   datePublished?: string; // ISO
   dateModified?: string; // ISO
   section?: string;
+  locale?: Locale;
 }
 
 export function articleSchema(args: ArticleArgs) {
@@ -221,7 +268,7 @@ export function articleSchema(args: ArticleArgs) {
     dateModified: args.dateModified ?? args.datePublished,
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     articleSection: args.section,
-    inLanguage: 'it-IT'
+    inLanguage: bcp47(args.locale ?? 'it'),
   } as const;
 }
 
@@ -237,15 +284,18 @@ export interface ServiceArgs {
   profession?: string;
   comune?: string;
   areaServed?: AreaServedInput;
+  locale?: Locale;
 }
 
 export function serviceSchema(args: ServiceArgs) {
+  const locale = args.locale ?? 'it';
+  const segment = locale === 'en' ? 'services' : 'servizi';
   const url = args.url
     ? args.url.startsWith('http')
       ? args.url
       : `${SITE.url}${args.url}`
     : args.slug
-      ? `${SITE.url}/servizi/${args.slug}`
+      ? `${SITE.url}${locale === 'en' ? '/en' : ''}/${segment}/${args.slug}`
       : SITE.url;
   const areaServed = args.areaServed ?? args.comune;
 
@@ -259,6 +309,7 @@ export function serviceSchema(args: ServiceArgs) {
     serviceType: args.serviceType ?? args.name,
     provider: { '@id': BUSINESS_ID },
     areaServed: normalizeAreaServed(areaServed),
+    inLanguage: bcp47(locale),
     ...(args.profession
       ? {
           audience: {
@@ -278,6 +329,7 @@ export interface CollectionPageArgs {
   description: string;
   url: string;
   items?: Array<{ name: string; url: string }>;
+  locale?: Locale;
 }
 
 export function collectionPageSchema(args: CollectionPageArgs) {
@@ -291,6 +343,7 @@ export function collectionPageSchema(args: CollectionPageArgs) {
     url,
     isPartOf: { '@id': WEBSITE_ID },
     publisher: { '@id': BUSINESS_ID },
+    inLanguage: bcp47(args.locale ?? 'it'),
     ...(args.items && args.items.length > 0
       ? {
           mainEntity: {
