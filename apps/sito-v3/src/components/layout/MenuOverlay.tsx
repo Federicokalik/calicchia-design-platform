@@ -8,9 +8,8 @@ import {
   Phone,
 } from '@phosphor-icons/react';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { SITE } from '@/data/site';
 import { getSocialIcon } from '@/data/social-icons';
 import {

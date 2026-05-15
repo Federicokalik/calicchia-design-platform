@@ -1,4 +1,5 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Download } from 'lucide-react';
 import { PortalShell } from '@/components/portal/PortalShell';

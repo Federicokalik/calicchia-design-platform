@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
+import { Link } from '@/i18n/navigation';
 import { StructuredData } from '@/components/seo/StructuredData';
 import {
   breadcrumbSchema,

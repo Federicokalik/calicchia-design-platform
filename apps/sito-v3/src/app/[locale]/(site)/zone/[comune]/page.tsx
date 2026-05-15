@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { Link } from '@/i18n/navigation';
 import { SEO_CITIES, getCityBySlug } from '@/data/seo-cities';
 import { SEO_SERVICES } from '@/data/seo-service-matrix';
 import { COMUNE_ATTRIBUTES, getPreposizione } from '@/lib/comune-attributes';

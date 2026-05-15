@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import {
   SEO_PROFESSIONS,
   PROFESSION_CATEGORIES,

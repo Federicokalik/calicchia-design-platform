@@ -1,7 +1,7 @@
 'use client';
 
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { FieldError } from '@/components/ui/form/FieldError';
 
 export interface GdprCheckboxProps extends InputHTMLAttributes<HTMLInputElement> {

@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 type Variant = 'solid' | 'ghost' | 'underline';
@@ -82,6 +82,14 @@ export function Button(props: ButtonAsButton | ButtonAsLink) {
 
   if ('href' in rest && rest.href !== undefined) {
     const { href, ...linkRest } = rest;
+    const isExternal = /^(https?:|mailto:|tel:|#)/.test(href);
+    if (isExternal) {
+      return (
+        <a href={href} className={cls} style={style} {...linkRest}>
+          {inner}
+        </a>
+      );
+    }
     return (
       <Link href={href} className={cls} style={style} {...linkRest}>
         {inner}

@@ -1,19 +1,11 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
-import { Link } from '@/i18n/navigation';
+import { Link, usePathname, getPathname } from '@/i18n/navigation';
 import { gsap } from '@/lib/gsap';
 import { cn } from '@/lib/utils';
-import {
-  DEFAULT_LOCALE,
-  LOCALES,
-  isLocale,
-  localizedPath,
-  stripLocale,
-  type Locale,
-} from '@/lib/i18n';
+import { DEFAULT_LOCALE, LOCALES, type Locale } from '@/lib/i18n';
 import { Logo } from '@/components/Logo';
 import { LanguageFlag } from '@/components/ui/LanguageFlag';
 import { MenuOverlay } from './MenuOverlay';
@@ -41,17 +33,22 @@ export function SiteHeader({ className }: { className?: string }) {
   const [logoCollapsed, setLogoCollapsed] = useState(false);
 
   const pathname = usePathname() ?? '/';
-  const router = useRouter();
-
-  // Detect current locale from URL prefix; fallback DEFAULT_LOCALE.
-  const firstSeg = pathname.split('/')[1];
-  const currentLocale: Locale = isLocale(firstSeg) ? firstSeg : DEFAULT_LOCALE;
+  const currentLocale = useLocale() as Locale;
   const otherLocale: Locale =
     LOCALES.find((l) => l !== currentLocale) ?? DEFAULT_LOCALE;
 
+  // Allineato a LanguageSwitcher: server-side cookie set via /api/locale +
+  // getPathname per slug tradotto (lavori→works, servizi→services, ecc.) +
+  // window.location.assign per bypass RSC prefetch / Next Router cache.
   const toggleLocale = () => {
-    const bare = stripLocale(pathname);
-    router.push(localizedPath(bare, otherLocale));
+    let targetPath: string;
+    try {
+      targetPath = getPathname({ href: pathname as never, locale: otherLocale });
+    } catch {
+      targetPath = otherLocale === DEFAULT_LOCALE ? pathname : `/${otherLocale}${pathname}`;
+    }
+    const href = `/api/locale?to=${otherLocale}&next=${encodeURIComponent(targetPath)}`;
+    window.location.assign(href);
   };
 
   // Header scroll state: logo collapse and language token share the same trigger.
@@ -134,10 +131,13 @@ export function SiteHeader({ className }: { className?: string }) {
       <header
         ref={headerRef}
         className={cn(
-          'fixed top-0 left-0 right-0 px-6 md:px-10 lg:px-14 py-5 md:py-6 flex items-center justify-between gap-6 pointer-events-none',
+          'fixed left-0 right-0 px-6 md:px-10 lg:px-14 py-5 md:py-6 flex items-center justify-between gap-6 pointer-events-none',
           className
         )}
-        style={{ zIndex: 90 }}
+        // top legge `--availability-banner-height` settato dall'AvailabilityTopbar:
+        // quando il banner è visibile, header si abbassa della stessa altezza
+        // del banner; quando manca/è dismissato, fallback a 0px (top:0).
+        style={{ zIndex: 90, top: 'var(--availability-banner-height, 0px)' }}
       >
         {/* Logo — auto-hide on scroll-down. Theme-swap: dark logo on light bg,
             white logo when MenuOverlay is open (dark bg). */}

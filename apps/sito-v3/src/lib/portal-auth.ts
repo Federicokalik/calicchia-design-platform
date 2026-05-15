@@ -1,7 +1,7 @@
 'use server';
 
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirect } from '@/i18n/navigation';
 import { z } from 'zod';
 import { getCustomer, type PortalCustomer } from '@/lib/portal-api';
 

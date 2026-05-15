@@ -1,8 +1,9 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
 import { Loader2, MailCheck } from 'lucide-react';
 import { Button } from '@/components/portal/ui/button';
 import { Input } from '@/components/portal/ui/input';

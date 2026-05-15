@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 
 type Arrow = 'right' | 'left' | 'down' | 'up' | 'none';

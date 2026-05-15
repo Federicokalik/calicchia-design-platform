@@ -16,11 +16,12 @@ import {
   UserCircle,
   WhatsappLogo,
 } from '@phosphor-icons/react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { type ComponentType, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
 import { SITE } from '@/data/site';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
+import { TrustBadge } from '@/components/common/TrustBadge';
 import { FooterMap } from './FooterMap';
 
 interface FooterLink {
@@ -73,6 +74,7 @@ export function SiteFooter() {
   // common.json è SPREAD top-level in request.ts → footer è root namespace,
   // non common.footer. Pattern corretto: useTranslations('footer').
   const tFooter = useTranslations('footer');
+  const locale = useLocale();
   const tNav = useTranslations('navigation');
   const root = useRef<HTMLElement>(null);
   const year = new Date().getFullYear();
@@ -229,6 +231,22 @@ export function SiteFooter() {
                     <Cookie size={14} aria-hidden />
                     {tFooter('manageCookies')}
                   </button>
+                </div>
+              </div>
+
+              {/* Trustindex badge — integrato nella colonna trust/legal della
+                  destra. Il widget è una "white card" hard-coded da Trustindex
+                  (lo stile vive nella loro dashboard), quindi qui resta come
+                  piccolo timbro di garanzia adiacente ai link legali. */}
+              <div className="mt-8">
+                <p
+                  className="font-mono text-[10px] uppercase tracking-[0.25em]"
+                  style={{ color: 'rgba(250,250,247,0.48)' }}
+                >
+                  {tFooter('reviewsLabel')}
+                </p>
+                <div className="mt-4">
+                  <TrustBadge locale={locale} />
                 </div>
               </div>
             </section>

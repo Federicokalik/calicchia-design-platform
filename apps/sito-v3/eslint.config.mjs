@@ -51,4 +51,51 @@ export default [
       ],
     },
   },
+  // i18n navigation guard: impedisce di importare `next/link` raw o le primitive
+  // di `next/navigation` che bypassano il wrapper next-intl. Decisione 2026-05-15:
+  // tutti gli internal link/redirect DEVONO passare per `@/i18n/navigation` per
+  // preservare locale + tradurre i segmenti (/servizi → /services, ecc.).
+  //
+  // Eccezioni:
+  // - `src/i18n/navigation.ts`: il wrapper stesso, importa da next-intl/navigation.
+  // - `src/components/providers/ViewTransitionsBootstrap.tsx`: intercepta in
+  //   capture phase URL già risolti — non deve ri-tradurre.
+  // - `src/components/layout/LanguageSwitcher.tsx`: `window.location.assign`
+  //   intenzionale per server-side cookie set via /api/locale.
+  // - `src/proxy.ts`: middleware Next.js (NextResponse, etc.).
+  // - `src/app/error.tsx`: root error boundary, sta fuori dal NextIntlClientProvider.
+  // - `src/app/api/**`: Route Handlers server-side, niente locale concern.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      'src/i18n/navigation.ts',
+      'src/components/providers/ViewTransitionsBootstrap.tsx',
+      'src/components/layout/LanguageSwitcher.tsx',
+      'src/components/layout/AvailabilityTopbar.tsx',
+      'src/components/analytics/**',
+      'src/proxy.ts',
+      'src/app/error.tsx',
+      'src/app/api/**',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'next/link',
+              message:
+                "Usa 'import { Link } from \"@/i18n/navigation\"' per preservare il locale corrente nei link interni.",
+            },
+            {
+              name: 'next/navigation',
+              importNames: ['useRouter', 'usePathname', 'redirect', 'permanentRedirect'],
+              message:
+                "Per navigation interna usa '@/i18n/navigation' (preserva locale + traduce segmenti). useSearchParams e notFound sono OK da next/navigation.",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ];

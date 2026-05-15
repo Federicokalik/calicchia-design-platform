@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { Body } from '@/components/ui/Body';
 import { Heading } from '@/components/ui/Heading';
 import { MonoLabel } from '@/components/ui/MonoLabel';
