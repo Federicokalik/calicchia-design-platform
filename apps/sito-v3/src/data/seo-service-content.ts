@@ -7,10 +7,15 @@
 // `ServiceSlug` per il consumer (matrix page, zone page).
 
 import type { ServiceSlug } from './seo-service-matrix';
+import type { Locale } from '@/lib/i18n';
 import { WEB_DESIGN_CONTENT } from './seo-content/web-design';
 import { E_COMMERCE_CONTENT } from './seo-content/e-commerce';
 import { SVILUPPO_WEB_CONTENT } from './seo-content/sviluppo-web';
 import { SEO_CONTENT } from './seo-content/seo';
+import { WEB_DESIGN_CONTENT_EN } from './seo-content/web-design-en';
+import { E_COMMERCE_CONTENT_EN } from './seo-content/e-commerce-en';
+import { SVILUPPO_WEB_CONTENT_EN } from './seo-content/sviluppo-web-en';
+import { SEO_CONTENT_EN } from './seo-content/seo-en';
 
 export interface ServiceCategoryContent {
   description: string;
@@ -36,16 +41,28 @@ const SERVICE_CONTENT_MAP: Record<ServiceSlug, Record<string, ServiceCategoryCon
   'seo': SEO_CONTENT,
 };
 
+const SERVICE_CONTENT_MAP_EN: Record<ServiceSlug, Record<string, ServiceCategoryContent>> = {
+  'sito-web': WEB_DESIGN_CONTENT_EN,
+  'e-commerce': E_COMMERCE_CONTENT_EN,
+  'sviluppo-web': SVILUPPO_WEB_CONTENT_EN,
+  'seo': SEO_CONTENT_EN,
+};
+
 /**
  * Get service content for a specific service + category combination.
  * Restituisce il content settoriale per la combo (servizio × categoria).
  * Se la categoria non ha content per quel servizio, ritorna undefined.
+ *
+ * Locale-aware (dal 2026-05-15): su locale='en' usa SERVICE_CONTENT_MAP_EN
+ * (32 ServiceCategoryContent EN-tradotte via codex).
  */
 export function getServiceContent(
   serviceSlug: ServiceSlug,
   categoryId: string,
+  locale: Locale = 'it',
 ): ServiceCategoryContent | undefined {
-  const serviceMap = SERVICE_CONTENT_MAP[serviceSlug];
+  const map = locale === 'en' ? SERVICE_CONTENT_MAP_EN : SERVICE_CONTENT_MAP;
+  const serviceMap = map[serviceSlug];
   if (!serviceMap) return undefined;
   return serviceMap[categoryId];
 }

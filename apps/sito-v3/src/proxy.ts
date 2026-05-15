@@ -73,11 +73,19 @@ function isEnPathAvailable(pathname: string): boolean {
     if (path === prefix || path.startsWith(`${prefix}/`)) return false;
   }
 
-  // Matrix path catch-all: i path con pattern `<service-prefix>-<profession>`
-  // (es. `/web-design-per-dentista`) sono IT-only.
-  if (/-per-/.test(path) && !EN_PATH_PREFIXES_ENABLED.some((p) => path === p || path.startsWith(`${p}/`))) {
+  // Matrix + città pattern: /<service>-{per|for}-<profession>-a-<city> è IT-only
+  // (le rotte città sono geo-IT, decisione utente 2026-05-15). Le matrix
+  // profession-only (/sito-web-per-avvocati, /en/website-for-lawyers) restano
+  // EN-accessible. Match: include "-per-" OR "-for-" AND "-a-".
+  if (/-(per|for)-/.test(path) && /-a-/.test(path)) {
     return false;
   }
+
+  // NOTA: il catch-all matrix `/<service>-per-<professione>` è stato rimosso
+  // (decisione 2026-05-15). Solo le route geo-locali ("/zone", "/sito-web-per-pmi",
+  // "/web-design-freelance-ciociaria") restano bloccate in EN — le matrix pages
+  // servizio×professione (/sito-web-per-avvocati, /e-commerce-per-dentisti, ecc.)
+  // sono accessibili su EN per coerenza col selettore matrix tradotto.
 
   // Enabled prefix → true
   for (const prefix of EN_PATH_PREFIXES_ENABLED) {
@@ -86,7 +94,8 @@ function isEnPathAvailable(pathname: string): boolean {
   }
 
   // Default: pass-through (DB-driven /lavori/[slug], /blog/[anno]/[mese]/[slug],
-  // /servizi/[slug] — il page-level component decide il fallback).
+  // /servizi/[slug], matrix /<service>-per-<prof> — il page-level component
+  // decide il fallback).
   return true;
 }
 
