@@ -17,6 +17,7 @@ import {
   BarChart3,
   Settings,
   FileSignature,
+  PenLine,
   Workflow,
   Brain,
   StickyNote,
@@ -69,19 +70,24 @@ const navigation: NavGroup[] = [
     labelKey: 'nav.sales',
     items: [
       { labelKey: 'nav.quotes', icon: FileSignature, path: '/preventivi' },
-      { labelKey: 'nav.signatures', icon: FileSignature, path: '/firme' },
+      { labelKey: 'nav.signatures', icon: PenLine, path: '/firme' },
     ],
   },
   {
-    labelKey: 'nav.work',
+    labelKey: 'nav.projectsTime',
     items: [
       { labelKey: 'nav.projects', icon: FolderKanban, path: '/progetti' },
       { labelKey: 'nav.timeTracking', icon: Timer, path: '/time-tracking' },
-      { labelKey: 'nav.calendar', icon: Calendar, path: '/calendario', end: true },
-      { labelKey: 'nav.calendar.calendars', icon: Calendar, path: '/calendario/calendari' },
-      { labelKey: 'nav.calendar.bookings', icon: Calendar, path: '/calendario/prenotazioni' },
-      { labelKey: 'nav.calendar.availability', icon: Calendar, path: '/calendario/disponibilita' },
-      { labelKey: 'nav.calendar.eventTypes', icon: Calendar, path: '/calendario/event-types' },
+      // Calendario è una singola voce: le sotto-pagine vivono come tab dentro /calendario.
+      { labelKey: 'nav.calendar', icon: Calendar, path: '/calendario' },
+    ],
+  },
+  {
+    labelKey: 'nav.finance',
+    items: [
+      { labelKey: 'nav.billing', icon: Receipt, path: '/fatturazione' },
+      { labelKey: 'nav.expenses', icon: Wallet, path: '/spese' },
+      { labelKey: 'nav.taxes', icon: Calculator, path: '/tasse' },
     ],
   },
   {
@@ -103,20 +109,17 @@ const brainItems: NavItem[] = [
 
 const bottomNavigation: NavGroup[] = [
   {
-    labelKey: 'nav.automations',
+    labelKey: 'nav.automationsAnalytics',
     items: [
       { labelKey: 'nav.workflow', icon: Workflow, path: '/workflows' },
+      { labelKey: 'nav.analytics', icon: BarChart3, path: '/analytics' },
     ],
   },
   {
-    labelKey: 'nav.tools',
+    labelKey: 'nav.infrastructure',
     items: [
       { labelKey: 'nav.domains', icon: Globe, path: '/domini' },
-      { labelKey: 'nav.billing', icon: Receipt, path: '/fatturazione' },
-      { labelKey: 'nav.expenses', icon: Wallet, path: '/spese' },
-      { labelKey: 'nav.taxes', icon: Calculator, path: '/tasse' },
       { labelKey: 'nav.services', icon: Package, path: '/servizi' },
-      { labelKey: 'nav.analytics', icon: BarChart3, path: '/analytics' },
     ],
   },
 ];

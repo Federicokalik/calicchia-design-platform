@@ -5,6 +5,7 @@ import { Plus, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 interface SlotRow { id?: string; day_of_week: number; start_time: string; end_time: string }
 interface Override { id: string; override_date: string; is_unavailable: boolean; start_time: string | null; end_time: string | null; note: string | null }
@@ -78,6 +79,8 @@ export default function DisponibilitaPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
+      <CalendarTabs />
+
       <div className="rounded-lg border bg-card p-4 space-y-3">
         <h3 className="font-semibold text-sm">Timezone</h3>
         <div className="flex gap-2 items-center">

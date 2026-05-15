@@ -3,7 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Mail, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Lead } from '@/types/lead';
-import { LEAD_SOURCE_CONFIG } from '@/types/lead';
+import { getLeadSourceConfig } from '@/types/lead';
 import { useI18n } from '@/hooks/use-i18n';
 
 interface LeadCardProps {
@@ -27,7 +27,7 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
     transition: transition || 'transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1)',
   };
 
-  const sourceConfig = LEAD_SOURCE_CONFIG[lead.source];
+  const sourceConfig = getLeadSourceConfig(lead.source);
   return (
     <div
       ref={setNodeRef}

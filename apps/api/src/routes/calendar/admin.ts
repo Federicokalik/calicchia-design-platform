@@ -41,6 +41,15 @@ import {
   createOccurrenceOverride,
   EventValidationError,
 } from '../../lib/calendar/events';
+import {
+  listSubscriptions,
+  getSubscription,
+  createSubscription,
+  updateSubscription,
+  deleteSubscription,
+  syncSubscription,
+  SubscriptionValidationError,
+} from '../../lib/calendar/subscriptions';
 import type {
   AvailabilityOverride,
   AvailabilitySchedule,
@@ -716,6 +725,62 @@ calendarAdmin.post('/events/:id/exception', async (c) => {
     return c.json({ event: override });
   } catch (err) {
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+// ============================================
+// SUBSCRIPTIONS (read-only ICS pull — Google Calendar via "secret iCal" URL)
+// ============================================
+
+calendarAdmin.get('/subscriptions', async (c) => {
+  const subs = await listSubscriptions();
+  return c.json({ subscriptions: subs });
+});
+
+calendarAdmin.post('/subscriptions', async (c) => {
+  const body = await c.req.json();
+  try {
+    const sub = await createSubscription({
+      calendar_id: String(body.calendar_id || ''),
+      name: String(body.name || ''),
+      ics_url: String(body.ics_url || ''),
+    });
+    // Sync immediato per dare feedback all'utente (non aspetta il prossimo cron tick)
+    const result = await syncSubscription(sub.id);
+    const refreshed = await getSubscription(sub.id);
+    return c.json({ subscription: refreshed, sync: result });
+  } catch (err) {
+    if (err instanceof SubscriptionValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+calendarAdmin.put('/subscriptions/:id', async (c) => {
+  const body = await c.req.json();
+  try {
+    const sub = await updateSubscription(c.req.param('id'), body);
+    if (!sub) return c.json({ error: 'Subscription non trovata' }, 404);
+    return c.json({ subscription: sub });
+  } catch (err) {
+    if (err instanceof SubscriptionValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+calendarAdmin.delete('/subscriptions/:id', async (c) => {
+  const ok = await deleteSubscription(c.req.param('id'));
+  if (!ok) return c.json({ error: 'Subscription non trovata' }, 404);
+  return c.json({ success: true });
+});
+
+calendarAdmin.post('/subscriptions/:id/sync', async (c) => {
+  try {
+    const result = await syncSubscription(c.req.param('id'));
+    const refreshed = await getSubscription(c.req.param('id'));
+    return c.json({ subscription: refreshed, sync: result });
+  } catch (err) {
+    if (err instanceof SubscriptionValidationError) return c.json({ error: err.message }, 404);
     throw err;
   }
 });

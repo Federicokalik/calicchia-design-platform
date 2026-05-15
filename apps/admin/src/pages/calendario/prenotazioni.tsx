@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { useI18n } from '@/hooks/use-i18n';
+import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 interface BookingRow {
   id: string;
@@ -95,6 +96,8 @@ export default function PrenotazioniPage() {
 
   return (
     <div className="space-y-4">
+      <CalendarTabs />
+
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         {(['confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled'] as const).map((k) => (

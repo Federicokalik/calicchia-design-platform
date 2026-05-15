@@ -47,8 +47,7 @@ projects.post('/', async (c) => {
     title,
     slug,
     description,
-    content,
-    excerpt,
+    brief, // Migration 090 — body unico case study (sostituisce content/challenge/solution)
     cover_image,
     live_url,
     repo_url,
@@ -58,10 +57,6 @@ projects.post('/', async (c) => {
     client,
     services,
     industries,
-    challenge,
-    challenge_images,
-    solution,
-    solution_image,
     feedback,
     gallery,
     // Migration 075 — case study extension
@@ -85,8 +80,7 @@ projects.post('/', async (c) => {
       title,
       slug,
       description: description || null,
-      content: content || null,
-      excerpt: excerpt || null,
+      brief: brief || null,
       cover_image: cover_image || null,
       live_url: live_url || null,
       repo_url: repo_url || null,
@@ -96,10 +90,6 @@ projects.post('/', async (c) => {
       client: client || null,
       services: services || null,
       industries: industries || null,
-      challenge: challenge || null,
-      challenge_images: challenge_images || null,
-      solution: solution || null,
-      solution_image: solution_image || null,
       feedback: feedback || null,
       gallery: gallery || null,
       // Migration 075
@@ -130,8 +120,7 @@ projects.put('/:id', async (c) => {
     title,
     slug,
     description,
-    content,
-    excerpt,
+    brief, // Migration 090
     cover_image,
     live_url,
     repo_url,
@@ -141,10 +130,6 @@ projects.put('/:id', async (c) => {
     client,
     services,
     industries,
-    challenge,
-    challenge_images,
-    solution,
-    solution_image,
     feedback,
     gallery,
     display_order,
@@ -161,8 +146,7 @@ projects.put('/:id', async (c) => {
   if (title !== undefined) updateData.title = title;
   if (slug !== undefined) updateData.slug = slug;
   if (description !== undefined) updateData.description = description || null;
-  if (content !== undefined) updateData.content = content || null;
-  if (excerpt !== undefined) updateData.excerpt = excerpt || null;
+  if (brief !== undefined) updateData.brief = brief || null;
   if (cover_image !== undefined) updateData.cover_image = cover_image || null;
   if (live_url !== undefined) updateData.live_url = live_url || null;
   if (repo_url !== undefined) updateData.repo_url = repo_url || null;
@@ -172,10 +156,6 @@ projects.put('/:id', async (c) => {
   if (client !== undefined) updateData.client = client || null;
   if (services !== undefined) updateData.services = services || null;
   if (industries !== undefined) updateData.industries = industries || null;
-  if (challenge !== undefined) updateData.challenge = challenge || null;
-  if (challenge_images !== undefined) updateData.challenge_images = challenge_images || null;
-  if (solution !== undefined) updateData.solution = solution || null;
-  if (solution_image !== undefined) updateData.solution_image = solution_image || null;
   if (feedback !== undefined) updateData.feedback = feedback || null;
   if (gallery !== undefined) updateData.gallery = gallery || null;
   if (display_order !== undefined) updateData.display_order = display_order;
@@ -241,7 +221,7 @@ projects.delete('/:id', async (c) => {
 const TRANSLATABLE_PROJECT_FIELDS = [
   'title',
   'description',
-  'content',
+  'brief', // Migration 090 — sostituisce `content` come campo traducibile del body
   'outcome',
   'seo_title',
   'seo_description',

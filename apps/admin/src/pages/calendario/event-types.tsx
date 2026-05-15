@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 interface EventType {
   id: string;
@@ -67,6 +68,8 @@ export default function EventTypesPage() {
 
   return (
     <div className="space-y-4">
+      <CalendarTabs />
+
       {showNew && <NewEventTypeForm onClose={() => setShowNew(false)} />}
 
       {isLoading ? (

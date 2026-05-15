@@ -46,6 +46,11 @@ calendarFeed.get('/:token{.+\\.ics}', async (c) => {
   // - Eventi singoli che si sovrappongono al range
   // - Master ricorrenti il cui start_time è prima del fine range
   // - Override (sostituiscono occorrenze del master)
+  //
+  // Esclusi: gli eventi importati da ICS subscription (source='ics_pull').
+  // Sono già sull'origine remota dell'utente (es. Google) — ripubblicarli sul
+  // feed Caldes esporrebbe il calendario sottostante a chiunque abbia il token,
+  // e creerebbe un loop se Caldes si auto-sottoscrivesse al proprio feed.
   const events = await sql<CalendarEvent[]>`
     SELECT id, calendar_id, uid, summary, description, location, url,
            start_time, end_time, all_day,
@@ -54,6 +59,7 @@ calendarFeed.get('/:token{.+\\.ics}', async (c) => {
     FROM calendar_events
     WHERE calendar_id = ${calendar.id}::uuid
       AND status != 'cancelled'
+      AND source != 'ics_pull'
       AND (
         rrule IS NOT NULL
         OR (start_time < ${toIso}::timestamptz AND end_time > ${fromIso}::timestamptz)

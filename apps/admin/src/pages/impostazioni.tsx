@@ -204,11 +204,11 @@ export default function ImpostazioniPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <Field
-                  label="Max clienti / mese"
+                  label="Max clienti / mese (reale)"
                   value={String(getFs('max_clients_per_month', 3))}
                   onChange={(v) => setFsField('max_clients_per_month', parseInt(v, 10) || 0)}
                   type="number"
-                  description="Soglia mostrata nel badge 'Disponibile' della home"
+                  description="Limite operativo interno. Usato dal dashboard capacity. Non mostrato al pubblico se i due campi sotto sono valorizzati."
                 />
                 <Field
                   label="Ore disponibili / settimana"
@@ -217,6 +217,34 @@ export default function ImpostazioniPage() {
                   type="number"
                   description="Usato dal widget capacity nel dashboard"
                 />
+              </div>
+
+              <div className="rounded-md border border-dashed bg-muted/30 p-4 space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Vetrina pubblica (scarcity marketing)
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Override cosmetici del badge "Disponibile · X/Y posti questo mese" sulla home.
+                  Lasciali vuoti (o 0) per mostrare i numeri reali. Esempio: max reale 3,
+                  imposta <em>visibile 6</em> + <em>fantasma 3</em> → al sito appare "3/6"
+                  con zero clienti effettivi e "5/6 → ultimo posto" già al secondo cliente vero.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field
+                    label="Slot visibili (display max)"
+                    value={String(getFs('displayed_max_clients', 6))}
+                    onChange={(v) => setFsField('displayed_max_clients', parseInt(v, 10) || 0)}
+                    type="number"
+                    description="Numero esibito a destra della frazione. Default 6."
+                  />
+                  <Field
+                    label="Slot fantasma precaricati"
+                    value={String(getFs('phantom_used_clients', 2))}
+                    onChange={(v) => setFsField('phantom_used_clients', parseInt(v, 10) || 0)}
+                    type="number"
+                    description="Quantità sommata al conteggio clienti reali. Default 2 (parte già occupato). 0 disattiva l'effetto."
+                  />
+                </div>
               </div>
             </div>
 

@@ -11,7 +11,8 @@ import { apiFetch } from '@/lib/api';
 const TRANSLATABLE_FIELDS = [
   { key: 'title', label: 'Titolo', type: 'input', maxChars: 200 },
   { key: 'description', label: 'Descrizione breve', type: 'textarea', maxChars: 500 },
-  { key: 'content', label: 'Contenuto long-form', type: 'textarea', maxChars: 50000 },
+  // Migration 090: `content` (longform) sostituito da `brief` (body unico).
+  { key: 'brief', label: 'Brief (body case study)', type: 'textarea', maxChars: 50000 },
   { key: 'outcome', label: 'Outcome (risultati)', type: 'textarea', maxChars: 1500 },
   { key: 'seo_title', label: 'SEO Title', type: 'input', maxChars: 70 },
   { key: 'seo_description', label: 'SEO Description', type: 'textarea', maxChars: 160 },
@@ -159,7 +160,7 @@ export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelEN
                     value={itVal}
                     readOnly
                     disabled
-                    rows={f.key === 'content' ? 8 : 3}
+                    rows={f.key === 'brief' ? 8 : 3}
                     className="mt-1 bg-muted/30 font-mono text-xs"
                   />
                 )}
@@ -185,7 +186,7 @@ export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelEN
                   <Textarea
                     value={enVal}
                     maxLength={f.maxChars}
-                    rows={f.key === 'content' ? 8 : 3}
+                    rows={f.key === 'brief' ? 8 : 3}
                     onChange={(e) => setEnValues({ ...enValues, [f.key]: e.target.value })}
                     placeholder={`English ${f.label.toLowerCase()}…`}
                     className="mt-1 font-mono text-xs"

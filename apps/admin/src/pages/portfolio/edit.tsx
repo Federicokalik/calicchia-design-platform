@@ -26,9 +26,10 @@ import { TranslationsPanelEN } from './TranslationsPanelEN';
 const schema = z.object({
   title: z.string().min(1, 'Titolo richiesto'),
   slug: z.string().min(1, 'Slug richiesto'),
-  excerpt: z.string().optional(),
   description: z.string().optional(),
-  content: z.string().optional(),
+  // Migration 090: `brief` sostituisce `content`/`challenge`/`solution`
+  // come body unico del case study (markdown via RichEditor TipTap).
+  brief: z.string().optional(),
   cover_image: z.string().optional(),
   live_url: z.string().optional(),
   repo_url: z.string().optional(),
@@ -71,9 +72,7 @@ export default function PortfolioEditorPage() {
   const queryClient = useQueryClient();
   const isNew = !id || id === 'new';
 
-  // Challenge & Solution (JSON fields, managed separately)
-  const [challenge, setChallenge] = useState({ title: '', description: '' });
-  const [solution, setSolution] = useState({ title: '', description: '' });
+  // Migration 090: challenge/solution states rimossi. Brief vive in form.brief.
   const [feedback, setFeedback] = useState({ quote: '', author: '', role: '' });
   const [gallery, setGallery] = useState<string[]>([]);
   // Migration 075 — metrics repeater. Each row may use either {label,value}
@@ -109,8 +108,8 @@ export default function PortfolioEditorPage() {
     defaultValues: {
       title: '',
       slug: '',
-      excerpt: '',
       description: '',
+      brief: '',
       tags: '',
       outcome: '',
       seo_title: '',
@@ -127,9 +126,8 @@ export default function PortfolioEditorPage() {
       form.reset({
         title: p.title || '',
         slug: p.slug || '',
-        excerpt: p.excerpt || '',
         description: p.description || '',
-        content: p.content || '',
+        brief: p.brief || '',
         cover_image: p.cover_image || '',
         live_url: p.live_url || '',
         repo_url: p.repo_url || '',
@@ -146,8 +144,6 @@ export default function PortfolioEditorPage() {
         is_featured: p.is_featured || false,
         display_order: p.display_order || 0,
       });
-      if (p.challenge) setChallenge(typeof p.challenge === 'string' ? JSON.parse(p.challenge) : p.challenge);
-      if (p.solution) setSolution(typeof p.solution === 'string' ? JSON.parse(p.solution) : p.solution);
       if (p.feedback) setFeedback(typeof p.feedback === 'string' ? JSON.parse(p.feedback) : p.feedback);
       if (p.gallery) setGallery(typeof p.gallery === 'string' ? JSON.parse(p.gallery) : (p.gallery || []));
       if (p.metrics) {
@@ -194,10 +190,10 @@ export default function PortfolioEditorPage() {
         ...values,
         technologies: values.technologies?.split(',').map((t) => t.trim()).filter(Boolean) || [],
         services: serializeServices(serviceSlugs),
-        challenge: JSON.stringify(challenge),
-        solution: JSON.stringify(solution),
         feedback: JSON.stringify(feedback),
         gallery: JSON.stringify(gallery),
+        // Migration 090 — brief unico body
+        brief: values.brief || null,
         // Migration 075 — case study extension
         year: values.year || null,
         tags: values.tags?.split(',').map((t) => t.trim()).filter(Boolean) || [],
@@ -229,8 +225,8 @@ export default function PortfolioEditorPage() {
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList>
             <TabsTrigger value="general">Generale</TabsTrigger>
-            <TabsTrigger value="content">Contenuto</TabsTrigger>
-            <TabsTrigger value="case-study">Case Study</TabsTrigger>
+            <TabsTrigger value="brief">Brief</TabsTrigger>
+            <TabsTrigger value="case-study">Risultato & Feedback</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
             <TabsTrigger value="seo">SEO & Link</TabsTrigger>
           </TabsList>
@@ -248,10 +244,6 @@ export default function PortfolioEditorPage() {
                   <Label className="text-xs">Slug *</Label>
                   <Input {...form.register('slug')} />
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Estratto</Label>
-                <Textarea {...form.register('excerpt')} rows={2} placeholder="Breve descrizione per le card..." />
               </div>
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-1.5">
@@ -338,51 +330,31 @@ export default function PortfolioEditorPage() {
             </div>
           </TabsContent>
 
-          {/* === CONTENUTO === */}
-          <TabsContent value="content" className="space-y-4">
+          {/* === BRIEF === Migration 090: body unico markdown.
+              Sostituisce le ex sezioni Contenuto/Challenge/Solution. */}
+          <TabsContent value="brief" className="space-y-4">
             <div className="rounded-xl border bg-card p-5 space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs">Descrizione</Label>
-                <Textarea {...form.register('description')} rows={3} placeholder="Descrizione del progetto..." />
+                <Label className="text-xs">Descrizione breve (per card index e SEO meta)</Label>
+                <Textarea {...form.register('description')} rows={3} placeholder="Una frase secca per la card del progetto e meta description fallback." />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-xs">Contenuto completo (Rich Text)</Label>
+                <Label className="text-xs">Brief (body del case study)</Label>
+                <p className="text-[10px] text-muted-foreground">
+                  Markdown unico: contesto + sfida + approccio in 300-500 parole.
+                  Voice asciutto, niente "siamo riusciti". Va mostrato come
+                  sezione 01 — Brief sul detail page.
+                </p>
                 <RichEditor
-                  value={form.watch('content') || ''}
-                  onChange={(val) => form.setValue('content', val)}
+                  value={form.watch('brief') || ''}
+                  onChange={(val) => form.setValue('brief', val)}
                 />
               </div>
             </div>
           </TabsContent>
 
-          {/* === CASE STUDY === */}
+          {/* === RISULTATO & FEEDBACK === */}
           <TabsContent value="case-study" className="space-y-4">
-            {/* Challenge */}
-            <div className="rounded-xl border bg-card p-5 space-y-4">
-              <h3 className="text-sm font-semibold">La Sfida</h3>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Titolo sfida</Label>
-                <Input value={challenge.title} onChange={(e) => setChallenge({ ...challenge, title: e.target.value })} placeholder="Il problema che il cliente aveva..." />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Descrizione sfida</Label>
-                <Textarea value={challenge.description} onChange={(e) => setChallenge({ ...challenge, description: e.target.value })} rows={3} placeholder="Descrivi il problema in dettaglio..." />
-              </div>
-            </div>
-
-            {/* Solution */}
-            <div className="rounded-xl border bg-card p-5 space-y-4">
-              <h3 className="text-sm font-semibold">La Soluzione</h3>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Titolo soluzione</Label>
-                <Input value={solution.title} onChange={(e) => setSolution({ ...solution, title: e.target.value })} placeholder="Come hai risolto il problema..." />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">Descrizione soluzione</Label>
-                <Textarea value={solution.description} onChange={(e) => setSolution({ ...solution, description: e.target.value })} rows={3} placeholder="Descrivi la soluzione implementata..." />
-              </div>
-            </div>
-
             {/* Outcome + Metrics (migration 075) */}
             <div className="rounded-xl border bg-card p-5 space-y-4">
               <div>
@@ -644,7 +616,7 @@ export default function PortfolioEditorPage() {
             itValues={{
               title: form.watch('title'),
               description: form.watch('description'),
-              content: form.watch('content'),
+              brief: form.watch('brief'),
               outcome: form.watch('outcome'),
               seo_title: form.watch('seo_title'),
               seo_description: form.watch('seo_description'),

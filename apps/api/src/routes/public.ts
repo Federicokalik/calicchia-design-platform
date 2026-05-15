@@ -249,13 +249,14 @@ publicRoutes.get('/projects/:slug', async (c) => {
   const locale = parseLocale(c.req.query('locale'));
 
   // i18n: JOIN su translations per i 6 campi traducibili
-  // (title, description, content, outcome, seo_title, seo_description).
+  // (title, description, brief, outcome, seo_title, seo_description).
+  // Migration 090: `content`/`challenge`/`solution` consolidati in `brief`.
   const rows = await sql`
     SELECT
       p.*,
       COALESCE(t_title.field_value, p.title) AS i18n_title,
       COALESCE(t_description.field_value, p.description) AS i18n_description,
-      COALESCE(t_content.field_value, p.content) AS i18n_content,
+      COALESCE(t_brief.field_value, p.brief) AS i18n_brief,
       COALESCE(t_outcome.field_value, p.outcome) AS i18n_outcome,
       COALESCE(t_seo_title.field_value, p.seo_title) AS i18n_seo_title,
       COALESCE(t_seo_desc.field_value, p.seo_description) AS i18n_seo_description
@@ -264,8 +265,8 @@ publicRoutes.get('/projects/:slug', async (c) => {
       ON t_title.project_id = p.id AND t_title.locale = ${locale} AND t_title.field_name = 'title'
     LEFT JOIN projects_translations t_description
       ON t_description.project_id = p.id AND t_description.locale = ${locale} AND t_description.field_name = 'description'
-    LEFT JOIN projects_translations t_content
-      ON t_content.project_id = p.id AND t_content.locale = ${locale} AND t_content.field_name = 'content'
+    LEFT JOIN projects_translations t_brief
+      ON t_brief.project_id = p.id AND t_brief.locale = ${locale} AND t_brief.field_name = 'brief'
     LEFT JOIN projects_translations t_outcome
       ON t_outcome.project_id = p.id AND t_outcome.locale = ${locale} AND t_outcome.field_name = 'outcome'
     LEFT JOIN projects_translations t_seo_title
@@ -280,7 +281,7 @@ publicRoutes.get('/projects/:slug', async (c) => {
   // Override con i18n risolti (translation > legacy IT column)
   project.title = project.i18n_title;
   project.description = project.i18n_description;
-  project.content = project.i18n_content;
+  project.brief = project.i18n_brief;
   project.outcome = project.i18n_outcome;
   project.seo_title = project.i18n_seo_title;
   project.seo_description = project.i18n_seo_description;
@@ -313,17 +314,13 @@ publicRoutes.get('/projects/:slug', async (c) => {
       slug: project.slug,
       title: project.title,
       description: project.description,
-      content: project.content, // long-form markdown (admin Rich Text TipTap)
+      brief: project.brief, // Migration 090 — single source per body case study
       client: project.client,
       services: project.services,
       industries: project.industries,
       cover_image: resolveImageUrl(project.cover_image as string | null),
       gallery: Array.isArray(project.gallery) ? project.gallery : [],
       technologies: project.technologies || [],
-      challenge: project.challenge,
-      challenge_images: project.challenge_images,
-      solution: project.solution,
-      solution_image: project.solution_image,
       feedback: project.feedback,
       // Migration 075 — case study extension
       year: project.year,

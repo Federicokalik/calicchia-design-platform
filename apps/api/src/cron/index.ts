@@ -15,6 +15,7 @@ import { runAnalyticsRetention } from './analytics-retention';
 import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintenance';
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
+import { runIcsPull } from './ics-pull';
 
 interface CronJob {
   name: string;
@@ -92,6 +93,11 @@ const jobs: CronJob[] = [
     intervalMs: 24 * 60 * 60 * 1000,
     runAtHour: 9, // 9:00 italiana
     run: runDunningEngine,
+  },
+  {
+    name: 'ics-pull',
+    intervalMs: 15 * 60 * 1000,
+    run: runIcsPull,
   },
 ];
 

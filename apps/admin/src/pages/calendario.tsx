@@ -15,6 +15,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
 import EventoEditModal from '@/pages/calendario/evento-edit';
+import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 // Colors per source (fallback se evento non ha colore custom dal calendario)
 const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: string; textColor: string }> = {
@@ -231,6 +232,8 @@ export default function CalendarioPage() {
 
   return (
     <div className="space-y-4">
+      <CalendarTabs />
+
       {/* Modale crea/edit evento */}
       {showEditor && (
         <EventoEditModal

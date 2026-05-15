@@ -29,11 +29,28 @@ export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; labelKey: s
   lost: { label: 'Perso', labelKey: 'lead.status.lost', color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900/30' },
 };
 
-export const LEAD_SOURCE_CONFIG: Record<LeadSource, { label: string; labelKey: string; color: string }> = {
+export interface LeadSourceConfig { label: string; labelKey: string; color: string }
+
+export const LEAD_SOURCE_CONFIG: Record<LeadSource, LeadSourceConfig> = {
   manual: { label: 'Manuale', labelKey: 'lead.source.manual', color: 'text-slate-500' },
   website_form: { label: 'Form Sito', labelKey: 'lead.source.website_form', color: 'text-blue-500' },
   calcom: { label: 'Cal.com', labelKey: 'lead.source.calcom', color: 'text-violet-500' },
   referral: { label: 'Referral', labelKey: 'lead.source.referral', color: 'text-emerald-500' },
 };
+
+// The DB schema stores `source` as free-text (no CHECK constraint), and several
+// API routes write values not in LEAD_SOURCE_CONFIG: 'booking_<slug>' from
+// calendar/public, 'embed_form' from public-leads. Bucket those into the
+// closest known config; fall back to a neutral chip for anything else.
+export function getLeadSourceConfig(source: string | null | undefined): LeadSourceConfig {
+  if (source && source in LEAD_SOURCE_CONFIG) {
+    return LEAD_SOURCE_CONFIG[source as LeadSource];
+  }
+  if (typeof source === 'string') {
+    if (source.startsWith('booking_')) return LEAD_SOURCE_CONFIG.calcom;
+    if (source === 'embed_form') return LEAD_SOURCE_CONFIG.website_form;
+  }
+  return LEAD_SOURCE_CONFIG.manual;
+}
 
 export const LEAD_COLUMN_ORDER: LeadStatus[] = ['new', 'contacted', 'proposal', 'negotiation', 'won', 'lost'];
