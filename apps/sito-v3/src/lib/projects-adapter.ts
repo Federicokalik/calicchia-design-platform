@@ -107,7 +107,7 @@ function extractFeedback(
 function deriveHero(api: ApiProjectDetail): Asset {
   return {
     src: resolveImageUrl(api.cover_image) ?? '/img/works/showcase-piscina-pooltech.webp',
-    alt: `${api.title} — case study`,
+    alt: api.cover_alt || `${api.title} — case study`,
     width: 2400,
     height: 1350,
   };
@@ -171,6 +171,7 @@ export interface AdaptedListItem {
   title: string;
   description: string | null;
   cover_image: string | null;
+  cover_alt: string | null;
   tags: string[];
   year: number;
   client: string | null;
@@ -186,6 +187,7 @@ export function adaptApiListItem(
     title: item.title,
     description: item.description,
     cover_image: resolveImageUrl(item.cover_image),
+    cover_alt: item.cover_alt ?? null,
     tags: item.tags ?? [],
     year:
       typeof item.year === 'number' && item.year > 1990

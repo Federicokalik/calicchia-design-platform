@@ -274,7 +274,7 @@ export default async function LavoriIndexPage() {
                         <div className="relative aspect-video overflow-hidden">
                           <Image
                             src={cover}
-                            alt={`${p.title} — cover`}
+                            alt={p.cover_alt || `${p.title} — cover`}
                             fill
                             sizes="(min-width: 768px) 40vw, 100vw"
                             className="object-cover transition-transform duration-300 ease-out"

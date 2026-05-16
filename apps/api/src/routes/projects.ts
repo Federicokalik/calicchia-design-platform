@@ -49,6 +49,7 @@ projects.post('/', async (c) => {
     description,
     brief, // Migration 090 — body unico case study (sostituisce content/challenge/solution)
     cover_image,
+    cover_alt, // Migration 092
     live_url,
     repo_url,
     technologies,
@@ -82,6 +83,7 @@ projects.post('/', async (c) => {
       description: description || null,
       brief: brief || null,
       cover_image: cover_image || null,
+      cover_alt: cover_alt || null,
       live_url: live_url || null,
       repo_url: repo_url || null,
       technologies: technologies || [],
@@ -122,6 +124,7 @@ projects.put('/:id', async (c) => {
     description,
     brief, // Migration 090
     cover_image,
+    cover_alt, // Migration 092
     live_url,
     repo_url,
     technologies,
@@ -148,6 +151,7 @@ projects.put('/:id', async (c) => {
   if (description !== undefined) updateData.description = description || null;
   if (brief !== undefined) updateData.brief = brief || null;
   if (cover_image !== undefined) updateData.cover_image = cover_image || null;
+  if (cover_alt !== undefined) updateData.cover_alt = cover_alt || null;
   if (live_url !== undefined) updateData.live_url = live_url || null;
   if (repo_url !== undefined) updateData.repo_url = repo_url || null;
   if (technologies !== undefined) updateData.technologies = technologies;

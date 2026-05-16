@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ImageUpload } from '@/components/ui/image-upload';
+import { GalleryEditor, normalizeGalleryIncoming, type GalleryItem } from '@/components/portfolio/gallery-editor';
 import { RichEditor } from '@/components/ui/rich-editor';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
@@ -31,6 +32,7 @@ const schema = z.object({
   // come body unico del case study (markdown via RichEditor TipTap).
   brief: z.string().optional(),
   cover_image: z.string().optional(),
+  cover_alt: z.string().max(250).optional(),
   live_url: z.string().optional(),
   repo_url: z.string().optional(),
   client: z.string().optional(),
@@ -74,7 +76,7 @@ export default function PortfolioEditorPage() {
 
   // Migration 090: challenge/solution states rimossi. Brief vive in form.brief.
   const [feedback, setFeedback] = useState({ quote: '', author: '', role: '' });
-  const [gallery, setGallery] = useState<string[]>([]);
+  const [gallery, setGallery] = useState<GalleryItem[]>([]);
   // Migration 075 — metrics repeater. Each row may use either {label,value}
   // or {label,before,after,unit} pattern; the frontend renders both.
   const [metrics, setMetrics] = useState<MetricRow[]>([]);
@@ -129,6 +131,7 @@ export default function PortfolioEditorPage() {
         description: p.description || '',
         brief: p.brief || '',
         cover_image: p.cover_image || '',
+        cover_alt: p.cover_alt || '',
         live_url: p.live_url || '',
         repo_url: p.repo_url || '',
         client: p.client || '',
@@ -145,7 +148,11 @@ export default function PortfolioEditorPage() {
         display_order: p.display_order || 0,
       });
       if (p.feedback) setFeedback(typeof p.feedback === 'string' ? JSON.parse(p.feedback) : p.feedback);
-      if (p.gallery) setGallery(typeof p.gallery === 'string' ? JSON.parse(p.gallery) : (p.gallery || []));
+      if (p.gallery) {
+        const raw = typeof p.gallery === 'string' ? JSON.parse(p.gallery) : p.gallery;
+        // Accept both legacy string[] and current {src, alt}[] shapes.
+        setGallery(normalizeGalleryIncoming(raw));
+      }
       if (p.metrics) {
         const parsed = typeof p.metrics === 'string' ? JSON.parse(p.metrics) : p.metrics;
         setMetrics(
@@ -508,34 +515,27 @@ export default function PortfolioEditorPage() {
                 value={form.watch('cover_image') || ''}
                 onChange={(url) => form.setValue('cover_image', url)}
               />
+              <div className="space-y-1.5">
+                <Label className="text-xs">Alt text cover</Label>
+                <Input
+                  {...form.register('cover_alt')}
+                  placeholder="Descrizione concisa dell'immagine — usata da screen reader e SEO."
+                  maxLength={250}
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Vuoto = fallback automatico a "{form.watch('title') || 'titolo progetto'} — case study".
+                </p>
+              </div>
             </div>
 
             <div className="rounded-xl border bg-card p-5 space-y-4">
-              <div className="flex items-center justify-between">
+              <div>
                 <h3 className="text-sm font-semibold">Galleria</h3>
-                <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={() => setGallery([...gallery, ''])}>
-                  <Plus className="h-3 w-3 mr-1" /> Aggiungi immagine
-                </Button>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Carica le immagini, riordina con le frecce, scrivi un alt text per ciascuna (accessibilità + SEO).
+                </p>
               </div>
-              {gallery.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Nessuna immagine nella galleria</p>
-              ) : (
-                <div className="space-y-2">
-                  {gallery.map((url, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <Input
-                        value={url}
-                        onChange={(e) => { const next = [...gallery]; next[i] = e.target.value; setGallery(next); }}
-                        placeholder="URL immagine"
-                        className="flex-1 h-8 text-xs"
-                      />
-                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => setGallery(gallery.filter((_, j) => j !== i))}>
-                        <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <GalleryEditor value={gallery} onChange={setGallery} folder="projects" max={20} />
             </div>
           </TabsContent>
 

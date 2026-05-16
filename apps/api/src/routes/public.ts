@@ -211,7 +211,7 @@ publicRoutes.get('/projects', async (c) => {
       p.slug,
       COALESCE(t_title.field_value, p.title) AS title,
       COALESCE(t_description.field_value, p.description) AS description,
-      p.cover_image, p.technologies, p.tags, p.year, p.client, p.industries
+      p.cover_image, p.cover_alt, p.technologies, p.tags, p.year, p.client, p.industries
     FROM projects p
     LEFT JOIN projects_translations t_title
       ON t_title.project_id = p.id AND t_title.locale = ${locale} AND t_title.field_name = 'title'
@@ -229,6 +229,7 @@ publicRoutes.get('/projects', async (c) => {
       title: p.title,
       description: p.description,
       cover_image: resolveImageUrl(p.cover_image as string | null),
+      cover_alt: p.cover_alt as string | null,
       tags: (p.tags && (p.tags as string[]).length > 0)
         ? (p.tags as string[])
         : (p.technologies || []),
@@ -319,6 +320,7 @@ publicRoutes.get('/projects/:slug', async (c) => {
       services: project.services,
       industries: project.industries,
       cover_image: resolveImageUrl(project.cover_image as string | null),
+      cover_alt: (project.cover_alt as string | null) ?? null,
       gallery: Array.isArray(project.gallery) ? project.gallery : [],
       technologies: project.technologies || [],
       feedback: project.feedback,

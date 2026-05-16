@@ -12,6 +12,8 @@ export interface ApiProjectListItem {
   title: string;
   description: string | null;
   cover_image: string | null;
+  /** Migration 092 — alt text for cover_image; null falls back to title at render time. */
+  cover_alt: string | null;
   tags: string[];
   year: number | null;
   client: string | null;
@@ -57,6 +59,8 @@ export interface ApiProjectDetail {
   services: string | null;
   industries: string | null;
   cover_image: string | null;
+  /** Migration 092 — alt text for cover_image; null falls back to title at render time. */
+  cover_alt: string | null;
   gallery: ApiProjectGalleryItem[];
   technologies: string[];
   feedback: ApiProjectFeedback | string | null;
