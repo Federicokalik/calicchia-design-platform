@@ -477,3 +477,131 @@ Genera un articolo completo, ben strutturato e coinvolgente.`;
     tags,
   };
 }
+
+// ─────────────────────────────────────────────────────────────
+// Portfolio (projects) — translation & SEO helpers
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Italian-canonical fields of a portfolio project that admin can request
+ * EN translations for. Keys match `TRANSLATABLE_FIELDS` in
+ * `apps/admin/src/pages/portfolio/TranslationsPanelEN.tsx`.
+ *
+ * Any field can be empty/undefined — only non-empty IT inputs are
+ * translated; the corresponding EN output is omitted, so the frontend
+ * leaves the field blank (which falls back to IT canonical at render
+ * time via projects_translations join).
+ */
+export interface ProjectTranslatableFields {
+  title?: string;
+  description?: string;
+  brief?: string;
+  outcome?: string;
+  seo_title?: string;
+  seo_description?: string;
+}
+
+export async function translateProjectFieldsToEN(
+  itFields: ProjectTranslatableFields,
+  model: string = 'gpt-4o-mini',
+): Promise<ProjectTranslatableFields> {
+  // Filter out empty inputs so the model has less to chew on and the
+  // output stays predictable (we only ask for what we sent).
+  const payload: Record<string, string> = {};
+  for (const [k, v] of Object.entries(itFields)) {
+    if (typeof v === 'string' && v.trim()) payload[k] = v;
+  }
+  if (Object.keys(payload).length === 0) return {};
+
+  const result = await createChatCompletion({
+    model,
+    messages: [
+      {
+        role: 'system',
+        content:
+          "You are a professional IT→EN translator for a freelance designer's portfolio. " +
+          "Translate the provided Italian fields into natural, idiomatic British English. " +
+          "Preserve markdown formatting (headings, lists, links, code spans, code blocks) when present in the `brief` field. " +
+          "Do NOT translate brand names, technology names, file paths, URLs, or code identifiers. " +
+          "For `seo_title` keep it ≤70 characters. For `seo_description` keep it ≤160 characters. " +
+          'Respond with a single JSON object whose keys are the field names from the input, and values are the translations. ' +
+          'Do not invent keys not present in the input. Do not wrap in any envelope.',
+      },
+      {
+        role: 'user',
+        content:
+          'Translate these fields:\n\n' + JSON.stringify(payload, null, 2),
+      },
+    ],
+    response_format: { type: 'json_object' },
+  });
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    throw new Error('AI translation: invalid JSON returned by model');
+  }
+
+  // Coerce values to string and drop anything not in the original payload
+  // so a hallucinated key cannot leak through.
+  const out: ProjectTranslatableFields = {};
+  for (const key of Object.keys(payload)) {
+    const v = parsed[key];
+    if (typeof v === 'string' && v.trim()) {
+      (out as Record<string, string>)[key] = v;
+    }
+  }
+  return out;
+}
+
+/**
+ * Generate SEO title + description for a portfolio project from its
+ * Italian-canonical content. Returns hard-capped values (70 / 160 chars)
+ * — defensive trim in case the model over-runs.
+ */
+export async function generateProjectSEOSuggestions(
+  args: { title: string; description?: string; brief?: string; client?: string; services?: string },
+  model: string = 'gpt-4o-mini',
+): Promise<{ seo_title: string; seo_description: string }> {
+  const briefExcerpt = (args.brief ?? '').substring(0, 2000);
+
+  const result = await createChatCompletion({
+    model,
+    messages: [
+      {
+        role: 'system',
+        content:
+          'Sei un esperto SEO per portfolio di freelance designer/sviluppatori. ' +
+          'Genera un seo_title (≤70 caratteri, include il nome cliente o keyword principale, finisce con "· Federico Calicchia" se sta nei 70 char) ' +
+          'e una seo_description (≤160 caratteri, descrittiva e benefit-driven, niente clickbait). ' +
+          'Lingua: italiano. Rispondi SOLO con JSON valido: {"seo_title":"...","seo_description":"..."}',
+      },
+      {
+        role: 'user',
+        content:
+          `Titolo progetto: ${args.title}\n` +
+          (args.client ? `Cliente: ${args.client}\n` : '') +
+          (args.services ? `Servizi: ${args.services}\n` : '') +
+          (args.description ? `Descrizione: ${args.description}\n` : '') +
+          (briefExcerpt ? `Estratto brief:\n${briefExcerpt}\n` : ''),
+      },
+    ],
+    response_format: { type: 'json_object' },
+  });
+
+  let parsed: { seo_title?: unknown; seo_description?: unknown };
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    throw new Error('AI SEO: invalid JSON returned by model');
+  }
+
+  const rawTitle = typeof parsed.seo_title === 'string' ? parsed.seo_title.trim() : '';
+  const rawDesc = typeof parsed.seo_description === 'string' ? parsed.seo_description.trim() : '';
+
+  return {
+    seo_title: rawTitle.slice(0, 70),
+    seo_description: rawDesc.slice(0, 160),
+  };
+}

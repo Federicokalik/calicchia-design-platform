@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, Sparkles, Loader2, Link as LinkIcon, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -219,6 +219,40 @@ export default function PortfolioEditorPage() {
     },
     onError: () => toast.error('Errore nel salvataggio'),
   });
+
+  // AI: suggest seo_title + seo_description from title/description/brief.
+  // Requires a saved project (uses IT canonical fields from the DB row),
+  // so the button is disabled while isNew. Pre-fills the form, user reviews.
+  const seoMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch(`/api/projects/${id}/ai/seo`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      return res as { seo_title: string; seo_description: string };
+    },
+    onSuccess: (data) => {
+      if (data.seo_title) form.setValue('seo_title', data.seo_title, { shouldDirty: true });
+      if (data.seo_description) form.setValue('seo_description', data.seo_description, { shouldDirty: true });
+      toast.success('SEO suggerito da AI · rivedi e salva');
+    },
+    onError: (err: Error) => toast.error(`Errore SEO AI: ${err.message}`),
+  });
+
+  // Pure regex URL extraction from the brief markdown — no AI tax.
+  // Handles bare URLs and markdown-link [text](url). Deduplicates.
+  const briefValue = form.watch('brief') || '';
+  const extractedLinks = useMemo(() => {
+    const urls = new Set<string>();
+    const re = /https?:\/\/[^\s)<>'"]+/gi;
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(briefValue)) !== null) {
+      // Strip trailing punctuation that the regex might catch.
+      const cleaned = match[0].replace(/[.,;:!?]+$/, '');
+      urls.add(cleaned);
+    }
+    return Array.from(urls);
+  }, [briefValue]);
 
   return (
     <div className="space-y-4">
@@ -542,11 +576,34 @@ export default function PortfolioEditorPage() {
           {/* === SEO & LINK === */}
           <TabsContent value="seo" className="space-y-4">
             <div className="rounded-xl border bg-card p-5 space-y-4">
-              <div>
-                <h3 className="text-sm font-semibold">SEO Override</h3>
-                <p className="text-[10px] text-muted-foreground mt-1">
-                  Opzionali. Se vuoti, sito-v3 cade su titolo + descrizione del progetto.
-                </p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold">SEO Override</h3>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Opzionali. Se vuoti, sito-v3 cade su titolo + descrizione del progetto.
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="h-8 text-xs shrink-0"
+                  disabled={isNew || seoMutation.isPending}
+                  onClick={() => {
+                    const hasTitle = (form.getValues('seo_title') || '').trim().length > 0;
+                    const hasDesc = (form.getValues('seo_description') || '').trim().length > 0;
+                    if ((hasTitle || hasDesc) && !window.confirm('Sovrascrivo i campi SEO esistenti?')) return;
+                    seoMutation.mutate();
+                  }}
+                  title={isNew ? 'Salva prima il progetto per usare la generazione AI' : 'Genera seo_title + seo_description da contenuto IT'}
+                >
+                  {seoMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  )}
+                  {seoMutation.isPending ? 'Genero…' : 'Suggerisci con AI'}
+                </Button>
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">SEO Title</Label>
@@ -601,6 +658,55 @@ export default function PortfolioEditorPage() {
               <div className="space-y-1.5">
                 <Label className="text-xs">Ordine visualizzazione</Label>
                 <Input type="number" {...form.register('display_order', { valueAsNumber: true })} className="w-24" />
+              </div>
+
+              {/* Link extraction from brief markdown — pure client-side regex.
+                  Each URL is clickable (apri in nuova tab) e ha "Usa come Live URL". */}
+              <div className="pt-3 border-t border-muted-foreground/15">
+                <div className="flex items-center justify-between gap-3 mb-2">
+                  <div>
+                    <h4 className="text-xs font-semibold flex items-center gap-1.5">
+                      <LinkIcon className="h-3.5 w-3.5" /> Link nel brief
+                    </h4>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      URL trovati nel campo brief (estrazione automatica).
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {extractedLinks.length} trovato{extractedLinks.length === 1 ? '' : 'i'}
+                  </span>
+                </div>
+                {extractedLinks.length === 0 ? (
+                  <p className="text-[11px] text-muted-foreground italic">
+                    Nessun URL nel brief.
+                  </p>
+                ) : (
+                  <ul className="space-y-1.5">
+                    {extractedLinks.map((url) => (
+                      <li key={url} className="flex items-center gap-2 text-xs">
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 truncate text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          <ExternalLink className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{url}</span>
+                        </a>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px]"
+                          onClick={() => form.setValue('live_url', url, { shouldDirty: true })}
+                          title="Imposta come URL sito live"
+                        >
+                          Usa come Live URL
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
           </TabsContent>

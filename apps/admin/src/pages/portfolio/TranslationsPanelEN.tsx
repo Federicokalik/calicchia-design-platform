@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Save, Globe } from 'lucide-react';
+import { Save, Globe, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -83,6 +83,28 @@ export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelEN
     },
   });
 
+  // AI translation: IT canonical → EN, prefills enValues in form (user
+  // reviews + clicks "Salva EN" to persist). Does not auto-save.
+  const translateMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch(`/api/projects/${projectId}/ai/translate`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      return res as { en: Translations };
+    },
+    onSuccess: (data) => {
+      // Merge: only overwrite fields the model returned, preserve any
+      // manually-edited EN values for fields the model didn't translate.
+      setEnValues((prev) => ({ ...prev, ...data.en }));
+      const count = Object.keys(data.en).length;
+      toast.success(`Traduzione AI completata · ${count}/${TRANSLATABLE_FIELDS.length} campi`);
+    },
+    onError: (err: Error) => {
+      toast.error(`Errore traduzione AI: ${err.message}`);
+    },
+  });
+
   const filledCount = useMemo(
     () =>
       TRANSLATABLE_FIELDS.filter((f) => {
@@ -128,8 +150,28 @@ export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelEN
           <Button
             type="button"
             size="sm"
+            variant="outline"
+            onClick={() => {
+              // Warn if any EN field has manual content that would be overwritten.
+              const hasManual = TRANSLATABLE_FIELDS.some((f) => (enValues[f.key] || '').trim().length > 0);
+              if (hasManual && !window.confirm('Sovrascrivo le traduzioni EN già inserite?')) return;
+              translateMutation.mutate();
+            }}
+            disabled={translateMutation.isPending || saveMutation.isPending}
+            title="Traduce IT → EN con AI. Pre-riempie i campi: rivedi prima di salvare."
+          >
+            {translateMutation.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            {translateMutation.isPending ? 'Traduco…' : 'Traduci con AI'}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
             onClick={() => saveMutation.mutate(enValues)}
-            disabled={saveMutation.isPending}
+            disabled={saveMutation.isPending || translateMutation.isPending}
           >
             <Save className="h-3.5 w-3.5 mr-1.5" />
             {saveMutation.isPending ? 'Salvataggio…' : 'Salva EN'}

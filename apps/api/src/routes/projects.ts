@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import * as openai from '../lib/ai/openai';
 
 type Env = { Variables: { user: { id: string; email?: string } } };
 
@@ -310,4 +311,162 @@ projects.patch('/:id/translations/:locale', async (c) => {
   }
 
   return c.json({ project_id: id, locale, upserted, deleted });
+});
+
+// ─────────────────────────────────────────────────────────────
+// AI logs helper (Migration 093 — project_ai_logs)
+// Fire-and-forget: never block the response on logging.
+// ─────────────────────────────────────────────────────────────
+const DEFAULT_MODEL = 'gpt-4o-mini';
+
+async function logAiCall(entry: {
+  project_id: string;
+  kind: 'translate' | 'seo';
+  model: string;
+  status: 'ok' | 'error';
+  error_message?: string | null;
+  duration_ms: number;
+  input_chars: number;
+  output_chars: number;
+}): Promise<void> {
+  try {
+    await sql`
+      INSERT INTO project_ai_logs ${sql({
+        project_id: entry.project_id,
+        kind: entry.kind,
+        model: entry.model,
+        status: entry.status,
+        error_message: entry.error_message ?? null,
+        duration_ms: entry.duration_ms,
+        input_chars: entry.input_chars,
+        output_chars: entry.output_chars,
+      })}
+    `;
+  } catch (err) {
+    // Audit log failure must never break the user-facing flow.
+    console.error('[project_ai_logs] insert failed:', err);
+  }
+}
+
+// ========== AI: translate IT → EN ==========
+//
+// POST /api/projects/:id/ai/translate
+//   Body: { model?: string }
+//   Returns: { en: { title?, description?, brief?, outcome?, seo_title?, seo_description? } }
+//
+// Pulls IT canonical from the projects row (not from projects_translations
+// for IT — IT lives in the base columns by convention).
+projects.post('/:id/ai/translate', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{ model?: string }>().catch(() => ({} as { model?: string }));
+
+  const [project] = await sql`
+    SELECT title, description, brief, outcome, seo_title, seo_description
+    FROM projects WHERE id = ${id}
+  `;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+  if (!openai.isOpenAIConfigured()) {
+    return c.json({ error: 'OpenAI non configurato (OPENAI_API_KEY mancante)' }, 400);
+  }
+
+  const model = body.model ?? DEFAULT_MODEL;
+  const itFields = {
+    title: (project.title as string | null) ?? undefined,
+    description: (project.description as string | null) ?? undefined,
+    brief: (project.brief as string | null) ?? undefined,
+    outcome: (project.outcome as string | null) ?? undefined,
+    seo_title: (project.seo_title as string | null) ?? undefined,
+    seo_description: (project.seo_description as string | null) ?? undefined,
+  };
+  const inputChars = Object.values(itFields)
+    .filter((v): v is string => typeof v === 'string')
+    .reduce((sum, v) => sum + v.length, 0);
+
+  const startedAt = Date.now();
+  try {
+    const en = await openai.translateProjectFieldsToEN(itFields, model);
+    const outputChars = Object.values(en)
+      .filter((v): v is string => typeof v === 'string')
+      .reduce((sum, v) => sum + v.length, 0);
+    await logAiCall({
+      project_id: id,
+      kind: 'translate',
+      model,
+      status: 'ok',
+      duration_ms: Date.now() - startedAt,
+      input_chars: inputChars,
+      output_chars: outputChars,
+    });
+    return c.json({ en });
+  } catch (err) {
+    await logAiCall({
+      project_id: id,
+      kind: 'translate',
+      model,
+      status: 'error',
+      error_message: err instanceof Error ? err.message : String(err),
+      duration_ms: Date.now() - startedAt,
+      input_chars: inputChars,
+      output_chars: 0,
+    });
+    throw err;
+  }
+});
+
+// ========== AI: SEO suggestions ==========
+//
+// POST /api/projects/:id/ai/seo
+//   Body: { model?: string }
+//   Returns: { seo_title: string, seo_description: string }
+projects.post('/:id/ai/seo', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{ model?: string }>().catch(() => ({} as { model?: string }));
+
+  const [project] = await sql`
+    SELECT title, description, brief, client, services
+    FROM projects WHERE id = ${id}
+  `;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+  if (!openai.isOpenAIConfigured()) {
+    return c.json({ error: 'OpenAI non configurato (OPENAI_API_KEY mancante)' }, 400);
+  }
+
+  const model = body.model ?? DEFAULT_MODEL;
+  const args = {
+    title: project.title as string,
+    description: (project.description as string | null) ?? undefined,
+    brief: (project.brief as string | null) ?? undefined,
+    client: (project.client as string | null) ?? undefined,
+    services: (project.services as string | null) ?? undefined,
+  };
+  const inputChars = Object.values(args)
+    .filter((v): v is string => typeof v === 'string')
+    .reduce((sum, v) => sum + v.length, 0);
+
+  const startedAt = Date.now();
+  try {
+    const suggestions = await openai.generateProjectSEOSuggestions(args, model);
+    await logAiCall({
+      project_id: id,
+      kind: 'seo',
+      model,
+      status: 'ok',
+      duration_ms: Date.now() - startedAt,
+      input_chars: inputChars,
+      output_chars: suggestions.seo_title.length + suggestions.seo_description.length,
+    });
+    return c.json(suggestions);
+  } catch (err) {
+    await logAiCall({
+      project_id: id,
+      kind: 'seo',
+      model,
+      status: 'error',
+      error_message: err instanceof Error ? err.message : String(err),
+      duration_ms: Date.now() - startedAt,
+      input_chars: inputChars,
+      output_chars: 0,
+    });
+    throw err;
+  }
 });
