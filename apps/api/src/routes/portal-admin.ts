@@ -95,7 +95,8 @@ portalAdmin.get('/preview/:customer_id', async (c) => {
 
   const invoiceRows = await sql`
     SELECT id, invoice_number, status, subtotal, tax_amount, total,
-           issue_date, due_date, payment_status, line_items, created_at
+           issue_date, due_date, payment_status, line_items, created_at,
+           sdi_status, sdi_xml_generated_at, sdi_xml_filename
     FROM invoices
     WHERE customer_id = ${customerId}
     ORDER BY issue_date DESC NULLS LAST

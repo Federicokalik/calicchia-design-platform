@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import {
-  ExternalLink, Receipt, CreditCard, Link2, Repeat,
+  ExternalLink, Receipt, CreditCard, Link2, Repeat, FileCode2,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTopbar } from '@/hooks/use-topbar';
@@ -9,6 +9,7 @@ const SchedulesTab = lazy(() => import('@/components/fatturazione/schedules-tab'
 const LinksTab = lazy(() => import('@/components/fatturazione/links-tab'));
 const TrackerTab = lazy(() => import('@/components/fatturazione/tracker-tab'));
 const SubscriptionsTab = lazy(() => import('@/components/fatturazione/subscriptions-tab'));
+const SdiTab = lazy(() => import('@/components/fatturazione/sdi-tab'));
 
 function TabFallback() {
   return (
@@ -47,6 +48,10 @@ export default function FatturazionePage() {
           <TabsTrigger value="tracker" className="gap-1.5">
             <Receipt className="h-3.5 w-3.5" />
             Tracker
+          </TabsTrigger>
+          <TabsTrigger value="sdi" className="gap-1.5">
+            <FileCode2 className="h-3.5 w-3.5" />
+            XML SDI
           </TabsTrigger>
         </TabsList>
 
@@ -87,6 +92,13 @@ export default function FatturazionePage() {
         <TabsContent value="tracker" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <TrackerTab />
+          </Suspense>
+        </TabsContent>
+
+        {/* SDI / FatturaPA XML */}
+        <TabsContent value="sdi" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <SdiTab />
           </Suspense>
         </TabsContent>
       </Tabs>

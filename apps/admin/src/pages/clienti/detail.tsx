@@ -6,7 +6,7 @@ import {
   ArrowLeft, Building2, Mail, Phone, Globe,
   FolderKanban, Receipt, MessageSquare,
   Send, KeyRound, Copy, Check, RefreshCw, ExternalLink,
-  FileBarChart, Plus, ShieldOff, Eye, EyeOff,
+  FileBarChart, Plus, ShieldOff, Eye, EyeOff, FileCode2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import { EmptyState } from '@/components/shared/empty-state';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { downloadSdiXml } from '@/lib/sdi';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 import type { Customer, CustomerNote } from '@/types/customer';
@@ -90,6 +91,9 @@ export default function ClienteDetailPage() {
       id: string; invoice_number: string | null; status: string;
       total: number | string; issue_date: string | null;
       due_date: string | null; payment_status: string | null;
+      sdi_status: 'pending' | 'generated' | 'sent' | 'accepted' | 'rejected' | null;
+      sdi_xml_generated_at: string | null;
+      sdi_xml_filename: string | null;
     }>;
     summary: {
       projects_total: number; projects_visible: number;
@@ -782,20 +786,48 @@ export default function ClienteDetailPage() {
                     <p className="text-xs text-muted-foreground px-4 py-3">Nessuna fattura.</p>
                   ) : (
                     <div className="divide-y">
-                      {portalPreviewData.invoices.map((i) => (
-                        <div key={i.id} className="px-4 py-2.5 flex items-center gap-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{i.invoice_number || 'Bozza'}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {i.issue_date ? new Date(i.issue_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                            </p>
+                      {portalPreviewData.invoices.map((i) => {
+                        const sdiGenerated = i.sdi_status && i.sdi_status !== 'pending';
+                        const sdiTitle = i.status === 'draft'
+                          ? 'Emetti la fattura prima di generare XML SDI'
+                          : sdiGenerated
+                            ? `XML SDI già generato${i.sdi_xml_generated_at ? ` il ${new Date(i.sdi_xml_generated_at).toLocaleDateString('it-IT')}` : ''} · clicca per riscaricare`
+                            : 'Scarica XML FatturaPA';
+
+                        return (
+                          <div key={i.id} className="px-4 py-2.5 flex items-center gap-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{i.invoice_number || 'Bozza'}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {i.issue_date ? new Date(i.issue_date).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] shrink-0">{i.status}</Badge>
+                            <span className="text-sm font-semibold tabular-nums shrink-0">
+                              €{Number(i.total || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 shrink-0"
+                              disabled={i.status === 'draft'}
+                              title={sdiTitle}
+                              onClick={async () => {
+                                try {
+                                  await downloadSdiXml(i.id);
+                                  toast.success('XML SDI scaricato');
+                                  queryClient.invalidateQueries({ queryKey: ['portal-preview', id] });
+                                } catch (err) {
+                                  toast.error(err instanceof Error ? err.message : 'Errore generazione XML');
+                                }
+                              }}
+                            >
+                              <FileCode2 className={cn('h-3.5 w-3.5', sdiGenerated && 'text-emerald-600')} />
+                            </Button>
                           </div>
-                          <Badge variant="outline" className="text-[10px] shrink-0">{i.status}</Badge>
-                          <span className="text-sm font-semibold tabular-nums shrink-0">
-                            €{Number(i.total || 0).toLocaleString('it-IT', { minimumFractionDigits: 2 })}
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
