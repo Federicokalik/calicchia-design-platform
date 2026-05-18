@@ -15,6 +15,7 @@ import type {
   ApiProjectListItem,
   ApiProjectFeedback,
   ApiProjectMetric,
+  ApiBeforeAfterPair,
 } from './projects-api';
 import type { Asset, Project, ProjectSection } from '@/data/types';
 
@@ -225,6 +226,11 @@ export interface CaseStudyExtensionData {
   client: string | null;
   industries: string | null;
   servicesLine: string | null;
+  /**
+   * Migration 095 — restyle pairs con src già risolti via resolveImageUrl.
+   * Vuoto = non renderizzare la sezione (rendering condizionale chiamante).
+   */
+  beforeAfterPairs: ApiBeforeAfterPair[];
 }
 
 export function deriveCaseStudyExtension(
@@ -246,5 +252,44 @@ export function deriveCaseStudyExtension(
     client: api.client,
     industries: api.industries,
     servicesLine: api.services,
+    beforeAfterPairs: deriveBeforeAfterPairs(api),
   };
+}
+
+/**
+ * Migration 095 — risolve i src delle immagini e scarta le pair invalide
+ * (ne basta una mancante per saltare l'intera coppia). Rispetta il flag
+ * `is_restyling`: se false → ritorna [] anche se ci sono pair nel JSONB
+ * (così l'editor puo' nascondere la sezione senza svuotare i dati).
+ */
+function deriveBeforeAfterPairs(api: ApiProjectDetail): ApiBeforeAfterPair[] {
+  if (!api.is_restyling) return [];
+  const raw = api.before_after?.pairs;
+  if (!Array.isArray(raw) || raw.length === 0) return [];
+
+  return raw
+    .map((p): ApiBeforeAfterPair | null => {
+      const beforeSrc = resolveImageUrl(p.before?.src ?? null);
+      const afterSrc = resolveImageUrl(p.after?.src ?? null);
+      if (!beforeSrc || !afterSrc) return null;
+      return {
+        label: typeof p.label === 'string' && p.label.trim() ? p.label : undefined,
+        label_en:
+          typeof p.label_en === 'string' && p.label_en.trim() ? p.label_en : undefined,
+        note: typeof p.note === 'string' && p.note.trim() ? p.note : undefined,
+        before: {
+          src: beforeSrc,
+          alt: p.before.alt || `${api.title} — prima`,
+          w: typeof p.before.w === 'number' ? p.before.w : 2400,
+          h: typeof p.before.h === 'number' ? p.before.h : 1500,
+        },
+        after: {
+          src: afterSrc,
+          alt: p.after.alt || `${api.title} — dopo`,
+          w: typeof p.after.w === 'number' ? p.after.w : 2400,
+          h: typeof p.after.h === 'number' ? p.after.h : 1500,
+        },
+      };
+    })
+    .filter((p): p is ApiBeforeAfterPair => p !== null);
 }

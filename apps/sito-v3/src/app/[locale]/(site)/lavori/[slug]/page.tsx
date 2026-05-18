@@ -4,6 +4,7 @@ import { CaseHeroOverlay } from '@/components/case-study/CaseHeroOverlay';
 import { CaseStaleNotice } from '@/components/case-study/CaseStaleNotice';
 import { CaseBrief } from '@/components/case-study/CaseBrief';
 import { CaseGallery } from '@/components/case-study/CaseGallery';
+import { CaseBeforeAfter } from '@/components/case-study/CaseBeforeAfter';
 import { CaseOutcome } from '@/components/case-study/CaseOutcome';
 import { CaseQuote } from '@/components/case-study/CaseQuote';
 import { CaseNext } from '@/components/case-study/CaseNext';
@@ -122,6 +123,34 @@ export default async function CaseStudyPage({
       : []),
   ].filter(Boolean);
 
+  // Migration 095 — expose before/after pairs as ImageObject pairs in
+  // associatedMedia so Google can index them. Each pair becomes two
+  // ImageObject entries with captions disambiguating "before" / "after".
+  // Falls back to undefined (omitted) when there are no pairs.
+  const associatedMedia = ext.beforeAfterPairs.length > 0
+    ? ext.beforeAfterPairs.flatMap((pair, i) => {
+        const labelPrefix = pair.label ?? `Sezione ${i + 1}`;
+        return [
+          {
+            '@type': 'ImageObject',
+            contentUrl: pair.before.src,
+            caption: `${labelPrefix} — prima`,
+            description: pair.before.alt,
+            width: pair.before.w,
+            height: pair.before.h,
+          },
+          {
+            '@type': 'ImageObject',
+            contentUrl: pair.after.src,
+            caption: `${labelPrefix} — dopo`,
+            description: pair.after.alt,
+            width: pair.after.w,
+            height: pair.after.h,
+          },
+        ];
+      })
+    : undefined;
+
   const creativeWorkSchema = {
     '@context': 'https://schema.org',
     '@type': 'CreativeWork',
@@ -142,6 +171,7 @@ export default async function CaseStudyPage({
     workExample: detail.project.live_url
       ? { '@type': 'WebSite', url: detail.project.live_url }
       : undefined,
+    associatedMedia,
   };
 
   const breadcrumbSchema = buildBreadcrumbSchema([
@@ -173,14 +203,31 @@ export default async function CaseStudyPage({
         />
       ) : null}
 
-      {/* Detail redesign 2026-05-14: la sequenza scende da 8 a 5 sezioni.
-          Brief unico (markdown) sostituisce Contesto + Sfida + Approccio +
-          Longform. Galleria, Outcome, Quote, Next invariati. */}
+      {/* Detail sequence (migration 095 — restyle prima/dopo opzionale):
+          01 — Brief (markdown unico, post-090).
+          02 — Prima / Dopo (solo se is_restyling AND pairs > 0).
+          03/02 — Gallery.
+          04/03 — Outcome.
+          Quote + Next chiudono. La numerazione si compatta dinamicamente
+          quando la sezione restyle e' assente per evitare buchi nella
+          serie "01 / 02 / 03" che il visitatore legge sui rail. */}
       <CaseBrief markdown={ext.brief} index="01" />
 
-      {gallery ? <CaseGallery section={gallery} index="02" /> : null}
+      {ext.beforeAfterPairs.length > 0 ? (
+        <CaseBeforeAfter pairs={ext.beforeAfterPairs} index="02" />
+      ) : null}
 
-      <CaseOutcome outcome={ext.outcome} metrics={ext.metrics} index="03" />
+      {(() => {
+        const hasRestyle = ext.beforeAfterPairs.length > 0;
+        const galleryIdx = hasRestyle ? '03' : '02';
+        const outcomeIdx = hasRestyle ? '04' : '03';
+        return (
+          <>
+            {gallery ? <CaseGallery section={gallery} index={galleryIdx} /> : null}
+            <CaseOutcome outcome={ext.outcome} metrics={ext.metrics} index={outcomeIdx} />
+          </>
+        );
+      })()}
 
       {feedback ? (
         <CaseQuote

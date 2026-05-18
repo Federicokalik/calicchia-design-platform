@@ -49,6 +49,30 @@ export interface ApiProjectMetric {
   unit?: string;
 }
 
+/**
+ * Migration 095 — Before/After pair for website-restyle case studies.
+ * Una pair = una "schermata" del sito da confrontare prima vs dopo.
+ */
+export interface ApiBeforeAfterImage {
+  src: string;
+  alt: string;
+  w?: number;
+  h?: number;
+}
+export interface ApiBeforeAfterPair {
+  /** IT canonical label, opzionale (es. "Homepage", "Pagina contatti"). */
+  label?: string;
+  /** Override EN, opzionale. */
+  label_en?: string;
+  before: ApiBeforeAfterImage;
+  after: ApiBeforeAfterImage;
+  /** Una riga di contesto sotto la coppia. */
+  note?: string;
+}
+export interface ApiBeforeAfter {
+  pairs: ApiBeforeAfterPair[];
+}
+
 export interface ApiProjectDetail {
   slug: string;
   title: string;
@@ -74,6 +98,9 @@ export interface ApiProjectDetail {
   live_url: string | null;
   published_at: string | null;
   created_at: string;
+  // Migration 095 — restyle before/after
+  is_restyling: boolean;
+  before_after: ApiBeforeAfter | null;
 }
 
 export interface ApiProjectAdjacent {

@@ -39,6 +39,14 @@
     "goToCaseStudy": "Open case study",
     "beforeAfterHeading": "Before and after, in numbers.",
     "numbersHeading": "The numbers are clear.",
-    "gallery": "Gallery"
+    "gallery": "Gallery",
+    "beforeAfter": {
+      "eyebrow": "Restyle",
+      "heading": "The site before the restyle, and after.",
+      "beforeWord": "BEFORE",
+      "afterWord": "AFTER",
+      "hint": "Drag the handle",
+      "sliderAriaLabel": "Before/after comparison: {label}. Use arrow keys to reveal the after."
+    }
   }
 }

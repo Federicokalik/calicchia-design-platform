@@ -39,6 +39,14 @@
     "goToCaseStudy": "Vai al case study",
     "beforeAfterHeading": "Prima e dopo, in numeri.",
     "numbersHeading": "I numeri parlano.",
-    "gallery": "Galleria"
+    "gallery": "Galleria",
+    "beforeAfter": {
+      "eyebrow": "Restyling",
+      "heading": "Il sito prima del restyling, e dopo.",
+      "beforeWord": "PRIMA",
+      "afterWord": "DOPO",
+      "hint": "Trascina la maniglia",
+      "sliderAriaLabel": "Confronto prima/dopo: {label}. Usa le frecce per rivelare il dopo."
+    }
   }
 }

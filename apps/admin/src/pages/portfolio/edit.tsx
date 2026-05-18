@@ -14,6 +14,12 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { GalleryEditor, normalizeGalleryIncoming, type GalleryItem } from '@/components/portfolio/gallery-editor';
+import {
+  BeforeAfterEditor,
+  normalizeBeforeAfter,
+  serializeBeforeAfter,
+  type BeforeAfterPair,
+} from '@/components/portfolio/before-after-editor';
 import { RichEditor } from '@/components/ui/rich-editor';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
@@ -48,6 +54,8 @@ const schema = z.object({
   seo_description: z.string().max(160).optional(),
   is_published: z.boolean().default(false),
   is_featured: z.boolean().default(false),
+  // Migration 095 — toggle dedicato per la sezione restyling (prima/dopo).
+  is_restyling: z.boolean().default(false),
   display_order: z.number().default(0),
 });
 
@@ -80,6 +88,8 @@ export default function PortfolioEditorPage() {
   // Migration 075 — metrics repeater. Each row may use either {label,value}
   // or {label,before,after,unit} pattern; the frontend renders both.
   const [metrics, setMetrics] = useState<MetricRow[]>([]);
+  // Migration 095 — before/after pairs for the restyle section.
+  const [beforeAfter, setBeforeAfter] = useState<BeforeAfterPair[]>([]);
 
   // Services: managed as canonical-slug array; serialised to CSV on save.
   // Drives the pill-toggle multi-select that replaces the old free-text Input.
@@ -118,6 +128,7 @@ export default function PortfolioEditorPage() {
       seo_description: '',
       is_published: false,
       is_featured: false,
+      is_restyling: false,
       display_order: 0,
     },
   });
@@ -145,6 +156,7 @@ export default function PortfolioEditorPage() {
         seo_description: p.seo_description || '',
         is_published: p.is_published || false,
         is_featured: p.is_featured || false,
+        is_restyling: p.is_restyling || false,
         display_order: p.display_order || 0,
       });
       if (p.feedback) setFeedback(typeof p.feedback === 'string' ? JSON.parse(p.feedback) : p.feedback);
@@ -169,6 +181,16 @@ export default function PortfolioEditorPage() {
       }
       // Parse legacy free-text services into canonical slugs (typo-safe).
       setServiceSlugs(parseServicesString(p.services));
+      // Migration 095 — before/after pairs (accept null / JSON string / object).
+      if (p.before_after) {
+        const parsed =
+          typeof p.before_after === 'string'
+            ? JSON.parse(p.before_after)
+            : p.before_after;
+        setBeforeAfter(normalizeBeforeAfter(parsed));
+      } else {
+        setBeforeAfter([]);
+      }
     }
   }, [data]);
 
@@ -208,6 +230,9 @@ export default function PortfolioEditorPage() {
         outcome: values.outcome || null,
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
+        // Migration 095 — restyle before/after
+        is_restyling: values.is_restyling,
+        before_after: serializeBeforeAfter(beforeAfter),
       };
       if (isNew) return apiFetch('/api/projects', { method: 'POST', body: JSON.stringify(body) });
       return apiFetch(`/api/projects/${id}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -269,6 +294,9 @@ export default function PortfolioEditorPage() {
             <TabsTrigger value="brief">Brief</TabsTrigger>
             <TabsTrigger value="case-study">Risultato & Feedback</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
+            {form.watch('is_restyling') ? (
+              <TabsTrigger value="restyle">Prima / Dopo</TabsTrigger>
+            ) : null}
             <TabsTrigger value="seo">SEO & Link</TabsTrigger>
           </TabsList>
 
@@ -358,7 +386,7 @@ export default function PortfolioEditorPage() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-6 flex-wrap">
                 <div className="flex items-center gap-2">
                   <Switch checked={form.watch('is_published')} onCheckedChange={(v) => form.setValue('is_published', v)} />
                   <Label className="text-xs">Pubblicato</Label>
@@ -366,6 +394,18 @@ export default function PortfolioEditorPage() {
                 <div className="flex items-center gap-2">
                   <Switch checked={form.watch('is_featured')} onCheckedChange={(v) => form.setValue('is_featured', v)} />
                   <Label className="text-xs">In evidenza</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.watch('is_restyling')}
+                    onCheckedChange={(v) => form.setValue('is_restyling', v)}
+                  />
+                  <Label className="text-xs">
+                    Restyling sito
+                    <span className="ml-1 text-[10px] text-muted-foreground">
+                      (abilita tab Prima/Dopo)
+                    </span>
+                  </Label>
                 </div>
               </div>
             </div>
@@ -572,6 +612,32 @@ export default function PortfolioEditorPage() {
               <GalleryEditor value={gallery} onChange={setGallery} folder="projects" max={20} />
             </div>
           </TabsContent>
+
+          {/* === RESTYLING (Migration 095) ===
+              Tab visibile solo quando is_restyling = true. Una coppia per
+              schermata del sito ridisegnato. Lato sito-v3 viene resa come
+              drag-slider (sezione 02) tra Brief (01) e Gallery. */}
+          {form.watch('is_restyling') ? (
+            <TabsContent value="restyle" className="space-y-4">
+              <div className="rounded-xl border bg-card p-5 space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold">Prima / Dopo</h3>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Carica le coppie di schermate per il confronto restyling.
+                    Alt text obbligatorio su entrambe (a11y + SEO).
+                    Se disattivi "Restyling sito" in Generale, la sezione
+                    sparisce dal sito ma le coppie restano salvate.
+                  </p>
+                </div>
+                <BeforeAfterEditor
+                  value={beforeAfter}
+                  onChange={setBeforeAfter}
+                  folder="projects/restyle"
+                  max={8}
+                />
+              </div>
+            </TabsContent>
+          ) : null}
 
           {/* === SEO & LINK === */}
           <TabsContent value="seo" className="space-y-4">

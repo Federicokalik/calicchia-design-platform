@@ -68,6 +68,9 @@ projects.post('/', async (c) => {
     outcome,
     seo_title,
     seo_description,
+    // Migration 095 — before/after restyle section
+    is_restyling,
+    before_after,
   } = body;
 
   if (!title || !slug) {
@@ -102,6 +105,9 @@ projects.post('/', async (c) => {
       outcome: outcome || null,
       seo_title: seo_title || null,
       seo_description: seo_description || null,
+      // Migration 095
+      is_restyling: is_restyling ?? false,
+      before_after: before_after ?? null,
       display_order: (max_order as number) + 1,
     })}
     RETURNING *
@@ -144,6 +150,9 @@ projects.put('/:id', async (c) => {
     outcome,
     seo_title,
     seo_description,
+    // Migration 095 — before/after restyle section
+    is_restyling,
+    before_after,
   } = body;
 
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
@@ -171,6 +180,9 @@ projects.put('/:id', async (c) => {
   if (outcome !== undefined) updateData.outcome = outcome || null;
   if (seo_title !== undefined) updateData.seo_title = seo_title || null;
   if (seo_description !== undefined) updateData.seo_description = seo_description || null;
+  // Migration 095
+  if (is_restyling !== undefined) updateData.is_restyling = !!is_restyling;
+  if (before_after !== undefined) updateData.before_after = before_after ?? null;
 
   const [project] = await sql`
     UPDATE projects SET ${sql(updateData)} WHERE id = ${id} RETURNING *
