@@ -10,6 +10,7 @@ import {
   Calendar,
   FileText,
   Image,
+  MessageCircle,
   Sparkles,
   Globe,
   Receipt,
@@ -56,6 +57,7 @@ const navigation: NavGroup[] = [
       { labelKey: 'nav.today', icon: Sun, path: '/oggi' },
       { labelKey: 'nav.dashboard', icon: LayoutDashboard, path: '/', end: true },
       { labelKey: 'nav.mail', icon: Mail, path: '/posta' },
+      { labelKey: 'nav.whatsapp', icon: MessageCircle, path: '/whatsapp' },
     ],
   },
   {

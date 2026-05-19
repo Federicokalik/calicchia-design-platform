@@ -451,25 +451,114 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'send_whatsapp',
-    description: 'Invia un messaggio WhatsApp a un numero di telefono. RICHIEDE CONFERMA UTENTE.',
+    description: 'Invia un messaggio WhatsApp a un numero di telefono. Rispetta automaticamente le preferenze di opt-out del destinatario (categoria operational di default). RICHIEDE CONFERMA UTENTE.',
     riskLevel: 'high',
     requiresConfirmation: true,
     parameters: {
       type: 'object',
       properties: {
-        phone: { type: 'string', description: 'Numero telefono (con prefisso, es +39...)' },
+        phone: { type: 'string', description: 'Numero telefono (con o senza prefisso, es +39... oppure 39...)' },
         message: { type: 'string', description: 'Testo del messaggio' },
+        category: {
+          type: 'string',
+          enum: ['transactional', 'operational', 'marketing'],
+          description: 'transactional = sempre consentito (fatture/scadenze/sicurezza). operational = default (reminder, follow-up). marketing = solo se il cliente ha dato opt-in esplicito.',
+        },
       },
       required: ['phone', 'message'],
     },
     execute: async (args) => {
       try {
         const { sendWhatsAppText } = await import('../whatsapp');
-        await sendWhatsAppText(args.phone as string, args.message as string);
-        return JSON.stringify({ sent: true });
+        const { canSendWhatsApp } = await import('../whatsapp-policy');
+        const category = (args.category as 'transactional' | 'operational' | 'marketing') || 'operational';
+        const policy = await canSendWhatsApp(args.phone as string, category);
+        if (!policy.allowed) {
+          return JSON.stringify({ sent: false, blocked: true, reason: policy.reason });
+        }
+        const result = await sendWhatsAppText(args.phone as string, args.message as string);
+        return JSON.stringify({ sent: true, externalId: result.externalId, category });
       } catch (err) {
-        return JSON.stringify({ error: 'WhatsApp non configurato o errore invio' });
+        return JSON.stringify({ error: (err as Error).message || 'Errore invio WhatsApp' });
       }
+    },
+  },
+  {
+    name: 'list_whatsapp_conversations',
+    description: 'Lista delle conversazioni WhatsApp recenti del gestionale, opzionalmente filtrate per non lette o per ricerca testo.',
+    riskLevel: 'low',
+    parameters: {
+      type: 'object',
+      properties: {
+        only_unread: { type: 'boolean', description: 'Se true ritorna solo conversazioni con messaggi non letti' },
+        search: { type: 'string', description: 'Ricerca su nome contatto, numero o anteprima ultimo messaggio' },
+        limit: { type: 'number', description: 'Max risultati (default 20, max 50)' },
+      },
+    },
+    execute: async (args) => {
+      const limit = Math.min((args.limit as number) || 20, 50);
+      const unreadFilter = args.only_unread ? sql`AND unread_count > 0` : sql``;
+      const search = args.search as string | undefined;
+      const searchFilter = search
+        ? sql`AND (contact_name ILIKE ${'%' + search + '%'} OR phone ILIKE ${'%' + search + '%'} OR last_message_preview ILIKE ${'%' + search + '%'})`
+        : sql``;
+      const rows = await sql`
+        SELECT id, chat_id, phone, contact_name, ai_mode, unread_count,
+               last_message_at, last_message_preview, customer_id, lead_id
+        FROM whatsapp_conversations
+        WHERE archived = FALSE ${unreadFilter} ${searchFilter}
+        ORDER BY last_message_at DESC NULLS LAST
+        LIMIT ${limit}
+      `;
+      return JSON.stringify({ conversations: rows, count: rows.length });
+    },
+  },
+  {
+    name: 'read_whatsapp_conversation',
+    description: 'Mostra gli ultimi N messaggi di una specifica conversazione WhatsApp.',
+    riskLevel: 'low',
+    parameters: {
+      type: 'object',
+      properties: {
+        conversation_id: { type: 'string', description: 'UUID della conversazione' },
+        limit: { type: 'number', description: 'Numero messaggi (default 20)' },
+      },
+      required: ['conversation_id'],
+    },
+    execute: async (args) => {
+      const limit = Math.min((args.limit as number) || 20, 100);
+      const rows = await sql`
+        SELECT direction, type, body, sender_kind, ai_draft, created_at
+        FROM whatsapp_messages
+        WHERE conversation_id = ${args.conversation_id as string}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `;
+      return JSON.stringify({ messages: rows.reverse(), count: rows.length });
+    },
+  },
+  {
+    name: 'set_whatsapp_ai_mode',
+    description: 'Cambia la modalità AI di una conversazione WhatsApp (off/triage/auto_reply). triage = AI prepara bozza per approvazione admin; auto_reply = AI risponde automaticamente. RICHIEDE CONFERMA UTENTE.',
+    riskLevel: 'medium',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        conversation_id: { type: 'string' },
+        mode: { type: 'string', enum: ['off', 'triage', 'auto_reply'] },
+      },
+      required: ['conversation_id', 'mode'],
+    },
+    execute: async (args) => {
+      const updated = await sql`
+        UPDATE whatsapp_conversations
+        SET ai_mode = ${args.mode as string}, updated_at = now()
+        WHERE id = ${args.conversation_id as string}
+        RETURNING id, ai_mode
+      `;
+      if (!updated.length) return JSON.stringify({ error: 'Conversazione non trovata' });
+      return JSON.stringify({ updated: updated[0] });
     },
   },
   {

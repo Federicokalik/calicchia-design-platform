@@ -1,6 +1,6 @@
 # GDPR Compliance Checklist — Caldes 2026
 
-> Ultimo aggiornamento: 2026-03-19
+> Ultimo aggiornamento: 2026-05-19
 > Riferimenti normativi: GDPR (EU 2016/679), Codice Privacy (D.Lgs. 196/2003 mod. D.Lgs. 101/2018), Linee Guida Garante Cookie (luglio 2021), Decisione Garante 330/2025 (double opt-in)
 
 Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
@@ -137,6 +137,30 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | J6 | Policy di retention dati con job automatici | ✅ | Migration 038 con funzioni DB |
 | J7 | Procedura gestione richieste interessati | ✅ | Endpoint API + pagina pubblica + notifica admin |
 
+## L. WHATSAPP (GOWA gateway) — Canale comunicazione (introdotto 2026-05-19)
+
+Tre categorie con basi giuridiche distinte, gestite via tabella `communication_preferences`
+(migration 096). Ogni outbound passa per `canSendWhatsApp()` in `apps/api/src/lib/whatsapp-policy.ts`.
+
+| # | Requisito | Stato | Note |
+|---|-----------|-------|------|
+| L1 | Categoria **Transazionale** — base Art. 6(1)(b) | ✅ | Fatture, scadenze fiscali, avvisi di sicurezza. NON disattivabile dal cliente. |
+| L2 | Categoria **Operativa** — base Art. 6(1)(f) | ✅ | Reminder appuntamenti, follow-up progetti. Default ON con **opt-out** granulare lato portale (`/clienti/preferenze`). |
+| L3 | Categoria **Marketing** — base Art. 6(1)(a) | ✅ | Default OFF, richiede **opt-in esplicito** dall'area clienti o token link. |
+| L4 | Opt-out via portale autenticato | ✅ | Pagina `/clienti/preferenze` (PATCH `/api/portal/preferences`). Transazionale read-only. |
+| L5 | Opt-out via token pubblico (no login) | ✅ | `/preferenze/<token>` con `preferences_token` 24-byte HMAC-rotabile, rate-limited 20 req/min. |
+| L6 | Opt-out via reply "STOP" | ✅ | Webhook GOWA intercetta "STOP" / "STOP MARKETING" e aggiorna preferences con `updated_via='wa-stop'`. Auto-reply di conferma. |
+| L7 | Cifratura comunicazione GOWA ↔ api | ✅ | HTTPS + HMAC SHA256 (`x-hmac-signature`) sul webhook con `GOWA_WEBHOOK_SECRET`, constant-time compare. |
+| L8 | Audit trail outbound | ✅ | Tabella `whatsapp_messages` con `sender_kind` + `sender_user_id`. Cambi di `ai_mode` loggati. |
+| L9 | Retention messaggi | ✅ | Transactional: 10 anni (allineato obblighi fiscali). Operational: cancellabili a opt-out + GDPR erasure. Marketing: cancellabili a opt-out. |
+| L10 | Export GDPR include WhatsApp | ✅ | `/api/gdpr-requests/export/:email` ritorna `whatsapp_conversations`, `whatsapp_messages`, `communication_preferences`. |
+| L11 | Erasure GDPR include WhatsApp | ✅ | `/api/gdpr-requests/erase/:email` cancella in cascata conversazioni + messaggi + preferences linkate al customer/lead. |
+| L12 | AI inbound (auto-reply/triage) trasparenza | ✅ | Messaggi inviati da AI loggati con `sender_kind='ai'`. Modalità per conversazione (`ai_mode`) modificabile dall'admin. Triage richiede approvazione umana esplicita. |
+| L13 | Base giuridica AI processing | ✅ | Art. 6(1)(f) per triage interno. Nessuna decisione automatizzata che produce effetti giuridici (Art. 22 non applicabile — solo bozze di risposta). |
+| L14 | Sub-responsabile WhatsApp | ⚠️ | Meta (WhatsApp LLC) come destinatario dei messaggi via WhatsApp Web protocol. Aggiungere a privacy policy sezione 8. |
+| L15 | DPA con GOWA | ✅ | Self-hosted su VPS proprio (gowa.calicchia.design) — nessun sub-responsabile esterno per il gateway. |
+| L16 | Informativa al primo contatto WA | 🔧 | Da aggiungere al primo template "first contact" outbound: indicazione su come gestire preferenze e diritto di opt-out. |
+
 ## K. PORTALE / SEZIONE PUBBLICA
 
 | # | Requisito | Stato | Note |
@@ -164,9 +188,10 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
 | K. Portale Pubblico | 4 | 1 | 0 | 5 |
-| **TOTALE** | **74** | **11** | **0** | **85** |
+| L. WhatsApp (GOWA) | 14 | 1 | 0 | 15 (1 🔧 in corso, conteggio nei ⚠️) |
+| **TOTALE** | **88** | **13** | **0** | **101** |
 
-**Conformità: ~87% (74/85 pienamente conformi)**
+**Conformità: ~87% (88/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
@@ -176,3 +201,5 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 4. **H2/H5**: DPA clienti e workflow cancellazione post-10-anni
 5. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
 6. **K1**: Creare pagina termini e condizioni
+7. **L14**: Aggiungere Meta/WhatsApp tra i destinatari della privacy policy (sezione 8)
+8. **L16**: Creare template "first contact" WA con disclaimer preferenze (in corso)

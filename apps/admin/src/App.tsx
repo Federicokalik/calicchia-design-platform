@@ -64,6 +64,7 @@ import FatturazionePage from '@/pages/fatturazione';
 import ServiziPage from '@/pages/servizi';
 import AnalyticsPage from '@/pages/analytics';
 import ImpostazioniPage from '@/pages/impostazioni';
+import WhatsAppInboxPage from '@/pages/whatsapp';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -120,6 +121,8 @@ export default function App() {
         <Route path="today" element={<OggiPage />} />
         <Route path="posta" element={<PostaPage />} />
         <Route path="mail" element={<PostaPage />} />
+        <Route path="whatsapp" element={<WhatsAppInboxPage />} />
+        <Route path="whatsapp/:conversationId" element={<WhatsAppInboxPage />} />
 
         {/* CRM */}
         <Route path="pipeline" element={<PipelinePage />} />

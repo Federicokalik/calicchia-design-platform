@@ -92,6 +92,8 @@ import { mcpTokens } from './routes/mcp-tokens';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
+import { whatsappPublic, whatsappAdmin } from './routes/whatsapp';
+import { preferencesPublic } from './routes/preferences-public';
 
 // Ensure uploads directory exists
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
@@ -234,6 +236,16 @@ app.route('/api/cookie-consent', cookieConsent);
 app.use('/api/gdpr-requests', publicFormRateLimit);
 app.route('/api/gdpr-requests', gdprRequests);
 
+// WhatsApp (GOWA) — webhook ingress + endpoint pubblico preferences-by-token.
+// Il webhook è verificato via HMAC (GOWA_WEBHOOK_SECRET); le preferences-by-token
+// usano un token cifrato a 24 byte distribuito nei link "modifica preferenze".
+const whatsappWebhookRateLimit = createRateLimit(60, 60 * 1000);
+app.use('/api/whatsapp/webhook', whatsappWebhookRateLimit);
+app.route('/api/whatsapp', whatsappPublic);
+const preferencesPublicRateLimit = createRateLimit(20, 60 * 1000);
+app.use('/api/preferences/*', preferencesPublicRateLimit);
+app.route('/api/preferences', preferencesPublic);
+
 // Public cookieless analytics tracker — rate-limited to 60 req/min per IP.
 const trackRateLimit = createRateLimit(60, 60 * 1000);
 app.use('/api/track', trackRateLimit);
@@ -292,6 +304,7 @@ const protectedPaths = [
   '/api/mail',
   '/api/mcp-tokens',
   '/api/backup',
+  '/api/whatsapp-admin',
 ];
 
 // /api/track is intentionally NOT in protectedPaths — it's the cookieless
@@ -354,6 +367,7 @@ app.route('/api/inbox', inbox);
 app.route('/api/my-work', myWork);
 app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
+app.route('/api/whatsapp-admin', whatsappAdmin);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);

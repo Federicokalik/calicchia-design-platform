@@ -5,9 +5,10 @@ import {
   User, Link2, Key, KeyRound, History, Palette, FileSignature, Brain, Sparkles,
   Trash2, CheckCircle2, XCircle, RefreshCw, Building2, CreditCard, MapPin,
   Shield, Zap, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
-  Briefcase, Users, Calculator, Coins, Copy,
+  Briefcase, Users, Calculator, Coins, Copy, MessageCircle,
 } from 'lucide-react';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
+import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -43,6 +44,7 @@ const NAV_ITEMS = [
   { id: 'ai-costs', label: 'Costi AI', icon: Activity },
   { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
+  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'backup', label: 'Backup', icon: Database },
   { id: 'audit', label: 'Audit Log', icon: History },
 ];
@@ -769,6 +771,9 @@ export default function ImpostazioniPage() {
 
         {/* === TOKEN MCP === */}
         {activeTab === 'mcp-tokens' && <McpTokensSection />}
+
+        {/* === WHATSAPP === */}
+        {activeTab === 'whatsapp' && <WhatsAppSection />}
 
         {/* === BACKUP === */}
         {activeTab === 'backup' && <BackupSection />}

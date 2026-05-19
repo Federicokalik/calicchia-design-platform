@@ -520,3 +520,33 @@ export async function requestRevisions(deliverableId: string, notes: string): Pr
     body: JSON.stringify({ comment: notes }),
   });
 }
+
+// Communication preferences (opt-in/opt-out per canale e categoria)
+export interface PortalPreferences {
+  id: string;
+  whatsapp_transactional: boolean;
+  whatsapp_operational: boolean;
+  whatsapp_marketing: boolean;
+  email_operational: boolean;
+  email_marketing: boolean;
+  sms_transactional: boolean;
+  preferences_token: string;
+}
+
+export async function getPortalPreferences(): Promise<PortalPreferences> {
+  const data = await authedFetch<{ preferences: PortalPreferences }>('/preferences');
+  return data.preferences;
+}
+
+export async function updatePortalPreferences(
+  patch: Partial<Pick<
+    PortalPreferences,
+    'whatsapp_operational' | 'whatsapp_marketing' | 'email_operational' | 'email_marketing'
+  >>
+): Promise<PortalPreferences> {
+  const data = await authedFetch<{ preferences: PortalPreferences }>('/preferences', {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+  return data.preferences;
+}

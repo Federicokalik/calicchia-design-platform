@@ -16,6 +16,7 @@ import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintena
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
+import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 
 interface CronJob {
   name: string;
@@ -98,6 +99,11 @@ const jobs: CronJob[] = [
     name: 'ics-pull',
     intervalMs: 15 * 60 * 1000,
     run: runIcsPull,
+  },
+  {
+    name: 'whatsapp-media-fetch',
+    intervalMs: 30 * 1000,
+    run: runWhatsAppMediaFetch,
   },
 ];
 

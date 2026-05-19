@@ -25,6 +25,7 @@
       "invoices": "Invoices",
       "subscriptions": "Subscriptions",
       "renewals": "Renewals",
+      "preferences": "Preferences",
       "logout": "Sign out"
     }
   },

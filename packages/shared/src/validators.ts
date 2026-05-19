@@ -47,3 +47,44 @@ export const loginSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
+
+// =====================================================
+// WhatsApp / preferenze comunicazione
+// =====================================================
+
+export const whatsappCategorySchema = z.enum(['transactional', 'operational', 'marketing']);
+export type WhatsappCategory = z.infer<typeof whatsappCategorySchema>;
+
+export const whatsappAiModeSchema = z.enum(['off', 'triage', 'auto_reply']);
+export type WhatsappAiMode = z.infer<typeof whatsappAiModeSchema>;
+
+export const whatsappSendSchema = z.object({
+  phone: z.string().min(6, 'Numero richiesto'),
+  text: z.string().min(1, 'Testo richiesto').max(4000, 'Testo troppo lungo'),
+  category: whatsappCategorySchema.optional().default('operational'),
+});
+
+export const communicationPreferencesPatchSchema = z.object({
+  whatsapp_operational: z.boolean().optional(),
+  whatsapp_marketing: z.boolean().optional(),
+  email_operational: z.boolean().optional(),
+  email_marketing: z.boolean().optional(),
+}).refine(
+  (v) => Object.keys(v).length > 0,
+  { message: 'Nessuna modifica' }
+);
+
+export type CommunicationPreferencesPatch = z.infer<typeof communicationPreferencesPatchSchema>;
+
+export const communicationPreferencesSchema = z.object({
+  id: z.string().uuid(),
+  whatsapp_transactional: z.boolean(),
+  whatsapp_operational: z.boolean(),
+  whatsapp_marketing: z.boolean(),
+  email_operational: z.boolean(),
+  email_marketing: z.boolean(),
+  sms_transactional: z.boolean(),
+  preferences_token: z.string(),
+});
+
+export type CommunicationPreferences = z.infer<typeof communicationPreferencesSchema>;

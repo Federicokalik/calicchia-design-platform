@@ -7,7 +7,11 @@ import {
   FolderKanban, Receipt, MessageSquare,
   Send, KeyRound, Copy, Check, RefreshCw, ExternalLink,
   FileBarChart, Plus, ShieldOff, Eye, EyeOff, FileCode2,
+  MessageCircle, Loader2,
 } from 'lucide-react';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -198,6 +202,36 @@ export default function ClienteDetailPage() {
     },
   });
 
+  // WhatsApp send dialog — hooks dichiarati prima dei return condizionali (rules-of-hooks).
+  const [waOpen, setWaOpen] = useState(false);
+  const [waText, setWaText] = useState('');
+  const [waCategory, setWaCategory] = useState<'transactional' | 'operational' | 'marketing'>('operational');
+  const waSendMutation = useMutation({
+    mutationFn: () =>
+      apiFetch('/api/whatsapp-admin/send-to-phone', {
+        method: 'POST',
+        body: JSON.stringify({
+          phone: customer?.phone,
+          text: waText.trim(),
+          category: waCategory,
+          customerId: customer?.id,
+        }),
+      }),
+    onSuccess: (res: { conversationId?: string }) => {
+      toast.success('Messaggio inviato');
+      setWaOpen(false);
+      setWaText('');
+      if (res?.conversationId) navigate(`/whatsapp/${res.conversationId}`);
+    },
+    onError: (err: Error) => {
+      if (err.message?.includes('opt_out')) {
+        toast.error('Il cliente ha disattivato i messaggi non essenziali per questa categoria');
+      } else {
+        toast.error(err.message || 'Errore invio');
+      }
+    },
+  });
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -239,8 +273,63 @@ export default function ClienteDetailPage() {
               Revenue: €{(customer.total_revenue || 0).toLocaleString('it-IT')}
             </span>
           </div>
+          {customer.phone && (
+            <div className="mt-3">
+              <Button size="sm" variant="outline" onClick={() => setWaOpen(true)}>
+                <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Manda WhatsApp
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* WhatsApp send dialog */}
+      <Dialog open={waOpen} onOpenChange={setWaOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invia WhatsApp a {customer.contact_name}</DialogTitle>
+            <DialogDescription>
+              Numero: {customer.phone}. Le preferenze del cliente vengono rispettate automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label className="text-xs font-medium">Categoria</Label>
+              <Select value={waCategory} onValueChange={(v) => setWaCategory(v as any)}>
+                <SelectTrigger className="h-9 text-sm mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="transactional">Transazionale (fatture / scadenze)</SelectItem>
+                  <SelectItem value="operational">Operativo (reminder, follow-up)</SelectItem>
+                  <SelectItem value="marketing">Marketing (richiede opt-in)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs font-medium">Messaggio</Label>
+              <Textarea
+                value={waText}
+                onChange={(e) => setWaText(e.target.value)}
+                placeholder="Scrivi il messaggio…"
+                className="min-h-[120px] text-sm mt-1"
+                autoFocus
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setWaOpen(false)}>Annulla</Button>
+            <Button
+              onClick={() => waSendMutation.mutate()}
+              disabled={!waText.trim() || waSendMutation.isPending}
+            >
+              {waSendMutation.isPending ? (
+                <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Invio…</>
+              ) : (
+                <><Send className="h-3.5 w-3.5 mr-1.5" /> Invia</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Tabs */}
       <Tabs

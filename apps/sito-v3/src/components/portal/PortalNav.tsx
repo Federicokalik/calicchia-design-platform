@@ -13,6 +13,7 @@ import {
   Repeat,
   RefreshCw,
   LogOut,
+  SlidersHorizontal,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -54,6 +55,7 @@ const GROUPS: NavGroup[] = [
       { href: '/clienti/abbonamenti', key: 'subscriptions', icon: Repeat },
       { href: '/clienti/investimento', key: 'billing', icon: Wallet },
       { href: '/clienti/rinnovi', key: 'renewals', icon: RefreshCw },
+      { href: '/clienti/preferenze', key: 'preferences', icon: SlidersHorizontal },
       { href: '/clienti/logout', key: 'logout', icon: LogOut },
     ],
   },

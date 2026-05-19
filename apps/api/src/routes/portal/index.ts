@@ -10,6 +10,7 @@ import { filesRoutes } from './files';
 import { invoicesRoutes } from './invoices';
 import { renewalsRoutes } from './renewals';
 import { reportsRoutes } from './reports';
+import { preferencesRoutes } from './preferences';
 
 export const portal = new Hono<PortalEnv>();
 
@@ -45,3 +46,6 @@ portal.route('/renewals', renewalsRoutes);
 
 // Reports
 portal.route('/reports', reportsRoutes);
+
+// Communication preferences (opt-in/opt-out per canale e categoria)
+portal.route('/preferences', preferencesRoutes);
