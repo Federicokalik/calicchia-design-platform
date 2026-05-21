@@ -175,10 +175,28 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
 
 // ─── Admin: Erase user data (for erasure requests) ─────────────
 
+// GDPR-03 — Erasure policy. Three categories, applied atomically:
+//
+//  • DELETE — pure-PII records with no retention obligation:
+//      contacts, newsletter_subscribers, communication_preferences,
+//      whatsapp_conversations (whatsapp_messages cascade), portal_login_events.
+//
+//  • ANONYMIZE — records that cannot be deleted because fiscal/contractual
+//      children (invoices, payments, quotes) reference them under a 10-year
+//      legal retention obligation, and the FKs are RESTRICT/NO ACTION/CASCADE
+//      (a hard DELETE would either be blocked or destroy fiscal records):
+//      customers, leads. Identifying fields are overwritten; the row and its
+//      fiscal links survive in anonymized form.
+//
+//  • RETAINED / MANUAL — not touched here, surfaced in the response:
+//      invoices/payments/quotes (legal retention), email_messages (mailbox
+//      correspondence — controller's business record, manual review),
+//      client_uploads files on storage, and the Stripe customer (separate
+//      processor). cookie_consents/analytics hold no person-linkable PII.
 gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
   const email = decodeURIComponent(c.req.param('email'));
 
-  // Lookup linked records (per cancellare anche conversazioni WA collegate).
+  // Resolve linked records BEFORE anonymizing (anonymization changes the email).
   const linked = await sql`
     SELECT id, 'customer' AS kind FROM customers WHERE email = ${email}
     UNION ALL
@@ -187,31 +205,83 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
   const customerIds = linked.filter(r => r.kind === 'customer').map(r => r.id);
   const leadIds = linked.filter(r => r.kind === 'lead').map(r => r.id);
 
-  const [
-    deletedContacts,
-    deletedNewsletter,
-    deletedPrefs,
-    deletedWaConvs,
-  ] = await Promise.all([
-    sql`DELETE FROM contacts WHERE email = ${email} RETURNING id`,
-    sql`DELETE FROM newsletter_subscribers WHERE email = ${email} RETURNING id`,
-    sql`DELETE FROM communication_preferences
-        WHERE email = ${email}
-           OR customer_id = ANY(${customerIds as any})
-           OR lead_id = ANY(${leadIds as any}) RETURNING id`,
-    customerIds.length || leadIds.length
-      ? sql`DELETE FROM whatsapp_conversations
-            WHERE customer_id = ANY(${customerIds as any})
-               OR lead_id = ANY(${leadIds as any}) RETURNING id`
-      : Promise.resolve([] as Array<{ id: string }>),
-  ]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const result = await sql.begin(async (tx: any) => {
+    const deletedContacts = await tx`DELETE FROM contacts WHERE email = ${email} RETURNING id`;
+    const deletedNewsletter = await tx`DELETE FROM newsletter_subscribers WHERE email = ${email} RETURNING id`;
+    const deletedPrefs = await tx`
+      DELETE FROM communication_preferences
+      WHERE email = ${email}
+         OR customer_id = ANY(${customerIds as any})
+         OR lead_id = ANY(${leadIds as any}) RETURNING id`;
+    const deletedWaConvs = customerIds.length || leadIds.length
+      ? await tx`
+          DELETE FROM whatsapp_conversations
+          WHERE customer_id = ANY(${customerIds as any})
+             OR lead_id = ANY(${leadIds as any}) RETURNING id`
+      : [];
+    const deletedLoginEvents = await tx`
+      DELETE FROM portal_login_events
+      WHERE email = ${email} OR customer_id = ANY(${customerIds as any}) RETURNING id`;
+
+    // Anonymize customers — keep the row (fiscal children) but strip PII.
+    const anonCustomers = customerIds.length
+      ? await tx`
+          UPDATE customers SET
+            contact_name = 'Dato cancellato (GDPR)',
+            company_name = NULL,
+            email = 'erased-' || id::text || '@deleted.invalid',
+            phone = NULL,
+            billing_address = '{}'::jsonb,
+            notes = NULL,
+            tags = '[]'::jsonb,
+            portal_access_code_hash = NULL,
+            updated_at = NOW()
+          WHERE id = ANY(${customerIds as any}) RETURNING id`
+      : [];
+    const anonLeads = leadIds.length
+      ? await tx`
+          UPDATE leads SET
+            name = 'Dato cancellato (GDPR)',
+            company = NULL,
+            email = 'erased-' || id::text || '@deleted.invalid',
+            phone = NULL,
+            notes = NULL,
+            tags = '{}'::text[],
+            updated_at = NOW()
+          WHERE id = ANY(${leadIds as any}) RETURNING id`
+      : [];
+
+    return {
+      deletedContacts: deletedContacts.length,
+      deletedNewsletter: deletedNewsletter.length,
+      deletedPrefs: deletedPrefs.length,
+      deletedWaConvs: deletedWaConvs.length,
+      deletedLoginEvents: deletedLoginEvents.length,
+      anonCustomers: anonCustomers.length,
+      anonLeads: anonLeads.length,
+    };
+  });
 
   return c.json({
     erased: true,
     email,
-    contacts_deleted: deletedContacts.length,
-    newsletter_deleted: deletedNewsletter.length,
-    communication_preferences_deleted: deletedPrefs.length,
-    whatsapp_conversations_deleted: deletedWaConvs.length,
+    deleted: {
+      contacts: result.deletedContacts,
+      newsletter: result.deletedNewsletter,
+      communication_preferences: result.deletedPrefs,
+      whatsapp_conversations: result.deletedWaConvs,
+      portal_login_events: result.deletedLoginEvents,
+    },
+    anonymized: {
+      customers: result.anonCustomers,
+      leads: result.anonLeads,
+    },
+    retained: 'Fatture, pagamenti e preventivi sono conservati per obbligo fiscale (10 anni); il cliente collegato è stato anonimizzato.',
+    manual_followup: [
+      "Verificare ed eventualmente eliminare la corrispondenza dell'interessato nella casella email (email_messages).",
+      'Eliminare dallo storage i file caricati collegati (client_uploads).',
+      "Se l'interessato esiste come cliente Stripe, richiedere la cancellazione anche lì (responsabile esterno).",
+    ],
   });
 });

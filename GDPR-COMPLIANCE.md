@@ -96,7 +96,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | G2 | Risposta entro 30 giorni | ✅ | Email notifica admin con reminder |
 | G3 | Diritto di accesso (export dati personali) | ✅ | Endpoint /gdpr-requests/export/:email |
 | G4 | Diritto di rettifica | ✅ | Via form o email + gestione admin |
-| G5 | Diritto di cancellazione (oblio) | ✅ | Endpoint /gdpr-requests/erase/:email |
+| G5 | Diritto di cancellazione (oblio) | ✅ | Endpoint /gdpr-requests/erase/:email — elimina contacts/newsletter/preferenze/WhatsApp/portal_login_events e **anonimizza** customers/leads (fatture e pagamenti collegati restano per obbligo fiscale 10 anni) |
 | G6 | Diritto alla portabilità (CSV/JSON) | ✅ | Export in JSON + export admin CSV |
 | G7 | Diritto di opposizione | ✅ | Via form privacy-request |
 | G8 | Diritto di limitazione del trattamento | ✅ | Via form privacy-request |
@@ -134,7 +134,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | J3 | Registro interno violazioni | ✅ | Template in data-breach-procedure.md |
 | J4 | Valutazione legittimo interesse (LIA) per log | ✅ | docs/gdpr/lia-analytics.md |
 | J5 | DPIA per trattamenti ad alto rischio | ✅ | Non necessaria per freelancer (confermato) |
-| J6 | Policy di retention dati con job automatici | ✅ | Migration 038 con funzioni DB |
+| J6 | Policy di retention dati con job automatici | ✅ | Funzioni DB (migrazioni 038/084) eseguite dal cron `data-retention` (giornaliero, ore 5) — `run_data_retention()` + `cleanup_webhook_security_retention()` |
 | J7 | Procedura gestione richieste interessati | ✅ | Endpoint API + pagina pubblica + notifica admin |
 
 ## L. WHATSAPP (GOWA gateway) — Canale comunicazione (introdotto 2026-05-19)

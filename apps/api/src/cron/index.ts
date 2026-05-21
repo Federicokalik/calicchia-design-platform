@@ -18,6 +18,7 @@ import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
+import { runDataRetention } from './data-retention';
 
 interface CronJob {
   name: string;
@@ -105,6 +106,12 @@ const jobs: CronJob[] = [
     name: 'whatsapp-media-fetch',
     intervalMs: 30 * 1000,
     run: runWhatsAppMediaFetch,
+  },
+  {
+    name: 'data-retention',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 5,
+    run: runDataRetention,
   },
 ];
 
