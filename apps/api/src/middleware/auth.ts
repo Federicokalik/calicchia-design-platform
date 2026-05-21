@@ -1,6 +1,6 @@
 import { Context, Next } from 'hono';
 import { jwtVerify } from 'jose';
-import { getJwtSecret, signToken } from '../lib/jwt';
+import { getJwtSecret, signToken, ABSOLUTE_SESSION_MS } from '../lib/jwt';
 import { setAuthCookie } from '../lib/cookies';
 import { adminMessage } from '../lib/admin-locale';
 
@@ -41,17 +41,27 @@ export async function authMiddleware(c: Context, next: Next) {
       return c.json({ error: adminMessage(c, 'invalidOrExpiredToken') }, 401);
     }
 
+    // Absolute session cap: a session cannot be kept alive past ABSOLUTE_SESSION_MS
+    // from the original login, even with continuous activity (limits the window
+    // of a stolen auth cookie — finding SEC-05).
+    const authAt = payload.auth_at as number | undefined;
+    if (authAt && Date.now() - authAt > ABSOLUTE_SESSION_MS) {
+      return c.json({ error: adminMessage(c, 'invalidOrExpiredToken') }, 401);
+    }
+
     c.set('user', {
       id: payload.sub as string,
       email: payload.email as string,
       role: payload.role as string,
     });
 
-    // Refresh token with updated last_activity (non-blocking, best-effort)
+    // Refresh token with updated last_activity (non-blocking, best-effort).
+    // auth_at is carried over so the absolute cap above keeps anchoring to login.
     signToken({
       sub: payload.sub as string,
       email: payload.email as string,
       role: payload.role as string,
+      auth_at: authAt,
     }).then((newToken) => setAuthCookie(c, newToken)).catch(() => {});
   } catch {
     return c.json({ error: adminMessage(c, 'invalidOrExpiredToken') }, 401);
