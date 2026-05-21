@@ -3,6 +3,7 @@
  * Jobs run at specific hours, not on server restart.
  */
 
+import { captureException } from '../lib/bugsink';
 import { runDomainAlerts } from './domain-alerts';
 import { runQuoteExpiry } from './quote-expiry';
 import { runDailyDigest } from './daily-digest';
@@ -125,6 +126,11 @@ function scheduleJob(job: CronJob) {
       job.lastRun = new Date();
     } catch (err) {
       console.error(`[Cron] Error in ${job.name}:`, err);
+      // Report to Bugsink — cron failures are otherwise invisible in prod (BK-05).
+      captureException(err instanceof Error ? err : new Error(String(err)), {
+        source: 'cron',
+        job: job.name,
+      });
     }
     job.timer = setTimeout(execute, job.intervalMs);
   };

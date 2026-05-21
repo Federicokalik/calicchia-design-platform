@@ -6,8 +6,11 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 config({ path: path.resolve(__dirname, '../../../.env') });
 
-// Validate required environment variables before starting
-const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL'];
+// Validate required environment variables before starting.
+// WEBHOOK_ENCRYPTION_KEY: needed for envelope-encrypting stored webhook secrets;
+// without it the server used to boot and crash at the first webhook event —
+// fail fast here instead (finding BK-07).
+const REQUIRED_ENV = ['JWT_SECRET', 'DATABASE_URL', 'WEBHOOK_ENCRYPTION_KEY'];
 for (const key of REQUIRED_ENV) {
   if (!process.env[key]) {
     console.error(`FATAL: Missing required environment variable: ${key}`);

@@ -4,6 +4,7 @@ import { stripe, isStripeConfigured } from '../lib/stripe';
 import { sql, sqlv } from '../db';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
+import { captureException } from '../lib/bugsink';
 
 export const stripeWebhook = new Hono();
 
@@ -24,6 +25,9 @@ stripeWebhook.post('/', async (c) => {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
     console.error('Errore verifica webhook:', err);
+    captureException(err instanceof Error ? err : new Error(String(err)), {
+      source: 'stripe-webhook', stage: 'signature-verification',
+    });
     return c.json({ error: 'Webhook signature non valida' }, 400);
   }
 
@@ -267,6 +271,9 @@ stripeWebhook.post('/', async (c) => {
     return c.json({ received: true });
 
   } catch (error) {
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      source: 'stripe-webhook', event_id: event.id, event_type: event.type,
+    });
     await sql`
       UPDATE stripe_webhook_logs SET ${sql({
         processed: false,

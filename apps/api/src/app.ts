@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { MiddlewareHandler } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
@@ -109,8 +110,14 @@ if (isDev) {
   app.use('*', prettyJSON());
 }
 
-// Body size limit (10MB default, 50MB for media uploads)
-app.use('*', bodyLimit({ maxSize: 10 * 1024 * 1024 }));
+// Body size limits. The global 10MB cap is applied via a wrapper that SKIPS the
+// routes declaring a larger limit below: a plain app.use('*', bodyLimit()) runs
+// first and would 413 large uploads before their own limit ran (finding HN-01).
+const LARGE_BODY_PREFIXES = ['/api/media/', '/api/ai/extract-invoice', '/api/backup/import'];
+app.use('*', async (c, next) => {
+  if (LARGE_BODY_PREFIXES.some((p) => c.req.path.startsWith(p))) return next();
+  return bodyLimit({ maxSize: 10 * 1024 * 1024 })(c, next);
+});
 app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
@@ -160,11 +167,17 @@ app.route('/api/health', health);
 app.route('/api/auth', auth);
 
 // Public routes (no auth required)
+// Public-form rate limit (3 / 10 min). Applied to POST submissions only — the
+// same path prefixes also serve admin GET endpoints which must not be throttled
+// (HN-04) — and mounted on /api/newsletter/* so it covers the real subscribe
+// endpoint POST /api/newsletter/subscribe (HN-02).
 const publicFormRateLimit = createRateLimit(3, 10 * 60 * 1000);
-app.use('/api/contacts', publicFormRateLimit);
-app.use('/api/public-leads', publicFormRateLimit);
-app.use('/api/newsletter', publicFormRateLimit);
-app.use('/api/calendar/bookings', publicFormRateLimit);
+const postOnly = (mw: MiddlewareHandler): MiddlewareHandler =>
+  (c, next) => (c.req.method === 'POST' ? mw(c, next) : next());
+app.use('/api/contacts', postOnly(publicFormRateLimit));
+app.use('/api/public-leads', postOnly(publicFormRateLimit));
+app.use('/api/newsletter/*', postOnly(publicFormRateLimit));
+app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
 app.route('/api/public-leads', publicLeads);

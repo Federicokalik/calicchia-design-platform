@@ -5,6 +5,7 @@ import { capturePaypalOrder } from '../lib/paypal';
 import { extractPaypalSignatureHeaders, verifyPaypalSignature } from '../lib/paypal-webhook';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
+import { captureException } from '../lib/bugsink';
 
 export const paypalWebhook = new Hono();
 
@@ -233,6 +234,9 @@ paypalWebhook.post('/', async (c) => {
     await sql`UPDATE paypal_webhook_logs SET processed = true WHERE event_id = ${eventId}`;
     return c.json({ received: true });
   } catch (error) {
+    captureException(error instanceof Error ? error : new Error(String(error)), {
+      source: 'paypal-webhook', event_id: eventId, event_type: eventType,
+    });
     await sql`
       UPDATE paypal_webhook_logs SET ${sql({
         processed: false,
