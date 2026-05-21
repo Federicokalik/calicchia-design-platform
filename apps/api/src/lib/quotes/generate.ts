@@ -6,7 +6,9 @@ import { sql } from '../../db';
 import { generateText } from '../agent/llm-router';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const AGENT_DIR = resolve(__dirname, '../agent');
+// KB_DIR (set in production) points at the files delivered by kb-bootstrap.ts;
+// otherwise the knowledge bases are read from lib/agent/ on disk.
+const AGENT_DIR = process.env.KB_DIR || resolve(__dirname, '../agent');
 
 const PRICING_PATH = resolve(AGENT_DIR, 'pricing_knowledge_base.md');
 const PROFILE_PATH = resolve(AGENT_DIR, 'profile_knowledge_base.md');

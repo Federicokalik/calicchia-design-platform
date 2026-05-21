@@ -11,11 +11,13 @@ import { getToolsForLLM, executeTool, tools, type ToolDefinition } from './tools
 import { recallMemory, saveConversation, addFact, addPreference } from './memory';
 import { getProviderForTask, callOpenAICompatible } from './llm-router';
 
-// Load pricing knowledge base
+// Load pricing knowledge base. KB_DIR lets production read the files delivered
+// by kb-bootstrap.ts (MEGA S4); in dev it falls back to this directory.
 let PRICING_KB = '';
 try {
   const __dirname = dirname(fileURLToPath(import.meta.url));
-  PRICING_KB = readFileSync(resolve(__dirname, 'pricing_knowledge_base.md'), 'utf-8');
+  const kbDir = process.env.KB_DIR || __dirname;
+  PRICING_KB = readFileSync(resolve(kbDir, 'pricing_knowledge_base.md'), 'utf-8');
 } catch { PRICING_KB = ''; }
 
 const PERSONALITY = `Sei il Second Brain di Federico Calicchia, web designer freelance.

@@ -1,0 +1,146 @@
+# Production stack — Caldes 2026 — target: VPS con Dokploy (Traefik + SSL integrati).
+#
+# Deploy: in Dokploy crea un servizio "Compose", punta a questo file. Le variabili
+# ${...} vengono dal file .env del progetto Dokploy (vedi .env.prod.example).
+# Dokploy fornisce la rete esterna `dokploy-network` e il resolver TLS `letsencrypt`.
+#
+# NB: nessun `container_name` (richiesto da Dokploy). I router Traefik hanno nomi
+# univoci. Postgres NON espone porte sull'host ed è raggiungibile solo via rete interna.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY}
+      UPLOAD_DIR: /data/uploads
+      API_URL: ${API_URL}
+      SITE_URL: ${SITE_URL}
+      ADMIN_URL: ${ADMIN_URL}
+      PORTAL_URL: ${SITE_URL}
+      EMAIL_FROM: ${EMAIL_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+      BUGSINK_DSN: ${BUGSINK_DSN}
+      CRON_SECRET: ${CRON_SECRET}
+      ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
+      BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
+      # Integrazioni opzionali (degradano graceful se vuote)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+      PAYPAL_MODE: ${PAYPAL_MODE}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID}
+      REVOLUT_API_KEY: ${REVOLUT_API_KEY}
+      REVOLUT_MODE: ${REVOLUT_MODE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET}
+      GOWA_URL: ${GOWA_URL}
+      GOWA_BASIC_AUTH_USER: ${GOWA_BASIC_AUTH_USER}
+      GOWA_BASIC_AUTH_PASS: ${GOWA_BASIC_AUTH_PASS}
+      GOWA_WEBHOOK_SECRET: ${GOWA_WEBHOOK_SECRET}
+      # MEGA S4 (object storage): consegna dei knowledge base gitignored al boot.
+      # KB_DIR=/data/kb è già impostato nel Dockerfile.
+      S4_ENDPOINT: ${S4_ENDPOINT}
+      S4_REGION: ${S4_REGION}
+      S4_BUCKET: ${S4_BUCKET}
+      S4_ACCESS_KEY_ID: ${S4_ACCESS_KEY_ID}
+      S4_SECRET_ACCESS_KEY: ${S4_SECRET_ACCESS_KEY}
+    volumes:
+      - uploads_data:/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.caldes-api.rule=Host(`${API_DOMAIN}`)
+      - traefik.http.routers.caldes-api.entrypoints=websecure
+      - traefik.http.routers.caldes-api.tls.certresolver=letsencrypt
+      - traefik.http.services.caldes-api.loadbalancer.server.port=3001
+
+  sito-v3:
+    build:
+      context: .
+      dockerfile: apps/sito-v3/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+        NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY}
+        NEXT_PUBLIC_BUGSINK_DSN: ${NEXT_PUBLIC_BUGSINK_DSN}
+        NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID}
+        PUBLIC_SITE_URL: ${SITE_URL}
+        # PORTAL_API_URL omesso di proposito: vedi commento in apps/sito-v3/Dockerfile.
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.caldes-sito.rule=Host(`${SITE_DOMAIN}`)
+      - traefik.http.routers.caldes-sito.entrypoints=websecure
+      - traefik.http.routers.caldes-sito.tls.certresolver=letsencrypt
+      - traefik.http.services.caldes-sito.loadbalancer.server.port=3000
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+      args:
+        PUBLIC_BUGSINK_DSN: ${PUBLIC_BUGSINK_DSN}
+        VITE_BUGSINK_DSN: ${VITE_BUGSINK_DSN}
+        VITE_API_URL: ${VITE_API_URL}
+    restart: always
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.caldes-admin.rule=Host(`${ADMIN_DOMAIN}`)
+      - traefik.http.routers.caldes-admin.entrypoints=websecure
+      - traefik.http.routers.caldes-admin.tls.certresolver=letsencrypt
+      - traefik.http.services.caldes-admin.loadbalancer.server.port=80
+
+volumes:
+  postgres_data:
+  uploads_data:
+
+networks:
+  dokploy-network:
+    external: true

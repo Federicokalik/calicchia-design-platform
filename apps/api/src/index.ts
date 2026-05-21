@@ -15,10 +15,17 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
-import { serve } from '@hono/node-server';
-import { app } from './app';
-import { startCronEngine, stopCronEngine } from './cron';
-import { assertKBsValid } from './lib/quotes/generate';
+// Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
+// any module that reads them is loaded. The dynamic imports below guarantee
+// that lib/agent (which reads the pricing KB at module load) is evaluated only
+// after bootstrapKBs() has placed the files. No-op in local dev (S4_* unset).
+const { bootstrapKBs } = await import('./lib/agent/kb-bootstrap');
+await bootstrapKBs();
+
+const { serve } = await import('@hono/node-server');
+const { app } = await import('./app');
+const { startCronEngine, stopCronEngine } = await import('./cron');
+const { assertKBsValid } = await import('./lib/quotes/generate');
 
 // Validate AI knowledge bases are present and well-formed (fail-fast).
 // Without these files the AI quote generator cannot run; refusing to start
@@ -28,7 +35,7 @@ try {
   assertKBsValid();
 } catch (err) {
   console.error(`FATAL: AI knowledge base validation failed: ${(err as Error).message}`);
-  console.error('Hint: copy *.example.md templates from apps/api/src/lib/agent/ to *_knowledge_base.md and fill with real data.');
+  console.error('Hint: copy *.example.md templates from apps/api/src/lib/agent/ to *_knowledge_base.md and fill with real data, or configure S4_* to deliver them from the bucket.');
   process.exit(1);
 }
 
