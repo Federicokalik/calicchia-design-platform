@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 import { sql } from '../db';
-import { uploadFile } from './s3';
+import { savePrivateFile, signFileUrl } from './private-files';
 import { renderReceiptHtml, type ReceiptLineItem } from '../templates/receipt-html';
 
 interface GenerateReceiptInput {
@@ -161,11 +161,11 @@ export async function generateReceiptForPaymentLink(
   });
 
   const pdf = await renderPdf(html);
-  const key = `receipts/${link.id}.pdf`;
-  const uploaded = await uploadFile(pdf, key, 'application/pdf', {
-    receipt_number: receiptNumber,
-    payment_link_id: link.id,
-  });
+  // SEC-10: receipts go to the private store; the emailed link is a signed URL.
+  const receiptFile = `${link.id}.pdf`;
+  await savePrivateFile('receipts', receiptFile, pdf);
+  const pdfKey = `receipts/${receiptFile}`;
+  const pdfUrl = signFileUrl('receipts', receiptFile);
 
   const [inserted] = await sql`
     INSERT INTO payment_receipts ${sql({
@@ -173,8 +173,8 @@ export async function generateReceiptForPaymentLink(
       customer_id: link.customer_id,
       invoice_id: link.invoice_id,
       schedule_id: link.payment_schedule_id,
-      pdf_key: uploaded.key,
-      pdf_url: uploaded.url,
+      pdf_key: pdfKey,
+      pdf_url: pdfUrl,
       receipt_number: receiptNumber,
       amount: Number(link.amount),
       currency: link.currency,

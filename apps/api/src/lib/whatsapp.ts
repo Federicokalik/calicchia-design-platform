@@ -20,15 +20,13 @@
 
 import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { extname, join } from 'node:path';
+import { extname } from 'node:path';
+import { savePrivateFile } from './private-files';
 
 const GOWA_URL = (process.env.GOWA_URL || '').replace(/\/+$/, '');
 const GOWA_USER = process.env.GOWA_BASIC_AUTH_USER || '';
 const GOWA_PASS = process.env.GOWA_BASIC_AUTH_PASS || '';
 const GOWA_DEVICE_ID = process.env.GOWA_DEVICE_ID || '';
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-const MEDIA_SUBDIR = 'whatsapp';
 
 // ---------- internal helpers ----------
 
@@ -245,9 +243,9 @@ export async function markChatRead(chatId: string): Promise<void> {
 }
 
 /**
- * Scarica un media da GOWA e lo salva in UPLOAD_DIR/whatsapp/.
- * Ritorna il path relativo a UPLOAD_DIR (es. "whatsapp/<uuid>.jpg") da inserire
- * in whatsapp_messages.media_path.
+ * Scarica un media da GOWA e lo salva nello store privato (SEC-10).
+ * Ritorna il nome file (es. "<uuid>.jpg") da inserire in
+ * whatsapp_messages.media_path; la URL firmata viene generata in lettura.
  */
 export async function downloadMedia(messageId: string, hintExt?: string): Promise<{ path: string; mime: string; size: number }> {
   if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
@@ -263,11 +261,9 @@ export async function downloadMedia(messageId: string, hintExt?: string): Promis
   const ext = hintExt || extFromMime(mime) || extname(messageId) || '.bin';
   const safeExt = ext.startsWith('.') ? ext : `.${ext}`;
   const fileName = `${randomUUID()}${safeExt}`;
-  const fullDir = join(UPLOAD_DIR, MEDIA_SUBDIR);
-  mkdirSync(fullDir, { recursive: true });
-  writeFileSync(join(fullDir, fileName), buf);
+  await savePrivateFile('whatsapp', fileName, buf);
   return {
-    path: `${MEDIA_SUBDIR}/${fileName}`,
+    path: fileName,
     mime,
     size: buf.length,
   };

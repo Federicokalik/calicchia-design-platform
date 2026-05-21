@@ -17,6 +17,7 @@ import { Hono } from 'hono';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { sql } from '../db';
+import { signFileUrl } from '../lib/private-files';
 import {
   sendWhatsAppText,
   sendWhatsAppMedia,
@@ -474,7 +475,15 @@ whatsappAdmin.get('/conversations/:id/messages', async (c) => {
     ORDER BY created_at DESC
     LIMIT ${limit}
   `;
-  return c.json({ messages: rows.reverse() });
+  // SEC-10: media lives in the private store — expose a signed URL, not a path.
+  const messages = rows.reverse().map((m) => ({
+    ...m,
+    media_url:
+      typeof m.media_path === 'string' && /^[A-Za-z0-9._-]+$/.test(m.media_path)
+        ? signFileUrl('whatsapp', m.media_path)
+        : null,
+  }));
+  return c.json({ messages });
 });
 
 whatsappAdmin.post('/conversations/:id/messages', async (c) => {

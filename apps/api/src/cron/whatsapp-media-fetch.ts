@@ -3,8 +3,8 @@
  *
  * Quando un webhook GOWA arriva per un messaggio non-text, salviamo subito la
  * riga in whatsapp_messages con meta.media_pending = true. Questo job poi
- * scarica il binario via GOWA /message/<id>/download e lo salva in
- * UPLOAD_DIR/whatsapp/. Esposto come /media/whatsapp/<uuid>.<ext>.
+ * scarica il binario via GOWA /message/<id>/download e lo salva nello store
+ * privato (SEC-10); l'admin lo vede via URL firmata /api/files/whatsapp/<name>.
  *
  * Strategia: max 20 per giro, ogni 30s. Fallimenti loggati, riproveremo nel
  * prossimo tick.

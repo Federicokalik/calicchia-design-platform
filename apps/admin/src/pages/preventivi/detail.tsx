@@ -83,7 +83,8 @@ export default function PreventivoDetailPage() {
               toast.info('Generazione PDF...');
               const res = await apiFetch(`/api/quotes-v2/${id}/generate-pdf`, { method: 'POST' });
               if (res.pdf_url) {
-                window.open(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}${res.pdf_url}`, '_blank');
+                // pdf_url is an absolute, signed URL (SEC-10) — open it as-is.
+                window.open(res.pdf_url, '_blank');
                 toast.success('PDF generato!');
               }
             } catch { toast.error('Errore generazione PDF'); }

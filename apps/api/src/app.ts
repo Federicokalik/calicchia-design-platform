@@ -32,6 +32,7 @@ import { publicLeads } from './routes/public-leads';
 import { analytics } from './routes/analytics';
 import { keys } from './routes/keys';
 import { health } from './routes/health';
+import { files } from './routes/files';
 import { search } from './routes/search';
 import { exportRoutes } from './routes/export';
 import { importRoutes } from './routes/import';
@@ -170,6 +171,11 @@ app.use('/media/*', serveStatic({ root: UPLOAD_DIR, rewriteRequestPath: (path) =
 
 // Health check (no auth required)
 app.route('/api/health', health);
+
+// Private files (SEC-10): quote PDFs / receipts / WhatsApp media. Public route —
+// access is gated by the signed URL, not by a session. Must stay OUT of the
+// protected-paths list below.
+app.route('/api/files', files);
 
 // Auth routes (no auth required)
 app.route('/api/auth', auth);

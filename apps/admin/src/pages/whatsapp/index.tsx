@@ -39,6 +39,7 @@ interface WaMessage {
   type: string;
   body: string | null;
   media_path: string | null;
+  media_url: string | null;
   media_mime: string | null;
   ack_status: string | null;
   sender_kind: 'user' | 'admin' | 'ai' | 'workflow' | 'system';
@@ -409,8 +410,8 @@ function MessageBubble({ message, isEditing, editingText, onEditChange, onStartE
           <>
             {m.type === 'text' || m.type === 'reaction' ? (
               <p className="whitespace-pre-wrap break-words">{m.body || (m.type === 'reaction' ? '👍' : '')}</p>
-            ) : m.type === 'image' && m.media_path ? (
-              <img src={`/media/${m.media_path}`} alt="" className="rounded-lg max-w-full" />
+            ) : m.type === 'image' && m.media_url ? (
+              <img src={m.media_url} alt="" className="rounded-lg max-w-full" />
             ) : (
               <p className="italic opacity-70">[{m.type}]{m.body ? ` ${m.body}` : ''}</p>
             )}

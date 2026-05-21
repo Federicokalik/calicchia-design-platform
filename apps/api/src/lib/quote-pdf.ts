@@ -4,15 +4,8 @@
  */
 
 import puppeteer from 'puppeteer';
-import { mkdirSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
 import crypto from 'crypto';
-
-const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
-const QUOTES_DIR = resolve(UPLOAD_DIR, 'quotes');
-
-// Ensure directory exists
-mkdirSync(QUOTES_DIR, { recursive: true });
+import { savePrivateFile, signFileUrl } from './private-files';
 
 /**
  * Generate PDF from HTML string
@@ -44,18 +37,18 @@ export async function generateQuotePdf(
       footerTemplate: '<div style="font-size:7.5pt;color:#999;width:100%;display:flex;justify-content:space-between;padding:0 18mm;"><span></span><span>Pag. <span class="pageNumber"></span> di <span class="totalPages"></span></span></div>',
     });
 
-    // Save file
+    // Save to the private store (SEC-10) — never the public /media/* path.
     const safeName = filename.replace(/[^a-zA-Z0-9_-]/g, '_');
     const pdfFilename = `${safeName}_${Date.now()}.pdf`;
-    const pdfPath = resolve(QUOTES_DIR, pdfFilename);
-    writeFileSync(pdfPath, pdfBuffer);
+    const buffer = Buffer.from(pdfBuffer);
+    await savePrivateFile('quotes', pdfFilename, buffer);
 
     // Hash for audit trail
-    const pdfHash = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
+    const pdfHash = crypto.createHash('sha256').update(buffer).digest('hex');
 
     return {
       pdfPath: `quotes/${pdfFilename}`,
-      pdfUrl: `/media/quotes/${pdfFilename}`,
+      pdfUrl: signFileUrl('quotes', pdfFilename),
       pdfHash,
     };
   } finally {

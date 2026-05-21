@@ -38,6 +38,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS}
       WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY}
       UPLOAD_DIR: /data/uploads
+      PRIVATE_UPLOAD_DIR: /data/private
       API_URL: ${API_URL}
       SITE_URL: ${SITE_URL}
       ADMIN_URL: ${ADMIN_URL}
@@ -78,6 +79,7 @@ services:
       S4_SECRET_ACCESS_KEY: ${S4_SECRET_ACCESS_KEY}
     volumes:
       - uploads_data:/data/uploads
+      - private_data:/data/private
     depends_on:
       postgres:
         condition: service_healthy
@@ -140,6 +142,7 @@ services:
 volumes:
   postgres_data:
   uploads_data:
+  private_data:
 
 networks:
   dokploy-network:
