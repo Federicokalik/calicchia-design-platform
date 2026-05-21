@@ -236,8 +236,11 @@ async function fetchProjects(): Promise<ApiProject[]> {
 
   // Public sitemap: usa /api/public/projects (no auth) invece del privato /api/projects.
   try {
+    // ST-07: bound the wait — an unreachable/hanging API must not stall the
+    // sitemap; on timeout the catch below falls back to a static-only sitemap.
     const res = await fetch(`${apiBase()}/api/public/projects?limit=50`, {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
       warn('projects endpoint returned', res.status);
@@ -257,6 +260,7 @@ async function fetchBlogPosts(): Promise<ApiBlogPost[]> {
   try {
     const res = await fetch(`${apiBase()}/api/public/blog/posts?limit=100`, {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(5000),
     });
     if (res.status === 404) return [];
     if (!res.ok) {

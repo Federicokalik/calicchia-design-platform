@@ -23,6 +23,7 @@ ARG NEXT_PUBLIC_GOOGLE_MAPS_KEY
 ARG NEXT_PUBLIC_BUGSINK_DSN
 ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ARG PUBLIC_SITE_URL
+ARG GOOGLE_SITE_VERIFICATION
 # NB: PORTAL_API_URL NON viene passato in build di proposito. sitemap.ts fa
 # fetch verso l'API per progetti/blog; in build l'API non è raggiungibile e il
 # fetch va in timeout (60s ×3) facendo fallire `next build`. Senza la var,
@@ -36,6 +37,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_BUGSINK_DSN=$NEXT_PUBLIC_BUGSINK_DSN \
     NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
     PUBLIC_SITE_URL=$PUBLIC_SITE_URL \
+    GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION \
     NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=production
 COPY apps/sito-v3 ./apps/sito-v3

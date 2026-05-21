@@ -163,8 +163,9 @@ auth.get('/setup-status', async (c) => {
   return c.json({ needs_setup: !hasAdmin });
 });
 
-// POST /api/auth/setup — create first admin (only works if no admins exist)
-auth.post('/setup', async (c) => {
+// POST /api/auth/setup — create first admin (only works if no admins exist).
+// BK-14: rate-limited like /login to blunt brute-force against the setup window.
+auth.post('/setup', loginRateLimit, async (c) => {
   const { email, password, full_name } = await c.req.json();
 
   if (!email || !password) {

@@ -184,10 +184,20 @@ export async function callOpenAICompatible(
   messages: Array<{ role: string; content: string }>,
   options?: { tools?: any[]; temperature?: number; max_tokens?: number; _task?: string; _channel?: string }
 ): Promise<any> {
+  // BK-11: degrade cleanly when no provider is configured — never send a
+  // request with an empty `Authorization: Bearer` header. Callers wrap AI
+  // calls in try/catch, so a thrown error disables the feature gracefully.
+  const apiKey = config.apiKey();
+  if (!apiKey) {
+    throw new Error(
+      `LLM provider "${config.provider}" non configurato: API key mancante — funzione AI non disponibile.`,
+    );
+  }
+
   const startTime = Date.now();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${config.apiKey()}`,
+    'Authorization': `Bearer ${apiKey}`,
   };
 
   const res = await fetch(`${config.baseUrl()}/chat/completions`, {

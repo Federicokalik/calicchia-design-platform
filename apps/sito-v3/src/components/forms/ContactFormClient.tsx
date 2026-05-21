@@ -28,6 +28,7 @@ import {
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { useLeadSource } from '@/hooks/useLeadSource';
 import { reportEvent } from '@/instrumentation-client';
+import { SITE } from '@/data/site';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -243,11 +244,11 @@ export function ContactFormClient() {
         >
           {t('success.textBeforeEmail')}{' '}
           <a
-            href="mailto:mail@calicchia.design"
+            href={`mailto:${SITE.contact.email}`}
             className="underline"
             style={{ color: 'var(--color-accent-deep)' }}
           >
-            mail@calicchia.design
+            {SITE.contact.email}
           </a>
           {t('success.textAfterEmail')}
         </p>

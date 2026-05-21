@@ -75,8 +75,9 @@ export const metadata: Metadata = {
   },
   robots: { index: true, follow: true },
   verification: {
-    // Add when you have the codes:
-    // google: '...',
+    // ST-05: set GOOGLE_SITE_VERIFICATION in the deploy env (the token from
+    // Search Console). Left undefined → Next omits the meta tag.
+    google: process.env.GOOGLE_SITE_VERIFICATION,
   },
 };
 

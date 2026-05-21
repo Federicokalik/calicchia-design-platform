@@ -212,7 +212,9 @@ app.use('/api/sign/*', signRateLimit);
 app.route('/api/sign', signablesPublic);
 app.route('/api/paypal', paypal);
 app.route('/api/public-pay', publicPay);
-// Telegram webhook (no auth — verified by bot token)
+// Telegram webhook (no auth — verified by bot secret token).
+// BK-14: rate-limited so a leaked/guessed webhook path can't be flooded.
+app.use('/api/telegram/*', createRateLimit(30, 60 * 1000));
 app.route('/api/telegram', telegram);
 // Workflow webhook (no auth — identified by webhookId + HMAC signature)
 const webhookRateLimit = createRateLimit(10, 60 * 1000);

@@ -8,7 +8,6 @@ import { createRevolutOrder, getRevolutOrder, cancelRevolutOrder, isRevolutConfi
 import { zValidator } from '../lib/z-validator';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { generateReceiptForPaymentLink } from '../lib/receipt-pdf';
-import { maskPII } from '../lib/webhook-sanitize';
 
 export const payments = new Hono();
 
@@ -819,42 +818,7 @@ payments.post('/links/:id/void', async (c) => {
   return c.json({ link: row });
 });
 
-// =====================================================
-// WEBHOOK EVENTS (log + stub)
-// =====================================================
-
-payments.post('/webhooks/:provider', async (c) => {
-  const provider = c.req.param('provider');
-  const body = await c.req.text().catch(() => '{}');
-
-  let payload: Record<string, unknown> = {};
-  try {
-    payload = JSON.parse(body) as Record<string, unknown>;
-  } catch {
-    payload = { raw: body };
-  }
-
-  const eventType = String(
-    (payload.event_type as string | undefined)
-    ?? (payload.type as string | undefined)
-    ?? 'unknown',
-  );
-  const externalId = String(
-    (payload.id as string | undefined)
-    ?? ((payload.resource as Record<string, unknown> | undefined)?.id as string | undefined)
-    ?? '',
-  ) || null;
-
-  const webhookData: Record<string, unknown> = {
-    provider,
-    event_type: eventType,
-    external_id: externalId,
-    signature_valid: null,
-    payload_json: sqlv(maskPII(payload) as Record<string, unknown>),
-    status: 'received',
-  };
-
-  await sql`INSERT INTO payment_webhook_events ${sql(webhookData)}`;
-
-  return c.json({ received: true });
-});
+// BK-12: the unauthenticated `POST /webhooks/:provider` stub was removed — it
+// accepted and stored any payload with no signature check, letting anyone forge
+// payment webhook events. Real provider webhooks are handled (with HMAC/PayPal
+// signature verification) by routes/stripe-webhook.ts and routes/paypal-webhook.ts.
