@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  Receipt, Plus, Upload, Sparkles, Trash2, X, Calendar,
+  Receipt, Plus, Upload, Sparkles, Trash2, Calendar,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';

@@ -1,10 +1,35 @@
 import { Hono } from 'hono';
+import type { Context } from 'hono';
+import { timingSafeEqual } from 'node:crypto';
 import { runAgent } from '../lib/agent';
 import { sendTelegramMessage, isAuthorizedChat, isTelegramConfigured } from '../lib/telegram';
 
 export const telegram = new Hono();
 
 const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN || '';
+
+/**
+ * Verify the webhook request actually comes from Telegram.
+ *
+ * Telegram echoes the `secret_token` registered via setWebhook in the
+ * `X-Telegram-Bot-Api-Secret-Token` header. Compared in constant time.
+ * If no secret is configured: blocked in production, allowed in dev.
+ */
+function isWebhookAuthentic(c: Context): boolean {
+  const expected = process.env.TELEGRAM_WEBHOOK_SECRET || '';
+  if (!expected) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[SECURITY] TELEGRAM_WEBHOOK_SECRET not configured in production — blocking webhook');
+      return false;
+    }
+    return true; // dev convenience
+  }
+  const provided = c.req.header('x-telegram-bot-api-secret-token') || '';
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
 
 /**
  * Transcribe audio file using Infomaniak Whisper V3
@@ -87,6 +112,7 @@ async function sendReply(chatId: string, text: string) {
 
 // POST /api/telegram/webhook
 telegram.post('/webhook', async (c) => {
+  if (!isWebhookAuthentic(c)) return c.json({ error: 'Unauthorized' }, 401);
   if (!isTelegramConfigured()) return c.json({ ok: true });
 
   const update = await c.req.json();

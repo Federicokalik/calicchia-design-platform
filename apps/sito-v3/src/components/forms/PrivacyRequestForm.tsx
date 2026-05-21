@@ -13,14 +13,16 @@ import { Input } from '@/components/ui/form/Input';
 import { Textarea } from '@/components/ui/form/Textarea';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Button } from '@/components/ui/Button';
+import { useTurnstile } from '@/hooks/useTurnstile';
 
+// Italian copy keyed by the API enum values (request_type).
 const REQUEST_TYPE_LABELS: Record<PrivacyRequestType, string> = {
-  accesso: 'Accesso ai dati personali',
-  cancellazione: 'Cancellazione (diritto all\'oblio)',
-  portabilita: 'Portabilità dei dati',
-  rettifica: 'Rettifica',
-  opposizione: 'Opposizione al trattamento',
-  limitazione: 'Limitazione del trattamento',
+  access: 'Accesso ai dati personali',
+  erasure: 'Cancellazione (diritto all\'oblio)',
+  portability: 'Portabilità dei dati',
+  rectification: 'Rettifica',
+  objection: 'Opposizione al trattamento',
+  restriction: 'Limitazione del trattamento',
 };
 
 type FormState =
@@ -31,10 +33,14 @@ type FormState =
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? process.env.PORTAL_API_URL ?? 'http://localhost:3001';
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
+  process.env.PUBLIC_TURNSTILE_SITE_KEY;
 
 export function PrivacyRequestForm() {
   const [state, setState] = useState<FormState>({ kind: 'idle' });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof PrivacyRequestInput, string>>>({});
+  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -47,10 +53,6 @@ export function PrivacyRequestForm() {
       email: String(fd.get('email') ?? ''),
       description: String(fd.get('description') ?? ''),
       gdpr: fd.get('gdpr') === 'on' ? true : false,
-      // Turnstile token will be wired in P0-05; per ora passiamo placeholder
-      // accettato a livello server (la validazione finale anti-bot avverrà in fase
-      // 3 via Cloudflare Turnstile come da P0-05).
-      turnstileToken: 'pending-p0-05',
     };
 
     const parsed = privacyRequestSchema.safeParse(payload);
@@ -68,15 +70,31 @@ export function PrivacyRequestForm() {
 
     setState({ kind: 'loading' });
     try {
+      // Map the form shape onto the API contract: snake_case field names,
+      // `message` (not `description`), real Turnstile token.
       const res = await fetch(`${API_BASE}/api/gdpr-requests`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(parsed.data),
+        body: JSON.stringify({
+          request_type: parsed.data.requestType,
+          name: parsed.data.name,
+          email: parsed.data.email,
+          message: parsed.data.description,
+          turnstile_token: turnstile.token ?? '',
+        }),
       });
 
       if (!res.ok) {
+        turnstile.reset();
         const text = await res.text().catch(() => '');
-        throw new Error(text || `HTTP ${res.status}`);
+        let message = `HTTP ${res.status}`;
+        try {
+          const json = JSON.parse(text) as { error?: string };
+          if (json.error) message = json.error;
+        } catch {
+          if (text) message = text;
+        }
+        throw new Error(message);
       }
 
       setState({ kind: 'success' });
@@ -228,16 +246,15 @@ export function PrivacyRequestForm() {
         {fieldErrors.gdpr ? <FieldError>{fieldErrors.gdpr}</FieldError> : null}
       </Field>
 
-      {/* Turnstile slot — wired in P0-05 (Cloudflare Turnstile + RHF refactor) */}
-      <div
-        className="text-xs uppercase tracking-[0.18em]"
-        style={{
-          fontFamily: 'var(--font-mono)',
-          color: 'var(--color-text-tertiary)',
-        }}
-      >
-        Anti-bot · verifica server-side al submit
-      </div>
+      {/* Turnstile invisible widget (lazy script via useTurnstile). */}
+      <div ref={turnstile.containerRef} aria-hidden="true" />
+      {!TURNSTILE_SITE_KEY ? (
+        <MonoLabel as="p">
+          Anti-bot · verifica server-side al submit
+        </MonoLabel>
+      ) : turnstile.error ? (
+        <FieldError>{turnstile.error}</FieldError>
+      ) : null}
 
       {state.kind === 'error' ? (
         <p

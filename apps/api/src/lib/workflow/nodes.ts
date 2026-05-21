@@ -30,6 +30,75 @@ function interpolate(template: string, data: any): string {
   });
 }
 
+// ── tool_db_query safety ────────────────────────────────────────────────
+// The DB-query node runs admin-authored SQL. It is locked down to be safe by
+// construction:
+//   1. SELECT-only, single statement (no `;`, no DML/DDL, no CTEs).
+//   2. Values are NEVER interpolated into the SQL string — they are bound as
+//      $1..$n parameters (only the `params` array is interpolated, which is
+//      safe because parameters are not concatenated into SQL).
+//   3. Every table referenced after FROM/JOIN must be in ALLOWED_QUERY_TABLES.
+//      Sensitive tables (profiles, mcp_tokens, webhooks, email_accounts,
+//      *_tokens, audit logs, payment provider creds, …) are deliberately NOT
+//      allowlisted, so `SELECT password_hash FROM profiles` and sub-select
+//      exfiltration are rejected.
+//   4. System functions (pg_*, dblink, large-object import/export) are blocked.
+//   5. Results are capped to QUERY_MAX_ROWS.
+const ALLOWED_QUERY_TABLES = new Set<string>([
+  'leads', 'contacts', 'customers', 'customer_notes', 'communication_preferences',
+  'client_projects', 'project_tasks', 'project_milestones', 'project_deliverables',
+  'project_comments', 'project_files', 'project_revisions',
+  'quotes', 'quotes_v2',
+  'invoices', 'invoice_settings', 'invoice_numbering',
+  'payments', 'payment_schedules', 'payment_records', 'payment_links',
+  'payment_tracker', 'payment_receipts',
+  'subscriptions', 'services', 'expenses', 'time_entries',
+  'blog_posts', 'blog_posts_translations', 'blog_generation_config',
+  'blog_generation_logs', 'blog_post_revisions',
+  'newsletter_subscribers', 'newsletter_campaigns',
+  'marketing_campaigns', 'campaign_assets', 'campaign_reports',
+  'calendar_bookings', 'cal_bookings', 'calendar_events', 'calendar_event_types',
+  'calendar_availability_schedules', 'calendar_availability_slots',
+  'gdpr_requests', 'cookie_consents',
+  'domains', 'domain_renewals', 'domain_alerts', 'tld_pricing',
+  'notes', 'boards', 'notifications',
+  'analytics', 'analytics_daily', 'analytics_goals',
+  'workflows', 'workflow_executions', 'workflow_step_logs',
+  'deliverable_feedback', 'deliverable_versions',
+  'projects', 'experiences', 'skills', 'categories', 'media', 'timeline_events',
+  'seo_metadata', 'website_pages', 'website_projects',
+]);
+
+const QUERY_MAX_ROWS = 1000;
+
+// Blocks filesystem / large-object / cross-database access reachable from a
+// plain SELECT (the only statement type allowed).
+const FORBIDDEN_SQL_IDENT = /\bpg_[a-z_]+|\blo_import\b|\blo_export\b|\bdblink\b/i;
+
+/**
+ * Validate that `query` is a single read-only SELECT touching only allowlisted
+ * tables. Returns an Italian error string if unsafe, or null if safe.
+ */
+function validateReadOnlyQuery(query: string): string | null {
+  const trimmed = query.trim().replace(/;\s*$/, ''); // tolerate one trailing ;
+  if (!trimmed) return 'Query vuota';
+  if (trimmed.includes(';')) return 'Query bloccata: più istruzioni non permesse';
+  if (!/^select\b/i.test(trimmed)) {
+    return 'Query bloccata: sono permesse solo query SELECT';
+  }
+  if (FORBIDDEN_SQL_IDENT.test(trimmed)) {
+    return 'Query bloccata: funzioni di sistema non permesse';
+  }
+  for (const m of trimmed.matchAll(/\b(?:from|join)\s+("?[\w.]+"?)/gi)) {
+    const raw = m[1].replace(/"/g, '').toLowerCase();
+    const name = raw.includes('.') ? raw.split('.').pop()! : raw;
+    if (!ALLOWED_QUERY_TABLES.has(name)) {
+      return `Query bloccata: tabella non consentita "${name}"`;
+    }
+  }
+  return null;
+}
+
 export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
   // === TRIGGERS ===
   trigger_cron: {
@@ -126,21 +195,31 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
   // === TOOLS ===
   tool_db_query: {
     type: 'tool_db_query', label: 'Query DB', category: 'tool', color: '#3b82f6', icon: 'Database',
-    description: 'Esegue una query SQL sul database',
+    description: 'Esegue una query SELECT di sola lettura sul database (valori passati come parametri $1, $2…)',
     configSchema: { query: 'SELECT * FROM leads WHERE status = $1 LIMIT 10', params: ['new'] },
     execute: async (config, input) => {
-      let query = interpolate(config.query || '', input);
-      query = query.replace(/''/g, "'");
+      // The query string is treated as a fixed template: it is NEVER
+      // interpolated with `input`. Values flow exclusively through `params`,
+      // which are bound as $1..$n. See validateReadOnlyQuery above.
+      const query = String(config.query || '');
 
-      // GUARDRAIL: Block dangerous SQL
-      const dangerous = /\b(DELETE|DROP|TRUNCATE|ALTER|UPDATE\s+users|INSERT\s+INTO\s+users)\b/i;
-      if (dangerous.test(query)) {
-        return { rows: [], count: 0, error: 'Query bloccata: operazioni DELETE/DROP/ALTER non permesse nei workflow' };
+      const rejection = validateReadOnlyQuery(query);
+      if (rejection) {
+        return { rows: [], count: 0, error: rejection };
       }
 
+      // Only the params array is interpolated — safe, since params are bound,
+      // not concatenated into SQL.
+      const rawParams = Array.isArray(config.params) ? config.params : [];
+      const params = rawParams.map((p: unknown) =>
+        typeof p === 'string' ? interpolate(p, input) : p
+      );
+
       try {
-        const rows = await sql.unsafe(query);
-        return { rows, count: rows.length };
+        const rows = await sql.unsafe(query.trim().replace(/;\s*$/, ''), params);
+        const list = Array.isArray(rows) ? rows : [];
+        const capped = list.slice(0, QUERY_MAX_ROWS);
+        return { rows: capped, count: capped.length, truncated: list.length > QUERY_MAX_ROWS };
       } catch (err) {
         return { rows: [], count: 0, error: err instanceof Error ? err.message : 'Query error' };
       }
