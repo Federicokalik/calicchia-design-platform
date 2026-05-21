@@ -36,7 +36,7 @@ export function useAuth() {
       });
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string, turnstileToken?: string | null) => {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -44,7 +44,7 @@ export function useAuth() {
         'Accept-Language': toIntlLocale(getStoredAdminLocale()),
         'X-Admin-Locale': getStoredAdminLocale(),
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, turnstile_token: turnstileToken ?? undefined }),
       credentials: 'include',
     });
 

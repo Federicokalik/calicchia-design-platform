@@ -33,9 +33,7 @@ type FormState =
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? process.env.PORTAL_API_URL ?? 'http://localhost:3001';
-const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
-  process.env.PUBLIC_TURNSTILE_SITE_KEY;
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function PrivacyRequestForm() {
   const [state, setState] = useState<FormState>({ kind: 'idle' });

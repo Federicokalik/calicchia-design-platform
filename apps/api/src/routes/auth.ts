@@ -5,6 +5,7 @@ import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
+import { verifyTurnstileToken } from '../lib/turnstile';
 
 export const auth = new Hono();
 
@@ -15,10 +16,17 @@ import { setAuthCookie, clearAuthCookie } from '../lib/cookies';
 
 // POST /api/auth/login
 auth.post('/login', loginRateLimit, async (c) => {
-  const { email, password } = await c.req.json();
+  const { email, password, turnstile_token } = await c.req.json();
 
   if (!email || !password) {
     return c.json({ error: adminMessage(c, 'emailPasswordRequired') }, 400);
+  }
+
+  // Anti-bot check before any DB lookup / bcrypt work.
+  const clientIp =
+    c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
+  if (!(await verifyTurnstileToken(turnstile_token || '', clientIp))) {
+    return c.json({ error: adminMessage(c, 'turnstileFailed') }, 403);
   }
 
   const rows = await sql`

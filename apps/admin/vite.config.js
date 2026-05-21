@@ -7,7 +7,9 @@ export default defineConfig({
     plugins: [react()],
     root: __dirname,
     envDir: path.resolve(__dirname, '../..'), // Root monorepo .env (unico .env globale)
-    envPrefix: ['VITE_', 'PUBLIC_'], // Support both Vite and Astro conventions
+    // VITE_/PUBLIC_ for legacy admin vars; NEXT_PUBLIC_ so the admin can read the
+    // same client-side keys as sito-v3 from the single root .env (e.g. Turnstile).
+    envPrefix: ['VITE_', 'PUBLIC_', 'NEXT_PUBLIC_'],
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),

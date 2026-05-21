@@ -8,6 +8,7 @@ import { createRateLimit } from '../../middleware/rate-limit';
 import { setPortalCookie, clearPortalCookie } from '../../lib/cookies';
 import { auditPortalEvent } from '../../lib/portal-audit';
 import { issueMagicLink, consumeMagicLink } from '../../lib/portal-tokens';
+import { verifyTurnstileToken } from '../../lib/turnstile';
 import { sendEmail } from '../../lib/email';
 import { renderMagicLinkEmail } from '../../templates/magic-link';
 
@@ -128,11 +129,18 @@ export const authRoutes = new Hono<PortalEnv>();
 
 // ── Request magic link (email-only flow, primary auth) ───
 authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
-  const body = (await c.req.json().catch(() => ({}))) as { email?: string };
+  const body = (await c.req.json().catch(() => ({}))) as {
+    email?: string;
+    turnstile_token?: string;
+  };
   const email = String(body.email ?? '').toLowerCase().trim();
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return c.json({ error: 'Email non valida' }, 400);
+  }
+
+  if (!(await verifyTurnstileToken(body.turnstile_token ?? '', getClientIp(c) ?? undefined))) {
+    return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
   // ALWAYS respond 200 to prevent user enumeration. If customer doesn't
@@ -249,10 +257,18 @@ authRoutes.post('/exchange-token', portalLoginLimit, async (c) => {
 // ── Login (email + portal access code) ───────────────────
 // Kept for the "emergency code" fallback. Email REQUIRED here.
 authRoutes.post('/login', portalLoginLimit, async (c) => {
-  const { email, access_code } = (await c.req.json()) as { email?: string; access_code?: string };
+  const { email, access_code, turnstile_token } = (await c.req.json()) as {
+    email?: string;
+    access_code?: string;
+    turnstile_token?: string;
+  };
 
   if (!email || !access_code) {
     return c.json({ error: 'Email e codice di accesso richiesti' }, 400);
+  }
+
+  if (!(await verifyTurnstileToken(turnstile_token ?? '', getClientIp(c) ?? undefined))) {
+    return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
   const normalizedEmail = email.toLowerCase().trim();
