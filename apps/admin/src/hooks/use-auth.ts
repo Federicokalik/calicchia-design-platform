@@ -36,7 +36,12 @@ export function useAuth() {
       });
   }, []);
 
-  const signIn = useCallback(async (email: string, password: string, turnstileToken?: string | null) => {
+  const signIn = useCallback(async (
+    email: string,
+    password: string,
+    turnstileToken?: string | null,
+    mfaCode?: string | null,
+  ): Promise<{ mfaRequired: true } | { mfaRequired: false; user: AuthUser }> => {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -44,16 +49,24 @@ export function useAuth() {
         'Accept-Language': toIntlLocale(getStoredAdminLocale()),
         'X-Admin-Locale': getStoredAdminLocale(),
       },
-      body: JSON.stringify({ email, password, turnstile_token: turnstileToken ?? undefined }),
+      body: JSON.stringify({
+        email,
+        password,
+        turnstile_token: turnstileToken ?? undefined,
+        mfa_code: mfaCode ?? undefined,
+      }),
       credentials: 'include',
     });
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Errore durante il login');
-    if (data.user?.ui_locale) setStoredAdminLocale(data.user.ui_locale);
 
+    // SEC-06: step 1 (password only) on an MFA account — caller must collect a code.
+    if (data.mfa_required) return { mfaRequired: true };
+
+    if (data.user?.ui_locale) setStoredAdminLocale(data.user.ui_locale);
     setState({ user: data.user, isLoading: false });
-    return data;
+    return { mfaRequired: false, user: data.user };
   }, []);
 
   const signOut = useCallback(async () => {

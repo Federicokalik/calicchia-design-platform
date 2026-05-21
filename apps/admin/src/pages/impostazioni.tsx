@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { WhatsAppSection } from './impostazioni/whatsapp-section';
+import { MfaSection } from './impostazioni/mfa-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -46,6 +47,7 @@ const NAV_ITEMS = [
   { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
   { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
   { id: 'backup', label: 'Backup', icon: Database },
+  { id: 'sicurezza', label: 'Sicurezza', icon: Shield },
   { id: 'audit', label: 'Audit Log', icon: History },
 ];
 
@@ -770,6 +772,8 @@ export default function ImpostazioniPage() {
         )}
 
         {/* === TOKEN MCP === */}
+        {activeTab === 'sicurezza' && <MfaSection />}
+
         {activeTab === 'mcp-tokens' && <McpTokensSection />}
 
         {/* === WHATSAPP === */}

@@ -6,6 +6,9 @@ import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { generateTotpSecret, verifyTotp, otpauthUri } from '../lib/totp';
+import { encryptSecret, decryptSecret } from '../lib/crypto';
+import { randomBytes } from 'crypto';
 
 export const auth = new Hono();
 
@@ -16,7 +19,7 @@ import { setAuthCookie, clearAuthCookie } from '../lib/cookies';
 
 // POST /api/auth/login
 auth.post('/login', loginRateLimit, async (c) => {
-  const { email, password, turnstile_token } = await c.req.json();
+  const { email, password, turnstile_token, mfa_code } = await c.req.json();
 
   if (!email || !password) {
     return c.json({ error: adminMessage(c, 'emailPasswordRequired') }, 400);
@@ -31,6 +34,7 @@ auth.post('/login', loginRateLimit, async (c) => {
 
   const rows = await sql`
     SELECT u.id, u.email, u.password_hash, u.role,
+           u.mfa_secret, u.mfa_enabled, u.mfa_backup_codes,
            p.full_name, p.avatar_url, p.ui_locale
     FROM users u
     LEFT JOIN profiles p ON p.id = u.id
@@ -53,6 +57,34 @@ auth.post('/login', loginRateLimit, async (c) => {
     return c.json({ error: adminMessage(c, 'adminOnly') }, 403);
   }
 
+  // MFA gate (SEC-06): when enabled, a valid TOTP or one-time backup code is
+  // required. Step 1 (password only) replies { mfa_required: true } and sets
+  // no cookie; the client resubmits with `mfa_code`.
+  if (user.mfa_enabled) {
+    const code = typeof mfa_code === 'string' ? mfa_code.trim() : '';
+    if (!code) {
+      return c.json({ mfa_required: true });
+    }
+    let mfaOk = false;
+    if (user.mfa_secret && verifyTotp(decryptSecret(user.mfa_secret), code)) {
+      mfaOk = true;
+    } else {
+      // Backup code — single use, consumed on match.
+      const codes: string[] = Array.isArray(user.mfa_backup_codes) ? user.mfa_backup_codes : [];
+      for (let i = 0; i < codes.length; i++) {
+        if (await bcrypt.compare(code, codes[i])) {
+          const remaining = codes.filter((_, idx) => idx !== i);
+          await sql`UPDATE users SET mfa_backup_codes = ${sql.json(remaining)} WHERE id = ${user.id}`;
+          mfaOk = true;
+          break;
+        }
+      }
+    }
+    if (!mfaOk) {
+      return c.json({ error: adminMessage(c, 'invalidCredentials') }, 401);
+    }
+  }
+
   const token = await signToken({
     sub: user.id,
     email: user.email,
@@ -69,8 +101,71 @@ auth.post('/login', loginRateLimit, async (c) => {
       full_name: user.full_name,
       avatar_url: user.avatar_url,
       ui_locale: user.ui_locale || 'it',
+      mfa_enabled: user.mfa_enabled === true,
     },
   });
+});
+
+// ─── MFA (TOTP) — SEC-06 ───────────────────────────────────────
+
+// POST /api/auth/mfa/setup — start enrollment: generate a secret (not yet active).
+auth.post('/mfa/setup', authMiddleware, async (c) => {
+  const userId = (c as any).get('user')?.id as string | undefined;
+  if (!userId) return c.json({ error: adminMessage(c, 'authRequired') }, 401);
+
+  const [row] = await sql`SELECT email, mfa_enabled FROM users WHERE id = ${userId}`;
+  if (!row) return c.json({ error: adminMessage(c, 'userNotFound') }, 404);
+  if (row.mfa_enabled) return c.json({ error: 'MFA già attiva' }, 400);
+
+  const secret = generateTotpSecret();
+  await sql`UPDATE users SET mfa_secret = ${encryptSecret(secret)} WHERE id = ${userId}`;
+  return c.json({
+    secret,
+    otpauth_uri: otpauthUri(secret, String(row.email), 'Caldes Admin'),
+  });
+});
+
+// POST /api/auth/mfa/enable — verify the first code, activate MFA, return backup codes.
+auth.post('/mfa/enable', authMiddleware, async (c) => {
+  const userId = (c as any).get('user')?.id as string | undefined;
+  if (!userId) return c.json({ error: adminMessage(c, 'authRequired') }, 401);
+
+  const { code } = await c.req.json<{ code?: string }>();
+  const [row] = await sql`SELECT mfa_secret, mfa_enabled FROM users WHERE id = ${userId}`;
+  if (!row) return c.json({ error: adminMessage(c, 'userNotFound') }, 404);
+  if (row.mfa_enabled) return c.json({ error: 'MFA già attiva' }, 400);
+  if (!row.mfa_secret) return c.json({ error: 'Avvia prima il setup MFA' }, 400);
+  if (!verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
+    return c.json({ error: 'Codice non valido' }, 400);
+  }
+
+  // One-time backup codes — shown once, stored only as bcrypt hashes.
+  const backupCodes = Array.from({ length: 10 }, () => randomBytes(5).toString('hex'));
+  const hashed = await Promise.all(backupCodes.map((bc) => bcrypt.hash(bc, 12)));
+  await sql`
+    UPDATE users SET mfa_enabled = true, mfa_backup_codes = ${sql.json(hashed)}
+    WHERE id = ${userId}
+  `;
+  return c.json({ enabled: true, backup_codes: backupCodes });
+});
+
+// POST /api/auth/mfa/disable — turn MFA off (requires a current TOTP code).
+auth.post('/mfa/disable', authMiddleware, async (c) => {
+  const userId = (c as any).get('user')?.id as string | undefined;
+  if (!userId) return c.json({ error: adminMessage(c, 'authRequired') }, 401);
+
+  const { code } = await c.req.json<{ code?: string }>();
+  const [row] = await sql`SELECT mfa_secret, mfa_enabled FROM users WHERE id = ${userId}`;
+  if (!row?.mfa_enabled) return c.json({ error: 'MFA non attiva' }, 400);
+  if (!row.mfa_secret || !verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
+    return c.json({ error: 'Codice non valido' }, 400);
+  }
+
+  await sql`
+    UPDATE users SET mfa_enabled = false, mfa_secret = NULL, mfa_backup_codes = '[]'::jsonb
+    WHERE id = ${userId}
+  `;
+  return c.json({ disabled: true });
 });
 
 // GET /api/auth/me — uses shared authMiddleware so future cookie/refresh logic
@@ -81,7 +176,7 @@ auth.get('/me', authMiddleware, async (c) => {
   if (!userId) return c.json({ error: adminMessage(c, 'authRequired') }, 401);
 
   const rows = await sql`
-    SELECT u.id, u.email, u.role, p.full_name, p.avatar_url, p.ui_locale
+    SELECT u.id, u.email, u.role, u.mfa_enabled, p.full_name, p.avatar_url, p.ui_locale
     FROM users u
     LEFT JOIN profiles p ON p.id = u.id
     WHERE u.id = ${userId}
