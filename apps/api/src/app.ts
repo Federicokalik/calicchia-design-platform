@@ -152,6 +152,14 @@ app.use('*', async (c, next) => {
   c.header('X-XSS-Protection', '0'); // Deprecated but harmless
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  // CSP (SEC-08): the API only returns JSON and static files — none of which
+  // load sub-resources — so a deny-all policy is safe and blocks any HTML the
+  // API might ever serve (e.g. error pages) from executing scripts.
+  c.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  // SEC-13: COOP isolates the browsing context; CORP must stay 'cross-origin'
+  // because /media/* images are embedded by sito-v3 on another origin.
+  c.header('Cross-Origin-Opener-Policy', 'same-origin');
+  c.header('Cross-Origin-Resource-Policy', 'cross-origin');
   if (process.env.NODE_ENV === 'production') {
     c.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }

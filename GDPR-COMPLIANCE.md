@@ -203,3 +203,30 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 6. **K1**: Creare pagina termini e condizioni
 7. **L14**: Aggiungere Meta/WhatsApp tra i destinatari della privacy policy (sezione 8)
 8. **L16**: Creare template "first contact" WA con disclaimer preferenze (in corso)
+
+---
+
+## Procedura — verifica identità per richieste di accesso/cancellazione (GDPR-04)
+
+Gli endpoint `GET /api/gdpr-requests/export/:email` e `DELETE /api/gdpr-requests/erase/:email`
+operano **per indirizzo email** e sono protetti da `authMiddleware` — solo un admin
+autenticato può invocarli. Non eseguono di per sé alcuna verifica dell'identità
+dell'interessato: spetta all'admin verificarla **prima** di eseguire export o erase.
+
+Procedura obbligatoria prima di evadere una richiesta (art. 12(6) GDPR — in caso di
+dubbio ragionevole sull'identità si possono chiedere informazioni aggiuntive):
+
+1. **Match del canale.** La richiesta deve arrivare dall'indirizzo email oggetto
+   della richiesta stessa, oppure da un canale già associato a quell'interessato
+   (es. email del cliente già nel gestionale).
+2. **In caso di dubbio**, rispondere all'indirizzo email *registrato* (non a quello
+   indicato nella richiesta) chiedendo conferma — così la conferma arriva solo a
+   chi controlla davvero la casella.
+3. **Per richieste ad alto impatto** (erasure di un cliente con storico), richiedere
+   un elemento di riscontro non pubblico (es. numero di un preventivo/fattura,
+   ultimo progetto) prima di procedere.
+4. **Tracciare** la richiesta e la verifica effettuata nel record `gdpr_requests`
+   (campo `admin_notes`) prima di impostare lo stato `completed`.
+5. Solo dopo la verifica, eseguire export/erase dall'area admin.
+
+Termine di risposta: 30 giorni (art. 12(3)).

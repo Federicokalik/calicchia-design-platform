@@ -3,8 +3,10 @@ import { uploadFile, deleteFile, listFiles, generateFileKey, isS3Configured } fr
 
 export const media = new Hono();
 
+// SVG is intentionally excluded (SEC-09): an SVG can embed <script>, and files
+// served from /media/* would become stored XSS. Use raster formats instead.
 const ALLOWED_TYPES = [
-  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml', 'image/avif',
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif',
   'video/mp4', 'video/webm', 'video/quicktime',
   'application/pdf',
 ];

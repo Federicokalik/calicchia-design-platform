@@ -37,6 +37,37 @@ const bugsinkDsn =
   readRootEnvValue('BUGSINK_DSN') ??
   '';
 
+// CSP (SEC-08). sito-v3 has no nonce middleware (middleware.ts is deliberately
+// absent — see src/i18n/routing.ts), so script/style fall back to
+// 'unsafe-inline' for Next's hydration scripts and GSAP's inline style
+// attributes. The policy still hardens the meaningful axes: object-src 'none',
+// base-uri 'self', frame-ancestors 'none', and no http:/data: script sources.
+// localhost + ws entries keep dev (API on :3001, HMR socket) working; they are
+// harmless in production.
+const CONTENT_SECURITY_POLICY = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+  "style-src 'self' 'unsafe-inline' https:",
+  "img-src 'self' blob: data: https: http://localhost:3001",
+  "font-src 'self' data: https:",
+  "connect-src 'self' https: http://localhost:3001 ws://localhost:*",
+  "frame-src 'self' https:",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+].join('; ');
+
+const SECURITY_HEADERS = [
+  { key: 'Content-Security-Policy', value: CONTENT_SECURITY_POLICY },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+];
+
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -93,6 +124,9 @@ const config: NextConfig = {
       { source: '/:locale(it|en)/web-app-per-:slug', destination: '/:locale/sviluppo-web-per-:slug', permanent: true },
       { source: '/:locale(it|en)/servizi/web-app', destination: '/:locale/servizi/sviluppo-web', permanent: true },
     ];
+  },
+  async headers() {
+    return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
 };
 
