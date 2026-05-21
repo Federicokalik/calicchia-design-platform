@@ -1,0 +1,110 @@
+name: CI
+
+# Gate qualità su PR e push a main: typecheck, lint e build di tutti i workspace.
+# NB: il job "build" intercetta volutamente il finding AD-01 (build admin rotta)
+# finché non viene risolto — è la CI che fa il suo lavoro.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/**', '**/*.md']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck — api
+        run: pnpm --filter @caldes/api typecheck
+
+      - name: Typecheck — mcp
+        run: pnpm --filter @caldes/mcp typecheck
+
+      - name: Typecheck — sito-v3
+        run: pnpm --filter @caldes/sito-v3 typecheck
+
+      - name: Lint — sito-v3
+        run: pnpm --filter @caldes/sito-v3 lint
+
+      - name: Lint — admin
+        run: pnpm --filter @caldes/admin lint
+
+      - name: Build — api
+        run: pnpm --filter @caldes/api build
+
+      - name: Build — admin
+        run: pnpm --filter @caldes/admin build
+
+      - name: Build — sito-v3
+        run: pnpm --filter @caldes/sito-v3 build
+        env:
+          NEXT_PUBLIC_API_URL: https://api.example.com
+          NEXT_TELEMETRY_DISABLED: '1'
+
+  # Smoke test e2e dell'API contro un Postgres effimero.
+  api-e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: caldes
+          POSTGRES_USER: caldes
+          POSTGRES_PASSWORD: caldes
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U caldes"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://caldes:caldes@localhost:5432/caldes
+      JWT_SECRET: ci-test-secret-not-for-production-use-only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run migrations
+        run: pnpm --filter @caldes/api migrate
+      # NB: test-e2e.ts va riparato (vedi REPORT-07 TQ-02) prima di renderlo bloccante.
+      - name: API e2e smoke (non-blocking finché TQ-02 non è risolto)
+        run: pnpm --filter @caldes/api test:e2e
+        continue-on-error: true
+
+  # Deploy automatico: notifica Dokploy su push a main, dopo quality + api-e2e.
+  # Richiede il secret GitHub DOKPLOY_DEPLOY_WEBHOOK = URL del webhook di deploy
+  # del progetto Dokploy. Se il secret non è impostato lo step viene saltato.
+  deploy:
+    needs: [quality, api-e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy deploy
+        env:
+          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — deploy automatico saltato."
+            exit 0
+          fi
+          curl -fsSL -X POST "$WEBHOOK"
+          echo "Deploy Dokploy notificato."

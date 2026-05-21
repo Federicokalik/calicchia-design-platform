@@ -60,8 +60,10 @@ Serve la **AWS CLI** sull'host per il job di backup; l'API container usa invece
 ## CI/CD
 
 `.github/workflows/ci.yml` gira su PR e push a `main`: typecheck, lint, build di tutti i
-workspace, smoke e2e API contro un Postgres effimero. Per il deploy automatico, aggiungere
-un job che chiami il webhook di deploy di Dokploy su push a `main` (token in GitHub Secrets).
+workspace, smoke e2e API contro un Postgres effimero. Il job `deploy` notifica Dokploy su
+push a `main` (dopo `quality` + `api-e2e`): imposta il secret GitHub
+`DOKPLOY_DEPLOY_WEBHOOK` con l'URL del webhook di deploy del progetto Dokploy — se il
+secret non è impostato lo step viene saltato senza far fallire la CI.
 
 ## Caveat noti (da chiudere — vedi i report di audit)
 

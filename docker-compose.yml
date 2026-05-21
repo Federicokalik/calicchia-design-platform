@@ -1,16 +1,20 @@
+# Stack di SVILUPPO locale — solo Postgres. La produzione usa docker-compose.prod.yml.
+# Credenziali e porta sono parametrizzabili via .env; il default `caldes` è pensato
+# per lo sviluppo locale (il DB deve restare raggiungibile su localhost:5432 dalle
+# app eseguite in dev sull'host).
 services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: caldes
-      POSTGRES_USER: caldes
-      POSTGRES_PASSWORD: caldes
+      POSTGRES_DB: ${POSTGRES_DB:-caldes}
+      POSTGRES_USER: ${POSTGRES_USER:-caldes}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-caldes}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U caldes -d caldes"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-caldes} -d ${POSTGRES_DB:-caldes}"]
       interval: 5s
       timeout: 5s
       retries: 5

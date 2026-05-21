@@ -40,6 +40,9 @@ const bugsinkDsn =
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Self-contained build output for Docker: produces .next/standalone with a
+  // minimal server.js + traced node_modules. Required by apps/sito-v3/Dockerfile.
+  output: 'standalone',
   env: {
     NEXT_PUBLIC_GOOGLE_MAPS_KEY: googleMapsKey,
     NEXT_PUBLIC_BUGSINK_DSN: bugsinkDsn,

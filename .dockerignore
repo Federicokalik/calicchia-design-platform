@@ -1,0 +1,31 @@
+# Build context exclusions for all app Docker images
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/.vite
+.git
+.github
+.codex
+.agents
+.claude
+.serena
+.vscode
+.idea
+# Secrets — never bake into an image
+.env
+.env.*
+!.env.example
+!.env.prod.example
+# Runtime data
+uploads
+backups
+tmp
+data/*.mmdb
+# Docs & misc
+docs
+*.md
+!apps/api/src/lib/agent/*_knowledge_base.md
+calicchia-logo-package
+*.log
