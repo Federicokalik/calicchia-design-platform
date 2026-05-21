@@ -75,6 +75,7 @@
       "linkRequestFailed": "Couldn't send the link. Try again in a minute.",
       "connectionLost": "Connection lost. Try again.",
       "connectionLostDetail": "Connection lost: {message}",
+      "turnstilePending": "Anti-bot verification in progress. Wait a moment and try again.",
       "invalidLinkUrl": "The link is no longer valid or has expired. Request a new one."
     },
     "footer": {

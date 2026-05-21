@@ -24,9 +24,7 @@ import { SlotPicker } from './SlotPicker';
 import { createBooking, type BookingSlot } from '@/lib/booking-api';
 import type { BookingEventType } from '@/data/booking-types';
 
-const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
-  process.env.PUBLIC_TURNSTILE_SITE_KEY;
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 const bookingFormSchema = z.object({
   name: z.string().trim().min(2, 'Inserisci nome e cognome.').max(100),

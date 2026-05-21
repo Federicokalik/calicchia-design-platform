@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { Loader2, MailCheck } from 'lucide-react';
@@ -9,9 +9,11 @@ import { Button } from '@/components/portal/ui/button';
 import { Input } from '@/components/portal/ui/input';
 import { Label } from '@/components/portal/ui/label';
 import { PortalCaption } from '@/components/portal/ui/typography';
+import { useTurnstile } from '@/hooks/useTurnstile';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 type Mode = 'magic-link' | 'code';
 
@@ -31,6 +33,10 @@ interface FieldErrors {
  * Fallback "emergency code": toggle reveals email + access_code form for
  * cases where email delivery fails or admin issued a one-time code. Calls
  * /api/portal/login (email + bcrypt-verified code).
+ *
+ * Both flows are gated by a Cloudflare Turnstile invisible widget; the
+ * container is mounted once, outside the conditional branches, so it
+ * survives mode toggles and the "link sent → retry" path.
  */
 export function PortalLoginForm() {
   const t = useTranslations('portal.login');
@@ -46,12 +52,17 @@ export function PortalLoginForm() {
     urlError === 'invalid_link' ? { global: t('errors.invalidLinkUrl') } : {}
   );
 
+  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+
   const requestLink = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     const email = String(fd.get('email') ?? '').trim();
     if (!email) return setErrors({ email: t('errors.emailRequired') });
     if (!EMAIL_RE.test(email)) return setErrors({ email: t('errors.emailInvalid') });
+    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+      return setErrors({ global: t('errors.turnstilePending') });
+    }
     setErrors({});
     setSubmitting(true);
     try {
@@ -59,9 +70,10 @@ export function PortalLoginForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, turnstile_token: turnstile.token }),
       });
       if (!res.ok) {
+        turnstile.reset();
         setErrors({ global: t('errors.linkRequestFailed') });
         setSubmitting(false);
         return;
@@ -70,6 +82,7 @@ export function PortalLoginForm() {
       // unknown emails (anti-enumeration). UX consistent.
       setLinkSentEmail(email);
     } catch (error) {
+      turnstile.reset();
       setErrors({
         global:
           error instanceof Error
@@ -92,6 +105,9 @@ export function PortalLoginForm() {
     else if (!EMAIL_RE.test(email)) errs.email = t('errors.emailInvalid');
     if (!access_code) errs.access_code = t('errors.accessCodeRequired');
     if (Object.keys(errs).length) return setErrors(errs);
+    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+      return setErrors({ global: t('errors.turnstilePending') });
+    }
 
     setErrors({});
     setSubmitting(true);
@@ -100,9 +116,10 @@ export function PortalLoginForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, access_code }),
+        body: JSON.stringify({ email, access_code, turnstile_token: turnstile.token }),
       });
       if (!res.ok) {
+        turnstile.reset();
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         setErrors({ global: data.error ?? t('errors.credentialsInvalid') });
         setSubmitting(false);
@@ -110,6 +127,7 @@ export function PortalLoginForm() {
       }
       router.push(next);
     } catch (error) {
+      turnstile.reset();
       setErrors({
         global:
           error instanceof Error
@@ -120,9 +138,11 @@ export function PortalLoginForm() {
     }
   };
 
-  // Success: link sent confirmation
+  let body: ReactNode;
+
   if (linkSentEmail) {
-    return (
+    // Success: link sent confirmation
+    body = (
       <div className="flex flex-col gap-4 rounded-sm border border-border bg-card p-5">
         <div className="flex items-start gap-3">
           <MailCheck className="h-5 w-5 shrink-0 text-primary mt-0.5" aria-hidden />
@@ -146,11 +166,9 @@ export function PortalLoginForm() {
         </button>
       </div>
     );
-  }
-
-  // Magic link mode (primary)
-  if (mode === 'magic-link') {
-    return (
+  } else if (mode === 'magic-link') {
+    // Magic link mode (primary)
+    body = (
       <div className="flex flex-col gap-4">
         <form onSubmit={requestLink} noValidate className="space-y-5">
           <div className="space-y-2">
@@ -197,77 +215,85 @@ export function PortalLoginForm() {
         </button>
       </div>
     );
+  } else {
+    // Code mode (fallback)
+    body = (
+      <div className="flex flex-col gap-4">
+        <div className="space-y-1">
+          <p className="text-portal-h3 font-medium">{t('fallback.header')}</p>
+          <PortalCaption tone="muted">{t('fallback.subheader')}</PortalCaption>
+        </div>
+
+        <form onSubmit={codeLogin} noValidate className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="code-email">{t('fields.email')}</Label>
+            <Input
+              id="code-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder={t('fields.emailPlaceholder')}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? 'code-email-error' : undefined}
+            />
+            {errors.email ? (
+              <PortalCaption id="code-email-error" tone="error">
+                {errors.email}
+              </PortalCaption>
+            ) : null}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="code-access">{t('fields.accessCode')}</Label>
+            <Input
+              id="code-access"
+              name="access_code"
+              type="text"
+              autoComplete="one-time-code"
+              required
+              placeholder={t('fields.accessCodePlaceholder')}
+              aria-invalid={Boolean(errors.access_code)}
+              aria-describedby={errors.access_code ? 'code-access-error' : undefined}
+            />
+            {errors.access_code ? (
+              <PortalCaption id="code-access-error" tone="error">
+                {errors.access_code}
+              </PortalCaption>
+            ) : null}
+          </div>
+
+          {errors.global ? (
+            <PortalCaption role="alert" tone="error">
+              {errors.global}
+            </PortalCaption>
+          ) : null}
+
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {submitting ? t('submit.codeLoading') : t('submit.codeIdle')}
+          </Button>
+        </form>
+
+        <button
+          type="button"
+          onClick={() => {
+            setMode('magic-link');
+            setErrors({});
+          }}
+          className="self-start text-portal-label uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {t('fallback.toggleHide')}
+        </button>
+      </div>
+    );
   }
 
-  // Code mode (fallback)
   return (
-    <div className="flex flex-col gap-4">
-      <div className="space-y-1">
-        <p className="text-portal-h3 font-medium">{t('fallback.header')}</p>
-        <PortalCaption tone="muted">{t('fallback.subheader')}</PortalCaption>
-      </div>
-
-      <form onSubmit={codeLogin} noValidate className="space-y-5">
-        <div className="space-y-2">
-          <Label htmlFor="code-email">{t('fields.email')}</Label>
-          <Input
-            id="code-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            placeholder={t('fields.emailPlaceholder')}
-            aria-invalid={Boolean(errors.email)}
-            aria-describedby={errors.email ? 'code-email-error' : undefined}
-          />
-          {errors.email ? (
-            <PortalCaption id="code-email-error" tone="error">
-              {errors.email}
-            </PortalCaption>
-          ) : null}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="code-access">{t('fields.accessCode')}</Label>
-          <Input
-            id="code-access"
-            name="access_code"
-            type="text"
-            autoComplete="one-time-code"
-            required
-            placeholder={t('fields.accessCodePlaceholder')}
-            aria-invalid={Boolean(errors.access_code)}
-            aria-describedby={errors.access_code ? 'code-access-error' : undefined}
-          />
-          {errors.access_code ? (
-            <PortalCaption id="code-access-error" tone="error">
-              {errors.access_code}
-            </PortalCaption>
-          ) : null}
-        </div>
-
-        {errors.global ? (
-          <PortalCaption role="alert" tone="error">
-            {errors.global}
-          </PortalCaption>
-        ) : null}
-
-        <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {submitting ? t('submit.codeLoading') : t('submit.codeIdle')}
-        </Button>
-      </form>
-
-      <button
-        type="button"
-        onClick={() => {
-          setMode('magic-link');
-          setErrors({});
-        }}
-        className="self-start text-portal-label uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors"
-      >
-        {t('fallback.toggleHide')}
-      </button>
-    </div>
+    <>
+      {body}
+      {/* Cloudflare Turnstile — invisible widget, mounted once for every mode */}
+      <div ref={turnstile.containerRef} />
+    </>
   );
 }

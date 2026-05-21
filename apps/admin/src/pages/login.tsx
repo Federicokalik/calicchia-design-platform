@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useTurnstile } from '@/hooks/use-turnstile';
 import { API_BASE } from '@/lib/api';
+
+const TURNSTILE_SITE_KEY = import.meta.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 const loginSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -25,6 +28,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const next = searchParams.get('next');
   const { signIn } = useAuth();
+  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/auth/setup-status`, { credentials: 'include' })
@@ -45,12 +49,17 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
+    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+      toast.error(turnstile.error ?? 'Verifica anti-bot in corso. Attendi un istante e riprova.');
+      return;
+    }
     setIsLoading(true);
     try {
-      await signIn(data.email, data.password);
+      await signIn(data.email, data.password, turnstile.token);
       toast.success('Login effettuato');
       navigate(next && next.startsWith('/') ? next : '/');
     } catch (error) {
+      turnstile.reset();
       toast.error(error instanceof Error ? error.message : 'Errore durante il login');
     } finally {
       setIsLoading(false);
@@ -140,6 +149,9 @@ export default function LoginPage() {
                 <p className="text-xs text-destructive">{errors.password.message}</p>
               )}
             </div>
+
+            {/* Cloudflare Turnstile — invisible widget, renders no visible UI */}
+            <div ref={turnstile.containerRef} />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

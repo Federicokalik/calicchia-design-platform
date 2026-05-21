@@ -75,6 +75,7 @@
       "linkRequestFailed": "Non sono riuscito a inviare il link. Riprova fra un minuto.",
       "connectionLost": "Connessione persa. Riprova.",
       "connectionLostDetail": "Connessione persa: {message}",
+      "turnstilePending": "Verifica anti-bot in corso. Attendi un istante e riprova.",
       "invalidLinkUrl": "Il link non è più valido o è scaduto. Richiedine uno nuovo."
     },
     "footer": {

@@ -31,9 +31,7 @@ import { reportEvent } from '@/instrumentation-client';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TURNSTILE_SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ??
-  process.env.PUBLIC_TURNSTILE_SITE_KEY;
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 type ServiceOption = (typeof SERVICE_OPTIONS)[number];
 
