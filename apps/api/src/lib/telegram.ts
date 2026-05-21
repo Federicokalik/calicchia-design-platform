@@ -53,16 +53,29 @@ export async function sendTelegramMessage(
 }
 
 /**
- * Set webhook URL
+ * Set webhook URL.
+ *
+ * Registers `secret_token` (from TELEGRAM_WEBHOOK_SECRET) so Telegram echoes it
+ * back in the `X-Telegram-Bot-Api-Secret-Token` header on every webhook call —
+ * the route handler verifies it (see routes/telegram.ts). Without it the
+ * endpoint is publicly callable by anyone who knows the path.
  */
 export async function setTelegramWebhook(url: string): Promise<boolean> {
   if (!BOT_TOKEN()) return false;
+
+  const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET || '';
+  const body: Record<string, unknown> = {
+    url,
+    // The webhook handler also processes inline-button callbacks.
+    allowed_updates: ['message', 'callback_query'],
+  };
+  if (secretToken) body.secret_token = secretToken;
 
   const res = await fetch(apiUrl('setWebhook'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     signal: AbortSignal.timeout(10_000),
-    body: JSON.stringify({ url, allowed_updates: ['message'] }),
+    body: JSON.stringify(body),
   });
 
   return res.ok;
