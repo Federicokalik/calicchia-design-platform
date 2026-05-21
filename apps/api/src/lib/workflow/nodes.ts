@@ -3,6 +3,8 @@
  * Defines all node types with metadata, schema, and execution function.
  */
 
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 import { sql } from '../../db';
 import { generateText, callOpenAICompatible, getProviderForTask } from '../agent/llm-router';
 import { sendEmail } from '../email';
@@ -97,6 +99,126 @@ function validateReadOnlyQuery(query: string): string | null {
     }
   }
   return null;
+}
+
+// ── tool_http_request safety (SSRF) ──────────────────────────────────────
+// Validates an outbound URL before fetch: http/https only, optional domain
+// allowlist (WORKFLOW_HTTP_ALLOWLIST), and rejection of private / loopback /
+// link-local / cloud-metadata targets — checked on the resolved IP, not just
+// the literal hostname, so a domain pointing at 169.254.169.254 is blocked too.
+
+function isPrivateIPv4(ip: string): boolean {
+  const p = ip.split('.').map(Number);
+  if (p.length !== 4 || p.some((n) => Number.isNaN(n))) return true;
+  const [a, b] = p;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;            // link-local + metadata
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true;  // CGNAT
+  return false;
+}
+
+function isBlockedAddress(ip: string): boolean {
+  const v = isIP(ip);
+  if (v === 4) return isPrivateIPv4(ip);
+  if (v === 6) {
+    const lc = ip.toLowerCase();
+    if (lc === '::1' || lc === '::') return true;
+    if (/^fe[89ab]/.test(lc)) return true;            // fe80::/10 link-local
+    if (/^f[cd]/.test(lc)) return true;               // fc00::/7 unique-local
+    const mapped = lc.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
+    if (mapped) return isPrivateIPv4(mapped[1]);
+    return false;
+  }
+  return true; // not a valid IP literal
+}
+
+async function assertSafeHttpUrl(rawUrl: string): Promise<URL> {
+  let url: URL;
+  try { url = new URL(rawUrl); } catch { throw new Error('URL non valido'); }
+  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+    throw new Error('Solo http/https sono permessi');
+  }
+  const hostname = url.hostname.replace(/^\[|\]$/g, '');
+
+  const allow = (process.env.WORKFLOW_HTTP_ALLOWLIST || '')
+    .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (allow.length > 0) {
+    const host = hostname.toLowerCase();
+    if (!allow.some((d) => host === d || host.endsWith('.' + d))) {
+      throw new Error(`Dominio non in allowlist: ${hostname}`);
+    }
+  }
+
+  if (isIP(hostname)) {
+    if (isBlockedAddress(hostname)) throw new Error('Indirizzo IP non permesso');
+  } else {
+    let addrs: { address: string }[];
+    try { addrs = await lookup(hostname, { all: true }); }
+    catch { throw new Error('Host non risolvibile'); }
+    if (addrs.length === 0 || addrs.some((a) => isBlockedAddress(a.address))) {
+      throw new Error('Host risolve a un indirizzo non permesso');
+    }
+  }
+  return url;
+}
+
+// ── logic_condition safety ───────────────────────────────────────────────
+// Replaces `new Function()` (arbitrary server-side JS execution on saved
+// workflow config) with a tiny whitelisted evaluator: dotted paths resolved
+// against the workflow data, literals, comparison operators and &&/||. It
+// cannot call functions or reach globals.
+
+function resolvePath(path: string, data: unknown): unknown {
+  return path.split('.').reduce<unknown>(
+    (o, k) => (o == null ? undefined : (o as Record<string, unknown>)[k]),
+    data,
+  );
+}
+
+function parseOperand(token: string, data: unknown): unknown {
+  const t = token.trim();
+  if (t === 'true') return true;
+  if (t === 'false') return false;
+  if (t === 'null') return null;
+  if (t === 'undefined') return undefined;
+  if (/^-?\d+(\.\d+)?$/.test(t)) return Number(t);
+  if (/^'[^']*'$/.test(t) || /^"[^"]*"$/.test(t)) return t.slice(1, -1);
+  if (/^[a-zA-Z_$][\w$]*(\.[a-zA-Z_$][\w$]*)*$/.test(t)) {
+    if (t.split('.').some((s) => s === '__proto__' || s === 'constructor' || s === 'prototype')) {
+      throw new Error(`Percorso non permesso: ${token}`);
+    }
+    return resolvePath(t, data);
+  }
+  throw new Error(`Operando non valido: ${token}`);
+}
+
+const CONDITION_OPS: Array<[string, (a: any, b: any) => boolean]> = [
+  ['===', (a, b) => a === b], ['!==', (a, b) => a !== b],
+  ['==', (a, b) => a == b], ['!=', (a, b) => a != b],
+  ['>=', (a, b) => a >= b], ['<=', (a, b) => a <= b],
+  ['>', (a, b) => a > b], ['<', (a, b) => a < b],
+];
+
+function evalComparison(expr: string, data: unknown): boolean {
+  const e = expr.trim();
+  if (e.startsWith('!')) return !evalComparison(e.slice(1), data);
+  for (const [op, fn] of CONDITION_OPS) {
+    const idx = e.indexOf(op);
+    if (idx > 0) {
+      return fn(parseOperand(e.slice(0, idx), data), parseOperand(e.slice(idx + op.length), data));
+    }
+  }
+  return Boolean(parseOperand(e, data));
+}
+
+function evalCondition(condition: string, data: unknown): boolean {
+  const cond = String(condition || '').trim();
+  if (!cond) return false;
+  if (cond.includes('||')) return cond.split('||').some((p) => evalCondition(p, data));
+  if (cond.includes('&&')) return cond.split('&&').every((p) => evalCondition(p, data));
+  return evalComparison(cond, data);
 }
 
 export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
@@ -262,17 +384,28 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
   },
   tool_http_request: {
     type: 'tool_http_request', label: 'HTTP Request', category: 'tool', color: '#3b82f6', icon: 'Globe',
-    description: 'Chiama un API esterno',
+    description: 'Chiama un API esterno (solo http/https, no indirizzi interni)',
     configSchema: { url: '', method: 'GET', headers: {}, body: '' },
     execute: async (config, input) => {
-      const url = interpolate(config.url, input);
-      const res = await fetch(url, {
-        method: config.method || 'GET',
-        headers: { 'Content-Type': 'application/json', ...config.headers },
-        ...(config.body ? { body: interpolate(config.body, input) } : {}),
-      });
-      const data = await res.json().catch(() => res.text());
-      return { status: res.status, data };
+      let url: URL;
+      try {
+        url = await assertSafeHttpUrl(interpolate(config.url, input));
+      } catch (err) {
+        return { status: 0, error: err instanceof Error ? err.message : 'URL bloccato' };
+      }
+      try {
+        const res = await fetch(url, {
+          method: config.method || 'GET',
+          headers: { 'Content-Type': 'application/json', ...config.headers },
+          ...(config.body ? { body: interpolate(config.body, input) } : {}),
+          signal: AbortSignal.timeout(15_000),
+          redirect: 'manual', // do not follow redirects — could point at an internal host
+        });
+        const data = await res.json().catch(() => res.text());
+        return { status: res.status, data };
+      } catch (err) {
+        return { status: 0, error: err instanceof Error ? err.message : 'Request failed' };
+      }
     },
   },
 
@@ -283,8 +416,7 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
     configSchema: { condition: 'input.count > 0', true_label: 'Sì', false_label: 'No' },
     execute: async (config, input) => {
       try {
-        const fn = new Function('input', `return Boolean(${config.condition})`);
-        const result = fn(input);
+        const result = evalCondition(config.condition, { input });
         return { _branch: result ? 'true' : 'false', condition_result: result, ...input };
       } catch {
         return { _branch: 'false', condition_result: false, error: 'Condizione non valida' };

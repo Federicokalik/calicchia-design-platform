@@ -1,9 +1,8 @@
 import { Hono } from 'hono';
-import { jwtVerify } from 'jose';
 import bcrypt from 'bcrypt';
 import { sql } from '../db';
-import { getJwtSecret, signToken } from '../lib/jwt';
-import { authMiddleware, extractToken } from '../middleware/auth';
+import { signToken } from '../lib/jwt';
+import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
 
@@ -117,51 +116,36 @@ auth.post('/logout', (c) => {
 // POST /api/auth/keep-alive — refresh session (authMiddleware refreshes the cookie)
 auth.post('/keep-alive', authMiddleware, (c) => c.json({ ok: true }));
 
-// GET /api/auth/profile — get logged-in user's profile
-auth.get('/profile', async (c) => {
-  const token = extractToken(c);
-  if (!token) {
-    return c.json({ error: adminMessage(c, 'authRequired') }, 401);
-  }
-
-  try {
-    const { payload } = await jwtVerify(token, getJwtSecret());
-    const rows = await sql`
-      SELECT p.role_title, p.bio, p.socials
-      FROM profiles p
-      WHERE p.id = ${payload.sub as string}
-      LIMIT 1
-    `;
-    return c.json({ profile: rows[0] || null });
-  } catch {
-    return c.json({ error: adminMessage(c, 'invalidToken') }, 401);
-  }
+// GET /api/auth/profile — get logged-in user's profile.
+// Uses authMiddleware (role check + 30-min session timeout) instead of a manual
+// jwtVerify, so it is consistent with every other protected route (SEC-12).
+auth.get('/profile', authMiddleware, async (c) => {
+  const user = (c as any).get('user') as { id: string };
+  const rows = await sql`
+    SELECT p.role_title, p.bio, p.socials
+    FROM profiles p
+    WHERE p.id = ${user.id}
+    LIMIT 1
+  `;
+  return c.json({ profile: rows[0] || null });
 });
 
-// PUT /api/auth/profile — update logged-in user's profile
-auth.put('/profile', async (c) => {
-  const token = extractToken(c);
-  if (!token) {
-    return c.json({ error: adminMessage(c, 'authRequired') }, 401);
-  }
+// PUT /api/auth/profile — update logged-in user's profile.
+// Only role_title/bio/socials are accepted (explicit allowlist, no mass-assign).
+auth.put('/profile', authMiddleware, async (c) => {
+  const user = (c as any).get('user') as { id: string };
+  const { role_title, bio, socials } = await c.req.json();
 
-  try {
-    const { payload } = await jwtVerify(token, getJwtSecret());
-    const { role_title, bio, socials } = await c.req.json();
+  await sql`
+    UPDATE profiles SET ${sql({
+      role_title: role_title || null,
+      bio: bio || null,
+      socials: socials?.length > 0 ? socials : null,
+    })}
+    WHERE id = ${user.id}
+  `;
 
-    await sql`
-      UPDATE profiles SET ${sql({
-        role_title: role_title || null,
-        bio: bio || null,
-        socials: socials?.length > 0 ? socials : null,
-      })}
-      WHERE id = ${payload.sub as string}
-    `;
-
-    return c.json({ success: true });
-  } catch {
-    return c.json({ error: adminMessage(c, 'invalidToken') }, 401);
-  }
+  return c.json({ success: true });
 });
 
 // GET /api/auth/setup-status — check if first-time setup is needed

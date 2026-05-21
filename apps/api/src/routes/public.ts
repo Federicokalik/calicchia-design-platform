@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
 
 export const publicRoutes = new Hono();
 
@@ -163,7 +164,7 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
       cover_image: resolveImageUrl(post.cover_image as string | null),
       tags: post.tags || [],
       category: post.category,
-      content: post.content,
+      content: sanitizeBlogHtml(post.content as string | null),
       published_at: post.published_at,
       created_at: post.created_at,
       reading_time: post.reading_time,

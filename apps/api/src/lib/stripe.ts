@@ -1,18 +1,40 @@
 import Stripe from 'stripe';
 
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const STRIPE_API_VERSION = '2025-02-24.acacia';
 
-if (!stripeSecretKey) {
-  console.warn('STRIPE_SECRET_KEY not configured');
+let _stripe: Stripe | null = null;
+
+/**
+ * Lazily create the Stripe client on first use.
+ *
+ * Instantiating `new Stripe()` at module load throws when STRIPE_SECRET_KEY is
+ * unset, which crashed the whole API boot (finding BK-15/DP-13). Stripe routes
+ * already degrade gracefully via isStripeConfigured(); deferring construction
+ * keeps a misconfiguration a call-time error, not a boot crash.
+ */
+function getStripe(): Stripe {
+  if (_stripe) return _stripe;
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY not configured');
+  _stripe = new Stripe(key, { apiVersion: STRIPE_API_VERSION, typescript: true });
+  return _stripe;
 }
 
-export const stripe = new Stripe(stripeSecretKey || '', {
-  apiVersion: '2025-02-24.acacia',
-  typescript: true,
+/**
+ * Lazy proxy: existing `stripe.xxx` call sites keep working unchanged, but the
+ * underlying client is created only on first property access — never at module
+ * load time.
+ */
+export const stripe: Stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    const client = getStripe();
+    const value = Reflect.get(client as object, prop, client);
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
 });
 
 export function isStripeConfigured(): boolean {
-  return !!stripeSecretKey;
+  return !!process.env.STRIPE_SECRET_KEY;
 }
 
 // ========== CATALOG HELPERS ==========

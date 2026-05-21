@@ -12,6 +12,23 @@ const API_URL = process.env.API_URL || 'http://localhost:3001';
 // Ensure upload directory exists
 mkdirSync(UPLOAD_DIR, { recursive: true });
 
+const RESOLVED_BASE = resolve(UPLOAD_DIR);
+
+/**
+ * Resolve `key` under UPLOAD_DIR, rejecting path traversal (`..`) and absolute
+ * paths. Every filesystem operation goes through this so a malicious key from
+ * an admin endpoint cannot read, write or delete outside the upload directory
+ * (finding SEC-07 — the check previously existed only in uploadFile).
+ */
+function safeResolve(key: string): string {
+  const target = resolve(join(UPLOAD_DIR, key));
+  const rel = relative(RESOLVED_BASE, target);
+  if (rel.startsWith('..') || resolve(rel) === rel) {
+    throw new Error('Invalid storage path');
+  }
+  return target;
+}
+
 export function isS3Configured(): boolean {
   return true; // Local storage is always available
 }
@@ -26,13 +43,7 @@ export async function uploadFile(
   contentType: string,
   _metadata?: Record<string, string>
 ): Promise<{ url: string; key: string; size: number }> {
-  const filePath = join(UPLOAD_DIR, key);
-  const resolvedPath = resolve(filePath);
-  const resolvedBase = resolve(UPLOAD_DIR);
-  const rel = relative(resolvedBase, resolvedPath);
-  if (rel.startsWith('..') || resolve(rel) === rel) {
-    throw new Error('Invalid upload path');
-  }
+  const filePath = safeResolve(key);
   // Ensure subdirectory exists
   mkdirSync(dirname(filePath), { recursive: true });
 
@@ -41,7 +52,7 @@ export async function uploadFile(
 }
 
 export async function deleteFile(key: string): Promise<void> {
-  const filePath = join(UPLOAD_DIR, key);
+  const filePath = safeResolve(key);
   if (existsSync(filePath)) {
     unlinkSync(filePath);
   }
@@ -51,7 +62,7 @@ export async function listFiles(
   prefix: string = '',
   maxKeys: number = 100
 ): Promise<{ key: string; size: number; lastModified: Date; url: string | null }[]> {
-  const dir = prefix ? join(UPLOAD_DIR, prefix) : UPLOAD_DIR;
+  const dir = safeResolve(prefix);
 
   if (!existsSync(dir)) return [];
 
