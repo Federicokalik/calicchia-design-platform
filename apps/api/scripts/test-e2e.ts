@@ -5,17 +5,38 @@
  * Usage:
  *   TEST_EMAIL=me@example.com TEST_PASSWORD=secret pnpm test:e2e
  *   # defaults to env vars ADMIN_EMAIL / ADMIN_PASSWORD if TEST_* not set
+ *
+ * Auth: the API issues an httpOnly `auth_token` cookie (no bearer token in the
+ * body), so this script keeps a cookie jar and replays it on every request.
+ * Turnstile on /api/auth/login is skipped when TURNSTILE_SECRET_KEY is unset
+ * (dev/CI) — keep it unset for the test environment.
  */
 
 const BASE_URL = process.env.API_URL || 'http://localhost:3001';
 const EMAIL = process.env.TEST_EMAIL || process.env.ADMIN_EMAIL || '';
 const PASSWORD = process.env.TEST_PASSWORD || process.env.ADMIN_PASSWORD || '';
 
-let token = '';
+let cookie = '';
 let passed = 0;
 let failed = 0;
 
 // ─── helpers ────────────────────────────────────────────────────────────────
+
+type HeadersWithGetSetCookie = Headers & { getSetCookie?: () => string[] };
+
+function captureCookie(res: Response) {
+  const headers = res.headers as HeadersWithGetSetCookie;
+  const setCookies =
+    typeof headers.getSetCookie === 'function'
+      ? headers.getSetCookie()
+      : headers.get('set-cookie')
+        ? [headers.get('set-cookie') as string]
+        : [];
+  for (const sc of setCookies) {
+    const match = sc.match(/^auth_token=([^;]*)/);
+    if (match && match[1]) cookie = `auth_token=${match[1]}`;
+  }
+}
 
 async function req(
   method: string,
@@ -23,8 +44,13 @@ async function req(
   body?: unknown,
   auth = true,
 ): Promise<{ status: number; data: unknown }> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (auth && token) headers['Authorization'] = `Bearer ${token}`;
+  // `Connection: close` — don't leave keep-alive sockets open; they otherwise
+  // linger past process exit and trip a libuv assertion on Windows.
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Connection: 'close',
+  };
+  if (auth && cookie) headers['Cookie'] = cookie;
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -32,6 +58,7 @@ async function req(
     body: body ? JSON.stringify(body) : undefined,
   });
 
+  captureCookie(res);
   const data = await res.json().catch(() => ({}));
   return { status: res.status, data };
 }
@@ -52,7 +79,7 @@ async function testHealth() {
   console.log('\n📡 Health');
   const { status, data } = await req('GET', '/api/health', undefined, false);
   ok('GET /api/health → 200', status === 200);
-  ok('status: ok', (data as Record<string, unknown>)?.status === 'ok');
+  ok('status: healthy', (data as Record<string, unknown>)?.status === 'healthy');
 }
 
 async function testAuth() {
@@ -68,13 +95,12 @@ async function testAuth() {
   const bad = await req('POST', '/api/auth/login', { email: EMAIL, password: 'wrongpassword' }, false);
   ok('POST /login with bad password → 401', bad.status === 401);
 
-  // Valid login
+  // Valid login — issues the auth_token cookie (captured by req()).
   const good = await req('POST', '/api/auth/login', { email: EMAIL, password: PASSWORD }, false);
   ok('POST /login with correct password → 200', good.status === 200);
 
   const goodData = good.data as Record<string, unknown>;
-  token = (goodData?.token as string) || '';
-  ok('response contains token', !!token);
+  ok('login set the auth cookie', !!cookie);
   ok('response contains user', !!(goodData?.user));
 
   // GET /me
@@ -83,9 +109,9 @@ async function testAuth() {
   const meData = me.data as Record<string, unknown>;
   ok('/me returns user.email', (meData?.user as Record<string, unknown>)?.email === EMAIL.toLowerCase().trim());
 
-  // No token → 401
+  // No cookie → 401
   const noAuth = await req('GET', '/api/dashboard/counts', undefined, false);
-  ok('Protected route without token → 401', noAuth.status === 401);
+  ok('Protected route without auth → 401', noAuth.status === 401);
 }
 
 async function testDashboard() {
@@ -95,7 +121,7 @@ async function testDashboard() {
   const d = data as Record<string, unknown>;
   ok('has customers count', typeof d?.customers === 'number');
   ok('has posts count', typeof d?.posts === 'number');
-  ok('has projects count', typeof d?.projectsInProgress === 'number');
+  ok('has projects count', typeof d?.projects === 'number');
 }
 
 async function testBlog() {
@@ -129,6 +155,37 @@ async function testProjects() {
   ok('GET /api/projects → 200', status === 200);
   const d = data as Record<string, unknown>;
   ok('has projects array', Array.isArray(d?.projects));
+}
+
+// ─── public form smoke (TQ-03) ───────────────────────────────────────────────
+// Public form endpoints are rate-limited (3 / 10 min) and Turnstile-gated;
+// Turnstile is skipped in dev. These exercise one submission each.
+
+async function testPublicForms() {
+  console.log('\n🌐 Public forms');
+
+  const stamp = Date.now();
+
+  const contact = await req('POST', '/api/contacts', {
+    name: 'E2E Tester',
+    email: `e2e-contact-${stamp}@example.com`,
+    message: 'Messaggio di test e2e.',
+    gdpr_consent: true,
+  }, false);
+  ok('POST /api/contacts → 200', contact.status === 200, `status ${contact.status}`);
+
+  const newsletter = await req('POST', '/api/newsletter/subscribe', {
+    email: `e2e-news-${stamp}@example.com`,
+    name: 'E2E Tester',
+  }, false);
+  ok('POST /api/newsletter/subscribe → 200', newsletter.status === 200, `status ${newsletter.status}`);
+
+  const gdpr = await req('POST', '/api/gdpr-requests', {
+    email: `e2e-gdpr-${stamp}@example.com`,
+    request_type: 'access',
+    message: 'Richiesta di test e2e.',
+  }, false);
+  ok('POST /api/gdpr-requests → 200', gdpr.status === 200, `status ${gdpr.status}`);
 }
 
 async function testQuoteEngineFlow() {
@@ -219,8 +276,8 @@ async function testMediaUpload() {
   formData.append('file', new Blob([pngBytes], { type: 'image/png' }), 'test.png');
   formData.append('folder', 'test');
 
-  const headers: Record<string, string> = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const headers: Record<string, string> = { Connection: 'close' };
+  if (cookie) headers['Cookie'] = cookie;
 
   const res = await fetch(`${BASE_URL}/api/media/upload`, {
     method: 'POST',
@@ -236,7 +293,7 @@ async function testMediaUpload() {
 
   // Verify file is accessible via /media/<key>
   if (data?.key) {
-    const fileRes = await fetch(`${BASE_URL}/media/${data.key}`);
+    const fileRes = await fetch(`${BASE_URL}/media/${data.key}`, { headers: { Connection: 'close' } });
     ok(`GET /media/${data.key} → 200 (file accessible)`, fileRes.status === 200);
 
     // Cleanup: delete the test file
@@ -255,8 +312,8 @@ async function main() {
     await testHealth();
     await testAuth();
 
-    if (!token) {
-      console.log('\n⚠️  No token — skipping protected route tests');
+    if (!cookie) {
+      console.log('\n⚠️  No auth cookie — skipping protected route tests');
     } else {
       await testDashboard();
       await testBlog();
@@ -266,6 +323,8 @@ async function main() {
       await testQuoteEngineFlow();
       await testMediaUpload();
     }
+
+    await testPublicForms();
   } catch (err) {
     console.error('\n💥 Unexpected error:', err);
     failed++;
@@ -274,11 +333,8 @@ async function main() {
   console.log('\n' + '─'.repeat(40));
   console.log(`Results: ${passed} passed, ${failed} failed`);
 
-  if (failed > 0) {
-    process.exit(1);
-  } else {
-    console.log('✅ All tests passed!');
-  }
+  // Explicit exit — see the `Connection: close` note above.
+  process.exit(failed > 0 ? 1 : 0);
 }
 
 main();
