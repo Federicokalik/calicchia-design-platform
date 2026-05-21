@@ -102,6 +102,7 @@ services:
         NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${NEXT_PUBLIC_GOOGLE_MAPS_KEY}
         NEXT_PUBLIC_BUGSINK_DSN: ${NEXT_PUBLIC_BUGSINK_DSN}
         NEXT_PUBLIC_GA_MEASUREMENT_ID: ${NEXT_PUBLIC_GA_MEASUREMENT_ID}
+        GOOGLE_SITE_VERIFICATION: ${GOOGLE_SITE_VERIFICATION}
         PUBLIC_SITE_URL: ${SITE_URL}
         # PORTAL_API_URL omesso di proposito: vedi commento in apps/sito-v3/Dockerfile.
     restart: always
