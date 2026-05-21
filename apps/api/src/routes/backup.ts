@@ -33,23 +33,32 @@ async function listTables(): Promise<TableRef[]> {
   return rows;
 }
 
-async function getColumns(schema: string, table: string): Promise<ColumnInfo[]> {
+// Fetch column metadata for every allowed table in one query (DBX-02: avoids a
+// per-table round-trip), grouped by "schema.table".
+async function getAllColumns(): Promise<Map<string, ColumnInfo[]>> {
   const rows = await sql`
-    SELECT column_name, data_type, udt_name, is_generated, is_identity
+    SELECT table_schema, table_name, column_name, data_type, udt_name, is_generated, is_identity
     FROM information_schema.columns
-    WHERE table_schema = ${schema} AND table_name = ${table}
-    ORDER BY ordinal_position
-  ` as unknown as ColumnInfo[];
-  return rows;
+    WHERE table_schema = ANY(${[...ALLOWED_SCHEMAS] as unknown as string[]})
+    ORDER BY table_schema, table_name, ordinal_position
+  ` as unknown as Array<ColumnInfo & { table_schema: string; table_name: string }>;
+
+  const byTable = new Map<string, ColumnInfo[]>();
+  for (const r of rows) {
+    const key = `${r.table_schema}.${r.table_name}`;
+    (byTable.get(key) ?? byTable.set(key, []).get(key)!).push(r);
+  }
+  return byTable;
 }
 
 async function buildSnapshot() {
   const tables = await listTables();
+  const columnsByTable = await getAllColumns();
   const data: Record<string, unknown[]> = {};
   let totalRows = 0;
 
   for (const t of tables) {
-    const cols = await getColumns(t.schema, t.table);
+    const cols = columnsByTable.get(`${t.schema}.${t.table}`) ?? [];
     const writable = cols.filter((c) => c.is_generated !== 'ALWAYS');
     if (writable.length === 0) {
       data[`${t.schema}.${t.table}`] = [];
@@ -76,14 +85,26 @@ async function buildSnapshot() {
 
 backup.get('/info', async (c) => {
   const tables = await listTables();
-  const stats = await Promise.all(
-    tables.map(async (t) => {
-      const res = await sql.unsafe(
-        `SELECT COUNT(*)::int AS count FROM "${t.schema}"."${t.table}"`
-      ) as unknown as Array<{ count: number }>;
-      return { schema: t.schema, table: t.table, rows: res[0]?.count ?? 0 };
-    })
-  );
+
+  // DBX-02: one round-trip for all row counts instead of a COUNT(*) per table.
+  // Schema/table names come from information_schema (real identifiers); they are
+  // double-quoted as identifiers and single-quote-escaped as string literals.
+  let stats: Array<{ schema: string; table: string; rows: number }> = [];
+  if (tables.length > 0) {
+    const ident = (s: string) => `"${s.replace(/"/g, '""')}"`;
+    const lit = (s: string) => `'${s.replace(/'/g, "''")}'`;
+    const unionSql = tables
+      .map((t) => `SELECT ${lit(`${t.schema}.${t.table}`)} AS key, COUNT(*)::int AS count FROM ${ident(t.schema)}.${ident(t.table)}`)
+      .join(' UNION ALL ');
+    const counts = await sql.unsafe(unionSql) as unknown as Array<{ key: string; count: number }>;
+    const byKey = new Map(counts.map((r) => [r.key, r.count]));
+    stats = tables.map((t) => ({
+      schema: t.schema,
+      table: t.table,
+      rows: byKey.get(`${t.schema}.${t.table}`) ?? 0,
+    }));
+  }
+
   const totalRows = stats.reduce((acc, t) => acc + t.rows, 0);
   return c.json({ version: BACKUP_VERSION, tableCount: tables.length, totalRows, tables: stats });
 });
@@ -179,8 +200,11 @@ backup.post('/import', async (c) => {
         .join(', ');
       await tx.unsafe(`TRUNCATE ${truncateList} RESTART IDENTITY CASCADE`);
 
+      // DBX-02: fetch all column metadata once, not per table inside the loop.
+      const columnsByTable = await getAllColumns();
+
       for (const t of targetTables) {
-        const cols = await getColumns(t.schema, t.table);
+        const cols = columnsByTable.get(`${t.schema}.${t.table}`) ?? [];
         const writable = cols.filter((c) => c.is_generated !== 'ALWAYS');
         const writableNames = new Set(writable.map((c) => c.column_name));
         const jsonCols = new Set(

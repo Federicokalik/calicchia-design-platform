@@ -198,30 +198,37 @@ blog.patch('/posts/:id/translations/:locale', async (c) => {
   if (!exists) return c.json({ error: 'Post non trovato' }, 404);
 
   const body = await c.req.json<Partial<Record<TranslatableBlogField, string | null>>>();
-  const upserted: string[] = [];
+
+  // DBX-03: split the fields once, then a single DELETE + a single batch UPSERT
+  // instead of one statement per field.
   const deleted: string[] = [];
+  const rows: Array<{ post_id: string; locale: string; field_name: string; field_value: string }> = [];
 
   for (const [field, value] of Object.entries(body)) {
     if (!isTranslatableBlogField(field)) continue;
-
     if (value === null || value === '') {
-      await sql`
-        DELETE FROM blog_posts_translations
-        WHERE post_id = ${id} AND locale = ${locale} AND field_name = ${field}
-      `;
       deleted.push(field);
     } else {
-      await sql`
-        INSERT INTO blog_posts_translations (post_id, locale, field_name, field_value)
-        VALUES (${id}, ${locale}, ${field}, ${value})
-        ON CONFLICT (post_id, locale, field_name)
-        DO UPDATE SET field_value = EXCLUDED.field_value, updated_at = NOW()
-      `;
-      upserted.push(field);
+      rows.push({ post_id: id, locale, field_name: field, field_value: value });
     }
   }
 
-  return c.json({ post_id: id, locale, upserted, deleted });
+  if (deleted.length > 0) {
+    await sql`
+      DELETE FROM blog_posts_translations
+      WHERE post_id = ${id} AND locale = ${locale} AND field_name = ANY(${deleted})
+    `;
+  }
+
+  if (rows.length > 0) {
+    await sql`
+      INSERT INTO blog_posts_translations ${sql(rows, 'post_id', 'locale', 'field_name', 'field_value')}
+      ON CONFLICT (post_id, locale, field_name)
+      DO UPDATE SET field_value = EXCLUDED.field_value, updated_at = NOW()
+    `;
+  }
+
+  return c.json({ post_id: id, locale, upserted: rows.map((r) => r.field_name), deleted });
 });
 
 // ─────────────────────────────────────────────────────────────

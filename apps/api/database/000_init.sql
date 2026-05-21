@@ -77,6 +77,12 @@ CREATE TRIGGER users_updated_at
 -- SHARED HELPER FUNCTIONS (used by later migrations)
 -- =============================================
 
+-- MG-04: two updated_at trigger functions coexist for historical reasons —
+-- `update_updated_at()` and `update_updated_at_column()`. Their bodies are
+-- identical; different migrations attached triggers to one or the other name.
+-- Both are kept (defined here, idempotently) so every historical trigger keeps
+-- resolving. Prefer `update_updated_at()` for any new trigger.
+
 -- Used in 005 and others as update_updated_at()
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER AS $$
@@ -86,7 +92,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Used in 001 and others as update_updated_at_column()
+-- Used in 001 and others as update_updated_at_column() — alias of the above.
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
