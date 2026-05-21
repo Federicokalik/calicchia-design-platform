@@ -29,6 +29,8 @@ export default function LoginPage() {
   const next = searchParams.get('next');
   const { signIn } = useAuth();
   const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaCode, setMfaCode] = useState('');
 
   useEffect(() => {
     fetch(`${API_BASE}/api/auth/setup-status`, { credentials: 'include' })
@@ -53,13 +55,32 @@ export default function LoginPage() {
       toast.error(turnstile.error ?? 'Verifica anti-bot in corso. Attendi un istante e riprova.');
       return;
     }
+    if (mfaRequired && !mfaCode.trim()) {
+      toast.error('Inserisci il codice di autenticazione');
+      return;
+    }
     setIsLoading(true);
     try {
-      await signIn(data.email, data.password, turnstile.token);
+      const result = await signIn(
+        data.email,
+        data.password,
+        turnstile.token,
+        mfaRequired ? mfaCode.trim() : undefined,
+      );
+      if (result.mfaRequired) {
+        // SEC-06 step 2: ask for the TOTP/backup code. The Turnstile token was
+        // consumed by step 1 — reset to get a fresh one for the resubmit.
+        setMfaRequired(true);
+        turnstile.reset();
+        toast.info("Inserisci il codice dell'app di autenticazione");
+        setIsLoading(false);
+        return;
+      }
       toast.success('Login effettuato');
       navigate(next && next.startsWith('/') ? next : '/');
     } catch (error) {
       turnstile.reset();
+      if (mfaRequired) setMfaCode('');
       toast.error(error instanceof Error ? error.message : 'Errore durante il login');
     } finally {
       setIsLoading(false);
@@ -150,12 +171,31 @@ export default function LoginPage() {
               )}
             </div>
 
+            {mfaRequired && (
+              <div className="space-y-2">
+                <Label htmlFor="mfa-code">Codice di autenticazione</Label>
+                <Input
+                  id="mfa-code"
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  placeholder="123456"
+                  autoFocus
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Codice a 6 cifre dell'app di autenticazione, oppure un codice di recupero.
+                </p>
+              </div>
+            )}
+
             {/* Cloudflare Turnstile — invisible widget, renders no visible UI */}
             <div ref={turnstile.containerRef} />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Accesso in corso...' : 'Accedi'}
+              {isLoading ? 'Accesso in corso...' : mfaRequired ? 'Verifica codice' : 'Accedi'}
             </Button>
           </form>
 
