@@ -8,7 +8,7 @@
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx --env-file=../../.env scripts/migrate.ts",
-    "migrate:new": "tsx --env-file=../../.env scripts/migrate-new.ts",
+    "migrate:new": "tsx --env-file=../../.env scripts/migrate.ts",
     "verify:calendar": "tsx --env-file=../../.env scripts/verify-calendar-schema.ts",
     "seed": "tsx scripts/seed.ts",
     "test:e2e": "tsx scripts/test-e2e.ts"
