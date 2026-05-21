@@ -29,6 +29,7 @@ const { serve } = await import('@hono/node-server');
 const { app } = await import('./app');
 const { startCronEngine, stopCronEngine } = await import('./cron');
 const { assertKBsValid } = await import('./lib/quotes/generate');
+const { sql } = await import('./db');
 
 // Validate AI knowledge bases are present and well-formed (fail-fast).
 // Without these files the AI quote generator cannot run; refusing to start
@@ -60,7 +61,9 @@ console.log(`✅ API server running at http://localhost:${port}`);
 function shutdown(signal: string) {
   console.log(`\n${signal} received — shutting down gracefully...`);
   stopCronEngine();
-  server.close(() => {
+  server.close(async () => {
+    // Drain the Postgres pool so in-flight queries finish before exit (DBX-01).
+    await sql.end({ timeout: 5 }).catch(() => {});
     console.log('Server closed.');
     process.exit(0);
   });
