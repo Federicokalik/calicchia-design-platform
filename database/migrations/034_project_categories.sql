@@ -29,8 +29,12 @@ UPDATE client_projects SET project_category = 'web'
 UPDATE client_projects SET project_category = 'consulenza'
   WHERE project_category IS NULL;
 
--- Refresh the view to include new column
-CREATE OR REPLACE VIEW client_projects_view AS
+-- Refresh the view to include the new column.
+-- DROP + CREATE (not CREATE OR REPLACE): the view leads with `cp.*`, and
+-- client_projects has gained columns since the view was last defined (024) —
+-- CREATE OR REPLACE rejects a changed column list/order (Postgres 42P16).
+DROP VIEW IF EXISTS client_projects_view CASCADE;
+CREATE VIEW client_projects_view AS
 SELECT
   cp.*,
   cu.contact_name AS customer_name,
