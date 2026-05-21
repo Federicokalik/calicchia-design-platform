@@ -1,6 +1,8 @@
 /**
  * analytics-retention — Daily purge of analytics partitions older than 13 months.
- * Calls the PG function which DETACH + DROP whole partitions (fast).
+ * Calls purge_old_analytics(): the partition-based version from migration 086
+ * (which DETACH + DROPs whole partitions, fast) supersedes the earlier row-DELETE
+ * version in migration 038 — 13 months is the effective retention window.
  */
 import { sql } from '../db';
 

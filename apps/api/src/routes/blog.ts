@@ -6,6 +6,7 @@ import * as perplexity from '../lib/ai/perplexity';
 import * as coverGenerator from '../lib/ai/cover-generator';
 import { generateText } from '../lib/agent/llm-router';
 import { getAdminLocale } from '../lib/admin-locale';
+import { verifyCronSecret } from '../lib/cron-auth';
 
 // Convert markdown content to HTML for Lexical editor
 function mdToHtml(content: string): string {
@@ -799,7 +800,7 @@ blog.post('/:id/generate-category', async (c) => {
 
 blog.post('/scheduled/generate', async (c) => {
   const cronSecret = c.req.header('x-cron-secret') || c.req.query('secret');
-  if (!process.env.CRON_SECRET || !cronSecret || cronSecret !== process.env.CRON_SECRET) {
+  if (!verifyCronSecret(cronSecret)) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
 
@@ -921,7 +922,7 @@ blog.post('/scheduled/generate', async (c) => {
 
 blog.post('/scheduled/publish', async (c) => {
   const cronSecret = c.req.header('x-cron-secret') || c.req.query('secret');
-  if (!process.env.CRON_SECRET || !cronSecret || cronSecret !== process.env.CRON_SECRET) {
+  if (!verifyCronSecret(cronSecret)) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
 

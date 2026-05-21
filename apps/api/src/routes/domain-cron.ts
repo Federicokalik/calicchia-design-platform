@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { sendDomainExpiringEmail } from '../lib/email';
+import { verifyCronSecret } from '../lib/cron-auth';
 
 export const domainCron = new Hono();
 
@@ -126,7 +127,7 @@ domainCron.post('/check-expiring', async (c) => {
   // Header-only: query strings leak into nginx access logs, referer headers,
   // browser history, and downstream proxies.
   const secret = c.req.header('x-cron-secret');
-  if (!process.env.CRON_SECRET || !secret || secret !== process.env.CRON_SECRET) {
+  if (!verifyCronSecret(secret)) {
     return c.json({ error: 'Non autorizzato' }, 401);
   }
 

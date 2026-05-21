@@ -10,8 +10,10 @@ const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
 const PRESIGNED_EXPIRY = 600; // 10 minutes
 
+// SVG is intentionally excluded (SEC-09): SVG can carry <script> → stored XSS
+// once served as a file. Raster image formats only.
 const ALLOWED_TYPES = new Set([
-  'image/jpeg', 'image/png', 'image/webp', 'image/tiff', 'image/svg+xml',
+  'image/jpeg', 'image/png', 'image/webp', 'image/tiff',
   'application/pdf',
   'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
