@@ -30,6 +30,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-off: applica le migrazioni pending, poi esce. Stessa immagine dell'api
+  # (contiene scripts/migrate.ts + i file SQL). Idempotente — gira a ogni deploy
+  # e applica solo le migrazioni non ancora nel ledger schema_migrations.
+  migrate:
+    image: ghcr.io/federicokalik/calicchia-api:latest
+    restart: "no"
+    command: ["pnpm", "exec", "tsx", "scripts/migrate.ts"]
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+
   api:
     image: ghcr.io/federicokalik/calicchia-api:latest
     restart: always
@@ -86,6 +101,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     networks:
       - dokploy-network
     labels:
