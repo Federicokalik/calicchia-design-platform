@@ -1,5 +1,5 @@
 {
-  "name": "@caldes/shared",
+  "name": "@calicchia/shared",
   "version": "1.0.0",
   "description": "Shared utilities, types, and validators",
   "type": "module",

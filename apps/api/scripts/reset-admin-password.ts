@@ -2,7 +2,7 @@
  * Reset password for an existing admin user.
  * Usage:
  *   ADMIN_EMAIL=you@example.com NEW_PASSWORD=your-new-pass \
- *     pnpm --filter @caldes/api exec tsx --env-file=../../.env scripts/reset-admin-password.ts
+ *     pnpm --filter @calicchia/api exec tsx --env-file=../../.env scripts/reset-admin-password.ts
  *
  * Exits non-zero if:
  *   - ADMIN_EMAIL or NEW_PASSWORD missing

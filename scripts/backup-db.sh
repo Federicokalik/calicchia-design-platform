@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Backup del database Postgres — Caldes 2026.
+# Backup del database Postgres — Calicchia Design Platform.
 #
 # Uso:   ./scripts/backup-db.sh
 # Legge DATABASE_URL dall'ambiente (o da un .env passato via `set -a; . .env; set +a`).

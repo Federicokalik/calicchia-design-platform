@@ -1,6 +1,6 @@
 name: build-api-image
 
-# Builda l'immagine Docker di @caldes/api e la pubblica su ghcr.io, poi notifica
+# Builda l'immagine Docker di @calicchia/api e la pubblica su ghcr.io, poi notifica
 # Dokploy. Sostituisce il vecchio job "deploy" di ci.yml: Dokploy non builda piu'
 # da sorgente, pulla l'immagine gia' pronta da ghcr.io.
 #
@@ -50,7 +50,7 @@ jobs:
 
       # Fail-fast: non pubblicare un'immagine se l'api non typechecka.
       - name: Typecheck — api
-        run: pnpm --filter @caldes/api typecheck
+        run: pnpm --filter @calicchia/api typecheck
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

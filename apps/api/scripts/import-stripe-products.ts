@@ -10,7 +10,7 @@
  * Idempotente: ri-eseguibile, non duplica (UPSERT su stripe_product_id).
  *
  * Uso:
- *   pnpm --filter @caldes/api tsx scripts/import-stripe-products.ts
+ *   pnpm --filter @calicchia/api tsx scripts/import-stripe-products.ts
  *
  * Flag:
  *   --dry-run  → mostra cosa farebbe senza scrivere su DB

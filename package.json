@@ -1,5 +1,5 @@
 {
-  "name": "caldes-2026",
+  "name": "calicchia-design-platform",
   "version": "1.0.0",
   "private": true,
   "description": "Portfolio, admin dashboard and API monorepo",
@@ -12,13 +12,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=@caldes/sito-v3",
-    "dev:admin": "npm run dev --workspace=@caldes/admin",
-    "dev:api": "npm run dev --workspace=@caldes/api",
+    "dev": "npm run dev --workspace=@calicchia/sito-v3",
+    "dev:admin": "npm run dev --workspace=@calicchia/admin",
+    "dev:api": "npm run dev --workspace=@calicchia/api",
     "dev:all": "./dev.sh",
     "build": "npm run build --workspaces --if-present",
-    "build:sito": "npm run build --workspace=@caldes/sito-v3",
-    "build:admin": "npm run build --workspace=@caldes/admin"
+    "build:sito": "npm run build --workspace=@calicchia/sito-v3",
+    "build:admin": "npm run build --workspace=@calicchia/admin"
   },
   "author": "Federico",
   "license": "AGPL-3.0-or-later",

@@ -11,7 +11,7 @@
  *   PAYPAL_CLIENT_ID=AY1n... PAYPAL_CLIENT_SECRET=EM4q... \
  *   PAYPAL_MODE=sandbox \
  *   PAYPAL_WEBHOOK_URL=https://api.calicchia.design/api/paypal-webhook \
- *     pnpm --filter @caldes/api tsx scripts/setup-paypal-webhook.ts
+ *     pnpm --filter @calicchia/api tsx scripts/setup-paypal-webhook.ts
  *
  * Uso (live):
  *   PAYPAL_MODE=live + credenziali live → endpoint live.

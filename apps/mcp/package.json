@@ -1,5 +1,5 @@
 {
-  "name": "@caldes/mcp",
+  "name": "@calicchia/mcp",
   "version": "1.0.0",
   "description": "MCP server per il gestionale — espone i tool di apps/api a Claude Desktop/Code via stdio",
   "type": "module",

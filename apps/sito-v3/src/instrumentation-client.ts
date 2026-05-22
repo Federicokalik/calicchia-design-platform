@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/nextjs';
 
 const DSN = process.env.NEXT_PUBLIC_BUGSINK_DSN;
-const RELEASE = process.env.NEXT_PUBLIC_APP_RELEASE ?? '@caldes/sito-v3@0.1.0';
+const RELEASE = process.env.NEXT_PUBLIC_APP_RELEASE ?? '@calicchia/sito-v3@0.1.0';
 
 function withoutQueryString(url: string): string {
   try {

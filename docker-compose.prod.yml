@@ -1,4 +1,4 @@
-# Production stack — Caldes 2026 — target: VPS con Dokploy (Traefik + SSL integrati).
+# Production stack — Calicchia Design Platform — target: VPS con Dokploy (Traefik + SSL integrati).
 #
 # Deploy: in Dokploy crea un servizio "Compose", punta a questo file. Le variabili
 # ${...} vengono dal file .env del progetto Dokploy (vedi .env.prod.example).

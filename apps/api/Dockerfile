@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Production image — @caldes/api (Hono on Node 22). Build context = repo root.
+# Production image — @calicchia/api (Hono on Node 22). Build context = repo root.
 #
 # NB: l'API gira in produzione via `tsx` (come lo script `dev`), NON via
 # `node dist/index.js`. Motivo: `tsc` emette import ESM SENZA estensione `.js`

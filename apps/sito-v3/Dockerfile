@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Production image — @caldes/sito-v3 (Next.js 16, standalone output).
+# Production image — @calicchia/sito-v3 (Next.js 16, standalone output).
 # Build context = repo root. NEXT_PUBLIC_* must be passed as build args:
 # Next inlines them at build time.
 
@@ -42,7 +42,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NODE_ENV=production
 COPY apps/sito-v3 ./apps/sito-v3
 COPY packages/shared ./packages/shared
-RUN pnpm --filter @caldes/sito-v3 build
+RUN pnpm --filter @calicchia/sito-v3 build
 
 FROM base AS runtime
 ENV NODE_ENV=production \

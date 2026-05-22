@@ -10,7 +10,7 @@
  * Idempotente: ri-eseguibile, aggiorna in place.
  *
  * Uso:
- *   pnpm --filter @caldes/api tsx scripts/import-stripe-subscriptions.ts
+ *   pnpm --filter @calicchia/api tsx scripts/import-stripe-subscriptions.ts
  *
  * Flag:
  *   --dry-run           → mostra senza scrivere

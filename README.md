@@ -1,4 +1,4 @@
-# Caldes 2026
+# Calicchia Design Platform
 
 > ⚠️ **Alpha** — Progetto ancora in fase alpha. Non production-ready: API instabili, breaking change attesi, copertura test parziale, documentazione in evoluzione.
 > ⚠️ **Alpha** — Project is still in alpha. Not production-ready: APIs unstable, breaking changes expected, partial test coverage, docs are a moving target.
@@ -16,7 +16,7 @@
 
 ### Cos'è
 
-**Caldes 2026** è la piattaforma su cui girerà [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti.
+**Calicchia Design Platform** è la piattaforma su cui girerà [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti.
 (attualmente calicchia.design è un esperimento realizzato con [bolt.new](https://bolt.new/~/sb1-qxnunhjf) e questa piattaforma non è ancora attiva)
 
 | Cosa | A cosa serve |
@@ -53,10 +53,10 @@
 
 | App | Porta dev | Package |
 |-----|-----------|---------|
-| `apps/sito-v3` | **3000** | `@caldes/sito-v3` |
-| `apps/api` | **3001** | `@caldes/api` |
-| `apps/admin` | **5173** | `@caldes/admin` |
-| `apps/mcp` | — | `@caldes/mcp` |
+| `apps/sito-v3` | **3000** | `@calicchia/sito-v3` |
+| `apps/api` | **3001** | `@calicchia/api` |
+| `apps/admin` | **5173** | `@calicchia/admin` |
+| `apps/mcp` | — | `@calicchia/mcp` |
 
 ### Anteprime
 
@@ -107,7 +107,7 @@ Opzionali ma comuni: `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `PAYPAL_CLIENT_ID`, 
 Avvia Postgres in Docker (porta 5432, utente `caldes`, db `caldes`) e applica le migration:
 
 ```bash
-pnpm --filter @caldes/api migrate
+pnpm --filter @calicchia/api migrate
 ```
 
 Le migration vivono in `database/migrations/` numerate progressivamente.
@@ -142,9 +142,9 @@ pnpm dev:admin         # admin     http://localhost:5173
 
 ```bash
 pnpm build                              # build tutti i workspace
-pnpm --filter @caldes/sito-v3 build     # solo sito
-pnpm --filter @caldes/api build         # solo api (tsc)
-pnpm --filter @caldes/admin build       # solo admin
+pnpm --filter @calicchia/sito-v3 build     # solo sito
+pnpm --filter @calicchia/api build         # solo api (tsc)
+pnpm --filter @calicchia/admin build       # solo admin
 ```
 
 Il sito-v3 va su un Node host (SSR), l'admin come SPA statica, l'api dietro un reverse proxy.
@@ -159,7 +159,7 @@ MIT — vedi [LICENSE](LICENSE).
 
 ### What it is
 
-**Caldes 2026** is the platform that will power [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps.
+**Calicchia Design Platform** is the platform that will power [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps.
 (At the moment, calicchia.design is an experiment built with [bolt.new](https://bolt.new/~/sb1-qxnunhjf) and this platform is not yet active.)
 
 | What | What it does |
@@ -196,10 +196,10 @@ MIT — vedi [LICENSE](LICENSE).
 
 | App | Dev port | Package |
 |-----|----------|---------|
-| `apps/sito-v3` | **3000** | `@caldes/sito-v3` |
-| `apps/api` | **3001** | `@caldes/api` |
-| `apps/admin` | **5173** | `@caldes/admin` |
-| `apps/mcp` | — | `@caldes/mcp` |
+| `apps/sito-v3` | **3000** | `@calicchia/sito-v3` |
+| `apps/api` | **3001** | `@calicchia/api` |
+| `apps/admin` | **5173** | `@calicchia/admin` |
+| `apps/mcp` | — | `@calicchia/mcp` |
 
 ### Previews
 
@@ -250,7 +250,7 @@ Optional but common: `RESEND_API_KEY`, `STRIPE_SECRET_KEY`, `PAYPAL_CLIENT_ID`, 
 Start Postgres in Docker (port 5432, user `caldes`, db `caldes`) and apply migrations:
 
 ```bash
-pnpm --filter @caldes/api migrate
+pnpm --filter @calicchia/api migrate
 ```
 
 Migrations live in `database/migrations/`, numbered sequentially.
@@ -285,9 +285,9 @@ pnpm dev:admin         # admin     http://localhost:5173
 
 ```bash
 pnpm build                              # build every workspace
-pnpm --filter @caldes/sito-v3 build     # site only
-pnpm --filter @caldes/api build         # api only (tsc)
-pnpm --filter @caldes/admin build       # admin only
+pnpm --filter @calicchia/sito-v3 build     # site only
+pnpm --filter @calicchia/api build         # api only (tsc)
+pnpm --filter @calicchia/admin build       # admin only
 ```
 
 sito-v3 ships to a Node host (SSR), the admin as a static SPA, the api behind a reverse proxy.

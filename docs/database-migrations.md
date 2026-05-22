@@ -8,7 +8,7 @@ ri-esecuzione è un no-op. NON ingoia gli errori "already exists": una migrazion
 che fallisce blocca l'intera esecuzione.
 
 ```bash
-pnpm --filter @caldes/api migrate    # applica le migrazioni pendenti
+pnpm --filter @calicchia/api migrate    # applica le migrazioni pendenti
 ```
 
 Ordine: prima lo schema base pulito (`apps/api/database/*.sql`), poi le

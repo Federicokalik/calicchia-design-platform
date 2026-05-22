@@ -1,4 +1,4 @@
-# @caldes/mcp
+# @calicchia/mcp
 
 MCP server che espone i tool del gestionale (`apps/api/src/lib/agent/tools.ts`) a Claude Desktop / Claude Code via stdio.
 
@@ -13,13 +13,13 @@ MCP server che espone i tool del gestionale (`apps/api/src/lib/agent/tools.ts`) 
 1. Genera un token random: `openssl rand -hex 32` (o `[System.Guid]::NewGuid().ToString('N')` su PowerShell).
 2. Aggiungi a `.env` (root monorepo): `MCP_SERVICE_TOKEN=<token>`.
 3. Riavvia `apps/api`.
-4. Build: `pnpm --filter @caldes/mcp build`.
+4. Build: `pnpm --filter @calicchia/mcp build`.
 5. Configura Claude Desktop (vedi `docs/mcp-setup.md`).
 
 ## Dev
 
 ```bash
-pnpm --filter @caldes/mcp dev
+pnpm --filter @calicchia/mcp dev
 ```
 
 Gira in stdio mode — utile solo per test con un client MCP locale.
