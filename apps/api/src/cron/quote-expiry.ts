@@ -1,4 +1,7 @@
 import { sql } from '../db';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'quote-expiry' });
 
 /**
  * Mark quotes past their valid_until date as expired
@@ -13,6 +16,6 @@ export async function runQuoteExpiry() {
   `;
 
   if (result.length > 0) {
-    console.log(`[Cron] Expired ${result.length} quotes: ${result.map((r) => r.title).join(', ')}`);
+    log.info(`Expired ${result.length} quotes: ${result.map((r) => r.title).join(', ')}`);
   }
 }

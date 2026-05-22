@@ -5,6 +5,9 @@ import { sql, sqlv } from '../db';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
 import { captureException } from '../lib/bugsink';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'stripe-webhook' });
 
 export const stripeWebhook = new Hono();
 
@@ -24,7 +27,7 @@ stripeWebhook.post('/', async (c) => {
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    console.error('Errore verifica webhook:', err);
+    log.error({ err }, 'Errore verifica webhook');
     captureException(err instanceof Error ? err : new Error(String(err)), {
       source: 'stripe-webhook', stage: 'signature-verification',
     });
@@ -264,7 +267,7 @@ stripeWebhook.post('/', async (c) => {
       }
 
       default:
-        console.log(`Evento non gestito: ${event.type}`);
+        log.info(`Evento non gestito: ${event.type}`);
     }
 
     await sql`UPDATE stripe_webhook_logs SET processed = true WHERE event_id = ${event.id}`;

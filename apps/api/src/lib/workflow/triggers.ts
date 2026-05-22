@@ -5,6 +5,9 @@
 
 import { sql } from '../../db';
 import { executeWorkflow } from './engine';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'workflow-triggers' });
 
 /**
  * Fire all active workflows that match a specific event type
@@ -19,15 +22,15 @@ export async function fireEvent(eventType: string, eventData: any = {}) {
     `;
 
     for (const wf of workflows) {
-      console.log(`[Workflow] Firing event "${eventType}" → workflow ${wf.id}`);
+      log.info(`Firing event "${eventType}" → workflow ${wf.id}`);
       // Execute asynchronously (don't block the event)
       executeWorkflow(wf.id, { event_type: eventType, ...eventData })
-        .catch((err) => console.error(`[Workflow] Error executing ${wf.id}:`, err));
+        .catch((err) => log.error({ err }, `Error executing ${wf.id}`));
     }
 
     return workflows.length;
   } catch (err) {
-    console.error(`[Workflow] Error firing event "${eventType}":`, err);
+    log.error({ err }, `Error firing event "${eventType}"`);
     return 0;
   }
 }

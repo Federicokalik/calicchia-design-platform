@@ -3,6 +3,10 @@
  * Lightweight error tracking compatible with Sentry/Bugsink API
  */
 
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'bugsink' });
+
 interface ErrorPayload {
   event_id: string;
   timestamp: string;
@@ -31,7 +35,7 @@ export function initBugsink() {
   // Parse DSN: https://publicKey@host/projectId
   const match = dsn.match(/^(https?:\/\/)([^@]+)@([^\/]+)(.*)$/);
   if (!match) {
-    console.warn('[Bugsink] Invalid DSN format');
+    log.warn('invalid DSN format');
     return;
   }
 
@@ -92,6 +96,6 @@ export function captureException(error: Error, context?: Record<string, unknown>
     },
     body: JSON.stringify(payload),
   }).catch((fetchError) => {
-    console.error('[Bugsink] Failed to send error:', fetchError);
+    log.error({ err: fetchError }, 'failed to send error');
   });
 }

@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'public' });
 
 export const publicRoutes = new Hono();
 
@@ -123,7 +126,7 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
 
   // Increment views (fire-and-forget)
   sql`UPDATE blog_posts SET views = COALESCE(views, 0) + 1 WHERE slug = ${slug}`.catch(
-    (err: unknown) => console.error('[public] Failed to increment views:', err),
+    (err: unknown) => log.error({ err }, 'Failed to increment views'),
   );
 
   // Get prev/next navigation

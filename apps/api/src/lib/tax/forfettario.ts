@@ -1,4 +1,7 @@
 import { fileURLToPath } from 'node:url';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'tax-forfettario' });
 
 /**
  * Forfettario tax calculator (Italia).
@@ -70,7 +73,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   // -> taxable=23400, irpef=1170, inps=6100.38, total=7270.38, plafond 35.29%, warning 'ok'
   // Caso 2: forfettario, 80000€ -> plafond 94.12%, warning 'approaching'
   // Caso 3: forfettario, 90000€ -> plafond 105.88%, warning 'exceeded'
-  console.log(computeTaxes(30000, {}));
-  console.log(computeTaxes(80000, {}));
-  console.log(computeTaxes(90000, {}));
+  log.info(computeTaxes(30000, {}));
+  log.info(computeTaxes(80000, {}));
+  log.info(computeTaxes(90000, {}));
 }

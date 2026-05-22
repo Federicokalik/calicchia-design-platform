@@ -2,6 +2,9 @@ import { sql } from '../db';
 import { notifyTelegram } from '../lib/telegram';
 import { isWhatsAppConfigured, sendWhatsAppText, formatPhone } from '../lib/whatsapp';
 import { canSendWhatsApp } from '../lib/whatsapp-policy';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'lead-followup' });
 
 /**
  * Check leads without activity for 3+ days and notify the admin via Telegram.
@@ -81,7 +84,7 @@ export async function runLeadFollowup() {
         WHERE id = ${lead.id}
       `;
     } catch (err) {
-      console.error(`[lead-followup] WA send to ${phone} failed:`, (err as Error).message);
+      log.error({ err }, `WA send to ${phone} failed`);
     }
   }
 }

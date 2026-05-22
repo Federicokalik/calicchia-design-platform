@@ -4,6 +4,9 @@ import { authMiddleware } from '../middleware/auth';
 import { verifyTurnstileToken } from '../lib/turnstile';
 import { sendEmail } from '../lib/email';
 import { renderGdprRequestEmail } from '../templates/gdpr-request';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'gdpr' });
 
 export const gdprRequests = new Hono();
 
@@ -64,7 +67,7 @@ gdprRequests.post('/', async (c) => {
     .then(({ subject, html, text }) =>
       sendEmail({ to: adminEmail, subject, html, text })
     )
-    .catch((err) => console.error('[gdpr] Email notify failed:', err));
+    .catch((err) => log.error({ err }, 'Email notify failed'));
 
   return c.json({ success: true, message: 'Richiesta inviata. Riceverai riscontro entro 30 giorni.' });
 });

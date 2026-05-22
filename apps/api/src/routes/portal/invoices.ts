@@ -7,6 +7,9 @@ import { portalAuth, type PortalEnv } from './auth';
 import { stripe, isStripeConfigured } from '../../lib/stripe';
 import { createPaypalOrder, isPaypalReady, capturePaypalOrder } from '../../lib/paypal';
 import { recordPaymentSuccess } from '../../lib/payment-events';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'portal-invoices' });
 
 export const invoicesRoutes = new Hono<PortalEnv>();
 
@@ -320,7 +323,7 @@ invoicesRoutes.post('/paypal-capture/:linkId', portalAuth, async (c) => {
     if (fresh?.status === 'paid' || fresh?.status === 'refunded' || fresh?.status === 'partially_refunded') {
       return c.json({ captured: true, alreadyProcessed: true, viaWebhook: true });
     }
-    console.error('[portal/paypal-capture] capture failed:', (err as Error).message);
+    log.error({ err }, 'capture failed');
     throw new HTTPException(502, {
       message: 'Cattura PayPal non riuscita. Riprova fra qualche secondo.',
     });

@@ -21,6 +21,9 @@ import type {
   CreateBookingInput,
   EventType,
 } from './types';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'calendar-booking' });
 
 // Alphabet URL-safe, 12 char (~62^12 = abbastanza per uso commerciale)
 const generateBookingUid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 12);
@@ -132,7 +135,7 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     // Cleanup evento Google orfano se l'INSERT fallisce (no-op dopo rimozione Google)
     if (resolved.googleEventId) {
       deleteGoogleEvent(resolved.googleEventId).catch((cleanupErr) => {
-        console.error('[booking] Orphan Google event cleanup failed:', cleanupErr);
+        log.error({ err: cleanupErr }, 'Orphan Google event cleanup failed');
       });
     }
     const message = err instanceof Error ? err.message : String(err);
@@ -168,7 +171,7 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
     }
   } catch (eventErr) {
     // Non bloccare il booking se la creazione dell'evento fallisce — log per recovery
-    console.error(`[booking] Auto-create calendar_event FAILED for booking ${inserted.uid}:`, eventErr);
+    log.error({ err: eventErr, bookingUid: inserted.uid }, 'Auto-create calendar_event FAILED for booking');
   }
 
   return { booking: inserted, eventType };
@@ -210,7 +213,7 @@ export async function cancelBooking(uid: string, opts: {
       await updateEvent(linkedEvent.id, { status: 'cancelled' });
     }
   } catch (err) {
-    console.error(`[booking] Sync cancel calendar_event FAILED for booking ${booking.uid}:`, err);
+    log.error({ err, bookingUid: booking.uid }, 'Sync cancel calendar_event FAILED for booking');
   }
 
   const eventType = await getEventType(booking.event_type_id);
@@ -252,7 +255,7 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
       await updateEvent(linkedEvent.id, { status: 'cancelled' });
     }
   } catch (err) {
-    console.error(`[booking] Sync cancel calendar_event (reschedule) FAILED for booking ${uid}:`, err);
+    log.error({ err, bookingUid: uid }, 'Sync cancel calendar_event (reschedule) FAILED for booking');
   }
 
   let result: CreateBookingResult;
@@ -289,7 +292,7 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
         WHERE id = ${original.id}::uuid
       `;
     } catch (rollbackErr) {
-      console.error('[booking] Rollback reschedule fallito (slot occupato da altri):', rollbackErr);
+      log.error({ err: rollbackErr }, 'Rollback reschedule fallito (slot occupato da altri)');
     }
     throw err;
   }

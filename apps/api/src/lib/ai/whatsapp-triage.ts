@@ -17,6 +17,9 @@ import { sql } from '../../db';
 import { createChatCompletion, isOpenAIConfigured } from './openai';
 import { TRIAGE_SYSTEM_PROMPT, buildTriageUserPrompt, type TriageContext } from './prompts/whatsapp';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'whatsapp-triage' });
 
 const MODEL = process.env.WHATSAPP_AI_MODEL || 'gpt-4o-mini';
 const MAX_TOKENS = 400;
@@ -85,7 +88,7 @@ async function generateReply(ctx: TriageContext): Promise<string | null> {
     // Hard cap (lunghezza messaggio WhatsApp ragionevole)
     return trimmed.slice(0, 1200);
   } catch (err) {
-    console.error('[whatsapp-triage] generation failed:', err);
+    log.error({ err }, 'generation failed');
     return null;
   }
 }
@@ -132,7 +135,7 @@ export async function runWhatsAppTriage(
           WHERE id = ${conv.id}
         `;
       } catch (err) {
-        console.error('[whatsapp-triage] auto_reply send failed:', err);
+        log.error({ err }, 'auto_reply send failed');
       }
       return;
     }
@@ -146,6 +149,6 @@ export async function runWhatsAppTriage(
          ${sql.json({ model: MODEL, mode: 'triage' })})
     `;
   } catch (err) {
-    console.error('[whatsapp-triage] failed:', err);
+    log.error({ err }, 'failed');
   }
 }

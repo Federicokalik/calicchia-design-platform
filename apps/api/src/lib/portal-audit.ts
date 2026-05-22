@@ -1,5 +1,8 @@
 import type { Context } from 'hono';
 import { sql } from '../db';
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'portal-audit' });
 
 export type PortalAuthEvent =
   | 'link_requested'
@@ -51,6 +54,6 @@ export async function auditPortalEvent(
     `;
   } catch (err) {
     // Best-effort — log to stderr and move on.
-    console.error('[portal-audit] insert failed:', (err as Error).message);
+    log.error({ err }, 'insert failed');
   }
 }

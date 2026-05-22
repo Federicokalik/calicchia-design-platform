@@ -8,6 +8,9 @@ import { createRevolutOrder, getRevolutOrder, cancelRevolutOrder, isRevolutConfi
 import { zValidator } from '../lib/z-validator';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { generateReceiptForPaymentLink } from '../lib/receipt-pdf';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'payments' });
 
 export const payments = new Hono();
 
@@ -805,7 +808,7 @@ payments.post('/links/:id/void', async (c) => {
     }
     // PayPal orders auto-expire, no cancel endpoint for CREATED orders
   } catch (err) {
-    console.warn(`Failed to cancel ${provider} order ${providerOrderId}:`, err);
+    log.warn({ err }, `Failed to cancel ${provider} order ${providerOrderId}`);
   }
 
   const [row] = await sql`

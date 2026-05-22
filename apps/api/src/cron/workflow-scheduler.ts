@@ -5,6 +5,9 @@
 import { sql } from '../db';
 import { executeWorkflow } from '../lib/workflow/engine';
 import { captureException } from '../lib/bugsink';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'workflow-scheduler' });
 
 export async function runWorkflowScheduler() {
   const workflows = await sql`
@@ -23,10 +26,10 @@ export async function runWorkflowScheduler() {
     const now = Date.now();
 
     if (now - lastRun >= intervalMs) {
-      console.log(`[Workflow Scheduler] Executing: ${wf.name} (${wf.id})`);
+      log.info(`Executing: ${wf.name} (${wf.id})`);
       executeWorkflow(wf.id, { scheduled: true, triggered_at: new Date().toISOString() })
         .catch((err) => {
-          console.error(`[Workflow Scheduler] Error executing ${wf.name}:`, err);
+          log.error({ err }, `Error executing ${wf.name}`);
           captureException(err instanceof Error ? err : new Error(String(err)), {
             source: 'workflow-scheduler', workflow_id: wf.id, workflow_name: wf.name,
           });

@@ -15,6 +15,9 @@
 import { sql } from '../db';
 import { sendBookingReminder } from '../lib/calendar/email';
 import type { Booking, EventType } from '../lib/calendar/types';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'booking-reminders' });
 
 async function processReminderType(kind: '24h' | '2h') {
   const reminderTypeKey = kind === '24h' ? 'reminder_24h' : 'reminder_2h';
@@ -42,7 +45,7 @@ async function processReminderType(kind: '24h' | '2h') {
 
   if (!candidates.length) return 0;
 
-  console.log(`[booking-reminders] ${candidates.length} reminder ${reminderTypeKey} da inviare`);
+  log.info(`${candidates.length} reminder ${reminderTypeKey} da inviare`);
 
   // Bulk-load event types per tutti i bookings (evita N+1 query)
   const eventTypeIds = [...new Set(candidates.map((b) => b.event_type_id))];
@@ -65,8 +68,8 @@ async function processReminderType(kind: '24h' | '2h') {
       if (!eventType) {
         // Surface esplicito: event type cancellato dal DB ma booking ancora confermato.
         // Notifica admin per intervento manuale (cancellare il booking o ricreare l'event type).
-        console.warn(
-          `[booking-reminders] Event type ${booking.event_type_id} NON TROVATO per booking ${booking.uid} ` +
+        log.warn(
+          `Event type ${booking.event_type_id} NON TROVATO per booking ${booking.uid} ` +
           `(attendee=${booking.attendee_email}, start=${booking.start_time}). Reminder ${reminderTypeKey} non inviato. ` +
           `Cancellare il booking o ripristinare l'event type.`
         );
@@ -77,7 +80,7 @@ async function processReminderType(kind: '24h' | '2h') {
       await sendBookingReminder({ booking, eventType, kind });
       sent++;
     } catch (err) {
-      console.error(`[booking-reminders] errore booking ${booking.uid}:`, err);
+      log.error({ err }, `errore booking ${booking.uid}`);
     }
   }
 
@@ -88,6 +91,6 @@ export async function runBookingReminders(): Promise<void> {
   const sent24 = await processReminderType('24h');
   const sent2 = await processReminderType('2h');
   if (sent24 + sent2 > 0) {
-    console.log(`[booking-reminders] Completato — ${sent24} (24h) + ${sent2} (2h) inviate`);
+    log.info(`Completato — ${sent24} (24h) + ${sent2} (2h) inviate`);
   }
 }

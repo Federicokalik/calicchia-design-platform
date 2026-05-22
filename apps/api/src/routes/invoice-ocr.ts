@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { getProviderForTask, callOpenAICompatible } from '../lib/agent/llm-router';
 import type { LLMTask } from '../lib/agent/llm-router';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'invoice-ocr' });
 
 export const invoiceOcr = new Hono();
 
@@ -122,7 +125,7 @@ invoiceOcr.post('/extract-invoice', async (c) => {
 
     return c.json({ extracted });
   } catch (err: any) {
-    console.error('[Invoice OCR] Error:', err.message);
+    log.error({ err }, 'invoice: error');
     return c.json({ error: 'Errore AI durante l\'estrazione della fattura' }, 500);
   }
 });
@@ -195,7 +198,7 @@ invoiceOcr.post('/extract-expense', async (c) => {
     return c.json({ extracted });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[Expense OCR] Error:', message);
+    log.error({ err }, 'expense: error');
     return c.json({ error: 'Errore AI durante l\'estrazione della spesa' }, 500);
   }
 });

@@ -8,6 +8,9 @@
 import { spawn } from 'child_process';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'analytics-geo-refresh' });
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,7 +25,7 @@ export async function runAnalyticsGeoRefresh(): Promise<void> {
     );
     child.on('exit', (code) => {
       if (code !== 0) {
-        console.warn(`[analytics-geo-refresh] download script exited ${code}`);
+        log.warn(`download script exited ${code}`);
       }
       res();
     });

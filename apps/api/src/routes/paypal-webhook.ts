@@ -6,6 +6,9 @@ import { extractPaypalSignatureHeaders, verifyPaypalSignature } from '../lib/pay
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
 import { captureException } from '../lib/bugsink';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'paypal-webhook' });
 
 export const paypalWebhook = new Hono();
 
@@ -223,12 +226,12 @@ paypalWebhook.post('/', async (c) => {
       }
 
       case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED': {
-        console.warn('[paypal-webhook] subscription payment failed', resource.id ?? eventId);
+        log.warn({ resourceId: resource.id ?? eventId }, 'subscription payment failed');
         break;
       }
 
       default:
-        console.log(`[paypal-webhook] Evento non gestito: ${eventType}`);
+        log.info(`Evento non gestito: ${eventType}`);
     }
 
     await sql`UPDATE paypal_webhook_logs SET processed = true WHERE event_id = ${eventId}`;

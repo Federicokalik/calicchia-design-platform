@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'public-leads' });
 
 export const publicLeads = new Hono();
 
@@ -76,7 +79,7 @@ publicLeads.post('/', async (c) => {
 
     return c.json({ ok: true, lead_id: lead.id }, 201);
   } catch (err) {
-    console.error('[public-leads] error:', err);
+    log.error({ err }, 'error');
     return c.json({ error: 'Internal Server Error' }, 500);
   }
 });

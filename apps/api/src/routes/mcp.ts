@@ -5,6 +5,9 @@ import { generateOtp, hashOtp } from '../lib/mcp/tokens';
 import { writeMcpAudit, summarizeArgs } from '../lib/mcp/audit';
 import { sendTelegramMessage, isTelegramConfigured } from '../lib/telegram';
 import type { McpTokenContext } from '../middleware/mcp-auth';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'mcp' });
 
 type McpEnv = {
   Variables: {
@@ -130,11 +133,11 @@ mcp.post('/execute', async (c) => {
       if (tgConfigured) {
         const message = `🔐 <b>OTP MCP</b>: <code>${code}</code>\nAzione: <b>${escapeHtml(name)}</b>\nDevice: <b>${escapeHtml(tokenCtx.label)}</b>\n${escapeHtml(argsSummary.slice(0, 200))}\n\n⏱ Valido ${OTP_TTL_SECONDS}s`;
         sendTelegramMessage(message, undefined, { parse_mode: 'HTML' }).catch((err) =>
-          console.error('[mcp] Telegram OTP delivery failed:', err)
+          log.error({ err }, 'Telegram OTP delivery failed')
         );
       } else {
-        console.error(
-          '[mcp] HIGH_RISK call ricevuta ma Telegram non configurato — OTP non consegnabile'
+        log.error(
+          'HIGH_RISK call ricevuta ma Telegram non configurato — OTP non consegnabile'
         );
       }
 

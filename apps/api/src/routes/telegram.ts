@@ -3,6 +3,9 @@ import type { Context } from 'hono';
 import { timingSafeEqual } from 'node:crypto';
 import { runAgent } from '../lib/agent';
 import { sendTelegramMessage, isAuthorizedChat, isTelegramConfigured } from '../lib/telegram';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'telegram' });
 
 export const telegram = new Hono();
 
@@ -19,7 +22,7 @@ function isWebhookAuthentic(c: Context): boolean {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || '';
   if (!expected) {
     if (process.env.NODE_ENV === 'production') {
-      console.error('[SECURITY] TELEGRAM_WEBHOOK_SECRET not configured in production — blocking webhook');
+      log.error('[SECURITY] TELEGRAM_WEBHOOK_SECRET not configured in production — blocking webhook');
       return false;
     }
     return true; // dev convenience
@@ -173,7 +176,7 @@ telegram.post('/webhook', async (c) => {
 
       await sendReply(chatId, `🎤 <i>${transcript}</i>\n\n${result.reply}`);
     } catch (err) {
-      console.error('[Telegram] Voice error:', err);
+      log.error({ err }, 'Voice error');
       await sendTelegramMessage('Errore nella trascrizione audio.', chatId);
     }
 

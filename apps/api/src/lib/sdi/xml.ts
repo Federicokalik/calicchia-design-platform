@@ -1,4 +1,7 @@
 import { fileURLToPath } from 'node:url';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'sdi-xml' });
 
 export interface FatturaPAInvoice {
   id: string;
@@ -336,5 +339,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       address: { street: 'Via Scifelli 74', postal_code: '03023', city: 'Ceccano', province: 'FR' },
     },
   );
-  console.log(xml);
+  log.info(xml);
 }

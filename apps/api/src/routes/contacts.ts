@@ -18,6 +18,9 @@ import {
   scheduleAuditOnboardingSequence,
   runLeadAuditSequence,
 } from '../jobs/lead-audit-sequence';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'contacts' });
 
 export const contacts = new Hono();
 
@@ -54,7 +57,7 @@ contacts.get('/cal-slots', async (c) => {
 
     return c.json({ slots: slotsByDate });
   } catch (err) {
-    console.error('[contacts/cal-slots] error:', err);
+    log.error({ err }, 'cal-slots error');
     return c.json({ error: 'Errore nel recupero degli slot disponibili' }, 500);
   }
 });
@@ -154,14 +157,14 @@ contacts.post('/', async (c) => {
       Promise.allSettled([
         sendBookingConfirmation({ booking, eventType }),
         sendBookingAdminNotification({ booking, eventType }),
-      ]).catch((err) => console.error('[contacts] booking email error:', err));
+      ]).catch((err) => log.error({ err }, 'booking email error'));
     } catch (err) {
       if (err instanceof BookingConflictError) {
         bookingConflict = true;
       } else if (err instanceof BookingValidationError) {
-        console.warn('[contacts] booking validation:', err.message);
+        log.warn({ err }, 'booking validation');
       } else {
-        console.error('[contacts] booking create error:', err);
+        log.error({ err }, 'booking create error');
       }
       // Non blocca il form — il messaggio viene salvato comunque
     }
@@ -200,7 +203,7 @@ contacts.post('/', async (c) => {
   if (isAuditLeadSource(safeLeadSource)) {
     scheduleAuditOnboardingSequence(inserted.id, safeLeadSource)
       .then(() => runLeadAuditSequence())
-      .catch((err) => console.error('[contacts] audit sequence schedule failed:', err));
+      .catch((err) => log.error({ err }, 'audit sequence schedule failed'));
   }
 
   // Auto-create lead in pipeline + notify Telegram
@@ -222,13 +225,13 @@ contacts.post('/', async (c) => {
     import('../lib/telegram').then(({ notifyTelegram }) => {
       const value = company ? ` (${company})` : '';
       notifyTelegram('🔔 Nuovo lead dal sito', `${name}${value}\n${email}${phone ? `\n${phone}` : ''}`);
-    }).catch((err) => console.error('[contacts] Telegram notify failed:', err));
+    }).catch((err) => log.error({ err }, 'Telegram notify failed'));
     // Fire workflow event
     import('../lib/workflow/triggers').then(({ fireEvent }) => {
       fireEvent('nuovo_lead', { name, email, phone, company });
-    }).catch((err) => console.error('[contacts] Workflow trigger failed:', err));
+    }).catch((err) => log.error({ err }, 'Workflow trigger failed'));
   } catch (err) {
-    console.error('Error auto-creating lead from contact:', err);
+    log.error({ err }, 'Error auto-creating lead from contact');
   }
 
   // Send email notification (non-blocking)
@@ -239,7 +242,7 @@ contacts.post('/', async (c) => {
     wants_call: !!wants_call,
     wants_meet: !!wants_meet,
     source_page, source_service, source_profession,
-  }).catch((err) => console.error('Failed to send contact notification:', err));
+  }).catch((err) => log.error({ err }, 'Failed to send contact notification'));
 
   return c.json({
     success: true,

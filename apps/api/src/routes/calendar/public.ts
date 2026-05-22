@@ -25,6 +25,9 @@ import {
 } from '../../lib/calendar/email';
 import { buildIcs } from '../../lib/calendar/ics';
 import type { EventType } from '../../lib/calendar/types';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'calendar-public' });
 
 export const calendarPublic = new Hono();
 
@@ -200,7 +203,7 @@ calendarPublic.post('/bookings', async (c) => {
         await sql`UPDATE calendar_bookings SET lead_id = ${leadId}::uuid WHERE id = ${booking.id}::uuid`;
       }
     } catch (err) {
-      console.error(`[calendar/public] Lead auto-create FAILED for booking uid=${booking.uid}:`, err);
+      log.error({ err }, `Lead auto-create FAILED for booking uid=${booking.uid}`);
       // Notifica admin per recovery manuale (best-effort)
       import('../../lib/telegram').then(({ notifyTelegram }) => {
         notifyTelegram(
@@ -214,7 +217,7 @@ calendarPublic.post('/bookings', async (c) => {
     Promise.allSettled([
       sendBookingConfirmation({ booking, eventType }),
       sendBookingAdminNotification({ booking, eventType }),
-    ]).catch((err) => console.error('[calendar/public] email send error:', err));
+    ]).catch((err) => log.error({ err }, 'email send error'));
 
     // Telegram notification (best-effort, log errori)
     import('../../lib/telegram').then(({ notifyTelegram }) => {
@@ -223,7 +226,7 @@ calendarPublic.post('/bookings', async (c) => {
         '📅 Nuova prenotazione',
         `${eventType.title}\n${booking.attendee_name} <${booking.attendee_email}>\n${new Date(booking.start_time).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}\n${where}`
       );
-    }).catch((err) => console.error('[calendar/public] Telegram notify failed:', err));
+    }).catch((err) => log.error({ err }, 'Telegram notify failed'));
 
     // Workflow event fire (best-effort, log errori in modo che fallimenti automation siano visibili)
     import('../../lib/workflow/triggers').then(({ fireEvent }) => {
@@ -235,7 +238,7 @@ calendarPublic.post('/bookings', async (c) => {
         attendee_email: booking.attendee_email,
         start_time: booking.start_time,
       });
-    }).catch((err) => console.error(`[calendar/public] Workflow fireEvent failed for booking ${booking.uid}:`, err));
+    }).catch((err) => log.error({ err }, `Workflow fireEvent failed for booking ${booking.uid}`));
 
     return c.json({
       success: true,
@@ -254,7 +257,7 @@ calendarPublic.post('/bookings', async (c) => {
     if (err instanceof BookingValidationError) {
       return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
     }
-    console.error('[calendar/public] booking create error:', err);
+    log.error({ err }, 'booking create error');
     return c.json({ error: 'Errore creazione prenotazione' }, 500);
   }
 });
@@ -303,7 +306,7 @@ calendarPublic.post('/bookings/:uid/cancel', async (c) => {
   Promise.allSettled([
     sendBookingCancelled({ ...result, recipient: 'attendee' }),
     sendBookingCancelled({ ...result, recipient: 'admin' }),
-  ]).catch((err) => console.error('[calendar/public] cancel email error:', err));
+  ]).catch((err) => log.error({ err }, 'cancel email error'));
 
   import('../../lib/workflow/triggers').then(({ fireEvent }) => {
     return fireEvent('booking_cancellato', {
@@ -312,7 +315,7 @@ calendarPublic.post('/bookings/:uid/cancel', async (c) => {
       attendee_email: result.booking.attendee_email,
       cancelled_by: 'attendee',
     });
-  }).catch((err) => console.error(`[calendar/public] Workflow fireEvent (cancellato) failed for ${uid}:`, err));
+  }).catch((err) => log.error({ err }, `Workflow fireEvent (cancellato) failed for ${uid}`));
 
   return c.json({ success: true });
 });
@@ -343,7 +346,7 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
         booking: result.booking, eventType: result.eventType,
         previousStart: previous.start_time, recipient: 'admin',
       }),
-    ]).catch((err) => console.error('[calendar/public] reschedule email error:', err));
+    ]).catch((err) => log.error({ err }, 'reschedule email error'));
 
     import('../../lib/workflow/triggers').then(({ fireEvent }) => {
       return fireEvent('booking_riprogrammato', {
@@ -352,7 +355,7 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
         event_type_slug: result.eventType.slug,
         attendee_email: result.booking.attendee_email,
       });
-    }).catch((err) => console.error(`[calendar/public] Workflow fireEvent (riprogrammato) failed for ${uid}:`, err));
+    }).catch((err) => log.error({ err }, `Workflow fireEvent (riprogrammato) failed for ${uid}`));
 
     return c.json({
       success: true,
@@ -369,7 +372,7 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
     if (err instanceof BookingValidationError) {
       return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
     }
-    console.error('[calendar/public] reschedule error:', err);
+    log.error({ err }, 'reschedule error');
     return c.json({ error: 'Errore riprogrammazione' }, 500);
   }
 });

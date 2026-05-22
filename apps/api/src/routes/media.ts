@@ -1,5 +1,8 @@
 import { Hono } from 'hono';
 import { uploadFile, deleteFile, listFiles, generateFileKey, isS3Configured } from '../lib/s3';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'media' });
 
 export const media = new Hono();
 
@@ -17,7 +20,7 @@ media.get('/', async (c) => {
   // Check if S3 is configured
   if (!isS3Configured()) {
     // Return empty files array instead of error - allows page to render
-    console.warn('S3 storage not configured');
+    log.warn('S3 storage not configured');
     return c.json({ files: [], warning: 'Storage non configurato' });
   }
 
@@ -28,7 +31,7 @@ media.get('/', async (c) => {
     const files = await listFiles(folder, limit);
     return c.json({ files });
   } catch (error) {
-    console.error('Error listing S3 files:', error);
+    log.error({ err: error }, 'Error listing S3 files');
     // Return empty array on error instead of 500
     return c.json({ files: [], error: 'Errore nel caricamento file' });
   }
@@ -73,7 +76,7 @@ media.post('/upload', async (c) => {
       contentType: file.type,
     });
   } catch (error) {
-    console.error('Error uploading file:', error);
+    log.error({ err: error }, 'Error uploading file');
     const message = error instanceof Error ? error.message : 'Errore upload';
     return c.json({ error: message }, 500);
   }
@@ -93,7 +96,7 @@ media.delete('/', async (c) => {
     await deleteFile(key);
     return c.json({ success: true });
   } catch (error) {
-    console.error('Error deleting file:', error);
+    log.error({ err: error }, 'Error deleting file');
     const message = error instanceof Error ? error.message : 'Errore cancellazione';
     return c.json({ error: message }, 500);
   }

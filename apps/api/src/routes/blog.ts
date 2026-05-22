@@ -7,6 +7,9 @@ import * as coverGenerator from '../lib/ai/cover-generator';
 import { generateText } from '../lib/agent/llm-router';
 import { getAdminLocale } from '../lib/admin-locale';
 import { verifyCronSecret } from '../lib/cron-auth';
+import { logger } from '../lib/logger';
+
+const blogLog = logger.child({ scope: 'blog' });
 
 // Convert markdown content to HTML for Lexical editor
 function mdToHtml(content: string): string {
@@ -51,7 +54,7 @@ async function processCodeDemos(content: string, articleContext: string): Promis
     const description = match[1].trim();
 
     try {
-      console.log(`[Blog Gen] Generating demo ${i + 1}/${matches.length}: "${description}"`);
+      blogLog.info(`generation: generating demo ${i + 1}/${matches.length}: "${description}"`);
       const html = await generateText('code_generation', [
         { role: 'system', content: `Sei un esperto frontend developer. Genera una SINGOLA pagina HTML autocontenuta (HTML + CSS inline + JS inline) che funzioni come demo interattiva.
 
@@ -74,7 +77,7 @@ REGOLE TASSATIVE:
 
       demos.push(cleanHtml);
     } catch (err) {
-      console.error(`[Blog Gen] Demo generation failed for "${description}":`, err);
+      blogLog.error({ err }, `generation: demo generation failed for "${description}"`);
       demos.push(`<html><body style="background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui"><p>Demo non disponibile</p></body></html>`);
     }
   }
@@ -469,7 +472,7 @@ blog.post('/generate', async (c) => {
   try {
     await sql`UPDATE blog_generation_logs SET status = 'researching' WHERE id = ${logId}`;
 
-    console.log(`[Blog Gen] Step 1: Researching "${topic}" with Perplexity...`);
+    blogLog.info(`generation: step 1: researching "${topic}" with Perplexity...`);
     const research = await perplexity.research({
       topic,
       model: settings.perplexity_model as perplexity.PerplexityModel,
@@ -479,7 +482,7 @@ blog.post('/generate', async (c) => {
 
     await sql`UPDATE blog_generation_logs SET ${sql({ status: 'generating', generation_model_used: settings.openai_model })} WHERE id = ${logId}`;
 
-    console.log(`[Blog Gen] Step 2: Writing article with OpenAI ${settings.openai_model}...`);
+    blogLog.info(`generation: step 2: writing article with OpenAI ${settings.openai_model}...`);
     const article = await openai.writeArticle({
       research,
       model: settings.openai_model,
@@ -510,7 +513,7 @@ blog.post('/generate', async (c) => {
         });
         await sql`UPDATE blog_generation_logs SET cover_url = ${coverImage.url} WHERE id = ${logId}`;
       } catch (err) {
-        console.error('[Blog Gen] Cover generation FAILED:', err instanceof Error ? err.message : err);
+        blogLog.error({ err }, 'generation: cover generation failed');
         // Update log with error but continue without cover
         await sql`UPDATE blog_generation_logs SET cover_url = ${'ERROR: ' + (err instanceof Error ? err.message : 'unknown')} WHERE id = ${logId}`;
       }
@@ -531,7 +534,7 @@ blog.post('/generate', async (c) => {
         });
         finalContent = coverGenerator.replaceImagePlaceholders(article.content, inlineImages);
       } catch (err) {
-        console.error('[Blog Gen] Inline images error:', err);
+        blogLog.error({ err }, 'generation: inline images error');
         finalContent = article.content.replace(/\[IMAGE:[^\]]+\]/g, '');
       }
     } else {
@@ -550,13 +553,13 @@ blog.post('/generate', async (c) => {
     if (hasDemos) {
       try {
         await sql`UPDATE blog_generation_logs SET status = 'generating_demos' WHERE id = ${logId}`;
-        console.log('[Blog Gen] Step 4: Generating code demos with Kimi-K2.5...');
+        blogLog.info('generation: step 4: generating code demos with Kimi-K2.5...');
         const demoResult = await processCodeDemos(finalContent, article.title + ' — ' + article.excerpt);
         finalContent = demoResult.content;
         demos = demoResult.demos;
-        console.log(`[Blog Gen] Generated ${demos.length} code demos`);
+        blogLog.info(`generation: generated ${demos.length} code demos`);
       } catch (err) {
-        console.error('[Blog Gen] Demo generation error:', err);
+        blogLog.error({ err }, 'generation: demo generation error');
         // Remove placeholders if demo generation fails
         finalContent = finalContent.replace(/<!--\s*DEMO:\s*.+?\s*-->/g, '');
       }
@@ -611,7 +614,7 @@ blog.post('/generate', async (c) => {
   } catch (error) {
     const duration = Date.now() - startTime;
     const errorMessage = error instanceof Error ? error.message : JSON.stringify(error) || 'Errore sconosciuto';
-    console.error('[Blog Gen] Error:', errorMessage);
+    blogLog.error({ err: error }, 'generation: error');
 
     await sql`UPDATE blog_generation_logs SET ${sql({ status: 'failed', error_message: errorMessage, completed_at: new Date().toISOString(), duration_ms: duration })} WHERE id = ${logId}`;
 
@@ -676,7 +679,7 @@ blog.post('/generate/random', async (c) => {
         coverImage = await coverGenerator.generateCover({ topic: article.title, provider: config.cover_provider, dalleModel: config.dalle_model, zimageModel: config.zimage_model });
         await sql`UPDATE blog_generation_logs SET cover_url = ${coverImage.url} WHERE id = ${log.id}`;
       } catch (err) {
-        console.error('[Generate Random] Cover error:', err);
+        blogLog.error({ err }, 'generate random: cover error');
       }
     }
 
@@ -689,7 +692,7 @@ blog.post('/generate/random', async (c) => {
         inlineImages = await coverGenerator.generateInlineImages({ images: article.imagePlaceholders, provider: config.cover_provider, dalleModel: config.dalle_model, zimageModel: config.zimage_model, articleTitle: article.title });
         finalContent = coverGenerator.replaceImagePlaceholders(article.content, inlineImages);
       } catch (err) {
-        console.error('[Generate Random] Inline images error:', err);
+        blogLog.error({ err }, 'generate random: inline images error');
         finalContent = article.content.replace(/\[IMAGE:[^\]]+\]/g, '');
       }
     } else {
@@ -861,7 +864,7 @@ blog.post('/scheduled/generate', async (c) => {
         coverImage = await coverGenerator.generateCover({ topic: article.title, provider: config.cover_provider as coverGenerator.CoverProvider, dalleModel: config.dalle_model as coverGenerator.DalleModel, zimageModel: config.zimage_model as coverGenerator.ZImageModel });
         await sql`UPDATE blog_generation_logs SET cover_url = ${coverImage.url} WHERE id = ${log.id}`;
       } catch (err) {
-        console.error('[Scheduled] Cover error:', err);
+        blogLog.error({ err }, 'scheduled: cover error');
       }
     }
 
@@ -874,7 +877,7 @@ blog.post('/scheduled/generate', async (c) => {
         inlineImages = await coverGenerator.generateInlineImages({ images: article.imagePlaceholders, provider: config.cover_provider as coverGenerator.CoverProvider, dalleModel: config.dalle_model as coverGenerator.DalleModel, zimageModel: config.zimage_model as coverGenerator.ZImageModel, articleTitle: article.title });
         finalContent = coverGenerator.replaceImagePlaceholders(article.content, inlineImages);
       } catch (err) {
-        console.error('[Scheduled] Inline images error:', err);
+        blogLog.error({ err }, 'scheduled: inline images error');
         finalContent = article.content.replace(/\[IMAGE:[^\]]+\]/g, '');
       }
     } else {

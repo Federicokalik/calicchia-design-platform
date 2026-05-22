@@ -5,6 +5,9 @@
 
 import { uploadFile, generateFileKey } from '../s3';
 import { generateVisualImagePrompt, isOpenAIConfigured } from './openai';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'cover' });
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const KIE_API_KEY = process.env.KIE_API_KEY;
@@ -344,7 +347,7 @@ async function saveImageToS3(
   try {
     const response = await fetch(imageUrl);
     if (!response.ok) {
-      console.error('[Cover] Download failed:', response.status);
+      log.error({ status: response.status }, 'Download failed');
       return null;
     }
 
@@ -359,10 +362,10 @@ async function saveImageToS3(
     mkdirSync(join(process.env.UPLOAD_DIR || './uploads', folder), { recursive: true });
 
     const result = await uploadFile(buffer, key, contentType);
-    console.log('[Cover] Saved:', result.url);
+    log.info({ url: result.url }, 'Saved');
     return { url: result.url, key: result.key };
   } catch (error) {
-    console.error('[Cover] Save error:', error instanceof Error ? error.message : error);
+    log.error({ err: error instanceof Error ? error.message : error }, 'Save error');
     return null;
   }
 }
@@ -457,7 +460,7 @@ export async function generateInlineImages(
         provider,
       });
     } catch (error) {
-      console.error(`Error generating inline image ${image.id}:`, error);
+      log.error({ err: error }, `Error generating inline image ${image.id}`);
       // Continua con le altre immagini
     }
   }

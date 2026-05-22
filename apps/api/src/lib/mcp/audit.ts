@@ -1,4 +1,7 @@
 import { sql } from '../../db';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'mcp-audit' });
 
 export interface McpAuditEntry {
   tokenId: string;
@@ -29,7 +32,7 @@ export async function writeMcpAudit(e: McpAuditEntry): Promise<void> {
       ${JSON.stringify({ mcp_token_id: e.tokenId, duration_ms: e.durationMs })}::jsonb,
       now()
     )
-  `.catch((err: unknown) => console.error('[mcp-audit]', err));
+  `.catch((err: unknown) => log.error({ err }, 'audit write failed'));
 }
 
 export function summarizeArgs(args: Record<string, unknown>): string {

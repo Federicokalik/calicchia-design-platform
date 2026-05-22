@@ -15,6 +15,9 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'kb-bootstrap' });
 
 // This file lives in apps/api/src/lib/agent/, so its directory IS the agent dir
 // where the KB files are read from in local dev.
@@ -52,7 +55,7 @@ function getS4(): { client: S3Client; bucket: string } | null {
 export async function bootstrapKBs(): Promise<void> {
   const s4 = getS4();
   if (!s4) {
-    console.log('[kb-bootstrap] S4 not configured — using on-disk knowledge bases');
+    log.info('S4 not configured — using on-disk knowledge bases');
     return;
   }
   const { client, bucket } = s4;
@@ -68,9 +71,9 @@ export async function bootstrapKBs(): Promise<void> {
       if (obj.Key && obj.Key.endsWith('.md')) keys.add(obj.Key);
     }
   } catch (err) {
-    console.error(
-      '[kb-bootstrap] cannot list S4 bucket (will still try required files):',
-      err instanceof Error ? err.message : err,
+    log.error(
+      { err: err instanceof Error ? err.message : err },
+      'cannot list S4 bucket (will still try required files)',
     );
   }
 
@@ -86,11 +89,11 @@ export async function bootstrapKBs(): Promise<void> {
         downloaded++;
       }
     } catch (err) {
-      console.error(
-        `[kb-bootstrap] failed to fetch ${key}:`,
-        err instanceof Error ? err.message : err,
+      log.error(
+        { err: err instanceof Error ? err.message : err },
+        `failed to fetch ${key}`,
       );
     }
   }
-  console.log(`[kb-bootstrap] downloaded ${downloaded} knowledge-base file(s) from S4 into ${KB_DIR}`);
+  log.info(`downloaded ${downloaded} knowledge-base file(s) from S4 into ${KB_DIR}`);
 }

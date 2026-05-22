@@ -12,6 +12,9 @@ import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
 import { sendTelegramMessage, isTelegramConfigured } from '../telegram';
 import { addFact } from '../agent/memory';
 import type { AdminLocale } from '../admin-locale';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'workflow-nodes' });
 
 export interface NodeTypeDefinition {
   type: string;
@@ -531,7 +534,7 @@ REGOLE TASSATIVE:
     configSchema: { message: '' },
     execute: async (config, input) => {
       const message = interpolate(config.message || '{{data}}', { ...input, data: JSON.stringify(input) });
-      console.log(`[Workflow Log] ${message}`);
+      log.info(`${message}`);
       return { logged: true, message };
     },
   },

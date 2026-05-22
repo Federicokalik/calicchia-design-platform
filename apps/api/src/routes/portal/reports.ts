@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { sql } from '../../db';
 import { applyTranslations, getRequestLocale } from '../../lib/portal-i18n';
 import { portalAuth, type PortalEnv } from './auth';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'portal-reports' });
 
 export const reportsRoutes = new Hono<PortalEnv>();
 
@@ -31,7 +34,7 @@ reportsRoutes.get('/', portalAuth, async (c) => {
 
     return c.json({ reports });
   } catch (err: unknown) {
-    console.error('Portal reports error:', err);
+    log.error({ err }, 'Portal reports error');
     return c.json({ error: 'Errore recupero report' }, 500);
   }
 });

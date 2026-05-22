@@ -4,6 +4,9 @@
  */
 
 import { sql } from '../../db';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'ai-usage' });
 
 export type LLMTask = 'chat' | 'chat_fast' | 'tool_calling' | 'blog_research' | 'blog_writing' | 'email_copy' | 'task_breakdown' | 'code_generation' | 'invoice_ocr';
 
@@ -31,7 +34,7 @@ async function logUsage(providerName: string, model: string, task: string, chann
   try {
     await sql`INSERT INTO ai_usage_logs (provider, model, task_type, channel, input_tokens, output_tokens, total_tokens, cost_eur, duration_ms, success, error)
       VALUES (${providerName}, ${model}, ${task}, ${channel}, ${inputTokens}, ${outputTokens}, ${inputTokens + outputTokens}, ${cost}, ${durationMs}, ${success}, ${error || null})`;
-  } catch (e) { console.error('[AI Usage] Log error:', e); }
+  } catch (e) { log.error({ err: e }, 'Log error'); }
 }
 
 interface ProviderConfig {

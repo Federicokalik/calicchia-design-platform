@@ -3,6 +3,9 @@ import { randomUUID } from 'crypto';
 import { sql } from '../../db';
 import { fail } from '../../lib/responses';
 import { portalAuth, type PortalEnv } from './auth';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'upload' });
 
 export const uploadRoutes = new Hono<PortalEnv>();
 
@@ -206,7 +209,7 @@ uploadRoutes.post('/done', portalAuth, async (c) => {
   } catch (err) {
     // Transient S3 read error: don't reject the upload but flag it
     sniffSkipped = true;
-    console.error('[upload] magic-byte sniff failed for key', key, err);
+    log.error({ key, err }, 'magic-byte sniff failed for key');
   }
 
   if (!sniffOk) {
@@ -220,7 +223,7 @@ uploadRoutes.post('/done', portalAuth, async (c) => {
     UPDATE client_uploads SET status = 'completed', uploaded_at = NOW()
     WHERE id = ${String(upload.id)}
   `;
-  if (sniffSkipped) console.warn('[upload] completed without magic-byte verification:', key);
+  if (sniffSkipped) log.warn({ key }, 'completed without magic-byte verification');
 
   const uploadProjectId = upload.project_id ? String(upload.project_id) : null;
   const uploadName = String(upload.original_name || '');

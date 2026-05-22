@@ -5,6 +5,10 @@
  * senza throw - il chiamante puo' fallback a email.
  */
 
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'sms' });
+
 export interface SmsOptions {
   to: string;
   body: string;
@@ -38,7 +42,7 @@ function normalizePhone(phone: string): string {
 
 export async function sendSms(options: SmsOptions): Promise<SmsResult> {
   if (!hasTwilio()) {
-    console.warn('[sms] Twilio non configurato - skip send a', options.to);
+    log.warn({ to: options.to }, 'Twilio non configurato - skip send a');
     return { success: false, error: 'SMS not configured' };
   }
 
@@ -63,13 +67,13 @@ export async function sendSms(options: SmsOptions): Promise<SmsResult> {
     });
     const data = await res.json() as { sid?: string; message?: string };
     if (!res.ok) {
-      console.error('[sms] Twilio error', res.status, data);
+      log.error({ status: res.status, data }, 'Twilio error');
       return { success: false, error: data.message || `Twilio HTTP ${res.status}` };
     }
     return { success: true, provider_sid: data.sid };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error('[sms] send failure', message);
+    log.error({ err }, 'send failure');
     return { success: false, error: message || 'Unknown SMS error' };
   }
 }

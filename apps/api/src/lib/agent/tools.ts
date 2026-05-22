@@ -13,6 +13,9 @@
  */
 
 import { sql } from '../../db';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'tools' });
 
 export interface ToolDefinition {
   name: string;
@@ -2048,7 +2051,7 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
   try {
     return await tool.execute(args);
   } catch (err) {
-    console.error(`Tool ${name} error:`, err);
+    log.error({ err }, `Tool ${name} error`);
     return JSON.stringify({ error: `Errore esecuzione tool "${name}"` });
   }
 }

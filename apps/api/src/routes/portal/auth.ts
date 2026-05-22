@@ -11,6 +11,9 @@ import { issueMagicLink, consumeMagicLink } from '../../lib/portal-tokens';
 import { verifyTurnstileToken } from '../../lib/turnstile';
 import { sendEmail } from '../../lib/email';
 import { renderMagicLinkEmail } from '../../templates/magic-link';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'portal-auth' });
 
 export type PortalEnv = {
   Variables: {
@@ -184,7 +187,7 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
       success: true,
     });
   } catch (err) {
-    console.error('[portal/request-link] failed:', (err as Error).message);
+    log.error({ err }, 'request-link failed');
     await auditPortalEvent(c, 'link_requested', {
       customer_id: customer.id,
       email,
