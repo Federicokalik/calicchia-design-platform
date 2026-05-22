@@ -28,6 +28,10 @@ COPY packages/shared ./packages/shared
 RUN pnpm --filter @calicchia/admin build
 
 FROM nginx:alpine AS runtime
+# GNU wget per l'HEALTHCHECK: il wget di busybox in nginx:alpine NON supporta
+# `--spider` — senza questo la healthcheck fallisce sempre, il container resta
+# `unhealthy` e Dokploy non instrada il traffico (404 su admin.calicchia.design).
+RUN apk add --no-cache wget
 COPY apps/admin/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/admin/dist /usr/share/nginx/html
 EXPOSE 80
