@@ -1,0 +1,98 @@
+name: build-admin-image
+
+# Builda l'immagine Docker di @calicchia/admin e la pubblica su ghcr.io,
+# poi notifica Dokploy. Gemello di build-api-image.yml.
+#
+# ATTENZIONE 1: Vite inlina le VITE_*/PUBLIC_* a BUILD time — i loro valori
+# vanno passati QUI come build-args (da GitHub repo Variables, non segreti).
+# ATTENZIONE 2: finche' il finding AD-01 (build admin rotta) non e' risolto,
+# lo step "Build e push" fallisce — il Dockerfile esegue `pnpm build` dell'admin.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/admin/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/build-admin-image.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: build-admin-image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: federicokalik/calicchia-admin
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint — admin
+        run: pnpm --filter @calicchia/admin lint
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login a ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Estrai metadata immagine
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build e push immagine
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/admin/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          # Valori pubblici inlinati nel bundle: vanno definiti come repo Variables.
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
+            PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
+
+      - name: Notifica Dokploy per il redeploy
+        env:
+          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — redeploy saltato."
+            exit 0
+          fi
+          curl -fsSL -X POST "$WEBHOOK"
+          echo "Redeploy Dokploy notificato."

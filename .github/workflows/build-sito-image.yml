@@ -1,0 +1,102 @@
+name: build-sito-image
+
+# Builda l'immagine Docker di @calicchia/sito-v3 e la pubblica su ghcr.io,
+# poi notifica Dokploy. Gemello di build-api-image.yml.
+#
+# ATTENZIONE: Next.js inlina le NEXT_PUBLIC_* a BUILD time. Quindi i loro valori
+# vanno passati QUI come build-args (da GitHub repo Variables, non sono segreti:
+# finiscono comunque nel bundle browser). Cambiare una NEXT_PUBLIC_* richiede un
+# rebuild dell'immagine — non basta cambiare una env var su Dokploy.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/sito-v3/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/build-sito-image.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: build-sito-image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: federicokalik/calicchia-sito
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck — sito-v3
+        run: pnpm --filter @calicchia/sito-v3 typecheck
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login a ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Estrai metadata immagine
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build e push immagine
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/sito-v3/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          # Valori pubblici inlinati nel bundle: vanno definiti come repo Variables.
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+            NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ vars.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
+            NEXT_PUBLIC_BUGSINK_DSN=${{ vars.NEXT_PUBLIC_BUGSINK_DSN }}
+            NEXT_PUBLIC_GA_MEASUREMENT_ID=${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
+            GOOGLE_SITE_VERIFICATION=${{ vars.GOOGLE_SITE_VERIFICATION }}
+            PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL }}
+
+      - name: Notifica Dokploy per il redeploy
+        env:
+          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — redeploy saltato."
+            exit 0
+          fi
+          curl -fsSL -X POST "$WEBHOOK"
+          echo "Redeploy Dokploy notificato."
