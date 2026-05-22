@@ -12,6 +12,7 @@ import {
   usePayPalCardFields,
 } from '@paypal/react-paypal-js';
 import { Loader2 } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/portal/ui/button';
 import { PortalLabel } from '@/components/portal/ui/typography';
 
@@ -51,6 +52,7 @@ function CardFieldsSubmit({
     } catch (err) {
       onError(t('cardError.generic'));
       console.error('[PaypalEmbedded] cardFields.submit error:', err);
+      Sentry.captureException(err, { tags: { area: 'payment', source: 'paypal-card-submit' } });
     }
   }
 
@@ -161,6 +163,7 @@ export function PaypalEmbedded({
             }}
             onError={(err) => {
               console.error('[PayPalButtons] error:', err);
+              Sentry.captureException(err, { tags: { area: 'payment', source: 'paypal-buttons' } });
               setError(t('captureError'));
             }}
             disabled={pending}
@@ -227,6 +230,7 @@ function CardFieldsSection({
         }}
         onError={(err) => {
           console.error('[PayPalCardFields] error:', err);
+          Sentry.captureException(err, { tags: { area: 'payment', source: 'paypal-card-fields' } });
           onError(t('cardError.generic'));
         }}
       >
@@ -284,6 +288,10 @@ function EligibilityProbe({ onResult }: { onResult: (eligible: boolean) => void 
       onResult(eligible);
     } catch (err) {
       console.warn('[PaypalEmbedded] isEligible probe failed:', err);
+      Sentry.captureException(err, {
+        level: 'warning',
+        tags: { area: 'payment', source: 'paypal-eligibility-probe' },
+      });
       onResult(false);
     }
   }, [cardFieldsForm, onResult]);

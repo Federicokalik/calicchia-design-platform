@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { CreditCard, Loader2 } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 import { Button } from './ui/button';
 
 interface PayButtonProps {
@@ -51,6 +52,7 @@ export function PayButton({
     } catch (err) {
       setPending(null);
       console.error('[PayButton] Error:', err);
+      Sentry.captureException(err, { tags: { area: 'payment', source: 'pay-button' } });
       alert((err as Error).message || 'Errore avvio pagamento');
     }
   }
