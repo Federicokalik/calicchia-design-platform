@@ -7,10 +7,13 @@
  */
 
 import { syncAllSubscriptions } from '../lib/calendar/subscriptions';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'ics-pull' });
 
 export async function runIcsPull(): Promise<void> {
   const { total, ok, failed, notModified } = await syncAllSubscriptions();
   if (total > 0) {
-    console.log(`[ics-pull] synced ${ok}/${total} subscriptions (${notModified} unchanged, ${failed} failed)`);
+    log.info(`synced ${ok}/${total} subscriptions (${notModified} unchanged, ${failed} failed)`);
   }
 }

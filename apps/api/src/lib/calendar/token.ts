@@ -7,11 +7,14 @@
 
 import { createHmac, timingSafeEqual } from 'crypto';
 import type { BookingTokenPayload } from './types';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'booking-token' });
 
 const SECRET = process.env.BOOKING_TOKEN_SECRET || process.env.JWT_SECRET || '';
 
 if (!SECRET) {
-  console.warn('[booking/token] BOOKING_TOKEN_SECRET non configurato — token non verranno generati');
+  log.warn('BOOKING_TOKEN_SECRET non configurato — token non verranno generati');
 }
 
 const DEFAULT_TTL_SECONDS = 90 * 24 * 60 * 60;

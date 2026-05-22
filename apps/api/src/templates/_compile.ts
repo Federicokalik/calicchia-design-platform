@@ -1,4 +1,7 @@
 import mjml2html from 'mjml';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'templates' });
 
 /**
  * MJML → HTML+text compiler con cache LRU per-source.
@@ -57,9 +60,9 @@ export async function compileMjml(mjmlSource: string): Promise<CompileResult> {
 
   if (errors && errors.length > 0) {
     // Log but don't throw — degrade gracefully
-    console.warn(
-      '[mjml] compile warnings:',
-      errors.map((e: { formattedMessage: string }) => e.formattedMessage).join('; ')
+    log.warn(
+      { warnings: errors.map((e: { formattedMessage: string }) => e.formattedMessage).join('; ') },
+      'compile warnings'
     );
   }
 

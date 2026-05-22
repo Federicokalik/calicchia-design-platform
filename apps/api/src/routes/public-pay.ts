@@ -6,6 +6,9 @@ import { zValidator } from '../lib/z-validator';
 import { stripe, isStripeConfigured } from '../lib/stripe';
 import { createPaypalOrderEmbedded, isPaypalReady, capturePaypalOrder } from '../lib/paypal';
 import { recordPaymentSuccess } from '../lib/payment-events';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'public-pay' });
 
 export const publicPay = new Hono();
 
@@ -291,7 +294,7 @@ publicPay.post('/:id/capture', zValidator('param', linkIdSchema), async (c) => {
     if (fresh?.status === 'paid' || fresh?.status === 'refunded' || fresh?.status === 'partially_refunded') {
       return c.json({ captured: true, alreadyProcessed: true, viaWebhook: true });
     }
-    console.error('[public-pay/capture] error:', (err as Error).message);
+    log.error({ err }, 'capture error');
     throw new HTTPException(502, { message: 'Cattura PayPal non riuscita. Riprova fra qualche secondo.' });
   }
 });

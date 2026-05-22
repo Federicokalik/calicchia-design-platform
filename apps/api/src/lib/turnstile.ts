@@ -1,3 +1,7 @@
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'turnstile' });
+
 const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY || '';
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
@@ -8,7 +12,7 @@ export function isTurnstileConfigured(): boolean {
 export async function verifyTurnstileToken(token: string, remoteIp?: string): Promise<boolean> {
   if (!isTurnstileConfigured()) {
     if (process.env.NODE_ENV === 'production') {
-      console.error('[SECURITY] TURNSTILE_SECRET_KEY not configured in production — blocking request');
+      log.error('TURNSTILE_SECRET_KEY not configured in production — blocking request');
       return false;
     }
     return true; // skip in development
@@ -31,7 +35,7 @@ export async function verifyTurnstileToken(token: string, remoteIp?: string): Pr
     const json = await res.json() as { success: boolean };
     return json.success === true;
   } catch (err) {
-    console.error('Turnstile verification error:', err);
+    log.error({ err }, 'Turnstile verification error');
     return false;
   }
 }

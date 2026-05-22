@@ -6,6 +6,9 @@
  */
 import { getProviderForTask, callOpenAICompatible } from '../agent/llm-router';
 import type { MailCategory } from './classifier';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'ai-classifier' });
 
 const VALID: Set<MailCategory> = new Set(['importanti', 'normali', 'aggiornamenti', 'marketing', 'spam']);
 
@@ -104,7 +107,7 @@ export async function classifyEmailsWithAi(emails: EmailInput[]): Promise<{
       results.push(...out);
       failed += batch.length - out.length;
     } catch (err) {
-      console.error('[ai-classifier] batch failed:', (err as Error).message);
+      log.error({ err: (err as Error).message }, 'batch failed');
       failed += batch.length;
     }
   }

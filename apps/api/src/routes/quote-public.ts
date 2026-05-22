@@ -3,6 +3,9 @@ import crypto from 'crypto';
 import { sql } from '../db';
 import { sendEmail } from '../lib/email';
 import { renderOtpCodeEmail } from '../templates/otp-code';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'quote-sign' });
 
 export const quotePublic = new Hono();
 
@@ -100,16 +103,16 @@ quotePublic.post('/:token/sign', async (c) => {
     to: process.env.ADMIN_EMAIL || 'admin@calicchia.design',
     subject: `Preventivo firmato: ${quote.title}`,
     html: `<p><strong>${quote.title}</strong> firmato da ${signer_name || quote.customer_email}.</p><p>IP: ${ip} — ${new Date().toLocaleString('it-IT')}</p>`,
-  }).catch(console.error);
+  }).catch((err) => log.error({ err }, 'admin signature notification failed'));
 
   // Notify Telegram
   import('../lib/telegram').then(({ notifyTelegram }) => {
     notifyTelegram('✅ Preventivo firmato!', `${quote.title}\nFirmato da: ${signer_name || quote.customer_email}\n€${parseFloat(quote.total || '0').toLocaleString('it-IT')}`);
-  }).catch((err) => console.error('[quote-sign] Telegram notify failed:', err));
+  }).catch((err) => log.error({ err }, 'Telegram notify failed'));
   // Fire workflow event
   import('../lib/workflow/triggers').then(({ fireEvent }) => {
     fireEvent('preventivo_firmato', { quote_id: quote.id, title: quote.title, total: quote.total, signer_name, customer_email: quote.customer_email });
-  }).catch((err) => console.error('[quote-sign] Workflow trigger failed:', err));
+  }).catch((err) => log.error({ err }, 'Workflow trigger failed'));
 
   return c.json({ success: true, signed_at: new Date().toISOString() });
 });

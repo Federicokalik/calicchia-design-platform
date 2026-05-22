@@ -19,6 +19,9 @@ import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runDataRetention } from './data-retention';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'cron' });
 
 interface CronJob {
   name: string;
@@ -128,11 +131,11 @@ function msUntilHour(hour: number): number {
 function scheduleJob(job: CronJob) {
   const execute = async () => {
     try {
-      console.log(`[Cron] Running: ${job.name}`);
+      log.info(`Running: ${job.name}`);
       await job.run();
       job.lastRun = new Date();
     } catch (err) {
-      console.error(`[Cron] Error in ${job.name}:`, err);
+      log.error({ err }, `Error in ${job.name}`);
       // Report to Bugsink — cron failures are otherwise invisible in prod (BK-05).
       captureException(err instanceof Error ? err : new Error(String(err)), {
         source: 'cron',
@@ -147,12 +150,12 @@ function scheduleJob(job: CronJob) {
     ? msUntilHour(job.runAtHour)
     : 30_000;
 
-  console.log(`[Cron] ${job.name} — next run in ${Math.round(delay / 60000)}min`);
+  log.info(`${job.name} — next run in ${Math.round(delay / 60000)}min`);
   job.timer = setTimeout(execute, delay);
 }
 
 export function startCronEngine() {
-  console.log(`[Cron] Starting ${jobs.length} scheduled jobs`);
+  log.info(`Starting ${jobs.length} scheduled jobs`);
   for (const job of jobs) {
     scheduleJob(job);
   }

@@ -10,6 +10,9 @@ import { sql } from '../../db';
 import { buildIcs } from './ics';
 import { signBookingToken, isTokenSecretConfigured } from './token';
 import type { Booking, EventType } from './types';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'booking-email' });
 
 let resendClient: Resend | null = null;
 function getResend(): Resend {
@@ -135,7 +138,7 @@ async function sendWithIcs(opts: {
   icsFilename?: string;
 }): Promise<SendResult> {
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[booking/email] RESEND_API_KEY non configurato — skip');
+    log.warn('RESEND_API_KEY non configurato — skip');
     return { success: false, error: 'RESEND_API_KEY missing' };
   }
   try {
@@ -153,7 +156,7 @@ async function sendWithIcs(opts: {
     return { success: true, messageId: res.data?.id };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('[booking/email] Send error:', message);
+    log.error({ message }, 'Send error');
     return { success: false, error: message };
   }
 }
@@ -173,7 +176,7 @@ async function claimReminder(bookingId: string, type: string, to: string): Promi
     `;
     return rows.length > 0;
   } catch (err) {
-    console.error('[booking/email] Errore claim reminder:', err);
+    log.error({ err }, 'Errore claim reminder');
     // Failsafe: se l'audit fallisce, NON inviamo (per evitare duplicati silenziosi).
     return false;
   }
@@ -193,7 +196,7 @@ async function markReminderError(bookingId: string, type: string, to: string, er
         AND sent_to = ${to}
     `;
   } catch (err) {
-    console.error('[booking/email] Errore mark reminder error:', err);
+    log.error({ err }, 'Errore mark reminder error');
   }
 }
 

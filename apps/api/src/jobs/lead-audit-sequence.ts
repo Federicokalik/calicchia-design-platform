@@ -3,6 +3,9 @@ import { sendEmail } from '../lib/email';
 import { renderAuditEmail1 } from '../templates/audit-email-1';
 import { renderAuditEmail2 } from '../templates/audit-email-2';
 import { renderAuditEmail3 } from '../templates/audit-email-3';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'lead-audit-sequence' });
 
 const SEQUENCE_TYPE = 'audit-onboarding';
 const DEFAULT_EVENT_TYPE_SLUG = process.env.CONTACT_FORM_EVENT_TYPE || 'consulenza-gratuita-30min';
@@ -171,11 +174,11 @@ async function processSequenceRow(row: AuditSequenceRow): Promise<void> {
   });
 
   if (!result.success) {
-    console.warn('[lead-audit-sequence] email not sent:', {
+    log.warn({
       contactId: row.contact_id,
       step: row.step,
       error: result.error,
-    });
+    }, 'email not sent');
     return;
   }
 
@@ -212,18 +215,18 @@ export async function runLeadAuditSequence(): Promise<void> {
 
   if (!pending.length) return;
 
-  console.log(`[lead-audit-sequence] ${pending.length} email pending`);
+  log.info(`${pending.length} email pending`);
 
   for (const row of pending) {
     try {
       await processSequenceRow(row);
     } catch (err) {
-      console.error('[lead-audit-sequence] row error:', {
+      log.error({
         id: row.id,
         contactId: row.contact_id,
         step: row.step,
         err,
-      });
+      }, 'row error');
     }
   }
 }

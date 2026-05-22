@@ -27,6 +27,9 @@ import {
   createPaypalPlan,
   isPaypalReady,
 } from '../lib/paypal';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'services' });
 
 export const services = new Hono();
 
@@ -240,7 +243,7 @@ services.post('/:id/sync-stripe', async (c) => {
         description: (svc.description as string | null) ?? undefined,
       });
     } catch (err) {
-      console.warn(`[services] Stripe product update failed (${productId}):`, (err as Error).message);
+      log.warn({ err }, `Stripe product update failed (${productId})`);
     }
   }
 
@@ -260,7 +263,7 @@ services.post('/:id/sync-stripe', async (c) => {
     try {
       await stripe.prices.update(oldPriceId, { active: false });
     } catch (err) {
-      console.warn(`[services] Stripe price archive failed (${oldPriceId}):`, (err as Error).message);
+      log.warn({ err }, `Stripe price archive failed (${oldPriceId})`);
     }
   }
 

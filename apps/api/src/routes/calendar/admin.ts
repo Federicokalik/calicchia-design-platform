@@ -56,6 +56,9 @@ import type {
   AvailabilitySlot,
   EventType,
 } from '../../lib/calendar/types';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'calendar-admin' });
 
 export const calendarAdmin = new Hono();
 
@@ -434,7 +437,7 @@ calendarAdmin.post('/bookings', async (c) => {
       Promise.allSettled([
         sendBookingConfirmation({ booking, eventType }),
         sendBookingAdminNotification({ booking, eventType }),
-      ]).catch((err) => console.error('[calendar/admin] email send error:', err));
+      ]).catch((err) => log.error({ err }, 'email send error'));
     }
 
     return c.json({ booking });
@@ -456,7 +459,7 @@ calendarAdmin.post('/bookings/:uid/cancel', async (c) => {
   if (body.notify !== false) {
     Promise.allSettled([
       sendBookingCancelled({ ...result, recipient: 'attendee' }),
-    ]).catch((err) => console.error('[calendar/admin] cancel email error:', err));
+    ]).catch((err) => log.error({ err }, 'cancel email error'));
   }
 
   return c.json({ success: true });
@@ -479,7 +482,7 @@ calendarAdmin.post('/bookings/:uid/reschedule', async (c) => {
           booking: result.booking, eventType: result.eventType,
           previousStart: previous.start_time, recipient: 'attendee',
         }),
-      ]).catch((err) => console.error('[calendar/admin] reschedule email error:', err));
+      ]).catch((err) => log.error({ err }, 'reschedule email error'));
     }
     return c.json({ booking: result.booking });
   } catch (err) {

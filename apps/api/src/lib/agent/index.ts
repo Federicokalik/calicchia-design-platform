@@ -10,6 +10,9 @@ import { fileURLToPath } from 'url';
 import { getToolsForLLM, executeTool, tools, type ToolDefinition } from './tools';
 import { recallMemory, saveConversation, addFact, addPreference } from './memory';
 import { getProviderForTask, callOpenAICompatible } from './llm-router';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'brain' });
 
 // Load pricing knowledge base. KB_DIR lets production read the files delivered
 // by kb-bootstrap.ts (MEGA S4); in dev it falls back to this directory.
@@ -114,7 +117,7 @@ async function executeAnyTool(name: string, args: Record<string, unknown>): Prom
   const tool = allTools.find((t) => t.name === name);
   if (!tool) return JSON.stringify({ error: `Tool "${name}" non trovato` });
   try { return await tool.execute(args); }
-  catch (err) { console.error(`Tool ${name} error:`, err); return JSON.stringify({ error: `Errore tool "${name}"` }); }
+  catch (err) { log.error({ err }, `Tool ${name} error`); return JSON.stringify({ error: `Errore tool "${name}"` }); }
 }
 
 interface AgentEntityContext {
@@ -183,7 +186,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
         max_tokens: 2000,
       });
     } catch (err) {
-      console.error(`[Brain] ${provider.name} error:`, err);
+      log.error({ err }, `${provider.name} error`);
       return { reply: 'Errore comunicazione AI. Riprova.', toolsUsed };
     }
 
@@ -207,7 +210,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
 
           if (!isConfirmed) {
             // Block execution, ask for confirmation
-            console.log(`[Brain] BLOCKED: ${toolName} requires confirmation`);
+            log.info(`BLOCKED: ${toolName} requires confirmation`);
             const argsPreview = JSON.stringify(args).slice(0, 200);
             messages.push({
               role: 'tool',
@@ -238,7 +241,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
 
         const argKeys = Object.keys(args).join(',') || '∅';
         const argHash = createHash('sha256').update(JSON.stringify(args)).digest('hex').slice(0, 8);
-        console.log(`[Brain] Tool: ${toolName} keys=[${argKeys}] hash=${argHash}`);
+        log.info(`Tool: ${toolName} keys=[${argKeys}] hash=${argHash}`);
         toolsUsed.push(toolName);
         const result = await executeAnyTool(toolName, args);
         messages.push({ role: 'tool', tool_call_id: tc.id, content: result });
@@ -250,7 +253,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
 
     // Save conversation asynchronously (don't block response)
     const fullHistory = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }];
-    saveConversation(channel, fullHistory, context).catch((err) => console.error('[Brain] Save error:', err));
+    saveConversation(channel, fullHistory, context).catch((err) => log.error({ err }, 'Save error'));
 
     return { reply, toolsUsed };
   }

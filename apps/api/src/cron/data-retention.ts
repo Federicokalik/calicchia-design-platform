@@ -13,18 +13,21 @@
  * no-op (nothing left to purge).
  */
 import { sql } from '../db';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'data-retention' });
 
 export async function runDataRetention(): Promise<void> {
   const [retention] = (await sql`SELECT run_data_retention() AS result`) as Array<{
     result: Record<string, unknown>;
   }>;
-  console.log('[data-retention] run_data_retention:', JSON.stringify(retention?.result ?? {}));
+  log.info({ result: retention?.result ?? {} }, 'run_data_retention');
 
   const [webhook] = (await sql`
     SELECT * FROM cleanup_webhook_security_retention()
   `) as Array<Record<string, number>>;
-  console.log(
-    '[data-retention] cleanup_webhook_security_retention:',
-    JSON.stringify(webhook ?? {})
+  log.info(
+    { result: webhook ?? {} },
+    'cleanup_webhook_security_retention'
   );
 }

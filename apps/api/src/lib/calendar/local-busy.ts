@@ -6,6 +6,9 @@
  */
 
 import { getBusyRanges } from './events';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'calendar-local-busy' });
 
 export interface BusyRange {
   start: string;
@@ -16,7 +19,7 @@ export async function getLocalBusyRanges(timeMinIso: string, timeMaxIso: string)
   try {
     return await getBusyRanges(timeMinIso, timeMaxIso);
   } catch (err) {
-    console.error('[local-busy] Errore caricamento eventi:', err);
+    log.error({ err }, 'Errore caricamento eventi');
     return [];
   }
 }

@@ -7,6 +7,9 @@
  */
 import { sql } from '../db';
 import { syncAccount } from '../lib/mail/sync-service';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'mail-sync' });
 
 export async function runMailSync(): Promise<void> {
   if (!process.env.MAIL_ENC_KEY) return; // silently skip if mail not configured
@@ -25,10 +28,10 @@ export async function runMailSync(): Promise<void> {
       const results = await syncAccount(acc.id);
       const fetched = results.reduce((sum, r) => sum + r.fetched, 0);
       if (fetched > 0) {
-        console.log(`[mail-sync] ${acc.email}: ${fetched} new`);
+        log.info(`${acc.email}: ${fetched} new`);
       }
     } catch (err) {
-      console.error(`[mail-sync] ${acc.email}: ${(err as Error).message}`);
+      log.error({ err }, `${acc.email}`);
       // last_error is already stored by syncAccount
     }
   }

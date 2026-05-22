@@ -18,6 +18,9 @@
 import { customAlphabet } from 'nanoid';
 import { sql, sqlv } from '../../db';
 import { fetchIcs, parseIcs, IcsImportError, type ParsedEvent } from './ics-import';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'ics-pull' });
 
 const generateEventUid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 16);
 
@@ -188,7 +191,7 @@ export async function syncSubscription(id: string): Promise<SyncResult> {
     if (err instanceof IcsImportError) {
       return { notModified: false, inserted: 0, removed: 0, error: msg };
     }
-    console.error('[ics-pull] sync failed for subscription', id, err);
+    log.error({ err, subscriptionId: id }, 'sync failed for subscription');
     return { notModified: false, inserted: 0, removed: 0, error: msg };
   }
 }

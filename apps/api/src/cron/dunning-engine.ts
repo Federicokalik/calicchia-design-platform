@@ -13,6 +13,9 @@
  */
 import { sql, sqlv } from '../db';
 import { sendEmail } from '../lib/email';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'dunning' });
 
 type DunningRow = Record<string, unknown> & {
   id: string;
@@ -37,7 +40,7 @@ type SendEmailResult = Awaited<ReturnType<typeof sendEmail>>;
 
 export async function runDunningEngine(): Promise<void> {
   const todayCheck = await sql`SELECT CURRENT_DATE AS today` as Array<{ today: string }>;
-  console.log('[dunning] Run for', todayCheck[0]?.today);
+  log.info({ today: todayCheck[0]?.today }, 'run started');
 
   const candidates = await sql`
     SELECT
@@ -55,7 +58,7 @@ export async function runDunningEngine(): Promise<void> {
       AND s.next_billing_date < CURRENT_DATE
   ` as DunningRow[];
 
-  console.log(`[dunning] ${candidates.length} candidates`);
+  log.info({ count: candidates.length }, 'candidates found');
 
   for (const row of candidates) {
     const daysLate = Number(row.days_late);
@@ -96,7 +99,7 @@ export async function runDunningEngine(): Promise<void> {
             subject: `Sospensione abbonamento "${row.name}" - ritardo pagamento`,
             html: renderSuspendHtml(row, daysLate),
             transport: 'critical',
-          }).catch((err: unknown) => console.error('[dunning] suspend mail error', err));
+          }).catch((err: unknown) => log.error({ err }, 'suspend mail error'));
         }
       }
       continue;
@@ -112,7 +115,7 @@ export async function runDunningEngine(): Promise<void> {
           html: renderReminderHtml(row, daysLate),
           transport: 'critical',
         }).catch((err: unknown) => {
-          console.error('[dunning] reminder mail error', err);
+          log.error({ err }, 'reminder mail error');
           return { success: false };
         });
 
@@ -139,7 +142,7 @@ export async function runDunningEngine(): Promise<void> {
     }
   }
 
-  console.log('[dunning] done');
+  log.info('run finished');
 }
 
 async function writeAudit(action: 'REMINDER' | 'SUSPEND', row: DunningRow): Promise<void> {
@@ -153,7 +156,7 @@ async function writeAudit(action: 'REMINDER' | 'SUSPEND', row: DunningRow): Prom
       ${null}, ${null}, ${null}, ${'cron/dunning-engine'},
       ${sqlv({ subscription_name: row.name, days_late: Number(row.days_late) })}
     )
-  `.catch((err: unknown) => console.error('[dunning] audit error', err));
+  `.catch((err: unknown) => log.error({ err }, 'audit error'));
 }
 
 function renderReminderHtml(row: DunningRow, daysLate: number): string {

@@ -16,6 +16,9 @@ import { sql, sqlv } from '../db';
 import { sendEmail } from './email';
 import { renderPaymentConfirmedEmail } from '../templates/payment-confirmed';
 import { maskPII } from './webhook-sanitize';
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'payment-events' });
 
 export type PaymentProvider = 'stripe' | 'paypal' | 'revolut' | 'bank_transfer';
 
@@ -263,7 +266,7 @@ export async function recordPaymentSuccess(
     currency,
     provider: input.provider,
   }).catch((err) => {
-    console.error('[payment-events] receipt generation failed:', (err as Error).message);
+    log.error({ err }, 'receipt generation failed');
     return null;
   });
 
@@ -278,7 +281,7 @@ export async function recordPaymentSuccess(
     paidAt,
     receiptUrl: receipt?.pdf_url ?? null,
   }).catch((err) => {
-    console.error('[payment-events] confirmation email failed:', (err as Error).message);
+    log.error({ err }, 'confirmation email failed');
   });
 
   return {
@@ -489,7 +492,7 @@ async function maybeGenerateReceipt(ctx: {
       paymentLinkId: ctx.linkId,
     });
   } catch (err) {
-    console.warn('[payment-events] receipt-pdf module not ready:', (err as Error).message);
+    log.warn({ err }, 'receipt-pdf module not ready');
     return null;
   }
 }

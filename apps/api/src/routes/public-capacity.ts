@@ -1,5 +1,8 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'public-capacity' });
 
 export const publicCapacity = new Hono();
 
@@ -132,7 +135,7 @@ publicCapacity.get('/', async (c) => {
     c.header('Cache-Control', 'public, max-age=300, s-maxage=300');
     return c.json({ used: usedForUi, max: displayedMax, status, nextAvailableMonth });
   } catch (err) {
-    console.error('[public-capacity] error:', err);
+    log.error({ err }, 'error');
     return c.json({ error: 'Internal Server Error' }, 500);
   }
 });

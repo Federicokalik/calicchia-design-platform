@@ -10,6 +10,10 @@
 
 // rrule è CommonJS — Node 24 ESM non vede i named exports, serve default import + destructure
 import rrulePkg from 'rrule';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'rrule' });
+
 const { rrulestr } = rrulePkg as unknown as { rrulestr: (input: string) => { between: (a: Date, b: Date, inc: boolean) => Date[]; toString: () => string } };
 
 /** Espande un master ricorrente in una lista di ISO timestamps di occorrenze. */
@@ -43,7 +47,7 @@ export function expandRRule(opts: {
       : `DTSTART:${formatUtcCompact(masterStart)}\nRRULE:${opts.rrule}`;
     rule = rrulestr(fullStr);
   } catch (err) {
-    console.error('[rrule] Parse error:', err, 'input:', opts.rrule);
+    log.error({ err, input: opts.rrule }, 'Parse error');
     return [];
   }
 

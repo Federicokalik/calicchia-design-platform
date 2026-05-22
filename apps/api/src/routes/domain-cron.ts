@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { sql } from '../db';
 import { sendDomainExpiringEmail } from '../lib/email';
 import { verifyCronSecret } from '../lib/cron-auth';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'domain-cron' });
 
 export const domainCron = new Hono();
 
@@ -135,7 +138,7 @@ domainCron.post('/check-expiring', async (c) => {
     const result = await checkAndSendReminders();
     return c.json(result);
   } catch (error) {
-    console.error('[domain-cron] check-expiring failed:', error);
+    log.error({ err: error }, 'check-expiring failed');
     return c.json({ error: 'Internal Server Error' }, 500);
   }
 });

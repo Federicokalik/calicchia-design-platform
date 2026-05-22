@@ -13,6 +13,9 @@
  */
 
 import { sql } from '../db';
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'paypal-webhook' });
 
 interface PaypalCreds {
   client_id: string;
@@ -105,7 +108,7 @@ export async function verifyPaypalSignature(
 ): Promise<boolean> {
   const webhookId = process.env.PAYPAL_WEBHOOK_ID;
   if (!webhookId) {
-    console.warn('[paypal-webhook] PAYPAL_WEBHOOK_ID not set — refusing to verify');
+    log.warn('PAYPAL_WEBHOOK_ID not set — refusing to verify');
     return false;
   }
   if (!headers.auth_algo || !headers.cert_url || !headers.transmission_id ||
@@ -134,13 +137,13 @@ export async function verifyPaypalSignature(
     });
     if (!res.ok) {
       const text = await res.text();
-      console.error('[paypal-webhook] verify failed HTTP', res.status, text);
+      log.error({ status: res.status, response: text }, 'verify failed HTTP');
       return false;
     }
     const data = (await res.json()) as { verification_status?: string };
     return data.verification_status === 'SUCCESS';
   } catch (err) {
-    console.error('[paypal-webhook] verify threw:', (err as Error).message);
+    log.error({ err }, 'verify threw');
     return false;
   }
 }

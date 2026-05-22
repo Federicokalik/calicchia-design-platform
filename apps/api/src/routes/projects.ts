@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import * as openai from '../lib/ai/openai';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'project-ai-logs' });
 
 type Env = { Variables: { user: { id: string; email?: string } } };
 
@@ -356,7 +359,7 @@ async function logAiCall(entry: {
     `;
   } catch (err) {
     // Audit log failure must never break the user-facing flow.
-    console.error('[project_ai_logs] insert failed:', err);
+    log.error({ err }, 'insert failed');
   }
 }
 

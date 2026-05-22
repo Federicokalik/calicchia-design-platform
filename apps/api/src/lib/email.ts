@@ -1,5 +1,8 @@
 import { Resend } from 'resend';
 import nodemailer, { type Transporter } from 'nodemailer';
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'email' });
 
 function esc(s: string | null | undefined): string {
   if (!s) return '';
@@ -113,7 +116,7 @@ async function sendViaResend(opts: EmailOptions): Promise<SendResult> {
     return { success: true, messageId: result.data?.id, via: 'critical' };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[email] Resend send error:', message);
+    log.error({ err: error }, 'Resend send error');
     return { success: false, error: message, via: 'critical' };
   }
 }
@@ -140,7 +143,7 @@ async function sendViaSmtp(opts: EmailOptions): Promise<SendResult> {
     return { success: true, messageId: info.messageId, via: 'standard' };
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('[email] SMTP send error:', message);
+    log.error({ err: error }, 'SMTP send error');
     return { success: false, error: message, via: 'standard' };
   }
 }
@@ -154,15 +157,15 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
 
   // Fallback path
   if (requested === 'critical' && hasSmtp()) {
-    console.warn('[email] Resend not configured — falling back to SMTP for critical email');
+    log.warn('Resend not configured — falling back to SMTP for critical email');
     return sendViaSmtp(options);
   }
   if (requested === 'standard' && hasResend()) {
-    console.warn('[email] SMTP not configured — falling back to Resend for standard email');
+    log.warn('SMTP not configured — falling back to Resend for standard email');
     return sendViaResend(options);
   }
 
-  console.warn('[email] No transport configured (RESEND_API_KEY + SMTP_* both missing) — skipping');
+  log.warn('No transport configured (RESEND_API_KEY + SMTP_* both missing) — skipping');
   return { success: false, error: 'No email transport configured' };
 }
 

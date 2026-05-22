@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { generatePaypalClientToken, isPaypalReady } from '../lib/paypal';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'paypal-client-token' });
 
 export const paypal = new Hono();
 
@@ -24,7 +27,7 @@ paypal.get('/client-token', async (c) => {
     const clientToken = await generatePaypalClientToken();
     return c.json({ client_token: clientToken });
   } catch (err) {
-    console.error('[paypal/client-token] error:', (err as Error).message);
+    log.error({ err }, 'error');
     throw new HTTPException(502, { message: 'Impossibile generare client token PayPal' });
   }
 });

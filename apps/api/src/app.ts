@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { MiddlewareHandler } from 'hono';
 import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
+import { logger as honoLogger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
@@ -14,6 +14,9 @@ import { initBugsink, captureException } from './lib/bugsink';
 import { authMiddleware } from './middleware/auth';
 import { sql } from './db';
 import { decryptSecret, isEncryptedSecret } from './lib/crypto';
+import { logger } from './lib/logger';
+
+const log = logger.child({ scope: 'http' });
 
 // Initialize error tracking
 initBugsink();
@@ -107,7 +110,7 @@ export const app = new Hono();
 
 // Global middleware
 if (isDev) {
-  app.use('*', logger());
+  app.use('*', honoLogger());
   app.use('*', prettyJSON());
 }
 
@@ -421,7 +424,7 @@ app.onError((err, c) => {
     return c.json({ error: err.message }, err.status);
   }
   // Unexpected errors (5xx) — log and report to Bugsink
-  console.error('Error:', err);
+  log.error({ err, url: c.req.url, method: c.req.method }, 'unhandled error');
   captureException(err, { url: c.req.url, method: c.req.method });
   return c.json({ error: 'Internal Server Error' }, 500);
 });

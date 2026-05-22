@@ -1,5 +1,8 @@
 import { Hono } from 'hono';
 import { sql, sqlv } from '../db';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'quotes' });
 
 export const quotes = new Hono();
 
@@ -887,7 +890,7 @@ quotes.get('/:id/pdf', async (c) => {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Errore generazione PDF';
-    console.error('PDF generation error:', message);
+    log.error({ message }, 'PDF generation error');
     return c.json({ error: 'Errore nella generazione del PDF. Assicurarsi che Python e weasyprint siano installati.' }, 500);
   }
 });

@@ -6,6 +6,12 @@ import path from 'path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 config({ path: path.resolve(__dirname, '../../../.env') });
 
+// NOTE (BK-14): boot/shutdown messages below intentionally stay on console.*.
+// They run outside the request lifecycle and several are immediately followed
+// by process.exit(), where pino's async transport could truncate the write.
+// console.* is synchronous and guaranteed to flush — exactly what fail-fast
+// boot diagnostics need. The structured logger covers the running server.
+
 // Validate required environment variables before starting.
 // WEBHOOK_ENCRYPTION_KEY: needed for envelope-encrypting stored webhook secrets;
 // without it the server used to boot and crash at the first webhook event —

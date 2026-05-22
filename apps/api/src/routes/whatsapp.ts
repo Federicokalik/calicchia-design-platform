@@ -36,6 +36,9 @@ import {
   type WhatsAppCategory,
 } from '../lib/whatsapp-policy';
 import { runWhatsAppTriage } from '../lib/ai/whatsapp-triage';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'whatsapp-webhook' });
 
 const GOWA_WEBHOOK_SECRET = process.env.GOWA_WEBHOOK_SECRET || '';
 
@@ -74,7 +77,7 @@ whatsappPublic.post('/webhook', async (c) => {
     await handleGowaEvent(payload);
   } catch (err) {
     // Non rilanciamo: GOWA si attende 2xx. Errori interni a Bugsink.
-    console.error('[whatsapp webhook] handler failed:', err);
+    log.error({ err }, 'handler failed');
   }
   return c.json({ ok: true });
 });
@@ -114,7 +117,7 @@ async function handleGowaEvent(evt: GowaEvent): Promise<void> {
       break;
     default:
       // group.*, newsletter.*, call.offer → log-only fase 1
-      console.log('[whatsapp webhook] unhandled event:', eventName);
+      log.info({ eventName }, 'unhandled event');
   }
 }
 

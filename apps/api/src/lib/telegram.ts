@@ -2,6 +2,10 @@
  * Telegram Bot API wrapper
  */
 
+import { logger } from './logger';
+
+const log = logger.child({ scope: 'telegram' });
+
 const BOT_TOKEN = () => process.env.TELEGRAM_BOT_TOKEN || '';
 const CHAT_ID = () => process.env.TELEGRAM_CHAT_ID || '';
 
@@ -42,12 +46,12 @@ export async function sendTelegramMessage(
 
     if (!res.ok) {
       const err = await res.text();
-      console.error('Telegram sendMessage error:', err);
+      log.error({ err }, 'Telegram sendMessage error');
       return false;
     }
     return true;
   } catch (err) {
-    console.error('Telegram error:', err);
+    log.error({ err }, 'Telegram error');
     return false;
   }
 }

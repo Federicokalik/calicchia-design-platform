@@ -15,6 +15,9 @@ import { autoLinkMessage } from './auto-link';
 import { classifyMail } from './classifier';
 import { loadUserRules, applyRules } from './rules';
 import type { EncryptedBlob } from './crypto';
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'sync' });
 
 interface AccountRow {
   id: string;
@@ -278,7 +281,7 @@ export async function syncAccount(
         const r = await syncAccountFolder(accountId, f, maxMessages, mode);
         results.push(r);
       } catch (err) {
-        console.error(`[sync] ${accountId} folder=${f}:`, (err as Error).message);
+        log.error({ err: (err as Error).message }, `${accountId} folder=${f}`);
         results.push({
           folder: f, fetched: 0, skipped: 0, linksCreated: 0, serverTotal: 0, cachedAfter: 0,
         });

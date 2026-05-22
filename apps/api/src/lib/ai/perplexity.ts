@@ -3,6 +3,10 @@
  * Used for content generation with online search capabilities
  */
 
+import { logger } from '../logger';
+
+const log = logger.child({ scope: 'perplexity' });
+
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 const PERPLEXITY_API_URL = 'https://api.perplexity.ai/chat/completions';
 
@@ -157,7 +161,7 @@ Rispondi con questo ESATTO formato JSON:
       rawContent,
     };
   } catch (error) {
-    console.error('Error parsing research JSON:', error);
+    log.error({ err: error }, 'Error parsing research JSON');
     // Fallback: ritorna contenuto raw strutturato
     return {
       topic,

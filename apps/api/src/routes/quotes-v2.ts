@@ -6,6 +6,9 @@ import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../li
 import { renderQuoteHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
 import { generateQuoteDraft, GenerateQuoteInputSchema } from '../lib/quotes/generate';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'quotes-v2' });
 
 export const quotesV2 = new Hono();
 
@@ -86,7 +89,7 @@ quotesV2.post('/generate', async (c) => {
     const draft = await generateQuoteDraft(parseResult.data, { idempotencyKey });
     return c.json(draft, 201);
   } catch (err) {
-    console.error('quotes-v2 generate error:', err);
+    log.error({ err }, 'quotes-v2 generate error');
     return c.json(
       { error: 'Generazione preventivo fallita', detail: (err as Error).message },
       502,
@@ -294,7 +297,7 @@ quotesV2.post('/:id/send', async (c) => {
       });
       sentVia.push('email');
     } catch (err) {
-      console.error('Error sending quote email:', err);
+      log.error({ err }, 'Error sending quote email');
     }
   }
 
@@ -305,7 +308,7 @@ quotesV2.post('/:id/send', async (c) => {
       await sendWhatsAppText(quote.customer_phone, message);
       sentVia.push('whatsapp');
     } catch (err) {
-      console.error('Error sending quote WhatsApp:', err);
+      log.error({ err }, 'Error sending quote WhatsApp');
     }
   }
 
