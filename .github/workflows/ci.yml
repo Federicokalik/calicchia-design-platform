@@ -1,17 +1,17 @@
 name: CI
 
-# Gate qualità su PR e push a main: typecheck, lint e build di tutti i workspace.
+# Gate qualità sulle PR verso main: typecheck, lint e build di tutti i workspace.
 # NB: il job "build" intercetta volutamente il finding AD-01 (build admin rotta)
 # finché non viene risolto — è la CI che fa il suo lavoro.
-# Il deploy dell'api è gestito da build-api-image.yml (build immagine → ghcr.io
-# → notifica Dokploy); questo workflow resta solo gate di qualità.
+#
+# Non gira più su push a main: su push la qualità per-app è coperta dai workflow
+# build-*-image.yml (typecheck/lint + build dell'immagine). Il deploy è gestito
+# da quegli stessi workflow (build immagine → ghcr.io → notifica Dokploy).
 
 on:
-  push:
-    branches: [main]
-    paths-ignore: ['docs/**', '**/*.md']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
