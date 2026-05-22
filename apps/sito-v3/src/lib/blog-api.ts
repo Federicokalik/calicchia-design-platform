@@ -8,7 +8,6 @@
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const API_BASE = API_URL.replace(/\/$/, '');
-const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE);
 const IS_PRODUCTION_BUILD =
   process.env.NEXT_PHASE === 'phase-production-build' ||
   process.env.npm_lifecycle_event === 'build';
@@ -62,12 +61,12 @@ export async function fetchBlogList(
   limit = 50,
   locale: SupportedLocale = 'it',
 ): Promise<BlogPostMeta[]> {
-  if (IS_LOCAL_API && IS_PRODUCTION_BUILD) return [];
+  if (IS_PRODUCTION_BUILD) return [];
 
   try {
     const res = await fetch(
       `${API_BASE}/api/public/blog/posts?limit=${limit}&locale=${locale}`,
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) },
     );
     if (!res.ok) return [];
     const data = (await res.json()) as { posts: BlogPostMeta[] };
@@ -83,12 +82,12 @@ export async function fetchBlogArticle(
   slug: string,
   locale: SupportedLocale = 'it',
 ): Promise<BlogPostResponse | null> {
-  if (IS_LOCAL_API && IS_PRODUCTION_BUILD) return null;
+  if (IS_PRODUCTION_BUILD) return null;
 
   try {
     const res = await fetch(
       `${API_BASE}/api/public/blog/posts/${encodeURIComponent(slug)}?locale=${locale}`,
-      { next: { revalidate: 600 } },
+      { next: { revalidate: 600 }, signal: AbortSignal.timeout(5000) },
     );
     if (!res.ok) return null;
     return (await res.json()) as BlogPostResponse;

@@ -126,19 +126,16 @@ function apiBase(): string {
   ).replace(/\/$/, '');
 }
 
-function shouldSkipLocalApiFetch(url: string): boolean {
-  const isProductionBuild =
+/**
+ * During `next build` the API is a separate, unreachable container — skip
+ * every build-time fetch so SSG pages fall back to on-demand / ISR rendering
+ * instead of hanging on an unanswerable request.
+ */
+function shouldSkipApiFetchDuringBuild(): boolean {
+  return (
     process.env.NEXT_PHASE === 'phase-production-build' ||
-    process.env.npm_lifecycle_event === 'build';
-
-  if (!isProductionBuild) return false;
-
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
-  } catch {
-    return false;
-  }
+    process.env.npm_lifecycle_event === 'build'
+  );
 }
 
 function warn(context: string, detail: unknown): void {
@@ -147,10 +144,14 @@ function warn(context: string, detail: unknown): void {
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
-  if (shouldSkipLocalApiFetch(url)) return null;
+  if (shouldSkipApiFetchDuringBuild()) return null;
 
   try {
-    const res = await fetch(url, { next: { revalidate: REVALIDATE_SECONDS } });
+    // Bound the wait — an unreachable/hanging API must never stall a render.
+    const res = await fetch(url, {
+      next: { revalidate: REVALIDATE_SECONDS },
+      signal: AbortSignal.timeout(5000),
+    });
     if (!res.ok) {
       warn(`${url} returned`, res.status);
       return null;

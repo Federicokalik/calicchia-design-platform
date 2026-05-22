@@ -9,7 +9,6 @@ const API_BASE_RAW =
   'http://localhost:3001';
 const API_BASE = API_BASE_RAW.replace(/\/$/, '');
 const PUBLIC_PREFIX = `${API_BASE}/api/calendar/public`;
-const IS_LOCAL_API = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(API_BASE);
 const IS_PRODUCTION_BUILD =
   process.env.NEXT_PHASE === 'phase-production-build' ||
   process.env.npm_lifecycle_event === 'build';
@@ -131,11 +130,12 @@ function normalizeActionOptions(
 
 /** Lista event types disponibili. Fallback: array vuoto se API irraggiungibile. */
 export async function fetchEventTypes(): Promise<BookingEventType[]> {
-  if (IS_LOCAL_API && IS_PRODUCTION_BUILD) return [];
+  if (IS_PRODUCTION_BUILD) return [];
 
   try {
     const res = await fetch(`${PUBLIC_PREFIX}/event-types`, {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
       warn('fetchEventTypes failed', { status: res.status });
@@ -154,12 +154,12 @@ export async function fetchEventTypes(): Promise<BookingEventType[]> {
 export async function fetchEventType(
   slug: string,
 ): Promise<BookingEventType | null> {
-  if (IS_LOCAL_API && IS_PRODUCTION_BUILD) return null;
+  if (IS_PRODUCTION_BUILD) return null;
 
   try {
     const res = await fetch(
       `${PUBLIC_PREFIX}/event-types/${encodeURIComponent(slug)}`,
-      { next: { revalidate: 300 } },
+      { next: { revalidate: 300 }, signal: AbortSignal.timeout(5000) },
     );
     if (!res.ok) {
       warn('fetchEventType failed', { slug, status: res.status });
