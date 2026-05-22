@@ -11,7 +11,7 @@
  * No-op when the `S4_*` env vars are not set — local dev reads the files that
  * already exist on disk in this directory.
  */
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { S3Client, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
@@ -29,6 +29,19 @@ export const KB_DIR = process.env.KB_DIR || AGENT_DIR;
 const KB_PREFIX = 'kb/';
 // assertKBsValid() requires these two; always attempted even if listing fails.
 const REQUIRED_KB = ['pricing_knowledge_base.md', 'profile_knowledge_base.md'];
+
+/** Freshness metadata written into KB_DIR after an S4 bootstrap; read by /api/health/kb. */
+const KB_METADATA_FILE = '.kb-metadata.json';
+
+export interface KbMetadata {
+  /** 's4' when fetched from the MEGA S4 bucket, 'local' when read from disk (dev). */
+  source: 's4' | 'local';
+  file_count: number;
+  /** ISO timestamp of the most recently modified KB file, or null if none found. */
+  latest_modified: string | null;
+  /** ISO timestamp of when bootstrapKBs() last ran (S4 source only). */
+  loaded_at?: string;
+}
 
 function getS4(): { client: S3Client; bucket: string } | null {
   const endpoint = process.env.S4_ENDPOINT;
@@ -78,6 +91,7 @@ export async function bootstrapKBs(): Promise<void> {
   }
 
   let downloaded = 0;
+  let latestModified: Date | null = null;
   for (const key of keys) {
     const filename = key.slice(KB_PREFIX.length);
     if (!filename || filename.includes('/')) continue; // skip nested paths
@@ -87,6 +101,9 @@ export async function bootstrapKBs(): Promise<void> {
       if (body) {
         writeFileSync(resolve(KB_DIR, filename), body, 'utf-8');
         downloaded++;
+        if (res.LastModified && (!latestModified || res.LastModified > latestModified)) {
+          latestModified = res.LastModified;
+        }
       }
     } catch (err) {
       log.error(
@@ -96,4 +113,62 @@ export async function bootstrapKBs(): Promise<void> {
     }
   }
   log.info(`downloaded ${downloaded} knowledge-base file(s) from S4 into ${KB_DIR}`);
+
+  // Persist freshness metadata so /api/health/kb can report staleness without
+  // re-hitting S4. Best-effort: a write failure must not abort the boot.
+  const metadata: KbMetadata = {
+    source: 's4',
+    file_count: downloaded,
+    latest_modified: latestModified ? latestModified.toISOString() : null,
+    loaded_at: new Date().toISOString(),
+  };
+  try {
+    writeFileSync(
+      resolve(KB_DIR, KB_METADATA_FILE),
+      JSON.stringify(metadata, null, 2),
+      'utf-8',
+    );
+  } catch (err) {
+    log.error(
+      { err: err instanceof Error ? err.message : err },
+      'cannot write KB metadata file',
+    );
+  }
+}
+
+/**
+ * Read knowledge-base freshness metadata for the `/api/health/kb` endpoint.
+ *
+ * Prefers the `.kb-metadata.json` written by {@link bootstrapKBs} (S4 production
+ * path). Falls back to stat-ing the on-disk `.md` files — covers local dev
+ * (S4 unset, no metadata file) and the case where an S4 bootstrap failed to
+ * write metadata.
+ */
+export function readKbMetadata(): KbMetadata {
+  try {
+    const raw = readFileSync(resolve(KB_DIR, KB_METADATA_FILE), 'utf-8');
+    return JSON.parse(raw) as KbMetadata;
+  } catch {
+    // No metadata file — derive freshness from the .md files currently on disk.
+  }
+
+  let fileCount = 0;
+  let latestMs: number | null = null;
+  try {
+    for (const entry of readdirSync(KB_DIR)) {
+      // Count real KB files only — skip the committed `*.example.md` templates.
+      if (!entry.endsWith('.md') || entry.endsWith('.example.md')) continue;
+      fileCount++;
+      const { mtimeMs } = statSync(resolve(KB_DIR, entry));
+      if (latestMs === null || mtimeMs > latestMs) latestMs = mtimeMs;
+    }
+  } catch {
+    // KB_DIR unreadable — report zero files; the endpoint flags this as degraded.
+  }
+
+  return {
+    source: 'local',
+    file_count: fileCount,
+    latest_modified: latestMs === null ? null : new Date(latestMs).toISOString(),
+  };
 }
