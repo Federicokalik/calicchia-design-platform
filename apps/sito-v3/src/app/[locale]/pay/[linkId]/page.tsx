@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getLocale, getTranslations } from 'next-intl/server';
+import * as Sentry from '@sentry/nextjs';
 import { LockKey } from '@phosphor-icons/react/dist/ssr';
 import { InlineCheckout, type PaymentProvider } from '@/components/portal/payment/InlineCheckout';
 import {
@@ -41,12 +42,19 @@ async function fetchLink(linkId: string): Promise<{ link: LinkData | null; statu
       return { link: { ...(data as LinkData), status: 'expired' }, status: 410 };
     }
     if (!res.ok) {
-      console.error('[pay/page] api error', res.status, await res.text().catch(() => ''));
+      const body = await res.text().catch(() => '');
+      console.error('[pay/page] api error', res.status, body);
+      Sentry.captureMessage('pay link API error', {
+        level: 'error',
+        tags: { area: 'payment', source: 'pay-link-fetch' },
+        extra: { status: res.status, body: body.slice(0, 500) },
+      });
       return { link: null, status: res.status };
     }
     return { link: (await res.json()) as LinkData, status: 200 };
   } catch (err) {
     console.error('[pay/page] fetch error', err);
+    Sentry.captureException(err, { tags: { area: 'payment', source: 'pay-link-fetch' } });
     return { link: null, status: 500 };
   }
 }
