@@ -32,7 +32,9 @@ build/
 .env.test.local
 .env.production.local
 .env.*.local
-# Keep .env.example as template
+# Real production env — compiled locally, holds secrets, never committed
+.env.prod
+# Keep example templates (.env.example, .env.prod.example)
 !.env.example
 
 # =====================================================
