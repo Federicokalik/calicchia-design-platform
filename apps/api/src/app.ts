@@ -15,6 +15,7 @@ import { authMiddleware } from './middleware/auth';
 import { sql } from './db';
 import { decryptSecret, isEncryptedSecret } from './lib/crypto';
 import { logger } from './lib/logger';
+import { mapDbError } from './lib/db-errors';
 
 const log = logger.child({ scope: 'http' });
 
@@ -422,6 +423,21 @@ app.onError((err, c) => {
   // HTTPException from fail() helper — expected errors (4xx)
   if (err instanceof HTTPException) {
     return c.json({ error: err.message }, err.status);
+  }
+  // DBX-04: database error boundary. Routes that run `sql` without a try/catch
+  // would otherwise leak raw driver errors as opaque 500s. Map the known ones
+  // (constraint violations → 4xx, connection/timeout failures → 503) to clean
+  // responses. Routes that catch the error themselves re-throw via fail() and
+  // are handled by the HTTPException branch above, so they keep full control.
+  const dbError = mapDbError(err);
+  if (dbError) {
+    if (dbError.client) {
+      log.warn({ err, url: c.req.url, method: c.req.method }, 'database constraint error');
+    } else {
+      log.error({ err, url: c.req.url, method: c.req.method }, 'database unavailable');
+      captureException(err, { url: c.req.url, method: c.req.method, kind: 'db' });
+    }
+    return c.json({ error: dbError.message }, dbError.status);
   }
   // Unexpected errors (5xx) — log and report to Bugsink
   log.error({ err, url: c.req.url, method: c.req.method }, 'unhandled error');
