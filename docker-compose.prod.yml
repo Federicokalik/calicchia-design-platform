@@ -4,8 +4,9 @@
 # ${...} vengono dal file .env del progetto Dokploy (vedi .env.prod.example).
 # Dokploy fornisce la rete esterna `dokploy-network` e il resolver TLS `letsencrypt`.
 #
-# NB: nessun `container_name` (richiesto da Dokploy). I router Traefik hanno nomi
-# univoci. Postgres NON espone porte sull'host ed è raggiungibile solo via rete interna.
+# NB: nessun `container_name` (richiesto da Dokploy). Il routing/dominio dei
+# servizi web è gestito dalla UI "Domains" di Dokploy, NON da label Traefik nel
+# compose. Postgres NON espone porte sull'host (solo rete interna).
 #
 # Le immagini api/sito-v3/admin NON si buildano da sorgente: sono pubblicate su
 # ghcr.io dai workflow .github/workflows/build-*-image.yml. Dokploy le pulla.
@@ -125,12 +126,6 @@ services:
         condition: service_completed_successfully
     networks:
       - dokploy-network
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.calicchia-api.rule=Host(`${API_DOMAIN}`)
-      - traefik.http.routers.calicchia-api.entrypoints=websecure
-      - traefik.http.routers.calicchia-api.tls.certresolver=letsencrypt
-      - traefik.http.services.calicchia-api.loadbalancer.server.port=3001
 
   sito-v3:
     image: ghcr.io/federicokalik/calicchia-sito:latest
@@ -142,12 +137,6 @@ services:
       - api
     networks:
       - dokploy-network
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.calicchia-sito.rule=Host(`${SITE_DOMAIN}`)
-      - traefik.http.routers.calicchia-sito.entrypoints=websecure
-      - traefik.http.routers.calicchia-sito.tls.certresolver=letsencrypt
-      - traefik.http.services.calicchia-sito.loadbalancer.server.port=3000
 
   admin:
     image: ghcr.io/federicokalik/calicchia-admin:latest
@@ -156,12 +145,6 @@ services:
       - api
     networks:
       - dokploy-network
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.calicchia-admin.rule=Host(`${ADMIN_DOMAIN}`)
-      - traefik.http.routers.calicchia-admin.entrypoints=websecure
-      - traefik.http.routers.calicchia-admin.tls.certresolver=letsencrypt
-      - traefik.http.services.calicchia-admin.loadbalancer.server.port=80
 
 volumes:
   postgres_data:
