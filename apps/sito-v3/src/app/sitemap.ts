@@ -8,6 +8,12 @@ import {
 } from '@/data/seo-service-matrix';
 import { LOCALES, localizedPath, type Locale } from '@/lib/i18n';
 
+// La sitemap include progetti e articoli letti dall'API. La build salta quel
+// fetch (l'API non è raggiungibile in CI), quindi senza questo la sitemap
+// resterebbe congelata con le sole route statiche. Con `revalidate` la route
+// diventa ISR: rigenerata a runtime — con l'API raggiungibile — ogni ora.
+export const revalidate = 3600;
+
 type SitemapEntry = MetadataRoute.Sitemap[number];
 type ChangeFrequency = NonNullable<SitemapEntry['changeFrequency']>;
 
