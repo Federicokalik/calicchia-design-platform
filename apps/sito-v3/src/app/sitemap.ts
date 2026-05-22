@@ -132,7 +132,15 @@ const TOP_MONTHLY = new Set([
 
 function apiBase(): string {
   const siteWithApi = SITE as typeof SITE & { api?: string };
-  return (siteWithApi.api ?? process.env.PORTAL_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+  // NEXT_PUBLIC_API_URL è il valore canonico (build-time, sempre impostato in
+  // prod) — allineato a lib/projects-api.ts. Senza, in prod si cadeva su
+  // localhost e la sitemap non raccoglieva progetti/blog.
+  return (
+    process.env.NEXT_PUBLIC_API_URL ??
+    siteWithApi.api ??
+    process.env.PORTAL_API_URL ??
+    'http://localhost:3001'
+  ).replace(/\/$/, '');
 }
 
 function shouldSkipApiFetchDuringBuild(): boolean {

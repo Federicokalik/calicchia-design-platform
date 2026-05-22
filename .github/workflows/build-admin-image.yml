@@ -86,13 +86,5 @@ jobs:
             VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
 
-      - name: Notifica Dokploy per il redeploy
-        env:
-          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — redeploy saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Redeploy Dokploy notificato."
+      # Nessuno step di redeploy automatico: il webhook Dokploy rifiuta una POST
+      # semplice ("Branch Not Match"). Il redeploy si fa dalla UI di Dokploy.
