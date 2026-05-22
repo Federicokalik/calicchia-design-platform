@@ -41,6 +41,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY apps/api/package.json apps/api/tsconfig.json ./apps/api/
 COPY apps/api/src ./apps/api/src
+# Migration runner + SQL files — used by the one-off `migrate` service in
+# docker-compose.prod.yml. scripts/migrate.ts resolves apps/api/database/
+# (base schema) and database/migrations/ (numbered files) by relative path.
+COPY apps/api/scripts ./apps/api/scripts
+COPY apps/api/database ./apps/api/database
+COPY database/migrations ./database/migrations
 WORKDIR /app/apps/api
 EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=5s --start-period=25s --retries=3 \

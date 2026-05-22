@@ -129,19 +129,11 @@ function apiBase(): string {
   return (siteWithApi.api ?? process.env.PORTAL_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
 }
 
-function shouldSkipLocalApiFetch(): boolean {
-  const isProductionBuild =
+function shouldSkipApiFetchDuringBuild(): boolean {
+  return (
     process.env.NEXT_PHASE === 'phase-production-build' ||
-    process.env.npm_lifecycle_event === 'build';
-
-  if (!isProductionBuild) return false;
-
-  try {
-    const parsed = new URL(apiBase());
-    return parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1';
-  } catch {
-    return false;
-  }
+    process.env.npm_lifecycle_event === 'build'
+  );
 }
 
 function siteBase(): string {
@@ -232,7 +224,7 @@ function warn(context: string, detail: unknown): void {
 }
 
 async function fetchProjects(): Promise<ApiProject[]> {
-  if (shouldSkipLocalApiFetch()) return [];
+  if (shouldSkipApiFetchDuringBuild()) return [];
 
   // Public sitemap: usa /api/public/projects (no auth) invece del privato /api/projects.
   try {
@@ -255,7 +247,7 @@ async function fetchProjects(): Promise<ApiProject[]> {
 }
 
 async function fetchBlogPosts(): Promise<ApiBlogPost[]> {
-  if (shouldSkipLocalApiFetch()) return [];
+  if (shouldSkipApiFetchDuringBuild()) return [];
 
   try {
     const res = await fetch(`${apiBase()}/api/public/blog/posts?limit=100`, {
