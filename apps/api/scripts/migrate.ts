@@ -15,7 +15,7 @@
  * replaces both the old `migrate.ts` (re-ran everything) and `migrate-new.ts`
  * (manual range arg) — one incremental runner now covers both (DB-08).
  *
- * Usage:  pnpm --filter @caldes/api migrate
+ * Usage:  pnpm --filter @calicchia/api migrate
  *
  * RLS NOTE (DB-07): Row Level Security is intentionally DISABLED on every
  * public table. Access control is enforced by the Hono auth middleware

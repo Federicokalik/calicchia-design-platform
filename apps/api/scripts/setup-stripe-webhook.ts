@@ -7,7 +7,7 @@
  *
  * Uso:
  *   STRIPE_WEBHOOK_URL=https://api.calicchia.design/api/stripe/webhook \
- *     pnpm --filter @caldes/api tsx scripts/setup-stripe-webhook.ts
+ *     pnpm --filter @calicchia/api tsx scripts/setup-stripe-webhook.ts
  *
  * Override env: STRIPE_SECRET_KEY se vuoi forzare una chiave specifica.
  *

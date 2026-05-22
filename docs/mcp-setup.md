@@ -1,6 +1,6 @@
 ﻿# MCP Gestionale - Setup Claude Desktop / Claude Code
 
-Questo documento spiega come collegare Claude Desktop o Claude Code al gestionale tramite il server MCP `@caldes/mcp`.
+Questo documento spiega come collegare Claude Desktop o Claude Code al gestionale tramite il server MCP `@calicchia/mcp`.
 
 ## Cosa fa
 
@@ -15,7 +15,7 @@ Espone tutti i tool registrati in `apps/api/src/lib/agent/tools.ts` (lettura + s
 ## Pre-requisiti
 
 - `apps/api` deve essere in esecuzione (porta 3001).
-- Il server MCP (`apps/mcp/dist/index.js`) deve essere buildato: `pnpm --filter @caldes/mcp build`.
+- Il server MCP (`apps/mcp/dist/index.js`) deve essere buildato: `pnpm --filter @calicchia/mcp build`.
 
 ## Step 1 - Token
 

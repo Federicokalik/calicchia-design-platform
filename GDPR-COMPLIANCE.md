@@ -1,4 +1,4 @@
-# GDPR Compliance Checklist — Caldes 2026
+# GDPR Compliance Checklist — Calicchia Design Platform
 
 > Ultimo aggiornamento: 2026-05-19
 > Riferimenti normativi: GDPR (EU 2016/679), Codice Privacy (D.Lgs. 196/2003 mod. D.Lgs. 101/2018), Linee Guida Garante Cookie (luglio 2021), Decisione Garante 330/2025 (double opt-in)

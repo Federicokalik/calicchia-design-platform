@@ -1,7 +1,7 @@
 /**
  * Generate a new MAIL_ENC_KEY for encrypting email credentials.
  *
- * Usage: pnpm --filter @caldes/api exec tsx scripts/generate-mail-enc-key.ts
+ * Usage: pnpm --filter @calicchia/api exec tsx scripts/generate-mail-enc-key.ts
  *
  * Output: 64-char hex string (32 bytes). Paste into your .env as:
  *   MAIL_ENC_KEY=<the hex string>

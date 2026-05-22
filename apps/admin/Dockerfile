@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Production image — @caldes/admin (React + Vite SPA, served by nginx).
+# Production image — @calicchia/admin (React + Vite SPA, served by nginx).
 # Build context = repo root.
 
 FROM node:22-alpine AS base
@@ -25,7 +25,7 @@ ENV PUBLIC_BUGSINK_DSN=$PUBLIC_BUGSINK_DSN \
     NODE_ENV=production
 COPY apps/admin ./apps/admin
 COPY packages/shared ./packages/shared
-RUN pnpm --filter @caldes/admin build
+RUN pnpm --filter @calicchia/admin build
 
 FROM nginx:alpine AS runtime
 COPY apps/admin/nginx.conf /etc/nginx/conf.d/default.conf

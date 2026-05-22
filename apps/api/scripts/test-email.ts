@@ -2,11 +2,11 @@
  * Smoke test per il sistema email hybrid.
  *
  * Usage:
- *   pnpm --filter @caldes/api exec tsx --env-file=../../.env \
+ *   pnpm --filter @calicchia/api exec tsx --env-file=../../.env \
  *     scripts/test-email.ts <critical|standard> <to-email>
  *
  * Esempio:
- *   pnpm --filter @caldes/api exec tsx --env-file=../../.env \
+ *   pnpm --filter @calicchia/api exec tsx --env-file=../../.env \
  *     scripts/test-email.ts critical federico@calicchia.design
  *
  * Modalità senza argomenti: compila tutti i 10 template + stampa primo

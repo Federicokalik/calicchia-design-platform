@@ -14,7 +14,7 @@ importers:
 
   apps/admin:
     dependencies:
-      '@caldes/shared':
+      '@calicchia/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@dnd-kit/core':

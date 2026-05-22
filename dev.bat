@@ -1,8 +1,8 @@
 @echo off
-title Caldes 2026 - Development Server
+title Calicchia Design Platform - Development Server
 
 echo ========================================
-echo   Caldes 2026 - Development Server
+echo   Calicchia Design Platform - Development Server
 echo ========================================
 echo.
 echo API (Hono):          http://localhost:3001

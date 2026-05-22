@@ -8,7 +8,7 @@ const DSN =
 Sentry.init({
   dsn: DSN,
   enabled: Boolean(DSN),
-  release: process.env.SENTRY_RELEASE ?? '@caldes/sito-v3@0.1.0',
+  release: process.env.SENTRY_RELEASE ?? '@calicchia/sito-v3@0.1.0',
   environment: process.env.NODE_ENV,
   integrations: [],
   tracesSampleRate: 0,

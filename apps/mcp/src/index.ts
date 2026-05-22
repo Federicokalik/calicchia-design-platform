@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @caldes/mcp — MCP stdio server per il gestionale.
+ * @calicchia/mcp — MCP stdio server per il gestionale.
  *
  * Espone i tool registrati in apps/api/src/lib/agent/tools.ts a un client MCP
  * (Claude Desktop, Claude Code, ecc.) traducendo le chiamate tools/list e

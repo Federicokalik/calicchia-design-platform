@@ -1,6 +1,6 @@
 /**
  * Re-run the classifier on all stored email messages.
- * Usage: pnpm --filter @caldes/api exec tsx --env-file=../../.env scripts/reclassify-mail.ts
+ * Usage: pnpm --filter @calicchia/api exec tsx --env-file=../../.env scripts/reclassify-mail.ts
  */
 import postgres from 'postgres';
 import { classifyMail } from '../src/lib/mail/classifier';

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Restore del database Postgres — Caldes 2026.
+# Restore del database Postgres — Calicchia Design Platform.
 #
 # Uso:   ./scripts/restore-db.sh <file.sql.gz>
 #        ./scripts/restore-db.sh s3://<bucket>/db/caldes-YYYYMMDD-HHMMSS.sql.gz
