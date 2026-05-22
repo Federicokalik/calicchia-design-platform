@@ -79,7 +79,7 @@
 
 ```bash
 git clone <repo-url>
-cd Sito-Gestionale-public-clean
+cd calicchia-design-platform
 pnpm install
 ```
 
@@ -149,9 +149,11 @@ pnpm --filter @calicchia/admin build       # solo admin
 
 Il sito-v3 va su un Node host (SSR), l'admin come SPA statica, l'api dietro un reverse proxy.
 
+**Deploy in produzione:** ogni push su `main` builda l'immagine Docker dell'app interessata e la pubblica su `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflow `.github/workflows/build-*-image.yml`). Dokploy pulla le immagini tramite `docker-compose.prod.yml` e ridistribuisce. La knowledge base AI dell'api non è dentro l'immagine: arriva a runtime da MEGA S4.
+
 ### Licenza
 
-MIT — vedi [LICENSE](LICENSE).
+AGPL-3.0-or-later — vedi [LICENSE](LICENSE).
 
 ---
 
@@ -222,7 +224,7 @@ MIT — vedi [LICENSE](LICENSE).
 
 ```bash
 git clone <repo-url>
-cd Sito-Gestionale-public-clean
+cd calicchia-design-platform
 pnpm install
 ```
 
@@ -291,6 +293,8 @@ pnpm --filter @calicchia/admin build       # admin only
 ```
 
 sito-v3 ships to a Node host (SSR), the admin as a static SPA, the api behind a reverse proxy.
+
+**Production deploy:** every push to `main` builds the Docker image of the affected app and publishes it to `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflows `.github/workflows/build-*-image.yml`). Dokploy pulls the images via `docker-compose.prod.yml` and redeploys. The api's AI knowledge base is not baked into the image: it is fetched at runtime from MEGA S4.
 
 ### License
 
