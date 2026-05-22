@@ -1,0 +1,98 @@
+name: build-api-image
+
+# Builda l'immagine Docker di @caldes/api e la pubblica su ghcr.io, poi notifica
+# Dokploy. Sostituisce il vecchio job "deploy" di ci.yml: Dokploy non builda piu'
+# da sorgente, pulla l'immagine gia' pronta da ghcr.io.
+#
+# La knowledge base NON e' nell'immagine: arriva a runtime da MEGA S4 —
+# bootstrapKBs() la scarica al boot (apps/api/src/lib/agent/kb-bootstrap.ts).
+# Dokploy passa al container le env var S4_* (vedi .env.example).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/build-api-image.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: build-api-image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  # Nome immagine: minuscolo obbligatorio per ghcr.io. Cambialo qui se serve.
+  IMAGE_NAME: federicokalik/calicchia-api
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Fail-fast: non pubblicare un'immagine se l'api non typechecka.
+      - name: Typecheck — api
+        run: pnpm --filter @caldes/api typecheck
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login a ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Estrai metadata immagine
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # `latest` segue main; `sha-<short>` serve per il rollback puntuale.
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build e push immagine
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      # Notifica a Dokploy di pullare la nuova immagine e ridistribuire.
+      # Se il secret non e' impostato lo step viene saltato (immagine comunque pubblicata).
+      - name: Notifica Dokploy per il redeploy
+        env:
+          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — redeploy saltato."
+            exit 0
+          fi
+          curl -fsSL -X POST "$WEBHOOK"
+          echo "Redeploy Dokploy notificato."

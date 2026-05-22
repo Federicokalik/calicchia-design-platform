@@ -3,6 +3,8 @@ name: CI
 # Gate qualità su PR e push a main: typecheck, lint e build di tutti i workspace.
 # NB: il job "build" intercetta volutamente il finding AD-01 (build admin rotta)
 # finché non viene risolto — è la CI che fa il suo lavoro.
+# Il deploy dell'api è gestito da build-api-image.yml (build immagine → ghcr.io
+# → notifica Dokploy); questo workflow resta solo gate di qualità.
 
 on:
   push:
@@ -90,22 +92,3 @@ jobs:
       - name: API e2e smoke (non-blocking finché TQ-02 non è risolto)
         run: pnpm --filter @caldes/api test:e2e
         continue-on-error: true
-
-  # Deploy automatico: notifica Dokploy su push a main, dopo quality + api-e2e.
-  # Richiede il secret GitHub DOKPLOY_DEPLOY_WEBHOOK = URL del webhook di deploy
-  # del progetto Dokploy. Se il secret non è impostato lo step viene saltato.
-  deploy:
-    needs: [quality, api-e2e]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Dokploy deploy
-        env:
-          WEBHOOK: ${{ secrets.DOKPLOY_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "DOKPLOY_DEPLOY_WEBHOOK non impostato — deploy automatico saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Deploy Dokploy notificato."
