@@ -34,6 +34,8 @@ build/
 .env.*.local
 # Real production env — compiled locally, holds secrets, never committed
 .env.prod
+# Operational deploy runbook — kept local, not tracked
+/DEPLOY.md
 # Keep example templates (.env.example, .env.prod.example)
 !.env.example
 
