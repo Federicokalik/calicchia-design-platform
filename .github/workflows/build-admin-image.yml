@@ -86,5 +86,15 @@ jobs:
             VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
 
-      # Nessuno step di redeploy automatico: il webhook Dokploy rifiuta una POST
-      # semplice ("Branch Not Match"). Il redeploy si fa dalla UI di Dokploy.
+      # Notifica Portainer: una POST nuda al webhook dello stack scatena il
+      # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
+      - name: Notifica Portainer per il redeploy
+        env:
+          WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK" ]; then
+            echo "PORTAINER_DEPLOY_WEBHOOK non impostato — redeploy saltato."
+            exit 0
+          fi
+          curl -fsSL -X POST "$WEBHOOK"
+          echo "Redeploy Portainer notificato."
