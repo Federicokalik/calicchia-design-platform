@@ -31,15 +31,6 @@ export default defineConfig({
     outDir: 'dist',
     chunkSizeWarningLimit: 5000,
     rollupOptions: {
-      onwarn(warning, defaultHandler) {
-        if (
-          warning.message.includes('"web-worker"') &&
-          warning.message.includes('treating it as an external dependency')
-        ) {
-          return;
-        }
-        defaultHandler(warning);
-      },
       output: {
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],

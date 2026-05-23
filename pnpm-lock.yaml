@@ -218,6 +218,9 @@ importers:
       turndown:
         specifier: ^7.2.2
         version: 7.2.4
+      web-worker:
+        specifier: ^1.5.0
+        version: 1.5.0
       zod:
         specifier: ^3.24.0
         version: 3.25.76
@@ -8451,6 +8454,9 @@ packages:
 
   web-vitals@5.2.0:
     resolution: {integrity: sha512-i2z98bEmaCqSDiHEDu+gHl/dmR4Q+TxFmG3/13KkMO+o8UxQzCqWaDRCiLgEa41nlO4VpXSI0ASa1xWmO9sBlA==}
+
+  web-worker@1.5.0:
+    resolution: {integrity: sha512-RiMReJrTAiA+mBjGONMnjVDP2u3p9R1vkcGz6gDIrOMT3oGuYwX2WRMYI9ipkphSuE5XKEhydbhNEJh4NY9mlw==}
 
   webdriver-bidi-protocol@0.4.1:
     resolution: {integrity: sha512-ARrjNjtWRRs2w4Tk7nqrf2gBI0QXWuOmMCx2hU+1jUt6d00MjMxURrhxhGbrsoiZKJrhTSTzbIrc554iKI10qw==}
@@ -18057,6 +18063,8 @@ snapshots:
       valid-data-url: 3.0.1
 
   web-vitals@5.2.0: {}
+
+  web-worker@1.5.0: {}
 
   webdriver-bidi-protocol@0.4.1: {}
 
