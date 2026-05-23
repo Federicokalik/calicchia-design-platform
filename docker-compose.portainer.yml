@@ -1,0 +1,163 @@
+# Production stack — Calicchia Design Platform
+# Variant for: Portainer (container management) + CloudPanel (reverse proxy + TLS).
+#
+# Deploy: in Portainer crea uno "Stack" puntando a questo file (sorgente git o
+# upload). Le variabili ${...} vengono da un .env nello stack o dai compose env
+# di Portainer (lo stesso .env.prod che usavi su Dokploy, vedi .env.prod.example).
+#
+# Routing: le 3 web app pubblicano le porte SOLO su 127.0.0.1; CloudPanel
+# (nginx + Let's Encrypt sull'host) fa il reverse proxy verso quei loopback.
+# Vedi docs/portainer-cloudpanel.md per gli snippet dei 3 siti CloudPanel.
+#
+# Le immagini sono pre-buildate dai workflow GitHub Actions
+# (.github/workflows/build-*-image.yml) e pubblicate su ghcr.io. Configura
+# in Portainer una registry credential ghcr.io (PAT read:packages).
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # One-off: applica le migrazioni pending, poi esce. Stessa immagine dell'api
+  # (contiene scripts/migrate.ts + i file SQL). Idempotente — gira a ogni deploy.
+  migrate:
+    image: ghcr.io/federicokalik/calicchia-api:latest
+    restart: "no"
+    command: ["pnpm", "exec", "tsx", "scripts/migrate.ts"]
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-net
+
+  api:
+    image: ghcr.io/federicokalik/calicchia-api:latest
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+      WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY}
+      UPLOAD_DIR: /data/uploads
+      PRIVATE_UPLOAD_DIR: /data/private
+      API_URL: ${API_URL}
+      SITE_URL: ${SITE_URL}
+      ADMIN_URL: ${ADMIN_URL}
+      PORTAL_URL: ${SITE_URL}
+      EMAIL_FROM: ${EMAIL_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      # Email "standard" via SMTP Vhosting (preventivi, notifiche, contact form)
+      EMAIL_FROM_CRITICAL: ${EMAIL_FROM_CRITICAL}
+      EMAIL_REPLY_TO: ${EMAIL_REPLY_TO}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_SECURE: ${SMTP_SECURE}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      # Cifratura AES-256-GCM delle credenziali email salvate nel DB
+      MAIL_ENC_KEY: ${MAIL_ENC_KEY}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
+      BUGSINK_DSN: ${BUGSINK_DSN}
+      CRON_SECRET: ${CRON_SECRET}
+      ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
+      BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
+      # Integrazioni opzionali (degradano graceful se vuote)
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
+      PAYPAL_CLIENT_SECRET: ${PAYPAL_CLIENT_SECRET}
+      PAYPAL_MODE: ${PAYPAL_MODE}
+      PAYPAL_WEBHOOK_ID: ${PAYPAL_WEBHOOK_ID}
+      PAYPAL_RETURN_URL: ${PAYPAL_RETURN_URL}
+      PAYPAL_CANCEL_URL: ${PAYPAL_CANCEL_URL}
+      REVOLUT_API_KEY: ${REVOLUT_API_KEY}
+      REVOLUT_MODE: ${REVOLUT_MODE}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      PERPLEXITY_API_KEY: ${PERPLEXITY_API_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      # LLM principale (Infomaniak — EU/Svizzera, GDPR)
+      INFOMANIAK_AI_TOKEN: ${INFOMANIAK_AI_TOKEN}
+      INFOMANIAK_AI_PRODUCT_ID: ${INFOMANIAK_AI_PRODUCT_ID}
+      # Generazione immagini (admin)
+      KIE_API_KEY: ${KIE_API_KEY}
+      UNSPLASH_ACCESS_KEY: ${UNSPLASH_ACCESS_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET}
+      GOWA_URL: ${GOWA_URL}
+      GOWA_BASIC_AUTH_USER: ${GOWA_BASIC_AUTH_USER}
+      GOWA_BASIC_AUTH_PASS: ${GOWA_BASIC_AUTH_PASS}
+      GOWA_WEBHOOK_SECRET: ${GOWA_WEBHOOK_SECRET}
+      GOWA_DEVICE_ID: ${GOWA_DEVICE_ID}
+      # MEGA S4 (object storage): consegna dei knowledge base gitignored al boot.
+      # KB_DIR=/data/kb e' gia' impostato nel Dockerfile.
+      S4_ENDPOINT: ${S4_ENDPOINT}
+      S4_REGION: ${S4_REGION}
+      S4_BUCKET: ${S4_BUCKET}
+      S4_ACCESS_KEY_ID: ${S4_ACCESS_KEY_ID}
+      S4_SECRET_ACCESS_KEY: ${S4_SECRET_ACCESS_KEY}
+    volumes:
+      - uploads_data:/data/uploads
+      - private_data:/data/private
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - app-net
+    # Solo su loopback: CloudPanel proxa da `http://127.0.0.1:3001`.
+    ports:
+      - "127.0.0.1:3001:3001"
+
+  sito-v3:
+    image: ghcr.io/federicokalik/calicchia-sito:latest
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - api
+    networks:
+      - app-net
+    ports:
+      - "127.0.0.1:3000:3000"
+
+  admin:
+    image: ghcr.io/federicokalik/calicchia-admin:latest
+    restart: always
+    depends_on:
+      - api
+    networks:
+      - app-net
+    # 8081 sull'host -> 80 nel container (nginx). Scegli un'altra porta se 8081 e' occupata.
+    ports:
+      - "127.0.0.1:8081:80"
+
+volumes:
+  postgres_data:
+  uploads_data:
+  private_data:
+
+networks:
+  app-net:
+    driver: bridge
