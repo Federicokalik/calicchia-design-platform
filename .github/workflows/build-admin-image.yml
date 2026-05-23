@@ -89,6 +89,9 @@ jobs:
       # Notifica Portainer: una POST nuda al webhook dello stack scatena il
       # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
       - name: Notifica Portainer per il redeploy
+        # Non bloccante: l'immagine e' gia' su ghcr. Se il webhook fallisce
+        # (es. WAF Cloudflare che blocca gli IP dei runner) si redeploya a mano.
+        continue-on-error: true
         env:
           WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
         run: |
