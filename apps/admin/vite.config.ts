@@ -15,6 +15,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      // elkjs/lib/elk.bundled.js fa require('web-worker') come fallback Node.
+      // Vite a volte lo lascia come bare specifier nel bundle finale, anche
+      // se `web-worker` e' installato: cache non-deterministica + `exports`
+      // del pacchetto un po' ambigui. Aliasandolo a uno stub locale, la
+      // risoluzione e' deterministica e l'errore runtime sparisce.
+      'web-worker': path.resolve(__dirname, './src/lib/web-worker-stub.ts'),
     },
   },
   server: {
