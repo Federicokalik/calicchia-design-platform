@@ -13,6 +13,12 @@ interface Params {
   slug: string;
 }
 
+// Locale layout sets dynamicParams=false to restrict locales. We override here
+// because fetchEventTypes() returns [] during Docker image build (no API
+// reachable), so generateStaticParams below produces no params. Without this
+// override, every request 500s with NoFallbackError.
+export const dynamicParams = true;
+
 const STEPS = [
   {
     n: '01',

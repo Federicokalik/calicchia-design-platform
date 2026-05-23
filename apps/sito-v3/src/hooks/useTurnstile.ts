@@ -17,7 +17,7 @@ declare global {
 interface TurnstileRenderOptions {
   sitekey: string;
   theme?: 'light' | 'dark' | 'auto';
-  size?: 'normal' | 'compact' | 'invisible';
+  size?: 'normal' | 'compact' | 'flexible';
   appearance?: 'always' | 'execute' | 'interaction-only';
   callback?: (token: string) => void;
   'error-callback'?: () => void;
@@ -136,7 +136,8 @@ export function useTurnstile(siteKey: string | undefined): UseTurnstileResult {
         widgetIdRef.current = window.turnstile.render(container, {
           sitekey: siteKey,
           theme: 'light',
-          size: 'invisible',
+          size: 'flexible',
+          appearance: 'interaction-only',
           callback: (nextToken) => {
             setToken(nextToken);
             setError(null);

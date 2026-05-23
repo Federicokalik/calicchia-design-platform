@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 
 // Cloudflare Turnstile widget hook for the admin SPA. Mirrors the sito-v3
-// hook (apps/sito-v3/src/hooks/useTurnstile.ts): same invisible-widget flow,
-// kept as a separate copy because admin is a standalone Vite app.
+// hook (apps/sito-v3/src/hooks/useTurnstile.ts): same interaction-only flow
+// (size=flexible + appearance=interaction-only), kept as a separate copy
+// because admin is a standalone Vite app.
 
 declare global {
   interface Window {
@@ -19,7 +20,7 @@ declare global {
 interface TurnstileRenderOptions {
   sitekey: string;
   theme?: 'light' | 'dark' | 'auto';
-  size?: 'normal' | 'compact' | 'invisible';
+  size?: 'normal' | 'compact' | 'flexible';
   appearance?: 'always' | 'execute' | 'interaction-only';
   callback?: (token: string) => void;
   'error-callback'?: () => void;
@@ -138,7 +139,8 @@ export function useTurnstile(siteKey: string | undefined): UseTurnstileResult {
         widgetIdRef.current = window.turnstile.render(container, {
           sitekey: siteKey,
           theme: 'light',
-          size: 'invisible',
+          size: 'flexible',
+          appearance: 'interaction-only',
           callback: (nextToken) => {
             setToken(nextToken);
             setError(null);
