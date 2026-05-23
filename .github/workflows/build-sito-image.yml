@@ -90,38 +90,6 @@ jobs:
             GOOGLE_SITE_VERIFICATION=${{ vars.GOOGLE_SITE_VERIFICATION }}
             PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL }}
 
-      # Forza la visibility del package GHCR a `private`. Idempotente: se gia'
-      # privato, l'API ritorna 204 e non succede nulla. Serve un PAT con scope
-      # admin:packages salvato come secret GHCR_VISIBILITY_TOKEN, perche'
-      # GITHUB_TOKEN non ha admin sui packages utente.
-      #
-      # Prerequisito operativo: Portainer deve avere la registry credentials
-      # configurata per ghcr.io, altrimenti il prossimo pull fallisce.
-      - name: Forza visibility privata del package GHCR
-        if: github.ref == 'refs/heads/main'
-        continue-on-error: true
-        env:
-          GHCR_VISIBILITY_TOKEN: ${{ secrets.GHCR_VISIBILITY_TOKEN }}
-          PACKAGE_NAME: calicchia-sito
-        run: |
-          if [ -z "$GHCR_VISIBILITY_TOKEN" ]; then
-            echo "::warning::GHCR_VISIBILITY_TOKEN non impostato — package $PACKAGE_NAME resta con visibility default."
-            exit 0
-          fi
-          HTTP_CODE=$(curl -sS -o /tmp/ghcr-resp.json -w "%{http_code}" \
-            -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GHCR_VISIBILITY_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/user/packages/container/$PACKAGE_NAME" \
-            -d '{"visibility":"private"}')
-          if [ "$HTTP_CODE" = "204" ] || [ "$HTTP_CODE" = "200" ]; then
-            echo "Package $PACKAGE_NAME impostato a visibility=private (HTTP $HTTP_CODE)."
-          else
-            echo "::warning::PATCH visibility ha restituito HTTP $HTTP_CODE per $PACKAGE_NAME:"
-            cat /tmp/ghcr-resp.json
-          fi
-
       # Notifica Portainer: una POST nuda al webhook dello stack scatena il
       # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
       - name: Notifica Portainer per il redeploy
