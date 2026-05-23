@@ -13,6 +13,7 @@ import { useTurnstile } from '@/hooks/use-turnstile';
 import { API_BASE } from '@/lib/api';
 
 const TURNSTILE_SITE_KEY = import.meta.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const PORTAL_URL = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
 
 const loginSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -204,7 +205,7 @@ export default function LoginPage() {
               Pannello amministrativo riservato
             </p>
             <a
-              href="/clienti/login"
+              href={`${PORTAL_URL}/clienti/login`}
               className="inline-block text-xs text-primary hover:underline"
             >
               Accedi all'area clienti &rarr;
