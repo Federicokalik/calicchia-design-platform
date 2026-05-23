@@ -1,0 +1,25 @@
+{
+  "name": "Caldes — Area Clienti",
+  "short_name": "Area Clienti",
+  "description": "Area riservata clienti Calicchia Design: pagamenti, fatture, abbonamenti.",
+  "scope": "/clienti",
+  "start_url": "/clienti",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FAFAF7",
+  "theme_color": "#FAFAF7",
+  "lang": "it",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

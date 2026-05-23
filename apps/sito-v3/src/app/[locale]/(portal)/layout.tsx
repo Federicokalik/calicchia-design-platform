@@ -1,3 +1,14 @@
+import type { Metadata } from 'next';
+
+// PWA manifest is scoped to the portal only. The marketing site (home,
+// /lavori, /servizi, ecc.) intentionally has NO manifest: it's a portfolio,
+// not an installable app. Linking the manifest from this layout means the
+// <link rel="manifest"> tag is emitted only on /clienti/* pages, so Chrome
+// won't add the "App sul dispositivo" permission row outside the portal.
+export const metadata: Metadata = {
+  manifest: '/clienti-manifest.webmanifest',
+};
+
 /**
  * Portal layout — pass-through. Each portal page wraps itself with
  * `<PortalShell>` explicitly so login and share-link pages can opt out
