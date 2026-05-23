@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  getConsent,
+  hasConsent,
+  installCookieConsentGlobals,
+  setConsent,
+} from '@/lib/cookie-consent';
 
 const WIDGET_ID = 'f60b4ee62d499198f7563ee8095';
 const LOADER_SRC = `https://cdn.trustindex.io/loader.js?${WIDGET_ID}`;
@@ -31,16 +37,31 @@ interface TrustIndexEmbedProps {
  *   events to trigger activation. With Lenis (smooth-scroll) those native
  *   events never reach window, so we drain the queue manually after load.
  *
- * Same widget id as the legacy site so reviews stay in sync.
+ * Marketing-consent gated: the loader is mounted only when the user has
+ * accepted the `marketing` cookie category — Trustindex sets its own
+ * third-party cookies and contacts cdn.trustindex.io. Same pattern used by
+ * FooterMap.tsx.
  *
- * NOTE: this component currently auto-loads (no cookie-consent system in
- * sito-v3 yet). When the consent layer is added, gate this component behind
- * a marketing-consent check and offer a click-to-load placeholder.
+ * Same widget id as the legacy site so reviews stay in sync.
  */
 export function TrustIndexEmbed({ locale = 'it' }: TrustIndexEmbedProps = {}) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [canLoad, setCanLoad] = useState(false);
 
   useEffect(() => {
+    installCookieConsentGlobals();
+    setCanLoad(hasConsent('marketing'));
+
+    const onConsentChanged = () => {
+      setCanLoad(hasConsent('marketing'));
+    };
+
+    window.addEventListener('cookie-consent-changed', onConsentChanged);
+    return () => window.removeEventListener('cookie-consent-changed', onConsentChanged);
+  }, []);
+
+  useEffect(() => {
+    if (!canLoad) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -74,7 +95,56 @@ export function TrustIndexEmbed({ locale = 'it' }: TrustIndexEmbedProps = {}) {
     }, 250);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [canLoad]);
+
+  const acceptMarketing = () => {
+    const current = getConsent()?.preferences;
+    setConsent({
+      analytics: current?.analytics ?? false,
+      marketing: true,
+    });
+  };
+
+  if (!canLoad) {
+    const isEn = locale.toLowerCase().startsWith('en');
+    return (
+      <div
+        className="flex w-full flex-col justify-between"
+        style={{ minHeight: 320 }}
+        aria-label={
+          isEn
+            ? 'Google Reviews blocked: third-party cookies required'
+            : 'Recensioni Google bloccate: richiede cookie di terze parti'
+        }
+      >
+        <div>
+          <p
+            className="font-mono text-[10px] uppercase tracking-[0.24em] mb-3"
+            style={{ color: 'var(--color-ink-subtle)' }}
+          >
+            {isEn ? 'Google reviews blocked' : 'Recensioni Google bloccate'}
+          </p>
+          <p
+            className="text-sm leading-relaxed"
+            style={{ color: 'var(--color-ink-muted)', maxWidth: '36ch' }}
+          >
+            {isEn
+              ? 'Trustindex sets third-party cookies and contacts cdn.trustindex.io. Accept marketing cookies to load the widget.'
+              : 'Trustindex usa cookie di terze parti e contatta cdn.trustindex.io. Accetta i cookie marketing per caricare il widget.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={acceptMarketing}
+          className="mt-8 inline-flex min-h-[44px] items-center justify-center gap-3 self-start border px-5 py-3 text-xs font-medium uppercase tracking-[0.18em] transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-ink)]"
+          style={{ borderColor: 'var(--color-line-strong)', color: 'var(--color-ink)' }}
+        >
+          {isEn ? 'Accept marketing cookies' : 'Accetta cookie marketing'}
+          <span aria-hidden>→</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div

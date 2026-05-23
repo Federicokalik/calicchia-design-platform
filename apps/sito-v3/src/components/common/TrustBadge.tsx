@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import {
+  getConsent,
+  hasConsent,
+  installCookieConsentGlobals,
+  setConsent,
+} from '@/lib/cookie-consent';
 
 const BADGE_WIDGET_ID = 'b6d27ea71e820416e706c5df027';
 const LOADER_SRC = `https://cdn.trustindex.io/loader.js?${BADGE_WIDGET_ID}`;
@@ -35,9 +41,9 @@ interface TrustBadgeProps {
  * as `TrustIndexEmbed` — without it, `data-delay-load="1"` widgets never
  * activate because Lenis intercepts native scroll/resize on window.
  *
- * Mounted on the dark footer of the site, so the wrapper drops the inline
- * dark background that used to compensate cream pages — l'hack CSS globale
- * è stato rimosso insieme.
+ * Marketing-consent gated: when consent is missing, renders a small
+ * inline link offering to accept; matches the pattern used by FooterMap
+ * and TrustIndexEmbed.
  */
 export function TrustBadge({
   className = '',
@@ -45,8 +51,22 @@ export function TrustBadge({
   locale = 'it',
 }: TrustBadgeProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [canLoad, setCanLoad] = useState(false);
 
   useEffect(() => {
+    installCookieConsentGlobals();
+    setCanLoad(hasConsent('marketing'));
+
+    const onConsentChanged = () => {
+      setCanLoad(hasConsent('marketing'));
+    };
+
+    window.addEventListener('cookie-consent-changed', onConsentChanged);
+    return () => window.removeEventListener('cookie-consent-changed', onConsentChanged);
+  }, []);
+
+  useEffect(() => {
+    if (!canLoad) return;
     const container = containerRef.current;
     if (!container) return;
 
@@ -83,7 +103,35 @@ export function TrustBadge({
     }, 250);
 
     return () => window.clearInterval(interval);
-  }, [reuseExistingLoader]);
+  }, [canLoad, reuseExistingLoader]);
+
+  const acceptMarketing = () => {
+    const current = getConsent()?.preferences;
+    setConsent({
+      analytics: current?.analytics ?? false,
+      marketing: true,
+    });
+  };
+
+  if (!canLoad) {
+    const isEn = locale.toLowerCase().startsWith('en');
+    return (
+      <button
+        type="button"
+        onClick={acceptMarketing}
+        className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em] underline-offset-4 hover:underline ${className}`}
+        style={{ color: 'rgba(250,250,247,0.62)' }}
+        aria-label={
+          isEn
+            ? 'Google reviews blocked: accept marketing cookies to load'
+            : 'Recensioni Google bloccate: accetta i cookie marketing per caricare'
+        }
+      >
+        {isEn ? 'Reviews · accept marketing cookies' : 'Recensioni · accetta cookie marketing'}
+        <span aria-hidden>→</span>
+      </button>
+    );
+  }
 
   return (
     <div
