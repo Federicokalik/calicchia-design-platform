@@ -83,8 +83,11 @@ jobs:
           # Valori pubblici inlinati nel bundle: vanno definiti come repo Variables.
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_SITE_URL=${{ vars.VITE_SITE_URL }}
+            VITE_PORTAL_URL=${{ vars.VITE_PORTAL_URL }}
             VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
 
       # Notifica Portainer: una POST nuda al webhook dello stack scatena il
       # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
