@@ -142,6 +142,7 @@ docs/sql-privacy-audit-codex.md
 docs/security-hardening-plan.md
 docs/codex-execution-report.md
 docs/codex-h1234-report.md
+docs/go-live-audit/
 
 # Prompt e TODO operativi storici (workflow interno, non documentazione pubblica)
 /AGENTS.md
