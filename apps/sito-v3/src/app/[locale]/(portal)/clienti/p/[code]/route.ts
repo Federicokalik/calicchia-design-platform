@@ -14,12 +14,14 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { locale, code } = await params;
   const decodedCode = decodeURIComponent(code).trim();
 
-  const dashboardUrl = new URL(`/${locale}/clienti/dashboard`, request.url);
-  const loginUrl = new URL(`/${locale}/clienti/login`, request.url);
+  // Relative Location paths: the browser resolves them against the request
+  // origin, so this works behind a reverse proxy whose Host header isn't
+  // rewritten (request.url would otherwise contain HOSTNAME=0.0.0.0:3000).
+  const dashboardPath = `/${locale}/clienti/dashboard`;
+  const loginErrorPath = `/${locale}/clienti/login?error=invalid_code`;
 
   if (!decodedCode) {
-    loginUrl.searchParams.set('error', 'invalid_code');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
   }
 
   const apiRes = await fetch(`${API_BASE}/api/portal/login-by-code`, {
@@ -30,11 +32,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }).catch(() => null);
 
   if (!apiRes || !apiRes.ok) {
-    loginUrl.searchParams.set('error', 'invalid_code');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
   }
 
-  const response = NextResponse.redirect(dashboardUrl);
+  const response = new NextResponse(null, { status: 307, headers: { Location: dashboardPath } });
 
   const setCookieHeaders =
     typeof (apiRes.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie === 'function'

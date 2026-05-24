@@ -22,12 +22,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { locale } = await params;
   const token = request.nextUrl.searchParams.get('token')?.trim() ?? '';
 
-  const dashboardUrl = new URL(`/${locale}/clienti/dashboard`, request.url);
-  const loginUrl = new URL(`/${locale}/clienti/login`, request.url);
+  // Relative Location paths: the browser resolves them against the request
+  // origin it actually sees, so the redirect works correctly behind a reverse
+  // proxy that does not rewrite the Host header (in standalone Docker
+  // request.url would otherwise leak the internal HOSTNAME=0.0.0.0:3000).
+  const dashboardPath = `/${locale}/clienti/dashboard`;
+  const loginErrorPath = `/${locale}/clienti/login?error=invalid_link`;
 
   if (!token) {
-    loginUrl.searchParams.set('error', 'invalid_link');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
   }
 
   const apiRes = await fetch(`${API_BASE}/api/portal/exchange-token`, {
@@ -38,11 +41,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }).catch(() => null);
 
   if (!apiRes || !apiRes.ok) {
-    loginUrl.searchParams.set('error', 'invalid_link');
-    return NextResponse.redirect(loginUrl);
+    return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
   }
 
-  const response = NextResponse.redirect(dashboardUrl);
+  const response = new NextResponse(null, { status: 307, headers: { Location: dashboardPath } });
 
   // Forward Set-Cookie header(s) from API (the portal_token JWT lives here).
   const getSetCookie =

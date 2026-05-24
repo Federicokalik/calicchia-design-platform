@@ -27,12 +27,24 @@ export function GET(req: NextRequest) {
   // per evitare open-redirect.
   const safeNext = nextParam.startsWith('/') && !nextParam.startsWith('//') ? nextParam : '/';
 
-  const target = new URL(safeNext, req.url);
-  const response = NextResponse.redirect(target);
+  // Location relativa (path-only): il browser la risolve contro l'URL della
+  // request, quindi il redirect punta sempre all'origin pubblico che il client
+  // sta effettivamente vedendo. Evitiamo `new URL(safeNext, req.url)` perché
+  // in standalone dietro reverse-proxy `req.url` può contenere l'host interno
+  // del container (HOSTNAME=0.0.0.0:3000) e finire come Location assoluta che
+  // butta l'utente fuori dal dominio pubblico.
+  const response = new NextResponse(null, {
+    status: 307,
+    headers: { Location: safeNext },
+  });
   response.cookies.set('NEXT_LOCALE', to, {
     path: '/',
     maxAge: COOKIE_MAX_AGE,
     sameSite: 'lax',
+    // Defence in depth: a 1-year persistent preference cookie should not be
+    // transmittable over plain HTTP. `Secure` is also valid on localhost per
+    // browser spec since 2017, so dev keeps working.
+    secure: true,
   });
   // Blocca cache del redirect (browser, CDN, RSC prefetch) — il client deve
   // sempre eseguire il flow Set-Cookie → redirect senza riusare risposte stale.

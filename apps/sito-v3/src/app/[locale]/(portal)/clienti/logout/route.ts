@@ -35,8 +35,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     cache: 'no-store',
   }).catch(() => null);
 
-  const loginUrl = new URL(`/${locale}/clienti/login`, request.url);
-  const response = NextResponse.redirect(loginUrl);
+  // Relative Location: browser resolves against the request origin, avoiding
+  // host leak when sitting behind a reverse proxy in standalone Docker.
+  const response = new NextResponse(null, {
+    status: 307,
+    headers: { Location: `/${locale}/clienti/login` },
+  });
 
   // Forward any Set-Cookie from API (typically the API clears its own token).
   if (apiRes) {
