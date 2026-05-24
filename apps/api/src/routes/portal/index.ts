@@ -11,6 +11,7 @@ import { invoicesRoutes } from './invoices';
 import { renewalsRoutes } from './renewals';
 import { reportsRoutes } from './reports';
 import { preferencesRoutes } from './preferences';
+import { legalRoutes } from './legal';
 
 export const portal = new Hono<PortalEnv>();
 
@@ -49,3 +50,7 @@ portal.route('/reports', reportsRoutes);
 
 // Communication preferences (opt-in/opt-out per canale e categoria)
 portal.route('/preferences', preferencesRoutes);
+
+// Legal acceptance gate (T&C + DPA) — blocca l'accesso al portale finche` il
+// cliente non ha accettato esplicitamente le versioni correnti dei documenti.
+portal.route('/legal', legalRoutes);
