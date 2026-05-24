@@ -18,6 +18,16 @@ export type LegalDocument = {
 export const TITOLARE_EMAIL = 'mail@calicchia.design';
 export const LAST_LEGAL_UPDATE = '2026-05-24';
 
+/**
+ * Major version dei documenti gating-ati nel portale clienti (T&C + DPA).
+ * Mirror di `apps/api/src/lib/legal-versions.ts` — tenere sincronizzati.
+ * Bump = nuovo prompt al prossimo login del cliente.
+ */
+export const LEGAL_MAJOR_VERSIONS = {
+  'termini-e-condizioni': '1',
+  'dpa-clienti': '1',
+} as const;
+
 const TITOLARE = 'Federico Calicchia';
 const TITOLARE_ADDRESS = 'Via Scifelli 74, Ceccano 03023 FR';
 const TITOLARE_VAT = 'P.IVA 03160480608';

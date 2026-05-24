@@ -17,10 +17,11 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getMessages,
   getProject,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import {
   formatPortalDate,
@@ -45,14 +46,13 @@ export default async function ProgettoDetailPage({ params }: PageProps) {
 
   try {
     const [customer, project, messages, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getProject(id),
       getMessages(id),
       getTranslations('portal'),
       getLocale(),
     ]);
 
-    if (!customer) redirect(portalLoginRedirect(`/clienti/progetti/${id}`));
     if (!project) notFound();
 
     const milestones = project.milestones ?? [];
@@ -168,6 +168,9 @@ export default async function ProgettoDetailPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect(`/clienti/progetti/${id}`));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

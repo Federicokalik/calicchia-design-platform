@@ -16,10 +16,11 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getInvoices,
   getPaymentSchedules,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
   type PortalInvoice,
   type PortalPaymentSchedule,
 } from '@/lib/portal-api';
@@ -56,13 +57,12 @@ export default async function FatturePage({ params }: PageProps) {
 
   try {
     const [customer, invoices, schedules, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getInvoices(),
       getPaymentSchedules(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/fatture'));
 
     const paid = invoices
       .filter((i) => i.status === 'paid' || i.payment_status === 'paid')
@@ -257,6 +257,9 @@ export default async function FatturePage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/fatture'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

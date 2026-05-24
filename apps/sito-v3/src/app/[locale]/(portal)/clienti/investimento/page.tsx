@@ -12,9 +12,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getInvoices,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
   type PortalInvoice,
 } from '@/lib/portal-api';
 import {
@@ -43,12 +44,11 @@ export default async function InvestmentPage({ params }: PageProps) {
 
   try {
     const [customer, invoices, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getInvoices(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/investimento'));
 
     const total = invoices.reduce((sum, invoice) => sum + Number(invoice.total || 0), 0);
     const paid = invoices
@@ -155,6 +155,9 @@ export default async function InvestmentPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/investimento'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

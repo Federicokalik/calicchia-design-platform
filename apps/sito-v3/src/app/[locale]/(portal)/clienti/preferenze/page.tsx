@@ -4,9 +4,10 @@ import { PortalShell } from '@/components/portal/PortalShell';
 import { PortalTopbar } from '@/components/portal/PortalTopbar';
 import { PortalDisplay, PortalBody, PortalLabel } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getPortalPreferences,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import { getPortalCustomerLabel, portalLoginRedirect } from '@/lib/portal-format';
 import type { Locale } from '@/lib/i18n';
@@ -21,12 +22,10 @@ export default async function PreferenzePage({ params }: PageProps) {
 
   try {
     const [customer, preferences, t] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getPortalPreferences(),
       getTranslations('portal'),
     ]);
-
-    if (!customer) redirect(portalLoginRedirect('/clienti/preferenze'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -66,6 +65,9 @@ export default async function PreferenzePage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/preferenze'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

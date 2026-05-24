@@ -11,9 +11,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getSubscriptions,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
   type PortalSubscription,
 } from '@/lib/portal-api';
 import {
@@ -42,12 +43,11 @@ export default async function AbbonamentiPage({ params }: PageProps) {
 
   try {
     const [customer, subs, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getSubscriptions(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/abbonamenti'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -156,6 +156,9 @@ export default async function AbbonamentiPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/abbonamenti'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

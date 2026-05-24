@@ -11,9 +11,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getProjects,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
   type PortalProject,
 } from '@/lib/portal-api';
 import {
@@ -39,12 +40,11 @@ export default async function ProgettiListPage({ params }: PageProps) {
 
   try {
     const [customer, projects, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getProjects(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/progetti'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -133,6 +133,9 @@ export default async function ProgettiListPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/progetti'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

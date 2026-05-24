@@ -13,12 +13,13 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getDashboard,
   getInvoices,
   getProjects,
   getRenewals,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import {
   formatPortalCurrency,
@@ -39,7 +40,7 @@ export default async function ClientiDashboardPage({ params }: PageProps) {
 
   try {
     const [customer, dashboard, projects, invoices, renewals, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getDashboard(),
       getProjects(),
       getInvoices(),
@@ -47,8 +48,6 @@ export default async function ClientiDashboardPage({ params }: PageProps) {
       getTranslations('portal'),
       getLocale(),
     ]);
-
-    if (!customer) redirect(portalLoginRedirect('/clienti/dashboard'));
 
     const activeProjects = projects.filter(
       (project) => !['completed', 'cancelled', 'on_hold', 'draft'].includes(project.status)
@@ -183,6 +182,9 @@ export default async function ClientiDashboardPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/dashboard'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

@@ -15,9 +15,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getFiles,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
   type PortalFile,
 } from '@/lib/portal-api';
 import {
@@ -45,12 +46,11 @@ export default async function FilesPage({ params }: PageProps) {
 
   try {
     const [customer, files, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getFiles(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/file'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -154,6 +154,9 @@ export default async function FilesPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/file'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

@@ -11,9 +11,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getRenewals,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import {
   formatPortalCurrency,
@@ -33,12 +34,11 @@ export default async function RenewalsPage({ params }: PageProps) {
 
   try {
     const [customer, renewals, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getRenewals(),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/rinnovi'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -96,6 +96,9 @@ export default async function RenewalsPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/rinnovi'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

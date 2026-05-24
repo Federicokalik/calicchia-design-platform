@@ -9,9 +9,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getProjects,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import { getPortalCustomerLabel, portalLoginRedirect } from '@/lib/portal-format';
 import type { Locale } from '@/lib/i18n';
@@ -25,11 +26,10 @@ export default async function UploadPage({ params }: PageProps) {
 
   try {
     const [customer, projects, t] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getProjects(),
       getTranslations('portal'),
     ]);
-    if (!customer) redirect(portalLoginRedirect('/clienti/upload'));
 
     return (
       <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
@@ -62,6 +62,9 @@ export default async function UploadPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect('/clienti/upload'));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }

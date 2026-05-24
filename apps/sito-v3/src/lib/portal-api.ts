@@ -14,6 +14,34 @@ export class PortalUnauthorizedError extends Error {
   }
 }
 
+/**
+ * Sollevato da `requirePortalAccess()` quando il customer e` autenticato ma
+ * non ha ancora accettato T&C+DPA per le versioni correnti (vedi
+ * `apps/api/src/lib/legal-versions.ts`). Le page.tsx del portale catturano
+ * questo errore e fanno `redirect('/clienti/accettazione-legale')`.
+ */
+export class LegalAcceptanceRequiredError extends Error {
+  constructor(public missing: string[]) {
+    super(`Legal acceptance required for: ${missing.join(', ')}`);
+    this.name = 'LegalAcceptanceRequiredError';
+  }
+}
+
+export interface LegalDocumentInfo {
+  slug: 'termini-e-condizioni' | 'dpa-clienti';
+  version: string;
+  title: string;
+  url: string;
+}
+
+export interface LegalStatusResponse {
+  requires_acceptance: boolean;
+  missing: string[];
+  reason: 'never_accepted' | 'version_changed' | null;
+  quote_bypass: boolean;
+  documents: LegalDocumentInfo[];
+}
+
 export interface PortalCustomer {
   id: string;
   email: string;
@@ -300,6 +328,31 @@ async function authedFetchNullable<T>(path: string, init: RequestInit = {}): Pro
 export async function getCustomer(): Promise<PortalCustomer | null> {
   const data = await authedFetchNullable<{ customer: PortalCustomer }>('/me');
   return data?.customer ?? null;
+}
+
+export async function getLegalStatus(): Promise<LegalStatusResponse> {
+  return authedFetch<LegalStatusResponse>('/legal/status');
+}
+
+/**
+ * Variante di getCustomer() che enforce anche l'accettazione T&C+DPA per le
+ * versioni correnti. Da usare nelle page.tsx del portale al posto di
+ * getCustomer() per fare gating dell'accesso in un colpo solo.
+ *
+ * Errori sollevati:
+ *  - PortalUnauthorizedError: cookie mancante/scaduto → redirect a /clienti/login.
+ *  - LegalAcceptanceRequiredError: loggato ma deve accettare → redirect a
+ *    /clienti/accettazione-legale.
+ */
+export async function requirePortalAccess(): Promise<PortalCustomer> {
+  const customer = await getCustomer();
+  if (!customer) throw new PortalUnauthorizedError('/me');
+
+  const status = await getLegalStatus();
+  if (status.requires_acceptance) {
+    throw new LegalAcceptanceRequiredError(status.missing);
+  }
+  return customer;
 }
 
 export async function getDashboard(): Promise<PortalDashboard> {

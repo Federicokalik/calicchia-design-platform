@@ -15,9 +15,10 @@ import {
   PortalLabel,
 } from '@/components/portal/ui/typography';
 import {
-  getCustomer,
   getReport,
+  LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  requirePortalAccess,
 } from '@/lib/portal-api';
 import {
   formatPortalMonth,
@@ -35,12 +36,11 @@ export default async function ReportDetailPage({ params }: PageProps) {
 
   try {
     const [customer, report, t, locale] = await Promise.all([
-      getCustomer(),
+      requirePortalAccess(),
       getReport(id),
       getTranslations('portal'),
       getLocale(),
     ]);
-    if (!customer) redirect(portalLoginRedirect(`/clienti/report/${id}`));
     if (!report) notFound();
 
     const period = formatPortalMonth(report.month, report.year, locale);
@@ -141,6 +141,9 @@ export default async function ReportDetailPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       redirect(portalLoginRedirect(`/clienti/report/${id}`));
+    }
+    if (error instanceof LegalAcceptanceRequiredError) {
+      redirect('/clienti/accettazione-legale');
     }
     throw error;
   }
