@@ -46,7 +46,8 @@
 | Pagamenti | Stripe (inline Elements) + PayPal (sandbox/live) |
 | Email | Resend (transazionale critica) + SMTP Vhosting (standard) + MJML template |
 | Storage | Filesystem locale `./uploads/` servito su `/media/` (drop-in S3-style) |
-| Analytics | GA4 + Mouseflow (consent-gated) + Bugsink per error tracking |
+| Analytics | GA4 + Mouseflow (consent-gated) + Bugsink self-hosted per error tracking (PII filtrate client-side) |
+| Messaging | WhatsApp via gateway GOWA self-hosted con disclaimer GDPR auto-appeso al primo contatto |
 | i18n | `next-intl` 4.11 — IT default sui path root, EN su `/en/...` con slug tradotti (`/lavori` ↔ `/en/works`) |
 
 ### Struttura monorepo
@@ -110,7 +111,7 @@ Avvia Postgres in Docker (porta 5432, utente `caldes`, db `caldes`) e applica le
 pnpm --filter @calicchia/api migrate
 ```
 
-Le migration vivono in `database/migrations/` numerate progressivamente.
+Le migration vivono in `database/migrations/` numerate progressivamente. Il runner è idempotente (ledger `schema_migrations`) e in produzione gira automaticamente a ogni deploy come container one-shot `migrate` (vedi `docker-compose.prod.yml`) prima dell'avvio dell'api.
 
 #### 4. Avvia i dev server
 
@@ -136,7 +137,21 @@ pnpm dev:admin         # admin     http://localhost:5173
 - **Sito-v3 è server-component-first**: `'use client'` solo dove serve interattività, hook o GSAP.
 - **Mai Barba/Swup su Next 16** — le transizioni di pagina usano Native View Transitions API + un overlay GSAP coordinato.
 - **Design tokens da CSS variables**: niente colori/pesi/opacità hardcoded.
-- Lo stato d'implementazione è tracciato nei vari `*.md` in root e `docs/`.
+- Lo stato d'implementazione è tracciato in `GDPR-COMPLIANCE.md` e nei file in `docs/`.
+
+### Privacy & compliance
+
+| Area | Cosa fa |
+|------|---------|
+| **Cookie consent** | Banner con Accept/Reject equipollenti (Garante 2021 §6), vendor disclosure granulare, finestra di silenzio 6 mesi sul rifiuto |
+| **PII scrubber** | Hook `beforeSend` Sentry condiviso client/server/edge: email, telefono IT, IBAN, codice fiscale, IP, Bearer token rimossi prima dell'invio a Bugsink (legitimate interest art. 6(1)(f)) |
+| **Newsletter** | Double opt-in con timestamp + IP + user-agent come prova del consenso (art. 7 GDPR, Decisione Garante 330/2025) |
+| **Data retention** | Anonimizzazione automatica di customers/leads post-10-anni dall'ultima attività fiscale (cron daily, allineato art. 2220 c.c.) |
+| **Portale clienti** | Gate di accettazione T&C + DPA prima del primo accesso, con scroll-to-bottom obbligatorio e audit trail IP/UA. Bypass per chi ha già preventivi accettati |
+| **WhatsApp** | Disclaimer GDPR auto-appeso al primo contatto outbound (gestione preferenze + opt-out "STOP") |
+| **Documenti legali** | Privacy Policy, Cookie Policy, T&C (18 sezioni con diritti consumatore + ODR EU), DPA standard art. 28 GDPR su `/dpa-clienti` |
+
+Checklist completa in [`GDPR-COMPLIANCE.md`](./GDPR-COMPLIANCE.md).
 
 ### Build & deploy
 
@@ -149,7 +164,7 @@ pnpm --filter @calicchia/admin build       # solo admin
 
 Il sito-v3 va su un Node host (SSR), l'admin come SPA statica, l'api dietro un reverse proxy.
 
-**Deploy in produzione:** ogni push su `main` builda l'immagine Docker dell'app interessata e la pubblica su `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflow `.github/workflows/build-*-image.yml`). Dokploy pulla le immagini tramite `docker-compose.prod.yml` e ridistribuisce. La knowledge base AI dell'api non è dentro l'immagine: arriva a runtime da MEGA S4.
+**Deploy in produzione:** ogni push su `main` builda l'immagine Docker dell'app interessata e la pubblica su `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflow `.github/workflows/build-*-image.yml`). **Portainer** (stack `docker-compose.portainer.yml`) ridistribuisce dietro un reverse proxy **CloudPanel** che termina TLS via Let's Encrypt. Le migration sono applicate da un container one-shot `migrate` che gira prima dell'api a ogni redeploy (`service_completed_successfully`). La knowledge base AI dell'api non è dentro l'immagine: arriva a runtime da MEGA S4.
 
 ### Licenza
 
@@ -191,7 +206,8 @@ AGPL-3.0-or-later — vedi [LICENSE](LICENSE).
 | Payments | Stripe (inline Elements) + PayPal (sandbox/live) |
 | Email | Resend (critical transactional) + SMTP Vhosting (standard) + MJML templates |
 | Storage | Local filesystem `./uploads/` served on `/media/` (S3-style drop-in) |
-| Analytics | GA4 + Mouseflow (consent-gated) + Bugsink error tracking |
+| Analytics | GA4 + Mouseflow (consent-gated) + self-hosted Bugsink error tracking (PII scrubbed client-side) |
+| Messaging | WhatsApp via self-hosted GOWA gateway, with GDPR disclaimer auto-appended on first outbound |
 | i18n | `next-intl` 4.11 — IT default on root paths, EN under `/en/...` with translated slugs (`/lavori` ↔ `/en/works`) |
 
 ### Monorepo layout
@@ -255,7 +271,7 @@ Start Postgres in Docker (port 5432, user `caldes`, db `caldes`) and apply migra
 pnpm --filter @calicchia/api migrate
 ```
 
-Migrations live in `database/migrations/`, numbered sequentially.
+Migrations live in `database/migrations/`, numbered sequentially. The runner is idempotent (ledger `schema_migrations`) and in production it auto-runs at every deploy via a one-shot `migrate` container that completes before the api starts (see `docker-compose.prod.yml`).
 
 #### 4. Run dev servers
 
@@ -281,7 +297,21 @@ pnpm dev:admin         # admin     http://localhost:5173
 - **sito-v3 is server-component-first**: `'use client'` only when you need interactivity, hooks or GSAP.
 - **Never Barba/Swup on Next 16** — page transitions use the native View Transitions API + a coordinated GSAP overlay.
 - **Design tokens via CSS variables**: never hardcode colors, weights or opacity.
-- Implementation notes are tracked in the various `*.md` files at the repo root and in `docs/`.
+- Implementation status is tracked in `GDPR-COMPLIANCE.md` and the files under `docs/`.
+
+### Privacy & compliance
+
+| Area | What it does |
+|------|--------------|
+| **Cookie consent** | Banner with equally-weighted Accept/Reject (Garante Italia 2021 §6), granular vendor disclosure, 6-month silence window on reject |
+| **PII scrubber** | Shared Sentry `beforeSend` hook (client / server / edge): emails, IT phones, IBAN, fiscal codes, IPs, Bearer tokens stripped before reaching Bugsink (legitimate interest, GDPR art. 6(1)(f)) |
+| **Newsletter** | Double opt-in with timestamp + IP + user-agent as consent proof (GDPR art. 7, Garante decision 330/2025) |
+| **Data retention** | Automatic anonymisation of customers/leads after 10 years from last fiscal activity (daily cron, aligned with art. 2220 Italian civil code) |
+| **Client portal** | T&C + DPA acceptance gate on first login, with scroll-to-bottom requirement and IP/UA audit trail. Whitelisted for customers with already-accepted quotes |
+| **WhatsApp** | GDPR disclaimer auto-appended to the first outbound message to any new phone (preferences URL + "STOP" opt-out) |
+| **Legal documents** | Privacy Policy, Cookie Policy, T&C (18 sections including consumer rights + EU ODR), GDPR art. 28 standard DPA at `/dpa-clienti` |
+
+Full checklist in [`GDPR-COMPLIANCE.md`](./GDPR-COMPLIANCE.md).
 
 ### Build & deploy
 
@@ -294,7 +324,7 @@ pnpm --filter @calicchia/admin build       # admin only
 
 sito-v3 ships to a Node host (SSR), the admin as a static SPA, the api behind a reverse proxy.
 
-**Production deploy:** every push to `main` builds the Docker image of the affected app and publishes it to `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflows `.github/workflows/build-*-image.yml`). Dokploy pulls the images via `docker-compose.prod.yml` and redeploys. The api's AI knowledge base is not baked into the image: it is fetched at runtime from MEGA S4.
+**Production deploy:** every push to `main` builds the Docker image of the affected app and publishes it to `ghcr.io/federicokalik/calicchia-{api,sito,admin}` (workflows `.github/workflows/build-*-image.yml`). **Portainer** redeploys the stack (`docker-compose.portainer.yml`) behind a **CloudPanel** reverse proxy that terminates TLS via Let's Encrypt. Database migrations are applied by a one-shot `migrate` container that runs before the api on every redeploy (`service_completed_successfully`). The api's AI knowledge base is not baked into the image: it is fetched at runtime from MEGA S4.
 
 ### License
 
