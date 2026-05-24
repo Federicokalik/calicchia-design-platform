@@ -1,7 +1,7 @@
 # Calicchia Design Platform
 
-> ⚠️ **Alpha** — Progetto ancora in fase alpha. Non production-ready: API instabili, breaking change attesi, copertura test parziale, documentazione in evoluzione.
-> ⚠️ **Alpha** — Project is still in alpha. Not production-ready: APIs unstable, breaking changes expected, partial test coverage, docs are a moving target.
+> 🟡 **Pre-launch** — infrastruttura deployata su Portainer+CloudPanel da maggio 2026, ma [calicchia.design](https://calicchia.design) serve ancora un esperimento bolt.new in attesa dello switch del dominio. Single-tenant per design: piattaforma ottimizzata per un solo freelancer (il sottoscritto), non un SaaS multi-tenant. In rifinitura: breaking change interni possibili, copertura test parziale, documentazione in aggiornamento.
+> 🟡 **Pre-launch** — infrastructure deployed on Portainer+CloudPanel since May 2026, but [calicchia.design](https://calicchia.design) still serves a bolt.new experiment pending the DNS cutover. Single-tenant by design: tuned for a single freelancer (myself), not a multi-tenant SaaS. Still being polished: internal breaking changes possible, partial test coverage, docs in flux.
 
 > Portfolio + gestionale di Federico Calicchia — sito pubblico, area clienti e backoffice in un unico monorepo.
 > Federico Calicchia's portfolio + business platform — public site, client area and back-office in a single monorepo.
@@ -16,8 +16,7 @@
 
 ### Cos'è
 
-**Calicchia Design Platform** è la piattaforma su cui girerà [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti.
-(attualmente calicchia.design è un esperimento realizzato con [bolt.new](https://bolt.new/~/sb1-qxnunhjf) e questa piattaforma non è ancora attiva)
+**Calicchia Design Platform** è la piattaforma destinata a [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti. L'infrastruttura è già deployata in produzione (Portainer+CloudPanel) da maggio 2026; il dominio pubblico serve ancora un esperimento [bolt.new](https://bolt.new/~/sb1-qxnunhjf) in attesa del cutover DNS.
 
 | Cosa | A cosa serve |
 |------|--------------|
@@ -176,8 +175,7 @@ AGPL-3.0-or-later — vedi [LICENSE](LICENSE).
 
 ### What it is
 
-**Calicchia Design Platform** is the platform that will power [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps.
-(At the moment, calicchia.design is an experiment built with [bolt.new](https://bolt.new/~/sb1-qxnunhjf) and this platform is not yet active.)
+**Calicchia Design Platform** is the platform meant for [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps. The infrastructure has been deployed in production (Portainer+CloudPanel) since May 2026; the public domain still serves a [bolt.new](https://bolt.new/~/sb1-qxnunhjf) experiment pending the DNS cutover.
 
 | What | What it does |
 |------|--------------|
