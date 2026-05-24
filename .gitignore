@@ -147,9 +147,20 @@ docs/go-live-audit/
 # Prompt e TODO operativi storici (workflow interno, non documentazione pubblica)
 /AGENTS.md
 /CLIENT-PORTAL-PROMPT.md
+/CLIENT-PORTAL.md
 /MIGRATION_TODO.md
 /PROMPT_GENERATORE_PREVENTIVI.md
 /TODO_CONTACT_FORM.md
+
+# MCP workspace config (locale a Claude Code, non utile a chi clona)
+/.mcp.json
+
+# Scratchpad / prompt scratch del Logo gia` implementato in apps/sito-v3
+/calicchia-logo-package/
+
+# Generatore preventivi Python standalone — sostituito da
+# apps/api/src/lib/quote-pdf.ts (Puppeteer). Tenuto in locale come reference.
+/tools/preventivi/
 
 # =====================================================
 # CLAUDE CODE & DEVELOPMENT NOTES
