@@ -10,6 +10,7 @@ import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { CommandPalette } from './command-palette';
 import { KbWarningBanner } from './kb-warning-banner';
+import { KbMissingDialog } from './kb-missing-dialog';
 import { AiBar } from '@/components/ai/ai-bar';
 
 export function AppLayout() {
@@ -57,6 +58,8 @@ export function AppLayout() {
 
         {/* AI Chatbot bubble — hidden on canvas pages */}
         {!hideAiBar && <AiBar />}
+
+        <KbMissingDialog />
 
         <CommandPalette
           open={commandPalette.open}
