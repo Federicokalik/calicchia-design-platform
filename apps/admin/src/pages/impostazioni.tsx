@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -10,6 +11,7 @@ import {
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { MfaSection } from './impostazioni/mfa-section';
+import { KnowledgeBaseSection } from './impostazioni/knowledge-base-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -42,6 +44,7 @@ const NAV_ITEMS = [
   { id: 'preventivi', label: 'Preventivi & PDF', icon: FileSignature },
   { id: 'integrazioni', label: 'Integrazioni', icon: Link2 },
   { id: 'brain', label: 'Second Brain', icon: Brain },
+  { id: 'knowledge-base', label: 'Knowledge Base AI', icon: Sparkles },
   { id: 'ai-costs', label: 'Costi AI', icon: Activity },
   { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
@@ -53,7 +56,16 @@ const NAV_ITEMS = [
 
 export default function ImpostazioniPage() {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState('profilo');
+  const location = useLocation();
+  // Allow deep-link from KB warning banner: <Link state={{ activeTab: 'knowledge-base' }} />.
+  const initialTab =
+    (location.state as { activeTab?: string } | null)?.activeTab ?? 'profilo';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  useEffect(() => {
+    const fromState = (location.state as { activeTab?: string } | null)?.activeTab;
+    if (fromState && fromState !== activeTab) setActiveTab(fromState);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   const { data: settingsData } = useQuery({ queryKey: ['settings'], queryFn: () => apiFetch('/api/settings') });
   const { data: keysData } = useQuery({ queryKey: ['api-keys'], queryFn: () => apiFetch('/api/keys') });
@@ -770,6 +782,9 @@ export default function ImpostazioniPage() {
             )}
           </>
         )}
+
+        {/* === KNOWLEDGE BASE AI === */}
+        {activeTab === 'knowledge-base' && <KnowledgeBaseSection />}
 
         {/* === TOKEN MCP === */}
         {activeTab === 'sicurezza' && <MfaSection />}

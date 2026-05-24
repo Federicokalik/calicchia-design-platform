@@ -37,16 +37,17 @@ const { startCronEngine, stopCronEngine } = await import('./cron');
 const { assertKBsValid } = await import('./lib/quotes/generate');
 const { sql } = await import('./db');
 
-// Validate AI knowledge bases are present and well-formed (fail-fast).
-// Without these files the AI quote generator cannot run; refusing to start
-// here is better than failing silently per-request or, worse, falling back
-// to a stale or hardcoded price list.
+// Validate AI knowledge bases are present and well-formed. Soft-fail by design:
+// the container starts anyway and the admin gets a banner + "Import from S4"
+// + "Upload .md" in /impostazioni/knowledge-base. Per-request, the AI quote
+// generator throws a clear error when called without valid KBs.
 try {
   assertKBsValid();
+  console.log('✅ AI knowledge bases validated');
 } catch (err) {
-  console.error(`FATAL: AI knowledge base validation failed: ${(err as Error).message}`);
-  console.error('Hint: copy *.example.md templates from apps/api/src/lib/agent/ to *_knowledge_base.md and fill with real data, or configure S4_* to deliver them from the bucket.');
-  process.exit(1);
+  console.warn(`⚠️  AI knowledge base validation failed: ${(err as Error).message}`);
+  console.warn('   AI quote generation will be unavailable until KBs are loaded.');
+  console.warn('   Use admin → Impostazioni → Knowledge Base to import from S4 or upload manually.');
 }
 
 const port = parseInt(process.env.PORT || '3001');

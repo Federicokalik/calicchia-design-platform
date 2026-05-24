@@ -9,6 +9,7 @@ import { AiEntityContextProvider } from '@/hooks/use-ai-entity-context';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { CommandPalette } from './command-palette';
+import { KbWarningBanner } from './kb-warning-banner';
 import { AiBar } from '@/components/ai/ai-bar';
 
 export function AppLayout() {
@@ -43,6 +44,7 @@ export function AppLayout() {
           )}
         >
           <main className="px-4 lg:px-5 pb-4" style={{ paddingTop: '5rem' }}>
+            <KbWarningBanner />
             <Outlet />
           </main>
         </div>

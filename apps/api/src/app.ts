@@ -83,6 +83,7 @@ import { workflows } from './routes/workflows';
 import { notes as notesRoutes } from './routes/notes';
 import { boards as boardsRoutes } from './routes/boards';
 import { aiKnowledge } from './routes/ai-knowledge';
+import { adminKb } from './routes/admin-kb';
 import { knowledge } from './routes/knowledge';
 import { brain } from './routes/brain';
 import { collaboratorsV2 } from './routes/collaborators-v2';
@@ -338,6 +339,7 @@ const protectedPaths = [
   '/api/mcp-tokens',
   '/api/backup',
   '/api/whatsapp-admin',
+  '/api/admin/kb',
 ];
 
 // /api/track is intentionally NOT in protectedPaths — it's the cookieless
@@ -401,6 +403,7 @@ app.route('/api/my-work', myWork);
 app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
+app.route('/api/admin/kb', adminKb);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);
