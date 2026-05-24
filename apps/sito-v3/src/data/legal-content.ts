@@ -205,8 +205,9 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         list: [
           'Dati di navigazione: indirizzo IP o dato tecnico equivalente, user-agent, pagine visitate, data e ora di accesso, referrer, log tecnici e di sicurezza.',
           'Dati forniti volontariamente tramite form: nome, email, telefono se richiesto, azienda se indicata, messaggio, servizi o settori di interesse.',
-          'Dati newsletter, se il servizio viene attivato: email e nome facoltativo.',
+          'Dati newsletter, se il servizio viene attivato: email, nome facoltativo, IP e user-agent al momento dell’iscrizione e della conferma (prova del consenso).',
           'Dati area clienti: nome, email, ragione sociale, indirizzo di fatturazione, telefono, documenti e informazioni di progetto.',
+          'Comunicazioni WhatsApp con clienti e contatti commerciali: numero di telefono, contenuto dei messaggi scambiati, metadati tecnici (timestamp, stato lettura), preferenze di comunicazione e relativi opt-in/opt-out.',
           'Cookie e tecnologie simili: dettagli nella Cookie Policy.'
         ]
       },
@@ -222,6 +223,9 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Misurare traffico e uso del sito con strumenti aggregati, se attivi: art. 6(1)(a) GDPR, consenso.',
           'Garantire sicurezza, prevenzione abusi e protezione anti-bot: art. 6(1)(f) GDPR, interesse legittimo.',
           'Diagnosticare errori tecnici e garantire la stabilità del sito tramite error tracking self-hosted, con PII filtrate lato client prima dell\'invio: art. 6(1)(f) GDPR, interesse legittimo.',
+          'Inviare comunicazioni WhatsApp transazionali (fatture, scadenze, avvisi di sicurezza) a clienti contrattualizzati: art. 6(1)(b) GDPR, esecuzione del contratto.',
+          'Inviare comunicazioni WhatsApp operative (reminder appuntamenti, follow-up progetti) con possibilità di opt-out granulare: art. 6(1)(f) GDPR, interesse legittimo.',
+          'Inviare comunicazioni WhatsApp di marketing solo su consenso esplicito e revocabile (default OFF): art. 6(1)(a) GDPR, consenso.',
           'Gestire obblighi fiscali e contabili: art. 6(1)(c) GDPR, obbligo legale.'
         ]
       },
@@ -260,6 +264,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Dati contrattuali e di fatturazione: 10 anni per obblighi fiscali e contabili.',
           'Log tecnici e di sicurezza: per il tempo necessario alla protezione del sito e comunque in misura proporzionata.',
           'Consensi cookie: di norma 6 mesi, salvo rinnovo o modifica normativa/tecnica.',
+          'Messaggi WhatsApp transazionali (fatture, scadenze): 10 anni allineati agli obblighi fiscali. Messaggi operativi e di marketing: cancellabili a opt-out o su richiesta GDPR.',
           'Richieste privacy: conservate per documentare l’adempimento agli obblighi GDPR.'
         ]
       },
@@ -288,7 +293,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Google Maps: mappa nel footer, caricata solo previo consenso ai contenuti di terze parti.',
           'TrustIndex: recensioni e analytics aggregato del widget, se attivo.',
           'Google Analytics 4 e Mouseflow: misurazione aggregata e analisi di usabilità, caricati solo previo consenso analytics.',
-          'Bugsink (self-hosted): error tracking tecnico su base di interesse legittimo, con PII filtrate prima dell\'invio.'
+          'Bugsink (self-hosted): error tracking tecnico su base di interesse legittimo, con PII filtrate prima dell\'invio.',
+          'Meta Platforms Ireland Ltd. / WhatsApp LLC: i messaggi WhatsApp transitano per l\'infrastruttura Meta per essere recapitati al dispositivo del destinatario. Il gateway tecnico (GOWA) è self-hosted, ma Meta riceve metadati e contenuto dei messaggi secondo i termini WhatsApp Business.'
         ]
       },
       {
@@ -296,7 +302,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         number: '09',
         heading: 'Trasferimenti extra UE',
         paragraphs: [
-          'Alcuni fornitori tecnici possono avere sede o infrastrutture fuori dallo Spazio Economico Europeo.\nIn questi casi il trasferimento avviene sulla base di garanzie adeguate,\ncome EU-US Data Privacy Framework ove applicabile o Standard Contractual Clauses approvate dalla Commissione Europea.'
+          'Alcuni fornitori tecnici possono avere sede o infrastrutture fuori dallo Spazio Economico Europeo.\nIn questi casi il trasferimento avviene sulla base di garanzie adeguate,\ncome EU-US Data Privacy Framework ove applicabile o Standard Contractual Clauses approvate dalla Commissione Europea.',
+          'In particolare Meta Platforms (WhatsApp) e Google aderiscono all\'EU-US Data Privacy Framework; Mouseflow ha sede in Danimarca (UE).'
         ]
       },
       {
