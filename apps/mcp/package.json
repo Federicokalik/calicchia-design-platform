@@ -1,7 +1,7 @@
 {
   "name": "@calicchia/mcp",
   "version": "1.0.0",
-  "description": "MCP server per il gestionale — espone i tool di apps/api a Claude Desktop/Code via stdio",
+  "description": "MCP server per il gestionale: stdio locale e Streamable HTTP remoto",
   "type": "module",
   "bin": {
     "caldes-mcp": "dist/index.js"
@@ -9,8 +9,10 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx --env-file=../../.env src/index.ts",
+    "dev:http": "tsx --env-file=../../.env src/index.ts http",
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:http": "node dist/index.js http",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

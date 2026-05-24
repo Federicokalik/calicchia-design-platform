@@ -129,6 +129,23 @@ services:
     ports:
       - "127.0.0.1:3001:3001"
 
+  mcp:
+    image: ghcr.io/federicokalik/calicchia-mcp:latest
+    restart: always
+    environment:
+      NODE_ENV: production
+      MCP_TRANSPORT: http
+      PORT: 3002
+      API_URL: http://api:3001
+      MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-https://mcp.calicchia.design}
+      MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-mcp.calicchia.design}
+    depends_on:
+      - api
+    networks:
+      - app-net
+    ports:
+      - "127.0.0.1:3002:3002"
+
   sito-v3:
     image: ghcr.io/federicokalik/calicchia-sito:latest
     restart: always

@@ -127,6 +127,21 @@ services:
     networks:
       - dokploy-network
 
+  mcp:
+    image: ghcr.io/federicokalik/calicchia-mcp:latest
+    restart: always
+    environment:
+      NODE_ENV: production
+      MCP_TRANSPORT: http
+      PORT: 3002
+      API_URL: http://api:3001
+      MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-https://mcp.calicchia.design}
+      MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-mcp.calicchia.design}
+    depends_on:
+      - api
+    networks:
+      - dokploy-network
+
   sito-v3:
     image: ghcr.io/federicokalik/calicchia-sito:latest
     restart: always

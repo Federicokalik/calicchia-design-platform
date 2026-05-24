@@ -79,11 +79,40 @@ Riavvia Claude Desktop. In basso comparirà l'icona "🔌" con il server `caldes
 
 ## HTTPS in produzione
 
-Esempio minimo con Caddy per esporre `apps/api` in HTTPS:
+Per Claude Desktop / Claude Code locale basta esporre `apps/api`.
+Per Claude.ai / ChatGPT.com serve invece il gateway remoto `apps/mcp` in
+modalita Streamable HTTP.
+
+Endpoint previsto:
+
+```text
+https://mcp.calicchia.design/mcp
+```
+
+Il servizio `mcp` ascolta su `3002` e inoltra tutte le chiamate a `apps/api`
+tramite `API_URL`. Non accede direttamente al database.
+
+Autenticazione v1:
+
+- preferito: `Authorization: Bearer <token-creato-da-/impostazioni/mcp-tokens>`
+- fallback: `X-MCP-Service-Token`
+- fallback per client senza header statici: query string `?token=...`
+
+Fallback GPT Actions:
+
+- schema OpenAPI: `https://mcp.calicchia.design/openapi.json`
+- endpoint azioni: `https://mcp.calicchia.design/api/mcp/execute`
+- stesso token MCP in Bearer auth
+
+Esempio minimo con Caddy per esporre `apps/api` e `apps/mcp` in HTTPS:
 
 ```caddy
 api.tuodominio.com {
   reverse_proxy localhost:3001
+}
+
+mcp.tuodominio.com {
+  reverse_proxy localhost:3002
 }
 ```
 

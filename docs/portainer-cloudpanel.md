@@ -13,6 +13,7 @@ File compose dedicato: [`docker-compose.portainer.yml`](../docker-compose.portai
 Internet ─HTTPS─▶ Cloudflare ─HTTPS─▶ CloudPanel (nginx, host) ─HTTP─▶
                                           │
                                           ├─▶ 127.0.0.1:3001  (api)
+                                          ├─▶ 127.0.0.1:3002  (mcp)
                                           ├─▶ 127.0.0.1:3000  (sito-v3)
                                           └─▶ 127.0.0.1:8081  (admin nginx -> :80)
 
@@ -58,6 +59,7 @@ Ordine d'avvio gestito dal compose: `postgres` (healthy) → `migrate`
 Verifica subito che le porte loopback rispondano sul VPS:
 ```sh
 curl -I http://127.0.0.1:3001/api/health    # api
+curl -I http://127.0.0.1:3002/health         # mcp
 curl -I http://127.0.0.1:3000/              # sito
 curl -I http://127.0.0.1:8081/              # admin (nginx SPA)
 ```
@@ -131,6 +133,22 @@ proxy_read_timeout 60s;
 > dentro l'immagine. Il fix IPv6 di `apps/admin/nginx.conf` (`listen [::]:80;`)
 > resta valido — quel nginx **dentro** il container.
 
+### 4d. `mcp.calicchia.design` → `http://127.0.0.1:3002`
+
+Vhost MCP Streamable HTTP:
+```nginx
+client_max_body_size 10m;
+proxy_http_version 1.1;
+proxy_set_header Host              $host;
+proxy_set_header X-Real-IP         $remote_addr;
+proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header Authorization     $http_authorization;
+proxy_buffering off;
+proxy_request_buffering off;
+proxy_read_timeout 300s;
+```
+
 ---
 
 ## 5. GitHub repo Variables
@@ -178,6 +196,7 @@ Quando il nuovo VPS risponde correttamente sui 3 sottodomini:
 
 ```sh
 curl -s https://api.calicchia.design/api/health        # {"status":"healthy",...}
+curl -s https://mcp.calicchia.design/health            # {"status":"ok",...}
 curl -s https://api.calicchia.design/api/health/kb     # {"source":"s4","file_count":2,...}
 curl -I https://calicchia.design                       # 200
 curl -I https://admin.calicchia.design                 # 200

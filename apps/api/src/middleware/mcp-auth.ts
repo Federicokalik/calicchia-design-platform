@@ -14,7 +14,7 @@ export async function mcpAuthMiddleware(c: Context, next: Next) {
   const header = c.req.header('Authorization');
   const token = header?.startsWith('Bearer ') ? header.slice(7).trim() : null;
   if (!token || !token.startsWith('mcp_')) {
-    return c.json({ error: 'Token MCP richiesto' }, 401);
+    return c.json({ code: 'invalid_token', error: 'Token MCP richiesto' }, 401);
   }
 
   const tokenHash = hashMcpToken(token);
@@ -28,7 +28,7 @@ export async function mcpAuthMiddleware(c: Context, next: Next) {
     LIMIT 1
   `;
   const row = rows[0];
-  if (!row) return c.json({ error: 'Token non valido o revocato' }, 401);
+  if (!row) return c.json({ code: 'invalid_token', error: 'Token non valido o revocato' }, 401);
 
   const ip = (c.req.header('x-forwarded-for') ?? '').split(',')[0].trim()
     || c.req.header('x-real-ip')

@@ -39,6 +39,14 @@ function checkScope(scope: 'read' | 'write' | 'admin', risk: 'low' | 'medium' | 
   return false;
 }
 
+function canUseTool(scope: 'read' | 'write' | 'admin', tool: ToolDefinition): boolean {
+  return checkScope(scope, getRisk(tool), isReadTool(tool.name));
+}
+
+function errorPayload(code: string, error: string, details?: Record<string, unknown>) {
+  return { code, error, ...(details ?? {}) };
+}
+
 const MCP_UNLOCK_TOOL_DEF = {
   name: 'mcp_unlock',
   description:
@@ -51,12 +59,20 @@ const MCP_UNLOCK_TOOL_DEF = {
 };
 
 mcp.get('/tools', (c) => {
-  const apiTools = tools.map((t) => ({
+  const tokenCtx = c.get('mcpToken');
+  if (!tokenCtx) {
+    return c.json(errorPayload('invalid_token', 'Token context mancante'), 500);
+  }
+
+  const apiTools = tools.filter((t) => canUseTool(tokenCtx.scope, t)).map((t) => ({
     name: t.name,
     description: t.description,
     inputSchema: t.parameters,
   }));
-  return c.json({ tools: [...apiTools, MCP_UNLOCK_TOOL_DEF] });
+  return c.json({
+    tools: tokenCtx.scope === 'admin' ? [...apiTools, MCP_UNLOCK_TOOL_DEF] : apiTools,
+    scope: tokenCtx.scope,
+  });
 });
 
 mcp.post('/execute', async (c) => {
@@ -66,22 +82,22 @@ mcp.post('/execute', async (c) => {
   try {
     body = await c.req.json();
   } catch {
-    return c.json({ error: 'Body JSON richiesto' }, 400);
+    return c.json(errorPayload('invalid_request', 'Body JSON richiesto'), 400);
   }
 
   const name = body.name;
   const args = body.args ?? {};
   if (!name || typeof name !== 'string') {
-    return c.json({ error: 'Campo "name" richiesto' }, 400);
+    return c.json(errorPayload('invalid_request', 'Campo "name" richiesto'), 400);
   }
 
   if (!checkRateLimit('mcp')) {
-    return c.json({ error: 'Rate limit raggiunto (20 chiamate/minuto)' }, 429);
+    return c.json(errorPayload('rate_limited', 'Rate limit raggiunto (20 chiamate/minuto)'), 429);
   }
 
   const tokenCtx = c.get('mcpToken');
   if (!tokenCtx) {
-    return c.json({ error: 'Token context mancante' }, 500);
+    return c.json(errorPayload('invalid_token', 'Token context mancante'), 500);
   }
   const ip = c.get('mcpClientIp') ?? 'unknown';
   const userAgent = c.req.header('user-agent') ?? 'unknown';
@@ -92,7 +108,7 @@ mcp.post('/execute', async (c) => {
 
   const tool = tools.find((t) => t.name === name);
   if (!tool) {
-    return c.json({ error: `Tool "${name}" non trovato` }, 404);
+    return c.json(errorPayload('tool_not_found', `Tool "${name}" non trovato`, { tool: name }), 404);
   }
 
   const risk = getRisk(tool);
@@ -113,7 +129,14 @@ mcp.post('/execute', async (c) => {
       error: `scope_denied:${tokenCtx.scope}`,
       durationMs: Date.now() - startedAt,
     });
-    return c.json({ error: `Scope '${tokenCtx.scope}' non permette tool '${name}'` }, 403);
+    return c.json(
+      errorPayload('scope_denied', `Scope '${tokenCtx.scope}' non permette tool '${name}'`, {
+        scope: tokenCtx.scope,
+        tool: name,
+        risk,
+      }),
+      403
+    );
   }
 
   if (risk === 'high') {
@@ -158,10 +181,11 @@ mcp.post('/execute', async (c) => {
       return c.json(
         {
           needs_otp: true,
+          code: 'otp_required',
           action_id: otpRow.id,
           expires_in_seconds: OTP_TTL_SECONDS,
           telegram_delivered: tgConfigured,
-          message: tgConfigured
+          error: tgConfigured
             ? "Conferma OTP richiesta. Codice inviato via Telegram. Chiedi all'utente il codice e poi chiama il tool 'mcp_unlock'."
             : 'Telegram non configurato sul server: impossibile consegnare OTP. Configura TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID o usa scope=write per evitare HIGH_RISK.',
         },
@@ -177,6 +201,7 @@ mcp.post('/execute', async (c) => {
   } catch {
     /* mantiene grezzo */
   }
+  const toolError = typeof parsed === 'object' && parsed !== null && 'error' in parsed;
 
   await writeMcpAudit({
     tokenId: tokenCtx.id,
@@ -187,12 +212,23 @@ mcp.post('/execute', async (c) => {
     argsSummary,
     risk,
     otpRequired: false,
-    success: true,
+    success: !toolError,
+    error: toolError ? 'tool_error' : undefined,
     durationMs: Date.now() - startedAt,
   });
 
   return c.json({
-    content: [{ type: 'text', text: typeof parsed === 'string' ? parsed : JSON.stringify(parsed) }],
+    content: [
+      {
+        type: 'text',
+        text: toolError
+          ? JSON.stringify(errorPayload('tool_error', String((parsed as { error: unknown }).error), { tool: name }))
+          : typeof parsed === 'string'
+            ? parsed
+            : JSON.stringify(parsed),
+      },
+    ],
+    isError: toolError || undefined,
   });
 });
 
@@ -223,9 +259,10 @@ async function handleUnlock(
       content: [
         {
           type: 'text',
-          text: JSON.stringify({ unlocked: false, error: 'OTP deve essere 6 cifre numeriche' }),
+          text: JSON.stringify(errorPayload('invalid_otp', 'OTP deve essere 6 cifre numeriche', { unlocked: false })),
         },
       ],
+      isError: true,
     });
   }
 
@@ -265,13 +302,12 @@ async function handleUnlock(
       content: [
         {
           type: 'text',
-          text: JSON.stringify({
+          text: JSON.stringify(errorPayload('invalid_otp', "OTP non valido o scaduto. Per generare un nuovo OTP, ripeti la chiamata al tool ad alto rischio originale.", {
             unlocked: false,
-            error:
-              "OTP non valido o scaduto. Per generare un nuovo OTP, ripeti la chiamata al tool ad alto rischio originale.",
-          }),
+          })),
         },
       ],
+      isError: true,
     });
   }
 
