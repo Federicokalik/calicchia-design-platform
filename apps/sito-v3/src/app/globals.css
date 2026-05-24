@@ -130,25 +130,28 @@ body[data-menu-open='true'] [data-morph-ticker] {
   will-change: opacity, transform;
 }
 
-[role='dialog'] {
+/* Scoped to the MenuOverlay only — the previous `[role='dialog']` selector
+   leaked onto other dialogs (e.g. CookieConsentBanner) and left them at
+   opacity:0 forever because they never receive the `.is-open` class. */
+.caldes-menu-overlay {
   opacity: 0;
   transition: opacity 140ms ease;
 }
 
-[role='dialog'].is-open {
+.caldes-menu-overlay.is-open {
   opacity: 1;
 }
 
-[role='dialog'].is-open [data-band='left'] {
+.caldes-menu-overlay.is-open [data-band='left'] {
   opacity: 1;
   transform: translateY(0);
 }
-[role='dialog'].is-open [data-band='right'] {
+.caldes-menu-overlay.is-open [data-band='right'] {
   opacity: 1;
   transform: translateY(0);
 }
 
-[role='dialog'].is-closing .caldes-menu-band {
+.caldes-menu-overlay.is-closing .caldes-menu-band {
   opacity: 0;
   transform: translateY(4px);
   transition-duration: 120ms !important;
@@ -156,11 +159,11 @@ body[data-menu-open='true'] [data-morph-ticker] {
 
 /* Reduced-motion fallback */
 @media (prefers-reduced-motion: reduce) {
-  [role='dialog'],
+  .caldes-menu-overlay,
   .caldes-menu-band {
     transition: none !important;
   }
-  [role='dialog'].is-open .caldes-menu-band {
+  .caldes-menu-overlay.is-open .caldes-menu-band {
     opacity: 1;
     transform: none;
   }

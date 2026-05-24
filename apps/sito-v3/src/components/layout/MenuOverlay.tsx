@@ -247,7 +247,7 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
       aria-modal="true"
       aria-hidden={!open}
       aria-label={t('menuOverlay.ariaLabel')}
-      className="fixed inset-0"
+      className="caldes-menu-overlay fixed inset-0"
       style={{
         display: 'none',
         zIndex: 80,
