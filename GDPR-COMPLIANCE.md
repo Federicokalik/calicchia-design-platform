@@ -82,7 +82,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | F3 | Cookie HttpOnly + SameSite | ✅ | auth_token HttpOnly SameSite=Strict |
 | F4 | Rate limiting login | ✅ | 5 tentativi / 15 min |
 | F5 | Audit trail accessi e modifiche dati | ✅ | Migration 012 audit_logging |
-| F6 | MFA / 2FA | ⚠️ | Non implementato (raccomandato per futuro) |
+| F6 | MFA / 2FA | ✅ | TOTP RFC 6238 self-contained (`lib/totp.ts`, ±1 step skew, timing-safe). Enrollment wizard `impostazioni/mfa-section.tsx`, 2-step login con `mfa_required`. 10 backup codes bcrypt-hashed (rounds 12). Secret cifrato con envelope encryption (`crypto.ts`). Migration 102. Verificato 2026-05-24. |
 | F7 | Timeout sessione per inattività | ✅ | 30 min timeout via last_activity check |
 | F8 | HTTPS obbligatorio | ✅ | HSTS header in produzione |
 | F9 | Principio del minimo privilegio | ⚠️ | Solo ruolo admin, no granularità (accettabile per freelancer) |
@@ -182,23 +182,22 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | C. Form di Contatto | 6 | 0 | 0 | 6 |
 | D. Newsletter | 6 | 0 | 0 | 6 |
 | E. Analytics | 5 | 0 | 0 | 5 |
-| F. Admin & Sicurezza | 8 | 2 | 0 | 10 |
+| F. Admin & Sicurezza | 9 | 1 | 0 | 10 |
 | G. Diritti Interessato | 8 | 0 | 0 | 8 |
 | H. Area Clienti | 4 | 1 | 0 | 5 |
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
 | K. Portale Pubblico | 5 | 0 | 0 | 5 |
 | L. WhatsApp (GOWA) | 16 | 0 | 0 | 16 |
-| **TOTALE** | **93** | **8** | **0** | **101** |
+| **TOTALE** | **94** | **7** | **0** | **101** |
 
-**Conformità: ~92% (93/101 pienamente conformi)**
+**Conformità: ~93% (94/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
-1. **F6**: Implementare MFA (raccomandato, non obbligatorio) — schema in migration 102, codice/UI da implementare
-2. **F9**: Granularità ruoli (accettabile per freelancer)
-3. **H2**: DPA con clienti (template documento, non codice)
-4. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
+1. **F9**: Granularità ruoli (accettabile per freelancer)
+2. **H2**: DPA con clienti (template documento, non codice)
+3. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
 
 ### Chiusi nella sessione 2026-05-24:
 - **D4**: log IP/UA subscribe + confirm newsletter (migration 103)
@@ -206,6 +205,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 - **K1**: T&C completi a 18 sezioni con diritti consumatore + ODR EU
 - **L16**: disclaimer first-contact WhatsApp auto-appeso (`whatsapp-disclaimer.ts`)
 - **H5**: cron anonimizzazione customers/leads post-10-anni (migration 104)
+- **F6**: TOTP MFA admin (era già completamente implementato — checklist stale)
 
 ---
 
