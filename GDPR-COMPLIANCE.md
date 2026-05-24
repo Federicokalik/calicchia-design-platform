@@ -159,7 +159,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | L13 | Base giuridica AI processing | ✅ | Art. 6(1)(f) per triage interno. Nessuna decisione automatizzata che produce effetti giuridici (Art. 22 non applicabile — solo bozze di risposta). |
 | L14 | Sub-responsabile WhatsApp | ✅ | Meta Platforms Ireland Ltd. / WhatsApp LLC aggiunti alla privacy policy sez. 2 (dati), 3 (basi giuridiche per categoria), 6 (retention), 8 (destinatari), 9 (extra-UE/DPF). Commit 2026-05-24. |
 | L15 | DPA con GOWA | ✅ | Self-hosted su VPS proprio (gowa.calicchia.design) — nessun sub-responsabile esterno per il gateway. |
-| L16 | Informativa al primo contatto WA | 🔧 | Da aggiungere al primo template "first contact" outbound: indicazione su come gestire preferenze e diritto di opt-out. |
+| L16 | Informativa al primo contatto WA | ✅ | `apps/api/src/lib/whatsapp-disclaimer.ts` — `attachDisclaimerIfFirstContact()` viene chiamato automaticamente in `sendWhatsAppText`/`sendWhatsAppMedia` quando non esiste alcun outbound precedente al numero. Disclaimer include chi scrive, link gestione preferenze, opt-out via "STOP"/"STOP MARKETING" e link privacy policy. Commit 2026-05-24. |
 
 ## K. PORTALE / SEZIONE PUBBLICA
 
@@ -188,10 +188,10 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
 | K. Portale Pubblico | 5 | 0 | 0 | 5 |
-| L. WhatsApp (GOWA) | 15 | 0 | 0 | 15 (L16 🔧 in corso, conteggio nei ✅ una volta committato) |
-| **TOTALE** | **91** | **10** | **0** | **101** |
+| L. WhatsApp (GOWA) | 16 | 0 | 0 | 16 |
+| **TOTALE** | **92** | **9** | **0** | **101** |
 
-**Conformità: ~90% (91/101 pienamente conformi)**
+**Conformità: ~91% (92/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
@@ -199,12 +199,12 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 2. **F9**: Granularità ruoli (accettabile per freelancer)
 3. **H2/H5**: DPA clienti e workflow cancellazione post-10-anni
 4. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
-5. **L16**: Creare template "first contact" WA con disclaimer preferenze (in corso)
 
 ### Chiusi nella sessione 2026-05-24:
 - **D4**: log IP/UA subscribe + confirm newsletter (migration 103)
 - **L14**: Meta/WhatsApp in privacy policy sez. 2/3/6/8/9
 - **K1**: T&C completi a 18 sezioni con diritti consumatore + ODR EU
+- **L16**: disclaimer first-contact WhatsApp auto-appeso (`whatsapp-disclaimer.ts`)
 
 ---
 

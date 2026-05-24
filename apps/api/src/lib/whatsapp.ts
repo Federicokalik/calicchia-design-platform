@@ -115,10 +115,15 @@ export interface SendResult {
 export async function sendWhatsAppText(phone: string, message: string): Promise<SendResult> {
   if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
   const target = formatPhone(phone);
+  // GDPR L16: al primo outbound verso un numero ancora non contattato
+  // appende il blocco informativo con istruzioni opt-out e link preferenze.
+  // Dynamic import per evitare il ciclo whatsapp.ts <-> whatsapp-disclaimer.ts.
+  const { attachDisclaimerIfFirstContact } = await import('./whatsapp-disclaimer');
+  const body = await attachDisclaimerIfFirstContact(target, message);
   const data = await throttledSend(() =>
     gowaFetch<{ results?: { message_id?: string }; message_id?: string; code?: string }>(
       '/send/message',
-      { method: 'POST', jsonBody: { phone: target, message } }
+      { method: 'POST', jsonBody: { phone: target, message: body } }
     )
   );
   const id = data?.results?.message_id || data?.message_id;
@@ -134,6 +139,10 @@ export async function sendWhatsAppMedia(
 ): Promise<SendResult> {
   if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
   const target = formatPhone(phone);
+  // GDPR L16: anche per i media (es. PDF fattura come primo contatto) appende
+  // il disclaimer informativo alla caption se non c'e` ancora outbound history.
+  const { attachDisclaimerIfFirstContact } = await import('./whatsapp-disclaimer');
+  const finalCaption = await attachDisclaimerIfFirstContact(target, caption);
   // GOWA accetta sia URL remoto (file_url) sia upload multipart. Preferiamo URL
   // perché stripe-quote-pdf / fatture sono già esposti via /media/*.
   const endpoint = mimetype.startsWith('image/')
@@ -145,7 +154,7 @@ export async function sendWhatsAppMedia(
         : '/send/file';
   const body: Record<string, unknown> = {
     phone: target,
-    caption,
+    caption: finalCaption,
     file_url: mediaUrl,
     file_name: filename,
     mimetype,
