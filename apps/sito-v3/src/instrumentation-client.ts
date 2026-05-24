@@ -1,16 +1,8 @@
 import * as Sentry from '@sentry/nextjs';
+import { scrubEvent } from '@/lib/sentry-scrub';
 
 const DSN = process.env.NEXT_PUBLIC_BUGSINK_DSN;
 const RELEASE = process.env.NEXT_PUBLIC_APP_RELEASE ?? '@calicchia/sito-v3@0.1.0';
-
-function withoutQueryString(url: string): string {
-  try {
-    const parsed = new URL(url);
-    return `${parsed.origin}${parsed.pathname}`;
-  } catch {
-    return url.split('?')[0] ?? url;
-  }
-}
 
 Sentry.init({
   dsn: DSN,
@@ -19,13 +11,11 @@ Sentry.init({
   environment: process.env.NODE_ENV,
   integrations: [],
   tracesSampleRate: 0,
-  beforeSend(event) {
-    if (event.request?.url) {
-      event.request.url = withoutQueryString(event.request.url);
-    }
-
-    return event;
-  },
+  // PII scrubber: removes email, phone, tokens, IP, etc. from every event
+  // before it leaves the browser. Documented in cookie-policy as the safeguard
+  // that lets us run error tracking on legitimate-interest basis (GDPR
+  // art. 6(1)(f)) without explicit consent.
+  beforeSend: scrubEvent,
 });
 
 if (typeof window !== 'undefined') {

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { scrubEvent } from '@/lib/sentry-scrub';
 
 const DSN =
   process.env.BUGSINK_DSN ??
@@ -12,4 +13,7 @@ Sentry.init({
   environment: process.env.NODE_ENV,
   integrations: [],
   tracesSampleRate: 0,
+  // PII scrubber — shared hook across client/server/edge runtimes. See
+  // apps/sito-v3/src/lib/sentry-scrub.ts for the redaction logic.
+  beforeSend: scrubEvent,
 });
