@@ -3,6 +3,7 @@ import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { sendContactNotification } from '../lib/email';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { getClientIp } from '../lib/client-ip';
 import {
   createBooking,
   BookingConflictError,
@@ -76,9 +77,11 @@ contacts.post('/', async (c) => {
     turnstile_token,
   } = body;
 
-  // Turnstile verification
-  const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', clientIp);
+  // Turnstile verification (action binds the token to the public contact form)
+  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+    remoteIp: getClientIp(c) ?? undefined,
+    expectedAction: 'contact_form',
+  });
   if (!turnstileOk) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }

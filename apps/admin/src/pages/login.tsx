@@ -29,7 +29,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const next = searchParams.get('next');
   const { signIn } = useAuth();
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const turnstile = useTurnstile(TURNSTILE_SITE_KEY, 'admin_login');
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
 
@@ -192,7 +192,7 @@ export default function LoginPage() {
             )}
 
             {/* Cloudflare Turnstile — invisible widget, renders no visible UI */}
-            <div ref={turnstile.containerRef} />
+            <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

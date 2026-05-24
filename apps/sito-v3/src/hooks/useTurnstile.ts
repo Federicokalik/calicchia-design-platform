@@ -19,6 +19,8 @@ interface TurnstileRenderOptions {
   theme?: 'light' | 'dark' | 'auto';
   size?: 'normal' | 'compact' | 'flexible';
   appearance?: 'always' | 'execute' | 'interaction-only';
+  /** Label sent to Cloudflare; the server verifies it matches expectedAction. */
+  action?: string;
   callback?: (token: string) => void;
   'error-callback'?: () => void;
   'expired-callback'?: () => void;
@@ -87,7 +89,10 @@ function loadTurnstileScript(): Promise<void> {
   return loadPromise;
 }
 
-export function useTurnstile(siteKey: string | undefined): UseTurnstileResult {
+export function useTurnstile(
+  siteKey: string | undefined,
+  action?: string,
+): UseTurnstileResult {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -138,6 +143,7 @@ export function useTurnstile(siteKey: string | undefined): UseTurnstileResult {
           theme: 'light',
           size: 'flexible',
           appearance: 'interaction-only',
+          ...(action ? { action } : {}),
           callback: (nextToken) => {
             setToken(nextToken);
             setError(null);
@@ -172,7 +178,7 @@ export function useTurnstile(siteKey: string | undefined): UseTurnstileResult {
       window.turnstile.remove(widgetIdRef.current);
       widgetIdRef.current = null;
     };
-  }, [siteKey]);
+  }, [siteKey, action]);
 
   return {
     containerRef,

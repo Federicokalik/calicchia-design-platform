@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { getClientIp } from '../lib/client-ip';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'public-leads' });
@@ -49,8 +50,10 @@ publicLeads.post('/', async (c) => {
       return c.json({ error: 'Dati non validi' }, 400);
     }
 
-    const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-    const turnstileOk = await verifyTurnstileToken(turnstileToken, clientIp);
+    const turnstileOk = await verifyTurnstileToken(turnstileToken, {
+      remoteIp: getClientIp(c) ?? undefined,
+      expectedAction: 'embed_lead',
+    });
     if (!turnstileOk) return c.json({ error: 'Verifica anti-bot fallita.' }, 403);
 
     const tags: string[] = [];

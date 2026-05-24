@@ -126,7 +126,7 @@ export function ContactFormClient() {
 
   const { config } = useRuntimeConfig();
   const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey);
+  const turnstile = useTurnstile(turnstileSiteKey, 'contact_form');
 
   const {
     register,
@@ -440,7 +440,11 @@ export function ContactFormClient() {
       </Field>
 
       {/* Turnstile invisible widget (lazy script) */}
-      <div ref={turnstile.containerRef} aria-hidden="true" className="mt-6" />
+      {/* Turnstile interaction-only: invisible until CF requires a click;
+          must NOT be aria-hidden so screen reader users can complete the
+          challenge if it appears. min-width 300px is Cloudflare's hard
+          minimum for `size: flexible`. */}
+      <div ref={turnstile.containerRef} className="mt-6" style={{ minWidth: 300 }} />
       {!turnstileSiteKey ? (
         <MonoLabel as="p" className="mt-3">
           {t('turnstileDisabled')}

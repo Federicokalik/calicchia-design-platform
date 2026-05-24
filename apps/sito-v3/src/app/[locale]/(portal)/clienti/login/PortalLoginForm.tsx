@@ -54,7 +54,9 @@ export function PortalLoginForm() {
 
   const { config } = useRuntimeConfig();
   const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey);
+  // Same action label for both magic-link request and code login: server
+  // accepts either via the same expectedAction = 'portal_login'.
+  const turnstile = useTurnstile(turnstileSiteKey, 'portal_login');
 
   const requestLink = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -295,7 +297,7 @@ export function PortalLoginForm() {
     <>
       {body}
       {/* Cloudflare Turnstile — invisible widget, mounted once for every mode */}
-      <div ref={turnstile.containerRef} />
+      <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
     </>
   );
 }

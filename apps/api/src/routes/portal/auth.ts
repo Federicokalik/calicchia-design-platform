@@ -9,6 +9,7 @@ import { setPortalCookie, clearPortalCookie } from '../../lib/cookies';
 import { auditPortalEvent } from '../../lib/portal-audit';
 import { issueMagicLink, consumeMagicLink } from '../../lib/portal-tokens';
 import { verifyTurnstileToken } from '../../lib/turnstile';
+import { getClientIp } from '../../lib/client-ip';
 import { sendEmail } from '../../lib/email';
 import { renderMagicLinkEmail } from '../../templates/magic-link';
 import { logger } from '../../lib/logger';
@@ -29,15 +30,6 @@ const magicLinkRequestLimit = createRateLimit(5, 10 * 60 * 1000);
 
 function getSiteUrl(): string {
   return process.env.PORTAL_URL || process.env.SITE_URL || 'https://calicchia.design';
-}
-
-function getClientIp(c: Context): string | null {
-  return (
-    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
-    c.req.header('cf-connecting-ip') ||
-    c.req.header('x-real-ip') ||
-    null
-  );
 }
 
 // ── Portal Auth Middleware (exported for other portal sub-routes) ──
@@ -142,7 +134,12 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
     return c.json({ error: 'Email non valida' }, 400);
   }
 
-  if (!(await verifyTurnstileToken(body.turnstile_token ?? '', getClientIp(c) ?? undefined))) {
+  if (
+    !(await verifyTurnstileToken(body.turnstile_token ?? '', {
+      remoteIp: getClientIp(c) ?? undefined,
+      expectedAction: 'portal_login',
+    }))
+  ) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
@@ -270,7 +267,12 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
     return c.json({ error: 'Email e codice di accesso richiesti' }, 400);
   }
 
-  if (!(await verifyTurnstileToken(turnstile_token ?? '', getClientIp(c) ?? undefined))) {
+  if (
+    !(await verifyTurnstileToken(turnstile_token ?? '', {
+      remoteIp: getClientIp(c) ?? undefined,
+      expectedAction: 'portal_login',
+    }))
+  ) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 

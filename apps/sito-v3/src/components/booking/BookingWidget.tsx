@@ -71,7 +71,7 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
   const { config } = useRuntimeConfig();
   const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey);
+  const turnstile = useTurnstile(turnstileSiteKey, 'booking_create');
 
   const {
     register,
@@ -259,7 +259,9 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
                 />
               </Field>
 
-              <div ref={turnstile.containerRef} aria-hidden="true" className="mt-6" />
+              {/* Turnstile interaction-only: deve restare accessibile per il
+                  challenge interattivo se Cloudflare lo richiede. */}
+              <div ref={turnstile.containerRef} className="mt-6" style={{ minWidth: 300 }} />
               {turnstile.error ? <FieldError>{turnstile.error}</FieldError> : null}
 
               {errors.root ? (

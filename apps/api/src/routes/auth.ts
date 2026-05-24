@@ -6,6 +6,7 @@ import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { getClientIp } from '../lib/client-ip';
 import { generateTotpSecret, verifyTotp, otpauthUri } from '../lib/totp';
 import { encryptSecret, decryptSecret } from '../lib/crypto';
 import { randomBytes } from 'crypto';
@@ -26,9 +27,11 @@ auth.post('/login', loginRateLimit, async (c) => {
   }
 
   // Anti-bot check before any DB lookup / bcrypt work.
-  const clientIp =
-    c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-  if (!(await verifyTurnstileToken(turnstile_token || '', clientIp))) {
+  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+    remoteIp: getClientIp(c) ?? undefined,
+    expectedAction: 'admin_login',
+  });
+  if (!turnstileOk) {
     return c.json({ error: adminMessage(c, 'turnstileFailed') }, 403);
   }
 

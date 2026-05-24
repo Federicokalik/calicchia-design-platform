@@ -6,6 +6,7 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
 import { verifyTurnstileToken } from '../../lib/turnstile';
+import { getClientIp } from '../../lib/client-ip';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType } from '../../lib/calendar/availability';
 import {
@@ -120,9 +121,12 @@ calendarPublic.post('/bookings', async (c) => {
     return c.json({ error: 'Body JSON richiesto' }, 400);
   }
 
-  // Turnstile (skippa in dev se PUBLIC_TURNSTILE_SITE_KEY non configurato)
-  const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-  const turnstileOk = await verifyTurnstileToken(body.turnstile_token || '', clientIp);
+  // Turnstile (skippa in dev se TURNSTILE_SECRET_KEY non configurato)
+  const clientIp = getClientIp(c) ?? undefined;
+  const turnstileOk = await verifyTurnstileToken(body.turnstile_token || '', {
+    remoteIp: clientIp,
+    expectedAction: 'booking_create',
+  });
   if (!turnstileOk) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
@@ -325,6 +329,20 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
   if (!requireToken(c, uid)) return c.json({ error: 'Token mancante o scaduto' }, 401);
 
   const body = await c.req.json().catch(() => ({}));
+
+  // Turnstile verify if the client sent a token (booking-api.ts always does
+  // on the reschedule path). The HMAC `requireToken` above already binds the
+  // request to a specific booking, but anti-bot still belongs here as defense
+  // in depth — and it closes a previous gap where the client sent the field
+  // and the server silently ignored it.
+  if (body.turnstile_token) {
+    const ok = await verifyTurnstileToken(body.turnstile_token, {
+      remoteIp: getClientIp(c) ?? undefined,
+      expectedAction: 'booking_reschedule',
+    });
+    if (!ok) return c.json({ error: 'Verifica anti-bot fallita. Riprova.' }, 403);
+  }
+
   const newStart = typeof body.start === 'string' ? body.start : null;
   if (!newStart || isNaN(Date.parse(newStart))) return c.json({ error: 'start ISO richiesto' }, 400);
 

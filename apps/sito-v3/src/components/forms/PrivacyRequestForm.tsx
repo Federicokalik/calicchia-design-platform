@@ -40,7 +40,7 @@ export function PrivacyRequestForm() {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof PrivacyRequestInput, string>>>({});
   const { config } = useRuntimeConfig();
   const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey);
+  const turnstile = useTurnstile(turnstileSiteKey, 'gdpr_request');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -246,8 +246,9 @@ export function PrivacyRequestForm() {
         {fieldErrors.gdpr ? <FieldError>{fieldErrors.gdpr}</FieldError> : null}
       </Field>
 
-      {/* Turnstile invisible widget (lazy script via useTurnstile). */}
-      <div ref={turnstile.containerRef} aria-hidden="true" />
+      {/* Turnstile interaction-only widget (lazy script via useTurnstile).
+          NOT aria-hidden: must remain accessible when CF asks for a click. */}
+      <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
       {!turnstileSiteKey ? (
         <MonoLabel as="p">
           Anti-bot · verifica server-side al submit

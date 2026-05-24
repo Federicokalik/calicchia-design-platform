@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { getClientIp } from '../lib/client-ip';
 
 export const newsletter = new Hono();
 
@@ -10,9 +11,11 @@ const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.le
 newsletter.post('/subscribe', async (c) => {
   const { email, name, turnstile_token } = await c.req.json();
 
-  // Turnstile verification
-  const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', clientIp);
+  // Turnstile verification (action binds token to the newsletter signup form)
+  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+    remoteIp: getClientIp(c) ?? undefined,
+    expectedAction: 'newsletter_subscribe',
+  });
   if (!turnstileOk) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }

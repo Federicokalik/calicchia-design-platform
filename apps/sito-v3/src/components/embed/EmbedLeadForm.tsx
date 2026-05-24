@@ -41,7 +41,10 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const { config } = useRuntimeConfig();
-  const { containerRef, token, ready, reset } = useTurnstile(config.turnstileSiteKey);
+  const { containerRef, token, ready, reset } = useTurnstile(
+    config.turnstileSiteKey,
+    'embed_lead',
+  );
 
   // Resize observer: report height to parent ogni volta che cambia
   useEffect(() => {
@@ -189,7 +192,7 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
         />
       </div>
 
-      <div ref={containerRef} />
+      <div ref={containerRef} style={{ minWidth: 300 }} />
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 

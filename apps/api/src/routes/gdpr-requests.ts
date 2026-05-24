@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { verifyTurnstileToken } from '../lib/turnstile';
+import { getClientIp } from '../lib/client-ip';
 import { sendEmail } from '../lib/email';
 import { renderGdprRequestEmail } from '../templates/gdpr-request';
 import { logger } from '../lib/logger';
@@ -29,9 +30,11 @@ gdprRequests.post('/', async (c) => {
   const body = await c.req.json();
   const { email, name, request_type, message, turnstile_token } = body;
 
-  // Turnstile verification
-  const clientIp = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || undefined;
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', clientIp);
+  // Turnstile verification (action binds token to the GDPR request form)
+  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+    remoteIp: getClientIp(c) ?? undefined,
+    expectedAction: 'gdpr_request',
+  });
   if (!turnstileOk) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }

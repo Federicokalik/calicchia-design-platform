@@ -8,6 +8,7 @@
  */
 
 import { Hono } from 'hono';
+import { getClientIp } from '../lib/client-ip';
 import { z } from 'zod';
 import { sql, sqlv } from '../db';
 import { sessionId, visitId, visitIdYesterday } from '../lib/analytics/hash';
@@ -39,21 +40,7 @@ const trackSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
-function getClientIp(c: import('hono').Context): string | null {
-  const cf = c.req.header('cf-connecting-ip');
-  if (cf) return cf;
-  const xf = c.req.header('x-forwarded-for');
-  if (xf) return xf.split(',')[0].trim();
-  const xr = c.req.header('x-real-ip');
-  if (xr) return xr;
-  // Node.js fallback: read the socket remote address directly from the underlying
-  // IncomingMessage. Critical for dev without a reverse proxy.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const env = c.env as { incoming?: { socket?: { remoteAddress?: string } } } | undefined;
-  const sock = env?.incoming?.socket?.remoteAddress;
-  if (sock) return sock;
-  return null;
-}
+// getClientIp: shared helper in lib/client-ip (CF-first priority + socket fallback).
 
 function sanitizeReferrer(raw: string | null | undefined): { full: string | null; domain: string | null } {
   if (!raw) return { full: null, domain: null };
