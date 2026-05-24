@@ -53,16 +53,10 @@ export function AiBar() {
   const { t } = useI18n();
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
-  // Mobile-only collapsed state. On phones the full pill+suggestions stack
-  // takes too much space over content, so by default we render just a FAB.
-  // Desktop ignores this and always renders the full bar.
-  // Collapsable everywhere. On mobile we start collapsed because the bar
-  // covers content; on desktop we start expanded (productivity assist) but
-  // the user can minimize to a FAB when it gets in the way.
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    return !window.matchMedia('(min-width: 1024px)').matches;
-  });
+  // Start collapsed (FAB-only) everywhere. The user opens with click or ⌘J;
+  // the always-expanded desktop default was perceived as visual clutter that
+  // couldn't be dismissed (X clears messages, only the minimize icon collapses).
+  const [collapsed, setCollapsed] = useState(true);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
