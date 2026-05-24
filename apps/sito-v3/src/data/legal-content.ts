@@ -16,7 +16,7 @@ export type LegalDocument = {
 };
 
 export const TITOLARE_EMAIL = 'mail@calicchia.design';
-export const LAST_LEGAL_UPDATE = '2026-05-05';
+export const LAST_LEGAL_UPDATE = '2026-05-24';
 
 const TITOLARE = 'Federico Calicchia';
 const TITOLARE_ADDRESS = 'Via Scifelli 74, Ceccano 03023 FR';
@@ -57,8 +57,9 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
             ],
             list: [
               'Next.js own data e sessionStorage: gestione tecnica della navigazione, stato temporaneo dell’interfaccia e transizioni locali; durata di sessione o finché il browser conserva il dato.',
-              'Middleware locale: routing, localizzazione e controlli tecnici lato server; nessuna profilazione.',
               'cookie_consent: memorizza le preferenze cookie espresse; durata 6 mesi.',
+              'NEXT_LOCALE: memorizza la lingua scelta (IT/EN) per non doverla riselezionare a ogni visita; durata 1 anno.',
+              'LANG_BANNER_DISMISSED: ricorda la chiusura del banner che suggerisce la versione inglese; durata 1 anno.',
               'Eventuali cookie di autenticazione HttpOnly: usati solo per aree riservate o amministrative; durata tecnica collegata alla sessione o alla sicurezza del servizio.'
             ]
           },
@@ -74,38 +75,54 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
             ]
           },
           {
-            id: 'analytics-trustindex',
+            id: 'analytics-google',
             number: '02.03',
-            heading: 'Analytics e recensioni',
+            heading: 'Analytics aggregato',
             paragraphs: [
-              'Se attivo e consentito, TrustIndex può fornire analytics aggregato legato al widget recensioni.\nIl trattamento è aggregato, senza profilazione e senza conservazione di IP raw da parte del sito.'
+              'Se hai prestato consenso alla categoria Analytics, il sito carica strumenti di misurazione aggregata del traffico e di analisi di usabilità. I dati sono trattati in forma anonimizzata o aggregata, senza profilazione individuale.'
             ],
             list: [
-              'TrustIndex: widget recensioni e statistiche aggregate; caricamento subordinato alle impostazioni del banner quando richiesto.'
+              'Google Analytics 4: pagine viste, eventi, durata sessione. Cookie `_ga` e `_ga_<measurement-id>` con durata 13 mesi. Titolare: Google Ireland Ltd.',
+              'Mouseflow: heatmap e session replay aggregati con input dei form mascherati di default. Cookie `mf_user` con durata 12 mesi. Titolare: Mouseflow ApS (Danimarca).'
+            ]
+          },
+          {
+            id: 'analytics-trustindex',
+            number: '02.04',
+            heading: 'Recensioni e widget di terze parti',
+            paragraphs: [
+              "Previo consenso alla categoria Marketing/Terze parti, il sito può caricare widget esterni che mostrano contenuti di terze parti."
+            ],
+            list: [
+              'TrustIndex: widget recensioni verificate; carica contenuto dalla CDN del fornitore. Cookie `ti-cookie` di sessione. Titolare: Trustindex Innovacios Kft. (Ungheria).'
             ]
           },
           {
             id: 'error-tracking-bugsink',
-            number: '02.04',
+            number: '02.05',
             heading: 'Error tracking',
             paragraphs: [
-              'Bugsink non è attivo nella versione corrente del sito.\nSarà eventualmente attivato in una fase successiva per raccogliere errori tecnici, senza finalità di profilazione.'
+              "Per garantire la stabilità del sito raccolgo errori tecnici tramite un'istanza Bugsink self-hosted. La raccolta avviene anche in assenza di consenso ai cookie analytics/marketing perché basata su interesse legittimo (art. 6(1)(f) GDPR) e limitata a stack trace e breadcrumb tecnici.",
+              'Email, telefono, nome, token e indirizzo IP vengono filtrati lato client e sostituiti con [redacted] prima dell\'invio (hook `beforeSend` dello SDK Sentry). Bugsink è ospitato sulla mia infrastruttura, nessun trasferimento extra-UE.'
+            ],
+            list: [
+              'Bugsink (self-hosted): stack trace, breadcrumb UI, URL anonimizzato (querystring rimossa). Conservazione 90 giorni. Titolare: Caldes (self-hosted).'
             ]
           },
           {
             id: 'mappe-google',
-            number: '02.05',
+            number: '02.06',
             heading: 'Mappe e contenuti esterni',
             paragraphs: [
               'La mappa nel footer può caricare Google Maps solo dopo consenso ai contenuti di terze parti.\nPrima del consenso viene mostrato un placeholder.'
             ],
             list: [
-              'Google Maps: visualizzazione mappa e indicazioni; può trattare IP, dati tecnici del browser e cookie Google secondo le policy del fornitore.'
+              'Google Maps: visualizzazione mappa e indicazioni. Cookie `NID` con durata 6 mesi. Può trattare IP e dati tecnici del browser secondo le policy del fornitore. Titolare: Google Ireland Ltd.'
             ]
           },
           {
             id: 'servizi-rimossi',
-            number: '02.06',
+            number: '02.07',
             heading: 'Servizi non utilizzati',
             paragraphs: [
               'Il sito non carica embed di prenotazione di terze parti.\nLa prenotazione, quando disponibile, viene gestita con stack proprietario o link interni.'
@@ -204,6 +221,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Inviare newsletter o comunicazioni facoltative: art. 6(1)(a) GDPR, consenso esplicito e revocabile.',
           'Misurare traffico e uso del sito con strumenti aggregati, se attivi: art. 6(1)(a) GDPR, consenso.',
           'Garantire sicurezza, prevenzione abusi e protezione anti-bot: art. 6(1)(f) GDPR, interesse legittimo.',
+          'Diagnosticare errori tecnici e garantire la stabilità del sito tramite error tracking self-hosted, con PII filtrate lato client prima dell\'invio: art. 6(1)(f) GDPR, interesse legittimo.',
           'Gestire obblighi fiscali e contabili: art. 6(1)(c) GDPR, obbligo legale.'
         ]
       },
@@ -269,7 +287,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Stripe e PayPal: pagamenti e fatturazione quando usati nei servizi contrattualizzati.',
           'Google Maps: mappa nel footer, caricata solo previo consenso ai contenuti di terze parti.',
           'TrustIndex: recensioni e analytics aggregato del widget, se attivo.',
-          'Bugsink: non attivo nella versione corrente del sito; eventuale error tracking tecnico in fase successiva.'
+          'Google Analytics 4 e Mouseflow: misurazione aggregata e analisi di usabilità, caricati solo previo consenso analytics.',
+          'Bugsink (self-hosted): error tracking tecnico su base di interesse legittimo, con PII filtrate prima dell\'invio.'
         ]
       },
       {

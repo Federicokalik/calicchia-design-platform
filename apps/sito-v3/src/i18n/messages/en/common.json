@@ -64,5 +64,49 @@
     "notFoundLabel": "404",
     "notFoundTitle": "Nothing to see here.",
     "notFoundBody": "You followed a broken link, or I changed something without telling you. Try the home page."
+  },
+  "cookies": {
+    "banner": {
+      "kicker": "Cookie preferences",
+      "title": "Choose what to load.",
+      "intro": "I use technical cookies required to run the site. With your consent I can also enable aggregate analytics tools and third-party content.",
+      "rejectAll": "Necessary only",
+      "acceptAll": "Accept all",
+      "customize": "Customize",
+      "closeAriaLabel": "Close and reject non-necessary cookies",
+      "cookiePolicy": "Cookie Policy",
+      "privacyPolicy": "Privacy Policy",
+      "preferencesKicker": "Manage consent",
+      "preferencesTitle": "Preferences.",
+      "preferencesIntro": "Expand a category to see vendor details, cookies used, purpose and retention.",
+      "back": "Back",
+      "save": "Save preferences",
+      "categories": {
+        "necessary": {
+          "label": "Necessary",
+          "description": "Essential for site operation, security, and saving your preferences. They do not require consent under applicable law.",
+          "always": "Always on"
+        },
+        "analytics": {
+          "label": "Analytics",
+          "description": "Aggregate traffic measurement and usability analysis. Data is used only in anonymous/aggregate form, with no profiling."
+        },
+        "marketing": {
+          "label": "Marketing & third parties",
+          "description": "Third-party content such as interactive maps and review widgets. They may process your IP and technical data per the vendor's own policies."
+        }
+      },
+      "table": {
+        "vendor": "Vendor",
+        "cookies": "Cookies",
+        "purpose": "Purpose",
+        "duration": "Retention",
+        "processor": "Controller/Processor",
+        "policy": "Policy",
+        "serverOnly": "Server-side only (no cookies)",
+        "expandCategoryAria": "Show {category} vendor details",
+        "policyLink": "Open policy"
+      }
+    }
   }
 }

@@ -64,5 +64,49 @@
     "notFoundLabel": "404",
     "notFoundTitle": "Niente da vedere qui.",
     "notFoundBody": "Hai seguito un link rotto, oppure ho cambiato qualcosa senza dirtelo. Dai un'occhiata alla home."
+  },
+  "cookies": {
+    "banner": {
+      "kicker": "Preferenze cookie",
+      "title": "Scegli cosa caricare.",
+      "intro": "Uso cookie tecnici necessari al funzionamento. Con il tuo consenso posso abilitare strumenti di analytics aggregato e contenuti di terze parti.",
+      "rejectAll": "Solo necessari",
+      "acceptAll": "Accetta tutti",
+      "customize": "Personalizza",
+      "closeAriaLabel": "Chiudi e rifiuta i cookie non necessari",
+      "cookiePolicy": "Cookie Policy",
+      "privacyPolicy": "Privacy Policy",
+      "preferencesKicker": "Gestisci consenso",
+      "preferencesTitle": "Preferenze.",
+      "preferencesIntro": "Espandi una categoria per vedere il dettaglio dei vendor, i cookie utilizzati, lo scopo e la durata.",
+      "back": "Indietro",
+      "save": "Salva preferenze",
+      "categories": {
+        "necessary": {
+          "label": "Necessari",
+          "description": "Essenziali per funzionamento, sicurezza e memorizzazione delle preferenze. Non richiedono consenso ai sensi della normativa vigente.",
+          "always": "Sempre attivi"
+        },
+        "analytics": {
+          "label": "Analytics",
+          "description": "Misurazione aggregata del traffico e analisi di usabilità. Dati anonimi/aggregati, senza profilazione."
+        },
+        "marketing": {
+          "label": "Marketing & terze parti",
+          "description": "Contenuti di terze parti come mappe interattive e widget recensioni. Possono trattare il tuo IP e dati tecnici secondo le policy dei rispettivi fornitori."
+        }
+      },
+      "table": {
+        "vendor": "Vendor",
+        "cookies": "Cookie",
+        "purpose": "Scopo",
+        "duration": "Durata",
+        "processor": "Titolare/Responsabile",
+        "policy": "Policy",
+        "serverOnly": "Solo lato server (nessun cookie)",
+        "expandCategoryAria": "Mostra dettagli vendor {category}",
+        "policyLink": "Apri policy"
+      }
+    }
   }
 }

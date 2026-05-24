@@ -18,8 +18,8 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 anno
  * - Click "Switch to English" → redirect a /en/freelance-web-designer-italy + cookie set.
  * - Click "Dismiss" → cookie set, banner sparisce immediatamente.
  *
- * Pentagram-style: hairline 1px top+bottom, mono uppercase 11px, accent dot,
- * altezza fissa per evitare layout shift.
+ * Pentagram-style: hairline 1px top, mono uppercase 11px, accent dot,
+ * fixed al bottom del viewport (full-width, dismissible).
  */
 export function LanguagePromptBanner() {
   const currentLocale = useLocale();
@@ -36,20 +36,17 @@ export function LanguagePromptBanner() {
       .some((c) => c.startsWith(`${COOKIE_NAME}=`));
     if (dismissed) return;
 
-    // Browser language check
-    const langs = [
-      navigator.language,
-      ...(Array.isArray(navigator.languages) ? navigator.languages : []),
-    ]
-      .filter(Boolean)
-      .map((l) => l.toLowerCase());
-
-    const prefersEn = langs.some((l) => l.startsWith('en'));
-    if (prefersEn) setVisible(true);
+    // Browser language check — only the PRIMARY language (navigator.language).
+    // navigator.languages includes secondary languages and on most IT systems
+    // ships with en-US as fallback, which would trigger the banner for almost
+    // every Italian visitor. Restricting to the primary preference makes the
+    // banner appear only when the user has truly configured English first.
+    const primary = (navigator.language ?? '').toLowerCase();
+    if (primary.startsWith('en')) setVisible(true);
   }, [currentLocale]);
 
   const dismiss = () => {
-    document.cookie = `${COOKIE_NAME}=1; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax`;
+    document.cookie = `${COOKIE_NAME}=1; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax; Secure`;
     setVisible(false);
   };
 
@@ -63,8 +60,10 @@ export function LanguagePromptBanner() {
       style={{
         background: '#FAFAF7',
         borderTop: '1px solid var(--color-line)',
-        borderBottom: '1px solid var(--color-line)',
-        position: 'relative',
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        bottom: 0,
         zIndex: 70,
       }}
     >
@@ -85,7 +84,7 @@ export function LanguagePromptBanner() {
             href="/freelance-web-designer-italy"
             locale="en"
             onClick={() => {
-              document.cookie = `${COOKIE_NAME}=1; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax`;
+              document.cookie = `${COOKIE_NAME}=1; max-age=${COOKIE_MAX_AGE}; path=/; SameSite=Lax; Secure`;
             }}
             className="font-mono text-[11px] uppercase tracking-[0.18em] underline-offset-4 hover:underline"
             style={{ color: 'var(--color-ink)' }}

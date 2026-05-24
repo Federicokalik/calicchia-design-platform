@@ -79,8 +79,27 @@ export function rejectAll(): ConsentRecord {
 export function shouldShowBanner(): boolean {
   const consent = getConsent();
   if (!consent) return true;
-  if (Date.now() - consent.timestamp > SIX_MONTHS_MS) return true;
+
+  const age = Date.now() - consent.timestamp;
+
+  // Hard expiration: 6 months from the consent date (Garante 2021 §6 + EDPB
+  // Guidelines 5/2020 §3.1.3). After this window any prior choice lapses
+  // regardless of which option the user picked.
+  if (age > SIX_MONTHS_MS) return true;
+
+  // Explicit reject must be respected for the full 6-month silence window,
+  // even if CONSENT_VERSION bumps. Re-prompting a user who already said "no"
+  // would amount to nagging and violate the principle of fairness (Garante
+  // 2021 §6 ban on repeated solicitation).
+  const isExplicitReject =
+    consent.preferences.analytics === false && consent.preferences.marketing === false;
+  if (isExplicitReject) return false;
+
+  // For accepting users, a version bump (e.g. a new vendor was added that
+  // wasn't covered by the prior consent) reopens the banner so they can
+  // re-express their choice on the updated scope.
   if (consent.version !== CONSENT_VERSION) return true;
+
   return false;
 }
 
