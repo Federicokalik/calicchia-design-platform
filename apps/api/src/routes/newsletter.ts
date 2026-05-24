@@ -11,9 +11,14 @@ const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.le
 newsletter.post('/subscribe', async (c) => {
   const { email, name, turnstile_token } = await c.req.json();
 
+  const clientIp = getClientIp(c);
+  // Truncate user-agent to a reasonable length to avoid unbounded text storage
+  // if a client sends an abusive header.
+  const userAgent = (c.req.header('user-agent') ?? '').slice(0, 512) || null;
+
   // Turnstile verification (action binds token to the newsletter signup form)
   const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
-    remoteIp: getClientIp(c) ?? undefined,
+    remoteIp: clientIp ?? undefined,
     expectedAction: 'newsletter_subscribe',
   });
   if (!turnstileOk) {
@@ -27,10 +32,19 @@ newsletter.post('/subscribe', async (c) => {
     return c.json({ error: 'Email non valida' }, 400);
   }
 
+  // Persist consent proof (art. 7 GDPR + Decisione Garante 330/2025): IP +
+  // user-agent at subscribe time, alongside the existing timestamp. The
+  // double-opt-in confirmation later captures `confirmed_ip` to prove that
+  // the click came from someone with mailbox access.
   await sql`
-    INSERT INTO newsletter_subscribers (email, name, status)
-    VALUES (${email}, ${name || null}, 'pending')
-    ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, status = 'pending'
+    INSERT INTO newsletter_subscribers (email, name, status, consent_ip, consent_user_agent)
+    VALUES (${email}, ${name || null}, 'pending', ${clientIp}, ${userAgent})
+    ON CONFLICT (email) DO UPDATE SET
+      name               = EXCLUDED.name,
+      status             = 'pending',
+      consent_ip         = EXCLUDED.consent_ip,
+      consent_user_agent = EXCLUDED.consent_user_agent,
+      updated_at         = NOW()
   `;
 
   return c.json({ success: true, message: 'Iscrizione ricevuta. Controlla la tua email.' });
@@ -40,9 +54,13 @@ newsletter.get('/confirm', async (c) => {
   const token = c.req.query('token');
   if (!token) return c.json({ error: 'Token mancante' }, 400);
 
+  const confirmIp = getClientIp(c);
+
   const [updated] = await sql`
     UPDATE newsletter_subscribers
-    SET status = 'confirmed', confirmed_at = NOW()
+    SET status       = 'confirmed',
+        confirmed_at = NOW(),
+        confirmed_ip = ${confirmIp}
     WHERE confirmation_token = ${token}::uuid
     RETURNING id
   `;
