@@ -378,15 +378,29 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         number: '02',
         heading: 'Oggetto',
         paragraphs: [
-          'I presenti Termini e Condizioni regolano l’utilizzo del sito Caldes / Calicchia Design\ne i rapporti contrattuali relativi ai servizi professionali offerti.'
+          'I presenti Termini e Condizioni regolano l’utilizzo del sito Caldes / Calicchia Design\ne i rapporti contrattuali relativi ai servizi professionali offerti.\nL’uso del sito comporta accettazione integrale di queste condizioni.'
+        ]
+      },
+      {
+        id: 'uso-del-sito',
+        number: '03',
+        heading: 'Uso del sito',
+        paragraphs: [
+          'Il sito è messo a disposizione gratuitamente per finalità di informazione,\nconsultazione del portfolio e richiesta di preventivi.\nL’accesso e l’uso devono avvenire nel rispetto della legge e dei presenti Termini.'
+        ],
+        list: [
+          'È vietato qualsiasi uso automatizzato del sito (scraping massivo, crawling intensivo, bot non autorizzati) che possa comprometterne la stabilità o aggirare le misure anti-bot.',
+          'È vietato tentare di accedere ad aree riservate, alterare contenuti, o compromettere la sicurezza del sito o dei suoi utenti.',
+          'I contenuti del sito (testi, immagini, layout, codice) sono protetti da diritto d’autore. Sono ammessi citazione e link in conformità alla normativa applicabile.',
+          'Mi riservo il diritto di sospendere o limitare l’accesso in caso di abuso, attività illecita o violazione dei presenti Termini.'
         ]
       },
       {
         id: 'servizi-offerti',
-        number: '03',
+        number: '04',
         heading: 'Servizi offerti',
         paragraphs: [
-          'I servizi v3 sono organizzati in cinque aree principali.\nEventuali attività accessorie vengono concordate nel preventivo e\nnon costituiscono automaticamente un servizio autonomo.'
+          'I servizi sono organizzati in cinque aree principali.\nEventuali attività accessorie vengono concordate nel preventivo e\nnon costituiscono automaticamente un servizio autonomo.'
         ],
         list: [
           'Web Design.',
@@ -398,7 +412,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'preventivi-ordini',
-        number: '04',
+        number: '05',
         heading: 'Preventivi e ordini',
         list: [
           'I preventivi sono gratuiti e senza impegno, salvo diversa indicazione scritta.',
@@ -410,19 +424,19 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'prezzi-pagamenti',
-        number: '05',
+        number: '06',
         heading: 'Prezzi e pagamenti',
         list: [
           'I prezzi indicati nel preventivo sono comprensivi di IVA se dovuta.',
           'Modalità standard, salvo diversa pattuizione: acconto all’accettazione, saldo o milestone intermedie durante il progetto.',
           'Per importi superiori a 1.000 euro può essere concordato un pagamento rateale senza interessi.',
-          'I pagamenti possono essere effettuati tramite bonifico bancario, Stripe o altri metodi indicati nel preventivo.',
-          'In caso di ritardato pagamento il progetto può essere sospeso fino al saldo.'
+          'I pagamenti possono essere effettuati tramite bonifico bancario, Stripe, PayPal o altri metodi indicati nel preventivo.',
+          'In caso di ritardato pagamento il progetto può essere sospeso fino al saldo. Decorsi 30 giorni dalla scadenza possono essere applicati interessi moratori ai sensi del D.Lgs. 231/2002 per i rapporti tra professionisti.'
         ]
       },
       {
         id: 'tempistiche',
-        number: '06',
+        number: '07',
         heading: 'Tempistiche',
         list: [
           'Le tempistiche indicate nel preventivo sono stime operative e non termini essenziali, salvo accordo scritto.',
@@ -433,7 +447,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'revisioni-modifiche',
-        number: '07',
+        number: '08',
         heading: 'Revisioni e modifiche',
         list: [
           'Il preventivo include il numero di revisioni specificato nell’offerta.',
@@ -443,7 +457,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'proprieta-intellettuale',
-        number: '08',
+        number: '09',
         heading: 'Proprietà intellettuale',
         list: [
           'Il codice sorgente e gli asset sviluppati su misura diventano di proprietà del cliente al saldo completo, salvo diversa indicazione.',
@@ -454,7 +468,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'hosting-terze-parti',
-        number: '09',
+        number: '10',
         heading: 'Hosting e terze parti',
         list: [
           'Hosting, dominio e servizi di terze parti non sono inclusi nel prezzo, salvo diversa indicazione nel preventivo.',
@@ -463,8 +477,20 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         ]
       },
       {
+        id: 'trattamento-dati-tc',
+        number: '11',
+        heading: 'Trattamento dei dati personali',
+        paragraphs: [
+          'I dati personali raccolti tramite il sito o nell’ambito dell’esecuzione dei servizi\nsono trattati secondo quanto descritto nella Privacy Policy e nella Cookie Policy,\nche costituiscono parte integrante dei presenti Termini.'
+        ],
+        list: [
+          'Le basi giuridiche, le finalità, i periodi di conservazione e i diritti dell’interessato sono descritti nella Privacy Policy.',
+          'Per esercitare i diritti previsti dagli artt. 15-22 GDPR è disponibile il modulo /privacy-request o l’email indicata nei contatti.'
+        ]
+      },
+      {
         id: 'garanzia-supporto',
-        number: '10',
+        number: '12',
         heading: 'Garanzia e supporto',
         list: [
           'Ogni progetto include il supporto indicato nel preventivo; in assenza di indicazione specifica, 30 giorni dalla consegna.',
@@ -474,10 +500,10 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'limitazione-responsabilita',
-        number: '11',
+        number: '13',
         heading: 'Limitazione di responsabilità',
         paragraphs: [
-          'Nei limiti consentiti dalla legge, non sono responsabile per eventi che dipendono da uso improprio,\nservizi di terze parti, contenuti forniti dal cliente o fattori fuori dal mio controllo diretto.'
+          'Nei limiti consentiti dalla legge, non sono responsabile per eventi che dipendono da uso improprio,\nservizi di terze parti, contenuti forniti dal cliente o fattori fuori dal mio controllo diretto.\nResta in ogni caso impregiudicata la responsabilità per dolo o colpa grave e i diritti inderogabili del consumatore.'
         ],
         list: [
           'Danni diretti o indiretti derivanti dall’uso del sito web del cliente.',
@@ -488,33 +514,49 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
       },
       {
         id: 'recesso',
-        number: '12',
+        number: '14',
         heading: 'Recesso',
         list: [
-          'Il cliente può recedere dal contratto in qualsiasi momento.',
+          'Il cliente può recedere dal contratto in qualsiasi momento con comunicazione scritta (email).',
           'In caso di recesso sono dovuti i compensi per il lavoro già svolto e per i costi non recuperabili sostenuti.',
-          'L’acconto versato non è rimborsabile se il lavoro è già stato avviato, salvo diverso accordo scritto.'
+          'L’acconto versato non è rimborsabile se il lavoro è già stato avviato, salvo diverso accordo scritto.',
+          'Per il diritto di recesso del consumatore nei contratti a distanza vedi la sezione dedicata.'
+        ]
+      },
+      {
+        id: 'diritti-consumatore',
+        number: '15',
+        heading: 'Diritti del consumatore',
+        paragraphs: [
+          'Le presenti disposizioni si applicano esclusivamente ai contratti conclusi a distanza con persone fisiche\nche agiscono per scopi estranei alla propria attività professionale (consumatori),\nai sensi del Codice del Consumo (D.Lgs. 206/2005).'
+        ],
+        list: [
+          'Il consumatore ha diritto di recedere senza fornire alcuna motivazione entro 14 giorni dalla conclusione del contratto (art. 52 D.Lgs. 206/2005).',
+          'Il recesso si esercita inviando comunicazione scritta a ' + TITOLARE_EMAIL + ' prima della scadenza del termine.',
+          'Il diritto di recesso non si applica una volta che il servizio è stato completamente eseguito con il consenso espresso del consumatore e con la sua accettazione del fatto di perdere il diritto di recesso a seguito della piena esecuzione (art. 59 lett. a, D.Lgs. 206/2005).',
+          'In caso di esecuzione parziale già autorizzata dal consumatore, è dovuto un importo proporzionale al servizio prestato.',
+          'Risoluzione alternativa controversie (ODR): la Commissione Europea mette a disposizione una piattaforma online accessibile all’indirizzo https://ec.europa.eu/consumers/odr.'
         ]
       },
       {
         id: 'foro-competente',
-        number: '13',
+        number: '16',
         heading: 'Foro competente',
         paragraphs: [
-          'Per qualsiasi controversia derivante dai presenti Termini e Condizioni\nè competente in via esclusiva il Foro di Frosinone,\nsalvo norme inderogabili applicabili al cliente consumatore.'
+          'Per qualsiasi controversia derivante dai presenti Termini e Condizioni\nè competente in via esclusiva il Foro di Frosinone,\nsalvo norme inderogabili applicabili al cliente consumatore\n(che potrà rivolgersi al foro della propria residenza o domicilio elettivo).'
         ]
       },
       {
         id: 'modifiche-termini',
-        number: '14',
+        number: '17',
         heading: 'Modifiche ai termini',
         paragraphs: [
-          'I presenti Termini e Condizioni possono essere modificati.\nLe modifiche vengono pubblicate su questa pagina con la data di ultimo aggiornamento.'
+          'I presenti Termini e Condizioni possono essere modificati.\nLe modifiche vengono pubblicate su questa pagina con la data di ultimo aggiornamento.\nPer i contratti già in corso si applicano i Termini in vigore alla data di accettazione del preventivo.'
         ]
       },
       {
         id: 'contatti-termini',
-        number: '15',
+        number: '18',
         heading: 'Contatti',
         paragraphs: [
           `Per qualsiasi domanda sui presenti termini puoi scrivermi a ${TITOLARE_EMAIL}.`

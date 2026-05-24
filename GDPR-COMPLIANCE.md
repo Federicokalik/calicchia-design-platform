@@ -59,7 +59,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | D1 | Double opt-in | ✅ | Implementato con confirmation_token |
 | D2 | Consenso separato (non accorpato ad altri consensi) | ✅ | Form dedicato |
 | D3 | Link unsubscribe in ogni email | ✅ | sendNewsletterEmail() con footer unsubscribe |
-| D4 | Prova del consenso (timestamp, IP, versione policy) | ⚠️ | Timestamp presente, IP da aggiungere nella subscribe |
+| D4 | Prova del consenso (timestamp, IP, versione policy) | ✅ | Timestamp + IP + user-agent al subscribe e al confirm (migration 103, 2026-05-24) |
 | D5 | Informativa al punto di iscrizione | ✅ | Testo sotto SubscribeForm |
 | D6 | Link privacy policy sul form di iscrizione | ✅ | Link a /privacy-policy |
 
@@ -157,7 +157,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | L11 | Erasure GDPR include WhatsApp | ✅ | `/api/gdpr-requests/erase/:email` cancella in cascata conversazioni + messaggi + preferences linkate al customer/lead. |
 | L12 | AI inbound (auto-reply/triage) trasparenza | ✅ | Messaggi inviati da AI loggati con `sender_kind='ai'`. Modalità per conversazione (`ai_mode`) modificabile dall'admin. Triage richiede approvazione umana esplicita. |
 | L13 | Base giuridica AI processing | ✅ | Art. 6(1)(f) per triage interno. Nessuna decisione automatizzata che produce effetti giuridici (Art. 22 non applicabile — solo bozze di risposta). |
-| L14 | Sub-responsabile WhatsApp | ⚠️ | Meta (WhatsApp LLC) come destinatario dei messaggi via WhatsApp Web protocol. Aggiungere a privacy policy sezione 8. |
+| L14 | Sub-responsabile WhatsApp | ✅ | Meta Platforms Ireland Ltd. / WhatsApp LLC aggiunti alla privacy policy sez. 2 (dati), 3 (basi giuridiche per categoria), 6 (retention), 8 (destinatari), 9 (extra-UE/DPF). Commit 2026-05-24. |
 | L15 | DPA con GOWA | ✅ | Self-hosted su VPS proprio (gowa.calicchia.design) — nessun sub-responsabile esterno per il gateway. |
 | L16 | Informativa al primo contatto WA | 🔧 | Da aggiungere al primo template "first contact" outbound: indicazione su come gestire preferenze e diritto di opt-out. |
 
@@ -165,7 +165,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 
 | # | Requisito | Stato | Note |
 |---|-----------|-------|------|
-| K1 | Pagina termini e condizioni | ⚠️ | Da creare (non strettamente GDPR, ma raccomandata) |
+| K1 | Pagina termini e condizioni | ✅ | 18 sezioni — uso del sito, preventivi, prezzi, IP, hosting, privacy ref, garanzia, recesso, diritti consumatore (14gg + ODR EU), foro. Commit 2026-05-24. |
 | K2 | Pagina cookie policy | ✅ | Aggiornata e completa |
 | K3 | Pagina privacy policy | ✅ | Aggiornata e completa |
 | K4 | Footer con link legali su tutte le pagine | ✅ | Privacy, Cookie Policy, Gestisci Cookie |
@@ -180,29 +180,31 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | A. Cookie & Consenso | 10 | 0 | 0 | 10 |
 | B. Privacy Policy | 14 | 0 | 0 | 14 |
 | C. Form di Contatto | 6 | 0 | 0 | 6 |
-| D. Newsletter | 5 | 1 | 0 | 6 |
+| D. Newsletter | 6 | 0 | 0 | 6 |
 | E. Analytics | 5 | 0 | 0 | 5 |
 | F. Admin & Sicurezza | 8 | 2 | 0 | 10 |
 | G. Diritti Interessato | 8 | 0 | 0 | 8 |
 | H. Area Clienti | 3 | 2 | 0 | 5 |
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
-| K. Portale Pubblico | 4 | 1 | 0 | 5 |
-| L. WhatsApp (GOWA) | 14 | 1 | 0 | 15 (1 🔧 in corso, conteggio nei ⚠️) |
-| **TOTALE** | **88** | **13** | **0** | **101** |
+| K. Portale Pubblico | 5 | 0 | 0 | 5 |
+| L. WhatsApp (GOWA) | 15 | 0 | 0 | 15 (L16 🔧 in corso, conteggio nei ✅ una volta committato) |
+| **TOTALE** | **91** | **10** | **0** | **101** |
 
-**Conformità: ~87% (88/101 pienamente conformi)**
+**Conformità: ~90% (91/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
-1. **D4**: Aggiungere log IP nella subscribe newsletter
-2. **F6**: Implementare MFA (raccomandato, non obbligatorio)
-3. **F9**: Granularità ruoli (accettabile per freelancer)
-4. **H2/H5**: DPA clienti e workflow cancellazione post-10-anni
-5. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
-6. **K1**: Creare pagina termini e condizioni
-7. **L14**: Aggiungere Meta/WhatsApp tra i destinatari della privacy policy (sezione 8)
-8. **L16**: Creare template "first contact" WA con disclaimer preferenze (in corso)
+1. **F6**: Implementare MFA (raccomandato, non obbligatorio) — schema in migration 102, codice/UI da implementare
+2. **F9**: Granularità ruoli (accettabile per freelancer)
+3. **H2/H5**: DPA clienti e workflow cancellazione post-10-anni
+4. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
+5. **L16**: Creare template "first contact" WA con disclaimer preferenze (in corso)
+
+### Chiusi nella sessione 2026-05-24:
+- **D4**: log IP/UA subscribe + confirm newsletter (migration 103)
+- **L14**: Meta/WhatsApp in privacy policy sez. 2/3/6/8/9
+- **K1**: T&C completi a 18 sezioni con diritti consumatore + ODR EU
 
 ---
 
