@@ -109,7 +109,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | H2 | DPA con clienti (se si trattano dati per conto loro) | ⚠️ | Template DPA disponibile in docs/gdpr/ |
 | H3 | Accesso limitato ai propri dati | ✅ | JWT portalAuth + query filtrate per customer_id |
 | H4 | Conservazione dati definita | ✅ | 10 anni (obbligo fiscale) documentato in privacy policy |
-| H5 | Cancellazione post-termine rapporto | ⚠️ | Da implementare workflow (dopo 10 anni) |
+| H5 | Cancellazione post-termine rapporto | ✅ | Migration 104 — funzioni Postgres `anonymize_customers_post_retention(10)` e `anonymize_leads_post_retention(10)` integrate in `run_data_retention()`, eseguite dal cron daily alle 5:00. Customers anonimizzati 10y dopo l'ultima attività fiscale; leads 10y dopo creazione se non linkati a customer attivo. Marker `anonymized_at` per audit. Commit 2026-05-24. |
 
 ## I. TERZE PARTI & DPA
 
@@ -184,20 +184,20 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | E. Analytics | 5 | 0 | 0 | 5 |
 | F. Admin & Sicurezza | 8 | 2 | 0 | 10 |
 | G. Diritti Interessato | 8 | 0 | 0 | 8 |
-| H. Area Clienti | 3 | 2 | 0 | 5 |
+| H. Area Clienti | 4 | 1 | 0 | 5 |
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
 | K. Portale Pubblico | 5 | 0 | 0 | 5 |
 | L. WhatsApp (GOWA) | 16 | 0 | 0 | 16 |
-| **TOTALE** | **92** | **9** | **0** | **101** |
+| **TOTALE** | **93** | **8** | **0** | **101** |
 
-**Conformità: ~91% (92/101 pienamente conformi)**
+**Conformità: ~92% (93/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
 1. **F6**: Implementare MFA (raccomandato, non obbligatorio) — schema in migration 102, codice/UI da implementare
 2. **F9**: Granularità ruoli (accettabile per freelancer)
-3. **H2/H5**: DPA clienti e workflow cancellazione post-10-anni
+3. **H2**: DPA con clienti (template documento, non codice)
 4. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
 
 ### Chiusi nella sessione 2026-05-24:
@@ -205,6 +205,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 - **L14**: Meta/WhatsApp in privacy policy sez. 2/3/6/8/9
 - **K1**: T&C completi a 18 sezioni con diritti consumatore + ODR EU
 - **L16**: disclaimer first-contact WhatsApp auto-appeso (`whatsapp-disclaimer.ts`)
+- **H5**: cron anonimizzazione customers/leads post-10-anni (migration 104)
 
 ---
 
