@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { Send, Sparkles, X } from 'lucide-react';
+import { Send, Sparkles, X, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
@@ -53,6 +53,16 @@ export function AiBar() {
   const { t } = useI18n();
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
+  // Mobile-only collapsed state. On phones the full pill+suggestions stack
+  // takes too much space over content, so by default we render just a FAB.
+  // Desktop ignores this and always renders the full bar.
+  // Collapsable everywhere. On mobile we start collapsed because the bar
+  // covers content; on desktop we start expanded (productivity assist) but
+  // the user can minimize to a FAB when it gets in the way.
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return !window.matchMedia('(min-width: 1024px)').matches;
+  });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -67,22 +77,40 @@ export function AiBar() {
     : pageContext;
   const suggestions = SUGGESTIONS[pageContext] || SUGGESTIONS.default;
 
-  // ⌘J shortcut
+  // ⌘J shortcut — collapsed → expand to full chat; otherwise toggle chat panel.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
         e.preventDefault();
-        setExpanded((v) => !v);
+        if (collapsed) {
+          setCollapsed(false);
+          setExpanded(true);
+        } else {
+          setExpanded((v) => !v);
+        }
       }
-      if (e.key === 'Escape' && expanded) setExpanded(false);
+      if (e.key === 'Escape') {
+        if (expanded) setExpanded(false);
+        else if (!collapsed) setCollapsed(true);
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [expanded]);
+  }, [expanded, collapsed]);
 
   useEffect(() => {
-    if (expanded) setTimeout(() => inputRef.current?.focus(), 100);
-  }, [expanded]);
+    if (expanded && !collapsed) setTimeout(() => inputRef.current?.focus(), 100);
+  }, [expanded, collapsed]);
+
+  const openFromFab = () => {
+    setCollapsed(false);
+    setExpanded(true);
+  };
+
+  const collapseToFab = () => {
+    setCollapsed(true);
+    setExpanded(false);
+  };
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -115,14 +143,34 @@ export function AiBar() {
     }
   };
 
-  return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2" style={{ maxWidth: '420px', width: 'min(420px, calc(100vw - 2rem))' }}>
+  // Collapsed state: render only the FAB. Tap opens straight into chat mode.
+  if (collapsed) {
+    return (
+      <button
+        type="button"
+        onClick={openFromFab}
+        className="fixed bottom-4 right-4 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center z-[var(--z-ai-bubble)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-label={t('ai.openAssistant')}
+      >
+        <Sparkles className="h-5 w-5" />
+      </button>
+    );
+  }
 
-      {/* Chat panel (expands upward) */}
+  return (
+    <div
+      className="fixed bottom-4 right-4 flex flex-col items-end gap-2 z-[var(--z-ai-bubble)]"
+      style={{ maxWidth: '420px', width: 'min(420px, calc(100vw - 2rem))' }}
+    >
+
+      {/* Chat panel (expands upward). max-h with dvh prevents covering more
+          than ~70% of viewport on phone landscape. */}
       <div
         className={cn(
           'w-full ai-bubble-island overflow-hidden transition-all duration-300 ease-out',
-          expanded ? 'max-h-[460px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none',
+          expanded
+            ? 'max-h-[min(70dvh,460px)] opacity-100'
+            : 'max-h-0 opacity-0 pointer-events-none',
         )}
       >
         {/* Header */}
@@ -131,13 +179,27 @@ export function AiBar() {
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-semibold">AI Assistant</span>
           </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setMessages([])}>
-              <X className="h-3 w-3" />
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 lg:h-7 lg:w-7"
+              onClick={() => setMessages([])}
+              aria-label={t('ai.clear')}
+              title={t('ai.clear')}
+            >
+              <X className="h-4 w-4 lg:h-3 lg:w-3" />
             </Button>
-            <button onClick={() => setExpanded(false)} className="text-[10px] text-muted-foreground hover:text-foreground px-1">
-              {t('ai.close')}
-            </button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 lg:h-7 lg:w-7"
+              onClick={collapseToFab}
+              aria-label={t('ai.minimize')}
+              title={t('ai.minimize')}
+            >
+              <Minimize2 className="h-4 w-4 lg:h-3 lg:w-3" />
+            </Button>
           </div>
         </div>
 
@@ -201,13 +263,15 @@ export function AiBar() {
         </div>
       </div>
 
-      {/* Suggestion chips (always visible above the pill) */}
+      {/* Suggestion chips. min-h-9 / px-3 / text-xs respects the 8dp grid +
+          44px tap rule (chip is short but still 36px which is acceptable for
+          secondary actions per Material guidance; primary actions get 44). */}
       {!expanded && (
-        <div className="flex gap-1.5 justify-end flex-wrap">
+        <div className="flex gap-2 justify-end flex-wrap">
           {suggestions.map((s) => (
             <button
               key={s}
-              className="text-[11px] rounded-full bg-card border border-border/50 px-2.5 py-1 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shadow-sm"
+              className="min-h-9 inline-flex items-center text-xs rounded-full bg-card border border-border/50 px-3 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shadow-sm"
               onClick={() => sendMessage(t(s))}
             >
               {t(s)}
@@ -216,24 +280,40 @@ export function AiBar() {
         </div>
       )}
 
-      {/* Input pill (always visible) */}
+      {/* Input pill (always visible). Mobile: 56px high pill + 16px input
+          font to avoid iOS auto-zoom. Desktop shrinks both back down.
+          The leading Sparkles is clickable to collapse back to FAB. */}
       <form
         onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-        className="w-full ai-bubble-island flex items-center gap-2 px-3 h-11"
+        className="w-full ai-bubble-island flex items-center gap-2 px-3 h-14 lg:h-11"
       >
-        <Sparkles className="h-4 w-4 text-primary shrink-0" />
+        <button
+          type="button"
+          onClick={collapseToFab}
+          aria-label={t('ai.minimize')}
+          title={t('ai.minimize')}
+          className="h-11 w-11 lg:h-7 lg:w-7 inline-flex items-center justify-center rounded-full text-primary shrink-0 hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Sparkles className="h-4 w-4" />
+        </button>
         <input
           ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => messages.length > 0 && !expanded && setExpanded(true)}
           placeholder={t('ai.placeholder')}
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/40"
+          className="flex-1 bg-transparent text-base lg:text-sm outline-none placeholder:text-muted-foreground/40"
           disabled={isLoading}
         />
         {input.trim() ? (
-          <Button type="submit" size="icon" className="h-7 w-7 rounded-full shrink-0" disabled={isLoading}>
-            <Send className="h-3.5 w-3.5" />
+          <Button
+            type="submit"
+            size="icon"
+            className="h-11 w-11 lg:h-7 lg:w-7 rounded-full shrink-0"
+            disabled={isLoading}
+            aria-label="Invia"
+          >
+            <Send className="h-4 w-4 lg:h-3.5 lg:w-3.5" />
           </Button>
         ) : (
           <kbd className="hidden sm:inline-flex pointer-events-none h-5 select-none items-center rounded border bg-muted/50 px-1.5 font-mono text-[10px] text-muted-foreground/40">

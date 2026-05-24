@@ -50,7 +50,7 @@ export function KbWarningBanner() {
         <Link
           to="/impostazioni"
           state={{ activeTab: 'knowledge-base' }}
-          className="ml-auto inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
+          className="ml-auto inline-flex items-center gap-1 min-h-11 lg:min-h-0 font-medium underline-offset-2 hover:underline"
         >
           Vai a Knowledge Base
           <ArrowRight className="h-3 w-3" />

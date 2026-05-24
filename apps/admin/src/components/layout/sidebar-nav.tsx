@@ -143,10 +143,12 @@ function NavItemLink({ item, collapsed }: { item: NavItem; collapsed: boolean })
       end={item.end}
       className={({ isActive }) =>
         cn(
-          'flex items-center transition-all duration-150',
+          // min-h-11 guarantees 44px touch target on mobile (lg+ shrinks via
+          // override below). Below lg we keep desktop density but compliant.
+          'flex items-center transition-all duration-150 min-h-11 lg:min-h-0',
           collapsed
-            ? 'justify-center rounded-md p-1.5'
-            : 'gap-3 rounded-md px-3 py-2 text-sm',
+            ? 'justify-center rounded-md p-1.5 lg:p-1.5'
+            : 'gap-3 rounded-md px-3 py-2.5 lg:py-2 text-sm',
           isActive
             ? collapsed ? 'bg-primary/15 text-primary' : 'nav-item-active'
             : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground font-normal'

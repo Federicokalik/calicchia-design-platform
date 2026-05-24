@@ -43,7 +43,13 @@ export function AppLayout() {
             sidebar.collapsed ? 'lg:ml-[60px]' : 'lg:ml-[264px]'
           )}
         >
-          <main className="px-4 lg:px-5 pb-4" style={{ paddingTop: '5rem' }}>
+          {/*
+            pt-14 mobile = 56px topbar; pt-16 lg = 64px topbar (matches topbar.tsx).
+            pb-24 mobile riserva spazio per l'AI bubble bottom-right (~56+16),
+            evita che copra l'ultimo contenuto della pagina. lg torna a pb-4
+            perche' a desktop il bubble e' al margine ma scrollabile via.
+          */}
+          <main className="px-4 lg:px-5 pb-24 lg:pb-4 pt-14 lg:pt-16">
             <KbWarningBanner />
             <Outlet />
           </main>

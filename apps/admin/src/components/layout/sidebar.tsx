@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   ChevronsLeft,
   ChevronsRight,
@@ -34,22 +35,36 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
     navigate('/login');
   };
 
+  // Mobile drawer: close on Escape key (a11y convention for modal-like overlays).
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCloseMobile();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [mobileOpen, onCloseMobile]);
+
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Mobile backdrop — sits between content (no z) and sidebar (z-50). */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 bg-black/50 lg:hidden z-[var(--z-sidebar-backdrop)]"
           onClick={onCloseMobile}
+          aria-hidden="true"
         />
       )}
 
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 flex flex-col sidebar-island transition-all duration-200 ease-in-out overflow-hidden',
+          'fixed left-0 top-0 flex flex-col sidebar-island transition-transform duration-200 ease-in-out overflow-hidden lg:z-[var(--z-topbar)] z-[var(--z-sidebar-mobile)]',
           collapsed ? 'w-[44px]' : 'w-[248px]',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
+        role={mobileOpen ? 'dialog' : undefined}
+        aria-modal={mobileOpen ? 'true' : undefined}
+        aria-label="Menu di navigazione"
       >
         {/* Header */}
         <div className={cn(
@@ -63,8 +78,15 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
               <Button variant="ghost" size="icon" className="hidden lg:flex h-7 w-7" onClick={onToggle}>
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="lg:hidden h-7 w-7" onClick={onCloseMobile}>
-                <X className="h-4 w-4" />
+              {/* Mobile close: full 44px target for the drawer dismiss. */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="lg:hidden h-11 w-11"
+                onClick={onCloseMobile}
+                aria-label="Chiudi menu"
+              >
+                <X className="h-5 w-5" />
               </Button>
             </>
           )}
