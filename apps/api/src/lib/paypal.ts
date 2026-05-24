@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { sql } from '../db';
 
 // Credentials can come from env or from DB settings
@@ -92,15 +93,26 @@ export async function createPaypalOrderEmbedded(opts: {
   currency: string;
   description: string;
   reference_id?: string;
+  /** Optional idempotency key. Defaults to deterministic value from reference_id
+   *  (so retrying the same payment_link doesn't create duplicate PayPal orders),
+   *  or a random UUID v4 if no reference_id available. */
+  idempotencyKey?: string;
 }): Promise<{ id: string; status: string }> {
   const token = await getAccessToken();
   const baseUrl = await getBaseUrl();
+
+  // PayPal v2 supports PayPal-Request-Id for idempotent order creation —
+  // if a retry hits within the dedup window (~3h), PayPal returns the
+  // original order instead of creating a duplicate.
+  const requestId = opts.idempotencyKey
+    ?? (opts.reference_id ? `pp-emb-${opts.reference_id}` : `pp-emb-${randomUUID()}`);
 
   const res = await fetch(`${baseUrl}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
+      'PayPal-Request-Id': requestId,
       Prefer: 'return=representation',
     },
     body: JSON.stringify({
@@ -188,15 +200,21 @@ export async function createPaypalOrder(opts: {
   return_url: string;
   cancel_url: string;
   reference_id?: string;
+  /** See createPaypalOrderEmbedded.idempotencyKey */
+  idempotencyKey?: string;
 }): Promise<PaypalOrderResult> {
   const token = await getAccessToken();
   const baseUrl = await getBaseUrl();
+
+  const requestId = opts.idempotencyKey
+    ?? (opts.reference_id ? `pp-redir-${opts.reference_id}` : `pp-redir-${randomUUID()}`);
 
   const res = await fetch(`${baseUrl}/v2/checkout/orders`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
+      'PayPal-Request-Id': requestId,
       Prefer: 'return=representation',
     },
     body: JSON.stringify({

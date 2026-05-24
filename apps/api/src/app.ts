@@ -203,6 +203,12 @@ app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);
 // ICS feed pubblico per subscription esterne (iPhone/macOS Calendar/Outlook)
 app.route('/api/calendar/feed', calendarFeed);
+// Webhook ingress rate limits: defense in depth before signature verify.
+// Real Stripe/PayPal traffic burstiness fits comfortably in 100 req/min/IP —
+// they retry with backoff and never overlap multiple deliveries per second.
+const paymentWebhookRateLimit = createRateLimit(100, 60 * 1000);
+app.use('/api/stripe/webhook', paymentWebhookRateLimit);
+app.use('/api/paypal-webhook', paymentWebhookRateLimit);
 app.route('/api/stripe/webhook', stripeWebhook);
 app.route('/api/paypal-webhook', paypalWebhook);
 app.route('/api/cron/domains', domainCron);
@@ -215,6 +221,10 @@ app.route('/api/quote-sign', quotePublic);
 const signRateLimit = createRateLimit(10, 60 * 1000);
 app.use('/api/sign/*', signRateLimit);
 app.route('/api/sign', signablesPublic);
+// PayPal client-token generation is unauthenticated by design (the token is a
+// browser-SDK capability, not a money-mover). Each call still costs us an
+// OAuth roundtrip to PayPal, so cap per-IP to avoid abuse.
+app.use('/api/paypal/client-token', createRateLimit(10, 60 * 1000));
 app.route('/api/paypal', paypal);
 app.route('/api/public-pay', publicPay);
 // Telegram webhook (no auth — verified by bot secret token).

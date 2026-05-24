@@ -3,24 +3,23 @@
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 
 /**
- * Lazy-loaded Stripe.js singleton.
+ * Lazy-loaded Stripe.js singleton, keyed by publishable key.
  *
- * Embedded Checkout (and Elements in general) needs the publishable key
- * exposed to the browser. Read from NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.
- * In dev: copy the value of STRIPE_PUBLISHABLE_KEY (pk_test_…) from the
- * monorepo root .env into the NEXT_PUBLIC_ variant.
+ * The publishable key comes from /api/config (RuntimeConfigProvider), NOT
+ * NEXT_PUBLIC_*: that way our published Docker image stays neutral and a
+ * fork who pulls it doesn't inherit our Stripe merchant. Pass the key in
+ * from the calling component via `useRuntimeConfig().config.stripePublishableKey`.
  */
-let stripePromise: Promise<Stripe | null> | null = null;
+const promises = new Map<string, Promise<Stripe | null>>();
 
-export function getStripePromise(): Promise<Stripe | null> {
-  if (stripePromise) return stripePromise;
-  const key = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
-  if (!key) {
-    console.warn(
-      '[stripe-client] NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY missing — Embedded Checkout disabled',
-    );
+export function getStripePromise(publishableKey: string): Promise<Stripe | null> {
+  if (!publishableKey) {
+    console.warn('[stripe-client] publishable key missing — Embedded Checkout disabled');
     return Promise.resolve(null);
   }
-  stripePromise = loadStripe(key);
-  return stripePromise;
+  const cached = promises.get(publishableKey);
+  if (cached) return cached;
+  const promise = loadStripe(publishableKey);
+  promises.set(publishableKey, promise);
+  return promise;
 }

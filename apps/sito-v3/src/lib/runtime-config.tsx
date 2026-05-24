@@ -19,6 +19,8 @@ const EMPTY_CONFIG: PublicRuntimeConfig = {
   mouseflowId: '',
   turnstileSiteKey: '',
   googleMapsKey: '',
+  stripePublishableKey: '',
+  paypalClientId: '',
 };
 
 interface RuntimeConfigState {

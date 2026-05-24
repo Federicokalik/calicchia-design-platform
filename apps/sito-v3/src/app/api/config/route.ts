@@ -18,6 +18,10 @@ export interface PublicRuntimeConfig {
   mouseflowId: string;
   turnstileSiteKey: string;
   googleMapsKey: string;
+  /** Stripe publishable key (pk_test_ / pk_live_). Used by @stripe/stripe-js loadStripe(). */
+  stripePublishableKey: string;
+  /** PayPal SDK client ID (same merchant as PAYPAL_CLIENT_ID). Used by PayPalScriptProvider. */
+  paypalClientId: string;
 }
 
 export async function GET() {
@@ -26,6 +30,11 @@ export async function GET() {
     mouseflowId: process.env.MOUSEFLOW_ID ?? '',
     turnstileSiteKey: process.env.TURNSTILE_SITE_KEY ?? '',
     googleMapsKey: process.env.GOOGLE_MAPS_KEY ?? '',
+    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? '',
+    // PayPal SDK reads the same merchant client_id that the server uses
+    // for OAuth. Allow override via PAYPAL_PUBLIC_CLIENT_ID for the rare
+    // case where you want a sandbox SDK against a live API (or vice versa).
+    paypalClientId: process.env.PAYPAL_PUBLIC_CLIENT_ID ?? process.env.PAYPAL_CLIENT_ID ?? '',
   };
 
   return NextResponse.json(config, {

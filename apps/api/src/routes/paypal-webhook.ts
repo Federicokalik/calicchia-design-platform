@@ -48,6 +48,12 @@ function readCaptureIdFromRefund(resource: Record<string, unknown>): string | nu
 }
 
 paypalWebhook.post('/', async (c) => {
+  // Block early if PayPal isn't configured at all. Mirrors stripe-webhook
+  // which returns 503 (Service Unavailable) rather than a generic 400.
+  if (!process.env.PAYPAL_WEBHOOK_ID) {
+    return c.json({ error: 'PayPal webhook non configurato' }, 503);
+  }
+
   const rawBody = await c.req.text();
 
   let event: PaypalWebhookEvent;
@@ -61,10 +67,22 @@ paypalWebhook.post('/', async (c) => {
   const eventType = event.event_type ?? 'unknown';
   if (!eventId) throw new HTTPException(400, { message: 'PayPal event_id mancante' });
 
+  // Signature verification BEFORE touching the DB. Otherwise an attacker can
+  // flood `paypal_webhook_logs` with bogus rows and use the duplicate-vs-new
+  // response shape as an oracle for which event_ids we've already seen.
+  // Mirrors Stripe webhook ordering (constructEvent -> insert log).
+  const signatureHeaders = extractPaypalSignatureHeaders((name) => c.req.header(name));
+  const signatureValid = await verifyPaypalSignature(signatureHeaders, event);
+  if (!signatureValid) {
+    log.warn({ eventId, eventType }, 'PayPal webhook signature rejected');
+    throw new HTTPException(400, { message: 'Signature PayPal non valida' });
+  }
+
   const logRow: Record<string, unknown> = {
     event_id: eventId,
     event_type: eventType,
     payload: sqlv(maskPII(event) as Record<string, unknown>),
+    signature_valid: true,
   };
   const inserted = await sql`
     INSERT INTO paypal_webhook_logs ${sql(logRow)}
@@ -74,24 +92,6 @@ paypalWebhook.post('/', async (c) => {
 
   if (inserted.length === 0) {
     return c.json({ received: true, duplicate: true });
-  }
-
-  const signatureHeaders = extractPaypalSignatureHeaders((name) => c.req.header(name));
-  const signatureValid = await verifyPaypalSignature(signatureHeaders, event);
-
-  await sql`
-    UPDATE paypal_webhook_logs
-    SET signature_valid = ${signatureValid}
-    WHERE event_id = ${eventId}
-  `;
-
-  if (!signatureValid) {
-    await sql`
-      UPDATE paypal_webhook_logs
-      SET processed = false, error_message = 'Signature PayPal non valida'
-      WHERE event_id = ${eventId}
-    `;
-    throw new HTTPException(400, { message: 'Signature PayPal non valida' });
   }
 
   try {

@@ -141,6 +141,11 @@ services:
       GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_KEY}
       GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID}
       MOUSEFLOW_ID: ${MOUSEFLOW_ID}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      # PAYPAL_CLIENT_ID viene gia' passato in api (server-side); il sito lo
+      # legge via /api/config dallo stesso valore. Override possibile via
+      # PAYPAL_PUBLIC_CLIENT_ID se servisse separare SDK e OAuth (raro).
+      PAYPAL_CLIENT_ID: ${PAYPAL_CLIENT_ID}
     depends_on:
       - api
     networks:

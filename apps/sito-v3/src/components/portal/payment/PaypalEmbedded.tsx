@@ -15,6 +15,7 @@ import { Loader2 } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
 import { Button } from '@/components/portal/ui/button';
 import { PortalLabel } from '@/components/portal/ui/typography';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
 interface PaypalEmbeddedProps {
   orderId: string;
@@ -23,8 +24,6 @@ interface PaypalEmbeddedProps {
   onSuccess: () => void;
   currency?: string;
 }
-
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
 
 function CardFieldsSubmit({
   onSubmitStart,
@@ -76,6 +75,8 @@ export function PaypalEmbedded({
   currency = 'EUR',
 }: PaypalEmbeddedProps) {
   const t = useTranslations('portal.payment.paypal');
+  const { config, ready } = useRuntimeConfig();
+  const paypalClientId = config.paypalClientId;
   const [clientToken, setClientToken] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -101,7 +102,16 @@ export function PaypalEmbedded({
     };
   }, [t]);
 
-  if (!PAYPAL_CLIENT_ID) {
+  if (!ready) {
+    return (
+      <div className="flex items-center gap-2 text-portal-body text-muted-foreground">
+        <Loader2 className="animate-spin" aria-hidden />
+        <span>{t('initializing')}</span>
+      </div>
+    );
+  }
+
+  if (!paypalClientId) {
     return (
       <p className="text-portal-body text-destructive">
         {t('configMissing')}
@@ -145,7 +155,7 @@ export function PaypalEmbedded({
   return (
     <PayPalScriptProvider
       options={{
-        clientId: PAYPAL_CLIENT_ID,
+        clientId: paypalClientId,
         currency,
         intent: 'capture',
         components: 'buttons,card-fields',
