@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { getConsent, installCookieConsentGlobals, type CookiePreferences } from '@/lib/cookie-consent';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
-const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || '';
 const GA_SCRIPT_ID = 'google-analytics-gtag-script';
 
 type ConsentValue = 'granted' | 'denied';
@@ -37,13 +37,13 @@ function ensureGtag() {
     };
 }
 
-function ensureGoogleAnalyticsScript() {
+function ensureGoogleAnalyticsScript(measurementId: string) {
   if (document.getElementById(GA_SCRIPT_ID)) return;
 
   const script = document.createElement('script');
   script.id = GA_SCRIPT_ID;
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
   document.head.appendChild(script);
 }
 
@@ -54,22 +54,25 @@ function updateConsent(preferences?: CookiePreferences) {
 
 export function GoogleAnalytics() {
   const pathname = usePathname();
+  const { config, ready } = useRuntimeConfig();
+  const measurementId = config.gaMeasurementId;
 
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!ready) return;
+    if (!measurementId) return;
     installCookieConsentGlobals();
-    window[`ga-disable-${GA_MEASUREMENT_ID}`] = false;
+    window[`ga-disable-${measurementId}`] = false;
 
     ensureGtag();
     if (!window.__googleAnalyticsConfigured) {
       window.gtag?.('consent', 'default', consentState());
       window.gtag?.('js', new Date());
-      window.gtag?.('config', GA_MEASUREMENT_ID, { send_page_view: false });
+      window.gtag?.('config', measurementId, { send_page_view: false });
       window.__googleAnalyticsConfigured = true;
     }
 
     updateConsent(getConsent()?.preferences);
-    ensureGoogleAnalyticsScript();
+    ensureGoogleAnalyticsScript(measurementId);
 
     const onConsentChanged = (event: WindowEventMap['cookie-consent-changed']) => {
       updateConsent(event.detail.preferences);
@@ -78,16 +81,17 @@ export function GoogleAnalytics() {
     window.addEventListener('cookie-consent-changed', onConsentChanged);
     return () => {
       window.removeEventListener('cookie-consent-changed', onConsentChanged);
-      window[`ga-disable-${GA_MEASUREMENT_ID}`] = true;
+      window[`ga-disable-${measurementId}`] = true;
     };
-  }, []);
+  }, [ready, measurementId]);
 
   useEffect(() => {
-    if (!GA_MEASUREMENT_ID) return;
+    if (!ready) return;
+    if (!measurementId) return;
     if (!pathname) return;
 
     ensureGtag();
-    window[`ga-disable-${GA_MEASUREMENT_ID}`] = false;
+    window[`ga-disable-${measurementId}`] = false;
 
     const pagePath = `${pathname}${window.location.search}`;
     if (window.__lastGoogleAnalyticsPageView === pagePath) return;
@@ -97,9 +101,9 @@ export function GoogleAnalytics() {
       page_location: window.location.href,
       page_path: pagePath,
       page_title: document.title,
-      send_to: GA_MEASUREMENT_ID
+      send_to: measurementId
     });
-  }, [pathname]);
+  }, [pathname, ready, measurementId]);
 
   return null;
 }

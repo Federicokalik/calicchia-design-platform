@@ -9,6 +9,7 @@ import {
   installCookieConsentGlobals,
   setConsent,
 } from '@/lib/cookie-consent';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
 const MAP_SCRIPT_ID = 'google-maps-footer-script';
 
@@ -57,7 +58,8 @@ export function FooterMap() {
   const [canLoad, setCanLoad] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
+  const { config } = useRuntimeConfig();
+  const apiKey = config.googleMapsKey;
 
   useEffect(() => {
     installCookieConsentGlobals();

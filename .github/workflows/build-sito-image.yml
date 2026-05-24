@@ -81,13 +81,11 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
           # Valori pubblici inlinati nel bundle: vanno definiti come repo Variables.
+          # NB: Turnstile / GMaps / GA / Mouseflow NON sono qui di proposito:
+          # vengono iniettati a runtime via /api/config dal container env.
           build-args: |
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-            NEXT_PUBLIC_GOOGLE_MAPS_KEY=${{ vars.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
             NEXT_PUBLIC_BUGSINK_DSN=${{ vars.NEXT_PUBLIC_BUGSINK_DSN }}
-            NEXT_PUBLIC_GA_MEASUREMENT_ID=${{ vars.NEXT_PUBLIC_GA_MEASUREMENT_ID }}
-            NEXT_PUBLIC_MOUSEFLOW_ID=${{ vars.NEXT_PUBLIC_MOUSEFLOW_ID }}
             GOOGLE_SITE_VERIFICATION=${{ vars.GOOGLE_SITE_VERIFICATION }}
             PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL }}
 

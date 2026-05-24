@@ -27,12 +27,12 @@ import {
 } from '@/lib/schemas/contact';
 import { useTurnstile } from '@/hooks/useTurnstile';
 import { useLeadSource } from '@/hooks/useLeadSource';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 import { reportEvent } from '@/instrumentation-client';
 import { SITE } from '@/data/site';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 type ServiceOption = (typeof SERVICE_OPTIONS)[number];
 
@@ -124,7 +124,9 @@ export function ContactFormClient() {
   const validationMessage = (message: string | undefined) =>
     message ? validationMessages.get(message) ?? message : undefined;
 
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const { config } = useRuntimeConfig();
+  const turnstileSiteKey = config.turnstileSiteKey;
+  const turnstile = useTurnstile(turnstileSiteKey);
 
   const {
     register,
@@ -439,7 +441,7 @@ export function ContactFormClient() {
 
       {/* Turnstile invisible widget (lazy script) */}
       <div ref={turnstile.containerRef} aria-hidden="true" className="mt-6" />
-      {!TURNSTILE_SITE_KEY ? (
+      {!turnstileSiteKey ? (
         <MonoLabel as="p" className="mt-3">
           {t('turnstileDisabled')}
         </MonoLabel>

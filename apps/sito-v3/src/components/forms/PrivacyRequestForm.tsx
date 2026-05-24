@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/form/Textarea';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Button } from '@/components/ui/Button';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
 // Italian copy keyed by the API enum values (request_type).
 const REQUEST_TYPE_LABELS: Record<PrivacyRequestType, string> = {
@@ -33,12 +34,13 @@ type FormState =
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ?? process.env.PORTAL_API_URL ?? 'http://localhost:3001';
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export function PrivacyRequestForm() {
   const [state, setState] = useState<FormState>({ kind: 'idle' });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof PrivacyRequestInput, string>>>({});
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const { config } = useRuntimeConfig();
+  const turnstileSiteKey = config.turnstileSiteKey;
+  const turnstile = useTurnstile(turnstileSiteKey);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -246,7 +248,7 @@ export function PrivacyRequestForm() {
 
       {/* Turnstile invisible widget (lazy script via useTurnstile). */}
       <div ref={turnstile.containerRef} aria-hidden="true" />
-      {!TURNSTILE_SITE_KEY ? (
+      {!turnstileSiteKey ? (
         <MonoLabel as="p">
           Anti-bot · verifica server-side al submit
         </MonoLabel>

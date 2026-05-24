@@ -18,13 +18,15 @@ RUN pnpm install --frozen-lockfile
 
 FROM deps AS builder
 ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
-ARG NEXT_PUBLIC_GOOGLE_MAPS_KEY
 ARG NEXT_PUBLIC_BUGSINK_DSN
-ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
-ARG NEXT_PUBLIC_MOUSEFLOW_ID
 ARG PUBLIC_SITE_URL
 ARG GOOGLE_SITE_VERIFICATION
+# Turnstile / Google Maps / GA / Mouseflow NON sono piu' build-args:
+# vengono iniettate a runtime tramite /api/config (vedi
+# apps/sito-v3/src/app/api/config/route.ts) leggendo le env del container:
+#   TURNSTILE_SITE_KEY, GOOGLE_MAPS_KEY, GA_MEASUREMENT_ID, MOUSEFLOW_ID.
+# In questo modo l'immagine resta neutra: chi pulla l'immagine non eredita
+# i nostri ID di analytics, cambio valore = restart container senza rebuild.
 # NB: PORTAL_API_URL NON viene passato in build di proposito. sitemap.ts fa
 # fetch verso l'API per progetti/blog; in build l'API non è raggiungibile e il
 # fetch va in timeout (60s ×3) facendo fallire `next build`. Senza la var,
@@ -33,11 +35,7 @@ ARG GOOGLE_SITE_VERIFICATION
 # (progetti, blog) richiedono un rebuild con API raggiungibile, oppure il fix
 # di sitemap.ts per renderlo runtime/resiliente (vedi audit ST-07 / CX-S2-04).
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
-    NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY \
-    NEXT_PUBLIC_GOOGLE_MAPS_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_KEY \
     NEXT_PUBLIC_BUGSINK_DSN=$NEXT_PUBLIC_BUGSINK_DSN \
-    NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
-    NEXT_PUBLIC_MOUSEFLOW_ID=$NEXT_PUBLIC_MOUSEFLOW_ID \
     PUBLIC_SITE_URL=$PUBLIC_SITE_URL \
     GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION \
     NEXT_TELEMETRY_DISABLED=1 \

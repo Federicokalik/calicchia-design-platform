@@ -20,11 +20,10 @@ import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/forms/PhoneInput';
 import { GdprCheckbox } from '@/components/forms/GdprCheckbox';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 import { SlotPicker } from './SlotPicker';
 import { createBooking, type BookingSlot } from '@/lib/booking-api';
 import type { BookingEventType } from '@/data/booking-types';
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 const bookingFormSchema = z.object({
   name: z.string().trim().min(2, 'Inserisci nome e cognome.').max(100),
@@ -70,7 +69,9 @@ const SLOT_FORMAT = new Intl.DateTimeFormat('it-IT', {
 export function BookingWidget({ eventType }: BookingWidgetProps) {
   const router = useRouter();
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const { config } = useRuntimeConfig();
+  const turnstileSiteKey = config.turnstileSiteKey;
+  const turnstile = useTurnstile(turnstileSiteKey);
 
   const {
     register,
@@ -101,7 +102,7 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
       setError('root', { type: 'manual', message: 'Seleziona prima uno slot.' });
       return;
     }
-    if (!turnstile.token && TURNSTILE_SITE_KEY) {
+    if (!turnstile.token && turnstileSiteKey) {
       setError('root', {
         type: 'manual',
         message: 'Verifica anti-bot non completata. Riprova tra qualche secondo.',

@@ -3,12 +3,12 @@
 import { useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { hasConsent, installCookieConsentGlobals } from '@/lib/cookie-consent';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
-const MOUSEFLOW_PROJECT_ID = process.env.NEXT_PUBLIC_MOUSEFLOW_ID || '';
 const MOUSEFLOW_SCRIPT_ID = 'mouseflow-script';
 
-function loadMouseflow() {
-  if (!MOUSEFLOW_PROJECT_ID) return;
+function loadMouseflow(projectId: string) {
+  if (!projectId) return;
   if (!hasConsent('analytics')) {
     window.mouseflow?.stop?.();
     return;
@@ -25,21 +25,24 @@ function loadMouseflow() {
   script.id = MOUSEFLOW_SCRIPT_ID;
   script.type = 'text/javascript';
   script.defer = true;
-  script.src = `//cdn.mouseflow.com/projects/${MOUSEFLOW_PROJECT_ID}.js`;
+  script.src = `//cdn.mouseflow.com/projects/${projectId}.js`;
   document.head.appendChild(script);
 }
 
 export function MouseflowAnalytics() {
   const pathname = usePathname();
   const lastPathRef = useRef<string | null>(null);
+  const { config, ready } = useRuntimeConfig();
+  const projectId = config.mouseflowId;
 
   useEffect(() => {
-    if (!MOUSEFLOW_PROJECT_ID) return;
+    if (!ready) return;
+    if (!projectId) return;
     installCookieConsentGlobals();
-    loadMouseflow();
+    loadMouseflow(projectId);
 
     const onConsentChanged = () => {
-      loadMouseflow();
+      loadMouseflow(projectId);
     };
 
     window.addEventListener('cookie-consent-changed', onConsentChanged);
@@ -47,7 +50,7 @@ export function MouseflowAnalytics() {
       window.removeEventListener('cookie-consent-changed', onConsentChanged);
       window.mouseflow?.stop?.();
     };
-  }, []);
+  }, [ready, projectId]);
 
   useEffect(() => {
     if (!pathname) return;

@@ -10,10 +10,10 @@ import { Input } from '@/components/portal/ui/input';
 import { Label } from '@/components/portal/ui/label';
 import { PortalCaption } from '@/components/portal/ui/typography';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 type Mode = 'magic-link' | 'code';
 
@@ -52,7 +52,9 @@ export function PortalLoginForm() {
     urlError === 'invalid_link' ? { global: t('errors.invalidLinkUrl') } : {}
   );
 
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY);
+  const { config } = useRuntimeConfig();
+  const turnstileSiteKey = config.turnstileSiteKey;
+  const turnstile = useTurnstile(turnstileSiteKey);
 
   const requestLink = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -60,7 +62,7 @@ export function PortalLoginForm() {
     const email = String(fd.get('email') ?? '').trim();
     if (!email) return setErrors({ email: t('errors.emailRequired') });
     if (!EMAIL_RE.test(email)) return setErrors({ email: t('errors.emailInvalid') });
-    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+    if (turnstileSiteKey && !turnstile.token) {
       return setErrors({ global: t('errors.turnstilePending') });
     }
     setErrors({});
@@ -105,7 +107,7 @@ export function PortalLoginForm() {
     else if (!EMAIL_RE.test(email)) errs.email = t('errors.emailInvalid');
     if (!access_code) errs.access_code = t('errors.accessCodeRequired');
     if (Object.keys(errs).length) return setErrors(errs);
-    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+    if (turnstileSiteKey && !turnstile.token) {
       return setErrors({ global: t('errors.turnstilePending') });
     }
 

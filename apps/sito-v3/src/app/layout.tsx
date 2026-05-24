@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
 import { ViewTransitionsBootstrap } from '@/components/providers/ViewTransitionsBootstrap';
+import { RuntimeConfigProvider } from '@/lib/runtime-config';
 import { MorphTicker } from '@/components/layout/MorphTicker';
 import { LanguagePromptBanner } from '@/components/layout/LanguagePromptBanner';
 import { AvailabilityTopbar } from '@/components/layout/AvailabilityTopbar';
@@ -111,6 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <StructuredData json={[personSchema(locale), localBusinessSchema({ locale }), websiteSchema(locale)]} />
 
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <RuntimeConfigProvider>
           <AvailabilityTopbar />
           <LanguagePromptBanner />
           <SmoothScrollProvider>
@@ -124,6 +126,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 documentato" (singolare). */}
             <MorphTicker />
           </SmoothScrollProvider>
+          </RuntimeConfigProvider>
         </NextIntlClientProvider>
       </body>
     </html>

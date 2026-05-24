@@ -133,6 +133,12 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # Runtime public config (consumato da /api/config -> RuntimeConfigProvider).
+      # Cambiare valore = restart container, nessun rebuild dell'immagine.
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
+      GOOGLE_MAPS_KEY: ${GOOGLE_MAPS_KEY}
+      GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID}
+      MOUSEFLOW_ID: ${MOUSEFLOW_ID}
     depends_on:
       - api
     networks:

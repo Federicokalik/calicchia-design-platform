@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useTurnstile } from '@/hooks/useTurnstile';
+import { useRuntimeConfig } from '@/lib/runtime-config';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 interface UtmParams {
   utm_source?: string;
@@ -40,7 +40,8 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const { containerRef, token, ready, reset } = useTurnstile(TURNSTILE_SITE_KEY);
+  const { config } = useRuntimeConfig();
+  const { containerRef, token, ready, reset } = useTurnstile(config.turnstileSiteKey);
 
   // Resize observer: report height to parent ogni volta che cambia
   useEffect(() => {
