@@ -71,6 +71,7 @@ const STATIC_PATHS = [
   '/privacy-policy',
   '/cookie-policy',
   '/termini-e-condizioni',
+  '/dpa-clienti',
   '/privacy-request',
 ] as const;
 
@@ -78,6 +79,7 @@ const LEGAL_PATHS = new Set([
   '/privacy-policy',
   '/cookie-policy',
   '/termini-e-condizioni',
+  '/dpa-clienti',
   '/privacy-request',
 ]);
 
@@ -112,6 +114,7 @@ const IT_ONLY_PATHS = new Set<string>([
   '/privacy-policy',
   '/cookie-policy',
   '/termini-e-condizioni',
+  '/dpa-clienti',
   '/privacy-request',
   '/faq',
 ]);

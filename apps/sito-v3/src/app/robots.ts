@@ -39,6 +39,7 @@ export default function robots(): MetadataRoute.Robots {
           '/en/privacy-policy',
           '/en/cookie-policy',
           '/en/termini-e-condizioni',
+          '/en/dpa-clienti',
           '/en/privacy-request',
           '/en/faq',
           '/en/prenota',

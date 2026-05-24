@@ -106,7 +106,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | # | Requisito | Stato | Note |
 |---|-----------|-------|------|
 | H1 | Base giuridica contrattuale documentata | ✅ | gdpr.legal_basis in risposta login portale |
-| H2 | DPA con clienti (se si trattano dati per conto loro) | ⚠️ | Template DPA disponibile in docs/gdpr/ |
+| H2 | DPA con clienti (se si trattano dati per conto loro) | ✅ | Pagina pubblica `/dpa-clienti` con DPA standard art. 28 GDPR (18 sezioni: parti, oggetto, istruzioni, riservatezza, misure sicurezza, sub-responsabili, extra-UE, diritti interessati, breach notification 24h, DPIA, fine rapporto, audit, foro). Richiamato come parte integrante dei T&C sez. 11. Commit 2026-05-24. |
 | H3 | Accesso limitato ai propri dati | ✅ | JWT portalAuth + query filtrate per customer_id |
 | H4 | Conservazione dati definita | ✅ | 10 anni (obbligo fiscale) documentato in privacy policy |
 | H5 | Cancellazione post-termine rapporto | ✅ | Migration 104 — funzioni Postgres `anonymize_customers_post_retention(10)` e `anonymize_leads_post_retention(10)` integrate in `run_data_retention()`, eseguite dal cron daily alle 5:00. Customers anonimizzati 10y dopo l'ultima attività fiscale; leads 10y dopo creazione se non linkati a customer attivo. Marker `anonymized_at` per audit. Commit 2026-05-24. |
@@ -184,20 +184,19 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 | E. Analytics | 5 | 0 | 0 | 5 |
 | F. Admin & Sicurezza | 9 | 1 | 0 | 10 |
 | G. Diritti Interessato | 8 | 0 | 0 | 8 |
-| H. Area Clienti | 4 | 1 | 0 | 5 |
+| H. Area Clienti | 5 | 0 | 0 | 5 |
 | I. Terze Parti & DPA | 4 | 5 | 0 | 9 |
 | J. Documentazione | 7 | 0 | 0 | 7 |
 | K. Portale Pubblico | 5 | 0 | 0 | 5 |
 | L. WhatsApp (GOWA) | 16 | 0 | 0 | 16 |
-| **TOTALE** | **94** | **7** | **0** | **101** |
+| **TOTALE** | **95** | **6** | **0** | **101** |
 
-**Conformità: ~93% (94/101 pienamente conformi)**
+**Conformità: ~94% (95/101 pienamente conformi)**
 **Nessun requisito mancante (❌ = 0)**
 
 ### Elementi ⚠️ rimanenti (azioni manuali richieste):
 1. **F9**: Granularità ruoli (accettabile per freelancer)
-2. **H2**: DPA con clienti (template documento, non codice)
-3. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com
+2. **I1/I3/I4/I6**: Sottoscrivere DPA con hosting, Cloudflare, Resend, Cal.com (firma esterna, una tantum)
 
 ### Chiusi nella sessione 2026-05-24:
 - **D4**: log IP/UA subscribe + confirm newsletter (migration 103)
@@ -206,6 +205,7 @@ Tre categorie con basi giuridiche distinte, gestite via tabella `communication_p
 - **L16**: disclaimer first-contact WhatsApp auto-appeso (`whatsapp-disclaimer.ts`)
 - **H5**: cron anonimizzazione customers/leads post-10-anni (migration 104)
 - **F6**: TOTP MFA admin (era già completamente implementato — checklist stale)
+- **H2**: DPA standard art. 28 GDPR pubblicato su `/dpa-clienti`, richiamato nei T&C come parte integrante
 
 ---
 

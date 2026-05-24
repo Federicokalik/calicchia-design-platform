@@ -45,6 +45,7 @@ const LEGAL_LINKS: FooterLink[] = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Cookie Policy', href: '/cookie-policy' },
   { label: 'Termini e condizioni', href: '/termini-e-condizioni' },
+  { label: 'DPA (clienti)', href: '/dpa-clienti' },
   { label: 'Richiesta dati personali', href: '/privacy-request' },
   { label: 'Area Clienti', href: '/clienti/login' },
 ];
@@ -95,6 +96,7 @@ export function SiteFooter() {
       '/privacy-policy': tFooter('legal.privacy'),
       '/cookie-policy': tFooter('legal.cookie'),
       '/termini-e-condizioni': tFooter('legal.terms'),
+      '/dpa-clienti': tFooter('legal.dpa'),
       '/privacy-request': tFooter('legal.request'),
       '/clienti/login': tNav('nav.areaClienti'),
     })[href] ?? fallback;

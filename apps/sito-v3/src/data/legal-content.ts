@@ -8,7 +8,7 @@ export type LegalSection = {
 };
 
 export type LegalDocument = {
-  slug: 'cookie-policy' | 'privacy-policy' | 'termini-e-condizioni';
+  slug: 'cookie-policy' | 'privacy-policy' | 'termini-e-condizioni' | 'dpa-clienti';
   title: string;
   intro: string;
   lastUpdated: string;
@@ -485,7 +485,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         ],
         list: [
           'Le basi giuridiche, le finalità, i periodi di conservazione e i diritti dell’interessato sono descritti nella Privacy Policy.',
-          'Per esercitare i diritti previsti dagli artt. 15-22 GDPR è disponibile il modulo /privacy-request o l’email indicata nei contatti.'
+          'Per esercitare i diritti previsti dagli artt. 15-22 GDPR è disponibile il modulo /privacy-request o l’email indicata nei contatti.',
+          'Quando i servizi commissionati comportano il trattamento di dati personali di cui il cliente è titolare (es. gestione hosting, manutenzione con accesso al backend, gestione mailing list o account analytics del cliente), si applica automaticamente il Data Processing Agreement ai sensi dell’art. 28 GDPR disponibile su /dpa-clienti, che costituisce parte integrante dei presenti Termini.'
         ]
       },
       {
@@ -560,6 +561,228 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         heading: 'Contatti',
         paragraphs: [
           `Per qualsiasi domanda sui presenti termini puoi scrivermi a ${TITOLARE_EMAIL}.`
+        ]
+      }
+    ]
+  },
+  'dpa-clienti': {
+    slug: 'dpa-clienti',
+    title: 'Accordo sul Trattamento dei Dati (DPA)',
+    intro:
+      'Accordo standard ai sensi dell’art. 28 GDPR per i servizi che comportano\ntrattamento di dati personali per conto del cliente.\nParte integrante dei Termini e Condizioni.',
+    lastUpdated: LAST_LEGAL_UPDATE,
+    sections: [
+      {
+        id: 'premessa-dpa',
+        number: '01',
+        heading: 'Premessa e ambito di applicazione',
+        paragraphs: [
+          'Il presente Accordo sul Trattamento dei Dati ("DPA") integra i Termini e Condizioni\ne disciplina i casi in cui — nell’esecuzione dei servizi commissionati — il prestatore\ntratta dati personali di cui il cliente è titolare ai sensi del Regolamento UE 2016/679 ("GDPR").',
+          'Il DPA si applica automaticamente, senza necessità di sottoscrizione separata,\nquando i servizi includono almeno una delle seguenti attività:'
+        ],
+        list: [
+          'gestione di hosting, dominio, certificati o infrastruttura del sito del cliente, con accesso ai dati ivi contenuti;',
+          'manutenzione continuativa, evolutiva o correttiva con accesso al backend, database o repository del cliente;',
+          'gestione di liste contatti o newsletter del cliente tramite account di terze parti (es. Resend, Mailchimp) operati dal prestatore;',
+          'attività SEO o analytics con accesso ad account Google (Search Console, Analytics, Tag Manager) o equivalenti del cliente;',
+          'sviluppo di funzionalità con accesso temporaneo o stabile a dati personali in chiaro del cliente.'
+        ]
+      },
+      {
+        id: 'parti',
+        number: '02',
+        heading: 'Identificazione delle parti',
+        list: [
+          `Responsabile del trattamento ("Responsabile"): ${TITOLARE}, ${TITOLARE_ADDRESS}, ${TITOLARE_VAT}, ${TITOLARE_EMAIL}.`,
+          'Titolare del trattamento ("Titolare"): il cliente identificato nel preventivo accettato e nei dati di fatturazione, che resta unico responsabile della liceità del trattamento dei dati conferiti al Responsabile.'
+        ]
+      },
+      {
+        id: 'oggetto-durata',
+        number: '03',
+        heading: 'Oggetto, durata, natura e finalità',
+        list: [
+          'Oggetto: trattamento dei dati personali necessari all’esecuzione dei servizi descritti nel preventivo accettato.',
+          'Durata: per tutta la durata del contratto commerciale, prorogata di 30 giorni per consentire la restituzione o cancellazione dei dati a fine rapporto.',
+          'Natura: operazioni tecniche di raccolta, registrazione, organizzazione, conservazione, consultazione, modifica, comunicazione, cancellazione, eseguite con strumenti elettronici.',
+          'Finalità: limitatamente all’esecuzione delle attività concordate; nessun uso autonomo dei dati per finalità diverse.'
+        ]
+      },
+      {
+        id: 'tipi-dati-interessati',
+        number: '04',
+        heading: 'Tipo di dati personali e categorie di interessati',
+        paragraphs: [
+          'A seconda dei servizi attivati, le categorie di dati e interessati possono includere:'
+        ],
+        list: [
+          'Dati identificativi e di contatto: nome, email, telefono, ragione sociale, indirizzo, codice fiscale/P.IVA.',
+          'Dati di navigazione e tecnici: indirizzo IP, user-agent, log di accesso, cookie.',
+          'Contenuto delle comunicazioni: messaggi inviati tramite form, email, chat o canali equivalenti.',
+          'Dati di fatturazione e pagamento dei clienti finali del Titolare.',
+          'Categorie di interessati: visitatori del sito, clienti del Titolare, dipendenti o collaboratori del Titolare nella misura in cui i loro dati siano trattati.',
+          'Categorie particolari (art. 9 GDPR) o dati relativi a condanne penali (art. 10 GDPR): di regola non trattati. Eventuali eccezioni richiedono integrazione scritta del DPA prima dell’inizio del trattamento.'
+        ]
+      },
+      {
+        id: 'istruzioni-titolare',
+        number: '05',
+        heading: 'Istruzioni del Titolare (art. 28(3)(a))',
+        paragraphs: [
+          'Il Responsabile tratta i dati personali esclusivamente su istruzioni documentate del Titolare,\nanche in caso di trasferimento di dati verso un Paese terzo o un’organizzazione internazionale,\nsalvo che il diritto dell’Unione o dello Stato membro cui è soggetto il Responsabile lo obblighi diversamente.'
+        ],
+        list: [
+          'Costituiscono istruzioni documentate il presente DPA, i Termini e Condizioni, il preventivo accettato, le email scambiate tra le parti, le configurazioni esplicitamente richieste dal Titolare.',
+          'Il Responsabile informa immediatamente il Titolare se, a suo parere, un’istruzione viola il GDPR o altre disposizioni applicabili in materia di protezione dei dati.'
+        ]
+      },
+      {
+        id: 'riservatezza',
+        number: '06',
+        heading: 'Riservatezza del personale (art. 28(3)(b))',
+        paragraphs: [
+          'Il Responsabile è un libero professionista che opera personalmente sui dati conferiti.\nEventuali collaboratori esterni occasionali sono vincolati per iscritto a obbligo di riservatezza\nequivalente al presente DPA prima di qualsiasi accesso ai dati del Titolare.'
+        ]
+      },
+      {
+        id: 'misure-sicurezza',
+        number: '07',
+        heading: 'Misure tecniche e organizzative (art. 28(3)(c) + art. 32)',
+        paragraphs: [
+          'Il Responsabile adotta misure proporzionate al rischio, tra cui in particolare:'
+        ],
+        list: [
+          'Cifratura in transito tramite TLS per tutti gli accessi e le comunicazioni.',
+          'Cifratura a riposo dei segreti applicativi (envelope encryption AES-256-GCM).',
+          'Accessi amministrativi protetti da autenticazione multi-fattore (TOTP) e password con hashing bcrypt.',
+          'Cookie di sessione con flag HttpOnly e Secure, scadenza sliding (30 minuti di inattività).',
+          'Protezione anti-bot dei form pubblici tramite Cloudflare Turnstile.',
+          'Log di accesso e audit trail conservati nei limiti previsti dalla policy di retention.',
+          'Backup periodici dei dati con conservazione separata dall’istanza primaria.',
+          'Procedure di hardening sistematico (security headers, CSP, rate limiting, mascheramento PII nei log).',
+          'Procedura documentata di notifica data breach (cfr. art. 11 del presente DPA).'
+        ]
+      },
+      {
+        id: 'sub-responsabili',
+        number: '08',
+        heading: 'Sub-responsabili (art. 28(2) e 28(4))',
+        paragraphs: [
+          'Il Titolare autorizza in via generale il Responsabile a ricorrere ai sub-responsabili indicati di seguito,\nai quali sono imposti per contratto obblighi di protezione dei dati equivalenti a quelli del presente DPA.\nIl Responsabile resta pienamente responsabile dell’adempimento degli obblighi del sub-responsabile.'
+        ],
+        list: [
+          'Hosting e infrastruttura: provider IaaS UE (es. Hetzner, Germania).',
+          'Sicurezza ed edge: Cloudflare, Inc. (Irlanda) per WAF, anti-bot Turnstile, CDN.',
+          'Email transazionali: Resend, Inc. (USA, DPF) o provider equivalente concordato.',
+          'Pagamenti: Stripe Payments Europe Ltd. (Irlanda), PayPal (Europe) S.à r.l. et Cie, S.C.A. (Lussemburgo).',
+          'Error tracking: istanza Bugsink self-hosted del Responsabile (nessun trasferimento a terzi).',
+          'Eventuali ulteriori sub-responsabili sono comunicati al Titolare con preavviso di almeno 30 giorni; il Titolare può opporsi entro 15 giorni dal ricevimento della comunicazione, nel qual caso le parti concordano in buona fede una soluzione alternativa o, in mancanza, la risoluzione anticipata della parte di servizio interessata.'
+        ]
+      },
+      {
+        id: 'trasferimenti-extra-ue-dpa',
+        number: '09',
+        heading: 'Trasferimenti extra UE',
+        list: [
+          'Eventuali trasferimenti di dati verso Paesi terzi avvengono solo sulla base di idonee garanzie ai sensi del Capo V GDPR:',
+          'EU-US Data Privacy Framework, ove il destinatario sia certificato (Stripe, PayPal, Cloudflare, Resend, Google).',
+          'Clausole Contrattuali Tipo approvate dalla Commissione Europea (Decisione 2021/914) per i trasferimenti non coperti da decisione di adeguatezza o DPF.',
+          'Il Responsabile rende disponibile copia delle garanzie su richiesta scritta del Titolare.'
+        ]
+      },
+      {
+        id: 'diritti-interessati-dpa',
+        number: '10',
+        heading: 'Assistenza per diritti degli interessati (art. 28(3)(e))',
+        paragraphs: [
+          'Il Responsabile assiste il Titolare con misure tecniche e organizzative adeguate,\nnella misura possibile, a rispondere alle richieste degli interessati relative\nall’esercizio dei diritti previsti dagli artt. 15-22 GDPR.'
+        ],
+        list: [
+          'Le richieste ricevute direttamente dal Responsabile vengono inoltrate al Titolare entro 5 giorni lavorativi.',
+          'L’assistenza include estrazione, rettifica o cancellazione dei dati e — ove tecnicamente fattibile — fornitura dei dati in formato strutturato e comunemente leggibile (art. 20 GDPR).',
+          'Le attività di assistenza che superino l’ordinaria amministrazione possono essere fatturate al Titolare secondo le tariffe correnti, previo preventivo scritto.'
+        ]
+      },
+      {
+        id: 'sicurezza-breach-dpa',
+        number: '11',
+        heading: 'Notifica violazioni (art. 28(3)(f) + art. 33)',
+        paragraphs: [
+          'In caso di violazione dei dati personali ("data breach") che riguardi dati trattati per conto del Titolare,\nil Responsabile notifica il Titolare senza ingiustificato ritardo dopo esserne venuto a conoscenza,\ne in ogni caso entro 24 ore.'
+        ],
+        list: [
+          'La notifica include: descrizione della natura della violazione, categorie e numero approssimativo di interessati e record interessati, conseguenze probabili, misure adottate o proposte per attenuare gli effetti.',
+          'Il Responsabile fornisce al Titolare ogni informazione ragionevolmente necessaria per consentire la notifica all’Autorità di controllo entro 72 ore (art. 33 GDPR) e, ove richiesta, agli interessati (art. 34 GDPR).',
+          'Il Responsabile coopera nell’indagine, contenimento e remediation, e documenta nel proprio registro interno violazioni la cronologia degli eventi.'
+        ]
+      },
+      {
+        id: 'dpia-consultazione',
+        number: '12',
+        heading: 'Valutazione di impatto e consultazione preventiva (art. 28(3)(f) + artt. 35-36)',
+        paragraphs: [
+          'Il Responsabile assiste il Titolare nella conduzione di una valutazione d’impatto sulla protezione dei dati (DPIA)\ne nella consultazione preventiva del Garante, ove ricorrano i presupposti dell’art. 35 GDPR,\nfornendo le informazioni tecniche nella propria disponibilità.'
+        ]
+      },
+      {
+        id: 'fine-rapporto',
+        number: '13',
+        heading: 'Restituzione o cancellazione a fine rapporto (art. 28(3)(g))',
+        paragraphs: [
+          'Al termine della prestazione dei servizi, su scelta del Titolare comunicata per iscritto entro 15 giorni dalla cessazione:'
+        ],
+        list: [
+          'il Responsabile restituisce al Titolare tutti i dati personali trattati per suo conto, in formato strutturato e comunemente leggibile; oppure',
+          'il Responsabile cancella i dati personali trattati per conto del Titolare, salvo che il diritto dell’Unione o dello Stato membro richieda la conservazione (in particolare, le fatture, i pagamenti e i preventivi connessi al rapporto commerciale restano conservati per 10 anni ai sensi dell’art. 2220 c.c. e della normativa fiscale).',
+          'In mancanza di indicazioni del Titolare entro 30 giorni dalla cessazione, il Responsabile procede alla cancellazione dei dati di esclusiva pertinenza del Titolare, conservando solo i record fiscalmente obbligatori in forma anonimizzata ove possibile.',
+          'Il Responsabile rilascia, su richiesta, dichiarazione di avvenuta cancellazione.'
+        ]
+      },
+      {
+        id: 'audit-ispezioni',
+        number: '14',
+        heading: 'Audit e ispezioni (art. 28(3)(h))',
+        paragraphs: [
+          'Il Responsabile mette a disposizione del Titolare tutte le informazioni necessarie per dimostrare\nil rispetto degli obblighi del presente DPA e contribuisce alle attività di revisione condotte\ndal Titolare o da soggetto da questi incaricato.'
+        ],
+        list: [
+          'Le richieste di informazioni vengono evase entro 15 giorni lavorativi.',
+          'Ispezioni in loco sono concordate con preavviso scritto di almeno 30 giorni, durante orario lavorativo, senza intralcio dell’operatività ordinaria del Responsabile.',
+          'Le spese ragionevoli dell’audit sono a carico del Titolare, salvo che dall’audit emergano violazioni del DPA imputabili al Responsabile.',
+          'Il Responsabile può proporre, in alternativa, certificazioni o rapporti di terzi indipendenti (es. ISO 27001) come prova del rispetto degli obblighi.'
+        ]
+      },
+      {
+        id: 'limitazione-resp-dpa',
+        number: '15',
+        heading: 'Limitazione di responsabilità',
+        paragraphs: [
+          'Nei limiti consentiti dalla legge, la responsabilità del Responsabile per i danni derivanti dal trattamento\ndei dati personali per conto del Titolare è limitata ai casi di dolo o colpa grave.',
+          'Resta in ogni caso impregiudicata la responsabilità solidale tra Titolare e Responsabile ai sensi dell’art. 82 GDPR\nnei confronti degli interessati.'
+        ]
+      },
+      {
+        id: 'modifiche-dpa',
+        number: '16',
+        heading: 'Modifiche al DPA',
+        paragraphs: [
+          'Il Responsabile può aggiornare il presente DPA per adeguarlo a modifiche normative,\nlinee guida delle Autorità di controllo o evoluzioni tecniche dei servizi.\nLa versione aggiornata è pubblicata su /dpa-clienti con la data di ultimo aggiornamento;\nle modifiche sostanziali sono comunicate al Titolare per iscritto con almeno 30 giorni di preavviso.'
+        ]
+      },
+      {
+        id: 'foro-dpa',
+        number: '17',
+        heading: 'Foro competente e legge applicabile',
+        paragraphs: [
+          'Il presente DPA è regolato dal diritto italiano.\nPer qualsiasi controversia derivante dall’accordo è competente in via esclusiva il Foro di Frosinone,\nsalvo norme inderogabili applicabili in caso di Titolare consumatore.'
+        ]
+      },
+      {
+        id: 'contatti-dpa',
+        number: '18',
+        heading: 'Contatti',
+        paragraphs: [
+          `Per qualsiasi richiesta relativa al presente DPA, per la notifica di un data breach o per esercitare i diritti contrattuali quivi previsti, scrivere a ${TITOLARE_EMAIL}.`
         ]
       }
     ]
