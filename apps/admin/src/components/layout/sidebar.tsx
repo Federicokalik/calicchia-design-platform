@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import {
   ChevronsLeft,
@@ -33,11 +32,16 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { t } = useI18n();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    // Full reload (non SPA navigate) per resettare lo stato globale: il widget
+    // Cloudflare Turnstile mantiene singleton del loader script + container
+    // ref interno, e un re-render via router lascia istanze stale che fanno
+    // fallire il successivo render con "Verifica anti-bot non disponibile".
+    // Anche React Query cache, hook state e contesti vari beneficiano dello
+    // hard reset.
+    window.location.assign('/login');
   };
 
   // Mobile drawer: close on Escape key (a11y convention for modal-like overlays).
