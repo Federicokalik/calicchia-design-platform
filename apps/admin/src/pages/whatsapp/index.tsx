@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   MessageCircle, Send, Search, Archive, ArchiveRestore, Sparkles,
-  Check, X, Pencil, Loader2, RefreshCw, Inbox, CheckCircle2, AlertCircle,
+  Check, X, Pencil, Loader2, RefreshCw, Inbox, CheckCircle2, AlertCircle, Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -199,6 +199,11 @@ export default function WhatsAppInboxPage() {
               >
                 <Archive className="h-3.5 w-3.5" />
               </Button>
+              <Link to="/whatsapp/events">
+                <Button size="sm" variant="ghost" title="Eventi side-channel (gruppi, newsletter, chiamate)">
+                  <Activity className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="relative">

@@ -50,7 +50,9 @@ export const whatsappPublic = new Hono();
 
 /**
  * Webhook ingress da GOWA.
- * Header: x-hmac-signature: <hex sha256 del raw body con GOWA_WEBHOOK_SECRET>
+ * GOWA (go-whatsapp-web-multidevice v6+) invia l'header standard
+ * `X-Hub-Signature-256: sha256=<hex>`. Per retrocompat accettiamo anche
+ * `x-hmac-signature` (sia con sia senza prefisso `sha256=`).
  * Tutti gli errori ritornano 404 generico (no enumeration, allineato al
  * webhook workflow ingress in app.ts).
  */
@@ -58,10 +60,16 @@ whatsappPublic.post('/webhook', async (c) => {
   if (!GOWA_WEBHOOK_SECRET) return c.json({ error: 'Not Found' }, 404);
 
   const rawBody = await c.req.text();
-  const sigHeader = (c.req.header('x-hmac-signature') || c.req.header('X-Hmac-Signature') || '').trim();
+  const sigHeader = (
+    c.req.header('X-Hub-Signature-256')   // ← header ufficiale GOWA v6+
+    || c.req.header('x-hub-signature-256')
+    || c.req.header('x-hmac-signature')   // legacy / custom integrations
+    || c.req.header('X-Hmac-Signature')
+    || ''
+  ).trim();
   if (!sigHeader) return c.json({ error: 'Not Found' }, 404);
 
-  // GOWA invia "sha256=<hex>" oppure solo "<hex>". Accettiamo entrambi.
+  // GOWA invia "sha256=<hex>"; legacy mandano solo "<hex>". Accettiamo entrambi.
   const candidate = sigHeader.startsWith('sha256=') ? sigHeader.slice(7) : sigHeader;
   const expectedHex = createHmac('sha256', GOWA_WEBHOOK_SECRET).update(rawBody).digest('hex');
   const a = Buffer.from(candidate, 'hex');
@@ -97,6 +105,7 @@ interface GowaEvent {
 async function handleGowaEvent(evt: GowaEvent): Promise<void> {
   const eventName = evt.event || evt?.payload?.event || 'message';
   const payload = evt.payload ?? evt;
+  const deviceId = evt.device_id || evt?.payload?.device_id || null;
 
   switch (eventName) {
     case 'message':
@@ -115,9 +124,47 @@ async function handleGowaEvent(evt: GowaEvent): Promise<void> {
     case 'message.edited':
       await handleEditEvent(payload);
       break;
+    case 'chat_presence':
+    case 'group.participants':
+    case 'group.joined':
+    case 'newsletter.joined':
+    case 'newsletter.left':
+    case 'newsletter.message':
+    case 'newsletter.mute':
+    case 'call.offer':
+      // Eventi side-channel: persistiti in whatsapp_events_log per audit /
+      // future UI dedicate. Niente proiezioni in whatsapp_conversations.
+      await persistSideChannelEvent(eventName, deviceId, payload);
+      break;
     default:
-      // group.*, newsletter.*, call.offer → log-only fase 1
       log.info({ eventName }, 'unhandled event');
+  }
+}
+
+// ----- side-channel events (group / newsletter / presence / call) -----
+
+async function persistSideChannelEvent(
+  eventType: string,
+  deviceId: string | null,
+  payload: any,
+): Promise<void> {
+  // chat_id / from_jid sono ottimisticamente estratti per indicizzazione,
+  // ma il payload integrale resta in JSONB per non perdere informazione.
+  const chatId = payload?.chat_id ?? payload?.group_id ?? payload?.newsletter_id ?? null;
+  const fromJid =
+    payload?.from ??
+    payload?.participant ??
+    payload?.caller ??
+    payload?.from_jid ??
+    null;
+
+  try {
+    await sql`
+      INSERT INTO whatsapp_events_log (event_type, device_id, chat_id, from_jid, payload)
+      VALUES (${eventType}, ${deviceId}, ${chatId}, ${fromJid}, ${sql.json(payload)})
+    `;
+  } catch (err) {
+    log.error({ err, eventType }, 'failed to persist side-channel event');
   }
 }
 
@@ -671,4 +718,31 @@ whatsappAdmin.post('/send-to-phone', async (c) => {
   } catch (err) {
     return c.json({ ok: false, error: (err as Error).message }, 502);
   }
+});
+
+// --- Side-channel events log (group / newsletter / presence / call) ---
+
+whatsappAdmin.get('/events', async (c) => {
+  const eventType = c.req.query('type');
+  const limit = Math.min(parseInt(c.req.query('limit') || '100'), 500);
+  const offset = parseInt(c.req.query('offset') || '0');
+  const filter = eventType ? sql`WHERE event_type = ${eventType}` : sql``;
+  const rows = await sql`
+    SELECT id, event_type, device_id, chat_id, from_jid, payload, received_at,
+           COUNT(*) OVER() AS _total_count
+    FROM whatsapp_events_log
+    ${filter}
+    ORDER BY received_at DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `;
+  const totalCount = rows[0]?._total_count ? Number(rows[0]._total_count) : 0;
+  return c.json({
+    events: rows.map((r: any) => {
+      const { _total_count, ...rest } = r;
+      return rest;
+    }),
+    total: totalCount,
+    limit,
+    offset,
+  });
 });
