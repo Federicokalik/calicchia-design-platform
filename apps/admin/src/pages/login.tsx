@@ -191,8 +191,11 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Cloudflare Turnstile — invisible widget, renders no visible UI */}
+            {/* Cloudflare Turnstile — visible widget (appearance: always sul hook). */}
             <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
+            {turnstile.error && (
+              <p className="text-xs text-destructive">{turnstile.error}</p>
+            )}
 
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

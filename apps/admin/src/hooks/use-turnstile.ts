@@ -145,7 +145,11 @@ export function useTurnstile(
           sitekey: siteKey,
           theme: 'light',
           size: 'flexible',
-          appearance: 'interaction-only',
+          // Sempre visibile sull'admin: superficie autenticata a basso volume,
+          // mostrare il widget esplicito (vs. interaction-only) elimina i
+          // fallimenti silenziosi al submit quando Cloudflare non emette
+          // challenge e dà feedback immediato all'utente.
+          appearance: 'always',
           ...(action ? { action } : {}),
           callback: (nextToken) => {
             setToken(nextToken);
