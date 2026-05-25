@@ -251,6 +251,88 @@ export async function markChatRead(chatId: string): Promise<void> {
   await gowaFetch(`/chat/${encodeURIComponent(chatId)}/mark-as-read`, { method: 'POST' });
 }
 
+// ---------- Backfill (chats & history) ----------
+
+export interface GowaChat {
+  jid: string;
+  name?: string | null;
+  last_message_time?: string | null;
+  ephemeral_expiration?: number;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface GowaChatMessage {
+  id: string;
+  chat_jid: string;
+  sender_jid?: string | null;
+  content?: string | null;
+  timestamp: string;
+  is_from_me: boolean;
+  media_type?: string | null;
+  filename?: string | null;
+  url?: string | null;
+  file_length?: number | null;
+  call_metadata?: string | null;
+  reactions?: Array<{ emoji: string; sender_jid: string; timestamp: string }>;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+interface GowaPaginated<T> {
+  code: string;
+  message?: string;
+  results: {
+    data: T[];
+    pagination: { limit: number; offset: number; total: number };
+    chat_info?: GowaChat;
+  };
+}
+
+/**
+ * Lista chat esistenti su GOWA. Paginato 100 alla volta.
+ * Ritorna [] se GOWA non e' configurato.
+ */
+export async function fetchGowaChats(opts: { limit?: number; offset?: number; archived?: boolean } = {}): Promise<{
+  chats: GowaChat[];
+  total: number;
+}> {
+  if (!isWhatsAppConfigured()) return { chats: [], total: 0 };
+  const params = new URLSearchParams();
+  params.set('limit', String(opts.limit ?? 100));
+  params.set('offset', String(opts.offset ?? 0));
+  if (opts.archived !== undefined) params.set('archived', String(opts.archived));
+  const res = await gowaFetch<GowaPaginated<GowaChat>>(`/chats?${params.toString()}`, { method: 'GET' });
+  return {
+    chats: res.results?.data ?? [],
+    total: res.results?.pagination?.total ?? 0,
+  };
+}
+
+/**
+ * Storico messaggi di una chat. Default 100 piu' recenti.
+ */
+export async function fetchGowaChatMessages(
+  chatJid: string,
+  opts: { limit?: number; offset?: number; startTime?: string; endTime?: string } = {},
+): Promise<{ messages: GowaChatMessage[]; total: number; chatInfo: GowaChat | null }> {
+  if (!isWhatsAppConfigured()) return { messages: [], total: 0, chatInfo: null };
+  const params = new URLSearchParams();
+  params.set('limit', String(opts.limit ?? 100));
+  params.set('offset', String(opts.offset ?? 0));
+  if (opts.startTime) params.set('start_time', opts.startTime);
+  if (opts.endTime) params.set('end_time', opts.endTime);
+  const res = await gowaFetch<GowaPaginated<GowaChatMessage>>(
+    `/chat/${encodeURIComponent(chatJid)}/messages?${params.toString()}`,
+    { method: 'GET' },
+  );
+  return {
+    messages: res.results?.data ?? [],
+    total: res.results?.pagination?.total ?? 0,
+    chatInfo: res.results?.chat_info ?? null,
+  };
+}
+
 /**
  * Scarica un media da GOWA e lo salva nello store privato (SEC-10).
  * Ritorna il nome file (es. "<uuid>.jpg") da inserire in

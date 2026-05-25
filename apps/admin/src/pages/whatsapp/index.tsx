@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   MessageCircle, Send, Search, Archive, ArchiveRestore, Sparkles,
-  Check, X, Pencil, Loader2, RefreshCw, Inbox, CheckCircle2, AlertCircle, Activity,
+  Check, X, Pencil, Loader2, RefreshCw, Inbox, CheckCircle2, AlertCircle, Activity, DownloadCloud,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -141,6 +141,19 @@ export default function WhatsAppInboxPage() {
     },
   });
 
+  const syncMutation = useMutation({
+    mutationFn: () =>
+      apiFetch('/api/whatsapp-admin/sync', { method: 'POST' }),
+    onSuccess: (data: { totalChats: number; createdConvs: number; createdMessages: number; errors: unknown[] }) => {
+      toast.success(
+        `Sync completata: ${data.createdConvs} nuove chat, ${data.createdMessages} nuovi messaggi (su ${data.totalChats} chat)` +
+          (data.errors.length ? ` — ${data.errors.length} errori, vedi log api` : ''),
+      );
+      refetchConvs();
+    },
+    onError: (err: Error) => toast.error(`Sync fallita: ${err.message}`),
+  });
+
   const approveMutation = useMutation({
     mutationFn: (msgId: string) => apiFetch(`/api/whatsapp-admin/messages/${msgId}/approve`, { method: 'POST' }),
     onSuccess: () => {
@@ -190,6 +203,19 @@ export default function WhatsAppInboxPage() {
             <div className="flex gap-1">
               <Button size="sm" variant="ghost" onClick={() => refetchConvs()}>
                 <RefreshCw className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => syncMutation.mutate()}
+                disabled={syncMutation.isPending}
+                title="Importa chat + messaggi esistenti da GOWA (backfill)"
+              >
+                {syncMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <DownloadCloud className="h-3.5 w-3.5" />
+                )}
               </Button>
               <Button
                 size="sm"

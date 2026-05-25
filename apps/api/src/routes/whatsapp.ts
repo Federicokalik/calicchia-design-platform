@@ -28,6 +28,10 @@ import {
   markChatRead,
   formatPhone,
   isWhatsAppConfigured,
+  fetchGowaChats,
+  fetchGowaChatMessages,
+  type GowaChat,
+  type GowaChatMessage,
 } from '../lib/whatsapp';
 import {
   canSendWhatsApp,
@@ -267,6 +271,11 @@ async function handleMessageEvent(p: any): Promise<void> {
   if (!chatId) return;
   // Ignoriamo i nostri stessi outbound (li registriamo già lato admin send).
   if (p?.from_me === true || p?.fromMe === true || p?.key?.fromMe === true) return;
+  // Skip newsletter (canali WhatsApp) e broadcast — non sono chat 1:1/gruppo.
+  // I newsletter.message dovrebbero arrivare come evento `newsletter.message`
+  // (gia' persistiti in whatsapp_events_log), ma alcuni payload li mandano
+  // come `event: message` con jid `@newsletter`. Defense in depth.
+  if (chatId.endsWith('@newsletter') || chatId.endsWith('@broadcast') || chatId === 'status@broadcast') return;
 
   const phone = chatIdToPhone(chatId);
   const isGroup = chatId.endsWith('@g.us');
@@ -746,3 +755,192 @@ whatsappAdmin.get('/events', async (c) => {
     offset,
   });
 });
+
+// --- Backfill: import chats + messages history from GOWA ---
+
+/**
+ * POST /api/whatsapp-admin/sync
+ *   ?messages_per_chat=200  → limita lo storico messaggi per chat (default 200, max 500)
+ *   ?max_chats=200          → limita il numero di chat sincronizzate (default 200, max 500)
+ *
+ * Idempotente: usa `external_id` per evitare duplicate messages. Le conversazioni
+ * esistenti sono aggiornate (preview + last_message_at); quelle nuove sono create
+ * via ensureConversation() (auto-link customer/lead per phone match).
+ *
+ * Non scarica i media (richiederebbe un secondo round-trip per ogni messaggio
+ * con media_type non null + ban di rate dal lato WhatsApp). I media verranno
+ * scaricati a richiesta via /api/files quando l'admin apre la chat.
+ */
+whatsappAdmin.post('/sync', async (c) => {
+  if (!isWhatsAppConfigured()) {
+    return c.json({ error: 'GOWA non configurato' }, 400);
+  }
+
+  const msgsPerChat = Math.min(parseInt(c.req.query('messages_per_chat') || '200'), 500);
+  const maxChats = Math.min(parseInt(c.req.query('max_chats') || '200'), 500);
+
+  // Cleanup difensivo: rimuove dalle inbox eventuali newsletter/broadcast che
+  // erano finiti li' da run precedenti del sync (prima del filtro). I messaggi
+  // collegati cadono via ON DELETE CASCADE.
+  const cleaned = await sql`
+    DELETE FROM whatsapp_conversations
+    WHERE chat_id LIKE '%@newsletter'
+       OR chat_id LIKE '%@broadcast'
+       OR chat_id = 'status@broadcast'
+    RETURNING id
+  ` as Array<{ id: string }>;
+  const removedLegacy = cleaned.length;
+
+  let totalChats = 0;
+  let totalMessages = 0;
+  let createdConvs = 0;
+  let createdMessages = 0;
+  let skippedNewsletter = 0;
+  let skippedBroadcast = 0;
+  let skippedUnknown = 0;
+  const errors: Array<{ chatJid: string; error: string }> = [];
+
+  try {
+    // Paginazione GOWA chats (100 per pagina).
+    for (let offset = 0; offset < maxChats; offset += 100) {
+      const { chats } = await fetchGowaChats({ limit: 100, offset });
+      if (chats.length === 0) break;
+      totalChats += chats.length;
+
+      for (const chat of chats) {
+        if (!chat.jid) continue;
+        try {
+          const stats = await importChatFromGowa(chat, msgsPerChat);
+          if (stats.skipped === 'newsletter') skippedNewsletter++;
+          else if (stats.skipped === 'broadcast') skippedBroadcast++;
+          else if (stats.skipped === 'unknown_jid') skippedUnknown++;
+          else {
+            createdConvs += stats.createdConv ? 1 : 0;
+            totalMessages += stats.fetchedMessages;
+            createdMessages += stats.createdMessages;
+          }
+        } catch (err) {
+          errors.push({ chatJid: chat.jid, error: (err as Error).message });
+          log.error({ err, chatJid: chat.jid }, 'sync chat failed');
+        }
+      }
+
+      if (chats.length < 100) break;
+    }
+  } catch (err) {
+    return c.json({
+      ok: false,
+      error: `Sync interrotta: ${(err as Error).message}`,
+      totalChats,
+      createdConvs,
+      totalMessages,
+      createdMessages,
+      skippedNewsletter,
+      skippedBroadcast,
+      skippedUnknown,
+      errors,
+    }, 502);
+  }
+
+  return c.json({
+    ok: true,
+    totalChats,
+    createdConvs,
+    totalMessages,
+    createdMessages,
+    skippedNewsletter,
+    skippedBroadcast,
+    skippedUnknown,
+    removedLegacy,
+    errors,
+  });
+});
+
+async function importChatFromGowa(chat: GowaChat, msgsPerChat: number): Promise<{
+  createdConv: boolean;
+  fetchedMessages: number;
+  createdMessages: number;
+  skipped?: 'newsletter' | 'broadcast' | 'unknown_jid';
+}> {
+  const chatId = chat.jid;
+  // Skip newsletter / WhatsApp channels e status broadcast — non sono chat
+  // 1:1 o di gruppo e l'UI inbox non e' progettata per gestirli.
+  // Sono comunque registrati in whatsapp_events_log via webhook newsletter.*.
+  if (chatId.endsWith('@newsletter')) {
+    return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'newsletter' };
+  }
+  if (chatId.endsWith('@broadcast') || chatId === 'status@broadcast') {
+    return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'broadcast' };
+  }
+  // Accept solo individui (@s.whatsapp.net) e gruppi (@g.us).
+  if (!chatId.endsWith('@s.whatsapp.net') && !chatId.endsWith('@g.us')) {
+    return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'unknown_jid' };
+  }
+  const isGroup = chatId.endsWith('@g.us');
+  const phone = chatIdToPhone(chatId);
+  const contactName = chat.name?.trim() || undefined;
+
+  // Crea/recupera la conversazione (con auto-link a customer/lead).
+  const existing = await sql`
+    SELECT id FROM whatsapp_conversations WHERE chat_id = ${chatId} LIMIT 1
+  ` as Array<{ id: string }>;
+  const conv = await ensureConversation({ chatId, phone, contactName, isGroup });
+  const createdConv = existing.length === 0;
+
+  // Fetch storico messaggi (max msgsPerChat, paginazione 100).
+  let fetched = 0;
+  let created = 0;
+  for (let offset = 0; offset < msgsPerChat; offset += 100) {
+    const remaining = msgsPerChat - offset;
+    const batchLimit = Math.min(remaining, 100);
+    const { messages } = await fetchGowaChatMessages(chatId, { limit: batchLimit, offset });
+    if (messages.length === 0) break;
+    fetched += messages.length;
+    for (const msg of messages) {
+      created += await upsertGowaMessage(conv.id, msg);
+    }
+    if (messages.length < batchLimit) break;
+  }
+
+  // Aggiorna preview/last_message_at sulla conversazione (best-effort).
+  if (chat.last_message_time) {
+    await sql`
+      UPDATE whatsapp_conversations
+      SET last_message_at = COALESCE(last_message_at, ${chat.last_message_time}::timestamptz)
+      WHERE id = ${conv.id}
+    `;
+  }
+
+  return { createdConv, fetchedMessages: fetched, createdMessages: created };
+}
+
+async function upsertGowaMessage(conversationId: string, msg: GowaChatMessage): Promise<number> {
+  // ON CONFLICT (external_id) DO NOTHING per idempotenza.
+  // Vincolo presente su whatsapp_messages.external_id (UNIQUE), se non c'e'
+  // funziona comunque ma puo' creare duplicati: il check applicativo qui sotto
+  // riproduce l'idempotenza.
+  if (msg.id) {
+    const dup = await sql`
+      SELECT 1 FROM whatsapp_messages WHERE external_id = ${msg.id} LIMIT 1
+    ` as Array<{ '?column?': number }>;
+    if (dup.length > 0) return 0;
+  }
+
+  const direction = msg.is_from_me ? 'outbound' : 'inbound';
+  const type = msg.media_type || (msg.content ? 'text' : 'unknown');
+  const body = msg.content || null;
+  const senderKind: 'user' | 'admin' = msg.is_from_me ? 'admin' : 'user';
+  // Per i media salviamo l'URL GOWA come hint (no download immediato — vedi
+  // commento sul `/sync` endpoint).
+  const mediaUrl = msg.url || null;
+
+  await sql`
+    INSERT INTO whatsapp_messages
+      (conversation_id, external_id, direction, category, type, body,
+       media_url, media_mime, sender_kind, created_at)
+    VALUES
+      (${conversationId}, ${msg.id ?? null}, ${direction}, 'operational', ${type}, ${body},
+       ${mediaUrl}, ${null}, ${senderKind}, ${msg.timestamp ?? null}::timestamptz)
+  `;
+  return 1;
+}

@@ -46,7 +46,7 @@ export function AppLayout() {
         >
           {/*
             pt-14 mobile = 56px topbar; pt-16 lg = 64px topbar (matches topbar.tsx).
-            pb-24 mobile riserva spazio per l'AI bubble bottom-right (~56+16),
+            pb-24 mobile riserva spazio per l'AI bubble bottom-left (~56+16),
             evita che copra l'ultimo contenuto della pagina. lg torna a pb-4
             perche' a desktop il bubble e' al margine ma scrollabile via.
           */}

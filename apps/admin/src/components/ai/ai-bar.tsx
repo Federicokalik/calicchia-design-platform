@@ -143,7 +143,7 @@ export function AiBar() {
       <button
         type="button"
         onClick={openFromFab}
-        className="fixed bottom-4 right-4 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center z-[var(--z-ai-bubble)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="fixed bottom-4 left-4 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center z-[var(--z-ai-bubble)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         aria-label={t('ai.openAssistant')}
       >
         <Sparkles className="h-5 w-5" />
@@ -153,7 +153,7 @@ export function AiBar() {
 
   return (
     <div
-      className="fixed bottom-4 right-4 flex flex-col items-end gap-2 z-[var(--z-ai-bubble)]"
+      className="fixed bottom-4 left-4 flex flex-col items-start gap-2 z-[var(--z-ai-bubble)]"
       style={{ maxWidth: '420px', width: 'min(420px, calc(100vw - 2rem))' }}
     >
 
@@ -261,7 +261,7 @@ export function AiBar() {
           44px tap rule (chip is short but still 36px which is acceptable for
           secondary actions per Material guidance; primary actions get 44). */}
       {!expanded && (
-        <div className="flex gap-2 justify-end flex-wrap">
+        <div className="flex gap-2 justify-start flex-wrap">
           {suggestions.map((s) => (
             <button
               key={s}
