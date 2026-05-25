@@ -80,6 +80,18 @@ export function CookieConsentBanner() {
     };
   }, []);
 
+  // Scroll lock while the modal is open: user must explicitly accept, reject,
+  // or close (= refuse) before navigating. Stored prior value so we don't
+  // clobber a pre-existing `overflow: hidden` set by other UI (e.g. menu).
+  useEffect(() => {
+    if (!visible) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [visible]);
+
   const closeWithNecessary = () => {
     const record = rejectAll();
     persist(record);
@@ -117,10 +129,10 @@ export function CookieConsentBanner() {
       aria-label={t('kicker')}
       className="pointer-events-none fixed inset-x-0 bottom-0 z-[120] flex items-end justify-center md:px-6 md:pb-6"
     >
-      {/* Dim backdrop only — NO click-to-dismiss. Per Garante 2021 §6 an
-          ambiguous dismissal cannot be interpreted as consent. The user must
+      {/* Solid backdrop, scroll locked — NO click-to-dismiss. Per Garante 2021 §6
+          an ambiguous dismissal cannot be interpreted as consent. The user must
           pick X (= refuse), "Solo necessari" (= refuse) or "Accetta tutti". */}
-      <div className="pointer-events-auto absolute inset-0 bg-black/30" aria-hidden />
+      <div className="pointer-events-auto absolute inset-0 bg-black/70" aria-hidden />
 
       <div
         className="pointer-events-auto relative max-h-[85vh] w-full max-w-[720px] overflow-y-auto border"
