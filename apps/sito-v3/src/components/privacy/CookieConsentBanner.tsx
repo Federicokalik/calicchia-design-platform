@@ -81,14 +81,20 @@ export function CookieConsentBanner() {
   }, []);
 
   // Scroll lock while the modal is open: user must explicitly accept, reject,
-  // or close (= refuse) before navigating. Stored prior value so we don't
-  // clobber a pre-existing `overflow: hidden` set by other UI (e.g. menu).
+  // or close (= refuse) before navigating. We lock BOTH html and body because
+  // depending on layout the scrollable element can be either (Tailwind's
+  // resets put overflow on html for some configs). Stored prior values so we
+  // don't clobber a pre-existing `overflow: hidden` set by other UI (e.g.
+  // MenuOverlay).
   useEffect(() => {
     if (!visible) return;
-    const prev = document.body.style.overflow;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
     document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
     };
   }, [visible]);
 
@@ -127,7 +133,7 @@ export function CookieConsentBanner() {
       role="dialog"
       aria-modal="true"
       aria-label={t('kicker')}
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[120] flex items-end justify-center md:px-6 md:pb-6"
+      className="pointer-events-none fixed inset-0 z-[120] flex items-end justify-center md:items-center md:p-6"
     >
       {/* Solid backdrop, scroll locked — NO click-to-dismiss. Per Garante 2021 §6
           an ambiguous dismissal cannot be interpreted as consent. The user must
