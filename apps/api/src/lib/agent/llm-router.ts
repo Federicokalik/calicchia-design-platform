@@ -10,20 +10,32 @@ const log = logger.child({ scope: 'ai-usage' });
 
 export type LLMTask = 'chat' | 'chat_fast' | 'tool_calling' | 'blog_research' | 'blog_writing' | 'email_copy' | 'task_breakdown' | 'code_generation' | 'invoice_ocr';
 
-// Pricing per million tokens (EUR)
+// Pricing per million tokens (EUR for Infomaniak, USD for OpenAI/Anthropic/Perplexity/Gemini).
+// Source Infomaniak (verificato 2026-05-25):
+//   https://www.infomaniak.com/it/hosting/ai-services/tariffe
+// I costi sono normalizzati in EUR — i provider non-EU vengono comunque
+// scritti come "USD per 1M token" perche' il rate USD/EUR oscilla; la
+// stima di costo nei logs e' una approssimazione (~+5-10% rispetto a EUR).
 const PRICING: Record<string, { input: number; output: number }> = {
-  'infomaniak-qwen': { input: 0.70, output: 2.00 },
-  'infomaniak-mistral': { input: 0.10, output: 0.30 },
-  'infomaniak-llama': { input: 1.00, output: 3.00 },
-  'infomaniak-apertus': { input: 0.70, output: 2.50 },
-  'infomaniak-gpt-oss': { input: 0.30, output: 0.90 },
-  'openai-fast': { input: 0.15, output: 0.60 },
-  'openai-smart': { input: 2.50, output: 10.00 },
-  'anthropic': { input: 3.00, output: 15.00 },
-  'perplexity': { input: 1.00, output: 5.00 },
+  // Infomaniak — EUR/1M
+  'infomaniak-qwen': { input: 0.40, output: 3.20 },         // Qwen3.5-122B-A10B-FP8 (slot primary)
+  'infomaniak-mistral': { input: 0.30, output: 0.40 },      // Ministral-3-14B-Instruct-2512
+  'infomaniak-mistral-large': { input: 0.20, output: 0.75 }, // Mistral-Small-4-119B-2603
+  'infomaniak-llama': { input: 0.20, output: 0.40 },        // ridotto: ora alias per gemma-4 (vedi PROVIDERS)
+  'infomaniak-apertus': { input: 0.70, output: 2.50 },      // Apertus-70B-Instruct-2509
+  'infomaniak-gemma': { input: 0.20, output: 0.40 },        // gemma-4-31B-it ("L'equilibrio perfetto")
+  'infomaniak-nemotron': { input: 0.05, output: 0.20 },     // Nemotron-3-Nano-30B (cheap fallback)
+  'infomaniak-kimi': { input: 0.60, output: 3.00 },         // Kimi-K2.6 (code)
+  // Slot "primary" — ora popolato con Qwen3.5-122B (gpt-oss-120b dismesso da Infomaniak 2026-05).
+  // Key conservato per non rompere TASK_ROUTING; vedi PROVIDERS.
+  'infomaniak-gpt-oss': { input: 0.40, output: 3.20 },
+  // OpenAI / Anthropic / Perplexity / Gemini — USD/1M (approssimato in EUR nei log)
+  'openai-fast': { input: 0.15, output: 0.60 },             // gpt-4o-mini
+  'openai-smart': { input: 2.50, output: 10.00 },           // gpt-4o
+  'anthropic': { input: 3.00, output: 15.00 },              // Claude Sonnet 4
+  'perplexity': { input: 1.00, output: 5.00 },              // Sonar Pro
   'gemini-flash': { input: 0.075, output: 0.30 },
   'gemini-pro': { input: 1.25, output: 5.00 },
-  'infomaniak-kimi': { input: 0.60, output: 2.40 },
 };
 
 async function logUsage(providerName: string, model: string, task: string, channel: string, inputTokens: number, outputTokens: number, durationMs: number, success: boolean, error?: string) {
@@ -101,17 +113,44 @@ const PROVIDERS: Record<string, ProviderConfig> = {
     baseUrl: () => 'https://api.anthropic.com/v1',
   },
 
+  // Slot "primary top-tier" — Infomaniak ha ritirato openai/gpt-oss-120b
+  // (validation_failed 400, 2026-05). Sostituito con Qwen3.5-122B-A10B-FP8
+  // (122B MoE, tool-calling, 200k ctx, "Il piu' potente" per Infomaniak).
+  // Key conservato per evitare di toccare TASK_ROUTING.
   'infomaniak-gpt-oss': {
-    name: 'Infomaniak GPT-OSS-120B',
+    name: 'Infomaniak Qwen3.5-122B-A10B-FP8 (primary)',
     provider: 'infomaniak',
-    model: 'openai/gpt-oss-120b',
+    model: 'Qwen/Qwen3.5-122B-A10B-FP8',
     apiKey: () => process.env.INFOMANIAK_AI_TOKEN || '',
     baseUrl: () => `https://api.infomaniak.com/2/ai/${process.env.INFOMANIAK_AI_PRODUCT_ID || ''}/openai/v1`,
   },
   'infomaniak-kimi': {
-    name: 'Infomaniak Kimi-K2.5',
+    name: 'Infomaniak Kimi-K2.6',
     provider: 'infomaniak',
-    model: 'moonshotai/Kimi-K2.5',
+    model: 'moonshotai/Kimi-K2.6',
+    apiKey: () => process.env.INFOMANIAK_AI_TOKEN || '',
+    baseUrl: () => `https://api.infomaniak.com/2/ai/${process.env.INFOMANIAK_AI_PRODUCT_ID || ''}/openai/v1`,
+  },
+  // Nuovi modelli Infomaniak (2026): aggiunti per future evoluzioni di
+  // TASK_ROUTING. Non ancora referenziati nei route, ma disponibili.
+  'infomaniak-gemma': {
+    name: 'Infomaniak Gemma-4-31B-it',
+    provider: 'infomaniak',
+    model: 'google/gemma-4-31B-it',
+    apiKey: () => process.env.INFOMANIAK_AI_TOKEN || '',
+    baseUrl: () => `https://api.infomaniak.com/2/ai/${process.env.INFOMANIAK_AI_PRODUCT_ID || ''}/openai/v1`,
+  },
+  'infomaniak-mistral-large': {
+    name: 'Infomaniak Mistral-Small-4-119B-2603',
+    provider: 'infomaniak',
+    model: 'mistralai/Mistral-Small-4-119B-2603',
+    apiKey: () => process.env.INFOMANIAK_AI_TOKEN || '',
+    baseUrl: () => `https://api.infomaniak.com/2/ai/${process.env.INFOMANIAK_AI_PRODUCT_ID || ''}/openai/v1`,
+  },
+  'infomaniak-nemotron': {
+    name: 'Infomaniak Nemotron-3-Nano-30B',
+    provider: 'infomaniak',
+    model: 'nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B-FP8',
     apiKey: () => process.env.INFOMANIAK_AI_TOKEN || '',
     baseUrl: () => `https://api.infomaniak.com/2/ai/${process.env.INFOMANIAK_AI_PRODUCT_ID || ''}/openai/v1`,
   },
