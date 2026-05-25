@@ -47,6 +47,9 @@
     --z-sidebar-backdrop: 45;
     --z-sidebar-mobile: 50;
     --z-modal: 60;
+    /* Radix popper (Select/Dropdown/Popover/Tooltip): deve stare SOPRA modal
+       altrimenti i dropdown dentro un Dialog spariscono dietro al backdrop. */
+    --z-popper: 65;
     --z-toast: 70;
   }
 
