@@ -14,9 +14,12 @@ interface Params {
 }
 
 // Locale layout sets dynamicParams=false to restrict locales. We override here
-// because fetchEventTypes() returns [] during Docker image build (no API
-// reachable), so generateStaticParams below produces no params. Without this
-// override, every request 500s with NoFallbackError.
+// so new slugs added upstream resolve at request time without a rebuild.
+// fetchEventTypes() returns STABLE_FALLBACK_EVENT_TYPES during Docker build
+// (api unreachable), so generateStaticParams always produces at least the
+// `consulenza-gratuita-30min` slug — without it RSC prefetches fell back to
+// [...matrix] and raised "Expected RSC response, got text/html" (Bugsink
+// b7c3aa29, 53 events on 2026-05-23..25).
 export const dynamicParams = true;
 
 const STEPS = [

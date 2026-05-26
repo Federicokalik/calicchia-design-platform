@@ -13,6 +13,32 @@ const IS_PRODUCTION_BUILD =
   process.env.NEXT_PHASE === 'phase-production-build' ||
   process.env.npm_lifecycle_event === 'build';
 
+/**
+ * Build-time fallback event types. Used when the api container is not yet
+ * reachable during `next build` inside Docker. Without this, generateStaticParams
+ * returns [] for /prenota/[slug], the route falls back to the [...matrix]
+ * catch-all, and RSC prefetches get an HTML 404 → "Expected RSC response, got
+ * text/html" InvariantError (Bugsink issue b7c3aa29, 53 events 2026-05-23..25).
+ *
+ * Keep this list minimal — only slugs that are stable and externally linked.
+ * Real metadata is fetched at request time once the api is reachable.
+ */
+const STABLE_FALLBACK_EVENT_TYPES: BookingEventType[] = [
+  {
+    id: 'fallback-consulenza-gratuita-30min',
+    slug: 'consulenza-gratuita-30min',
+    title: 'Consulenza gratuita 30 min',
+    description: null,
+    duration_minutes: 30,
+    location_type: 'google_meet',
+    location_value: null,
+    color: '#000000',
+    custom_questions: [],
+    min_notice_hours: 12,
+    max_advance_days: 60,
+  },
+];
+
 export type BookingStatus =
   | 'confirmed'
   | 'cancelled'
@@ -128,9 +154,15 @@ function normalizeActionOptions(
   return value;
 }
 
-/** Lista event types disponibili. Fallback: array vuoto se API irraggiungibile. */
+/**
+ * Lista event types disponibili.
+ * In `next build` (Docker, api irraggiungibile) ritorna gli slug fallback stabili
+ * così `generateStaticParams` produce param validi e la rotta letterale
+ * `/prenota/[slug]` viene matched al posto del catch-all `[...matrix]`.
+ * A runtime, se l'api fallisce, ritorna comunque il fallback per evitare 404 RSC.
+ */
 export async function fetchEventTypes(): Promise<BookingEventType[]> {
-  if (IS_PRODUCTION_BUILD) return [];
+  if (IS_PRODUCTION_BUILD) return STABLE_FALLBACK_EVENT_TYPES;
 
   try {
     const res = await fetch(`${PUBLIC_PREFIX}/event-types`, {
@@ -139,14 +171,16 @@ export async function fetchEventTypes(): Promise<BookingEventType[]> {
     });
     if (!res.ok) {
       warn('fetchEventTypes failed', { status: res.status });
-      return [];
+      return STABLE_FALLBACK_EVENT_TYPES;
     }
 
     const data = (await res.json()) as EventTypesResponse;
-    return Array.isArray(data.event_types) ? data.event_types : [];
+    return Array.isArray(data.event_types) && data.event_types.length > 0
+      ? data.event_types
+      : STABLE_FALLBACK_EVENT_TYPES;
   } catch (error) {
     warn('fetchEventTypes threw', error);
-    return [];
+    return STABLE_FALLBACK_EVENT_TYPES;
   }
 }
 
@@ -154,7 +188,9 @@ export async function fetchEventTypes(): Promise<BookingEventType[]> {
 export async function fetchEventType(
   slug: string,
 ): Promise<BookingEventType | null> {
-  if (IS_PRODUCTION_BUILD) return null;
+  if (IS_PRODUCTION_BUILD) {
+    return STABLE_FALLBACK_EVENT_TYPES.find((et) => et.slug === slug) ?? null;
+  }
 
   try {
     const res = await fetch(
@@ -163,14 +199,18 @@ export async function fetchEventType(
     );
     if (!res.ok) {
       warn('fetchEventType failed', { slug, status: res.status });
-      return null;
+      return STABLE_FALLBACK_EVENT_TYPES.find((et) => et.slug === slug) ?? null;
     }
 
     const data = (await res.json()) as EventTypeResponse;
-    return data.event_type ?? null;
+    return (
+      data.event_type ??
+      STABLE_FALLBACK_EVENT_TYPES.find((et) => et.slug === slug) ??
+      null
+    );
   } catch (error) {
     warn('fetchEventType threw', { slug, error });
-    return null;
+    return STABLE_FALLBACK_EVENT_TYPES.find((et) => et.slug === slug) ?? null;
   }
 }
 
