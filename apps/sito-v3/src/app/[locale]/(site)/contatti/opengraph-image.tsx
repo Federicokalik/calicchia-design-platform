@@ -1,8 +1,7 @@
 import { ImageResponse } from 'next/og';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { OGTemplate } from '@/components/og/OGTemplate';
 import { isLocale, type Locale } from '@/lib/i18n';
+import { getFunnelDisplay } from '@/lib/og-fonts';
 
 export const runtime = 'nodejs';
 export const size = { width: 1200, height: 630 };
@@ -17,9 +16,7 @@ export default async function ContattiOpenGraphImage({
   const { locale: rawLocale } = await params;
   const locale: Locale = isLocale(rawLocale) ? rawLocale : 'it';
 
-  const fontDisplay = await readFile(
-    join(process.cwd(), 'public/fonts/funnel-display-latin.woff2'),
-  );
+  const fontDisplay = await getFunnelDisplay();
 
   const title =
     locale === 'en' ? 'Get in touch.' : 'Sentiamoci. Niente PowerPoint.';
@@ -39,7 +36,9 @@ export default async function ContattiOpenGraphImage({
     ),
     {
       ...size,
-      fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }],
+      ...(fontDisplay
+        ? { fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }] }
+        : {}),
     },
   );
 }
