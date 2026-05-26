@@ -1,0 +1,75 @@
+/*
+ * WhatsApp inbox visual tokens.
+ *
+ * Kept separate from the shadcn/Radix theme tokens in `index.css` because
+ * these intentionally do NOT track the admin's primary/secondary palette —
+ * the goal is the unmistakable green/white bubble look that operators
+ * already associate with WhatsApp on their phone. The token names are
+ * prefixed `--wa-` to avoid colliding with global theme vars and to make
+ * grep easy.
+ */
+
+:root {
+  --wa-bubble-out: #d9fdd3;
+  --wa-bubble-out-fg: #111b21;
+  --wa-bubble-in: #ffffff;
+  --wa-bubble-in-fg: #111b21;
+  --wa-thread-bg: #efeae2;
+  --wa-thread-border: #d1d7db;
+  --wa-tick: #8696a0;
+  --wa-tick-read: #53bdeb;
+  --wa-meta: rgba(17, 27, 33, 0.45);
+}
+
+.dark {
+  --wa-bubble-out: #005c4b;
+  --wa-bubble-out-fg: #e9edef;
+  --wa-bubble-in: #202c33;
+  --wa-bubble-in-fg: #e9edef;
+  --wa-thread-bg: #0b141a;
+  --wa-thread-border: #222d34;
+  --wa-tick: #8696a0;
+  --wa-tick-read: #53bdeb;
+  --wa-meta: rgba(233, 237, 239, 0.55);
+}
+
+/* Subtle paper-like noise on the thread background (optional, very faint). */
+.wa-thread-bg {
+  background-color: var(--wa-thread-bg);
+}
+
+.wa-bubble-out {
+  background-color: var(--wa-bubble-out);
+  color: var(--wa-bubble-out-fg);
+}
+
+.wa-bubble-in {
+  background-color: var(--wa-bubble-in);
+  color: var(--wa-bubble-in-fg);
+  border: 1px solid var(--wa-thread-border);
+}
+
+.wa-meta {
+  color: var(--wa-meta);
+}
+
+.wa-tick {
+  color: var(--wa-tick);
+}
+
+.wa-tick-read {
+  color: var(--wa-tick-read);
+}
+
+/* Day separator pill shown between message groups. */
+.wa-day-separator {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background-color: var(--wa-bubble-in);
+  color: var(--wa-bubble-in-fg);
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--wa-thread-border);
+}

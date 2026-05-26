@@ -26,10 +26,15 @@ import { formatPhone } from './whatsapp';
 const SITE_BASE = (process.env.PUBLIC_SITE_URL || 'https://calicchia.design').replace(/\/+$/, '');
 
 /**
- * Template del disclaimer. Conserva-lo conciso: WhatsApp tronca i messaggi
- * lunghi nelle preview e un wall-of-text al primo contatto e` controproducente.
+ * Template di default del disclaimer. Conservalo conciso: WhatsApp tronca i
+ * messaggi lunghi nelle preview e un wall-of-text al primo contatto e`
+ * controproducente.
+ *
+ * L'admin puo` sovrascrivere questo template dalla pagina "Impostazioni →
+ * WhatsApp" salvando `whatsapp.first_contact_disclaimer` in site_settings.
+ * Se la setting e` vuota si usa questo default.
  */
-export const FIRST_CONTACT_DISCLAIMER = [
+export const FIRST_CONTACT_DISCLAIMER_DEFAULT = [
   '—',
   'Sono Federico (Calicchia Design). Questo numero WhatsApp e` ufficiale e lo uso solo per comunicazioni legate ai nostri rapporti professionali.',
   '',
@@ -39,9 +44,40 @@ export const FIRST_CONTACT_DISCLAIMER = [
 ].join('\n');
 
 /**
+ * Backwards-compat: alcuni moduli importavano `FIRST_CONTACT_DISCLAIMER` come
+ * costante. Lo manteniamo esportato come alias del default per non rompere
+ * le import-path esistenti; per logica di runtime usa `getFirstContactDisclaimer()`.
+ */
+export const FIRST_CONTACT_DISCLAIMER = FIRST_CONTACT_DISCLAIMER_DEFAULT;
+
+/**
+ * Legge il template attivo da `site_settings.whatsapp.first_contact_disclaimer`.
+ * Se la setting e` vuota / mancante / il DB e` irraggiungibile, ritorna il
+ * default. Fail-open coerente con `hasPriorOutboundTo`: la disclosure deve
+ * arrivare anche se la setting non e` leggibile.
+ */
+export async function getFirstContactDisclaimer(): Promise<string> {
+  try {
+    const rows = (await sql`
+      SELECT value FROM site_settings WHERE key = 'whatsapp' LIMIT 1
+    `) as Array<{ value: { first_contact_disclaimer?: unknown } | null }>;
+    const raw = rows[0]?.value?.first_contact_disclaimer;
+    if (typeof raw === 'string' && raw.trim().length > 0) return raw;
+  } catch {
+    // ignore — fall back to default
+  }
+  return FIRST_CONTACT_DISCLAIMER_DEFAULT;
+}
+
+/**
  * Sentinel string usata per riconoscere se un messaggio contiene gia` il
  * disclaimer (evita la doppia accodatura se un admin lo include manualmente
  * o se il messaggio e` stato gia` arricchito a monte).
+ *
+ * NOTE: se l'admin sovrascrive il template rimuovendo il link
+ * `/clienti/preferenze`, il rilevamento anti-doppio non funziona per il
+ * template custom. La pagina Impostazioni avvisa l'utente di mantenere la
+ * stringa nel template per preservare la guardia.
  */
 const DISCLAIMER_SENTINEL = '/clienti/preferenze';
 
@@ -93,5 +129,6 @@ export async function attachDisclaimerIfFirstContact(
   if (alreadyHasDisclaimer(original)) return original;
   const seen = await hasPriorOutboundTo(phone);
   if (seen) return original;
-  return `${original}\n\n${FIRST_CONTACT_DISCLAIMER}`;
+  const disclaimer = await getFirstContactDisclaimer();
+  return `${original}\n\n${disclaimer}`;
 }

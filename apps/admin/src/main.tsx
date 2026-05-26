@@ -9,6 +9,7 @@ import { I18nProvider } from '@/hooks/use-i18n';
 import { bugsink } from '@/lib/bugsink';
 import App from './App';
 import './index.css';
+import './styles/whatsapp.css';
 
 // Initialize Bugsink error tracking
 bugsink.init({

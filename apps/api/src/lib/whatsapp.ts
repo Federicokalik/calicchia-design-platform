@@ -112,7 +112,12 @@ export interface SendResult {
   externalId?: string;
 }
 
-export async function sendWhatsAppText(phone: string, message: string): Promise<SendResult> {
+export interface SendOptions {
+  /** External id of the message to quote (WhatsApp "reply" feature). */
+  replyToExternalId?: string;
+}
+
+export async function sendWhatsAppText(phone: string, message: string, options: SendOptions = {}): Promise<SendResult> {
   if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
   const target = formatPhone(phone);
   // GDPR L16: al primo outbound verso un numero ancora non contattato
@@ -120,10 +125,12 @@ export async function sendWhatsAppText(phone: string, message: string): Promise<
   // Dynamic import per evitare il ciclo whatsapp.ts <-> whatsapp-disclaimer.ts.
   const { attachDisclaimerIfFirstContact } = await import('./whatsapp-disclaimer');
   const body = await attachDisclaimerIfFirstContact(target, message);
+  const payload: Record<string, unknown> = { phone: target, message: body };
+  if (options.replyToExternalId) payload.reply_message_id = options.replyToExternalId;
   const data = await throttledSend(() =>
     gowaFetch<{ results?: { message_id?: string }; message_id?: string; code?: string }>(
       '/send/message',
-      { method: 'POST', jsonBody: { phone: target, message: body } }
+      { method: 'POST', jsonBody: payload }
     )
   );
   const id = data?.results?.message_id || data?.message_id;
@@ -135,7 +142,8 @@ export async function sendWhatsAppMedia(
   caption: string,
   mediaUrl: string,
   filename: string,
-  mimetype = 'application/pdf'
+  mimetype = 'application/pdf',
+  options: SendOptions = {},
 ): Promise<SendResult> {
   if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
   const target = formatPhone(phone);
@@ -159,6 +167,7 @@ export async function sendWhatsAppMedia(
     file_name: filename,
     mimetype,
   };
+  if (options.replyToExternalId) body.reply_message_id = options.replyToExternalId;
   const data = await throttledSend(() =>
     gowaFetch<{ results?: { message_id?: string }; message_id?: string }>(
       endpoint,
@@ -249,6 +258,25 @@ export async function reconnectWhatsAppDevice(): Promise<void> {
 export async function markChatRead(chatId: string): Promise<void> {
   if (!isWhatsAppConfigured()) return;
   await gowaFetch(`/chat/${encodeURIComponent(chatId)}/mark-as-read`, { method: 'POST' });
+}
+
+/**
+ * Send an emoji reaction to a specific message. GOWA accepts either an empty
+ * string to clear the reaction or any emoji to set it. We always go through
+ * the throttle since each call is a real network round-trip.
+ *
+ * `messageId` is the GOWA external id of the target message (the one the
+ * operator is reacting to), NOT the phone-number chat id.
+ */
+export async function sendWhatsAppReaction(phone: string, messageId: string, emoji: string): Promise<void> {
+  if (!isWhatsAppConfigured()) throw new Error('WhatsApp (GOWA) non configurato');
+  const target = formatPhone(phone);
+  await throttledSend(() =>
+    gowaFetch('/send/reaction', {
+      method: 'POST',
+      jsonBody: { phone: target, message_id: messageId, emoji },
+    })
+  );
 }
 
 // ---------- Backfill (chats & history) ----------

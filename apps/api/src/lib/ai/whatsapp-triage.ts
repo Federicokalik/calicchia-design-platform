@@ -15,8 +15,9 @@
 
 import { sql } from '../../db';
 import { createChatCompletion, isOpenAIConfigured } from './openai';
-import { TRIAGE_SYSTEM_PROMPT, buildTriageUserPrompt, type TriageContext } from './prompts/whatsapp';
+import { getTriageSystemPrompt, buildTriageUserPrompt, type TriageContext } from './prompts/whatsapp';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
+import { publishWaEvent } from '../whatsapp-events';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'whatsapp-triage' });
@@ -32,6 +33,7 @@ interface ConversationRow {
   ai_mode: 'off' | 'triage' | 'auto_reply';
   customer_id: string | null;
   lead_id: string | null;
+  ai_instructions: string | null;
 }
 
 interface MessageRow {
@@ -59,6 +61,7 @@ async function loadContext(conv: ConversationRow, inboundBody: string): Promise<
     contactName: conv.contact_name || undefined,
     customerCompany,
     isLead: !!conv.lead_id && !conv.customer_id,
+    perConversationInstructions: conv.ai_instructions,
     recentMessages: recent
       .slice(1) // escludi il nuovo inbound, l'aggiungiamo come prompt finale
       .reverse()
@@ -74,12 +77,13 @@ async function loadContext(conv: ConversationRow, inboundBody: string): Promise<
 async function generateReply(ctx: TriageContext): Promise<string | null> {
   if (!isOpenAIConfigured()) return null;
   try {
+    const systemPrompt = await getTriageSystemPrompt();
     const text = await createChatCompletion({
       model: MODEL,
       max_tokens: MAX_TOKENS,
       temperature: 0.6,
       messages: [
-        { role: 'system', content: TRIAGE_SYSTEM_PROMPT },
+        { role: 'system', content: systemPrompt },
         { role: 'user', content: buildTriageUserPrompt(ctx) },
       ],
     });
@@ -104,7 +108,7 @@ export async function runWhatsAppTriage(
 ): Promise<void> {
   try {
     const rows = await sql`
-      SELECT id, chat_id, phone, contact_name, ai_mode, customer_id, lead_id
+      SELECT id, chat_id, phone, contact_name, ai_mode, customer_id, lead_id, ai_instructions
       FROM whatsapp_conversations
       WHERE id = ${conversationId}
       LIMIT 1
@@ -121,19 +125,29 @@ export async function runWhatsAppTriage(
       if (!isWhatsAppConfigured()) return;
       try {
         const result = await sendWhatsAppText(conv.phone, reply);
-        await sql`
+        const inserted = await sql`
           INSERT INTO whatsapp_messages
             (conversation_id, external_id, direction, category, type, body, sender_kind, meta)
           VALUES
             (${conv.id}, ${result.externalId ?? null}, 'outbound', 'operational', 'text', ${reply}, 'ai',
              ${sql.json({ model: MODEL, mode: 'auto_reply' })})
-        `;
+          RETURNING id
+        ` as Array<{ id: string }>;
         await sql`
           UPDATE whatsapp_conversations
           SET last_message_at = now(),
               last_message_preview = ${reply.slice(0, 200)}
           WHERE id = ${conv.id}
         `;
+        publishWaEvent({
+          type: 'message:inserted',
+          conversationId: conv.id,
+          direction: 'outbound',
+          messageId: inserted[0].id,
+          externalId: result.externalId ?? null,
+          unread: false,
+        });
+        publishWaEvent({ type: 'conversation:updated', conversationId: conv.id, reason: 'message' });
       } catch (err) {
         log.error({ err }, 'auto_reply send failed');
       }
@@ -141,13 +155,22 @@ export async function runWhatsAppTriage(
     }
 
     // triage → salva bozza
-    await sql`
+    const draftRows = await sql`
       INSERT INTO whatsapp_messages
         (conversation_id, direction, category, type, body, sender_kind, ai_draft, meta)
       VALUES
         (${conv.id}, 'outbound', 'operational', 'text', ${reply}, 'ai', TRUE,
          ${sql.json({ model: MODEL, mode: 'triage' })})
-    `;
+      RETURNING id
+    ` as Array<{ id: string }>;
+    publishWaEvent({
+      type: 'message:inserted',
+      conversationId: conv.id,
+      direction: 'outbound',
+      messageId: draftRows[0].id,
+      externalId: null,
+      unread: false,
+    });
   } catch (err) {
     log.error({ err }, 'failed');
   }

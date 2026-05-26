@@ -151,6 +151,21 @@ const settingsSchemas = {
 
   'whatsapp': z.object({
     default_ai_mode: z.enum(['off', 'triage', 'auto_reply']).default('off'),
+    // First-contact GDPR disclaimer template. Empty string falls back to the
+    // hardcoded default in `apps/api/src/lib/whatsapp-disclaimer.ts`.
+    first_contact_disclaimer: z.string().default(''),
+    // Admin-curated quick reply snippets shown in the WhatsApp composer.
+    quick_replies: z
+      .array(
+        z.object({
+          label: z.string().min(1).max(60),
+          text: z.string().min(1).max(2000),
+        }),
+      )
+      .default([]),
+    // Override of the AI triage system prompt. Empty string falls back to
+    // TRIAGE_SYSTEM_PROMPT_DEFAULT in `apps/api/src/lib/ai/prompts/whatsapp.ts`.
+    ai_system_prompt: z.string().default(''),
   }).passthrough(),
 
   'quote.settings': z.object({
