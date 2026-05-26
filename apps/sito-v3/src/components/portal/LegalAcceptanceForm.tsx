@@ -7,7 +7,7 @@ import { LegalDocumentReadable } from './LegalDocumentReadable';
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
 
 interface LegalAcceptanceFormProps {
-  customerEmail: string;
+  customerEmail: string | null;
 }
 
 /**
@@ -87,7 +87,7 @@ export function LegalAcceptanceForm({ customerEmail }: LegalAcceptanceFormProps)
           className="font-mono text-[11px] uppercase tracking-[0.18em]"
           style={{ color: 'var(--color-text-tertiary)' }}
         >
-          Account: {customerEmail}
+          Account: {customerEmail || 'accesso via codice'}
         </p>
       </header>
 

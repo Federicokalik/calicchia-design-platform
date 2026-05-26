@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
 import { fail } from '../../lib/responses';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 
 export const deliverableRoutes = new Hono<PortalEnv>();
 
 // ── Approve a deliverable ────────────────────────────────
-deliverableRoutes.post('/deliverables/:id/approve', portalAuth, async (c) => {
+deliverableRoutes.post('/deliverables/:id/approve', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const deliverableId = c.req.param('id');
   const { comment } = await c.req.json().catch(() => ({ comment: '' }));
@@ -65,7 +65,7 @@ deliverableRoutes.post('/deliverables/:id/approve', portalAuth, async (c) => {
 });
 
 // ── Reject a deliverable (request revision) ──────────────
-deliverableRoutes.post('/deliverables/:id/reject', portalAuth, async (c) => {
+deliverableRoutes.post('/deliverables/:id/reject', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const deliverableId = c.req.param('id');
   const { comment } = await c.req.json().catch(() => ({ comment: '' }));

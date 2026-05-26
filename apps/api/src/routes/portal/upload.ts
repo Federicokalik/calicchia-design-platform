@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { randomUUID } from 'crypto';
 import { sql } from '../../db';
 import { fail } from '../../lib/responses';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'upload' });
@@ -103,7 +103,7 @@ function mimeMatches(declared: string, sniffed: string): boolean {
 }
 
 // ── Init multipart upload ────────────────────────────────
-uploadRoutes.post('/init', portalAuth, async (c) => {
+uploadRoutes.post('/init', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const { fileName, fileSize, contentType, projectId } = await c.req.json();
 
@@ -153,7 +153,7 @@ uploadRoutes.post('/init', portalAuth, async (c) => {
 });
 
 // ── Get presigned URL for a chunk ────────────────────────
-uploadRoutes.post('/url', portalAuth, async (c) => {
+uploadRoutes.post('/url', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const { uploadId, key, partNumber } = await c.req.json();
 
@@ -179,7 +179,7 @@ uploadRoutes.post('/url', portalAuth, async (c) => {
 });
 
 // ── Complete multipart upload ────────────────────────────
-uploadRoutes.post('/done', portalAuth, async (c) => {
+uploadRoutes.post('/done', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const { uploadId, key, parts } = await c.req.json();
 
@@ -262,7 +262,7 @@ uploadRoutes.post('/done', portalAuth, async (c) => {
 });
 
 // ── Abort multipart upload ───────────────────────────────
-uploadRoutes.post('/abort', portalAuth, async (c) => {
+uploadRoutes.post('/abort', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const { uploadId, key } = await c.req.json();
 

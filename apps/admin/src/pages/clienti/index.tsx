@@ -181,11 +181,11 @@ export default function ClientiPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (!newForm.contact_name.trim() || !newForm.email.trim()) return;
+              if (!newForm.contact_name.trim() || (!newForm.email.trim() && !newForm.phone.trim())) return;
               createMutation.mutate({
                 contact_name: newForm.contact_name.trim(),
-                email: newForm.email.trim(),
-                phone: newForm.phone || null,
+                email: newForm.email.trim() || null,
+                phone: newForm.phone.trim() || null,
                 company_name: newForm.company_name || null,
               });
             }}
@@ -201,7 +201,7 @@ export default function ClientiPage() {
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Email *</Label>
+              <Label>Email</Label>
               <Input
                 type="email"
                 value={newForm.email}
@@ -229,7 +229,7 @@ export default function ClientiPage() {
               <Button type="button" variant="outline" onClick={() => setShowNewDialog(false)}>
                 Annulla
               </Button>
-              <Button type="submit" disabled={!newForm.contact_name.trim() || !newForm.email.trim() || createMutation.isPending}>
+              <Button type="submit" disabled={!newForm.contact_name.trim() || (!newForm.email.trim() && !newForm.phone.trim()) || createMutation.isPending}>
                 Crea Cliente
               </Button>
             </DialogFooter>

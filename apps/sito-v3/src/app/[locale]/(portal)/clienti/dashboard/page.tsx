@@ -39,8 +39,12 @@ export default async function ClientiDashboardPage({ params }: PageProps) {
   await params;
 
   try {
-    const [customer, dashboard, projects, invoices, renewals, t, locale] = await Promise.all([
-      requirePortalAccess(),
+    const customer = await requirePortalAccess();
+    if (customer.role === 'collaborator') {
+      redirect('/clienti/progetti');
+    }
+
+    const [dashboard, projects, invoices, renewals, t, locale] = await Promise.all([
       getDashboard(),
       getProjects(),
       getInvoices(),

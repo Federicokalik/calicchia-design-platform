@@ -7,8 +7,12 @@ export const projectsRoutes = new Hono<PortalEnv>();
 
 // ── List all projects for this customer ──────────────────
 projectsRoutes.get('/', portalAuth, async (c) => {
-  const customerId = c.get('customer_id') as string;
+  const role = c.get('actor_role');
+  const actorId = c.get('actor_id');
   const locale = getRequestLocale(c);
+  const accessFilter = role === 'collaborator'
+    ? sql`cp.collaborator_id = ${actorId}`
+    : sql`cp.customer_id = ${c.get('customer_id') as string} AND cp.visible_to_client = true`;
 
   const projects = (await sql`
     SELECT
@@ -24,8 +28,7 @@ projectsRoutes.get('/', portalAuth, async (c) => {
        AND pc.customer_id IS NULL AND pc.is_internal = false) AS unread_messages
     FROM client_projects cp
     JOIN customers cu ON cu.id = cp.customer_id
-    WHERE cp.customer_id = ${customerId}
-      AND cp.visible_to_client = true
+    WHERE ${accessFilter}
     ORDER BY
       CASE cp.status
         WHEN 'in_progress' THEN 1 WHEN 'review' THEN 2
@@ -48,9 +51,13 @@ projectsRoutes.get('/', portalAuth, async (c) => {
 
 // ── Project detail ───────────────────────────────────────
 projectsRoutes.get('/:id', portalAuth, async (c) => {
-  const customerId = c.get('customer_id') as string;
+  const role = c.get('actor_role');
+  const actorId = c.get('actor_id');
   const id = c.req.param('id');
   const locale = getRequestLocale(c);
+  const accessFilter = role === 'collaborator'
+    ? sql`cp.id = ${id} AND cp.collaborator_id = ${actorId}`
+    : sql`cp.id = ${id} AND cp.customer_id = ${c.get('customer_id') as string} AND cp.visible_to_client = true`;
 
   const projectRows = (await sql`
     SELECT
@@ -61,9 +68,7 @@ projectsRoutes.get('/:id', portalAuth, async (c) => {
       cu.company_name, cu.contact_name
     FROM client_projects cp
     JOIN customers cu ON cu.id = cp.customer_id
-    WHERE cp.id = ${id}
-      AND cp.customer_id = ${customerId}
-      AND cp.visible_to_client = true
+    WHERE ${accessFilter}
     LIMIT 1
   `) as Array<Record<string, unknown>>;
 

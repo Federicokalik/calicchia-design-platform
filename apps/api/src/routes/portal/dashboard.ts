@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
 import { applyTranslations, getRequestLocale } from '../../lib/portal-i18n';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 
 export const dashboardRoutes = new Hono<PortalEnv>();
 
-dashboardRoutes.get('/', portalAuth, async (c) => {
+dashboardRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const locale = getRequestLocale(c);
 

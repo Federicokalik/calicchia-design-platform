@@ -30,9 +30,9 @@ interface FieldErrors {
  * screen "check your email". Click link in email → /clienti/auth/verify
  * (Route Handler) → cookie set → redirect dashboard.
  *
- * Fallback "emergency code": toggle reveals email + access_code form for
- * cases where email delivery fails or admin issued a one-time code. Calls
- * /api/portal/login (email + bcrypt-verified code).
+ * Fallback "emergency code": toggle reveals an access_code form for
+ * cases where email delivery fails, the customer only uses WhatsApp, or admin
+ * issued a collaborator code. Calls /api/portal/login.
  *
  * Both flows are gated by a Cloudflare Turnstile invisible widget; the
  * container is mounted once, outside the conditional branches, so it
@@ -101,12 +101,9 @@ export function PortalLoginForm() {
   const codeLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
-    const email = String(fd.get('email') ?? '').trim();
     const access_code = String(fd.get('access_code') ?? '').trim();
 
     const errs: FieldErrors = {};
-    if (!email) errs.email = t('errors.emailRequired');
-    else if (!EMAIL_RE.test(email)) errs.email = t('errors.emailInvalid');
     if (!access_code) errs.access_code = t('errors.accessCodeRequired');
     if (Object.keys(errs).length) return setErrors(errs);
     if (turnstileSiteKey && !turnstile.token) {
@@ -120,7 +117,7 @@ export function PortalLoginForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, access_code, turnstile_token: turnstile.token }),
+        body: JSON.stringify({ access_code, turnstile_token: turnstile.token }),
       });
       if (!res.ok) {
         turnstile.reset();
@@ -129,7 +126,10 @@ export function PortalLoginForm() {
         setSubmitting(false);
         return;
       }
-      router.push(next);
+      const data = (await res.json().catch(() => ({}))) as {
+        customer?: { role?: 'client' | 'collaborator' };
+      };
+      router.push(data.customer?.role === 'collaborator' ? '/clienti/progetti' : next);
     } catch (error) {
       turnstile.reset();
       setErrors({
@@ -229,25 +229,6 @@ export function PortalLoginForm() {
         </div>
 
         <form onSubmit={codeLogin} noValidate className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="code-email">{t('fields.email')}</Label>
-            <Input
-              id="code-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              placeholder={t('fields.emailPlaceholder')}
-              aria-invalid={Boolean(errors.email)}
-              aria-describedby={errors.email ? 'code-email-error' : undefined}
-            />
-            {errors.email ? (
-              <PortalCaption id="code-email-error" tone="error">
-                {errors.email}
-              </PortalCaption>
-            ) : null}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="code-access">{t('fields.accessCode')}</Label>
             <Input

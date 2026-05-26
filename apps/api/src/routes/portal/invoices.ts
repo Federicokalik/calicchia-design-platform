@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { z } from 'zod';
 import { sql, sqlv } from '../../db';
 import { zValidator } from '../../lib/z-validator';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 import { stripe, isStripeConfigured } from '../../lib/stripe';
 import { createPaypalOrder, isPaypalReady, capturePaypalOrder } from '../../lib/paypal';
 import { recordPaymentSuccess } from '../../lib/payment-events';
@@ -14,7 +14,7 @@ const log = logger.child({ scope: 'portal-invoices' });
 export const invoicesRoutes = new Hono<PortalEnv>();
 
 // ── List invoices for this customer ──────────────────────
-invoicesRoutes.get('/', portalAuth, async (c) => {
+invoicesRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
 
   const invoices = await sql`
@@ -46,7 +46,7 @@ invoicesRoutes.get('/', portalAuth, async (c) => {
 
 // ── Payments (schedules with payment links) ──────────────
 // NOTE: deve venire PRIMA di `/:id` per non essere catturato come id.
-invoicesRoutes.get('/payments', portalAuth, async (c) => {
+invoicesRoutes.get('/payments', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const projectId = c.req.query('project_id');
 
@@ -87,7 +87,7 @@ invoicesRoutes.get('/payments', portalAuth, async (c) => {
 
 // ── Subscriptions for this customer ─────────────────────
 // Statica → prima di /:id.
-invoicesRoutes.get('/subscriptions', portalAuth, async (c) => {
+invoicesRoutes.get('/subscriptions', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const rows = await sql`
     SELECT id, provider, stripe_subscription_id, paypal_subscription_id,
@@ -111,7 +111,7 @@ const paySchema = z.object({
   provider: z.enum(['stripe', 'paypal']),
 });
 
-invoicesRoutes.post('/pay', portalAuth, zValidator('json', paySchema), async (c) => {
+invoicesRoutes.post('/pay', portalClientAuth, zValidator('json', paySchema), async (c) => {
   const customerId = c.get('customer_id') as string;
   const { schedule_id, provider } = (c.req as any).valid('json') as z.infer<typeof paySchema>;
 
@@ -261,7 +261,7 @@ invoicesRoutes.post('/pay', portalAuth, zValidator('json', paySchema), async (c)
 // Cliente torna da PayPal con ?token=ORDER_ID&PayerID=…
 // Il portal chiama questa route per chiudere il pagamento sincronamente.
 // Idempotente: se webhook è già arrivato (status=paid) → no-op success.
-invoicesRoutes.post('/paypal-capture/:linkId', portalAuth, async (c) => {
+invoicesRoutes.post('/paypal-capture/:linkId', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const linkId = c.req.param('linkId');
 
@@ -332,7 +332,7 @@ invoicesRoutes.post('/paypal-capture/:linkId', portalAuth, async (c) => {
 
 // ── GET single invoice ───────────────────────────────────
 // Catch-all dinamico — DEVE essere l'ultima route per non catturare static paths.
-invoicesRoutes.get('/:id', portalAuth, async (c) => {
+invoicesRoutes.get('/:id', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const id = c.req.param('id');
 

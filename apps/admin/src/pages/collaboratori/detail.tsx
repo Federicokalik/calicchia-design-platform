@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Building2, Mail, Phone, Briefcase, FolderKanban,
-  FolderPlus,
+  FolderPlus, KeyRound, Send, Copy, Check, RefreshCw, ExternalLink, Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +29,9 @@ export default function CollaboratoreDetailPage() {
   const queryClient = useQueryClient();
   const [showNewProject, setShowNewProject] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: '', project_type: 'website', customer_id: '', notes: '' });
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [portalAccess, setPortalAccess] = useState<{ code: string; link: string } | null>(null);
+  const portalUrl = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
 
   const { data, isLoading } = useQuery({
     queryKey: ['collaborator', id],
@@ -79,6 +82,10 @@ export default function CollaboratoreDetailPage() {
     },
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['collaborator-projects', id] });
+      if (projectForm.customer_id) {
+        queryClient.invalidateQueries({ queryKey: ['customer-projects', projectForm.customer_id] });
+        queryClient.invalidateQueries({ queryKey: ['client-projects'] });
+      }
       setShowNewProject(false);
       setProjectForm({ name: '', project_type: 'website', customer_id: '', notes: '' });
       toast.success('Progetto creato');
@@ -86,6 +93,37 @@ export default function CollaboratoreDetailPage() {
     },
     onError: () => toast.error('Errore creazione'),
   });
+
+  const generateCodeMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/collaborators-v2/${id}/generate-portal-code`, { method: 'POST' }),
+    onSuccess: (res: any) => {
+      const code = res?.collaborator?.portal_access_code;
+      if (code) setPortalAccess({ code, link: `${portalUrl}/clienti/p/${code}` });
+      queryClient.invalidateQueries({ queryKey: ['collaborator', id] });
+      toast.success('Codice portale generato');
+    },
+    onError: (err: Error) => toast.error(err.message || 'Generazione codice fallita'),
+  });
+
+  const sendAccessMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/collaborators-v2/${id}/send-portal-access`, { method: 'POST' }),
+    onSuccess: (res: any) => {
+      if (res?.portal_access_code && res?.link) {
+        setPortalAccess({ code: res.portal_access_code, link: res.link });
+      }
+      queryClient.invalidateQueries({ queryKey: ['collaborator', id] });
+      toast.success(`Accesso inviato via ${res?.channel === 'whatsapp' ? 'WhatsApp' : 'email'}`);
+    },
+    onError: (err: Error) => toast.error(err.message || 'Invio accesso fallito'),
+  });
+
+  const copyPortalLink = () => {
+    if (!portalAccess) return;
+    navigator.clipboard.writeText(portalAccess.link);
+    setCopiedLink(true);
+    toast.success('Link copiato');
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
 
   if (isLoading) return <LoadingState />;
   if (!collab) return <EmptyState title="Collaboratore non trovato" />;
@@ -156,6 +194,50 @@ export default function CollaboratoreDetailPage() {
             <div className="space-y-1.5">
               <Label className="text-xs">Note</Label>
               <Textarea defaultValue={collab.notes || ''} rows={3} onBlur={(e) => updateMutation.mutate({ notes: e.target.value || null })} />
+            </div>
+          </div>
+
+          <div className="rounded-xl border bg-card p-6 space-y-4 mt-4">
+            <div className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold">Accesso portale collaboratore</h3>
+            </div>
+            {portalAccess ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-muted-foreground">Codice:</span>
+                  <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">{portalAccess.code}</code>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 overflow-hidden">
+                  <span className="truncate">{portalAccess.link}</span>
+                </div>
+              </div>
+            ) : collab.has_portal_access ? (
+              <p className="text-xs text-muted-foreground">Accesso configurato. Per vedere e inviare un nuovo codice, usa “Rigenera” o “Invia accesso”.</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Nessun accesso portale configurato.</p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" variant="outline" onClick={copyPortalLink} disabled={!portalAccess} className="gap-1.5">
+                {copiedLink ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copiedLink ? 'Copiato' : 'Copia link'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => generateCodeMutation.mutate()} disabled={generateCodeMutation.isPending} className="gap-1.5">
+                <RefreshCw className={`h-3.5 w-3.5 ${generateCodeMutation.isPending ? 'animate-spin' : ''}`} />
+                {collab.has_portal_access ? 'Rigenera' : 'Genera codice'}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => sendAccessMutation.mutate()} disabled={sendAccessMutation.isPending} className="gap-1.5">
+                {sendAccessMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                Invia accesso
+              </Button>
+              {portalAccess && (
+                <Button size="sm" variant="outline" asChild>
+                  <a href={portalAccess.link} target="_blank" rel="noopener noreferrer" className="gap-1.5">
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Apri
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
         </TabsContent>

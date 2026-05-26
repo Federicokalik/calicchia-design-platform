@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
 import { applyTranslations, getRequestLocale } from '../../lib/portal-i18n';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 
 export const renewalsRoutes = new Hono<PortalEnv>();
 
 // ── Unified renewals: subscriptions + domains ────────────
-renewalsRoutes.get('/', portalAuth, async (c) => {
+renewalsRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
 
   // Active subscriptions

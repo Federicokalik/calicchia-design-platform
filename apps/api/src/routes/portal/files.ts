@@ -1,11 +1,11 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 
 export const filesRoutes = new Hono<PortalEnv>();
 
 // ── List all files uploaded by this customer ─────────────
-filesRoutes.get('/', portalAuth, async (c) => {
+filesRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const projectId = c.req.query('project_id');
   const page = Math.max(1, Number(c.req.query('page') || '1'));

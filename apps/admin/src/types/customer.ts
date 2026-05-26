@@ -4,7 +4,7 @@ export interface Customer {
   id: string;
   contact_name: string;
   company_name: string | null;
-  email: string;
+  email: string | null;
   phone: string | null;
   billing_address: Record<string, unknown>;
   notes: string | null;

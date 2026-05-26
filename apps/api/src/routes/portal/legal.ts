@@ -21,7 +21,7 @@
 
 import { Hono } from 'hono';
 import { sql } from '../../db';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 import { getClientIp } from '../../lib/client-ip';
 import {
   BOOTSTRAP_VERSION,
@@ -77,7 +77,7 @@ async function fetchAcceptances(customerId: string): Promise<Map<LegalDocumentSl
 }
 
 // GET /api/portal/legal/status
-legalRoutes.get('/status', portalAuth, async (c) => {
+legalRoutes.get('/status', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
 
   // 1. Quali documenti mancano per la versione corrente?
@@ -117,7 +117,7 @@ legalRoutes.get('/status', portalAuth, async (c) => {
 });
 
 // POST /api/portal/legal/accept
-legalRoutes.post('/accept', portalAuth, async (c) => {
+legalRoutes.post('/accept', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
 
   let body: { documents?: string[] };

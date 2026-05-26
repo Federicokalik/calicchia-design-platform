@@ -10,7 +10,7 @@
 
 import { Hono } from 'hono';
 import { sql } from '../../db';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 
 export const preferencesRoutes = new Hono<PortalEnv>();
 
@@ -53,13 +53,13 @@ async function ensureRow(customerId: string): Promise<PrefsRow> {
   return inserted[0];
 }
 
-preferencesRoutes.get('/', portalAuth, async (c) => {
+preferencesRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const row = await ensureRow(customerId);
   return c.json({ preferences: row });
 });
 
-preferencesRoutes.patch('/', portalAuth, async (c) => {
+preferencesRoutes.patch('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const body = await c.req.json().catch(() => ({} as any));
 

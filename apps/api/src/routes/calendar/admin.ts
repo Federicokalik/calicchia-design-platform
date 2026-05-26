@@ -30,6 +30,7 @@ import {
   rotateFeedToken,
   buildFeedUrl,
   CalendarValidationError,
+  CalendarConflictError,
   CalendarSystemError,
 } from '../../lib/calendar/calendars';
 import {
@@ -582,8 +583,8 @@ calendarAdmin.get('/calendars/:idOrSlug', async (c) => {
 });
 
 calendarAdmin.post('/calendars', async (c) => {
-  const body = await c.req.json();
   try {
+    const body = await c.req.json();
     const cal = await createCalendar({
       slug: String(body.slug || '').toLowerCase(),
       name: String(body.name || ''),
@@ -597,7 +598,15 @@ calendarAdmin.post('/calendars', async (c) => {
     return c.json({ calendar: { ...cal, ics_feed_url: buildFeedUrl(cal) } });
   } catch (err) {
     if (err instanceof CalendarValidationError) return c.json({ error: err.message }, 400);
+    if (err instanceof SyntaxError) return c.json({ error: 'JSON non valido' }, 400);
+    if (err instanceof CalendarConflictError) return c.json({ error: err.message }, 409);
     if ((err as { code?: string }).code === '23505') return c.json({ error: 'Slug già usato' }, 409);
+    log.error({ err }, 'calendar create failed');
+    const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
+      || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
+    if (code === '42P01' || code === '42703' || code === 'ECONNREFUSED') {
+      return c.json({ error: 'Schema calendario non disponibile. Esegui le migrazioni e riprova.', code }, 503);
+    }
     throw err;
   }
 });

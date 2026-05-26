@@ -44,7 +44,8 @@ export interface LegalStatusResponse {
 
 export interface PortalCustomer {
   id: string;
-  email: string;
+  role?: 'client' | 'collaborator';
+  email: string | null;
   contact_name: string | null;
   company_name: string | null;
   portal_logo: string | null;
@@ -347,6 +348,8 @@ export async function getLegalStatus(): Promise<LegalStatusResponse> {
 export async function requirePortalAccess(): Promise<PortalCustomer> {
   const customer = await getCustomer();
   if (!customer) throw new PortalUnauthorizedError('/me');
+
+  if (customer.role === 'collaborator') return customer;
 
   const status = await getLegalStatus();
   if (status.requires_acceptance) {

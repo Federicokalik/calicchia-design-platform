@@ -134,16 +134,34 @@ export default function ClienteDetailPage() {
 
   // Portal access
   const [copiedLink, setCopiedLink] = useState(false);
+  const [portalAccess, setPortalAccess] = useState<{ code: string; link: string } | null>(null);
   const portalUrl = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
 
   const generateCodeMutation = useMutation({
     mutationFn: async () => {
       return apiFetch(`/api/customers/${id}/generate-portal-code`, { method: 'POST' });
     },
-    onSuccess: () => {
+    onSuccess: (res: { customer?: { portal_access_code?: string } }) => {
+      const code = res.customer?.portal_access_code;
+      if (code) setPortalAccess({ code, link: `${portalUrl}/clienti/p/${code}` });
       queryClient.invalidateQueries({ queryKey: ['customer', id] });
       toast.success('Codice portale generato');
     },
+  });
+
+  const sendPortalAccessMutation = useMutation({
+    mutationFn: async () => {
+      return apiFetch(`/api/customers/${id}/send-portal-access`, { method: 'POST' });
+    },
+    onSuccess: (res: { channel?: 'email' | 'whatsapp'; to?: string; portal_access_code?: string; link?: string }) => {
+      if (res.portal_access_code && res.link) {
+        setPortalAccess({ code: res.portal_access_code, link: res.link });
+      }
+      queryClient.invalidateQueries({ queryKey: ['customer', id] });
+      const channel = res.channel === 'whatsapp' ? 'WhatsApp' : 'email';
+      toast.success(`Accesso portale inviato via ${channel}`);
+    },
+    onError: (err: Error) => toast.error(err.message || 'Invio accesso portale fallito'),
   });
 
   const revokeSessionsMutation = useMutation({
@@ -157,9 +175,9 @@ export default function ClienteDetailPage() {
   });
 
   const copyPortalLink = () => {
-    const code = (customer as any)?.portal_access_code;
+    const code = portalAccess?.code || (customer as any)?.portal_access_code;
     if (!code) return;
-    navigator.clipboard.writeText(`${portalUrl}/clienti/p/${code}`);
+    navigator.clipboard.writeText(portalAccess?.link || `${portalUrl}/clienti/p/${code}`);
     setCopiedLink(true);
     toast.success('Link copiato');
     setTimeout(() => setCopiedLink(false), 2000);
@@ -392,8 +410,9 @@ export default function ClienteDetailPage() {
               </div>
               <div className="space-y-1.5">
                 <Label>Email</Label>
-                <Input defaultValue={customer.email} onBlur={(e) => {
-                  if (e.target.value !== customer.email) updateMutation.mutate({ email: e.target.value });
+                <Input defaultValue={customer.email || ''} onBlur={(e) => {
+                  const value = e.target.value.trim() || null;
+                  if (value !== customer.email) updateMutation.mutate({ email: value });
                 }} />
               </div>
               <div className="space-y-1.5">
@@ -440,19 +459,25 @@ export default function ClienteDetailPage() {
               <p className="text-[10px] text-muted-foreground">Logo personalizzato mostrato nel portale cliente</p>
             </div>
 
-            {(customer as any).portal_access_code ? (
+            {portalAccess || (customer as any).portal_access_code || (customer as any).has_portal_access ? (
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Codice:</span>
-                  <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
-                    {(customer as any).portal_access_code}
-                  </code>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 overflow-hidden">
-                  <span className="truncate">{portalUrl}/clienti/p/{(customer as any).portal_access_code}</span>
-                </div>
+                {portalAccess || (customer as any).portal_access_code ? (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Codice:</span>
+                      <code className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
+                        {portalAccess?.code || (customer as any).portal_access_code}
+                      </code>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 overflow-hidden">
+                      <span className="truncate">{portalAccess?.link || `${portalUrl}/clienti/p/${(customer as any).portal_access_code}`}</span>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Accesso portale configurato. Per vedere e inviare un nuovo codice, usa “Rigenera” o “Invia accesso”.</p>
+                )}
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={copyPortalLink} className="gap-1.5">
+                  <Button size="sm" variant="outline" onClick={copyPortalLink} disabled={!portalAccess && !(customer as any).portal_access_code} className="gap-1.5">
                     {copiedLink ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                     {copiedLink ? 'Copiato' : 'Copia link'}
                   </Button>
@@ -460,12 +485,24 @@ export default function ClienteDetailPage() {
                     <RefreshCw className={`h-3.5 w-3.5 ${generateCodeMutation.isPending ? 'animate-spin' : ''}`} />
                     Rigenera
                   </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={`${portalUrl}/clienti/p/${(customer as any).portal_access_code}`} target="_blank" rel="noopener noreferrer" className="gap-1.5">
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Apri
-                    </a>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => sendPortalAccessMutation.mutate()}
+                    disabled={sendPortalAccessMutation.isPending}
+                    className="gap-1.5"
+                  >
+                    {sendPortalAccessMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    Invia accesso
                   </Button>
+                  {(portalAccess || (customer as any).portal_access_code) && (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={portalAccess?.link || `${portalUrl}/clienti/p/${(customer as any).portal_access_code}`} target="_blank" rel="noopener noreferrer" className="gap-1.5">
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Apri
+                      </a>
+                    </Button>
+                  )}
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -506,6 +543,16 @@ export default function ClienteDetailPage() {
                 <Button size="sm" onClick={() => generateCodeMutation.mutate()} disabled={generateCodeMutation.isPending} className="gap-1.5">
                   <KeyRound className="h-3.5 w-3.5" />
                   Genera codice
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => sendPortalAccessMutation.mutate()}
+                  disabled={sendPortalAccessMutation.isPending}
+                  className="gap-1.5"
+                >
+                  {sendPortalAccessMutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  Genera e invia
                 </Button>
               </div>
             )}

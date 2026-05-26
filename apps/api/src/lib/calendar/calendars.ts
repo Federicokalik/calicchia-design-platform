@@ -7,7 +7,7 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv } from '../../db';
+import { sql } from '../../db';
 import type { Calendar, CreateCalendarInput } from './types';
 
 const generateFeedToken = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32);
@@ -16,6 +16,11 @@ const SLUG_REGEX = /^[a-z0-9][a-z0-9-]{0,80}$/;
 
 export class CalendarValidationError extends Error {
   code = 'CALENDAR_VALIDATION' as const;
+  constructor(message: string) { super(message); }
+}
+
+export class CalendarConflictError extends Error {
+  code = 'CALENDAR_CONFLICT' as const;
   constructor(message: string) { super(message); }
 }
 
@@ -78,8 +83,23 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
   if (!SLUG_REGEX.test(input.slug)) {
     throw new CalendarValidationError('Slug non valido (a-z, 0-9, -)');
   }
-  if (!input.name?.trim()) {
+  const name = input.name?.trim();
+  if (!name) {
     throw new CalendarValidationError('Nome richiesto');
+  }
+
+  const [duplicate] = await sql<Array<{ slug: string; name: string }>>`
+    SELECT slug, name
+    FROM calendars
+    WHERE slug = ${input.slug.toLowerCase()}
+       OR lower(name) = ${name.toLowerCase()}
+    LIMIT 1
+  `;
+  if (duplicate?.slug === input.slug.toLowerCase()) {
+    throw new CalendarConflictError('Slug gia usato');
+  }
+  if (duplicate) {
+    throw new CalendarConflictError('Nome calendario gia usato');
   }
 
   // Se nuovo è default, demota gli altri prima
@@ -88,9 +108,9 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
   }
 
   const rows = await sql<Calendar[]>`
-    INSERT INTO calendars ${sqlv({
+    INSERT INTO calendars ${sql({
       slug: input.slug.toLowerCase(),
-      name: input.name.trim().slice(0, 200),
+      name: name.slice(0, 200),
       description: input.description?.trim().slice(0, 1000) || null,
       color: input.color || '#7c3aed',
       icon: input.icon || null,

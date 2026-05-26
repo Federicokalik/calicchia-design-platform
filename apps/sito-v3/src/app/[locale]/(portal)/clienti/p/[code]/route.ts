@@ -17,7 +17,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   // Relative Location paths: the browser resolves them against the request
   // origin, so this works behind a reverse proxy whose Host header isn't
   // rewritten (request.url would otherwise contain HOSTNAME=0.0.0.0:3000).
-  const dashboardPath = `/${locale}/clienti/dashboard`;
   const loginErrorPath = `/${locale}/clienti/login?error=invalid_code`;
 
   if (!decodedCode) {
@@ -35,7 +34,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
   }
 
-  const response = new NextResponse(null, { status: 307, headers: { Location: dashboardPath } });
+  const data = (await apiRes.json().catch(() => ({}))) as {
+    customer?: { role?: 'client' | 'collaborator' };
+  };
+  const destinationPath =
+    data.customer?.role === 'collaborator'
+      ? `/${locale}/clienti/progetti`
+      : `/${locale}/clienti/dashboard`;
+
+  const response = new NextResponse(null, { status: 307, headers: { Location: destinationPath } });
 
   const setCookieHeaders =
     typeof (apiRes.headers as Headers & { getSetCookie?: () => string[] }).getSetCookie === 'function'

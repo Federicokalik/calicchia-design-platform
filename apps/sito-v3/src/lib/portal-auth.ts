@@ -101,8 +101,14 @@ export async function loginByCode(input: { code: string }): Promise<LoginResult>
   });
 
   if (res.ok) {
+    const data = (await res.json().catch(() => ({}))) as {
+      customer?: { role?: 'client' | 'collaborator' };
+    };
     await forwardApiCookies(res);
-    return { ok: true, redirect: '/clienti/dashboard' };
+    return {
+      ok: true,
+      redirect: data.customer?.role === 'collaborator' ? '/clienti/progetti' : '/clienti/dashboard',
+    };
   }
 
   if (res.status === 401 || res.status === 403) {

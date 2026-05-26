@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../../db';
 import { applyTranslations, getRequestLocale } from '../../lib/portal-i18n';
-import { portalAuth, type PortalEnv } from './auth';
+import { portalClientAuth, type PortalEnv } from './auth';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'portal-reports' });
@@ -9,7 +9,7 @@ const log = logger.child({ scope: 'portal-reports' });
 export const reportsRoutes = new Hono<PortalEnv>();
 
 // ── List published reports ───────────────────────────────
-reportsRoutes.get('/', portalAuth, async (c) => {
+reportsRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const locale = getRequestLocale(c);
 
@@ -40,7 +40,7 @@ reportsRoutes.get('/', portalAuth, async (c) => {
 });
 
 // ── Report detail with chart data ────────────────────────
-reportsRoutes.get('/:id', portalAuth, async (c) => {
+reportsRoutes.get('/:id', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const reportId = c.req.param('id');
   const locale = getRequestLocale(c);

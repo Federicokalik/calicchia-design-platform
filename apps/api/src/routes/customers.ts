@@ -3,17 +3,27 @@ import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { sql } from '../db';
 import { stripe, isStripeConfigured } from '../lib/stripe';
+import { sendEmail } from '../lib/email';
+import { canSendWhatsApp } from '../lib/whatsapp-policy';
+import { sendWhatsAppText } from '../lib/whatsapp';
 
 export const customers = new Hono();
 
 function stripPortalSecrets(row: Record<string, unknown>): Record<string, unknown> {
   const { portal_access_code, portal_access_code_hash, _total_count, ...safe } = row;
-  return { ...safe, _total_count };
+  return { ...safe, has_portal_access: Boolean(portal_access_code_hash), _total_count };
 }
 
 async function prepareCustomerUpdate(body: Record<string, unknown>): Promise<Record<string, unknown>> {
   const next = { ...body };
   delete next.portal_access_code_hash;
+
+  if (typeof next.email === 'string') {
+    next.email = next.email.trim() || null;
+  }
+  if (typeof next.phone === 'string') {
+    next.phone = next.phone.trim() || null;
+  }
 
   if (typeof next.portal_access_code === 'string' && next.portal_access_code.trim()) {
     next.portal_access_code_hash = await bcrypt.hash(next.portal_access_code.trim(), 12);
@@ -22,6 +32,42 @@ async function prepareCustomerUpdate(body: Record<string, unknown>): Promise<Rec
   delete next.portal_access_code;
 
   return next;
+}
+
+function isValidEmail(email: unknown): email is string {
+  return typeof email === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function portalBaseUrl(): string {
+  return (process.env.PORTAL_URL || process.env.SITE_URL || 'https://calicchia.design').replace(/\/$/, '');
+}
+
+function buildPortalAccessMessage(opts: { name: string | null; link: string; code: string }): string {
+  const greeting = opts.name?.trim() ? `Ciao ${opts.name.trim()},` : 'Ciao,';
+  return [
+    greeting,
+    '',
+    'ti ho preparato l\'accesso alla tua area clienti Calicchia Design.',
+    `Link diretto: ${opts.link}`,
+    `Codice accesso: ${opts.code}`,
+    '',
+    'Conserva questo messaggio: il link contiene il codice di accesso personale.',
+  ].join('\n');
+}
+
+async function rotateCustomerPortalCode(id: string): Promise<{ id: string; code: string } | null> {
+  const code = 'PRJ-' + randomBytes(4).toString('hex').toUpperCase();
+  const hash = await bcrypt.hash(code, 12);
+
+  const [customer] = await sql`
+    UPDATE customers
+    SET portal_access_code_hash = ${hash},
+        portal_access_code_rotated_at = NOW()
+    WHERE id = ${id}
+    RETURNING id
+  `;
+  if (!customer) return null;
+  return { id: customer.id as string, code };
 }
 
 customers.get('/', async (c) => {
@@ -94,9 +140,14 @@ customers.get('/:id', async (c) => {
 customers.post('/', async (c) => {
   const body = await c.req.json();
   const { company_name, contact_name, email, phone, billing_address, notes, tags, createOnStripe = true } = body;
+  const normalizedEmail = typeof email === 'string' ? email.trim() : '';
+  const normalizedPhone = typeof phone === 'string' ? phone.trim() : '';
 
-  if (!contact_name || !email) {
-    return c.json({ error: 'Nome e email richiesti' }, 400);
+  if (!contact_name || (!normalizedEmail && !normalizedPhone)) {
+    return c.json({ error: 'Nome e almeno un contatto tra email e telefono richiesti' }, 400);
+  }
+  if (normalizedEmail && !isValidEmail(normalizedEmail)) {
+    return c.json({ error: 'Email non valida' }, 400);
   }
 
   let stripeCustomerId: string | null = null;
@@ -104,8 +155,8 @@ customers.post('/', async (c) => {
   if (createOnStripe && isStripeConfigured()) {
     const sc = await stripe.customers.create({
       name: company_name || contact_name,
-      email,
-      phone: phone || undefined,
+      email: normalizedEmail || undefined,
+      phone: normalizedPhone || undefined,
       address: billing_address ? {
         line1: billing_address.street,
         city: billing_address.city,
@@ -120,7 +171,7 @@ customers.post('/', async (c) => {
 
   const [customer] = await sql`
     INSERT INTO customers (company_name, contact_name, email, phone, billing_address, notes, tags, stripe_customer_id)
-    VALUES (${company_name || null}, ${contact_name}, ${email}, ${phone || null}, ${billing_address || {}}, ${notes || null}, ${tags || []}, ${stripeCustomerId})
+    VALUES (${company_name || null}, ${contact_name}, ${normalizedEmail || null}, ${normalizedPhone || null}, ${billing_address || {}}, ${notes || null}, ${tags || []}, ${stripeCustomerId})
     RETURNING *
   `;
 
@@ -137,8 +188,8 @@ customers.put('/:id', async (c) => {
   if (customer?.stripe_customer_id && isStripeConfigured()) {
     await stripe.customers.update(customer.stripe_customer_id as string, {
       name: body.company_name || body.contact_name,
-      email: body.email,
-      phone: body.phone || undefined,
+      email: isValidEmail(body.email) ? body.email.trim() : undefined,
+      phone: typeof body.phone === 'string' && body.phone.trim() ? body.phone.trim() : undefined,
     });
   }
 
@@ -210,18 +261,60 @@ customers.post('/:id/payment-link', async (c) => {
 
 customers.post('/:id/generate-portal-code', async (c) => {
   const id = c.req.param('id');
-  const code = 'PRJ-' + randomBytes(4).toString('hex').toUpperCase();
-  const hash = await bcrypt.hash(code, 12);
-
-  const [customer] = await sql`
-    UPDATE customers
-    SET portal_access_code_hash = ${hash},
-        portal_access_code_rotated_at = NOW()
-    WHERE id = ${id}
-    RETURNING id
-  `;
+  const customer = await rotateCustomerPortalCode(id);
   if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
-  return c.json({ customer: { ...customer, portal_access_code: code } });
+  return c.json({ customer: { id: customer.id, portal_access_code: customer.code } });
+});
+
+customers.post('/:id/send-portal-access', async (c) => {
+  const id = c.req.param('id');
+  const rows = await sql`
+    SELECT id, contact_name, company_name, email, phone
+    FROM customers
+    WHERE id = ${id}
+    LIMIT 1
+  ` as Array<{
+    id: string;
+    contact_name: string | null;
+    company_name: string | null;
+    email: string | null;
+    phone: string | null;
+  }>;
+  const current = rows[0];
+  if (!current) return c.json({ error: 'Cliente non trovato' }, 404);
+  if (!current.email && !current.phone) {
+    return c.json({ error: 'Il cliente non ha email o telefono per ricevere l\'accesso' }, 422);
+  }
+
+  const access = await rotateCustomerPortalCode(id);
+  if (!access) return c.json({ error: 'Cliente non trovato' }, 404);
+
+  const link = `${portalBaseUrl()}/clienti/p/${encodeURIComponent(access.code)}`;
+  const name = current.contact_name || current.company_name;
+
+  if (current.email) {
+    const message = buildPortalAccessMessage({ name, link, code: access.code });
+    const email = await sendEmail({
+      to: current.email,
+      subject: 'Accesso area clienti - Calicchia Design',
+      html: message.replace(/\n/g, '<br />'),
+      text: message,
+      transport: 'critical',
+    });
+    if (!email.success) return c.json({ error: 'Invio email accesso portale fallito' }, 502);
+    return c.json({ channel: 'email', to: current.email, portal_access_code: access.code, link });
+  }
+
+  const phone = current.phone;
+  if (!phone) return c.json({ error: 'Il cliente non ha telefono per ricevere l\'accesso' }, 422);
+  const policy = await canSendWhatsApp(phone, 'transactional', { customerId: current.id });
+  if (!policy.allowed) {
+    return c.json({ error: 'Invio WhatsApp non consentito', reason: policy.reason }, 422);
+  }
+  const message = buildPortalAccessMessage({ name, link, code: access.code });
+  const result = await sendWhatsAppText(phone, message);
+  if (!result.success) return c.json({ error: 'Invio WhatsApp accesso portale fallito' }, 502);
+  return c.json({ channel: 'whatsapp', to: phone, portal_access_code: access.code, link });
 });
 
 // ── Revoke all portal sessions for a customer ─────────────
