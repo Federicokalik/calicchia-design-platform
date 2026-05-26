@@ -1,9 +1,8 @@
 import { ImageResponse } from 'next/og';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { OGTemplate } from '@/components/og/OGTemplate';
 import { fetchProjectBySlug } from '@/lib/projects-api';
 import { isLocale, type Locale } from '@/lib/i18n';
+import { getFunnelDisplay } from '@/lib/og-fonts';
 
 export const runtime = 'nodejs';
 export const size = { width: 1200, height: 630 };
@@ -19,9 +18,7 @@ export default async function CaseOpenGraphImage({ params }: { params: Promise<P
   const { locale: rawLocale, slug } = await params;
   const locale: Locale = isLocale(rawLocale) ? rawLocale : 'it';
 
-  const fontDisplay = await readFile(
-    join(process.cwd(), 'public/fonts/funnel-display-latin.woff2'),
-  );
+  const fontDisplay = await getFunnelDisplay();
 
   const detail = await fetchProjectBySlug(slug);
   const project = detail?.project;
@@ -43,7 +40,9 @@ export default async function CaseOpenGraphImage({ params }: { params: Promise<P
     ),
     {
       ...size,
-      fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }],
+      ...(fontDisplay
+        ? { fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }] }
+        : {}),
     },
   );
 }

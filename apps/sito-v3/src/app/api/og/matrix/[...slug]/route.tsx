@@ -1,8 +1,7 @@
 import { ImageResponse } from 'next/og';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 import { OGTemplate } from '@/components/og/OGTemplate';
 import { isLocale, type Locale } from '@/lib/i18n';
+import { getFunnelDisplay } from '@/lib/og-fonts';
 
 /**
  * OG image route handler per /[...matrix]/* — workaround perché Next.js NON
@@ -41,9 +40,7 @@ export async function GET(
   const rawLocale = url.searchParams.get('locale') ?? 'it';
   const locale: Locale = isLocale(rawLocale) ? rawLocale : 'it';
 
-  const fontDisplay = await readFile(
-    join(process.cwd(), 'public/fonts/funnel-display-latin.woff2'),
-  );
+  const fontDisplay = await getFunnelDisplay();
 
   const segment = slug?.[0] ?? '';
   const title = segment ? humanizeMatrixSlug(segment) : 'Servizio × settore';
@@ -63,7 +60,9 @@ export async function GET(
     ),
     {
       ...SIZE,
-      fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }],
+      ...(fontDisplay
+        ? { fonts: [{ name: 'Funnel Display', data: fontDisplay, weight: 700, style: 'normal' }] }
+        : {}),
       headers: {
         'Cache-Control': 'public, immutable, no-transform, max-age=3600, s-maxage=86400',
       },
