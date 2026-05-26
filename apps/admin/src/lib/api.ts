@@ -22,7 +22,8 @@ function isAuthRedirectExempt(): boolean {
  */
 export async function apiFetch(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retryAuth = true
 ): Promise<any> {
   const headers = new Headers(options.headers);
 
@@ -53,6 +54,11 @@ export async function apiFetch(
     return data;
   }
 
+  if (res.status === 401 && retryAuth && !isAuthRedirectExempt() && endpoint !== '/api/auth/refresh') {
+    const refreshed = await refreshAdminSession();
+    if (refreshed) return apiFetch(endpoint, options, false);
+  }
+
   if (res.status === 401 && !isAuthRedirectExempt()) {
     // Preserve where we were so the user lands back here after login.
     const back = window.location.pathname + window.location.search;
@@ -60,4 +66,15 @@ export async function apiFetch(
   }
 
   throw new Error(data?.error || `HTTP ${res.status}`);
+}
+
+export async function refreshAdminSession(): Promise<boolean> {
+  const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+    method: 'POST',
+    credentials: 'include',
+  }).catch(() => null);
+
+  if (!res?.ok) return false;
+  sessionState.lastActivity = Date.now();
+  return true;
 }

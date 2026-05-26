@@ -1,26 +1,36 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import bcrypt from 'bcrypt';
 import { sql } from '../db';
 import { signToken } from '../lib/jwt';
 import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
+import { setAuthCookie, clearAuthCookie, setAdminRefreshCookie, clearAdminRefreshCookie } from '../lib/cookies';
 import { verifyTurnstileToken } from '../lib/turnstile';
 import { getClientIp } from '../lib/client-ip';
 import { generateTotpSecret, verifyTotp, otpauthUri } from '../lib/totp';
 import { encryptSecret, decryptSecret } from '../lib/crypto';
 import { randomBytes } from 'crypto';
+import {
+  ADMIN_REFRESH_COOKIE_NAME,
+  createAdminSession,
+  revokeAdminSession,
+  rotateAdminSession,
+} from '../lib/admin-sessions';
 
 export const auth = new Hono();
 
 const loginRateLimit = createRateLimit(5, 15 * 60 * 1000);
 
-// Cookie helpers from shared module
-import { setAuthCookie, clearAuthCookie } from '../lib/cookies';
+function extractAdminRefreshToken(c: Context): string | null {
+  const cookieHeader = c.req.header('cookie') || '';
+  const match = cookieHeader.match(new RegExp(`${ADMIN_REFRESH_COOKIE_NAME}=([^;]+)`));
+  return match?.[1] ?? null;
+}
 
 // POST /api/auth/login
 auth.post('/login', loginRateLimit, async (c) => {
-  const { email, password, turnstile_token, mfa_code } = await c.req.json();
+  const { email, password, turnstile_token, mfa_code, remember_me } = await c.req.json();
 
   if (!email || !password) {
     return c.json({ error: adminMessage(c, 'emailPasswordRequired') }, 400);
@@ -60,6 +70,11 @@ auth.post('/login', loginRateLimit, async (c) => {
     return c.json({ error: adminMessage(c, 'adminOnly') }, 403);
   }
 
+  const rememberMe = remember_me === true;
+  if (rememberMe && !user.mfa_enabled) {
+    return c.json({ error: 'Attiva MFA per ricordare questo dispositivo.' }, 400);
+  }
+
   // MFA gate (SEC-06): when enabled, a valid TOTP or one-time backup code is
   // required. Step 1 (password only) replies { mfa_required: true } and sets
   // no cookie; the client resubmits with `mfa_code`.
@@ -95,6 +110,13 @@ auth.post('/login', loginRateLimit, async (c) => {
   });
 
   setAuthCookie(c, token);
+  if (rememberMe) {
+    const refreshToken = await createAdminSession(c, user.id);
+    setAdminRefreshCookie(c, refreshToken);
+  } else {
+    await revokeAdminSession(extractAdminRefreshToken(c));
+    clearAdminRefreshCookie(c);
+  }
 
   return c.json({
     user: {
@@ -214,9 +236,31 @@ auth.patch('/me/locale', authMiddleware, async (c) => {
 });
 
 // POST /api/auth/logout
-auth.post('/logout', (c) => {
+auth.post('/logout', async (c) => {
+  await revokeAdminSession(extractAdminRefreshToken(c));
   clearAuthCookie(c);
+  clearAdminRefreshCookie(c);
   return c.json({ success: true });
+});
+
+// POST /api/auth/refresh — rotate remembered-device session and issue a fresh auth cookie.
+auth.post('/refresh', async (c) => {
+  const refreshed = await rotateAdminSession(extractAdminRefreshToken(c));
+  if (!refreshed.ok) {
+    clearAuthCookie(c);
+    clearAdminRefreshCookie(c);
+    return c.json({ error: adminMessage(c, 'invalidOrExpiredToken') }, 401);
+  }
+
+  const token = await signToken({
+    sub: refreshed.user.id,
+    email: refreshed.user.email,
+    role: refreshed.user.role,
+  });
+  setAuthCookie(c, token);
+  setAdminRefreshCookie(c, refreshed.token);
+
+  return c.json({ ok: true });
 });
 
 // POST /api/auth/keep-alive — refresh session (authMiddleware refreshes the cookie)

@@ -126,6 +126,77 @@ function redirectToPortalLogin(req: NextRequest, locale: string | null) {
 
 const intlMiddleware = createMiddleware(routing);
 
+function getPortalJwtSecret(): Uint8Array | null {
+  const secret = process.env.JWT_SECRET;
+  return secret ? new TextEncoder().encode(secret) : null;
+}
+
+function base64UrlToBytes(value: string): Uint8Array {
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=');
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function decodeBase64UrlJson(value: string): Record<string, unknown> | null {
+  try {
+    const bytes = base64UrlToBytes(value);
+    const json = new TextDecoder().decode(bytes);
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+async function hasValidPortalToken(token: string): Promise<boolean> {
+  const secret = getPortalJwtSecret();
+  if (!secret) return false;
+
+  try {
+    const [encodedHeader, encodedPayload, encodedSignature, extra] = token.split('.');
+    if (!encodedHeader || !encodedPayload || !encodedSignature || extra) return false;
+
+    const header = decodeBase64UrlJson(encodedHeader);
+    const payload = decodeBase64UrlJson(encodedPayload);
+    if (!payload) return false;
+    if (header?.alg !== 'HS256' || (header?.typ && header.typ !== 'JWT')) return false;
+
+    const key = await crypto.subtle.importKey(
+      'raw',
+      secret,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['verify']
+    );
+    const validSignature = await crypto.subtle.verify(
+      'HMAC',
+      key,
+      base64UrlToBytes(encodedSignature),
+      new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`)
+    );
+    if (!validSignature) return false;
+
+    const exp = typeof payload?.exp === 'number' ? payload.exp : null;
+    if (!exp || exp <= Math.floor(Date.now() / 1000)) return false;
+
+    return payload.role === 'client' || payload.role === 'collaborator';
+  } catch {
+    return false;
+  }
+}
+
+function clearPortalCookie(response: NextResponse) {
+  response.cookies.delete(PORTAL_COOKIE_NAME);
+  const cookieDomain = process.env.COOKIE_DOMAIN;
+  if (cookieDomain) {
+    response.cookies.set(PORTAL_COOKIE_NAME, '', {
+      domain: cookieDomain,
+      path: '/',
+      maxAge: 0,
+    });
+  }
+}
+
 /**
  * Middleware composito:
  *   1. Portal auth check (priorità — se non autenticato, redirect a login senza
@@ -135,7 +206,7 @@ const intlMiddleware = createMiddleware(routing);
  *   3. next-intl middleware: gestisce locale routing, Accept-Language detection,
  *      cookie NEXT_LOCALE, redirect 302 a locale preferito su prima visita.
  */
-export default function proxy(req: NextRequest) {
+export default async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const portal = getPortalMatch(pathname);
 
@@ -143,6 +214,11 @@ export default function proxy(req: NextRequest) {
   if (portal && !isPublicPortalPath(portal.portalPath)) {
     const token = req.cookies.get(PORTAL_COOKIE_NAME)?.value;
     if (!token) return redirectToPortalLogin(req, portal.locale);
+    if (!(await hasValidPortalToken(token))) {
+      const response = redirectToPortalLogin(req, portal.locale);
+      clearPortalCookie(response);
+      return response;
+    }
   }
 
   // 2. EN-availability route guard

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { API_BASE } from '@/lib/api';
+import { API_BASE, refreshAdminSession, sessionState } from '@/lib/api';
 import { getStoredAdminLocale, setStoredAdminLocale, toIntlLocale, type AdminLocale } from '@/lib/i18n-storage';
 
 export interface AuthUser {
@@ -22,13 +22,24 @@ export function useAuth() {
 
   useEffect(() => {
     const locale = getStoredAdminLocale();
-    fetch(`${API_BASE}/api/auth/me`, {
-      credentials: 'include',
-      headers: { 'Accept-Language': toIntlLocale(locale), 'X-Admin-Locale': locale },
-    })
-      .then((res) => (res.ok ? res.json() : null))
+    const fetchMe = () =>
+      fetch(`${API_BASE}/api/auth/me`, {
+        credentials: 'include',
+        headers: { 'Accept-Language': toIntlLocale(locale), 'X-Admin-Locale': locale },
+      });
+
+    fetchMe()
+      .then(async (res) => {
+        if (res.ok) return res.json();
+        if (res.status === 401 && (await refreshAdminSession())) {
+          const retry = await fetchMe();
+          return retry.ok ? retry.json() : null;
+        }
+        return null;
+      })
       .then((data) => {
         if (data?.user?.ui_locale) setStoredAdminLocale(data.user.ui_locale);
+        if (data?.user) sessionState.lastActivity = Date.now();
         setState({ user: data?.user ?? null, isLoading: false });
       })
       .catch(() => {
@@ -41,6 +52,7 @@ export function useAuth() {
     password: string,
     turnstileToken?: string | null,
     mfaCode?: string | null,
+    rememberMe?: boolean,
   ): Promise<{ mfaRequired: true } | { mfaRequired: false; user: AuthUser }> => {
     const res = await fetch(`${API_BASE}/api/auth/login`, {
       method: 'POST',
@@ -54,6 +66,7 @@ export function useAuth() {
         password,
         turnstile_token: turnstileToken ?? undefined,
         mfa_code: mfaCode ?? undefined,
+        remember_me: rememberMe === true,
       }),
       credentials: 'include',
     });
@@ -65,6 +78,7 @@ export function useAuth() {
     if (data.mfa_required) return { mfaRequired: true };
 
     if (data.user?.ui_locale) setStoredAdminLocale(data.user.ui_locale);
+    sessionState.lastActivity = Date.now();
     setState({ user: data.user, isLoading: false });
     return { mfaRequired: false, user: data.user };
   }, []);

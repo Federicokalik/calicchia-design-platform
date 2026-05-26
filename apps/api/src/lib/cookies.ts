@@ -39,20 +39,28 @@ export function clearCookie(name: string): string {
   return buildCookie({ name, value: '', maxAge: 0 });
 }
 
-type HeaderSetter = { header: (name: string, value: string) => void };
+type HeaderSetter = { header: (name: string, value: string, options?: { append?: boolean }) => void };
 
 export function setAuthCookie(c: HeaderSetter, token: string) {
-  c.header('Set-Cookie', buildCookie({ name: 'auth_token', value: token, maxAge: 86400 * 7 }));
+  c.header('Set-Cookie', buildCookie({ name: 'auth_token', value: token, maxAge: 86400 * 7 }), { append: true });
 }
 
 export function clearAuthCookie(c: HeaderSetter) {
-  c.header('Set-Cookie', clearCookie('auth_token'));
+  c.header('Set-Cookie', clearCookie('auth_token'), { append: true });
+}
+
+export function setAdminRefreshCookie(c: HeaderSetter, token: string) {
+  c.header('Set-Cookie', buildCookie({ name: 'admin_refresh', value: token, maxAge: 86400 * 30 }), { append: true });
+}
+
+export function clearAdminRefreshCookie(c: HeaderSetter) {
+  c.header('Set-Cookie', clearCookie('admin_refresh'), { append: true });
 }
 
 export function setPortalCookie(c: HeaderSetter, token: string) {
-  c.header('Set-Cookie', buildCookie({ name: 'portal_token', value: token, maxAge: 86400 * 30 }));
+  c.header('Set-Cookie', buildCookie({ name: 'portal_token', value: token, maxAge: 86400 * 30 }), { append: true });
 }
 
 export function clearPortalCookie(c: HeaderSetter) {
-  c.header('Set-Cookie', clearCookie('portal_token'));
+  c.header('Set-Cookie', clearCookie('portal_token'), { append: true });
 }

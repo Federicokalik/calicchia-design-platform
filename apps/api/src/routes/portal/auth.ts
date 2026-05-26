@@ -16,15 +16,43 @@ import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'portal-auth' });
 
+export type PortalRole = 'client' | 'collaborator';
+
 export type PortalEnv = {
   Variables: {
-    customer_id: string;
-    customer_email: string;
+    actor_id: string;
+    actor_role: PortalRole;
+    customer_id?: string;
+    customer_email?: string;
+    collaborator_id?: string;
     session_version: number;
   };
 };
 
-const PORTAL_JWT_EXPIRES = '7d';
+type ClientActor = {
+  role: 'client';
+  id: string;
+  email: string | null;
+  contact_name: string | null;
+  company_name: string | null;
+  portal_logo: string | null;
+  portal_access_code_hash: string;
+  session_version: number;
+};
+
+type CollaboratorActor = {
+  role: 'collaborator';
+  id: string;
+  email: string | null;
+  name: string | null;
+  company: string | null;
+  portal_access_code_hash: string;
+  session_version: number;
+};
+
+type PortalActor = ClientActor | CollaboratorActor;
+
+const PORTAL_JWT_EXPIRES = '30d';
 const portalLoginLimit = createRateLimit(10, 15 * 60 * 1000);
 const magicLinkRequestLimit = createRateLimit(5, 10 * 60 * 1000);
 
@@ -32,7 +60,67 @@ function getSiteUrl(): string {
   return process.env.PORTAL_URL || process.env.SITE_URL || 'https://calicchia.design';
 }
 
-// ── Portal Auth Middleware (exported for other portal sub-routes) ──
+function isEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function actorPayload(actor: PortalActor) {
+  if (actor.role === 'collaborator') {
+    return {
+      id: actor.id,
+      role: 'collaborator',
+      email: actor.email,
+      contact_name: actor.name,
+      company_name: actor.company,
+      portal_logo: null,
+    };
+  }
+
+  return {
+    id: actor.id,
+    role: 'client',
+    email: actor.email,
+    contact_name: actor.contact_name,
+    company_name: actor.company_name,
+    portal_logo: actor.portal_logo,
+  };
+}
+
+async function findActorByCode(accessCode: string, normalizedEmail?: string): Promise<PortalActor | null> {
+  const provided = accessCode.trim();
+  if (!provided) return null;
+
+  const customerRows = (await sql`
+    SELECT id, email, contact_name, company_name, portal_access_code_hash, portal_logo, session_version
+    FROM customers
+    WHERE portal_access_code_hash IS NOT NULL
+      ${normalizedEmail ? sql`AND LOWER(email) = ${normalizedEmail}` : sql``}
+  `) as Array<Omit<ClientActor, 'role'>>;
+
+  for (const row of customerRows) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await bcrypt.compare(provided, row.portal_access_code_hash)) {
+      return { role: 'client', ...row };
+    }
+  }
+
+  const collaboratorRows = (await sql`
+    SELECT id, email, name, company, portal_access_code_hash, session_version
+    FROM collaborators
+    WHERE portal_access_code_hash IS NOT NULL
+      ${normalizedEmail ? sql`AND LOWER(email) = ${normalizedEmail}` : sql``}
+  `) as Array<Omit<CollaboratorActor, 'role'>>;
+
+  for (const row of collaboratorRows) {
+    // eslint-disable-next-line no-await-in-loop
+    if (await bcrypt.compare(provided, row.portal_access_code_hash)) {
+      return { role: 'collaborator', ...row };
+    }
+  }
+
+  return null;
+}
+
 export async function portalAuth(c: Context, next: Next) {
   const cookieHeader = c.req.header('cookie') || '';
   const match = cookieHeader.match(/portal_token=([^;]+)/);
@@ -46,43 +134,63 @@ export async function portalAuth(c: Context, next: Next) {
   try {
     const verified = await jwtVerify(token, getJwtSecret());
     payload = verified.payload as Record<string, unknown>;
-    if (!payload.sub || payload.role !== 'client') {
+    if (!payload.sub || (payload.role !== 'client' && payload.role !== 'collaborator')) {
       return c.json({ error: 'Token non valido' }, 401);
     }
   } catch {
     return c.json({ error: 'Sessione scaduta' }, 401);
   }
 
-  // Session version check — admin can revoke all JWTs by incrementing
-  // customers.session_version. JWT-embedded version must match current.
   const sv = Number(payload.sv ?? 0);
-  const customerId = payload.sub as string;
-  const [row] = (await sql`
-    SELECT session_version FROM customers WHERE id = ${customerId} LIMIT 1
-  `) as Array<{ session_version: number }>;
-  if (!row) return c.json({ error: 'Cliente non trovato' }, 401);
+  const actorId = String(payload.sub);
+  const role = payload.role as PortalRole;
+  const rows = role === 'client'
+    ? (await sql`
+        SELECT session_version FROM customers WHERE id = ${actorId} LIMIT 1
+      `) as Array<{ session_version: number }>
+    : (await sql`
+        SELECT session_version FROM collaborators WHERE id = ${actorId} LIMIT 1
+      `) as Array<{ session_version: number }>;
+  const row = rows[0];
+
+  if (!row) return c.json({ error: role === 'client' ? 'Cliente non trovato' : 'Collaboratore non trovato' }, 401);
   if (Number(row.session_version) !== sv) {
     return c.json({ error: 'Sessione revocata' }, 401);
   }
 
-  c.set('customer_id', customerId);
-  c.set('customer_email', String(payload.email ?? ''));
+  c.set('actor_id', actorId);
+  c.set('actor_role', role);
   c.set('session_version', sv);
+  if (role === 'client') {
+    c.set('customer_id', actorId);
+    c.set('customer_email', String(payload.email ?? ''));
+  } else {
+    c.set('collaborator_id', actorId);
+  }
 
   await next();
 }
 
-/** Sign a fresh portal JWT carrying the customer's current session_version. */
-async function signPortalJwt(customer: {
+export async function portalClientAuth(c: Context, next: Next) {
+  const authResult = await portalAuth(c, async () => {});
+  if (authResult) return authResult;
+  if (c.get('actor_role') !== 'client' || !c.get('customer_id')) {
+    return c.json({ error: 'Area riservata ai clienti' }, 403);
+  }
+  await next();
+}
+
+async function signPortalJwt(actor: {
   id: string;
-  email: string;
+  email?: string | null;
+  role: PortalRole;
   session_version: number;
 }): Promise<string> {
   return new SignJWT({
-    sub: customer.id,
-    email: customer.email,
-    role: 'client',
-    sv: customer.session_version,
+    sub: actor.id,
+    email: actor.email ?? '',
+    role: actor.role,
+    sv: actor.session_version,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -90,39 +198,8 @@ async function signPortalJwt(customer: {
     .sign(getJwtSecret());
 }
 
-/** Build the magic-link HTML email body. */
-function magicLinkEmailHtml(opts: {
-  greeting: string;
-  bodyIntro: string;
-  ctaLabel: string;
-  link: string;
-  expiryNote: string;
-  fallback: string;
-}): string {
-  const siteUrl = getSiteUrl();
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
-<body style="background:#FAFAF7;font-family:system-ui,-apple-system,sans-serif;margin:0;padding:40px 16px;color:#111;">
-  <div style="max-width:520px;margin:0 auto;background:#FFFFFF;border:1px solid #E6E4DC;border-radius:2px;">
-    <div style="padding:32px;">
-      <h1 style="font-family:Georgia,serif;font-size:22px;font-weight:500;margin:0 0 16px;letter-spacing:-0.01em;">${opts.greeting}</h1>
-      <p style="font-size:14px;line-height:1.55;color:#5C5C58;margin:0 0 24px;">${opts.bodyIntro}</p>
-      <a href="${opts.link}" style="display:inline-block;background:#F57F44;color:#FFFFFF;padding:12px 24px;border-radius:2px;text-decoration:none;font-size:14px;font-weight:500;">${opts.ctaLabel}</a>
-      <p style="font-size:12px;line-height:1.5;color:#8C8C86;margin:24px 0 0;">${opts.expiryNote}</p>
-      <hr style="border:0;border-top:1px solid #E6E4DC;margin:24px 0;" />
-      <p style="font-size:11px;line-height:1.5;color:#8C8C86;margin:0;word-break:break-all;">${opts.fallback}<br/><span style="color:#5C5C58;">${opts.link}</span></p>
-    </div>
-    <div style="padding:16px 32px;border-top:1px solid #E6E4DC;text-align:center;">
-      <p style="margin:0;font-size:11px;color:#8C8C86;letter-spacing:0.05em;">
-        <a href="${siteUrl}" style="color:#8C8C86;text-decoration:none;">calicchia.design</a>
-      </p>
-    </div>
-  </div>
-</body></html>`;
-}
-
 export const authRoutes = new Hono<PortalEnv>();
 
-// ── Request magic link (email-only flow, primary auth) ───
 authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as {
     email?: string;
@@ -130,7 +207,7 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
   };
   const email = String(body.email ?? '').toLowerCase().trim();
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !isEmail(email)) {
     return c.json({ error: 'Email non valida' }, 400);
   }
 
@@ -143,8 +220,6 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
-  // ALWAYS respond 200 to prevent user enumeration. If customer doesn't
-  // exist we still pretend success.
   const [customer] = (await sql`
     SELECT id, email, contact_name FROM customers
     WHERE LOWER(email) = ${email}
@@ -196,7 +271,6 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
   return c.json({ ok: true });
 });
 
-// ── Exchange magic link token for a session ──────────────
 authRoutes.post('/exchange-token', portalLoginLimit, async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as { token?: string };
   const token = String(body.token ?? '').trim();
@@ -218,7 +292,7 @@ authRoutes.post('/exchange-token', portalLoginLimit, async (c) => {
     LIMIT 1
   `) as Array<{
     id: string;
-    email: string;
+    email: string | null;
     contact_name: string | null;
     company_name: string | null;
     portal_logo: string | null;
@@ -233,29 +307,31 @@ authRoutes.post('/exchange-token', portalLoginLimit, async (c) => {
   const jwt = await signPortalJwt({
     id: customer.id,
     email: customer.email,
+    role: 'client',
     session_version: Number(customer.session_version),
   });
   setPortalCookie(c, jwt);
 
   await auditPortalEvent(c, 'link_consumed', {
     customer_id: customer.id,
-    email: customer.email,
+    email: customer.email ?? '',
     success: true,
   });
 
   return c.json({
-    customer: {
+    customer: actorPayload({
+      role: 'client',
       id: customer.id,
       email: customer.email,
       contact_name: customer.contact_name,
       company_name: customer.company_name,
+      portal_access_code_hash: '',
       portal_logo: customer.portal_logo,
-    },
+      session_version: customer.session_version,
+    }),
   });
 });
 
-// ── Login (email + portal access code) ───────────────────
-// Kept for the "emergency code" fallback. Email REQUIRED here.
 authRoutes.post('/login', portalLoginLimit, async (c) => {
   const { email, access_code, turnstile_token } = (await c.req.json()) as {
     email?: string;
@@ -263,8 +339,8 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
     turnstile_token?: string;
   };
 
-  if (!email || !access_code) {
-    return c.json({ error: 'Email e codice di accesso richiesti' }, 400);
+  if (!access_code) {
+    return c.json({ error: 'Codice di accesso richiesto' }, 400);
   }
 
   if (
@@ -276,38 +352,15 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
-  const normalizedEmail = email.toLowerCase().trim();
-  const [customer] = (await sql`
-    SELECT id, email, contact_name, company_name, portal_access_code_hash, portal_logo, session_version
-    FROM customers
-    WHERE LOWER(email) = ${normalizedEmail}
-    LIMIT 1
-  `) as Array<{
-    id: string;
-    email: string;
-    contact_name: string;
-    company_name: string;
-    portal_access_code_hash: string | null;
-    portal_logo: string | null;
-    session_version: number;
-  }>;
-
-  if (!customer?.portal_access_code_hash) {
-    await auditPortalEvent(c, 'code_login_failed', {
-      email: normalizedEmail,
-      success: false,
-      error_code: 'no_user',
-    });
-    return c.json({ error: 'Credenziali non valide' }, 401);
+  const normalizedEmail = String(email ?? '').toLowerCase().trim();
+  if (normalizedEmail && !isEmail(normalizedEmail)) {
+    return c.json({ error: 'Email non valida' }, 400);
   }
 
-  const provided = String(access_code).trim();
-  const valid = await bcrypt.compare(provided, customer.portal_access_code_hash);
-
-  if (!valid) {
+  const actor = await findActorByCode(String(access_code), normalizedEmail || undefined);
+  if (!actor) {
     await auditPortalEvent(c, 'code_login_failed', {
-      customer_id: customer.id,
-      email: customer.email,
+      email: normalizedEmail,
       success: false,
       error_code: 'bad_code',
     });
@@ -315,37 +368,33 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
   }
 
   const jwt = await signPortalJwt({
-    id: customer.id,
-    email: customer.email,
-    session_version: Number(customer.session_version),
+    id: actor.id,
+    email: actor.email,
+    role: actor.role,
+    session_version: Number(actor.session_version),
   });
   setPortalCookie(c, jwt);
 
   await auditPortalEvent(c, 'code_login_success', {
-    customer_id: customer.id,
-    email: customer.email,
+    customer_id: actor.role === 'client' ? actor.id : undefined,
+    email: actor.email ?? normalizedEmail,
     success: true,
-    metadata: { with_email: true },
+    metadata: { with_email: Boolean(normalizedEmail), role: actor.role },
   });
 
   const siteUrl = getSiteUrl();
   return c.json({
-    customer: {
-      id: customer.id,
-      email: customer.email,
-      contact_name: customer.contact_name,
-      company_name: customer.company_name,
-      portal_logo: customer.portal_logo,
-    },
-    gdpr: {
-      legal_basis: 'Art. 6(1)(b) GDPR — Esecuzione contrattuale',
-      privacy_policy: `${siteUrl}/privacy-policy`,
-      rights_request: `${siteUrl}/privacy-request`,
-    },
+    customer: actorPayload(actor),
+    gdpr: actor.role === 'client'
+      ? {
+          legal_basis: 'Art. 6(1)(b) GDPR - Esecuzione contrattuale',
+          privacy_policy: `${siteUrl}/privacy-policy`,
+          rights_request: `${siteUrl}/privacy-request`,
+        }
+      : undefined,
   });
 });
 
-// ── Login by code only (deep-link convenience, /clienti/p/[code]) ──
 authRoutes.post('/login-by-code', portalLoginLimit, async (c) => {
   const { access_code } = (await c.req.json()) as { access_code?: string };
 
@@ -353,35 +402,8 @@ authRoutes.post('/login-by-code', portalLoginLimit, async (c) => {
     return c.json({ error: 'Codice di accesso richiesto' }, 400);
   }
 
-  const provided = String(access_code).trim();
-
-  // Need to check against ALL customers with a hash.
-  // Scope is small (few customers); we accept O(N) bcrypt compares.
-  const candidates = (await sql`
-    SELECT id, email, contact_name, company_name,
-           portal_access_code_hash, portal_logo, session_version
-    FROM customers
-    WHERE portal_access_code_hash IS NOT NULL
-  `) as Array<{
-    id: string;
-    email: string;
-    contact_name: string;
-    company_name: string;
-    portal_access_code_hash: string;
-    portal_logo: string | null;
-    session_version: number;
-  }>;
-
-  let matched: (typeof candidates)[number] | null = null;
-  for (const cand of candidates) {
-    // eslint-disable-next-line no-await-in-loop
-    if (await bcrypt.compare(provided, cand.portal_access_code_hash)) {
-      matched = cand;
-      break;
-    }
-  }
-
-  if (!matched) {
+  const actor = await findActorByCode(String(access_code));
+  if (!actor) {
     await auditPortalEvent(c, 'code_login_failed', {
       success: false,
       error_code: 'no_match',
@@ -391,43 +413,34 @@ authRoutes.post('/login-by-code', portalLoginLimit, async (c) => {
   }
 
   const jwt = await signPortalJwt({
-    id: matched.id,
-    email: matched.email,
-    session_version: Number(matched.session_version),
+    id: actor.id,
+    email: actor.email,
+    role: actor.role,
+    session_version: Number(actor.session_version),
   });
   setPortalCookie(c, jwt);
 
   await auditPortalEvent(c, 'code_login_success', {
-    customer_id: matched.id,
-    email: matched.email,
+    customer_id: actor.role === 'client' ? actor.id : undefined,
+    email: actor.email ?? '',
     success: true,
-    metadata: { with_email: false },
+    metadata: { with_email: false, role: actor.role },
   });
 
-  return c.json({
-    customer: {
-      id: matched.id,
-      email: matched.email,
-      contact_name: matched.contact_name,
-      company_name: matched.company_name,
-      portal_logo: matched.portal_logo,
-    },
-  });
+  return c.json({ customer: actorPayload(actor) });
 });
 
-// ── Logout ───────────────────────────────────────────────
 authRoutes.post('/logout', async (c) => {
-  // Try to read the customer_id from JWT for audit, but don't require it.
   let customerId: string | null = null;
   try {
     const cookieHeader = c.req.header('cookie') || '';
     const match = cookieHeader.match(/portal_token=([^;]+)/);
     if (match) {
       const { payload } = await jwtVerify(match[1], getJwtSecret());
-      if (payload.sub) customerId = String(payload.sub);
+      if (payload.role === 'client' && payload.sub) customerId = String(payload.sub);
     }
   } catch {
-    /* ignore — logout always succeeds client-side */
+    /* logout always succeeds client-side */
   }
 
   clearPortalCookie(c);
@@ -435,17 +448,37 @@ authRoutes.post('/logout', async (c) => {
   return c.json({ ok: true });
 });
 
-// ── Me (verify session) ─────────────────────────────────
 authRoutes.get('/me', portalAuth, async (c) => {
-  const customerId = c.get('customer_id') as string;
+  const role = c.get('actor_role');
+  const actorId = c.get('actor_id');
+
+  if (role === 'collaborator') {
+    const [collaborator] = (await sql`
+      SELECT id, email, name, company
+      FROM collaborators
+      WHERE id = ${actorId}
+      LIMIT 1
+    `) as Array<{ id: string; email: string | null; name: string | null; company: string | null }>;
+    if (!collaborator) return c.json({ error: 'Collaboratore non trovato' }, 404);
+    return c.json({
+      customer: {
+        id: collaborator.id,
+        role: 'collaborator',
+        email: collaborator.email,
+        contact_name: collaborator.name,
+        company_name: collaborator.company,
+        portal_logo: null,
+      },
+    });
+  }
 
   const [customer] = (await sql`
     SELECT id, email, contact_name, company_name, portal_logo
     FROM customers
-    WHERE id = ${customerId}
+    WHERE id = ${actorId}
     LIMIT 1
   `) as Array<Record<string, unknown>>;
 
   if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
-  return c.json({ customer });
+  return c.json({ customer: { ...customer, role: 'client' } });
 });

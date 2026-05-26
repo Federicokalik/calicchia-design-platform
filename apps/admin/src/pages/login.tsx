@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
@@ -32,6 +33,7 @@ export default function LoginPage() {
   const turnstile = useTurnstile(TURNSTILE_SITE_KEY, 'admin_login');
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     fetch(`${API_BASE}/api/auth/setup-status`, { credentials: 'include' })
@@ -67,6 +69,7 @@ export default function LoginPage() {
         data.password,
         turnstile.token,
         mfaRequired ? mfaCode.trim() : undefined,
+        rememberMe,
       );
       if (result.mfaRequired) {
         // SEC-06 step 2: ask for the TOTP/backup code. The Turnstile token was
@@ -190,6 +193,20 @@ export default function LoginPage() {
                 </p>
               </div>
             )}
+
+            <div className="flex items-start gap-3 rounded-md border border-border p-3">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+              />
+              <div className="space-y-1 leading-none">
+                <Label htmlFor="remember-me" className="text-sm font-medium">
+                  Ricordami su questo dispositivo
+                </Label>
+                <p className="text-xs text-muted-foreground">Richiede MFA attiva.</p>
+              </div>
+            </div>
 
             {/* Cloudflare Turnstile — visible widget (appearance: always sul hook). */}
             <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
