@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import QRCode from 'qrcode';
 import { toast } from 'sonner';
-import { ShieldCheck, ShieldAlert, Loader2 } from 'lucide-react';
+import { Copy, ShieldCheck, ShieldAlert, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,15 +19,45 @@ export function MfaSection() {
   const [mode, setMode] = useState<Mode>('idle');
   const [secret, setSecret] = useState('');
   const [otpauthUri, setOtpauthUri] = useState('');
+  const [qrDataUrl, setQrDataUrl] = useState('');
   const [code, setCode] = useState('');
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     apiFetch('/api/auth/me')
       .then((d) => setEnabled(Boolean(d?.user?.mfa_enabled)))
-      .catch(() => setEnabled(false));
+      .catch((e) => {
+        setLoadError(e instanceof Error ? e.message : 'Impossibile leggere lo stato 2FA');
+        setEnabled(null);
+      });
   }, []);
+
+  useEffect(() => {
+    if (!otpauthUri) {
+      setQrDataUrl('');
+      return;
+    }
+
+    let cancelled = false;
+    QRCode.toDataURL(otpauthUri, { margin: 2, width: 192 })
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl('');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [otpauthUri]);
+
+  const copyText = async (text: string, message: string) => {
+    await navigator.clipboard.writeText(text);
+    toast.success(message);
+  };
 
   const startSetup = async () => {
     setBusy(true);
@@ -34,6 +65,7 @@ export function MfaSection() {
       const d = await apiFetch('/api/auth/mfa/setup', { method: 'POST', body: JSON.stringify({}) });
       setSecret(String(d.secret ?? ''));
       setOtpauthUri(String(d.otpauth_uri ?? ''));
+      setQrDataUrl('');
       setCode('');
       setMode('setup');
     } catch (e) {
@@ -96,6 +128,13 @@ export function MfaSection() {
         )}
       </div>
 
+      {loadError && (
+        <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-xs text-destructive">
+          <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
       {enabled === null && (
         <p className="text-sm text-muted-foreground flex items-center gap-2">
           <Loader2 className="h-4 w-4 animate-spin" /> Caricamento…
@@ -130,13 +169,34 @@ export function MfaSection() {
             dall'URI sotto, oppure inserisci la chiave manualmente — poi digita il
             codice a 6 cifre per confermare.
           </p>
-          <div className="space-y-1">
-            <Label>Chiave (inserimento manuale)</Label>
-            <code className="block rounded bg-muted px-3 py-2 text-sm font-mono break-all">{secret}</code>
-          </div>
-          <div className="space-y-1">
-            <Label>URI otpauth (per QR)</Label>
-            <code className="block rounded bg-muted px-3 py-2 text-xs font-mono break-all">{otpauthUri}</code>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="flex h-52 w-52 items-center justify-center rounded-lg border bg-white p-3">
+              {qrDataUrl ? (
+                <img src={qrDataUrl} alt="QR code per configurare la 2FA" className="h-48 w-48" />
+              ) : (
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1 space-y-3">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <Label>Chiave manuale</Label>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => copyText(secret, 'Chiave copiata')}>
+                    <Copy className="mr-1.5 h-3.5 w-3.5" /> Copia
+                  </Button>
+                </div>
+                <code className="block rounded bg-muted px-3 py-2 text-sm font-mono break-all">{secret}</code>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <Label>URI otpauth</Label>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => copyText(otpauthUri, 'URI copiato')}>
+                    <Copy className="mr-1.5 h-3.5 w-3.5" /> Copia
+                  </Button>
+                </div>
+                <code className="block rounded bg-muted px-3 py-2 text-xs font-mono break-all">{otpauthUri}</code>
+              </div>
+            </div>
           </div>
           <div className="space-y-2 max-w-xs">
             <Label htmlFor="mfa-enable-code">Codice di verifica</Label>
@@ -173,7 +233,12 @@ export function MfaSection() {
               <code key={bc} className="rounded bg-muted px-2 py-1 text-sm font-mono text-center">{bc}</code>
             ))}
           </div>
-          <Button onClick={() => setMode('idle')}>Ho salvato i codici</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={() => copyText(backupCodes.join('\n'), 'Codici copiati')}>
+              <Copy className="mr-2 h-4 w-4" /> Copia codici
+            </Button>
+            <Button onClick={() => setMode('idle')}>Ho salvato i codici</Button>
+          </div>
         </div>
       )}
 

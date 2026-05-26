@@ -1,6 +1,8 @@
 import { getStoredAdminLocale, toIntlLocale } from './i18n-storage';
 
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// The admin app always talks to /api on its own origin. In dev, Vite proxies
+// /api to apps/api; in production, nginx proxies /api to the API container.
+export const API_BASE = '';
 
 /**
  * Tracks when the user last successfully hit the API.

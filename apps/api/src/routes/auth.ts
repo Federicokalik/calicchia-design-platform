@@ -22,6 +22,13 @@ export const auth = new Hono();
 
 const loginRateLimit = createRateLimit(5, 15 * 60 * 1000);
 
+function mfaConfigError(c: Context, err: unknown) {
+  console.error('MFA configuration error:', err);
+  return c.json({
+    error: 'Configurazione MFA non valida. Verifica WEBHOOK_ENCRYPTION_KEY sul server e riprova.',
+  }, 500);
+}
+
 function extractAdminRefreshToken(c: Context): string | null {
   const cookieHeader = c.req.header('cookie') || '';
   const match = cookieHeader.match(new RegExp(`${ADMIN_REFRESH_COOKIE_NAME}=([^;]+)`));
@@ -84,6 +91,7 @@ auth.post('/login', loginRateLimit, async (c) => {
       return c.json({ mfa_required: true });
     }
     let mfaOk = false;
+    try {
     if (user.mfa_secret && verifyTotp(decryptSecret(user.mfa_secret), code)) {
       mfaOk = true;
     } else {
@@ -97,6 +105,9 @@ auth.post('/login', loginRateLimit, async (c) => {
           break;
         }
       }
+    }
+    } catch (err) {
+      return mfaConfigError(c, err);
     }
     if (!mfaOk) {
       return c.json({ error: adminMessage(c, 'invalidCredentials') }, 401);
@@ -143,7 +154,13 @@ auth.post('/mfa/setup', authMiddleware, async (c) => {
   if (row.mfa_enabled) return c.json({ error: 'MFA già attiva' }, 400);
 
   const secret = generateTotpSecret();
-  await sql`UPDATE users SET mfa_secret = ${encryptSecret(secret)} WHERE id = ${userId}`;
+  let encryptedSecret: string;
+  try {
+    encryptedSecret = encryptSecret(secret);
+  } catch (err) {
+    return mfaConfigError(c, err);
+  }
+  await sql`UPDATE users SET mfa_secret = ${encryptedSecret} WHERE id = ${userId}`;
   return c.json({
     secret,
     otpauth_uri: otpauthUri(secret, String(row.email), 'Caldes Admin'),
@@ -160,8 +177,12 @@ auth.post('/mfa/enable', authMiddleware, async (c) => {
   if (!row) return c.json({ error: adminMessage(c, 'userNotFound') }, 404);
   if (row.mfa_enabled) return c.json({ error: 'MFA già attiva' }, 400);
   if (!row.mfa_secret) return c.json({ error: 'Avvia prima il setup MFA' }, 400);
-  if (!verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
-    return c.json({ error: 'Codice non valido' }, 400);
+  try {
+    if (!verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
+      return c.json({ error: 'Codice non valido' }, 400);
+    }
+  } catch (err) {
+    return mfaConfigError(c, err);
   }
 
   // One-time backup codes — shown once, stored only as bcrypt hashes.
@@ -182,8 +203,12 @@ auth.post('/mfa/disable', authMiddleware, async (c) => {
   const { code } = await c.req.json<{ code?: string }>();
   const [row] = await sql`SELECT mfa_secret, mfa_enabled FROM users WHERE id = ${userId}`;
   if (!row?.mfa_enabled) return c.json({ error: 'MFA non attiva' }, 400);
-  if (!row.mfa_secret || !verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
-    return c.json({ error: 'Codice non valido' }, 400);
+  try {
+    if (!row.mfa_secret || !verifyTotp(decryptSecret(row.mfa_secret as string), String(code ?? ''))) {
+      return c.json({ error: 'Codice non valido' }, 400);
+    }
+  } catch (err) {
+    return mfaConfigError(c, err);
   }
 
   await sql`

@@ -8,6 +8,7 @@ import {
   validateSettingValue,
 } from '../lib/settings-schema';
 import { adminMessage, getAdminLocale } from '../lib/admin-locale';
+import { getWhatsAppStatus, isWhatsAppConfigured } from '../lib/whatsapp';
 
 type ApiUser = {
   id: string;
@@ -165,9 +166,20 @@ settings.get('/integrations-check', async (c) => {
   const addEnv = (key: string) => isEn ? `Add ${key} to .env` : `Aggiungi ${key} al .env`;
   checks['calcom'] = process.env.CALCOM_API_KEY ? { connected: true, detail: apiKeyConfigured } : { connected: false, action: addEnv('CALCOM_API_KEY') };
   try { const r = await sql`SELECT id FROM google_oauth_tokens LIMIT 1`; checks['google_calendar'] = r.length ? { connected: true, detail: isEn ? 'OAuth connected' : 'OAuth connesso' } : { connected: false, action: isEn ? 'Connect Google Calendar from Settings' : 'Connetti Google Calendar da Impostazioni' }; } catch { checks['google_calendar'] = { connected: false, action: isEn ? 'Configure GOOGLE_CLIENT_ID in .env' : 'Configura GOOGLE_CLIENT_ID nel .env' }; }
-  const evoUrl = process.env.EVOLUTION_API_URL, evoKey = process.env.EVOLUTION_API_KEY;
-  if (evoUrl && evoKey) { try { const r = await fetch(`${evoUrl}/instance/connectionState/${process.env.EVOLUTION_INSTANCE||'default'}`, { headers: { apikey: evoKey } }); const d = await r.json(); checks['whatsapp'] = d?.state === 'open' ? { connected: true, detail: 'WhatsApp connesso' } : { connected: false, action: 'Scansiona QR code su Evolution API' }; } catch { checks['whatsapp'] = { connected: false, action: 'Evolution API non raggiungibile' }; } } else { checks['whatsapp'] = { connected: false, action: 'Aggiungi EVOLUTION_API_URL e EVOLUTION_API_KEY al .env' }; }
+  if (isWhatsAppConfigured()) {
+    try {
+      const status = await getWhatsAppStatus();
+      checks['whatsapp'] = status.connected
+        ? { connected: true, detail: status.phone ? `GOWA connesso: ${status.phone}` : 'GOWA connesso' }
+        : { connected: false, action: 'Collega il numero WhatsApp da Impostazioni' };
+    } catch {
+      checks['whatsapp'] = { connected: false, action: 'GOWA configurato ma non raggiungibile' };
+    }
+  } else {
+    checks['whatsapp'] = { connected: false, action: addEnv('GOWA_URL') };
+  }
   checks['resend'] = process.env.RESEND_API_KEY ? { connected: true, detail: apiKeyConfigured } : { connected: false, action: addEnv('RESEND_API_KEY') };
+  checks['smtp'] = (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) ? { connected: true, detail: isEn ? 'SMTP configured' : 'SMTP configurato' } : { connected: false, action: addEnv('SMTP_HOST, SMTP_USER and SMTP_PASS') };
   const tgT = process.env.TELEGRAM_BOT_TOKEN, tgC = process.env.TELEGRAM_CHAT_ID;
   if (tgT && tgC) { try { const r = await fetch(`https://api.telegram.org/bot${tgT}/getMe`); const d = await r.json(); checks['telegram'] = d?.ok ? { connected: true, detail: `Bot: @${d.result.username}` } : { connected: false, action: 'Token non valido' }; } catch { checks['telegram'] = { connected: false, action: 'Telegram API non raggiungibile' }; } } else { checks['telegram'] = { connected: false, action: `Aggiungi ${!tgT ? 'TELEGRAM_BOT_TOKEN' : 'TELEGRAM_CHAT_ID'} al .env` }; }
   checks['turnstile'] = process.env.TURNSTILE_SECRET_KEY ? { connected: true, detail: isEn ? 'Secret key configured' : 'Secret key configurata' } : { connected: false, action: addEnv('TURNSTILE_SECRET_KEY') };
@@ -179,6 +191,9 @@ settings.get('/integrations-check', async (c) => {
   checks['dalle'] = process.env.OPENAI_API_KEY ? { connected: true, detail: isEn ? 'Uses OPENAI_API_KEY' : 'Usa OPENAI_API_KEY' } : { connected: false, action: isEn ? 'Requires OPENAI_API_KEY' : 'Richiede OPENAI_API_KEY' };
   checks['unsplash'] = process.env.UNSPLASH_ACCESS_KEY ? { connected: true, detail: isEn ? 'Access key configured' : 'Access key configurata' } : { connected: false, action: addEnv('UNSPLASH_ACCESS_KEY') };
   checks['stripe'] = process.env.STRIPE_SECRET_KEY ? { connected: true, detail: isEn ? 'Secret key configured' : 'Secret key configurata' } : { connected: false, action: isEn ? 'Add STRIPE_SECRET_KEY to .env (optional)' : 'Aggiungi STRIPE_SECRET_KEY al .env (opzionale)' };
+  checks['paypal'] = (process.env.PAYPAL_CLIENT_ID && process.env.PAYPAL_CLIENT_SECRET) ? { connected: true, detail: `PayPal ${process.env.PAYPAL_MODE || 'sandbox'}` } : { connected: false, action: addEnv('PAYPAL_CLIENT_ID and PAYPAL_CLIENT_SECRET') };
+  checks['revolut'] = process.env.REVOLUT_API_KEY ? { connected: true, detail: `Revolut ${process.env.REVOLUT_MODE || 'sandbox'}` } : { connected: false, action: addEnv('REVOLUT_API_KEY') };
+  checks['s4'] = (process.env.S4_ENDPOINT && process.env.S4_BUCKET && process.env.S4_ACCESS_KEY_ID && process.env.S4_SECRET_ACCESS_KEY) ? { connected: true, detail: isEn ? 'Knowledge Base storage configured' : 'Storage Knowledge Base configurato' } : { connected: false, action: addEnv('S4_ENDPOINT, S4_BUCKET and S4 credentials') };
   checks['gemini'] = process.env.GOOGLE_AI_API_KEY
     ? { connected: true, detail: apiKeyConfigured }
     : { connected: false, action: isEn ? 'Add GOOGLE_AI_API_KEY to .env (additional fallback)' : 'Aggiungi GOOGLE_AI_API_KEY al .env (fallback aggiuntivo)' };

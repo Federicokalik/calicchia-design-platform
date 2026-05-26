@@ -149,6 +149,10 @@ const settingsSchemas = {
     allow_client_upload: z.boolean().default(true),
   }).passthrough(),
 
+  'whatsapp': z.object({
+    default_ai_mode: z.enum(['off', 'triage', 'auto_reply']).default('off'),
+  }).passthrough(),
+
   'quote.settings': z.object({
     // Brand
     logo_url: z.string().default(''),

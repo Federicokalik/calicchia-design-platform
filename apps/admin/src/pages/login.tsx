@@ -69,7 +69,7 @@ export default function LoginPage() {
         data.password,
         turnstile.token,
         mfaRequired ? mfaCode.trim() : undefined,
-        rememberMe,
+        mfaRequired ? rememberMe : false,
       );
       if (result.mfaRequired) {
         // SEC-06 step 2: ask for the TOTP/backup code. The Turnstile token was
@@ -194,19 +194,21 @@ export default function LoginPage() {
               </div>
             )}
 
-            <div className="flex items-start gap-3 rounded-md border border-border p-3">
-              <Checkbox
-                id="remember-me"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked === true)}
-              />
-              <div className="space-y-1 leading-none">
-                <Label htmlFor="remember-me" className="text-sm font-medium">
-                  Ricordami su questo dispositivo
-                </Label>
-                <p className="text-xs text-muted-foreground">Richiede MFA attiva.</p>
+            {mfaRequired && (
+              <div className="flex items-start gap-3 rounded-md border border-border p-3">
+                <Checkbox
+                  id="remember-me"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                />
+                <div className="space-y-1 leading-none">
+                  <Label htmlFor="remember-me" className="text-sm font-medium">
+                    Ricordami su questo dispositivo
+                  </Label>
+                  <p className="text-xs text-muted-foreground">Mantiene l'accesso dopo la verifica 2FA.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Cloudflare Turnstile — visible widget (appearance: always sul hook). */}
             <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />

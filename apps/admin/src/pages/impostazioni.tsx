@@ -3,9 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
-  User, Link2, Key, KeyRound, History, Palette, FileSignature, Brain, Sparkles,
+  User, Link2, Key, KeyRound, History, Palette, FileSignature, Sparkles,
   Trash2, CheckCircle2, XCircle, RefreshCw, Building2, CreditCard, MapPin,
-  Shield, Zap, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
+  Shield, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
   Briefcase, Users, Calculator, Coins, Copy, MessageCircle,
 } from 'lucide-react';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
@@ -38,20 +38,49 @@ function Field({ label, value, onChange, type = 'text', placeholder = '', rows, 
   );
 }
 
-const NAV_ITEMS = [
-  { id: 'profilo', label: 'Profilo', icon: User },
-  { id: 'studio-freelance', label: 'Studio freelance', icon: Briefcase },
-  { id: 'preventivi', label: 'Preventivi & PDF', icon: FileSignature },
-  { id: 'integrazioni', label: 'Integrazioni', icon: Link2 },
-  { id: 'brain', label: 'Second Brain', icon: Brain },
-  { id: 'knowledge-base', label: 'Knowledge Base AI', icon: Sparkles },
-  { id: 'ai-costs', label: 'Costi AI', icon: Activity },
-  { id: 'api-keys', label: 'API Keys', icon: Key },
-  { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
-  { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
-  { id: 'backup', label: 'Backup', icon: Database },
-  { id: 'sicurezza', label: 'Sicurezza', icon: Shield },
-  { id: 'audit', label: 'Audit Log', icon: History },
+const NAV_GROUPS = [
+  {
+    label: 'Business',
+    items: [
+      { id: 'profilo', label: 'Profilo', icon: User },
+      { id: 'studio-freelance', label: 'Operatività', icon: Briefcase },
+    ],
+  },
+  {
+    label: 'Documenti',
+    items: [
+      { id: 'preventivi', label: 'Preventivi & PDF', icon: FileSignature },
+    ],
+  },
+  {
+    label: 'Integrazioni',
+    items: [
+      { id: 'integrazioni', label: 'Stato servizi', icon: Link2 },
+      { id: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
+    ],
+  },
+  {
+    label: 'Sicurezza & accesso',
+    items: [
+      { id: 'sicurezza', label: '2FA', icon: Shield },
+      { id: 'api-keys', label: 'API Keys', icon: Key },
+      { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
+    ],
+  },
+  {
+    label: 'AI & dati',
+    items: [
+      { id: 'knowledge-base', label: 'Knowledge Base AI', icon: Sparkles },
+      { id: 'ai-costs', label: 'Costi AI', icon: Activity },
+    ],
+  },
+  {
+    label: 'Sistema',
+    items: [
+      { id: 'backup', label: 'Backup', icon: Database },
+      { id: 'audit', label: 'Audit Log', icon: History },
+    ],
+  },
 ];
 
 export default function ImpostazioniPage() {
@@ -73,10 +102,6 @@ export default function ImpostazioniPage() {
   const { data: integrationsStatus, refetch: refetchIntegrations } = useQuery({
     queryKey: ['integrations-check'],
     queryFn: async () => { try { return await apiFetch('/api/settings/integrations-check'); } catch { return {}; } },
-  });
-  const { data: brainStats } = useQuery({
-    queryKey: ['brain-stats'],
-    queryFn: async () => { try { return await apiFetch('/api/settings/brain-stats'); } catch { return { facts: 0, conversations: 0, preferences: 0 }; } },
   });
   const { data: aiUsage } = useQuery({
     queryKey: ['ai-usage'],
@@ -128,28 +153,35 @@ export default function ImpostazioniPage() {
   const saveBp = () => { saveMutation.mutate({ key: 'business.profile', value: { ...businessProfile, ...bp } }); setBp({}); };
   const saveFs = () => { saveMutation.mutate({ key: 'freelancer.studio', value: { ...freelancerStudio, ...fs } }); setFs({}); };
 
-  useTopbar({ title: 'Impostazioni', subtitle: 'Profilo, integrazioni, preventivi, preferenze' });
+  useTopbar({ title: 'Impostazioni', subtitle: 'Business, integrazioni, sicurezza, AI e sistema' });
 
   const intStatus = (integrationsStatus || {}) as Record<string, any>;
 
   return (
     <div className="flex gap-6 min-h-[calc(100vh-8rem)]">
       {/* Left nav */}
-      <nav className="w-48 shrink-0 space-y-1">
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={cn(
-              'flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm transition-colors text-left',
-              activeTab === item.id
-                ? 'bg-primary/10 text-primary font-medium'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-            )}
-          >
-            <item.icon className="h-4 w-4 shrink-0" />
-            {item.label}
-          </button>
+      <nav className="w-56 shrink-0 space-y-4">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-1">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground/50">
+              {group.label}
+            </p>
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={cn(
+                  'flex items-center gap-2.5 w-full rounded-lg px-3 py-2 text-sm transition-colors text-left',
+                  activeTab === item.id
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {item.label}
+              </button>
+            ))}
+          </div>
         ))}
       </nav>
 
@@ -549,18 +581,23 @@ export default function ImpostazioniPage() {
               {[
                 { key: 'calcom', name: 'Cal.com', desc: 'Booking appuntamenti', category: 'Calendario' },
                 { key: 'google_calendar', name: 'Google Calendar', desc: 'Sync eventi', category: 'Calendario' },
-                { key: 'whatsapp', name: 'WhatsApp', desc: 'Evolution API — invio messaggi', category: 'Comunicazione' },
+                { key: 'whatsapp', name: 'WhatsApp (GOWA)', desc: 'Gateway WhatsApp self-hosted', category: 'Comunicazione' },
                 { key: 'resend', name: 'Resend', desc: 'Email transazionali', category: 'Comunicazione' },
+                { key: 'smtp', name: 'SMTP', desc: 'Email operative e notifiche', category: 'Comunicazione' },
                 { key: 'telegram', name: 'Telegram Bot', desc: 'Comandi + notifiche push', category: 'Comunicazione' },
                 { key: 'turnstile', name: 'Turnstile', desc: 'Anti-bot per i form del sito', category: 'Sicurezza' },
-                { key: 'openai', name: 'OpenAI', desc: 'AI Agent, chat, tool calling', category: 'AI & Generazione' },
-                { key: 'anthropic', name: 'Anthropic', desc: 'Copy e email di qualità', category: 'AI & Generazione' },
+                { key: 'infomaniak', name: 'Infomaniak AI', desc: 'LLM principale EU/Svizzera', category: 'AI & Generazione' },
+                { key: 'openai', name: 'OpenAI', desc: 'Fallback AI, tool calling e immagini', category: 'AI & Generazione' },
+                { key: 'anthropic', name: 'Anthropic', desc: 'Copy e email di qualita', category: 'AI & Generazione' },
                 { key: 'perplexity', name: 'Perplexity', desc: 'Ricerca web per blog', category: 'AI & Generazione' },
                 { key: 'zimage', name: 'Z-Image (KIE)', desc: 'Generazione cover blog AI', category: 'AI & Generazione' },
                 { key: 'dalle', name: 'DALL-E', desc: 'Generazione immagini (usa OpenAI)', category: 'AI & Generazione' },
                 { key: 'gemini', name: 'Google Gemini', desc: 'Fallback LLM aggiuntivo', category: 'AI & Generazione' },
                 { key: 'unsplash', name: 'Unsplash', desc: 'Foto stock per cover blog', category: 'AI & Generazione' },
+                { key: 's4', name: 'MEGA S4', desc: 'Storage Knowledge Base AI', category: 'AI & Dati' },
                 { key: 'stripe', name: 'Stripe', desc: 'Pagamenti online', category: 'Pagamenti' },
+                { key: 'paypal', name: 'PayPal', desc: 'Pagamenti PayPal', category: 'Pagamenti' },
+                { key: 'revolut', name: 'Revolut', desc: 'Pagamenti Revolut', category: 'Pagamenti' },
                 { key: 'bugsink', name: 'Bugsink', desc: 'Error tracking', category: 'Monitoring' },
               ].map((int, i, arr) => {
                 const status = intStatus[int.key];
@@ -597,70 +634,6 @@ export default function ImpostazioniPage() {
             </div>
           </>
         )}
-
-        {/* === SECOND BRAIN === */}
-        {activeTab === 'brain' && (
-          <>
-            <div>
-              <h2 className="text-lg font-semibold">Second Brain</h2>
-              <p className="text-sm text-muted-foreground">Personalità, memoria e automazioni del tuo agente AI.</p>
-            </div>
-
-            <div className="rounded-xl border bg-card p-6 space-y-5">
-              <div className="flex items-center gap-2 text-sm font-medium"><Sparkles className="h-4 w-4 text-muted-foreground" /> Personalità</div>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Nome dell'agent" value={getQs('brain_name', 'Brain')} onChange={(v) => setQsField('brain_name', v)} placeholder="Brain, Atlas, Cleo..." />
-                <Field label="Tono comunicazione" value={getQs('brain_tone', 'diretto ma amichevole')} onChange={(v) => setQsField('brain_tone', v)} />
-              </div>
-              <Field label="Orari silenziosi (non disturbare)" value={getQs('brain_quiet_hours', '')} onChange={(v) => setQsField('brain_quiet_hours', v)} placeholder="Es. 21:00-08:00" description="L'agent non invierà notifiche Telegram in questi orari" />
-              <Field label="Regole personalizzate" value={getQs('brain_custom_rules', '')} onChange={(v) => setQsField('brain_custom_rules', v)} rows={4} placeholder={"Preferisco email brevi\nNon mandare follow-up il lunedì\nPer siti web il prezzo minimo è 800€"} description="Una regola per riga. L'agent le seguirà in ogni interazione." />
-            </div>
-
-            <div className="rounded-xl border bg-card p-6 space-y-4">
-              <div className="flex items-center gap-2 text-sm font-medium"><Brain className="h-4 w-4 text-muted-foreground" /> Memoria</div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg bg-muted/40 p-4 text-center">
-                  <p className="text-2xl font-bold">{(brainStats as any)?.facts ?? 0}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Fatti appresi</p>
-                </div>
-                <div className="rounded-lg bg-muted/40 p-4 text-center">
-                  <p className="text-2xl font-bold">{(brainStats as any)?.conversations ?? 0}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Conversazioni</p>
-                </div>
-                <div className="rounded-lg bg-muted/40 p-4 text-center">
-                  <p className="text-2xl font-bold">{(brainStats as any)?.preferences ?? 0}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Regole attive</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">La memoria si popola automaticamente dalle tue interazioni con l'AI.</p>
-            </div>
-
-            <div className="rounded-xl border bg-card p-6 space-y-3">
-              <div className="flex items-center gap-2 text-sm font-medium"><Zap className="h-4 w-4 text-muted-foreground" /> Analisi proattiva</div>
-              <p className="text-xs text-muted-foreground">Ogni 6 ore il Brain analizza i tuoi dati e ti invia insight su Telegram:</p>
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  'Lead stagnanti senza follow-up',
-                  'Progetti a rischio scadenza',
-                  'Clienti pronti per upsell',
-                  'Preventivi non aperti',
-                  'Revenue sotto la media',
-                  'Domini in scadenza',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary/40 shrink-0" />
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <Button onClick={saveQs} disabled={saveMutation.isPending || Object.keys(qs).length === 0}>
-              {saveMutation.isPending ? 'Salvataggio...' : 'Salva impostazioni Brain'}
-            </Button>
-          </>
-        )}
-
         {/* === COSTI AI === */}
         {activeTab === 'ai-costs' && (() => {
           const usage = (aiUsage || {}) as any;
