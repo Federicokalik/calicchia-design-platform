@@ -81,6 +81,12 @@ function scrubRecord<T extends Record<string, unknown>>(record: T | undefined): 
 }
 
 export function scrubEvent(event: ErrorEvent, _hint?: EventHint): ErrorEvent | null {
+  // Drop all dev-machine events before they reach Bugsink. Local dev tunnels
+  // a real DSN so the SDK does fire, but events like EPIPE on Windows terminal
+  // close (Bugsink 3b0645d8) only pollute the production dashboard. Production
+  // and edge keep flowing through.
+  if (event.environment === 'development') return null;
+
   // Anonymise URL: drop querystrings entirely (may contain tokens or email in
   // some flows like magic-link verification).
   if (event.request?.url) {
