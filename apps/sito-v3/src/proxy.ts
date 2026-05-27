@@ -116,12 +116,18 @@ function isPublicPortalPath(portalPath: string[]) {
 }
 
 function redirectToPortalLogin(req: NextRequest, locale: string | null) {
-  const url = req.nextUrl.clone();
   const prefix = locale ? `/${locale}` : '';
-  url.pathname = `${prefix}/clienti/login`;
-  url.search = '';
-  url.searchParams.set('next', req.nextUrl.pathname + req.nextUrl.search);
-  return NextResponse.redirect(url);
+  const loginPath = `${prefix}/clienti/login`;
+  const search = new URLSearchParams({
+    next: req.nextUrl.pathname + req.nextUrl.search,
+  }).toString();
+
+  // Path-only Location: avoids leaking the internal standalone/container port
+  // (for example calicchia.design:3000) when the app runs behind a reverse proxy.
+  return new NextResponse(null, {
+    status: 307,
+    headers: { Location: `${loginPath}?${search}` },
+  });
 }
 
 const intlMiddleware = createMiddleware(routing);
