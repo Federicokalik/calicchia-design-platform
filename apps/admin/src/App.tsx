@@ -70,6 +70,8 @@ import ContattiPage from '@/pages/contatti';
 import GdprRequestsPage from '@/pages/privacy/gdpr-requests';
 import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
 import NewsletterPage from '@/pages/marketing/newsletter';
+import FaqCmsPage from '@/pages/cms/faq';
+import TeamCmsPage from '@/pages/cms/team';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -232,6 +234,10 @@ export default function App() {
 
         {/* Marketing (audit J-09) */}
         <Route path="marketing/newsletter" element={<NewsletterPage />} />
+
+        {/* CMS pubblico (audit C-013/C-014) */}
+        <Route path="cms/faq" element={<FaqCmsPage />} />
+        <Route path="cms/team" element={<TeamCmsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

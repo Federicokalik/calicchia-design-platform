@@ -1,7 +1,21 @@
 # Audit 2026-05-27 — Stato dopo lavorazione
 
 **Branch**: `fix/audit-2026-05-27-pr1-critical-security` (NON ancora mergeato in main)
-**Issue chiuse**: 88/136 (65%) — tutti i critical + tutti gli high + selezione medium + 2 medium architecturali (C-013/C-014)
+**Issue chiuse**: 89/136 (65%) — tutti i critical + tutti gli high + tutti i medium architecturali + J-K-11 (validators dedup)
+
+## PR19 (nuovo, 2026-05-27 tardo)
+
+Fondazione CMS pubblico + completamento J-K-11.
+
+- **J-K-11**: shared validators ora source of truth. `routes/contacts.ts` e `routes/calendar/public.ts` usano `publicContactSchema` / `publicBookingSchema` da `@calicchia/shared` (rimosse 50+ righe di validazione inline). Aggiunto `firstZodIssue()` helper. `@calicchia/shared` aggiunto come workspace dep in api.
+- **Site-config migrazione totale** (server): root layout `app/layout.tsx` ora usa `generateMetadata` async per brand/legalName/description da DB. Anche `rss.xml/route.ts`. URL/canonical/sitemap/robots restano file (sono structural deploy-time).
+- **Site-config client hook**: nuovo `lib/use-site-config.tsx` (SiteConfigProvider in root layout + `useSiteConfig()` hook). Migrati `SiteFooter`, `FooterMap`, `MenuOverlay`, `ContactFormClient`. Fallback su `data/site.ts` durante il primo paint.
+- **Admin editor `site.public`**: nuovo tab "Sito pubblico" in Impostazioni → Business. Edita brand, descrizione SEO, URL cal, social[] (JSON), geo{} (JSON). Salva su chiave `site.public`.
+- **CMS FAQ + Team** (foundation):
+  - Migration `120_site_cms_faq_team.sql`: tabelle `site_faqs` + `site_team` con locale, sort_order, is_published, audit triggers, set_updated_at_now() trigger condiviso.
+  - API: `routes/cms-public.ts` (GET pubblici `/api/public/cms/faqs`, `/team`) + `routes/cms-admin.ts` (CRUD protetto `/api/cms/faqs`, `/team`) con zod validation + whitelist patch.
+  - Admin: nuove pagine `pages/cms/faq.tsx` + `pages/cms/team.tsx`, gruppo sidebar "CMS sito".
+  - Sito: helper `lib/cms.ts` (`getFaqs()`, `getTeam()`) con fallback su `data/{faqs,team}.ts`. Migrati 2 consumer (`/faq` page + `TeamSection`).
 
 ## Cosa è stato deciso lungo strada
 
@@ -31,8 +45,12 @@
 | **Site-config migrazione totale** (C-013/C-014 long path) | Quando vuoi che ALL i 15+ consumer di `SITE` leggano da DB invece che da file. Oggi 2 surface (contatti page + ContactSocials) lo fanno come proof. | 1-2h per migrazione completa |
 | **Admin editor per `site.public`** | Quando il marketing chiede UI per editare brand/social/geo da admin. La chiave c'è nel settings-schema ma non c'è una page admin dedicata; le impostazioni cliente già hanno la pagina per `business.profile`. | ~30 min per aggiungere una sezione nel pannello settings esistente |
 
-### Scope-decision aperte (prodotto, non audit)
-- **CMS completo per servizi/FAQ/team/zone/glossario**: ancora hardcoded in `apps/sito-v3/src/data/*.ts` (32 file). Modifica testo = redeploy. Per editarli serve un layer CMS dedicato (tabelle `site_services`, `site_faqs`, `site_zones`...) + admin editor + endpoint pubblici. Settimane di lavoro, parla col marketing prima.
+### CMS roadmap (in corso)
+- ✅ **Fondazione + FAQ + Team** (PR19): pattern stabilito (table + audit trigger + admin CRUD + public endpoint + sito helper con fallback).
+- 🚧 **Glossario** (PR20): 365 righe, ~100 termini. Riusa pattern blog (title+slug+body).
+- 🚧 **SEO cities + zone** (PR21): 341 righe, 100+ città con attributi geografici.
+- 🚧 **Services + services-detail** (PR22): 22 file con shape complessa, serve Tiptap admin per i contenuti longform.
+- 🚧 **Traduzioni**: aggiungere righe `locale='en'` su site_faqs / site_team (schema già supporta).
 
 ### Issue low/cosmetic non chiuse (~46)
 Dead code di basso valore, refactor minori, documentazione. Diminishing returns: ogni nuovo PR cosmetic chiude 5-10 issue di severity "low" senza payoff utente visibile. **Suggerito skip** salvo trigger reale.
@@ -44,7 +62,8 @@ Resta aperta solo:
 ## Storia commit del branch
 
 ```
-TBD     fix: PR18 — webhook err normalization + site-config DB layer (3 fix)
+TBD     fix: PR19 — CMS pubblico foundation + J-K-11 (FAQ/Team + site-config completion)
+f98b026 fix: PR18 — webhook err normalization + site-config DB layer (3 fix)
 b8ae304 fix: PR17 — audit 2026-05-27 high-severity tail (4 fix)
 41dff70 revert(portal-upload): rollback B-014 client-direct — MEGA S4 no CORS
 cdcccca fix: PR16 — portal upload client-direct + Stripe checkout TTL  ← parziale
@@ -78,10 +97,9 @@ Tutte già su locale dev. Da applicare in prod al deploy:
 - `117_leads_consent_proof.sql` — consent_ip/UA su leads (C-007)
 - `118_audit_triggers_extension.sql` — audit triggers su workflows/whatsapp/calendar (J-K-06)
 - `119_drop_orphan_tables.sql` — drop 14 view + 3 table orphan verificati (J-K-12)
+- `120_site_cms_faq_team.sql` — tabelle CMS site_faqs + site_team + trigger updated_at (PR19)
 
 `pnpm --filter @calicchia/api migrate` le applica tutte (idempotente, no-op se già fatte).
-
-PR18 non aggiunge migration — la chiave `site.public` è soft (vive in `site_settings` come JSON, no DDL needed).
 
 ## Per chiudere il discorso audit
 

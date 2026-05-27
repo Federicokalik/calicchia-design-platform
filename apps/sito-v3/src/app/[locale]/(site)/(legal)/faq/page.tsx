@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
 import { FaqAccordion } from '@/components/about/FaqAccordion';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { Heading } from '@/components/ui/Heading';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Button } from '@/components/ui/Button';
 import { FinalCTA } from '@/components/home/FinalCTA';
-import { FAQS } from '@/data/faqs';
+// Audit C-013/C-014: FAQ rows now DB-backed via getFaqs(); file fallback
+// for fresh installs / API outages.
+import { getFaqs } from '@/lib/cms';
+import type { Locale } from '@/lib/i18n';
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +35,9 @@ export const metadata: Metadata = {
  * indice laterale separato — il pattern EditorialArticleLayout è usato per i
  * pillar longform).
  */
-export default function FaqPage() {
+export default async function FaqPage() {
+  const locale = (await getLocale()) as Locale;
+  const FAQS = await getFaqs(locale);
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

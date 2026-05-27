@@ -61,6 +61,8 @@ import { auditLogs } from './routes/audit-logs';
 import { collaborators } from './routes/collaborators';
 import { publicRoutes } from './routes/public';
 import { publicCapacity } from './routes/public-capacity';
+import { cmsPublic } from './routes/cms-public';
+import { cmsAdmin } from './routes/cms-admin';
 import { settings } from './routes/settings';
 import { payments } from './routes/payments';
 import { services } from './routes/services';
@@ -248,6 +250,9 @@ app.route('/api/stripe/webhook', stripeWebhook);
 app.route('/api/paypal-webhook', paypalWebhook);
 app.route('/api/cron/domains', domainCron);
 app.route('/api/public', publicRoutes);
+// CMS public reads — mount under /api/public/cms to inherit the public
+// rate-limit posture without going through any auth middleware.
+app.route('/api/public/cms', cmsPublic);
 const capacityRateLimit = createRateLimit(10, 60 * 1000);
 app.use('/api/public/capacity', capacityRateLimit);
 app.route('/api/public/capacity', publicCapacity);
@@ -419,6 +424,7 @@ const protectedPaths = [
   '/api/backup',
   '/api/whatsapp-admin',
   '/api/admin/kb',
+  '/api/cms',
 ];
 
 // /api/track is intentionally NOT in protectedPaths — it's the cookieless
@@ -483,6 +489,7 @@ app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
 app.route('/api/admin/kb', adminKb);
+app.route('/api/cms', cmsAdmin);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);

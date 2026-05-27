@@ -285,6 +285,9 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.992.0
         version: 3.992.0
+      '@calicchia/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.19.9(hono@4.11.5)

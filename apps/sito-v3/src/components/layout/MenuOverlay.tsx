@@ -10,7 +10,8 @@ import {
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { Link, usePathname } from '@/i18n/navigation';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: contact email/phone/cal + social[] via useSiteConfig().
+import { useSiteConfig } from '@/lib/use-site-config';
 import { getSocialIcon } from '@/data/social-icons';
 import {
   stripLocale,
@@ -88,6 +89,7 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
   const pathname = usePathname();
   const prevPathnameRef = useRef(pathname);
   const currentPath = stripLocale(pathname ?? '/');
+  const SITE = useSiteConfig();
 
   useEffect(() => {
     if (!open) return;

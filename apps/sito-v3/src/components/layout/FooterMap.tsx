@@ -2,7 +2,9 @@
 
 import { ArrowUpRight, MapPin } from '@phosphor-icons/react';
 import { useEffect, useRef, useState } from 'react';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: geo + address read via useSiteConfig() — admin can
+// move pin / change address text without redeploy.
+import { useSiteConfig } from '@/lib/use-site-config';
 import {
   getConsent,
   hasConsent,
@@ -26,8 +28,9 @@ const SWISS_LIGHT_STYLES: Array<Record<string, unknown>> = [
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#cfd8d8' }] },
 ];
 
-function directionsUrl() {
-  return `https://www.google.com/maps/dir/?api=1&destination=${SITE.geo.lat},${SITE.geo.lng}`;
+// Pure helper; reads coords from the merged SiteConfig passed by caller.
+function directionsUrl(geo: { lat: number; lng: number }) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${geo.lat},${geo.lng}`;
 }
 
 function loadGoogleMaps(apiKey: string): Promise<void> {
@@ -60,6 +63,7 @@ export function FooterMap() {
   const [mapReady, setMapReady] = useState(false);
   const { config } = useRuntimeConfig();
   const apiKey = config.googleMapsKey;
+  const SITE = useSiteConfig();
 
   useEffect(() => {
     installCookieConsentGlobals();
@@ -200,7 +204,7 @@ export function FooterMap() {
           </p>
         </div>
         <a
-          href={directionsUrl()}
+          href={directionsUrl(SITE.geo)}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-8 inline-flex min-h-[44px] items-center justify-center gap-3 border px-5 py-3 text-xs font-medium uppercase tracking-[0.18em] transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-ink)]"
@@ -253,7 +257,7 @@ export function FooterMap() {
         </div>
         <div className="mt-3 flex flex-col items-start gap-1 md:mt-0 md:items-end">
           <a
-            href={directionsUrl()}
+            href={directionsUrl(SITE.geo)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.16em]"

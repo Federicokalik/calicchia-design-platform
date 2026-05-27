@@ -5,12 +5,14 @@ import { getLocale, getMessages } from 'next-intl/server';
 import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
 import { ViewTransitionsBootstrap } from '@/components/providers/ViewTransitionsBootstrap';
 import { RuntimeConfigProvider } from '@/lib/runtime-config';
+import { SiteConfigProvider } from '@/lib/use-site-config';
 import { MorphTicker } from '@/components/layout/MorphTicker';
 import { LanguagePromptBanner } from '@/components/layout/LanguagePromptBanner';
 import { AvailabilityTopbar } from '@/components/layout/AvailabilityTopbar';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { personSchema, localBusinessSchema, websiteSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
+import { getSiteConfig } from '@/lib/site-config';
 import type { Locale } from '@/lib/i18n';
 import './globals.css';
 
@@ -39,48 +41,54 @@ const funnelSans = localFont({
   preload: true,
 });
 
+// Audit C-013/C-014: root metadata now async via generateMetadata so
+// brand/legalName/description come from getSiteConfig() (DB → file fallback).
+// SITE.url stays from the file because it's the deploy origin, not editable.
 const OG_DEFAULT = `${SITE.url}/img/federico-calicchia-ritratto-web-designer.webp`;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE.url),
-  title: {
-    default: `${SITE.brand} — ${SITE.legalName}`,
-    template: `%s — ${SITE.brand}`,
-  },
-  description: SITE.description,
-  applicationName: SITE.brand,
-  authors: [{ name: SITE.legalName, url: SITE.url }],
-  creator: SITE.legalName,
-  openGraph: {
-    type: 'website',
-    locale: 'it_IT',
-    url: SITE.url,
-    siteName: SITE.brand,
-    title: `${SITE.brand} — ${SITE.legalName}`,
-    description: SITE.description,
-    images: [
-      {
-        url: OG_DEFAULT,
-        width: 1200,
-        height: 630,
-        alt: 'Federico Calicchia — Web Designer & Developer Freelance',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    creator: '@calicchiadesign',
-    title: `${SITE.brand} — ${SITE.legalName}`,
-    description: SITE.description,
-    images: [OG_DEFAULT],
-  },
-  robots: { index: true, follow: true },
-  verification: {
-    // ST-05: set GOOGLE_SITE_VERIFICATION in the deploy env (the token from
-    // Search Console). Left undefined → Next omits the meta tag.
-    google: process.env.GOOGLE_SITE_VERIFICATION,
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSiteConfig();
+  return {
+    metadataBase: new URL(SITE.url),
+    title: {
+      default: `${site.brand} — ${site.legalName}`,
+      template: `%s — ${site.brand}`,
+    },
+    description: site.description,
+    applicationName: site.brand,
+    authors: [{ name: site.legalName, url: SITE.url }],
+    creator: site.legalName,
+    openGraph: {
+      type: 'website',
+      locale: 'it_IT',
+      url: SITE.url,
+      siteName: site.brand,
+      title: `${site.brand} — ${site.legalName}`,
+      description: site.description,
+      images: [
+        {
+          url: OG_DEFAULT,
+          width: 1200,
+          height: 630,
+          alt: 'Federico Calicchia — Web Designer & Developer Freelance',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      creator: '@calicchiadesign',
+      title: `${site.brand} — ${site.legalName}`,
+      description: site.description,
+      images: [OG_DEFAULT],
+    },
+    robots: { index: true, follow: true },
+    verification: {
+      // ST-05: set GOOGLE_SITE_VERIFICATION in the deploy env (the token from
+      // Search Console). Left undefined → Next omits the meta tag.
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: '#FAFAF7',
@@ -113,6 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RuntimeConfigProvider>
+          <SiteConfigProvider>
           <AvailabilityTopbar />
           <LanguagePromptBanner />
           <SmoothScrollProvider>
@@ -126,6 +135,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 documentato" (singolare). */}
             <MorphTicker />
           </SmoothScrollProvider>
+          </SiteConfigProvider>
           </RuntimeConfigProvider>
         </NextIntlClientProvider>
       </body>

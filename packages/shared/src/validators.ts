@@ -9,6 +9,71 @@ export const contactSchema = z.object({
 
 export type ContactFormData = z.infer<typeof contactSchema>;
 
+// =====================================================
+// Public form contracts — single source of truth
+//
+// Audit J-K-11: routes/contacts.ts and routes/calendar/public.ts used to
+// reimplement validation inline (~20 lines of typeof / .length / regex
+// checks each). With the schema living in shared, the public sito-v3
+// forms could in the future feed the same shape, and a contract change
+// becomes a one-file edit instead of three.
+//
+// `passthrough()` lets the api accept fields not listed here (turnstile_token,
+// source_page, lead_source) without validating them — they're handled
+// downstream where they're actually consumed. Keeping the schema strict
+// on what we DO validate but tolerant on what we IGNORE.
+// =====================================================
+
+const phoneE164ish = z.string()
+  .min(6, 'Numero richiesto')
+  .max(30, 'Numero troppo lungo')
+  .regex(/^\+\d{1,4}\s?\d{4,15}$/, 'Formato telefono non valido (es. +39 3510000000)');
+
+export const publicContactSchema = z.object({
+  name: z.string().trim().min(1, 'Nome richiesto').max(100, 'Nome troppo lungo (max 100 caratteri)'),
+  email: z.string().trim().toLowerCase().email('Email non valida').max(255, 'Email troppo lunga'),
+  message: z.string().trim().max(2000, 'Messaggio troppo lungo (max 2000 caratteri)').optional().default(''),
+  phone: phoneE164ish.optional().or(z.literal('')).transform((v) => v || undefined),
+  company: z.string().trim().max(150, 'Nome azienda troppo lungo').optional().or(z.literal('')).transform((v) => v || undefined),
+  services: z.array(z.string()).max(20).optional(),
+  sectors: z.array(z.string()).max(10).optional(),
+  wants_call: z.boolean().optional().default(false),
+  wants_meet: z.boolean().optional().default(false),
+  gdpr_consent: z.literal(true, { errorMap: () => ({ message: 'Consenso GDPR richiesto' }) }),
+  source_page: z.string().max(255).optional(),
+  source_service: z.string().max(64).optional(),
+  source_profession: z.string().max(64).optional(),
+  lead_source: z.string().trim().max(64, 'Origine lead troppo lunga').optional().or(z.literal('')).transform((v) => v || undefined),
+  meet_slot: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'Formato slot non valido').optional(),
+}).passthrough();
+export type PublicContactBody = z.infer<typeof publicContactSchema>;
+
+export const publicBookingAttendeeSchema = z.object({
+  name: z.string().trim().min(2, 'Nome richiesto (min 2 caratteri)').max(200, 'Nome troppo lungo (max 200)'),
+  email: z.string().trim().toLowerCase().email('Email non valida'),
+  phone: z.string().trim().regex(/^[+\d][\d\s\-().]{4,49}$/, 'Numero di telefono non valido').optional().or(z.literal('')).transform((v) => v || undefined),
+  company: z.string().trim().max(200, 'Nome azienda troppo lungo (max 200)').optional().or(z.literal('')).transform((v) => v || undefined),
+  message: z.string().trim().max(2000, 'Messaggio troppo lungo (max 2000 caratteri)').optional().or(z.literal('')).transform((v) => v || undefined),
+  timezone: z.string().min(1).max(79).optional(),
+}).passthrough();
+
+export const publicBookingSchema = z.object({
+  event_type_slug: z.string().min(1, 'event_type_slug richiesto').max(120),
+  start: z.string().refine((v) => !Number.isNaN(Date.parse(v)), 'start ISO richiesto'),
+  attendee: publicBookingAttendeeSchema,
+  gdpr_consent: z.literal(true, { errorMap: () => ({ message: 'Consenso GDPR richiesto' }) }),
+}).passthrough();
+export type PublicBookingBody = z.infer<typeof publicBookingSchema>;
+
+/**
+ * Helper for Hono handlers: run safeParse and short-circuit with a 400
+ * carrying the first zod issue message. Returns null on success so the
+ * handler can keep the existing early-return control flow.
+ */
+export function firstZodIssue(err: z.ZodError): string {
+  return err.issues[0]?.message ?? 'Dati non validi';
+}
+
 export const projectSchema = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug deve contenere solo lettere minuscole, numeri e trattini'),
   title: z.string().min(1, 'Titolo richiesto'),
