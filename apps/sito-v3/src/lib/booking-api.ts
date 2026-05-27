@@ -8,7 +8,10 @@ const API_BASE_RAW =
   process.env.PORTAL_API_URL ??
   'http://localhost:3001';
 const API_BASE = API_BASE_RAW.replace(/\/$/, '');
-const PUBLIC_PREFIX = `${API_BASE}/api/calendar/public`;
+// Backend mounts the public calendar router at `/api/calendar` (see
+// apps/api/src/app.ts:203 `app.route('/api/calendar', calendarPublic)`).
+// A previous `/api/calendar/public` here produced 404 on every slot lookup.
+const PUBLIC_PREFIX = `${API_BASE}/api/calendar`;
 const IS_PRODUCTION_BUILD =
   process.env.NEXT_PHASE === 'phase-production-build' ||
   process.env.npm_lifecycle_event === 'build';

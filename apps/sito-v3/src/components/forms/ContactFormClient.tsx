@@ -82,7 +82,7 @@ function buildPrefillMessage(params: URLSearchParams, t: FormTranslate): string 
 /**
  * ContactFormClient — RHF + Zod + Turnstile lazy + GDPR explicit.
  *
- * POSTs to `/api/contacts/`. Pattern Swiss: bottom-bordered inputs, label
+ * POSTs to `/api/contacts`. Pattern Swiss: bottom-bordered inputs, label
  * sopra, FieldError inline, mono labels metadata. Turnstile invisible si
  * carica al primo mount (lazy script via `useTurnstile`).
  *
@@ -184,7 +184,7 @@ export function ContactFormClient() {
 
   const onSubmit = async (data: ContactInput) => {
     try {
-      const res = await fetch(`${API_URL}/api/contacts/`, {
+      const res = await fetch(`${API_URL}/api/contacts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
