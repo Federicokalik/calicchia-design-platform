@@ -512,8 +512,17 @@ export async function getInvoice(id: string): Promise<PortalInvoice | null> {
   return data?.invoice ?? null;
 }
 
-export async function getPaymentSchedules(projectId?: string): Promise<PortalPaymentSchedule[]> {
-  const path = projectId ? `/invoices/payments?project_id=${encodeURIComponent(projectId)}` : '/invoices/payments';
+export async function getPaymentSchedules(
+  opts?: { projectId?: string; invoiceId?: string },
+): Promise<PortalPaymentSchedule[]> {
+  // Audit B-022: invoice detail used to list ALL schedules — now scope by
+  // invoice_id when provided so only schedules actually linked to that fattura
+  // appear. project filter kept for the project detail flow.
+  const params = new URLSearchParams();
+  if (opts?.projectId) params.set('project_id', opts.projectId);
+  if (opts?.invoiceId) params.set('invoice_id', opts.invoiceId);
+  const qs = params.toString();
+  const path = qs ? `/invoices/payments?${qs}` : '/invoices/payments';
   const data = await authedFetch<{ schedules: PortalPaymentSchedule[] }>(path);
   return data.schedules ?? [];
 }

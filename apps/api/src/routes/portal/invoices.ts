@@ -49,8 +49,13 @@ invoicesRoutes.get('/', portalClientAuth, async (c) => {
 invoicesRoutes.get('/payments', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
   const projectId = c.req.query('project_id');
+  const invoiceId = c.req.query('invoice_id');
 
   const projectFilter = projectId ? sql`AND ps.project_id = ${projectId}` : sql``;
+  // Audit B-022: invoice detail page used to show ALL the customer's schedules
+  // as if they belonged to the current fattura. Optional ?invoice_id scopes
+  // the schedule list to those actually linked to that invoice.
+  const invoiceFilter = invoiceId ? sql`AND ps.invoice_id = ${invoiceId}` : sql``;
 
   // Audit J-K-13: payment_schedules can be linked via project_id, quote_id OR
   // invoice_id (mig 030). The previous filter only matched the first two, so
@@ -87,6 +92,7 @@ invoicesRoutes.get('/payments', portalClientAuth, async (c) => {
         OR ps.invoice_id IN (SELECT id FROM invoices WHERE customer_id = ${customerId})
       )
       ${projectFilter}
+      ${invoiceFilter}
     GROUP BY ps.id, cp.id, q.id, i.id
     ORDER BY ps.due_date ASC NULLS LAST
   ` as Array<Record<string, unknown>>;

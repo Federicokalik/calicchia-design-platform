@@ -33,6 +33,16 @@ const cleanOptionalString = (value: unknown) => {
   return cleaned || null;
 };
 
+// Audit C-018: utm_* and source_token are concatenated into leads.tags TEXT[].
+// A partner site could submit unbounded strings (up to body limit) — bloat
+// per row + ugly admin tables + GDPR-export dumps. Cap at 64 chars and reject
+// anything outside a conservative slug charset. Same shape contacts.ts uses.
+const TAG_CHARSET = /^[a-zA-Z0-9_\-./]+$/;
+function cleanTag(value: unknown): string {
+  const trimmed = cleanString(value).slice(0, 64);
+  return TAG_CHARSET.test(trimmed) ? trimmed : '';
+}
+
 publicLeads.post('/', async (c) => {
   try {
     const body = await c.req.json().catch(() => ({})) as LeadBody;
@@ -40,12 +50,12 @@ publicLeads.post('/', async (c) => {
     const name = cleanString(body.name);
     const email = cleanString(body.email).toLowerCase();
     const message = cleanString(body.message);
-    const sourceToken = cleanString(body.source_token);
-    const utmSource = cleanString(body.utm_source);
-    const utmMedium = cleanString(body.utm_medium);
-    const utmCampaign = cleanString(body.utm_campaign);
-    const utmContent = cleanString(body.utm_content);
-    const utmTerm = cleanString(body.utm_term);
+    const sourceToken = cleanTag(body.source_token);
+    const utmSource = cleanTag(body.utm_source);
+    const utmMedium = cleanTag(body.utm_medium);
+    const utmCampaign = cleanTag(body.utm_campaign);
+    const utmContent = cleanTag(body.utm_content);
+    const utmTerm = cleanTag(body.utm_term);
     const turnstileToken = cleanString(body.turnstile_token);
 
     if (!name || name.length > 200 || !isValidEmail(email) || message.length > 2000) {

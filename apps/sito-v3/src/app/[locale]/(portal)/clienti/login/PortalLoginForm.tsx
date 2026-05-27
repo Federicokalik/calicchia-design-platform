@@ -207,6 +207,14 @@ export function PortalLoginForm() {
           </Button>
         </form>
 
+        {/* Audit B-021: clients registered WhatsApp-only have customers.email = NULL
+            (mig 108) — the magic-link path can never find them. Surface the
+            fallback explicitly so they don't get stuck after a few failed
+            email submissions. */}
+        <PortalCaption tone="foreground" className="self-start">
+          {t('fallback.noEmailHint') /* added in i18n with EN/IT copy below */}
+        </PortalCaption>
+
         <button
           type="button"
           onClick={() => {

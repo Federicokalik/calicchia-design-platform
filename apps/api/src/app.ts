@@ -349,7 +349,12 @@ const trackRateLimit = createRateLimit(60, 60 * 1000);
 app.use('/api/track', trackRateLimit);
 app.route('/api/track', analyticsTrack);
 
-// Protected routes (auth required — admin gestionale)
+// Protected routes (auth required — admin gestionale).
+// Audit D-013: a few public-form routes (/api/contacts, /api/newsletter,
+// /api/gdpr-requests, /api/cookie-consent) intentionally DO NOT appear in this
+// list — they expose both a public POST + admin GET/PUT/DELETE on the same
+// prefix, and gate the admin handlers via inline `authMiddleware` per-route.
+// Adding them here would block the public POST too. Don't add them.
 const protectedPaths = [
   '/api/customers',
   '/api/subscriptions',

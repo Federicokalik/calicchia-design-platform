@@ -199,19 +199,31 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
 // ─────────────────────────────────────────────────────────────
 
 publicRoutes.get('/projects', async (c) => {
-  // Optional ?service=<slug> filter — fuzzy match against the free-text
-  // `services` column (which the admin populates with values like
-  // "Web Design, E-commerce"). We normalise both sides: lowercase + hyphen
-  // for spaces, then ILIKE-match the service slug as a substring.
+  // Optional ?service=<slug> filter — admin enters free text like
+  // "Web Design, E-commerce, SEO". Audit C-017: the old ILIKE substring match
+  // over-matched ("seo" ⊂ "seo-onpage", "seokit") and under-matched ("webdesign"
+  // without hyphen). Tokenize on `,`, slug-normalize each token (lowercase +
+  // space→hyphen + strip noise), and require an EXACT match against ANY token.
+  // Schema-clean fix (a project_services junction table) is deferred — this
+  // stopgap removes the false-positive/negative noise without a migration.
   // Optional ?limit=N (default 50, max 50).
   // Optional ?locale=it|en — i18n via projects_translations.
   const serviceFilter = c.req.query('service');
   const limit = parseLimit(c.req.query('limit'), 50, 50);
   const locale = parseLocale(c.req.query('locale'));
 
-  const isValidServiceSlug = serviceFilter ? /^[a-z0-9-]{1,60}$/.test(serviceFilter) : false;
-  const serviceClause = isValidServiceSlug
-    ? sql`AND LOWER(REPLACE(COALESCE(p.services, ''), ' ', '-')) ILIKE ${'%' + serviceFilter + '%'}`
+  const validatedServiceSlug =
+    serviceFilter && /^[a-z0-9-]{1,60}$/.test(serviceFilter) ? serviceFilter : null;
+  // Postgres: split the normalised services column on `,`, trim each token,
+  // and check the slug against the resulting array. ANY(...) handles the
+  // exact-token semantics.
+  const serviceClause = validatedServiceSlug
+    ? sql`AND ${validatedServiceSlug} = ANY(
+            SELECT trim(BOTH '-' FROM regexp_replace(
+              LOWER(REPLACE(token, ' ', '-')), '[^a-z0-9-]', '', 'g'
+            ))
+            FROM unnest(string_to_array(COALESCE(p.services, ''), ',')) AS token
+          )`
     : sql``;
 
   const projects = await sql`
