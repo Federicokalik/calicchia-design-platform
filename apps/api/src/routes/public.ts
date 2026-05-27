@@ -458,3 +458,85 @@ publicRoutes.get('/blog-demos/:postId/:index', async (c) => {
   );
   return c.html(demos[index]);
 });
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/public/site-config — DB-backed public site config
+//
+// Audit C-013/C-014: site marketing copy (brand, contact, address, social
+// links, hero description) was hardcoded in apps/sito-v3/src/data/site.ts
+// — every text change required a code edit + Docker rebuild + redeploy.
+// site_settings has been admin-editable since mig 001 but the site never
+// consumed it. This endpoint exposes the editable subset:
+//
+//   - business.profile      → contact email/phone, vat, legal_name, address
+//   - site.public           → brand, description, social[] (new key, optional)
+//
+// Both are read with COALESCE-style fallback: an empty string / missing key
+// returns null so the caller can fall back to the file-defined defaults in
+// data/site.ts. Never throws — public endpoint, must degrade gracefully on
+// DB outage or missing rows. Short cache + SWR matches /api/config.
+// ─────────────────────────────────────────────────────────────
+publicRoutes.get('/site-config', async (c) => {
+  type BizProfile = {
+    company_name?: string; legal_name?: string; vat_number?: string;
+    fiscal_code?: string; pec_email?: string; sdi_code?: string;
+    email?: string; phone?: string; website?: string;
+    address?: { street?: string; city?: string; postal_code?: string; country?: string };
+  };
+  type SitePublic = {
+    brand?: string;
+    description?: string;
+    social?: Array<{ label: string; url: string; icon?: string }>;
+    geo?: { lat?: number; lng?: number; city?: string; province?: string; region?: string; country?: string; postalCode?: string };
+    cal?: string;
+  };
+
+  let bizProfile: BizProfile = {};
+  let sitePublic: SitePublic = {};
+  try {
+    const rows = await sql`
+      SELECT key, value FROM site_settings WHERE key IN ('business.profile', 'site.public')
+    ` as Array<{ key: string; value: unknown }>;
+    for (const r of rows) {
+      if (r.key === 'business.profile' && r.value && typeof r.value === 'object') {
+        bizProfile = r.value as BizProfile;
+      } else if (r.key === 'site.public' && r.value && typeof r.value === 'object') {
+        sitePublic = r.value as SitePublic;
+      }
+    }
+  } catch (err) {
+    log.warn({ err }, 'site-config read failed — falling back to empty');
+  }
+
+  // Drop empty strings so the consumer's fallback chain sees them as missing.
+  function nz(s: string | null | undefined): string | null {
+    return s && s.trim() ? s : null;
+  }
+
+  const addr = bizProfile.address ?? {};
+  const config = {
+    brand: nz(sitePublic.brand),
+    legalName: nz(bizProfile.legal_name) ?? nz(bizProfile.company_name),
+    description: nz(sitePublic.description),
+    contact: {
+      email: nz(bizProfile.email),
+      phone: nz(bizProfile.phone),
+      pec: nz(bizProfile.pec_email),
+      vat: nz(bizProfile.vat_number),
+      sdi: nz(bizProfile.sdi_code),
+      address: {
+        street: nz(addr.street),
+        city: nz(addr.city),
+        postalCode: nz(addr.postal_code),
+        country: nz(addr.country),
+      },
+      cal: nz(sitePublic.cal),
+    },
+    social: Array.isArray(sitePublic.social) ? sitePublic.social : null,
+    geo: sitePublic.geo ?? null,
+  };
+
+  return c.json(config, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});

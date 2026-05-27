@@ -1,7 +1,10 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: read brand/contact data through getSiteConfig() so the
+// admin can edit email/phone/address/cal without a redeploy. SITE-from-file
+// remains the fallback when nothing is set in site_settings yet.
+import { getSiteConfig } from '@/lib/site-config';
 import { ContactFormClient } from '@/components/forms/ContactFormClient';
 import { ContactSocials } from '@/components/contatti/ContactSocials';
 import { PageHero } from '@/components/layout/PageHero';
@@ -31,6 +34,7 @@ export default async function ContattiPage() {
   const tPage = await getTranslations('contatti.page');
   const tHero = await getTranslations('contatti.hero');
   const tNav = await getTranslations('navigation');
+  const SITE = await getSiteConfig();
 
   return (
     <>

@@ -115,7 +115,13 @@ async function sendReply(chatId: string, text: string) {
 
 // POST /api/telegram/webhook
 telegram.post('/webhook', async (c) => {
-  if (!isWebhookAuthentic(c)) return c.json({ error: 'Unauthorized' }, 401);
+  // Audit J-K-09: don't differentiate the rejection reason in the body — a
+  // probe should learn nothing from the response that it can't already get
+  // from the status code. The secret-token mismatch is logged internally.
+  if (!isWebhookAuthentic(c)) {
+    log.warn({ ip: c.req.header('cf-connecting-ip') ?? c.req.header('x-forwarded-for') ?? null }, 'telegram webhook auth failed');
+    return c.json({ error: 'Invalid request' }, 401);
+  }
   if (!isTelegramConfigured()) return c.json({ ok: true });
 
   const update = await c.req.json();
