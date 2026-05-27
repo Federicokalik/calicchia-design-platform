@@ -14,7 +14,7 @@ interface PortalMessage {
   id: string;
   content: string;
   sender_name: string;
-  sender_type: 'admin' | 'client';
+  sender_type: 'admin' | 'client' | 'collaborator';
   is_internal: boolean;
   attachments: unknown;
   customer_id: string | null;
@@ -101,21 +101,31 @@ export function PortalMessageThread({ projectId }: PortalMessageThreadProps) {
           />
         ) : (
           messages.map((m) => {
-            const isAdmin = m.sender_type === 'admin';
+            // Audit B-013: admin/collaborator both align right (outgoing),
+            // client aligns left. Badge label discriminates the three.
+            const isOutgoing = m.sender_type !== 'client';
+            const badgeLabel =
+              m.sender_type === 'admin'
+                ? 'admin'
+                : m.sender_type === 'collaborator'
+                  ? 'collab'
+                  : 'cliente';
             return (
               <div
                 key={m.id}
                 className={cn(
                   'flex flex-col gap-1 max-w-[80%] rounded-lg px-3 py-2',
-                  isAdmin
+                  isOutgoing
                     ? 'self-end bg-primary/10 ml-auto'
                     : 'self-start bg-muted',
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium">{m.sender_name || (isAdmin ? 'Calicchia' : 'Cliente')}</span>
-                  <Badge variant={isAdmin ? 'default' : 'secondary'} className="h-4 px-1.5 text-[10px]">
-                    {isAdmin ? 'admin' : 'cliente'}
+                  <span className="text-xs font-medium">
+                    {m.sender_name || (isOutgoing ? 'Calicchia' : 'Cliente')}
+                  </span>
+                  <Badge variant={m.sender_type === 'admin' ? 'default' : 'secondary'} className="h-4 px-1.5 text-[10px]">
+                    {badgeLabel}
                   </Badge>
                   <span className="text-[10px] text-muted-foreground ml-auto">
                     {new Date(m.created_at).toLocaleString('it-IT', {

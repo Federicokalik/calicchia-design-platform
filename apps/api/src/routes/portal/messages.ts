@@ -28,11 +28,19 @@ messagesRoutes.get('/projects/:id/messages', portalAuth, async (c) => {
     ? sql`AND pc.created_at < ${before}`
     : sql``;
 
+  // Audit B-013: customer_id NULL meant both 'admin' and 'collaborator' got
+  // labelled 'admin' on the client side. Now we discriminate via EXISTS on
+  // collaborators by name so the badge reads correctly. Slight perf cost
+  // (per-row subquery) is acceptable for a per-project thread.
   const messages = await sql`
     SELECT pc.id, pc.content, pc.sender_name, pc.is_internal,
            pc.created_at, pc.updated_at,
            CASE
              WHEN pc.customer_id IS NOT NULL THEN 'client'
+             WHEN EXISTS (
+               SELECT 1 FROM collaborators
+               WHERE name = pc.sender_name OR company = pc.sender_name
+             ) THEN 'collaborator'
              ELSE 'admin'
            END AS sender_type,
            pc.attachments

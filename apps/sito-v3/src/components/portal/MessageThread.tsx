@@ -46,8 +46,15 @@ export function MessageThread({ projectId, messages }: MessageThreadProps) {
               style={{ borderBottom: '1px solid var(--color-border)' }}
             >
               <div className="flex flex-col gap-2">
+                {/* Audit B-013: distinguish admin from collaborator in the
+                    badge so the client sees who actually wrote (a collaborator
+                    was previously mislabelled CALDES). */}
                 <MonoLabel tone={message.sender_type === 'client' ? 'accent' : 'muted'}>
-                  {message.sender_type === 'client' ? 'CLIENTE' : 'CALDES'}
+                  {message.sender_type === 'client'
+                    ? 'CLIENTE'
+                    : message.sender_type === 'collaborator'
+                      ? 'COLLABORATORE'
+                      : 'CALDES'}
                 </MonoLabel>
                 <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                   {message.sender_name}

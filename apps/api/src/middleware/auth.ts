@@ -3,6 +3,9 @@ import { jwtVerify } from 'jose';
 import { getJwtSecret, signToken, ABSOLUTE_SESSION_MS } from '../lib/jwt';
 import { setAuthCookie } from '../lib/cookies';
 import { adminMessage } from '../lib/admin-locale';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'auth-middleware' });
 
 export function extractToken(c: Context): string | null {
   // Cookie (priority — browser requests)
@@ -55,14 +58,22 @@ export async function authMiddleware(c: Context, next: Next) {
       role: payload.role as string,
     });
 
-    // Refresh token with updated last_activity (non-blocking, best-effort).
-    // auth_at is carried over so the absolute cap above keeps anchoring to login.
-    signToken({
-      sub: payload.sub as string,
-      email: payload.email as string,
-      role: payload.role as string,
-      auth_at: authAt,
-    }).then((newToken) => setAuthCookie(c, newToken)).catch(() => {});
+    // Refresh token with updated last_activity. Audit E-014: was
+    // fire-and-forget — `setAuthCookie` could run AFTER await next() flushed
+    // the response, so the browser never saw the refreshed cookie and the
+    // session silently aged toward absolute-expiry. Synchronous now (JWT sign
+    // is sub-ms) and any failure is logged instead of swallowed.
+    try {
+      const newToken = await signToken({
+        sub: payload.sub as string,
+        email: payload.email as string,
+        role: payload.role as string,
+        auth_at: authAt,
+      });
+      setAuthCookie(c, newToken);
+    } catch (err) {
+      log.warn({ err, sub: payload.sub }, 'session cookie refresh failed');
+    }
   } catch {
     return c.json({ error: adminMessage(c, 'invalidOrExpiredToken') }, 401);
   }

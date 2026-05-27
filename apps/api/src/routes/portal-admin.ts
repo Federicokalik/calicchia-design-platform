@@ -296,10 +296,19 @@ portalAdmin.get('/projects/:projectId/messages', async (c) => {
   if (!/^[a-f0-9-]{36}$/i.test(projectId)) return c.json({ error: 'projectId non valido' }, 400);
   const limit = Math.min(200, Math.max(1, Number(c.req.query('limit') || '100')));
 
+  // Audit B-013: mirror the portal-side fix so admin sees the same
+  // discrimination between admin and collaborator authors.
   const messages = await sql`
     SELECT pc.id, pc.content, pc.sender_name, pc.is_internal, pc.attachments,
            pc.created_at, pc.updated_at, pc.customer_id,
-           CASE WHEN pc.customer_id IS NOT NULL THEN 'client' ELSE 'admin' END AS sender_type
+           CASE
+             WHEN pc.customer_id IS NOT NULL THEN 'client'
+             WHEN EXISTS (
+               SELECT 1 FROM collaborators
+               WHERE name = pc.sender_name OR company = pc.sender_name
+             ) THEN 'collaborator'
+             ELSE 'admin'
+           END AS sender_type
     FROM project_comments pc
     WHERE pc.project_id = ${projectId}
       AND pc.is_internal = false

@@ -296,7 +296,7 @@ export interface PortalMessage {
   project_id?: string;
   content: string;
   sender_name: string;
-  sender_type: 'client' | 'admin';
+  sender_type: 'client' | 'admin' | 'collaborator';
   is_internal?: boolean;
   attachments?: unknown;
   created_at: string;
