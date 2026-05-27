@@ -28,7 +28,7 @@ export default async function PreferenzePage({ params }: PageProps) {
     ]);
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar breadcrumbs={[{ label: 'Preferenze' }]} />
 
         <div className="flex flex-col gap-8 max-w-[760px]">

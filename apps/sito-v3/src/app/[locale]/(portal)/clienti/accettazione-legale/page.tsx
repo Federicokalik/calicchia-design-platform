@@ -34,6 +34,12 @@ export default async function AccettazioneLegalePage({ params }: PageProps) {
   try {
     customer = await getCustomer();
     if (!customer) redirect(portalLoginRedirect('/clienti/accettazione-legale'));
+    // Collaborators don't sign the client-side T&C+DPA — they operate under the
+    // owner's existing acceptance. Without this gate, /legal/status returns 403
+    // (clientOnly route) and crashes the page (audit B-003 + B-020).
+    if (customer.role === 'collaborator') {
+      redirect('/clienti/progetti');
+    }
     status = await getLegalStatus();
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {

@@ -62,7 +62,7 @@ export default async function ClientiDashboardPage({ params }: PageProps) {
       .reduce((sum, invoice) => sum + Number(invoice.total || 0), 0);
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar breadcrumbs={[{ label: t('nav.items.dashboard') }]} />
 
         <div className="flex flex-col gap-10 max-w-[1280px]">

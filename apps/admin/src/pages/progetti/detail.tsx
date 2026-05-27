@@ -18,7 +18,7 @@ const restrictToVerticalAxis = ({ transform }: { transform: { x: number; y: numb
 import {
   ArrowLeft, CheckSquare, Milestone, StickyNote,
   Plus, Calendar, Clock, User, LayoutList, X, GripVertical,
-  Activity, Send, Languages, TrendingUp, Receipt,
+  Activity, Send, Languages, TrendingUp, Receipt, MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ import { StatusBadge } from '@/components/shared/status-badge';
 import { EntityView } from '@/components/entity-view';
 import { buildTasksConfig } from '@/components/tasks/task-entity-config';
 import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
+import { PortalMessageThread } from '@/components/projects/portal-message-thread';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
@@ -348,6 +349,10 @@ export default function ProgettoDetailPage() {
             <LayoutList className="h-3.5 w-3.5" />
             Portale
           </TabsTrigger>
+          <TabsTrigger value="messaggi" className="gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Messaggi
+          </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" />
             Timeline
@@ -535,6 +540,11 @@ export default function ProgettoDetailPage() {
               </div>
             </div>
           </div>
+        </TabsContent>
+
+        {/* Portal messages thread (audit B-006) */}
+        <TabsContent value="messaggi">
+          <PortalMessageThread projectId={id!} />
         </TabsContent>
 
         {/* Timeline */}

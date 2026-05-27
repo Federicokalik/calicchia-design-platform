@@ -15,6 +15,20 @@ export class PortalUnauthorizedError extends Error {
 }
 
 /**
+ * Sollevato quando la sessione e' valida ma il role non ha accesso all'endpoint
+ * (es. un collaboratore che hitta una route `portalClientAuth`). Audit
+ * B-003 + B-020: prima diventava `Error` generico e le pagine catch lo
+ * trattavano come 500 — ora le pagine possono riconoscerlo e redirect a
+ * `/clienti/progetti`.
+ */
+export class PortalForbiddenError extends Error {
+  constructor(public path: string) {
+    super('Portal access forbidden for this role');
+    this.name = 'PortalForbiddenError';
+  }
+}
+
+/**
  * Sollevato da `requirePortalAccess()` quando il customer e` autenticato ma
  * non ha ancora accettato T&C+DPA per le versioni correnti (vedi
  * `apps/api/src/lib/legal-versions.ts`). Le page.tsx del portale catturano
@@ -310,6 +324,7 @@ async function authedFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
   });
 
   if (res.status === 401) throw new PortalUnauthorizedError(path);
+  if (res.status === 403) throw new PortalForbiddenError(path);
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
     throw new Error(`Portal API ${path} returned ${res.status}: ${txt.slice(0, 200)}`);

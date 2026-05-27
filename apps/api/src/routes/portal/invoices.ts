@@ -330,6 +330,53 @@ invoicesRoutes.post('/paypal-capture/:linkId', portalClientAuth, async (c) => {
   }
 });
 
+// ── GET payment_link status (polled by /clienti/pagamento/successo) ──
+// Audit B-005: la return page Stripe attualmente mostra "Pagato" dopo 3.5s a
+// prescindere dallo stato reale (webhook authoritativo). Questo endpoint
+// permette al client di pollare e decidere quando mostrare success davvero.
+// Static path → DEVE stare prima di '/:id'.
+invoicesRoutes.get('/payment-links/:linkId/status', portalClientAuth, async (c) => {
+  const customerId = c.get('customer_id') as string;
+  const linkId = c.req.param('linkId');
+  if (!/^[a-f0-9-]{36}$/i.test(linkId)) {
+    throw new HTTPException(400, { message: 'linkId non valido' });
+  }
+
+  const [link] = await sql`
+    SELECT pl.id, pl.provider, pl.status, pl.amount, pl.currency, pl.updated_at,
+           COALESCE(q.customer_id, i.customer_id, cp.customer_id) AS owner_customer_id
+    FROM payment_links pl
+    LEFT JOIN payment_schedules ps ON ps.id = pl.payment_schedule_id
+    LEFT JOIN quotes q ON q.id = ps.quote_id
+    LEFT JOIN invoices i ON i.id = ps.invoice_id
+    LEFT JOIN client_projects cp ON cp.id = ps.project_id
+    WHERE pl.id = ${linkId}
+    LIMIT 1
+  ` as Array<{
+    id: string;
+    provider: string;
+    status: string;
+    amount: string;
+    currency: string;
+    updated_at: string;
+    owner_customer_id: string | null;
+  }>;
+
+  // 404 on both miss and cross-tenant access (anti-enumeration).
+  if (!link || link.owner_customer_id !== customerId) {
+    throw new HTTPException(404, { message: 'Link non trovato' });
+  }
+
+  return c.json({
+    id: link.id,
+    provider: link.provider,
+    status: link.status,
+    amount: Number(link.amount),
+    currency: link.currency,
+    updated_at: link.updated_at,
+  });
+});
+
 // ── GET single invoice ───────────────────────────────────
 // Catch-all dinamico — DEVE essere l'ultima route per non catturare static paths.
 invoicesRoutes.get('/:id', portalClientAuth, async (c) => {

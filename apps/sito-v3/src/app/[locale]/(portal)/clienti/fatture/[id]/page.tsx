@@ -66,7 +66,7 @@ export default async function FatturaDetailPage({ params }: PageProps) {
     const isPaid = status === 'paid';
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar
           breadcrumbs={[
             { label: t('nav.items.dashboard'), href: '/clienti/dashboard' },

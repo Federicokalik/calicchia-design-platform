@@ -53,12 +53,14 @@ export default function PaymentSuccessPage() {
       void capturePaypal(linkId, setState);
       return;
     }
-    if (provider === 'stripe' && stripeSession) {
-      void waitForStripe(setState);
+    if (provider === 'stripe' && linkId) {
+      void waitForStripe(linkId, setState);
       return;
     }
-    // Unknown shape — webhook is authoritative, show optimistic success.
-    setState({ kind: 'success' });
+    // No linkId we can poll → fall back to "elaborazione in corso" rather than
+    // fabricated success (audit B-005). The user is redirected to /clienti/fatture
+    // which will reflect the webhook-authoritative state.
+    setState({ kind: 'timeout' });
   }, [provider, linkId, stripeSession, paypalToken]);
 
   const headline = (() => {
@@ -132,11 +134,36 @@ async function capturePaypal(linkId: string, setState: (s: State) => void): Prom
   }
 }
 
-async function waitForStripe(setState: (s: State) => void): Promise<void> {
-  // Stripe webhook is authoritative; show a brief processing spinner then optimistic success.
-  // Polling endpoint not implemented in v1 — webhook + page refresh on /clienti/fatture
-  // surface the final state.
+async function waitForStripe(linkId: string, setState: (s: State) => void): Promise<void> {
+  // Stripe webhook is authoritative; we poll the link status with backoff until
+  // it flips to 'paid' or we time out, then route the user accordingly. Audit
+  // B-005: the previous version always showed 'success' after 3.5s regardless,
+  // which meant a crafted URL could fake a paid state to the user.
   setState({ kind: 'stripe_processing' });
-  await new Promise((r) => setTimeout(r, 3500));
-  setState({ kind: 'success' });
+  const delays = [1000, 2000, 2000, 4000, 4000]; // ~13s cumulative
+  for (const ms of delays) {
+    try {
+      const res = await fetch(
+        `/api/portal/invoices/payment-links/${encodeURIComponent(linkId)}/status`,
+        { cache: 'no-store' },
+      );
+      if (res.ok) {
+        const data = (await res.json()) as { status?: string };
+        if (data.status === 'paid') {
+          setState({ kind: 'success' });
+          return;
+        }
+        if (data.status === 'expired' || data.status === 'cancelled') {
+          setState({ kind: 'error', message: 'Il link di pagamento non è più valido.' });
+          return;
+        }
+      }
+    } catch {
+      // network blip — keep polling within budget
+    }
+    await new Promise((r) => setTimeout(r, ms));
+  }
+  // No confirmation arrived in time → leave the user with "elaborazione in
+  // corso" and a link to invoices, NEVER a fake success.
+  setState({ kind: 'timeout' });
 }
