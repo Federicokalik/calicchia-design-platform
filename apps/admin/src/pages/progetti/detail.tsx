@@ -18,7 +18,7 @@ const restrictToVerticalAxis = ({ transform }: { transform: { x: number; y: numb
 import {
   ArrowLeft, CheckSquare, Milestone, StickyNote,
   Plus, Calendar, Clock, User, LayoutList, X, GripVertical,
-  Activity, Send, Languages, TrendingUp, Receipt, MessageSquare,
+  Activity, Send, Languages, TrendingUp, Receipt, MessageSquare, Package,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,6 +39,7 @@ import { EntityView } from '@/components/entity-view';
 import { buildTasksConfig } from '@/components/tasks/task-entity-config';
 import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
 import { PortalMessageThread } from '@/components/projects/portal-message-thread';
+import { DeliverablesPanel } from '@/components/projects/deliverables-panel';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
@@ -353,6 +354,10 @@ export default function ProgettoDetailPage() {
             <MessageSquare className="h-3.5 w-3.5" />
             Messaggi
           </TabsTrigger>
+          <TabsTrigger value="consegne" className="gap-1.5">
+            <Package className="h-3.5 w-3.5" />
+            Consegne
+          </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" />
             Timeline
@@ -545,6 +550,11 @@ export default function ProgettoDetailPage() {
         {/* Portal messages thread (audit B-006) */}
         <TabsContent value="messaggi">
           <PortalMessageThread projectId={id!} />
+        </TabsContent>
+
+        {/* Deliverables (audit D-005) */}
+        <TabsContent value="consegne">
+          <DeliverablesPanel projectId={id!} />
         </TabsContent>
 
         {/* Timeline */}

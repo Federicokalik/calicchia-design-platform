@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { sql, sqlv } from '../db';
 import { zValidator } from '../lib/z-validator';
+import { authMiddleware } from '../middleware/auth';
 
 export const cookieConsent = new Hono();
 
@@ -55,6 +56,37 @@ cookieConsent.post('/', zValidator('json', cookieConsentSchema), async (c) => {
   `;
 
   return c.json({ success: true });
+});
+
+// ── Admin: list audit log + stats (audit J-11) ───────────────────
+// Read-only — entries are append-only and IPs anonymized at write time, so the
+// only meaningful actions on this page are pagination + filtering.
+cookieConsent.get('/', authMiddleware, async (c) => {
+  const limit = Math.min(parseInt(c.req.query('limit') || '100'), 500);
+  const acceptedOnly = c.req.query('accepted_only') === '1';
+
+  const filter = acceptedOnly
+    ? sql`WHERE (preferences->>'analytics')::boolean = true OR (preferences->>'marketing')::boolean = true`
+    : sql``;
+
+  const entries = await sql`
+    SELECT id, ip_anonymous, preferences, consent_version, user_agent, created_at
+    FROM cookie_consents
+    ${filter}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+
+  const [stats] = await sql`
+    SELECT
+      COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE (preferences->>'analytics')::boolean = true)::int AS with_analytics,
+      COUNT(*) FILTER (WHERE (preferences->>'marketing')::boolean = true)::int AS with_marketing,
+      COUNT(DISTINCT consent_version)::int AS versions
+    FROM cookie_consents
+  ` as Array<{ total: number; with_analytics: number; with_marketing: number; versions: number }>;
+
+  return c.json({ entries, stats });
 });
 
 function anonymizeIp(ip: string): string {

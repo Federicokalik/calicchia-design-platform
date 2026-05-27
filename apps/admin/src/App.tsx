@@ -66,6 +66,10 @@ import AnalyticsPage from '@/pages/analytics';
 import ImpostazioniPage from '@/pages/impostazioni';
 import WhatsAppInboxPage from '@/pages/whatsapp';
 import WhatsAppEventsPage from '@/pages/whatsapp/events';
+import ContattiPage from '@/pages/contatti';
+import GdprRequestsPage from '@/pages/privacy/gdpr-requests';
+import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
+import NewsletterPage from '@/pages/marketing/newsletter';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -217,6 +221,17 @@ export default function App() {
         <Route path="billing" element={<FatturazionePage />} />
         <Route path="services" element={<ServiziPage />} />
         <Route path="settings" element={<ImpostazioniPage />} />
+
+        {/* Inbox / CRM intake (audit J-08) */}
+        <Route path="contatti" element={<ContattiPage />} />
+        <Route path="contacts" element={<ContattiPage />} />
+
+        {/* Privacy / GDPR (audit J-10 + J-11) */}
+        <Route path="privacy/gdpr-requests" element={<GdprRequestsPage />} />
+        <Route path="privacy/cookie-consent" element={<CookieConsentAuditPage />} />
+
+        {/* Marketing (audit J-09) */}
+        <Route path="marketing/newsletter" element={<NewsletterPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

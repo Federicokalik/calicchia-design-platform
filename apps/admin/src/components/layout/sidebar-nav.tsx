@@ -27,6 +27,10 @@ import {
   Timer,
   Calculator,
   Wallet,
+  Inbox,
+  MailPlus,
+  ShieldAlert,
+  Cookie,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -64,6 +68,7 @@ const navigation: NavGroup[] = [
     labelKey: 'nav.crm',
     items: [
       { labelKey: 'nav.pipeline', icon: Kanban, path: '/pipeline' },
+      { labelKey: 'nav.contacts', icon: Inbox, path: '/contatti' },
       { labelKey: 'nav.clients', icon: Users, path: '/clienti' },
       { labelKey: 'nav.collaborators', icon: Handshake, path: '/collaboratori' },
     ],
@@ -122,6 +127,19 @@ const bottomNavigation: NavGroup[] = [
     items: [
       { labelKey: 'nav.domains', icon: Globe, path: '/domini' },
       { labelKey: 'nav.services', icon: Package, path: '/servizi' },
+    ],
+  },
+  {
+    labelKey: 'nav.marketing',
+    items: [
+      { labelKey: 'nav.newsletter', icon: MailPlus, path: '/marketing/newsletter' },
+    ],
+  },
+  {
+    labelKey: 'nav.privacy',
+    items: [
+      { labelKey: 'nav.gdprRequests', icon: ShieldAlert, path: '/privacy/gdpr-requests' },
+      { labelKey: 'nav.cookieConsent', icon: Cookie, path: '/privacy/cookie-consent' },
     ],
   },
 ];

@@ -304,3 +304,56 @@ contacts.delete('/:id', authMiddleware, async (c) => {
   await sql`DELETE FROM contacts WHERE id = ${id}`;
   return c.json({ success: true });
 });
+
+// ── Promote a generic contact submission to a lead in the CRM pipeline ──
+// Audit D-004: contact-form rows without an audit-leadsource never make it to
+// /pipeline. This endpoint creates the lead row + back-links contact ↔ lead so
+// admins can convert from the inbox UI with a single click.
+contacts.post('/:id/promote-to-lead', authMiddleware, async (c) => {
+  const id = c.req.param('id');
+
+  const [contact] = await sql`
+    SELECT id, name, email, phone, company, message, source_page, source_service
+    FROM contacts WHERE id = ${id} LIMIT 1
+  ` as Array<{
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+    message: string | null;
+    source_page: string | null;
+    source_service: string | null;
+  }>;
+  if (!contact) return c.json({ error: 'Contatto non trovato' }, 404);
+
+  // Idempotent: if a lead already exists for this contact (auto-created by the
+  // audit-sequence flow or by a previous promote click), return it instead of
+  // duplicating.
+  const [existing] = await sql`
+    SELECT id FROM leads WHERE source = 'website_form' AND source_id = ${id} LIMIT 1
+  ` as Array<{ id: string }>;
+  if (existing) {
+    return c.json({ lead: existing, alreadyExisted: true });
+  }
+
+  const [lead] = await sql`
+    INSERT INTO leads (name, email, phone, company, source, source_id, status, notes)
+    VALUES (
+      ${contact.name},
+      ${contact.email},
+      ${contact.phone},
+      ${contact.company},
+      'website_form',
+      ${contact.id},
+      'new',
+      ${contact.message}
+    )
+    RETURNING id
+  ` as Array<{ id: string }>;
+
+  // Mark the contact as read+archived so the inbox stays clean post-promotion.
+  await sql`UPDATE contacts SET is_read = true, is_archived = true WHERE id = ${id}`;
+
+  return c.json({ lead, alreadyExisted: false }, 201);
+});
