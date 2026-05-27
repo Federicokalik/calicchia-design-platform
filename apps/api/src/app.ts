@@ -211,6 +211,11 @@ app.use('/api/contacts', postOnly(publicFormRateLimit));
 // rate-limit; if you add one, switch this mount to a wildcard.
 app.use('/api/public-leads', postOnly(publicFormRateLimit));
 app.use('/api/newsletter/*', postOnly(publicFormRateLimit));
+// Defense-in-depth rate-limit on the GET token paths (audit C-008). UUIDs have
+// 122-bit entropy so brute-force is astronomic — this just keeps the DB out
+// of the bottleneck if a fuzzer probes the namespace at 60 req/s.
+app.use('/api/newsletter/confirm', createRateLimit(20, 60 * 1000));
+app.use('/api/newsletter/unsubscribe', createRateLimit(20, 60 * 1000));
 // Both the exact mount and the wildcard are required: app.use(path) without
 // a trailing /* matches ONLY the exact path under Hono, so cancel/reschedule
 // at /api/calendar/bookings/:uid/* were entirely unthrottled despite the

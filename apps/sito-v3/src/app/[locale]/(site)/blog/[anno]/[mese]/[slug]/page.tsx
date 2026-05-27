@@ -4,6 +4,7 @@ import { Link } from '@/i18n/navigation';
 import { fetchBlogArticle, buildBlogUrl, fetchBlogList } from '@/lib/blog-api';
 import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogBody } from '@/components/blog/BlogBody';
+import { BlogDemoIslands } from '@/components/blog/BlogDemoIslands';
 import { BlogTOC } from '@/components/blog/BlogTOC';
 import { BlogShare } from '@/components/blog/BlogShare';
 import { BlogComments } from '@/components/blog/BlogComments';
@@ -114,6 +115,10 @@ export default async function BlogArticlePage({
       ) : (
         <BlogBody content={post.content ?? ''} />
       )}
+
+      {/* Hydrate AI demo placeholders (audit C-003). Renders nothing — runs
+          on the client after mount and rewrites .demo-embed divs to iframes. */}
+      {post.id ? <BlogDemoIslands postId={post.id} /> : null}
 
       <BlogShare title={post.title} url={fullUrl} />
 

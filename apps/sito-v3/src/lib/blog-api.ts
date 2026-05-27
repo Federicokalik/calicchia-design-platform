@@ -13,6 +13,8 @@ const IS_PRODUCTION_BUILD =
   process.env.npm_lifecycle_event === 'build';
 
 export interface BlogPostMeta {
+  /** UUID of the blog_posts row; needed by BlogDemoIslands. */
+  id?: string;
   slug: string;
   title: string;
   excerpt: string | null;

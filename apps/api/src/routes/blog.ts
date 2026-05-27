@@ -1012,19 +1012,9 @@ function calculateNextRun(config: Record<string, unknown>, fromDate: Date): Date
   return next;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Serve interactive code demos (iframe src)
-// ─────────────────────────────────────────────────────────────
-
+// Interactive code demos were previously served at /api/blog/demos/:postId/:index
+// inside this admin-gated router (audit C-002) → 401 for anonymous iframe loads.
+// Moved to /api/public/blog-demos/:postId/:index in routes/public.ts.
 blog.get('/demos/:postId/:index', async (c) => {
-  const postId = c.req.param('postId');
-  const index = parseInt(c.req.param('index'));
-
-  const [post] = await sql`SELECT demos FROM blog_posts WHERE id = ${postId}`;
-  if (!post) return c.text('Post non trovato', 404);
-
-  const demos: string[] = typeof post.demos === 'string' ? JSON.parse(post.demos) : (post.demos || []);
-  if (index < 0 || index >= demos.length) return c.text('Demo non trovata', 404);
-
-  return c.html(demos[index]);
+  return c.text('Moved — see /api/public/blog-demos/:postId/:index', 410);
 });

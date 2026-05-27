@@ -1,23 +1,59 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Sparkles, Loader2 } from 'lucide-react';
+import {
+  Plus, Pencil, Trash2, Eye, EyeOff, Sparkles, Loader2,
+  ChevronLeft, ChevronRight,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { useTopbar } from '@/hooks/use-topbar';
+
+const PAGE_SIZE = 25;
+
+interface BlogPost {
+  id: string;
+  title: string;
+  category: string | null;
+  reading_time: number | null;
+  is_published: boolean;
+}
+
+interface BlogListPayload {
+  posts: BlogPost[];
+  count: number;
+}
 
 export default function BlogPage() {
   const queryClient = useQueryClient();
+  // Audit D-010: was loading every post in one shot. Added a status filter +
+  // cursor-less pagination consuming the server's existing limit/offset/count
+  // (routes/blog.ts already supports them — the admin just wasn't passing).
+  const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
+  const [page, setPage] = useState(0);
 
-  const { data: posts, isLoading } = useQuery({
-    queryKey: ['posts'],
+  const queryKey = ['posts', statusFilter, page] as const;
+
+  const { data, isLoading } = useQuery<BlogListPayload>({
+    queryKey,
     queryFn: async () => {
-      const data = await apiFetch('/api/blog/posts');
-      return data.posts || [];
+      const params = new URLSearchParams({
+        limit: String(PAGE_SIZE),
+        offset: String(page * PAGE_SIZE),
+      });
+      if (statusFilter === 'published') params.set('is_published', 'true');
+      if (statusFilter === 'draft') params.set('is_published', 'false');
+      return apiFetch(`/api/blog/posts?${params.toString()}`);
     },
   });
+  const posts = data?.posts ?? [];
+  const total = data?.count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -82,12 +118,50 @@ export default function BlogPage() {
 
   useTopbar({
     title: 'Blog',
-    subtitle: `${posts?.length || 0} articoli`,
+    subtitle: `${total} articoli totali · pagina ${page + 1}/${totalPages}`,
     actions: topbarActions,
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => { setStatusFilter(v as typeof statusFilter); setPage(0); }}
+        >
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tutti</SelectItem>
+            <SelectItem value="published">Solo pubblicati</SelectItem>
+            <SelectItem value="draft">Solo bozze</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="outline"
+            disabled={page === 0 || isLoading}
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            aria-label="Pagina precedente"
+            className="h-8 w-8"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {page + 1} / {totalPages}
+          </span>
+          <Button
+            size="icon"
+            variant="outline"
+            disabled={page + 1 >= totalPages || isLoading}
+            onClick={() => setPage((p) => p + 1)}
+            aria-label="Pagina successiva"
+            className="h-8 w-8"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {isLoading ? (
         <div className="space-y-4">
@@ -99,9 +173,9 @@ export default function BlogPage() {
             </Card>
           ))}
         </div>
-      ) : posts && posts.length > 0 ? (
+      ) : posts.length > 0 ? (
         <div className="space-y-4">
-          {posts.map((post: any) => (
+          {posts.map((post) => (
             <Card key={post.id}>
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex-1">

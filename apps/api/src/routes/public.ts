@@ -163,6 +163,8 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
   return c.json({
     locale,
     post: {
+      // id surfaced so sito-v3 BlogDemoIslands can build /api/public/blog-demos/<id>/<idx>.
+      id: post.id,
       slug: post.slug,
       title: post.title,
       excerpt: post.excerpt,
@@ -374,4 +376,41 @@ publicRoutes.get('/blog/rss', async (c) => {
       tags: p.tags || [],
     })),
   });
+});
+
+// ─────────────────────────────────────────────────────────────
+// Public blog demo iframe src (audit C-002): the legacy mount was inside
+// /api/blog/* which is in protectedPaths → every iframe loaded by an anonymous
+// visitor 401'd. Surfaced here under the public namespace; the iframe attr is
+// generated client-side in sito-v3 BlogDemoIslands. UUID postId guard +
+// generic 404 on miss to avoid enumerating which post ids exist.
+// ─────────────────────────────────────────────────────────────
+publicRoutes.get('/blog-demos/:postId/:index', async (c) => {
+  const postId = c.req.param('postId');
+  const indexParam = c.req.param('index');
+  if (!/^[a-f0-9-]{36}$/i.test(postId)) return c.text('Not Found', 404);
+  const index = Number.parseInt(indexParam, 10);
+  if (!Number.isInteger(index) || index < 0 || index > 50) return c.text('Not Found', 404);
+
+  const [post] = (await sql`
+    SELECT demos FROM blog_posts WHERE id = ${postId} AND is_published = true
+  `) as Array<{ demos: string | string[] | null }>;
+  if (!post) return c.text('Not Found', 404);
+
+  const demos: string[] = typeof post.demos === 'string'
+    ? JSON.parse(post.demos || '[]')
+    : (post.demos || []);
+  if (index >= demos.length) return c.text('Not Found', 404);
+
+  // Sandbox the iframe content — demos are admin-authored HTML+inline JS but
+  // the response is served on the API origin and embedded as third-party iframe
+  // from sito-v3, so X-Frame-Options/CSP must not block it. Frame-ancestors set
+  // to the canonical public origins.
+  const siteOrigin = process.env.SITE_URL ?? 'https://calicchia.design';
+  c.header('X-Frame-Options', 'ALLOW-FROM ' + siteOrigin); // legacy IE/Safari
+  c.header(
+    'Content-Security-Policy',
+    `frame-ancestors 'self' ${siteOrigin} http://localhost:3000`,
+  );
+  return c.html(demos[index]);
 });
