@@ -3,17 +3,26 @@
 /**
  * InternalAnalytics — Cookieless pageview tracker for our self-hosted analytics.
  *
- * RIGOROUSLY COOKIELESS:
+ * RIGOROUSLY COOKIELESS at the transport layer:
  *  - No reads or writes of any browser-side persistent or session storage.
  *  - sendBeacon with credentials omitted — no cookies travel with the request.
  *  - Pure in-memory dedupe via module-scoped variable.
  *  - No fingerprinting (no canvas, no audio, no font enumeration).
  *
+ * AUDIT A-022 — consent-gated despite being cookieless:
+ *  Even without browser storage, the server side HMAC-derives a per-day
+ *  session_id from IP+UA. EDPB Guidelines 2/2023 and the Garante 2025
+ *  guidance classify any persistent pseudonymous identifier as requiring
+ *  consent, regardless of where it lives. So we gate the entire pipeline
+ *  behind hasConsent('analytics') and listen to cookie-consent-changed so
+ *  a user who accepts mid-session starts being tracked from that point.
+ *
  * If you change this file, run the cookieless verify script.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { hasConsent, installCookieConsentGlobals } from '@/lib/cookie-consent';
 
 const TRACK_URL = (() => {
   const base = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -72,8 +81,20 @@ function send(payload: Record<string, unknown>): void {
 export function InternalAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [analyticsAllowed, setAnalyticsAllowed] = useState(false);
+
+  // Subscribe to consent changes. Initial read happens in the same effect
+  // because hasConsent() touches document.cookie and must run client-side.
+  useEffect(() => {
+    installCookieConsentGlobals();
+    setAnalyticsAllowed(hasConsent('analytics'));
+    const onConsentChanged = () => setAnalyticsAllowed(hasConsent('analytics'));
+    window.addEventListener('cookie-consent-changed', onConsentChanged);
+    return () => window.removeEventListener('cookie-consent-changed', onConsentChanged);
+  }, []);
 
   useEffect(() => {
+    if (!analyticsAllowed) return;
     if (!pathname) return;
     const fullPath = searchParams?.toString()
       ? `${pathname}?${searchParams.toString()}`
@@ -88,7 +109,7 @@ export function InternalAnalytics() {
       referrer: sanitizeReferrer(),
       utm: extractUtm(searchParams ?? new URLSearchParams()),
     });
-  }, [pathname, searchParams]);
+  }, [analyticsAllowed, pathname, searchParams]);
 
   return null;
 }

@@ -423,6 +423,63 @@ export async function sendContactNotification(contact: ContactForEmail): Promise
 const SITE_URL = process.env.SITE_URL || 'https://calicchia.design';
 const API_URL = process.env.API_URL || 'http://localhost:3001';
 
+/**
+ * Double-opt-in confirmation email — sent on /api/newsletter/subscribe.
+ * Audit A-010: subscribe was persisting the row with `pending` status but
+ * never reading back the confirmation_token nor mailing the confirm link,
+ * so every signup ended in a dead-letter row no human could escape from.
+ * Transport is `critical` (Resend preferred) because deliverability of
+ * the very first interaction makes or breaks the GDPR consent trail.
+ */
+export async function sendNewsletterConfirmEmail(data: {
+  to: string;
+  confirmationToken: string;
+  name?: string | null;
+}): Promise<SendResult> {
+  const confirmUrl = `${API_URL}/api/newsletter/confirm?token=${data.confirmationToken}`;
+  const greeting = data.name?.trim() ? `Ciao ${esc(data.name)},` : 'Ciao,';
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Ubuntu,sans-serif;margin:0;padding:40px 0">
+  <div style="background-color:#ffffff;border-radius:8px;max-width:600px;margin:0 auto;box-shadow:0 1px 3px 0 rgba(0,0,0,0.1)">
+    <div style="padding:32px 40px">
+      <h1 style="margin:0 0 16px;font-size:22px;color:#111827">Conferma la tua iscrizione</h1>
+      <p style="margin:0 0 16px;color:#374151;line-height:1.6">${greeting}</p>
+      <p style="margin:0 0 24px;color:#374151;line-height:1.6">
+        Hai chiesto di iscriverti alla newsletter di Calicchia Design. Per completare l'iscrizione, clicca il pulsante qui sotto.
+      </p>
+      <p style="text-align:center;margin:32px 0">
+        <a href="${confirmUrl}" style="background-color:#111827;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:500">
+          Conferma iscrizione
+        </a>
+      </p>
+      <p style="margin:24px 0 0;color:#6b7280;font-size:13px;line-height:1.6">
+        Se il pulsante non funziona, copia e incolla questo link nel browser:<br>
+        <a href="${confirmUrl}" style="color:#2563eb;word-break:break-all">${confirmUrl}</a>
+      </p>
+      <p style="margin:24px 0 0;color:#9ca3af;font-size:12px;line-height:1.6">
+        Se non hai richiesto tu l'iscrizione, ignora questa email — non riceverai altri messaggi.
+      </p>
+    </div>
+    <div style="padding:24px 40px;background-color:#f9fafb;border-top:1px solid #e5e7eb;border-radius:0 0 8px 8px">
+      <p style="color:#9ca3af;font-size:11px;text-align:center;margin:0">
+        Calicchia Design — <a href="${SITE_URL}" style="color:#6b7280">${SITE_URL}</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+  const text = `${greeting}\n\nConferma la tua iscrizione alla newsletter cliccando questo link:\n${confirmUrl}\n\nSe non hai richiesto tu l'iscrizione, ignora questa email.`;
+  return sendEmail({
+    to: data.to,
+    subject: 'Conferma la tua iscrizione — Calicchia Design',
+    html,
+    text,
+    transport: 'critical',
+  });
+}
+
 export async function sendNewsletterEmail(data: {
   to: string;
   subject: string;

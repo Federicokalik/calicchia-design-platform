@@ -1,9 +1,35 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { sql } from '../db';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import { logger } from '../lib/logger';
+import { isBotUA } from '../lib/analytics/ua';
 
 const log = logger.child({ scope: 'public' });
+
+/**
+ * Audit A-012: blog views_count was incremented on EVERY GET /api/public/
+ * blog/posts/:slug — including bot crawls, Next RSC prefetches when a user
+ * hovered the card, OG-image generation, ISR revalidation, and feed
+ * scrapers. Real human read count was inflated by an order of magnitude.
+ *
+ * Filter at the HTTP layer (cheap, no DB round-trip on the rejection):
+ *   - bot UA via the same `isbot` library the cookieless analytics uses
+ *   - Next 13+/14/15/16 prefetch signals: Next-Router-Prefetch (legacy),
+ *     Sec-Purpose: prefetch (modern, Chrome speculation rules + Next
+ *     dynamic prefetch), and Purpose: prefetch (Firefox/Safari).
+ *
+ * Returns true when the hit should NOT count toward views_count.
+ */
+function isUncountableViewer(c: Context): boolean {
+  const ua = c.req.header('user-agent');
+  if (isBotUA(ua)) return true;
+  const secPurpose = c.req.header('sec-purpose')?.toLowerCase() || '';
+  if (secPurpose.includes('prefetch')) return true;
+  const purpose = c.req.header('purpose')?.toLowerCase() || '';
+  if (purpose === 'prefetch') return true;
+  if (c.req.header('next-router-prefetch')) return true;
+  return false;
+}
 
 export const publicRoutes = new Hono();
 
@@ -126,10 +152,13 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
 
   // Increment views (fire-and-forget). Column is `views_count` per mig 001 —
   // the previous `views` reference silently failed in the .catch() and the
-  // counter never moved (audit C-016).
-  sql`UPDATE blog_posts SET views_count = COALESCE(views_count, 0) + 1 WHERE slug = ${slug}`.catch(
-    (err: unknown) => log.error({ err }, 'Failed to increment views_count'),
-  );
+  // counter never moved (audit C-016). Audit A-012: skip bots + prefetch
+  // requests so the count reflects real human reads.
+  if (!isUncountableViewer(c)) {
+    sql`UPDATE blog_posts SET views_count = COALESCE(views_count, 0) + 1 WHERE slug = ${slug}`.catch(
+      (err: unknown) => log.error({ err }, 'Failed to increment views_count'),
+    );
+  }
 
   // Get prev/next navigation
   const allPosts = await sql`

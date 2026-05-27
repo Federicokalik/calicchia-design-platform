@@ -26,13 +26,20 @@ const trackerFiles = [
   'apps/sito-v3/src/components/analytics/OutboundLinkTracker.tsx',
 ];
 
+// Audit A-022: the consent gate forces the tracker to READ document.cookie
+// via hasConsent(). The pattern guarantee remains: no WRITE of cookies/
+// storage from the tracker, no credentials on the wire. The cookie-consent
+// import was previously banned outright — that ban predated A-022 and now
+// conflicts with GDPR consent-gating, so it has been lifted. The
+// `document.cookie` ban remains because the tracker itself must never
+// touch cookies directly; it must go through hasConsent() which never
+// writes and only reads the consent record.
 const forbiddenPatterns = [
   /\bdocument\.cookie\b/i,
   /\blocalStorage\b/i,
   /\bsessionStorage\b/i,
   /\bindexedDB\b/i,
   /credentials:\s*['"]include['"]/i,
-  /from\s+['"]@\/lib\/cookie-consent['"]/i,
 ];
 
 function printResult(result: CheckResult): void {
