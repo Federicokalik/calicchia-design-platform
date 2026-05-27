@@ -165,7 +165,9 @@ settings.get('/integrations-check', async (c) => {
   const apiKeyConfigured = isEn ? 'API key configured' : 'API key configurata';
   const addEnv = (key: string) => isEn ? `Add ${key} to .env` : `Aggiungi ${key} al .env`;
   checks['calcom'] = process.env.CALCOM_API_KEY ? { connected: true, detail: apiKeyConfigured } : { connected: false, action: addEnv('CALCOM_API_KEY') };
-  try { const r = await sql`SELECT id FROM google_oauth_tokens LIMIT 1`; checks['google_calendar'] = r.length ? { connected: true, detail: isEn ? 'OAuth connected' : 'OAuth connesso' } : { connected: false, action: isEn ? 'Connect Google Calendar from Settings' : 'Connetti Google Calendar da Impostazioni' }; } catch { checks['google_calendar'] = { connected: false, action: isEn ? 'Configure GOOGLE_CLIENT_ID in .env' : 'Configura GOOGLE_CLIENT_ID nel .env' }; }
+  // google_calendar integration was dismissed in migration 073_drop_google_calendar.sql.
+  // The audit (E-002 / E-Codex-011) flagged the stale `SELECT FROM google_oauth_tokens`
+  // probe here as a phantom-table query. The legacy admin UI row is also removed.
   if (isWhatsAppConfigured()) {
     try {
       const status = await getWhatsAppStatus();

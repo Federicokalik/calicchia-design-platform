@@ -27,7 +27,9 @@ export const dynamicParams = true;
 export const revalidate = 3600;
 
 export async function generateStaticParams(): Promise<Params[]> {
-  const posts = await fetchBlogList(200);
+  // IT canonical list; blog posts share slugs across locales (admin
+  // TranslationsPanelEN attaches EN content to the same row, no separate slug).
+  const posts = await fetchBlogList(200, 'it');
   const params: Params[] = [];
   for (const post of posts) {
     const dateStr = post.published_at ?? post.created_at;
@@ -50,7 +52,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, locale: localeParam } = await params;
   const locale = (localeParam ?? 'it') as Locale;
-  const data = await fetchBlogArticle(slug);
+  const data = await fetchBlogArticle(slug, locale);
   if (!data) return { title: 'Articolo non trovato' };
   const { post } = data;
   const blogPath = buildBlogUrl(post);
@@ -75,8 +77,9 @@ export default async function BlogArticlePage({
 }: {
   params: Promise<Params>;
 }) {
-  const { slug } = await params;
-  const data = await fetchBlogArticle(slug);
+  const { slug, locale: localeParam } = await params;
+  const locale = (localeParam ?? 'it') as Locale;
+  const data = await fetchBlogArticle(slug, locale);
   if (!data) notFound();
 
   const { post, author } = data;

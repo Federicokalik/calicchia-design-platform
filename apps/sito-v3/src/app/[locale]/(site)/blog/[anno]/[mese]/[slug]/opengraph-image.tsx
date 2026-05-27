@@ -22,7 +22,7 @@ export default async function BlogOpenGraphImage({ params }: { params: Promise<P
 
   const fontDisplay = await getFunnelDisplay();
 
-  const data = await fetchBlogArticle(slug);
+  const data = await fetchBlogArticle(slug, locale);
   const post = data?.post;
 
   const title = post?.title ?? 'Articolo';

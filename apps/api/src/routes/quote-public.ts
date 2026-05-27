@@ -4,6 +4,14 @@ import { sql } from '../db';
 import { sendEmail } from '../lib/email';
 import { renderOtpCodeEmail } from '../templates/otp-code';
 import { logger } from '../lib/logger';
+import {
+  OTP_MAX_ATTEMPTS,
+  extractIpUa,
+  generateOtpCode,
+  hashOtp,
+  otpExpiresAt,
+  verifyOtpHash,
+} from '../lib/signing';
 
 const log = logger.child({ scope: 'quote-sign' });
 
@@ -43,10 +51,20 @@ quotePublic.post('/:token/otp', async (c) => {
   if (rows[0].status === 'signed') return c.json({ error: 'Già firmato' }, 400);
   if (!rows[0].customer_email) return c.json({ error: 'Email cliente non configurata' }, 400);
 
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+  const otp = generateOtpCode();
+  const expiresAt = otpExpiresAt(10);
 
-  await sql`UPDATE quotes_v2 SET otp_code = ${otp}, otp_expires_at = ${expiresAt.toISOString()} WHERE id = ${rows[0].id}`;
+  // Store only the keyed hash; reset failure counter on new code.
+  // otp_code (legacy plaintext column) is nulled so any in-flight verifier
+  // routed to the old comparison path can't accept a stale code.
+  await sql`
+    UPDATE quotes_v2
+    SET otp_code = NULL,
+        otp_hash = ${hashOtp(otp)},
+        otp_expires_at = ${expiresAt.toISOString()},
+        otp_attempts = 0
+    WHERE id = ${rows[0].id}
+  `;
 
   const otpEmail = await renderOtpCodeEmail({ code: otp, expiresMinutes: 10 });
   await sendEmail({
@@ -78,11 +96,28 @@ quotePublic.post('/:token/sign', async (c) => {
 
   const quote = rows[0];
   if (quote.status === 'signed') return c.json({ error: 'Già firmato' }, 400);
-  if (quote.otp_code !== otp) return c.json({ error: 'Codice OTP non valido' }, 400);
-  if (new Date(quote.otp_expires_at) < new Date()) return c.json({ error: 'Codice OTP scaduto' }, 400);
 
-  const ip = c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown';
-  const ua = c.req.header('user-agent') || 'unknown';
+  const { ip: clientIp, ua: clientUa } = extractIpUa({ header: (name) => c.req.header(name) });
+
+  if (!verifyOtpHash(quote.otp_hash, quote.otp_expires_at, otp)) {
+    const attempts = (quote.otp_attempts ?? 0) + 1;
+    if (attempts >= OTP_MAX_ATTEMPTS) {
+      // Burn the code so the remaining TTL can't be used; client must request a new one.
+      await sql`
+        UPDATE quotes_v2
+        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL, otp_attempts = ${attempts}
+        WHERE id = ${quote.id}
+      `;
+      await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+      return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
+    }
+    await sql`UPDATE quotes_v2 SET otp_attempts = ${attempts} WHERE id = ${quote.id}`;
+    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+    return c.json({ error: 'Codice OTP non valido o scaduto' }, 400);
+  }
+
+  const ip = clientIp || 'unknown';
+  const ua = clientUa || 'unknown';
   const pdfHash = crypto.createHash('sha256').update(`${quote.id}-${Date.now()}`).digest('hex');
 
   await sql`
@@ -91,7 +126,8 @@ quotePublic.post('/:token/sign', async (c) => {
       signer_name = ${signer_name || null}, signer_email = ${quote.customer_email},
       signature_image = ${signature_image}, signature_ip = ${ip},
       signature_user_agent = ${ua}, pdf_hash_sha256 = ${pdfHash},
-      otp_code = NULL, otp_expires_at = NULL, updated_at = now()
+      otp_code = NULL, otp_hash = NULL, otp_expires_at = NULL, otp_attempts = 0,
+      updated_at = now()
     WHERE id = ${quote.id}
   `;
 

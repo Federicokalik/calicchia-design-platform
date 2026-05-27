@@ -182,6 +182,9 @@ calendarPublic.post('/bookings', async (c) => {
         source_page: typeof body.source_page === 'string' ? body.source_page.slice(0, 255) : null,
         user_agent: c.req.header('user-agent')?.slice(0, 255) || null,
       },
+      // GDPR consent proof (migration 113)
+      consent_ip: clientIp ?? null,
+      consent_user_agent: c.req.header('user-agent')?.slice(0, 512) ?? null,
     });
 
     // Auto-create lead in pipeline (best-effort: errori non bloccano il booking,

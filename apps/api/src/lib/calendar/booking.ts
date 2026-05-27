@@ -132,6 +132,8 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
         source_metadata: input.source_metadata || {},
         contact_id: input.contact_id || null,
         lead_id: input.lead_id || null,
+        consent_ip: input.consent_ip ?? null,
+        consent_user_agent: input.consent_user_agent ?? null,
       })}
       RETURNING *
     `;

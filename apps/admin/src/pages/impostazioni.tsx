@@ -580,7 +580,6 @@ export default function ImpostazioniPage() {
             <div className="space-y-3">
               {[
                 { key: 'calcom', name: 'Cal.com', desc: 'Booking appuntamenti', category: 'Calendario' },
-                { key: 'google_calendar', name: 'Google Calendar', desc: 'Sync eventi', category: 'Calendario' },
                 { key: 'whatsapp', name: 'WhatsApp (GOWA)', desc: 'Gateway WhatsApp self-hosted', category: 'Comunicazione' },
                 { key: 'resend', name: 'Resend', desc: 'Email transazionali', category: 'Comunicazione' },
                 { key: 'smtp', name: 'SMTP', desc: 'Email operative e notifiche', category: 'Comunicazione' },

@@ -24,6 +24,18 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
+// JWT_SECRET length floor — same key signs HS256 JWTs, HMACs booking-cancel
+// tokens (lib/calendar/token.ts), HMACs private-file URLs (lib/private-files.ts)
+// and keys the OTP hashes (lib/signing). HMAC-SHA256 with a <32-byte key drops
+// well below the algorithm's security margin. Fail fast in any mode — letting a
+// dev secret like "changeme" through has been the root cause of two prior
+// near-incidents (audit E-003). Set BOOKING_TOKEN_SECRET +
+// PRIVATE_FILE_SIGNING_SECRET when you want to rotate per-purpose.
+if ((process.env.JWT_SECRET ?? '').length < 32) {
+  console.error('FATAL: JWT_SECRET must be at least 32 characters (HMAC-SHA256 key floor).');
+  process.exit(1);
+}
+
 // Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
 // any module that reads them is loaded. The dynamic imports below guarantee
 // that lib/agent (which reads the pricing KB at module load) is evaluated only

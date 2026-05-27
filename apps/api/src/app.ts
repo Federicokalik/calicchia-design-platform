@@ -216,9 +216,12 @@ app.route('/api/public', publicRoutes);
 const capacityRateLimit = createRateLimit(10, 60 * 1000);
 app.use('/api/public/capacity', capacityRateLimit);
 app.route('/api/public/capacity', publicCapacity);
-// Quote public signing endpoints (no auth)
-app.route('/api/quote-sign', quotePublic);
+// Quote public signing endpoints (no auth). Rate-limited identically to /api/sign/*
+// to deny brute-force of the 6-digit OTP — see audit J-01. OTPs are stored as
+// keyed hashes and burned after OTP_MAX_ATTEMPTS wrong submissions per code.
 const signRateLimit = createRateLimit(10, 60 * 1000);
+app.use('/api/quote-sign/*', signRateLimit);
+app.route('/api/quote-sign', quotePublic);
 app.use('/api/sign/*', signRateLimit);
 app.route('/api/sign', signablesPublic);
 // PayPal client-token generation is unauthenticated by design (the token is a
@@ -276,6 +279,9 @@ app.post('/api/wh/:webhookId', async (c) => {
   return c.json(result);
 });
 app.route('/api/portal', portal);
+// GDPR cookie consent log — public endpoint, rate-limited 10 req / 60s per IP
+// (audit J-03). Schema-validated in the route handler with strict zod object.
+app.use('/api/cookie-consent', createRateLimit(10, 60 * 1000));
 app.route('/api/cookie-consent', cookieConsent);
 app.use('/api/gdpr-requests', publicFormRateLimit);
 app.route('/api/gdpr-requests', gdprRequests);

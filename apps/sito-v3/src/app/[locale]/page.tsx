@@ -54,7 +54,7 @@ export default async function HomePage() {
   const years = getYearsOfExperience();
   const locale = (await getLocale()) as Locale;
   const services = getServices(locale);
-  const projects = await fetchAllPublishedProjects();
+  const projects = await fetchAllPublishedProjects(locale);
   const showcase: ShowcaseTile[] = projects.slice(0, 6).map((p) => ({
     src: p.cover_image ?? '',
     client: '',

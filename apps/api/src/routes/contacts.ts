@@ -131,6 +131,9 @@ contacts.post('/', async (c) => {
   let meetingUrl: string | null = null;
   let bookingConflict = false;
 
+  const consentIp = getClientIp(c) ?? null;
+  const consentUserAgent = c.req.header('user-agent')?.slice(0, 512) ?? null;
+
   if (wants_meet && meet_slot) {
     try {
       const { booking, eventType } = await createBooking({
@@ -151,6 +154,9 @@ contacts.post('/', async (c) => {
           source_profession: source_profession || null,
           lead_source: safeLeadSource,
         },
+        // GDPR art. 7 — consent proof originates from the same form submission
+        consent_ip: consentIp,
+        consent_user_agent: consentUserAgent,
       });
 
       calBookingUid = booking.uid;
@@ -180,7 +186,8 @@ contacts.post('/', async (c) => {
       wants_call, wants_meet, gdpr_consent,
       source_page, source_service, source_profession,
       lead_source,
-      meet_slot, cal_booking_uid
+      meet_slot, cal_booking_uid,
+      consent_ip, consent_user_agent
     )
     VALUES (
       ${name},
@@ -198,7 +205,9 @@ contacts.post('/', async (c) => {
       ${typeof source_profession === 'string' ? source_profession.slice(0, 100) : null},
       ${safeLeadSource},
       ${meet_slot || null},
-      ${calBookingUid}
+      ${calBookingUid},
+      ${consentIp},
+      ${consentUserAgent}
     )
     RETURNING id
   `;
