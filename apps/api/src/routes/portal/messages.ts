@@ -55,14 +55,24 @@ messagesRoutes.get('/projects/:id/messages', portalAuth, async (c) => {
     LIMIT ${limit}
   ` as Array<Record<string, unknown>>;
 
-  // Mark admin messages as read
-  await sql`
-    UPDATE project_comments SET is_read = true
-    WHERE project_id = ${projectId}
-      AND customer_id IS NULL
-      AND is_internal = false
-      AND is_read = false
-  `;
+  // Mark only the just-returned non-client messages as read. Audit B-018:
+  // the previous query marked every admin/collab row regardless of paging
+  // window — paginating to old messages would also clear unread badges on
+  // newer ones the client hasn't seen. Scope by id; sender_type was added
+  // to the SELECT above so we can filter without re-querying customer_id.
+  const justReturnedIds = messages
+    .filter((m) => m.sender_type !== 'client')
+    .map((m) => String(m.id))
+    .filter((id) => /^[a-f0-9-]{36}$/i.test(id));
+  if (justReturnedIds.length > 0) {
+    await sql`
+      UPDATE project_comments SET is_read = true
+      WHERE project_id = ${projectId}
+        AND is_internal = false
+        AND is_read = false
+        AND id = ANY(${justReturnedIds}::uuid[])
+    `;
+  }
 
   return c.json({ messages: messages.reverse() }); // chronological order
 });

@@ -43,6 +43,24 @@ if (process.env.NODE_ENV !== 'development' && !process.env.MAIL_ENC_KEY) {
   console.warn('⚠️  MAIL_ENC_KEY not set — mail-sync cron will skip and the admin mailbox UI will fail at every account open. Run scripts/generate-mail-enc-key.ts and add to .env if mail features are needed.');
 }
 
+// COOKIE_DOMAIN sanity check (audit B-024). The portal + admin login flow
+// POSTs cookies cross-origin (sito → api on different subdomains). With
+// SameSite=Lax (our default) the browser DROPS the Set-Cookie from a CORS
+// XHR unless the cookie is scoped to a shared parent domain. If we see
+// ≥2 distinct origins in CORS_ORIGINS in a non-dev deploy and COOKIE_DOMAIN
+// is unset, warn — silent cookie-not-sticking is a deploy nightmare to debug.
+if (process.env.NODE_ENV !== 'development') {
+  const origins = (process.env.CORS_ORIGINS || '')
+    .split(',').map((o) => o.trim()).filter(Boolean);
+  if (origins.length >= 2 && !process.env.COOKIE_DOMAIN) {
+    console.warn(
+      '⚠️  CORS_ORIGINS lists multiple origins but COOKIE_DOMAIN is unset. '
+        + 'Cross-origin auth cookies (portal / admin login) may be silently dropped by the browser. '
+        + 'Set COOKIE_DOMAIN=.your-etld-plus-one and ensure SameSite=None for portal_token in production.',
+    );
+  }
+}
+
 // Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
 // any module that reads them is loaded. The dynamic imports below guarantee
 // that lib/agent (which reads the pricing KB at module load) is evaluated only

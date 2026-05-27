@@ -34,8 +34,22 @@ projectComments.post('/', async (c) => {
     return c.json({ error: 'project_id, user_id e content richiesti' }, 400);
   }
 
+  // Audit B-023: whitelist what gets persisted. Before, `sql(body)` blindly
+  // expanded every key — an admin client could inject customer_id (making
+  // the message appear as 'client' in the portal CASE) or task_id pointing
+  // to a row they don't own. Restrict to the columns this endpoint
+  // legitimately writes.
+  const ALLOWED = ['project_id', 'task_id', 'user_id', 'content', 'is_internal'] as const;
+  const safe: Record<string, unknown> = {};
+  for (const key of ALLOWED) {
+    if (body[key] !== undefined) safe[key] = body[key];
+  }
+  // customer_id is set by the portal flow only (sender = client). Force NULL
+  // here so a stray field can't make an admin-authored row look client-side.
+  safe.customer_id = null;
+
   const rows = await sql`
-    INSERT INTO project_comments ${sql(body)}
+    INSERT INTO project_comments ${sql(safe)}
     RETURNING *, (SELECT email FROM profiles WHERE id = ${body.user_id}) AS user_email
   `;
 
