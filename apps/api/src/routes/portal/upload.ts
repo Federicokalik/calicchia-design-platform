@@ -13,6 +13,18 @@ const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB
 const PRESIGNED_EXPIRY = 600; // 10 minutes
 
+/**
+ * Customer folder prefix. /init generates keys with this shape from
+ * server-side state (JWT customer_id), and every subsequent endpoint
+ * verifies the supplied key matches BEFORE touching S4 or the DB.
+ * Audit B-014: belt-and-suspenders so a tampered key body can never
+ * cross the customer's own folder, even if the DB ownership check ever
+ * regressed.
+ */
+const customerKeyPrefix = (customerId: string) => `clients/${customerId}/`;
+const isOwnedKey = (key: unknown, customerId: string): key is string =>
+  typeof key === 'string' && key.startsWith(customerKeyPrefix(customerId));
+
 // SVG is intentionally excluded (SEC-09): SVG can carry <script> → stored XSS
 // once served as a file. Raster image formats only.
 const ALLOWED_TYPES = new Set([
@@ -131,7 +143,9 @@ uploadRoutes.post('/init', portalClientAuth, async (c) => {
   const safeName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
   // Use a UUID instead of Date.now() to avoid both same-ms collisions and
   // predictable bucket scanning if the bucket is ever exposed by mistake.
-  const key = `clients/${customerId}/${randomUUID()}-${safeName}`;
+  // Prefix anchors the customer folder — every subsequent operation rejects
+  // keys that don't start with this string.
+  const key = `${customerKeyPrefix(customerId)}${randomUUID()}-${safeName}`;
   const totalParts = Math.ceil(fileSize / CHUNK_SIZE);
 
   const uploadId = await initMultipartUpload(key, contentType);
@@ -160,6 +174,7 @@ uploadRoutes.post('/url', portalClientAuth, async (c) => {
   if (!uploadId || !key || !partNumber) {
     fail('uploadId, key e partNumber richiesti', 400);
   }
+  if (!isOwnedKey(key, customerId)) fail('Upload non trovato', 404);
   if (!Number.isInteger(partNumber) || partNumber < 1 || partNumber > 10000) {
     fail('partNumber non valido (atteso intero 1-10000)', 400);
   }
@@ -186,6 +201,7 @@ uploadRoutes.post('/done', portalClientAuth, async (c) => {
   if (!uploadId || !key || !parts?.length) {
     fail('uploadId, key e parts richiesti', 400);
   }
+  if (!isOwnedKey(key, customerId)) fail('Upload non trovato', 404);
 
   // Verify ownership BEFORE completing on S3
   const [upload] = await sql`
@@ -277,6 +293,17 @@ uploadRoutes.post('/abort', portalClientAuth, async (c) => {
   if (!uploadId || !key) {
     fail('uploadId e key richiesti', 400);
   }
+  // Audit B-014: enforce customer folder + DB ownership BEFORE touching S4.
+  // The previous order hit S4 first regardless of ownership — a noisy abort
+  // loop from one customer could probe other customers' in-flight uploads.
+  if (!isOwnedKey(key, customerId)) fail('Upload non trovato', 404);
+
+  const [owned] = await sql`
+    SELECT id FROM client_uploads
+    WHERE upload_id = ${uploadId} AND key = ${key} AND customer_id = ${customerId}
+    LIMIT 1
+  ` as Array<{ id: string }>;
+  if (!owned) fail('Upload non trovato', 404);
 
   const { abortMultipartUpload } = await import('../../lib/s4');
   await abortMultipartUpload(key, uploadId);

@@ -162,22 +162,40 @@ invoicesRoutes.post('/pay', portalClientAuth, zValidator('json', paySchema), asy
     throw new HTTPException(400, { message: 'Questa rata è stata annullata' });
   }
 
-  // 2. Idempotency: riusa link attivo se esiste già
+  // 2. Idempotency: riusa link attivo se esiste già. Audit B-030: cap the
+  // reuse at 22h — Stripe Checkout Sessions have a 24h TTL and the
+  // checkout.session.expired webhook may be delayed. If we hand back a link
+  // older than that, the client clicks "Paga" and lands on a Stripe 410.
+  // Below the cutoff: trust the row + the webhook to mark it expired. Above:
+  // mark it expired ourselves and create a fresh one. The 22h margin leaves
+  // 2h of headroom for Stripe's webhook backoff.
+  const REUSE_MAX_AGE_HOURS = 22;
   const remaining = Number(schedule.amount) - Number(schedule.paid_amount ?? 0);
   const [existingLink] = await sql`
-    SELECT id, checkout_url, provider_order_id
+    SELECT id, checkout_url, provider_order_id, created_at
     FROM payment_links
     WHERE payment_schedule_id = ${schedule_id}
       AND provider = ${provider}
       AND status = 'active'
       AND checkout_url IS NOT NULL
+      AND created_at > NOW() - (${REUSE_MAX_AGE_HOURS} || ' hours')::interval
     ORDER BY created_at DESC
     LIMIT 1
-  ` as Array<{ id: string; checkout_url: string; provider_order_id: string | null }>;
+  ` as Array<{ id: string; checkout_url: string; provider_order_id: string | null; created_at: string }>;
 
   if (existingLink) {
     return c.json({ checkout_url: existingLink.checkout_url, link_id: existingLink.id, reused: true });
   }
+
+  // Sweep: mark any stale 'active' link for this schedule+provider as
+  // expired so the dashboard counters don't keep showing it as live.
+  await sql`
+    UPDATE payment_links SET status = 'expired', updated_at = NOW()
+    WHERE payment_schedule_id = ${schedule_id}
+      AND provider = ${provider}
+      AND status = 'active'
+      AND created_at <= NOW() - (${REUSE_MAX_AGE_HOURS} || ' hours')::interval
+  `;
 
   // 3. Crea sul provider — generiamo l'ID del link prima così lo embed nei return URLs
   const portalBase = process.env.PORTAL_RETURN_BASE_URL || 'http://localhost:3000';
