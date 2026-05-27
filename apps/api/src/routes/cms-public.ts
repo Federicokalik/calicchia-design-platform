@@ -40,6 +40,31 @@ cmsPublic.get('/faqs', async (c) => {
   });
 });
 
+// ── GET /api/public/cms/glossario?locale=it|en ───────────────────
+cmsPublic.get('/glossario', async (c) => {
+  const locale = parseLocale(c.req.query('locale'));
+  let rows: Array<{
+    id: string; slug: string; term: string; full_name: string | null;
+    letter: string; what_it_is: string; why_you_care: string;
+    what_to_demand: string; sort_order: number | null;
+  }> = [];
+  try {
+    rows = await sql`
+      SELECT id, slug, term, full_name, letter, what_it_is, why_you_care,
+             what_to_demand, sort_order
+      FROM site_glossario
+      WHERE is_published = true AND locale = ${locale}
+      ORDER BY letter ASC, sort_order NULLS LAST, term ASC
+      LIMIT 1000
+    ` as typeof rows;
+  } catch (err) {
+    log.warn({ err, locale }, 'glossario read failed');
+  }
+  return c.json({ locale, entries: rows }, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});
+
 // ── GET /api/public/cms/team?locale=it|en ────────────────────────
 cmsPublic.get('/team', async (c) => {
   const locale = parseLocale(c.req.query('locale'));

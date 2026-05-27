@@ -13,6 +13,7 @@
 
 import { FAQS, type FaqEntry } from '@/data/faqs';
 import { TEAM, type TeamMember } from '@/data/team';
+import { GLOSSARIO, GLOSSARIO_LETTERS, type GlossarioEntry } from '@/data/glossario';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001';
 
@@ -59,6 +60,48 @@ export async function getFaqs(locale: Locale = 'it'): Promise<FaqEntry[]> {
     return res.faqs.map((r) => ({ question: r.question, answer: r.answer }));
   }
   return FAQS;
+}
+
+interface GlossarioRow {
+  id: string;
+  slug: string;
+  term: string;
+  full_name: string | null;
+  letter: string;
+  what_it_is: string;
+  why_you_care: string;
+  what_to_demand: string;
+  sort_order: number | null;
+}
+
+/**
+ * Returns the glossario entries + the unique letter index. Falls back to
+ * data/glossario.ts when the DB is empty or the API is unreachable.
+ *
+ * Returns the SAME shape as the file constants (`GLOSSARIO` +
+ * `GLOSSARIO_LETTERS`) so the consumer (glossario page) keeps its
+ * existing render path.
+ */
+export async function getGlossario(
+  locale: Locale = 'it',
+): Promise<{ entries: GlossarioEntry[]; letters: string[] }> {
+  const res = await fetchCms<{ entries: GlossarioRow[] }>(
+    `/api/public/cms/glossario?locale=${locale}`,
+  );
+  if (res && Array.isArray(res.entries) && res.entries.length > 0) {
+    const entries: GlossarioEntry[] = res.entries.map((r) => ({
+      slug: r.slug,
+      term: r.term,
+      fullName: r.full_name ?? undefined,
+      letter: r.letter,
+      whatItIs: r.what_it_is,
+      whyYouCare: r.why_you_care,
+      whatToDemand: r.what_to_demand,
+    }));
+    const letters = Array.from(new Set(entries.map((e) => e.letter))).sort();
+    return { entries, letters };
+  }
+  return { entries: GLOSSARIO, letters: [...GLOSSARIO_LETTERS] };
 }
 
 /**

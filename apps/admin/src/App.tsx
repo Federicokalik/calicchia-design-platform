@@ -72,6 +72,7 @@ import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
 import NewsletterPage from '@/pages/marketing/newsletter';
 import FaqCmsPage from '@/pages/cms/faq';
 import TeamCmsPage from '@/pages/cms/team';
+import GlossarioCmsPage from '@/pages/cms/glossario';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -238,6 +239,7 @@ export default function App() {
         {/* CMS pubblico (audit C-013/C-014) */}
         <Route path="cms/faq" element={<FaqCmsPage />} />
         <Route path="cms/team" element={<TeamCmsPage />} />
+        <Route path="cms/glossario" element={<GlossarioCmsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

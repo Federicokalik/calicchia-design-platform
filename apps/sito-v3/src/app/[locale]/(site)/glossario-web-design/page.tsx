@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
+import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
 import {
   breadcrumbSchema,
   definedTermListSchema,
 } from '@/data/structured-data';
-import { GLOSSARIO, GLOSSARIO_LETTERS } from '@/data/glossario';
+// Audit C-013/C-014 (PR20): glossario now DB-backed via getGlossario().
+// Falls back to data/glossario.ts on fresh installs / API outages.
+import { getGlossario } from '@/lib/cms';
+import type { Locale } from '@/lib/i18n';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/Button';
 import { MonoLabel } from '@/components/ui/MonoLabel';
@@ -30,7 +34,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function GlossarioPage() {
+export default async function GlossarioPage() {
+  const locale = (await getLocale()) as Locale;
+  const { entries: GLOSSARIO, letters: GLOSSARIO_LETTERS } = await getGlossario(locale);
+
   // Group terms by letter for A-Z layout
   const termsByLetter = new Map<string, typeof GLOSSARIO>();
   for (const t of GLOSSARIO) {
