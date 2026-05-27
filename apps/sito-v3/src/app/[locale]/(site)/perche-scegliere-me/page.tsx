@@ -16,7 +16,8 @@ import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema } from '@/data/structured-data';
 import { getPerchiFaqs } from '@/data/perchi-faqs';
-import { getServices } from '@/data/services';
+// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
+import { getServiceCatalog } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
@@ -60,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function PercheScegliereMePage() {
   const locale = (await getLocale()) as Locale;
-  const services = getServices(locale);
+  const services = (await getServiceCatalog(locale)).all;
   const faqs = getPerchiFaqs(locale);
   const tSkills = await getTranslations('perche.skillsOverride');
   const tBlog = await getTranslations('perche.blogLatestOverride');

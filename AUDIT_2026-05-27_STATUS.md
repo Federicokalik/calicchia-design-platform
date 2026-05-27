@@ -1,9 +1,32 @@
 # Audit 2026-05-27 — Stato dopo lavorazione
 
 **Branch**: `fix/audit-2026-05-27-pr1-critical-security` (NON ancora mergeato in main)
-**Issue chiuse**: 89/136 (65%) — tutti i critical + tutti gli high + tutti i medium architecturali + J-K-11 (validators dedup)
+**Issue chiuse**: 92/136 (68%) — tutti i critical + tutti gli high + tutti i medium architecturali + J-K-11 + CMS layer completo
 
-## PR19 (nuovo, 2026-05-27 tardo)
+## PR19-22 — CMS pubblico completo (4 dataset)
+
+PR19 ha definito il pattern. PR20-22 lo replicano sui dataset restanti.
+
+| PR | Dataset | Tabella | Righe | Admin route | Endpoint pubblico |
+|---|---|---|---|---|---|
+| PR19 | FAQ | site_faqs | 7 | /cms/faq | /api/public/cms/faqs |
+| PR19 | Team | site_team | 2 | /cms/team | /api/public/cms/team |
+| PR20 | Glossario | site_glossario | 30 | /cms/glossario | /api/public/cms/glossario |
+| PR21 | SEO cities | site_seo_cities | 199 | /cms/seo-cities | /api/public/cms/seo-cities |
+| PR22 | Services catalog | site_services | 10 | /cms/services | /api/public/cms/services |
+
+**Pattern condiviso**:
+- Migration con audit trigger (mig 012) + `set_updated_at_now()` trigger (mig 120)
+- Public endpoint con `Cache-Control: s-maxage=300, stale-while-revalidate=60` + degradazione graceful su DB outage
+- Admin CRUD su `/api/cms/<dataset>` con zod validation + whitelist patch keys (B-023 pattern)
+- Sito helper in `lib/cms.ts` con fallback su `data/*.ts` quando tabella vuota / API down
+- Locale support con righe overlay `'en'` (services + glossario + faq + team) oppure single-locale (seo-cities — i nomi città non si traducono)
+
+**Cosa NON è in CMS** (intentional):
+- `ServiceDetail` long-form (awareness/process/storyline/faq/features) resta in `apps/sito-v3/src/data/services-content/<slug>.ts`. Schema troppo ricco e voice-tuned per un form generico. Future work se marketing chiede CRUD per-sezione (servirebbe Tiptap admin).
+- `getCityContext()` (pure function che costruisce testo per-città da tier+tipo): resta `apps/sito-v3/src/data/seo-cities.ts` lato file.
+
+## PR19 (originale)
 
 Fondazione CMS pubblico + completamento J-K-11.
 
@@ -45,24 +68,30 @@ Fondazione CMS pubblico + completamento J-K-11.
 | **Site-config migrazione totale** (C-013/C-014 long path) | Quando vuoi che ALL i 15+ consumer di `SITE` leggano da DB invece che da file. Oggi 2 surface (contatti page + ContactSocials) lo fanno come proof. | 1-2h per migrazione completa |
 | **Admin editor per `site.public`** | Quando il marketing chiede UI per editare brand/social/geo da admin. La chiave c'è nel settings-schema ma non c'è una page admin dedicata; le impostazioni cliente già hanno la pagina per `business.profile`. | ~30 min per aggiungere una sezione nel pannello settings esistente |
 
-### CMS roadmap (in corso)
-- ✅ **Fondazione + FAQ + Team** (PR19): pattern stabilito (table + audit trigger + admin CRUD + public endpoint + sito helper con fallback).
-- 🚧 **Glossario** (PR20): 365 righe, ~100 termini. Riusa pattern blog (title+slug+body).
-- 🚧 **SEO cities + zone** (PR21): 341 righe, 100+ città con attributi geografici.
-- 🚧 **Services + services-detail** (PR22): 22 file con shape complessa, serve Tiptap admin per i contenuti longform.
-- 🚧 **Traduzioni**: aggiungere righe `locale='en'` su site_faqs / site_team (schema già supporta).
+### CMS roadmap (completata)
+- ✅ **Fondazione + FAQ + Team** (PR19)
+- ✅ **Glossario** (PR20): 30 termini DB-backed, riusa pattern blog (title+slug+body).
+- ✅ **SEO cities** (PR21): 199 città DB-backed (6 consumer migrati: sitemap, /zone, /zone/[comune], /zone/[comune]/[service], [...matrix], RelatedZones).
+- ✅ **Services catalog** (PR22): 10 servizi DB-backed (5 consumer: sitemap, home, /servizi, /perche-scegliere-me, /servizi-per-professioni).
+- ✅ **Traduzioni**: schema supporta locale='en' overlay su faq/team/glossario/services. Inserire righe EN da admin quando i contenuti sono pronti.
+
+### Future work CMS (non urgente)
+- **ServiceDetail long-form** (awareness/process/storyline/faq/features di /servizi/[slug]): resta in code. Per editarlo serve un editor strutturato per-sezione (Tiptap per i prose block + JSON per arrays). Solo se marketing chiede.
+- **getCityContext()** (testo per-città costruito da tier+tipo): resta pure function in code. Logica programmatica, non contenuto.
 
 ### Issue low/cosmetic non chiuse (~46)
 Dead code di basso valore, refactor minori, documentazione. Diminishing returns: ogni nuovo PR cosmetic chiude 5-10 issue di severity "low" senza payoff utente visibile. **Suggerito skip** salvo trigger reale.
 
 Resta aperta solo:
-- **J-K-11** validator dedup (refactor: shared zod schemas vs route inline) — low, niente bug, solo manutenibilità
-- **_summary_low_severity** placeholder
+- **_summary_low_severity** placeholder (raggruppa 30+ finding low-priority sparsi nei report per-area: dead routes, open-redirect minore, phone E.164 normalize, ecc.)
 
 ## Storia commit del branch
 
 ```
-TBD     fix: PR19 — CMS pubblico foundation + J-K-11 (FAQ/Team + site-config completion)
+TBD     feat: PR22 — CMS services catalog (10 servizi DB-backed)
+f184e92 feat: PR21 — CMS SEO cities (199 comuni DB-backed)
+b7ed6f1 feat: PR20 — CMS glossario (30 termini DB-backed)
+b74e190 feat: PR19 — CMS foundation + site-config completion + J-K-11 (7 fix)
 f98b026 fix: PR18 — webhook err normalization + site-config DB layer (3 fix)
 b8ae304 fix: PR17 — audit 2026-05-27 high-severity tail (4 fix)
 41dff70 revert(portal-upload): rollback B-014 client-direct — MEGA S4 no CORS
@@ -98,6 +127,9 @@ Tutte già su locale dev. Da applicare in prod al deploy:
 - `118_audit_triggers_extension.sql` — audit triggers su workflows/whatsapp/calendar (J-K-06)
 - `119_drop_orphan_tables.sql` — drop 14 view + 3 table orphan verificati (J-K-12)
 - `120_site_cms_faq_team.sql` — tabelle CMS site_faqs + site_team + trigger updated_at (PR19)
+- `121_site_cms_glossario.sql` — tabella site_glossario (PR20)
+- `122_site_cms_seo_cities.sql` — tabella site_seo_cities (PR21)
+- `123_site_cms_services.sql` — tabella site_services (PR22)
 
 `pnpm --filter @calicchia/api migrate` le applica tutte (idempotente, no-op se già fatte).
 

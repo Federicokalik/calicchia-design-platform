@@ -35,6 +35,7 @@ import {
   UsersRound,
   BookText,
   MapPin,
+  Layers,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -153,6 +154,7 @@ const bottomNavigation: NavGroup[] = [
       { labelKey: 'nav.cmsTeam', icon: UsersRound, path: '/cms/team' },
       { labelKey: 'nav.cmsGlossario', icon: BookText, path: '/cms/glossario' },
       { labelKey: 'nav.cmsSeoCities', icon: MapPin, path: '/cms/seo-cities' },
+      { labelKey: 'nav.cmsServices', icon: Layers, path: '/cms/services' },
     ],
   },
 ];

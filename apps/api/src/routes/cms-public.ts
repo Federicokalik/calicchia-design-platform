@@ -40,6 +40,30 @@ cmsPublic.get('/faqs', async (c) => {
   });
 });
 
+// ── GET /api/public/cms/services?locale=it|en ────────────────────
+cmsPublic.get('/services', async (c) => {
+  const locale = parseLocale(c.req.query('locale'));
+  let rows: Array<{
+    id: string; slug: string; title: string; lead: string;
+    deliverables: unknown; icon: string; category: string;
+    sort_order: number | null;
+  }> = [];
+  try {
+    rows = await sql`
+      SELECT id, slug, title, lead, deliverables, icon, category, sort_order
+      FROM site_services
+      WHERE is_published = true AND locale = ${locale}
+      ORDER BY category ASC, sort_order NULLS LAST, title ASC
+      LIMIT 100
+    ` as typeof rows;
+  } catch (err) {
+    log.warn({ err, locale }, 'services read failed');
+  }
+  return c.json({ locale, services: rows }, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});
+
 // ── GET /api/public/cms/seo-cities ───────────────────────────────
 // Single-locale: city names don't translate, only surrounding copy does.
 cmsPublic.get('/seo-cities', async (c) => {

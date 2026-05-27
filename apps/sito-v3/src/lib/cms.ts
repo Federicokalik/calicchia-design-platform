@@ -15,6 +15,8 @@ import { FAQS, type FaqEntry } from '@/data/faqs';
 import { TEAM, type TeamMember } from '@/data/team';
 import { GLOSSARIO, GLOSSARIO_LETTERS, type GlossarioEntry } from '@/data/glossario';
 import { SEO_CITIES, type SeoCity } from '@/data/seo-cities';
+import { getServices, getMatrixServices, getStandaloneServices } from '@/data/services';
+import type { Service } from '@/data/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001';
 
@@ -61,6 +63,64 @@ export async function getFaqs(locale: Locale = 'it'): Promise<FaqEntry[]> {
     return res.faqs.map((r) => ({ question: r.question, answer: r.answer }));
   }
   return FAQS;
+}
+
+interface ServiceRow {
+  id: string;
+  slug: string;
+  title: string;
+  lead: string;
+  deliverables: unknown;
+  icon: string;
+  category: 'matrix' | 'standalone';
+  sort_order: number | null;
+}
+
+/**
+ * ServiceCatalog — facade matching the function exports of data/services.ts
+ * so existing consumers (sitemap, /servizi, /perche-scegliere-me, /servizi-
+ * per-professioni, home) only swap the call site.
+ *
+ * NOTE: long-form `ServiceDetail` content (awareness, process, faq,
+ * features, storyline, expanded scope) is intentionally NOT in this CMS —
+ * it lives in apps/sito-v3/src/data/services-content/<slug>.ts because
+ * the schema is too rich and voice-tuned to edit safely from a generic
+ * form. Future work if marketing wants per-section CRUD.
+ */
+export interface ServiceCatalog {
+  all: Service[];
+  matrix: Service[];
+  standalone: Service[];
+}
+
+/**
+ * Returns the service catalog for the given locale. Falls back to the
+ * file constants (MATRIX_SERVICES / STANDALONE_SERVICES via getServices)
+ * when the DB is empty or the API is unreachable.
+ */
+export async function getServiceCatalog(locale: Locale = 'it'): Promise<ServiceCatalog> {
+  const res = await fetchCms<{ services: ServiceRow[] }>(
+    `/api/public/cms/services?locale=${locale}`,
+  );
+  if (res && Array.isArray(res.services) && res.services.length > 0) {
+    const all: Service[] = res.services.map((r) => ({
+      slug: r.slug,
+      title: r.title,
+      lead: r.lead,
+      deliverables: Array.isArray(r.deliverables) ? r.deliverables as string[] : [],
+      icon: r.icon,
+    }));
+    return {
+      all,
+      matrix: all.filter((_, i) => res.services[i].category === 'matrix'),
+      standalone: all.filter((_, i) => res.services[i].category === 'standalone'),
+    };
+  }
+  return {
+    all: getServices(locale),
+    matrix: getMatrixServices(locale),
+    standalone: getStandaloneServices(locale),
+  };
 }
 
 interface SeoCityRow {

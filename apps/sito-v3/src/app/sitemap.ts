@@ -1,8 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/data/site';
-import { SERVICES as SITE_SERVICES } from '@/data/services';
-// Audit C-013/C-014 (PR21): cities ora via getSeoCities() DB-backed.
-import { getSeoCities } from '@/lib/cms';
+// Audit C-013/C-014 (PR21/22): cities + services ora via DB-backed helper.
+import { getSeoCities, getServiceCatalog } from '@/lib/cms';
 import {
   SEO_SERVICES,
   getProfessionsForService,
@@ -309,7 +308,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
-  for (const service of SITE_SERVICES) {
+  const serviceCatalog = await getServiceCatalog();
+  for (const service of serviceCatalog.all) {
     entries.push(
       ...localizedEntries(`/servizi/${service.slug}`, now, {
         priority: 0.8,

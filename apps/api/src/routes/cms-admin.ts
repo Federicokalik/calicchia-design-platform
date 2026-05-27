@@ -75,6 +75,93 @@ cmsAdmin.delete('/faqs/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+// ── SERVICES (catalog) ───────────────────────────────────────────
+const serviceUpsertSchema = z.object({
+  locale: localeSchema.default('it'),
+  slug: z.string().trim().regex(/^[a-z0-9-]+$/, 'Slug solo a-z, 0-9, trattini').min(1),
+  title: z.string().trim().min(1, 'Titolo richiesto'),
+  lead: z.string().trim().min(1, 'Lead richiesto'),
+  deliverables: z.array(z.string().min(1).max(200)).max(20).default([]),
+  icon: z.string().trim().min(1).max(60).default('globe'),
+  category: z.enum(['matrix', 'standalone']),
+  sort_order: z.number().int().nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+cmsAdmin.get('/services', async (c) => {
+  const locale = c.req.query('locale');
+  const category = c.req.query('category');
+  let rows;
+  if ((locale === 'it' || locale === 'en') && (category === 'matrix' || category === 'standalone')) {
+    rows = await sql`SELECT * FROM site_services WHERE locale = ${locale} AND category = ${category} ORDER BY sort_order NULLS LAST, title ASC LIMIT 200`;
+  } else if (locale === 'it' || locale === 'en') {
+    rows = await sql`SELECT * FROM site_services WHERE locale = ${locale} ORDER BY category, sort_order NULLS LAST, title ASC LIMIT 200`;
+  } else if (category === 'matrix' || category === 'standalone') {
+    rows = await sql`SELECT * FROM site_services WHERE category = ${category} ORDER BY locale, sort_order NULLS LAST, title ASC LIMIT 200`;
+  } else {
+    rows = await sql`SELECT * FROM site_services ORDER BY locale, category, sort_order NULLS LAST, title ASC LIMIT 200`;
+  }
+  return c.json({ rows });
+});
+
+cmsAdmin.post('/services', async (c) => {
+  const body = await c.req.json();
+  const parsed = serviceUpsertSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+  const v = parsed.data;
+  try {
+    const [row] = await sql`
+      INSERT INTO site_services (locale, slug, title, lead, deliverables, icon, category, sort_order, is_published, source)
+      VALUES (
+        ${v.locale}, ${v.slug}, ${v.title}, ${v.lead},
+        ${sqlv(v.deliverables as unknown as Record<string, unknown>)},
+        ${v.icon}, ${v.category}, ${v.sort_order ?? null}, ${v.is_published}, 'admin'
+      )
+      RETURNING *
+    `;
+    return c.json({ row }, 201);
+  } catch (err) {
+    const msg = err instanceof Error && /unique/i.test(err.message)
+      ? 'Slug già esistente per questa lingua'
+      : 'Errore nel salvataggio';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+cmsAdmin.put('/services/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const parsed = serviceUpsertSchema.partial().safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+
+  const patch: Record<string, unknown> = {};
+  for (const k of ['locale', 'slug', 'title', 'lead', 'icon', 'category', 'sort_order', 'is_published'] as const) {
+    if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
+  }
+  if (parsed.data.deliverables !== undefined) {
+    patch.deliverables = sqlv(parsed.data.deliverables as unknown as Record<string, unknown>);
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  try {
+    const [row] = await sql`UPDATE site_services SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json({ row });
+  } catch (err) {
+    const msg = err instanceof Error && /unique/i.test(err.message)
+      ? 'Slug già esistente per questa lingua'
+      : 'Errore nel salvataggio';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+cmsAdmin.delete('/services/:id', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`DELETE FROM site_services WHERE id = ${id} RETURNING id`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
 // ── SEO CITIES ───────────────────────────────────────────────────
 const seoCityUpsertSchema = z.object({
   slug: z.string().trim().regex(/^[a-z0-9-]+$/, 'Slug solo a-z, 0-9, trattini').min(1),
