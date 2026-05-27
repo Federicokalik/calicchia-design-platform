@@ -1,6 +1,22 @@
 import { Hono } from 'hono';
 import crypto from 'crypto';
 import { sql } from '../db';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
+
+// Sanitize Tiptap-authored HTML inside line items before persist (audit D-002).
+// Items are rendered raw on the public quote-sign page; an admin compromise or
+// a hand-rolled POST could otherwise inject <script> into the signing surface.
+function sanitizeItems(items: unknown): unknown[] {
+  if (!Array.isArray(items)) return [];
+  return items.map((it) => {
+    if (!it || typeof it !== 'object') return it;
+    const item = it as Record<string, unknown>;
+    if (typeof item.description === 'string') {
+      return { ...item, description: sanitizeBlogHtml(item.description) };
+    }
+    return item;
+  });
+}
 import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
 import { renderQuoteHtml } from '../lib/quote-renderer';
@@ -105,7 +121,7 @@ quotesV2.post('/', async (c) => {
   if (!title) return c.json({ error: 'Titolo richiesto' }, 400);
 
   // Calculate totals
-  const parsedItems = items || [];
+  const parsedItems = sanitizeItems(items || []);
   const subtotal = parsedItems.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
   const rate = tax_rate ?? 22;
   const taxAmount = subtotal * (rate / 100);
@@ -220,6 +236,7 @@ quotesV2.put('/:id', async (c) => {
   let total = body.total;
 
   if (body.items) {
+    body.items = sanitizeItems(body.items);
     subtotal = body.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
     const rate = body.tax_rate ?? 22;
     taxAmount = subtotal * (rate / 100);

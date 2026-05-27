@@ -124,9 +124,11 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
   post.excerpt = post.i18n_excerpt;
   post.content = post.i18n_content;
 
-  // Increment views (fire-and-forget)
-  sql`UPDATE blog_posts SET views = COALESCE(views, 0) + 1 WHERE slug = ${slug}`.catch(
-    (err: unknown) => log.error({ err }, 'Failed to increment views'),
+  // Increment views (fire-and-forget). Column is `views_count` per mig 001 —
+  // the previous `views` reference silently failed in the .catch() and the
+  // counter never moved (audit C-016).
+  sql`UPDATE blog_posts SET views_count = COALESCE(views_count, 0) + 1 WHERE slug = ${slug}`.catch(
+    (err: unknown) => log.error({ err }, 'Failed to increment views_count'),
   );
 
   // Get prev/next navigation
@@ -172,7 +174,7 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
       created_at: post.created_at,
       reading_time: post.reading_time,
       allow_comments: post.allow_comments,
-      views: post.views,
+      views: post.views_count,
       prevSlug,
       nextSlug,
       prevTitle,

@@ -7,7 +7,10 @@ export async function runDailyDigest() {
   const today = new Date().toISOString().split('T')[0];
 
   const [bookings, dueTasks, newLeads, pendingQuotes, revenue, staleLeads] = await Promise.all([
-    sql`SELECT COUNT(*)::int AS c FROM cal_bookings WHERE DATE(start_time) = ${today} AND status != 'cancelled'`,
+    // Audit J-K-15: digest used to read cal_bookings (legacy read-only since
+    // mig 069); the active booking flow inserts into calendar_bookings, so the
+    // count was always 0 for new bookings. Switched to the live table.
+    sql`SELECT COUNT(*)::int AS c FROM calendar_bookings WHERE DATE(start_time) = ${today} AND status != 'cancelled'`,
     sql`SELECT COUNT(*)::int AS c FROM project_tasks WHERE DATE(due_date) = ${today} AND status != 'done'`,
     sql`SELECT COUNT(*)::int AS c FROM leads WHERE DATE(created_at) = ${today}`,
     sql`SELECT COUNT(*)::int AS c FROM quotes_v2 WHERE status IN ('sent', 'viewed')`,

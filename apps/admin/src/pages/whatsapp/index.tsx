@@ -1283,7 +1283,7 @@ function ConversationRow({ conv, selected, onSelect, onArchive, onMarkUnread, on
               {isLinked && (
                 <DropdownMenuItem onClick={() => {
                   if (conv.customer_id) navigate(`/clienti/${conv.customer_id}`);
-                  else if (conv.lead_id) navigate(`/leads/${conv.lead_id}`);
+                  else if (conv.lead_id) navigate(`/pipeline?lead=${conv.lead_id}`);
                 }}>
                   <UserIcon className="h-3.5 w-3.5 mr-2" /> Apri scheda
                 </DropdownMenuItem>
@@ -1372,7 +1372,11 @@ function ThreadHeader({
   typingState,
 }: ThreadHeaderProps) {
   const name = displayNameOf(conv);
-  const linkedHref = conv.customer_id ? `/clienti/${conv.customer_id}` : conv.lead_id ? `/leads/${conv.lead_id}` : null;
+  const linkedHref = conv.customer_id
+    ? `/clienti/${conv.customer_id}`
+    : conv.lead_id
+      ? `/pipeline?lead=${conv.lead_id}`
+      : null;
   const phoneHref = conv.phone ? `tel:+${conv.phone.replace(/\D/g, '')}` : null;
   const muted = conv.muted_until ? new Date(conv.muted_until).getTime() > Date.now() : false;
   const subtitle = typingState

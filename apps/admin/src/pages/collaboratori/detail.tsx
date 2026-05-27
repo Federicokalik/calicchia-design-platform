@@ -5,7 +5,13 @@ import { toast } from 'sonner';
 import {
   ArrowLeft, Building2, Mail, Phone, Briefcase, FolderKanban,
   FolderPlus, KeyRound, Send, Copy, Check, RefreshCw, ExternalLink, Loader2,
+  ShieldOff,
 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -115,6 +121,12 @@ export default function CollaboratoreDetailPage() {
       toast.success(`Accesso inviato via ${res?.channel === 'whatsapp' ? 'WhatsApp' : 'email'}`);
     },
     onError: (err: Error) => toast.error(err.message || 'Invio accesso fallito'),
+  });
+
+  const revokeSessionsMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/collaborators-v2/${id}/revoke-portal-sessions`, { method: 'POST' }),
+    onSuccess: () => toast.success('Sessioni portale revocate'),
+    onError: () => toast.error('Revoca sessioni fallita'),
   });
 
   const copyPortalLink = () => {
@@ -237,6 +249,40 @@ export default function CollaboratoreDetailPage() {
                     Apri
                   </a>
                 </Button>
+              )}
+              {collab.has_portal_access && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 text-destructive hover:text-destructive"
+                      disabled={revokeSessionsMutation.isPending}
+                    >
+                      <ShieldOff className="h-3.5 w-3.5" />
+                      Revoca sessioni
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Revocare tutte le sessioni portale?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tutti i token JWT esistenti per questo collaboratore verranno invalidati.
+                        Dovrà rifare login col codice. Il codice di accesso non viene cambiato —
+                        usa "Rigenera" se vuoi anche cambiare quello.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annulla</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => revokeSessionsMutation.mutate()}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Revoca
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
             </div>
           </div>

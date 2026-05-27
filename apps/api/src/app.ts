@@ -119,13 +119,23 @@ if (isDev) {
 // Body size limits. The global 10MB cap is applied via a wrapper that SKIPS the
 // routes declaring a larger limit below: a plain app.use('*', bodyLimit()) runs
 // first and would 413 large uploads before their own limit ran (finding HN-01).
-const LARGE_BODY_PREFIXES = ['/api/media/', '/api/ai/extract-invoice', '/api/backup/import'];
+// WhatsApp admin media upload accepts up to 16MB (UPLOAD_MAX_BYTES in
+// routes/whatsapp.ts). Without listing the prefix here, the global 10MB cap
+// hit first and 413'd 10–16MB files before the route's own limit ran
+// (audit J-K-16).
+const LARGE_BODY_PREFIXES = [
+  '/api/media/',
+  '/api/ai/extract-invoice',
+  '/api/backup/import',
+  '/api/whatsapp-admin/conversations/',
+];
 app.use('*', async (c, next) => {
   if (LARGE_BODY_PREFIXES.some((p) => c.req.path.startsWith(p))) return next();
   return bodyLimit({ maxSize: 10 * 1024 * 1024 })(c, next);
 });
 app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
+app.use('/api/whatsapp-admin/conversations/*', bodyLimit({ maxSize: 16 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
 // Refuse to start outside development without an explicit allowlist —

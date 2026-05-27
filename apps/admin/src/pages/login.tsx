@@ -81,7 +81,12 @@ export default function LoginPage() {
         return;
       }
       toast.success('Login effettuato');
-      navigate(next && next.startsWith('/') ? next : '/');
+      // Audit D-009: harden against protocol-relative URLs ('//evil.com',
+      // '/\\evil.com') which startsWith('/') alone would let through. Only
+      // accept paths that start with a single '/' followed by anything other
+      // than another '/' or a backslash.
+      const safeNext = next && /^\/(?![/\\])/.test(next) ? next : '/';
+      navigate(safeNext);
     } catch (error) {
       turnstile.reset();
       if (mfaRequired) setMfaCode('');

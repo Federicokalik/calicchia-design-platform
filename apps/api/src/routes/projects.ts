@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import * as openai from '../lib/ai/openai';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'project-ai-logs' });
@@ -88,7 +89,11 @@ projects.post('/', async (c) => {
       title,
       slug,
       description: description || null,
-      brief: brief || null,
+      // brief is Tiptap-authored HTML rendered raw on the public case-study page —
+      // sanitize at write-time so even a bypass of the admin Tiptap UI (DevTools
+      // edit, direct API call, future bulk importer) cannot store <script>.
+      // Audit D-002.
+      brief: brief ? sanitizeBlogHtml(brief) : null,
       cover_image: cover_image || null,
       cover_alt: cover_alt || null,
       live_url: live_url || null,
@@ -162,7 +167,7 @@ projects.put('/:id', async (c) => {
   if (title !== undefined) updateData.title = title;
   if (slug !== undefined) updateData.slug = slug;
   if (description !== undefined) updateData.description = description || null;
-  if (brief !== undefined) updateData.brief = brief || null;
+  if (brief !== undefined) updateData.brief = brief ? sanitizeBlogHtml(brief) : null;
   if (cover_image !== undefined) updateData.cover_image = cover_image || null;
   if (cover_alt !== undefined) updateData.cover_alt = cover_alt || null;
   if (live_url !== undefined) updateData.live_url = live_url || null;
@@ -315,9 +320,12 @@ projects.patch('/:id/translations/:locale', async (c) => {
       `;
       deleted.push(field);
     } else {
+      // 'brief' translation is the localized HTML body — same sanitize as the
+      // canonical write path (audit D-002).
+      const safeValue = field === 'brief' ? sanitizeBlogHtml(value) : value;
       await sql`
         INSERT INTO projects_translations (project_id, locale, field_name, field_value)
-        VALUES (${id}, ${locale}, ${field}, ${value})
+        VALUES (${id}, ${locale}, ${field}, ${safeValue})
         ON CONFLICT (project_id, locale, field_name)
         DO UPDATE SET field_value = EXCLUDED.field_value, updated_at = NOW()
       `;

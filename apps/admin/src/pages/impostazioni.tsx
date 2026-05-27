@@ -859,12 +859,22 @@ function BackupSection() {
       return apiFetch('/api/backup/import', { method: 'POST', body: fd });
     },
     onSuccess: (data: any) => {
-      toast.success(`Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe`);
+      // Audit D-006: after restore the users table has been wiped and reloaded,
+      // so the current admin's session cookie likely references a stale or
+      // missing row. Force a logout + redirect so the next page load goes
+      // through /login, instead of silently 401-ing on the next protected fetch.
+      toast.success(
+        `Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe. Devi effettuare nuovamente l'accesso.`,
+        { duration: 6000 },
+      );
       setSelectedFile(null);
       setConfirmText('');
       if (fileRef.current) fileRef.current.value = '';
-      queryClient.invalidateQueries({ queryKey: ['backup-info'] });
-      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+      // Hard reload to /login — drops in-memory caches and forces a fresh
+      // auth handshake against the restored DB.
+      setTimeout(() => {
+        window.location.assign('/login?restored=1');
+      }, 800);
     },
     onError: (err: any) => toast.error(err?.message || 'Errore ripristino'),
   });

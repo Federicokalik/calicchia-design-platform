@@ -59,10 +59,16 @@ async function rotateCustomerPortalCode(id: string): Promise<{ id: string; code:
   const code = 'PRJ-' + randomBytes(4).toString('hex').toUpperCase();
   const hash = await bcrypt.hash(code, 12);
 
+  // Bump session_version atomically so any cookie still authenticating with the
+  // old code (typical scenario: code leaked, admin clicks "Rigenera") is
+  // invalidated by the portalAuth middleware on the next request. Without this
+  // the new code lived alongside the old session cookie until natural expiry
+  // (audit B-007).
   const [customer] = await sql`
     UPDATE customers
     SET portal_access_code_hash = ${hash},
-        portal_access_code_rotated_at = NOW()
+        portal_access_code_rotated_at = NOW(),
+        session_version = session_version + 1
     WHERE id = ${id}
     RETURNING id
   `;

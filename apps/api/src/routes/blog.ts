@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { marked } from 'marked';
 import { sql } from '../db';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import * as openai from '../lib/ai/openai';
 import * as perplexity from '../lib/ai/perplexity';
 import * as coverGenerator from '../lib/ai/cover-generator';
@@ -129,6 +130,11 @@ blog.get('/posts/:id', async (c) => {
 
 blog.post('/posts', async (c) => {
   const body = await c.req.json();
+  // Defense in depth: Tiptap strips <script> client-side, but a hand-rolled
+  // POST can carry whatever HTML it wants. Sanitize before persist (audit D-002)
+  // so RSS, OG image, and any future raw renderer can't be turned into an XSS
+  // vector by a compromised or buggy editor session.
+  if (typeof body.content === 'string') body.content = sanitizeBlogHtml(body.content);
   const [post] = await sql`INSERT INTO blog_posts ${sql(body)} RETURNING *`;
   return c.json({ post }, 201);
 });
@@ -136,6 +142,7 @@ blog.post('/posts', async (c) => {
 blog.put('/posts/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json();
+  if (typeof body.content === 'string') body.content = sanitizeBlogHtml(body.content);
   const [post] = await sql`UPDATE blog_posts SET ${sql(body)} WHERE id = ${id} RETURNING *`;
   return c.json({ post });
 });
@@ -213,7 +220,9 @@ blog.patch('/posts/:id/translations/:locale', async (c) => {
     if (value === null || value === '') {
       deleted.push(field);
     } else {
-      rows.push({ post_id: id, locale, field_name: field, field_value: value });
+      // 'content' translation is HTML — same sanitize as the canonical IT body.
+      const safe = field === 'content' ? sanitizeBlogHtml(value) : value;
+      rows.push({ post_id: id, locale, field_name: field, field_value: safe });
     }
   }
 
