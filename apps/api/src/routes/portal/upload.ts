@@ -198,12 +198,17 @@ uploadRoutes.post('/done', portalClientAuth, async (c) => {
   const { completeMultipartUpload, getObjectHead, deleteObject } = await import('../../lib/s4');
   await completeMultipartUpload(key, uploadId, parts);
 
-  // Magic-byte validation: client-declared content_type is untrusted, verify against actual file bytes
+  // Magic-byte validation: client-declared content_type is untrusted, verify against actual file bytes.
+  // Audit N5: bumped window from 32 bytes to 4KB. Some archive/container
+  // signatures (zip-based formats like .docx/.xlsx/.odt, RIFF wrappers, OLE2
+  // legacy office) live further into the stream than the first 32 bytes; the
+  // narrow window let crafted polyglots slip through. 4KB still costs only one
+  // ranged S3 read per upload.
   const declaredType = String(upload.content_type || '');
   let sniffOk = true;
   let sniffSkipped = false;
   try {
-    const head = await getObjectHead(key, 32);
+    const head = await getObjectHead(key, 4096);
     const sniffed = sniffMime(head);
     sniffOk = !!sniffed && mimeMatches(declaredType, sniffed);
   } catch (err) {
@@ -256,7 +261,10 @@ uploadRoutes.post('/done', portalClientAuth, async (c) => {
       'Nuovo file caricato',
       `Cliente: ${customer?.company_name || customer?.contact_name}\nFile: ${uploadName}\nDimensione: ${formatBytes(uploadSize)}${projectName ? '\nProgetto: ' + projectName : ''}`
     );
-  } catch { /* non-blocking */ }
+  } catch (err) {
+    // Audit B-026: was silenced — surface so a revoked bot token shows up.
+    log.warn({ err, uploadName }, 'telegram notify failed (upload)');
+  }
 
   return c.json({ ok: true, id: upload?.id, key });
 });

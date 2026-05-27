@@ -123,19 +123,29 @@ if (isDev) {
 // routes/whatsapp.ts). Without listing the prefix here, the global 10MB cap
 // hit first and 413'd 10–16MB files before the route's own limit ran
 // (audit J-K-16).
+// Audit E-016: portal upload was inheriting the 10MB cap → 4K phone shots /
+// scans > 10MB silently 413'd in the customer face. Aligned to /api/media/* cap.
+// Audit E-015: prefix match was case-sensitive. Both sides toLowerCase'd so a
+// CDN/proxy that uppercase-normalises (rare but documented in nginx) doesn't
+// drop into the global limit. Path-based skipping is a fragile design (one
+// missed entry = wrong limit) — invariant documented here.
 const LARGE_BODY_PREFIXES = [
   '/api/media/',
   '/api/ai/extract-invoice',
   '/api/backup/import',
   '/api/whatsapp-admin/conversations/',
+  '/api/portal/upload',
 ];
 app.use('*', async (c, next) => {
-  if (LARGE_BODY_PREFIXES.some((p) => c.req.path.startsWith(p))) return next();
+  const path = c.req.path.toLowerCase();
+  if (LARGE_BODY_PREFIXES.some((p) => path.startsWith(p))) return next();
   return bodyLimit({ maxSize: 10 * 1024 * 1024 })(c, next);
 });
 app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
 app.use('/api/whatsapp-admin/conversations/*', bodyLimit({ maxSize: 16 * 1024 * 1024 }));
+app.use('/api/portal/upload', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
+app.use('/api/portal/upload/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
 // Refuse to start outside development without an explicit allowlist —
