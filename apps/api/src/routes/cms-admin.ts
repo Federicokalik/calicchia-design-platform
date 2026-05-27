@@ -75,6 +75,92 @@ cmsAdmin.delete('/faqs/:id', async (c) => {
   return c.json({ ok: true });
 });
 
+// ── SEO CITIES ───────────────────────────────────────────────────
+const seoCityUpsertSchema = z.object({
+  slug: z.string().trim().regex(/^[a-z0-9-]+$/, 'Slug solo a-z, 0-9, trattini').min(1),
+  nome: z.string().trim().min(1, 'Nome richiesto'),
+  regione: z.string().trim().min(1, 'Regione richiesta'),
+  tipo: z.enum(['capoluogo', 'ciociaria']),
+  tier: z.number().int().min(1).max(3),
+  sort_order: z.number().int().nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+cmsAdmin.get('/seo-cities', async (c) => {
+  const regione = c.req.query('regione');
+  const tierRaw = c.req.query('tier');
+  const tipoRaw = c.req.query('tipo');
+  // Single-filter fast paths — postgres.js doesn't compose chained sql``
+  // fragments naturally, so we just branch by which filter combination
+  // the admin sent. The page never combines >1 filter so this is fine.
+  const tipo = tipoRaw === 'capoluogo' || tipoRaw === 'ciociaria' ? tipoRaw : null;
+  const tier = tierRaw && /^[123]$/.test(tierRaw) ? Number(tierRaw) : null;
+  let rows;
+  if (regione && tipo && tier !== null) {
+    rows = await sql`SELECT * FROM site_seo_cities WHERE regione = ${regione} AND tipo = ${tipo} AND tier = ${tier} ORDER BY regione ASC, nome ASC LIMIT 1000`;
+  } else if (regione) {
+    rows = await sql`SELECT * FROM site_seo_cities WHERE regione = ${regione} ORDER BY nome ASC LIMIT 1000`;
+  } else if (tipo) {
+    rows = await sql`SELECT * FROM site_seo_cities WHERE tipo = ${tipo} ORDER BY regione ASC, nome ASC LIMIT 1000`;
+  } else if (tier !== null) {
+    rows = await sql`SELECT * FROM site_seo_cities WHERE tier = ${tier} ORDER BY regione ASC, nome ASC LIMIT 1000`;
+  } else {
+    rows = await sql`SELECT * FROM site_seo_cities ORDER BY regione ASC, nome ASC LIMIT 1000`;
+  }
+  return c.json({ rows });
+});
+
+cmsAdmin.post('/seo-cities', async (c) => {
+  const body = await c.req.json();
+  const parsed = seoCityUpsertSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+  const v = parsed.data;
+  try {
+    const [row] = await sql`
+      INSERT INTO site_seo_cities (slug, nome, regione, tipo, tier, sort_order, is_published, source)
+      VALUES (${v.slug}, ${v.nome}, ${v.regione}, ${v.tipo}, ${v.tier}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
+      RETURNING *
+    `;
+    return c.json({ row }, 201);
+  } catch (err) {
+    const msg = err instanceof Error && /unique/i.test(err.message)
+      ? 'Slug già esistente'
+      : 'Errore nel salvataggio';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+cmsAdmin.put('/seo-cities/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const parsed = seoCityUpsertSchema.partial().safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+
+  const patch: Record<string, unknown> = {};
+  for (const k of ['slug', 'nome', 'regione', 'tipo', 'tier', 'sort_order', 'is_published'] as const) {
+    if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  try {
+    const [row] = await sql`UPDATE site_seo_cities SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
+    if (!row) return c.json({ error: 'Not found' }, 404);
+    return c.json({ row });
+  } catch (err) {
+    const msg = err instanceof Error && /unique/i.test(err.message)
+      ? 'Slug già esistente'
+      : 'Errore nel salvataggio';
+    return c.json({ error: msg }, 400);
+  }
+});
+
+cmsAdmin.delete('/seo-cities/:id', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`DELETE FROM site_seo_cities WHERE id = ${id} RETURNING id`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
 // ── GLOSSARIO ────────────────────────────────────────────────────
 const glossarioUpsertSchema = z.object({
   locale: localeSchema.default('it'),

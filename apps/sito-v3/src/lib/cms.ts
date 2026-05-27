@@ -14,6 +14,7 @@
 import { FAQS, type FaqEntry } from '@/data/faqs';
 import { TEAM, type TeamMember } from '@/data/team';
 import { GLOSSARIO, GLOSSARIO_LETTERS, type GlossarioEntry } from '@/data/glossario';
+import { SEO_CITIES, type SeoCity } from '@/data/seo-cities';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001';
 
@@ -60,6 +61,57 @@ export async function getFaqs(locale: Locale = 'it'): Promise<FaqEntry[]> {
     return res.faqs.map((r) => ({ question: r.question, answer: r.answer }));
   }
   return FAQS;
+}
+
+interface SeoCityRow {
+  id: string;
+  slug: string;
+  nome: string;
+  regione: string;
+  tipo: 'capoluogo' | 'ciociaria';
+  tier: 1 | 2 | 3;
+  sort_order: number | null;
+}
+
+/**
+ * SeoCityIndex — facade returned by getSeoCities() so consumers don't
+ * need to re-derive `bySlug` / `byRegione` / `capoluoghi` themselves.
+ * Matches the function exports of data/seo-cities.ts.
+ */
+export interface SeoCityIndex {
+  all: SeoCity[];
+  bySlug: Map<string, SeoCity>;
+  capoluoghi: SeoCity[];
+  ciociaria: SeoCity[];
+  byRegione(regione: string): SeoCity[];
+  getCityBySlug(slug: string): SeoCity | undefined;
+}
+
+function buildSeoCityIndex(cities: SeoCity[]): SeoCityIndex {
+  const bySlug = new Map<string, SeoCity>();
+  for (const c of cities) bySlug.set(c.slug, c);
+  return {
+    all: cities,
+    bySlug,
+    capoluoghi: cities.filter((c) => c.tipo === 'capoluogo'),
+    ciociaria: cities.filter((c) => c.tipo === 'ciociaria'),
+    byRegione: (regione: string) => cities.filter((c) => c.regione === regione),
+    getCityBySlug: (slug: string) => bySlug.get(slug),
+  };
+}
+
+/**
+ * Returns the SEO city index. DB rows take precedence; falls back to the
+ * file `SEO_CITIES` when the table is empty (fresh install) or the API
+ * is unreachable (build-time outage). Single-locale by design — city
+ * names don't translate, surrounding marketing copy does.
+ */
+export async function getSeoCities(): Promise<SeoCityIndex> {
+  const res = await fetchCms<{ cities: SeoCityRow[] }>('/api/public/cms/seo-cities');
+  if (res && Array.isArray(res.cities) && res.cities.length > 0) {
+    return buildSeoCityIndex(res.cities as SeoCity[]);
+  }
+  return buildSeoCityIndex(SEO_CITIES);
 }
 
 interface GlossarioRow {

@@ -73,6 +73,7 @@ import NewsletterPage from '@/pages/marketing/newsletter';
 import FaqCmsPage from '@/pages/cms/faq';
 import TeamCmsPage from '@/pages/cms/team';
 import GlossarioCmsPage from '@/pages/cms/glossario';
+import SeoCitiesCmsPage from '@/pages/cms/seo-cities';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -240,6 +241,7 @@ export default function App() {
         <Route path="cms/faq" element={<FaqCmsPage />} />
         <Route path="cms/team" element={<TeamCmsPage />} />
         <Route path="cms/glossario" element={<GlossarioCmsPage />} />
+        <Route path="cms/seo-cities" element={<SeoCitiesCmsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

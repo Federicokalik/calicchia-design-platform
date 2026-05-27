@@ -9,26 +9,17 @@ import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 import { FinalCTA } from '@/components/home/FinalCTA';
-import { SEO_CITIES } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): SEO cities now DB-backed via getSeoCities();
+// falls back to data/seo-cities.ts on fresh installs / API outages.
+import { getSeoCities } from '@/lib/cms';
+import type { SeoCity } from '@/data/seo-cities';
 import { SITE } from '@/data/site';
 
 const PATH = '/zone';
 const SITE_URL = SITE.url.replace(/\/$/, '');
 
-const indexable = SEO_CITIES.filter((c) => c.tier <= 2);
-const ciociaria = SEO_CITIES.filter((c) => c.tipo === 'ciociaria');
-const capoluoghiTier1 = SEO_CITIES.filter(
-  (c) => c.tipo === 'capoluogo' && c.tier === 1
-).sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
-const ciociariaTier1 = ciociaria
-  .filter((c) => c.tier === 1)
-  .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
-const allCiociariaSorted = ciociaria.sort((a, b) =>
-  a.nome.localeCompare(b.nome, 'it')
-);
-
-function letterGroups(items: typeof SEO_CITIES) {
-  const groups = new Map<string, typeof SEO_CITIES>();
+function letterGroups(items: SeoCity[]) {
+  const groups = new Map<string, SeoCity[]>();
   for (const c of items) {
     const letter = c.nome.charAt(0).toUpperCase();
     if (!groups.has(letter)) groups.set(letter, []);
@@ -36,8 +27,6 @@ function letterGroups(items: typeof SEO_CITIES) {
   }
   return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b, 'it'));
 }
-
-const ciociariaByLetter = letterGroups(allCiociariaSorted);
 
 export const metadata: Metadata = {
   title: {
@@ -55,26 +44,38 @@ export const metadata: Metadata = {
   },
 };
 
-const collectionPageSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'CollectionPage',
-  name: 'Zone in cui lavoro',
-  description:
-    'Comuni serviti in Ciociaria e capoluoghi italiani con landing dedicate.',
-  url: `${SITE_URL}${PATH}`,
-  mainEntity: {
-    '@type': 'ItemList',
-    numberOfItems: indexable.length,
-    itemListElement: indexable.map((c, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      url: `${SITE_URL}/zone/${c.slug}`,
-      name: c.nome,
-    })),
-  },
-};
+export default async function ZoneHubPage() {
+  const cityIndex = await getSeoCities();
+  const indexable = cityIndex.all.filter((c) => c.tier <= 2);
+  const ciociaria = cityIndex.ciociaria;
+  const capoluoghiTier1 = cityIndex.capoluoghi
+    .filter((c) => c.tier === 1)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+  const ciociariaTier1 = ciociaria
+    .filter((c) => c.tier === 1)
+    .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+  const allCiociariaSorted = [...ciociaria].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+  const ciociariaByLetter = letterGroups(allCiociariaSorted);
 
-export default function ZoneHubPage() {
+  const collectionPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Zone in cui lavoro',
+    description:
+      'Comuni serviti in Ciociaria e capoluoghi italiani con landing dedicate.',
+    url: `${SITE_URL}${PATH}`,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: indexable.length,
+      itemListElement: indexable.map((c, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}/zone/${c.slug}`,
+        name: c.nome,
+      })),
+    },
+  };
+
   return (
     <>
       <StructuredData

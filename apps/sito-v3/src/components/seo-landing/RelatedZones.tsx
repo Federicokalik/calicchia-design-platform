@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
-import { SEO_CITIES } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): cities now via getSeoCities() DB-backed.
+import { getSeoCities } from '@/lib/cms';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';
@@ -28,10 +29,11 @@ interface RelatedZonesProps {
  */
 export async function RelatedZones({ currentSlug, limit = 4, serviceSlug }: RelatedZonesProps) {
   const t = await getTranslations('landing.relatedZones');
-  const current = SEO_CITIES.find((city) => city.slug === currentSlug);
+  const cityIndex = await getSeoCities();
+  const current = cityIndex.getCityBySlug(currentSlug);
   if (!current) return null;
 
-  const related = SEO_CITIES.filter(
+  const related = cityIndex.all.filter(
     (city) =>
       city.slug !== currentSlug &&
       city.tier <= 2 &&

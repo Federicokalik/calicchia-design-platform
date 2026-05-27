@@ -15,7 +15,9 @@ import {
   getProfessionLabel,
   type SeoProfession,
 } from '@/data/seo-professions';
-import { getCityBySlug, type SeoCity } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): cities now via getSeoCities() DB-backed.
+import { getSeoCities, type SeoCityIndex } from '@/lib/cms';
+import type { SeoCity } from '@/data/seo-cities';
 import { getServiceContent } from '@/data/seo-service-content';
 import { getComboMeta } from '@/data/comune-service-content';
 import { COMUNE_ATTRIBUTES, getPreposizione } from '@/lib/comune-attributes';
@@ -63,7 +65,7 @@ interface ParsedMatrix {
  *
  * Returns null if no valid combination is found.
  */
-function parseMatrix(segment: string, routeLocale: Locale): ParsedMatrix | null {
+function parseMatrix(segment: string, routeLocale: Locale, cityIndex: SeoCityIndex): ParsedMatrix | null {
   const head = parseServiceUrl(segment);
   if (!head) return null;
   const { service, remainder } = head;
@@ -88,7 +90,7 @@ function parseMatrix(segment: string, routeLocale: Locale): ParsedMatrix | null 
     const profSlug = remainder.slice(0, splitAt);
     const citySlug = remainder.slice(splitAt + 3); // +3 for "-a-"
     const prof = getProfessionBySlug(profSlug);
-    const city = getCityBySlug(citySlug);
+    const city = cityIndex.getCityBySlug(citySlug);
     if (prof && city && isProfessionValidForService(service.slug, prof.slug)) {
       // Block matrix+city su EN locale (sia URL EN-prefixed che locale EN su URL IT).
       if (routeLocale === 'en' || head.locale === 'en') return null;
@@ -136,7 +138,8 @@ export async function generateMetadata({
   if (matrix.length !== 1) {
     return { title: locale === 'en' ? 'Page not found' : 'Pagina non trovata' };
   }
-  const parsed = parseMatrix(matrix[0], locale);
+  const cityIndex = await getSeoCities();
+  const parsed = parseMatrix(matrix[0], locale, cityIndex);
   if (!parsed) {
     return { title: locale === 'en' ? 'Page not found' : 'Pagina non trovata' };
   }
@@ -210,7 +213,8 @@ export default async function SeoMatrixPage({
   // Catch-all should be exactly 1 segment for these legacy URLs.
   if (matrix.length !== 1) notFound();
 
-  const parsed = parseMatrix(matrix[0], locale);
+  const cityIndex = await getSeoCities();
+  const parsed = parseMatrix(matrix[0], locale, cityIndex);
   if (!parsed) notFound();
 
   const { service, profession, city } = parsed;

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { SEO_CITIES, getCityBySlug } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): cities now via getSeoCities() DB-backed.
+import { getSeoCities } from '@/lib/cms';
 import { SEO_SERVICES } from '@/data/seo-service-matrix';
 import { COMUNE_ATTRIBUTES, getPreposizione } from '@/lib/comune-attributes';
 import { buildCanonical } from '@/lib/canonical';
@@ -17,8 +18,9 @@ interface Params {
   comune: string;
 }
 
-export function generateStaticParams(): Params[] {
-  return SEO_CITIES.filter((c) => c.tier <= 2).map((c) => ({ comune: c.slug }));
+export async function generateStaticParams(): Promise<Params[]> {
+  const cityIndex = await getSeoCities();
+  return cityIndex.all.filter((c) => c.tier <= 2).map((c) => ({ comune: c.slug }));
 }
 
 export async function generateMetadata({
@@ -27,7 +29,8 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { comune, locale = DEFAULT_LOCALE } = await params;
-  const city = getCityBySlug(comune);
+  const cityIndex = await getSeoCities();
+  const city = cityIndex.getCityBySlug(comune);
   if (!city) return { title: 'Zona non trovata' };
   const prep = getPreposizione(city.nome);
   return {
@@ -44,7 +47,8 @@ export default async function ZonaComunePage({
   params: Promise<Params>;
 }) {
   const { comune, locale = DEFAULT_LOCALE } = await params;
-  const city = getCityBySlug(comune);
+  const cityIndex = await getSeoCities();
+  const city = cityIndex.getCityBySlug(comune);
   if (!city) notFound();
 
   const attrs = COMUNE_ATTRIBUTES[comune];

@@ -34,6 +34,7 @@ import {
   HelpCircle,
   UsersRound,
   BookText,
+  MapPin,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -151,6 +152,7 @@ const bottomNavigation: NavGroup[] = [
       { labelKey: 'nav.cmsFaq', icon: HelpCircle, path: '/cms/faq' },
       { labelKey: 'nav.cmsTeam', icon: UsersRound, path: '/cms/team' },
       { labelKey: 'nav.cmsGlossario', icon: BookText, path: '/cms/glossario' },
+      { labelKey: 'nav.cmsSeoCities', icon: MapPin, path: '/cms/seo-cities' },
     ],
   },
 ];
