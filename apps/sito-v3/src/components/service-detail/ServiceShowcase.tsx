@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Heading } from '@/components/ui/Heading';
 import { Eyebrow } from '@/components/ui/Eyebrow';
@@ -7,6 +7,7 @@ import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Section } from '@/components/ui/Section';
 import { fetchProjectsForService } from '@/lib/projects-api';
 import { adaptApiListItem } from '@/lib/projects-adapter';
+import type { Locale } from '@/lib/i18n';
 
 interface ServiceShowcaseProps {
   /** Service slug used to filter projects (matches API ?service= param). */
@@ -34,7 +35,8 @@ export async function ServiceShowcase({
   heading,
 }: ServiceShowcaseProps) {
   const t = await getTranslations('servizi.detail');
-  const apiList = await fetchProjectsForService(serviceSlug, limit);
+  const locale = (await getLocale()) as Locale;
+  const apiList = await fetchProjectsForService(serviceSlug, limit, locale);
   if (apiList.length === 0) return null;
 
   const projects = apiList.map((p) => adaptApiListItem(p));

@@ -454,13 +454,11 @@ export default function WhatsAppInboxPage() {
       fd.append('file', file, file.name);
       if (caption) fd.append('caption', caption);
       if (replyToExternalId) fd.append('reply_to_external_id', replyToExternalId);
-      const res = await fetch(`/api/whatsapp-admin/conversations/${id}/messages/media`, {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
-      });
-      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      // apiFetch handles FormData + 401 refresh + locale headers (audit D-005).
+      const data: { ok?: boolean; error?: string } = await apiFetch(
+        `/api/whatsapp-admin/conversations/${id}/messages/media`,
+        { method: 'POST', body: fd },
+      );
       return data;
     },
     onSuccess: (_, vars) => {
@@ -1283,7 +1281,7 @@ function ConversationRow({ conv, selected, onSelect, onArchive, onMarkUnread, on
               {isLinked && (
                 <DropdownMenuItem onClick={() => {
                   if (conv.customer_id) navigate(`/clienti/${conv.customer_id}`);
-                  else if (conv.lead_id) navigate(`/leads/${conv.lead_id}`);
+                  else if (conv.lead_id) navigate(`/pipeline?lead=${conv.lead_id}`);
                 }}>
                   <UserIcon className="h-3.5 w-3.5 mr-2" /> Apri scheda
                 </DropdownMenuItem>
@@ -1372,7 +1370,11 @@ function ThreadHeader({
   typingState,
 }: ThreadHeaderProps) {
   const name = displayNameOf(conv);
-  const linkedHref = conv.customer_id ? `/clienti/${conv.customer_id}` : conv.lead_id ? `/leads/${conv.lead_id}` : null;
+  const linkedHref = conv.customer_id
+    ? `/clienti/${conv.customer_id}`
+    : conv.lead_id
+      ? `/pipeline?lead=${conv.lead_id}`
+      : null;
   const phoneHref = conv.phone ? `tel:+${conv.phone.replace(/\D/g, '')}` : null;
   const muted = conv.muted_until ? new Date(conv.muted_until).getTime() > Date.now() : false;
   const subtitle = typingState

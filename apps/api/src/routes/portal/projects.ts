@@ -14,10 +14,18 @@ projectsRoutes.get('/', portalAuth, async (c) => {
     ? sql`cp.collaborator_id = ${actorId}`
     : sql`cp.customer_id = ${c.get('customer_id') as string} AND cp.visible_to_client = true`;
 
+  // client_notes are the customer's PRIVATE annotations to their own project —
+  // a collaborator working on the project does not need (and should not see)
+  // them. Audit B-015: NULL for collab via CASE so the column shape stays the
+  // same and downstream code/translations don't need branching.
+  const clientNotesExpr = role === 'collaborator'
+    ? sql`NULL::text AS client_notes`
+    : sql`cp.client_notes`;
+
   const projects = (await sql`
     SELECT
       cp.id, cp.name, cp.status, cp.progress_percentage,
-      cp.client_notes, cp.project_type, cp.staging_url,
+      ${clientNotesExpr}, cp.project_type, cp.staging_url,
       cp.pipeline_steps, cp.current_step,
       cp.start_date, cp.target_end_date,
       cu.company_name, cu.contact_name,
@@ -38,11 +46,17 @@ projectsRoutes.get('/', portalAuth, async (c) => {
       cp.created_at DESC
   `) as Array<Record<string, unknown>>;
 
+  // Exclude client_notes from the translation overlay for collab — otherwise
+  // the EN translation row would re-populate the field we just NULL'd above.
+  const translatableFields: Array<'name' | 'description' | 'client_notes'> =
+    role === 'collaborator'
+      ? ['name', 'description']
+      : ['name', 'description', 'client_notes'];
   await applyTranslations(
     projects,
     'client_projects_translations',
     'id',
-    ['name', 'description', 'client_notes'],
+    translatableFields,
     locale
   );
 
@@ -59,10 +73,15 @@ projectsRoutes.get('/:id', portalAuth, async (c) => {
     ? sql`cp.id = ${id} AND cp.collaborator_id = ${actorId}`
     : sql`cp.id = ${id} AND cp.customer_id = ${c.get('customer_id') as string} AND cp.visible_to_client = true`;
 
+  // Same B-015 gate as in the list endpoint — NULL client_notes for collab.
+  const clientNotesExpr = role === 'collaborator'
+    ? sql`NULL::text AS client_notes`
+    : sql`cp.client_notes`;
+
   const projectRows = (await sql`
     SELECT
       cp.id, cp.name, cp.description, cp.status, cp.progress_percentage,
-      cp.client_notes, cp.project_type, cp.staging_url, cp.production_url,
+      ${clientNotesExpr}, cp.project_type, cp.staging_url, cp.production_url,
       cp.pipeline_steps, cp.current_step,
       cp.start_date, cp.target_end_date, cp.actual_end_date,
       cu.company_name, cu.contact_name
@@ -73,11 +92,15 @@ projectsRoutes.get('/:id', portalAuth, async (c) => {
   `) as Array<Record<string, unknown>>;
 
   if (projectRows.length === 0) return c.json({ error: 'Progetto non trovato' }, 404);
+  const translatableFields: Array<'name' | 'description' | 'client_notes'> =
+    role === 'collaborator'
+      ? ['name', 'description']
+      : ['name', 'description', 'client_notes'];
   await applyTranslations(
     projectRows,
     'client_projects_translations',
     'id',
-    ['name', 'description', 'client_notes'],
+    translatableFields,
     locale
   );
   const [project] = projectRows;

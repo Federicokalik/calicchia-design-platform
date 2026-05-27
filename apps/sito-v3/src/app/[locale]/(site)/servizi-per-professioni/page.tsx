@@ -13,7 +13,8 @@ import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Button } from '@/components/ui/Button';
 import { Section } from '@/components/ui/Section';
 import { FinalCTA } from '@/components/home/FinalCTA';
-import { SERVICES } from '@/data/services';
+// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
+import { getServiceCatalog } from '@/lib/cms';
 import {
   getAllProfessionsLocalized,
   getProfessionCategories,
@@ -63,6 +64,7 @@ export default async function ServiziPerProfessioniHubPage() {
   // locale — chrome labels, headings, and category names are now translated.
   const allProfessions = getAllProfessionsLocalized(locale);
   const categories = getProfessionCategories(locale);
+  const SERVICES = (await getServiceCatalog(locale)).all;
   const indexableProfessions = allProfessions.filter((p) => p.tier <= 2);
   const categoriesOrdered = Object.values(categories);
   const professionsByCategory = new Map(

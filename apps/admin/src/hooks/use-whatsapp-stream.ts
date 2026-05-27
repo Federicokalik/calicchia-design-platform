@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { API_BASE } from '@/lib/api';
+import { API_BASE, refreshAdminSession } from '@/lib/api';
 
 /**
  * Subscribes to /api/whatsapp-admin/stream (SSE) and invalidates TanStack
@@ -59,6 +59,9 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
     let cancelled = false;
     let es: EventSource | null = null;
     let graceTimer: ReturnType<typeof setTimeout> | null = null;
+    // Audit D-006: only refresh the session once per mount so a permanently
+    // expired cookie doesn't loop.
+    let didRefresh = false;
 
     const blip = () => {
       setLiveBlip(true);
@@ -71,6 +74,8 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
       else qc.invalidateQueries({ queryKey: ['wa-messages'] });
     };
 
+    const connect = () => {
+      if (cancelled) return;
     try {
       es = new EventSource(`${API_BASE}/api/whatsapp-admin/stream`, { withCredentials: true });
 
@@ -161,10 +166,22 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
         setConnected(false);
         es?.close();
         es = null;
+        // Audit D-006: try a session refresh ONCE before giving up — the
+        // EventSource API swallows the HTTP status so 401 looks like any
+        // other socket drop. If the refresh succeeds we re-open the stream.
+        if (!didRefresh) {
+          didRefresh = true;
+          refreshAdminSession()
+            .then((ok) => { if (ok && !cancelled) connect(); })
+            .catch(() => { /* stay disconnected; page polling handles UX */ });
+        }
       };
     } catch {
       setConnected(false);
     }
+    };
+
+    connect();
 
     return () => {
       cancelled = true;

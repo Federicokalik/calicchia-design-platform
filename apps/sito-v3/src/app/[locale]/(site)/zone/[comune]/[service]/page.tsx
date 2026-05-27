@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getCityBySlug } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): cities now via getSeoCities() DB-backed.
+import { getSeoCities } from '@/lib/cms';
 import {
   SEO_SERVICES,
   getServiceByLandingSlug,
@@ -28,11 +29,12 @@ interface Params {
   service: string;
 }
 
-export function generateStaticParams(): Params[] {
+export async function generateStaticParams(): Promise<Params[]> {
   // Tier-1 comuni only × all SEO services. Tier-2 lazy on-demand via revalidate.
+  const cityIndex = await getSeoCities();
   const params: Params[] = [];
   for (const comune of Object.keys(COMUNE_ATTRIBUTES)) {
-    const c = getCityBySlug(comune);
+    const c = cityIndex.getCityBySlug(comune);
     if (!c || c.tier > 1) continue;
     for (const s of SEO_SERVICES) {
       params.push({ comune, service: s.slug });
@@ -51,7 +53,8 @@ export async function generateMetadata({
   // matrix+città). I contenuti sono hardcoded IT e i target sono attività della
   // zona italiana — niente fallback EN.
   if (locale === 'en') return { title: 'Page not found' };
-  const city = getCityBySlug(comune);
+  const cityIndex = await getSeoCities();
+  const city = cityIndex.getCityBySlug(comune);
   const svc = getServiceByLandingSlug(service as ServiceSlug);
   if (!city || !svc) return { title: 'Combinazione non trovata' };
   const prep = getPreposizione(city.nome);
@@ -71,7 +74,8 @@ export default async function ZonaComuneServicePage({
   const { comune, service, locale = DEFAULT_LOCALE } = await params;
   // EN guard — vedi nota in generateMetadata.
   if (locale === 'en') notFound();
-  const city = getCityBySlug(comune);
+  const cityIndex = await getSeoCities();
+  const city = cityIndex.getCityBySlug(comune);
   const svc = getServiceByLandingSlug(service as ServiceSlug);
   if (!city || !svc) notFound();
 

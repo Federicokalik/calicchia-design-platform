@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { sql } from '../../db';
 import { fail } from '../../lib/responses';
 import { portalClientAuth, type PortalEnv } from './auth';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'portal-deliverables' });
 
 export const deliverableRoutes = new Hono<PortalEnv>();
 
@@ -52,14 +55,16 @@ deliverableRoutes.post('/deliverables/:id/approve', portalClientAuth, async (c) 
     `;
   });
 
-  // Send Telegram notification
+  // Send Telegram notification (audit B-026: log failures instead of silence)
   try {
     const { notifyTelegram } = await import('../../lib/telegram');
     await notifyTelegram(
       'Deliverable approvato',
       `Progetto: ${projectName}\nDeliverable: ${deliverableTitle}${comment ? '\nCommento: ' + comment : ''}`
     );
-  } catch { /* non-blocking */ }
+  } catch (err) {
+    log.warn({ err, deliverableTitle }, 'telegram notify failed (approval)');
+  }
 
   return c.json({ ok: true, status: 'approved' });
 });
@@ -124,14 +129,16 @@ deliverableRoutes.post('/deliverables/:id/reject', portalClientAuth, async (c) =
     `;
   });
 
-  // Send Telegram notification
+  // Send Telegram notification (audit B-026)
   try {
     const { notifyTelegram } = await import('../../lib/telegram');
     await notifyTelegram(
       'Modifiche richieste',
       `Progetto: ${projectName}\nDeliverable: ${deliverableTitle}\nCommento: ${comment}`
     );
-  } catch { /* non-blocking */ }
+  } catch (err) {
+    log.warn({ err, deliverableTitle }, 'telegram notify failed (revisions)');
+  }
 
   return c.json({ ok: true, status: 'revision_requested' });
 });

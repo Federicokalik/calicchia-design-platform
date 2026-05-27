@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { getMatrixServices, getStandaloneServices } from '@/data/services';
+// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
+import { getServiceCatalog } from '@/lib/cms';
 import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { PageHero } from '@/components/layout/PageHero';
 import { ServiziCardLink } from '@/components/service-detail/ServiziCardLink';
@@ -29,10 +30,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ServiziIndexPage() {
   const t = await getTranslations('servizi.list');
   const locale = (await getLocale()) as Locale;
-  const ALL_SERVICES = [
-    ...getMatrixServices(locale),
-    ...getStandaloneServices(locale),
-  ];
+  const catalog = await getServiceCatalog(locale);
+  const ALL_SERVICES = [...catalog.matrix, ...catalog.standalone];
 
   return (
     <>

@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Section } from '@/components/ui/Section';
-import { TEAM } from '@/data/team';
+// Audit C-013/C-014: team rows now read from getTeam() (DB-backed) with
+// data/team.ts as the fresh-install / API-down fallback.
+import { getTeam } from '@/lib/cms';
+import type { Locale } from '@/lib/i18n';
 
 interface TeamSectionProps {
   index?: string;
@@ -17,6 +20,8 @@ interface TeamSectionProps {
  */
 export async function TeamSection({ index = '05', eyebrow }: TeamSectionProps) {
   const t = await getTranslations('perche.team');
+  const locale = (await getLocale()) as Locale;
+  const TEAM = await getTeam(locale);
 
   return (
     <Section spacing="default" bordered="top">

@@ -16,6 +16,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
     "@aws-sdk/s3-request-presigner": "^3.992.0",
+    "@calicchia/shared": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@maxmind/geoip2-node": "^6.3.4",
     "bcrypt": "^5.1.1",

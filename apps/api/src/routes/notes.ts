@@ -1,5 +1,18 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
+
+// Audit D-012: notes are admin-only, but defense-in-depth says any rich text
+// stored should be sanitized at write so a future renderer can't be turned
+// into an XSS vector. Tiptap JSON (`content`) is structured and rendered by
+// the editor parser — it's not a meaningful XSS surface here, so we only
+// sanitize `raw_markdown` which could embed inline HTML if a markdown
+// renderer ever decides to allow it.
+const sanitizeMarkdown = (md: string | null | undefined): string | null => {
+  if (md == null) return null;
+  const trimmed = String(md);
+  return trimmed.length > 0 ? sanitizeBlogHtml(trimmed) : '';
+};
 
 export const notes = new Hono();
 
@@ -70,7 +83,7 @@ notes.post('/', async (c) => {
     VALUES (
       ${title || 'Senza titolo'},
       ${content ? JSON.stringify(content) : null},
-      ${raw_markdown || null},
+      ${sanitizeMarkdown(raw_markdown)},
       ${source || 'app'},
       ${tags || []},
       ${linked_type || null},
@@ -89,7 +102,7 @@ notes.put('/:id', async (c) => {
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.title !== undefined) updates.title = body.title;
   if (body.content !== undefined) updates.content = JSON.stringify(body.content);
-  if (body.raw_markdown !== undefined) updates.raw_markdown = body.raw_markdown;
+  if (body.raw_markdown !== undefined) updates.raw_markdown = sanitizeMarkdown(body.raw_markdown);
   if (body.tags !== undefined) updates.tags = body.tags;
   if (body.linked_type !== undefined) updates.linked_type = body.linked_type;
   if (body.linked_id !== undefined) updates.linked_id = body.linked_id;

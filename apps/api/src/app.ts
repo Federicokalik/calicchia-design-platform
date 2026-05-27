@@ -61,6 +61,8 @@ import { auditLogs } from './routes/audit-logs';
 import { collaborators } from './routes/collaborators';
 import { publicRoutes } from './routes/public';
 import { publicCapacity } from './routes/public-capacity';
+import { cmsPublic } from './routes/cms-public';
+import { cmsAdmin } from './routes/cms-admin';
 import { settings } from './routes/settings';
 import { payments } from './routes/payments';
 import { services } from './routes/services';
@@ -119,20 +121,42 @@ if (isDev) {
 // Body size limits. The global 10MB cap is applied via a wrapper that SKIPS the
 // routes declaring a larger limit below: a plain app.use('*', bodyLimit()) runs
 // first and would 413 large uploads before their own limit ran (finding HN-01).
-const LARGE_BODY_PREFIXES = ['/api/media/', '/api/ai/extract-invoice', '/api/backup/import'];
+// WhatsApp admin media upload accepts up to 16MB (UPLOAD_MAX_BYTES in
+// routes/whatsapp.ts). Without listing the prefix here, the global 10MB cap
+// hit first and 413'd 10–16MB files before the route's own limit ran
+// (audit J-K-16).
+// Audit E-016: portal upload was inheriting the 10MB cap → 4K phone shots /
+// scans > 10MB silently 413'd in the customer face. Aligned to /api/media/* cap.
+// Audit E-015: prefix match was case-sensitive. Both sides toLowerCase'd so a
+// CDN/proxy that uppercase-normalises (rare but documented in nginx) doesn't
+// drop into the global limit. Path-based skipping is a fragile design (one
+// missed entry = wrong limit) — invariant documented here.
+const LARGE_BODY_PREFIXES = [
+  '/api/media/',
+  '/api/ai/extract-invoice',
+  '/api/backup/import',
+  '/api/whatsapp-admin/conversations/',
+  '/api/portal/upload',
+];
 app.use('*', async (c, next) => {
-  if (LARGE_BODY_PREFIXES.some((p) => c.req.path.startsWith(p))) return next();
+  const path = c.req.path.toLowerCase();
+  if (LARGE_BODY_PREFIXES.some((p) => path.startsWith(p))) return next();
   return bodyLimit({ maxSize: 10 * 1024 * 1024 })(c, next);
 });
 app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
+app.use('/api/whatsapp-admin/conversations/*', bodyLimit({ maxSize: 16 * 1024 * 1024 }));
+app.use('/api/portal/upload', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
+app.use('/api/portal/upload/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
-// In production, refuse to start without an explicit allowlist —
-// silently falling back to localhost would either break browser
-// auth or accidentally expose dev origins.
-if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGINS) {
-  throw new Error('CORS_ORIGINS environment variable is required in production');
+// Refuse to start outside development without an explicit allowlist —
+// silently falling back to localhost would either break browser auth or
+// accidentally expose dev origins. Using !== 'development' (instead of
+// === 'production') also catches staging/preview/test deploys that conventionally
+// use NODE_ENV=staging (audit E-012).
+if (process.env.NODE_ENV !== 'development' && !process.env.CORS_ORIGINS) {
+  throw new Error('CORS_ORIGINS environment variable is required when NODE_ENV is not "development"');
 }
 
 // Outer middleware: strip Access-Control-Allow-Credentials from /api/track responses.
@@ -194,9 +218,22 @@ const publicFormRateLimit = createRateLimit(3, 10 * 60 * 1000);
 const postOnly = (mw: MiddlewareHandler): MiddlewareHandler =>
   (c, next) => (c.req.method === 'POST' ? mw(c, next) : next());
 app.use('/api/contacts', postOnly(publicFormRateLimit));
+// Invariant: /api/contacts/:id/* sub-paths are admin-only via inline
+// authMiddleware in contacts.ts. No public sub-paths exist that bypass the
+// rate-limit; if you add one, switch this mount to a wildcard.
 app.use('/api/public-leads', postOnly(publicFormRateLimit));
 app.use('/api/newsletter/*', postOnly(publicFormRateLimit));
+// Defense-in-depth rate-limit on the GET token paths (audit C-008). UUIDs have
+// 122-bit entropy so brute-force is astronomic — this just keeps the DB out
+// of the bottleneck if a fuzzer probes the namespace at 60 req/s.
+app.use('/api/newsletter/confirm', createRateLimit(20, 60 * 1000));
+app.use('/api/newsletter/unsubscribe', createRateLimit(20, 60 * 1000));
+// Both the exact mount and the wildcard are required: app.use(path) without
+// a trailing /* matches ONLY the exact path under Hono, so cancel/reschedule
+// at /api/calendar/bookings/:uid/* were entirely unthrottled despite the
+// surface looking guarded (audit E-005, same pattern fix as /api/backup).
 app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
+app.use('/api/calendar/bookings/*', postOnly(publicFormRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
 app.route('/api/public-leads', publicLeads);
@@ -213,12 +250,18 @@ app.route('/api/stripe/webhook', stripeWebhook);
 app.route('/api/paypal-webhook', paypalWebhook);
 app.route('/api/cron/domains', domainCron);
 app.route('/api/public', publicRoutes);
+// CMS public reads — mount under /api/public/cms to inherit the public
+// rate-limit posture without going through any auth middleware.
+app.route('/api/public/cms', cmsPublic);
 const capacityRateLimit = createRateLimit(10, 60 * 1000);
 app.use('/api/public/capacity', capacityRateLimit);
 app.route('/api/public/capacity', publicCapacity);
-// Quote public signing endpoints (no auth)
-app.route('/api/quote-sign', quotePublic);
+// Quote public signing endpoints (no auth). Rate-limited identically to /api/sign/*
+// to deny brute-force of the 6-digit OTP — see audit J-01. OTPs are stored as
+// keyed hashes and burned after OTP_MAX_ATTEMPTS wrong submissions per code.
 const signRateLimit = createRateLimit(10, 60 * 1000);
+app.use('/api/quote-sign/*', signRateLimit);
+app.route('/api/quote-sign', quotePublic);
 app.use('/api/sign/*', signRateLimit);
 app.route('/api/sign', signablesPublic);
 // PayPal client-token generation is unauthenticated by design (the token is a
@@ -226,6 +269,11 @@ app.route('/api/sign', signablesPublic);
 // OAuth roundtrip to PayPal, so cap per-IP to avoid abuse.
 app.use('/api/paypal/client-token', createRateLimit(10, 60 * 1000));
 app.route('/api/paypal', paypal);
+// public-pay capability endpoints (UUID-as-capability) — rate-limited because
+// each /checkout call performs a Stripe/PayPal OAuth roundtrip (audit E-008,
+// same rationale as /api/paypal/client-token above). 20 req/min is generous
+// for legitimate 3DS-redirect retry loops while making URL probing pointless.
+app.use('/api/public-pay/*', createRateLimit(20, 60 * 1000));
 app.route('/api/public-pay', publicPay);
 // Telegram webhook (no auth — verified by bot secret token).
 // BK-14: rate-limited so a leaked/guessed webhook path can't be flooded.
@@ -239,24 +287,39 @@ app.post('/api/wh/:webhookId', async (c) => {
   // Generic 404 for invalid format → no enumeration (valid vs malformed)
   if (!/^[a-f0-9-]{36}$/.test(webhookId)) return c.json({ error: 'Not Found' }, 404);
 
-  const rows = await sql`
-    SELECT id, status, trigger_config FROM workflows
-    WHERE trigger_type = 'webhook'
-      AND trigger_config->>'webhook_id' = ${webhookId}
-      AND status = 'active'
-    LIMIT 1
-  ` as Array<{ id: string; status: string; trigger_config: any }>;
-  if (!rows.length) return c.json({ error: 'Not Found' }, 404);
+  // Lookup + decrypt MUST stay inside try/catch (audit E-013): the previous
+  // version let decryptSecret throw on a tampered/legacy payload, which surfaced
+  // as 500 via app.onError — distinguishable from the 404 returned on
+  // invalid/unknown webhookId, leaking webhook existence to a probe.
+  let workflowId: string;
+  let secret: string;
+  try {
+    const rows = await sql`
+      SELECT id, status, trigger_config FROM workflows
+      WHERE trigger_type = 'webhook'
+        AND trigger_config->>'webhook_id' = ${webhookId}
+        AND status = 'active'
+      LIMIT 1
+    ` as Array<{ id: string; status: string; trigger_config: any }>;
+    if (!rows.length) return c.json({ error: 'Not Found' }, 404);
 
-  const config = typeof rows[0].trigger_config === 'string'
-    ? JSON.parse(rows[0].trigger_config)
-    : rows[0].trigger_config;
-  const storedSecret: string | undefined = config?.webhook_secret;
-  const secret = storedSecret && isEncryptedSecret(storedSecret)
-    ? decryptSecret(storedSecret)
-    : storedSecret;
-  if (!secret) {
-    // Workflow legacy without secret — reject and force regen via admin
+    const config = typeof rows[0].trigger_config === 'string'
+      ? JSON.parse(rows[0].trigger_config)
+      : rows[0].trigger_config;
+    const storedSecret: string | undefined = config?.webhook_secret;
+    const resolved = storedSecret && isEncryptedSecret(storedSecret)
+      ? decryptSecret(storedSecret)
+      : storedSecret;
+    if (!resolved) {
+      // Workflow legacy without secret — reject and force regen via admin
+      return c.json({ error: 'Not Found' }, 404);
+    }
+    workflowId = rows[0].id;
+    secret = resolved;
+  } catch (err) {
+    // Log for operators (decrypt failures may indicate key rotation or
+    // tampering) but never differentiate the HTTP shape from the miss path.
+    log.warn({ err, webhookId }, 'webhook lookup/decrypt failed');
     return c.json({ error: 'Not Found' }, 404);
   }
 
@@ -272,12 +335,18 @@ app.post('/api/wh/:webhookId', async (c) => {
   let body: any = {};
   try { body = rawBody ? JSON.parse(rawBody) : {}; } catch {}
   const { executeWorkflow } = await import('./lib/workflow/engine');
-  const result = await executeWorkflow(rows[0].id, { webhook: true, ...body });
+  const result = await executeWorkflow(workflowId, { webhook: true, ...body });
   return c.json(result);
 });
 app.route('/api/portal', portal);
+// GDPR cookie consent log — public endpoint, rate-limited 10 req / 60s per IP
+// (audit J-03). Schema-validated in the route handler with strict zod object.
+app.use('/api/cookie-consent', createRateLimit(10, 60 * 1000));
 app.route('/api/cookie-consent', cookieConsent);
-app.use('/api/gdpr-requests', publicFormRateLimit);
+// postOnly so the 3 req / 10 min cap throttles only the public submission,
+// not the admin GET listing (audit E-006: admin loading the queue 3x burned
+// the limit and got 429).
+app.use('/api/gdpr-requests', postOnly(publicFormRateLimit));
 app.route('/api/gdpr-requests', gdprRequests);
 
 // WhatsApp (GOWA) — webhook ingress + endpoint pubblico preferences-by-token.
@@ -295,7 +364,12 @@ const trackRateLimit = createRateLimit(60, 60 * 1000);
 app.use('/api/track', trackRateLimit);
 app.route('/api/track', analyticsTrack);
 
-// Protected routes (auth required — admin gestionale)
+// Protected routes (auth required — admin gestionale).
+// Audit D-013: a few public-form routes (/api/contacts, /api/newsletter,
+// /api/gdpr-requests, /api/cookie-consent) intentionally DO NOT appear in this
+// list — they expose both a public POST + admin GET/PUT/DELETE on the same
+// prefix, and gate the admin handlers via inline `authMiddleware` per-route.
+// Adding them here would block the public POST too. Don't add them.
 const protectedPaths = [
   '/api/customers',
   '/api/subscriptions',
@@ -339,7 +413,7 @@ const protectedPaths = [
   '/api/search',
   '/api/notes',
   '/api/boards',
-  '/api/ai/knowledge',
+  // '/api/ai/knowledge' is shadowed by /api/ai/* (audit E-011) — removed.
   '/api/knowledge',
   '/api/brain',
   '/api/portal-admin',
@@ -350,6 +424,7 @@ const protectedPaths = [
   '/api/backup',
   '/api/whatsapp-admin',
   '/api/admin/kb',
+  '/api/cms',
 ];
 
 // /api/track is intentionally NOT in protectedPaths — it's the cookieless
@@ -414,6 +489,7 @@ app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
 app.route('/api/admin/kb', adminKb);
+app.route('/api/cms', cmsAdmin);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);

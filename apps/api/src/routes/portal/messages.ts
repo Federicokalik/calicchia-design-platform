@@ -2,6 +2,9 @@ import { Hono } from 'hono';
 import { sql } from '../../db';
 import { fail } from '../../lib/responses';
 import { portalAuth, type PortalEnv } from './auth';
+import { logger } from '../../lib/logger';
+
+const log = logger.child({ scope: 'portal-messages' });
 
 export const messagesRoutes = new Hono<PortalEnv>();
 
@@ -28,11 +31,19 @@ messagesRoutes.get('/projects/:id/messages', portalAuth, async (c) => {
     ? sql`AND pc.created_at < ${before}`
     : sql``;
 
+  // Audit B-013: customer_id NULL meant both 'admin' and 'collaborator' got
+  // labelled 'admin' on the client side. Now we discriminate via EXISTS on
+  // collaborators by name so the badge reads correctly. Slight perf cost
+  // (per-row subquery) is acceptable for a per-project thread.
   const messages = await sql`
     SELECT pc.id, pc.content, pc.sender_name, pc.is_internal,
            pc.created_at, pc.updated_at,
            CASE
              WHEN pc.customer_id IS NOT NULL THEN 'client'
+             WHEN EXISTS (
+               SELECT 1 FROM collaborators
+               WHERE name = pc.sender_name OR company = pc.sender_name
+             ) THEN 'collaborator'
              ELSE 'admin'
            END AS sender_type,
            pc.attachments
@@ -44,14 +55,24 @@ messagesRoutes.get('/projects/:id/messages', portalAuth, async (c) => {
     LIMIT ${limit}
   ` as Array<Record<string, unknown>>;
 
-  // Mark admin messages as read
-  await sql`
-    UPDATE project_comments SET is_read = true
-    WHERE project_id = ${projectId}
-      AND customer_id IS NULL
-      AND is_internal = false
-      AND is_read = false
-  `;
+  // Mark only the just-returned non-client messages as read. Audit B-018:
+  // the previous query marked every admin/collab row regardless of paging
+  // window — paginating to old messages would also clear unread badges on
+  // newer ones the client hasn't seen. Scope by id; sender_type was added
+  // to the SELECT above so we can filter without re-querying customer_id.
+  const justReturnedIds = messages
+    .filter((m) => m.sender_type !== 'client')
+    .map((m) => String(m.id))
+    .filter((id) => /^[a-f0-9-]{36}$/i.test(id));
+  if (justReturnedIds.length > 0) {
+    await sql`
+      UPDATE project_comments SET is_read = true
+      WHERE project_id = ${projectId}
+        AND is_internal = false
+        AND is_read = false
+        AND id = ANY(${justReturnedIds}::uuid[])
+    `;
+  }
 
   return c.json({ messages: messages.reverse() }); // chronological order
 });
@@ -105,14 +126,17 @@ messagesRoutes.post('/projects/:id/messages', portalAuth, async (c) => {
     VALUES (${projectId}, ${project.customer_id}, 'message', ${'Messaggio da ' + senderName}, ${content.trim().substring(0, 200)}, ${role === 'collaborator' ? 'collaborator' : 'client'})
   `;
 
-  // Send Telegram notification
+  // Send Telegram notification (audit B-026: was swallowed silently; if the
+  // bot token gets revoked we want a server log instead of dark failure).
   try {
     const { notifyTelegram } = await import('../../lib/telegram');
     await notifyTelegram(
       'Nuovo messaggio dal cliente',
       `Da: ${sender?.company_name || senderName}\nProgetto: ${project.name}\n"${content.trim().substring(0, 300)}"`
     );
-  } catch { /* non-blocking */ }
+  } catch (err) {
+    log.warn({ err, projectId }, 'telegram notify failed');
+  }
 
   return c.json({ message: { ...message, sender_type: role === 'collaborator' ? 'collaborator' : 'client' } }, 201);
 });

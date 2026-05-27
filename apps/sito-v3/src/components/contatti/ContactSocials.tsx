@@ -3,7 +3,10 @@ import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Heading } from '@/components/ui/Heading';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Section } from '@/components/ui/Section';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: social list is admin-editable through getSiteConfig().
+// The file-defined SITE.social[] remains the fallback when the admin has
+// not yet populated site_settings.site.public.social.
+import { getSiteConfig } from '@/lib/site-config';
 import { getSocialIcon } from '@/data/social-icons';
 
 /**
@@ -19,6 +22,7 @@ import { getSocialIcon } from '@/data/social-icons';
  */
 export async function ContactSocials() {
   const t = await getTranslations('contatti.channels');
+  const SITE = await getSiteConfig();
 
   if (!SITE.social || SITE.social.length === 0) return null;
 

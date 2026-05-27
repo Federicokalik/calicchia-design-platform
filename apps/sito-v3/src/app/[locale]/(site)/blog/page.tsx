@@ -29,7 +29,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BlogIndexPage() {
   const t = await getTranslations('blog.list');
-  const posts = await fetchBlogList(50);
+  const locale = (await getLocale()) as Locale;
+  const posts = await fetchBlogList(50, locale);
 
   return (
     <>

@@ -61,6 +61,7 @@
       "retry": "Invia un altro link"
     },
     "fallback": {
+      "noEmailHint": "Sei stato registrato solo via WhatsApp? Salta l'email e usa il codice di accesso ricevuto.",
       "toggleShow": "Hai un codice di accesso? Entra direttamente →",
       "toggleHide": "← Torna al link via email",
       "header": "Codice di accesso",

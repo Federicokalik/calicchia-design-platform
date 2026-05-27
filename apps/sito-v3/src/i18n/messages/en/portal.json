@@ -61,6 +61,7 @@
       "retry": "Send another link"
     },
     "fallback": {
+      "noEmailHint": "Registered via WhatsApp only? Skip the email and sign in with the access code you received.",
       "toggleShow": "Got an access code? Sign in directly →",
       "toggleHide": "← Back to email link",
       "header": "Access code",

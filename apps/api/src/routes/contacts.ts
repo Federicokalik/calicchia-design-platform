@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { publicContactSchema, firstZodIssue } from '@calicchia/shared';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { sendContactNotification } from '../lib/email';
@@ -24,8 +25,6 @@ import { logger } from '../lib/logger';
 const log = logger.child({ scope: 'contacts' });
 
 export const contacts = new Hono();
-
-const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 255;
 
 // Slug del nuovo event type dedicato al form contatti
 const CONTACT_FORM_EVENT_TYPE = process.env.CONTACT_FORM_EVENT_TYPE || 'consulenza-gratuita-30min';
@@ -67,15 +66,7 @@ contacts.get('/cal-slots', async (c) => {
 
 contacts.post('/', async (c) => {
   const body = await c.req.json();
-  const {
-    name, email, message, phone, company,
-    services, sectors,
-    wants_call, wants_meet, gdpr_consent,
-    source_page, source_service, source_profession,
-    lead_source,
-    meet_slot, // ISO datetime string if user picked a slot
-    turnstile_token,
-  } = body;
+  const { turnstile_token } = body as { turnstile_token?: string };
 
   // Turnstile verification (action binds the token to the public contact form)
   const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
@@ -86,50 +77,34 @@ contacts.post('/', async (c) => {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
-  // Validation
-  if (!name || !email) {
-    return c.json({ error: 'Nome e email richiesti' }, 400);
+  // Audit J-K-11: contract validated via the shared schema (the file used
+  // to inline ~30 lines of typeof / .length / regex checks). zod handles
+  // trim, lowercase, default-empty-string, transforms; we read the typed
+  // result instead of re-asserting types.
+  const parsed = publicContactSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: firstZodIssue(parsed.error) }, 400);
   }
-  if (!isValidEmail(email)) {
-    return c.json({ error: 'Email non valida' }, 400);
-  }
-  if (typeof name === 'string' && name.length > 100) {
-    return c.json({ error: 'Nome troppo lungo (max 100 caratteri)' }, 400);
-  }
-  if (typeof message === 'string' && message.length > 2000) {
-    return c.json({ error: 'Messaggio troppo lungo (max 2000 caratteri)' }, 400);
-  }
-  if (typeof phone === 'string') {
-    if (phone.length > 30) return c.json({ error: 'Numero di telefono troppo lungo' }, 400);
-    if (phone && !/^\+\d{1,4}\s?\d{4,15}$/.test(phone.replace(/\s+/g, ' ').trim())) {
-      return c.json({ error: 'Formato telefono non valido (es. +39 3510000000)' }, 400);
-    }
-  }
-  if (typeof company === 'string' && company.length > 150) {
-    return c.json({ error: 'Nome azienda troppo lungo' }, 400);
-  }
-  if (typeof lead_source === 'string' && lead_source.length > 64) {
-    return c.json({ error: 'Origine lead troppo lunga' }, 400);
-  }
-  if (meet_slot && (typeof meet_slot !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(meet_slot))) {
-    return c.json({ error: 'Formato slot non valido' }, 400);
-  }
-  if (gdpr_consent !== true) {
-    return c.json({ error: 'Consenso GDPR richiesto' }, 400);
-  }
+  const {
+    name, email, message, phone, company,
+    services, sectors,
+    wants_call, wants_meet, gdpr_consent,
+    source_page, source_service, source_profession,
+    lead_source,
+    meet_slot,
+  } = parsed.data;
 
-  // Sanitize arrays
-  const safeServices = Array.isArray(services) ? services.filter((s: unknown) => typeof s === 'string').slice(0, 20) : null;
-  const safeSectors = Array.isArray(sectors) ? sectors.filter((s: unknown) => typeof s === 'string').slice(0, 10) : null;
-  const safeLeadSource =
-    typeof lead_source === 'string' && lead_source.trim()
-      ? lead_source.trim().slice(0, 64)
-      : null;
+  const safeServices = services ?? null;
+  const safeSectors = sectors ?? null;
+  const safeLeadSource = lead_source ?? null;
 
   // Crea booking interno se l'utente ha scelto uno slot
   let calBookingUid: string | null = null;
   let meetingUrl: string | null = null;
   let bookingConflict = false;
+
+  const consentIp = getClientIp(c) ?? null;
+  const consentUserAgent = c.req.header('user-agent')?.slice(0, 512) ?? null;
 
   if (wants_meet && meet_slot) {
     try {
@@ -151,6 +126,9 @@ contacts.post('/', async (c) => {
           source_profession: source_profession || null,
           lead_source: safeLeadSource,
         },
+        // GDPR art. 7 — consent proof originates from the same form submission
+        consent_ip: consentIp,
+        consent_user_agent: consentUserAgent,
       });
 
       calBookingUid = booking.uid;
@@ -180,7 +158,8 @@ contacts.post('/', async (c) => {
       wants_call, wants_meet, gdpr_consent,
       source_page, source_service, source_profession,
       lead_source,
-      meet_slot, cal_booking_uid
+      meet_slot, cal_booking_uid,
+      consent_ip, consent_user_agent
     )
     VALUES (
       ${name},
@@ -198,7 +177,9 @@ contacts.post('/', async (c) => {
       ${typeof source_profession === 'string' ? source_profession.slice(0, 100) : null},
       ${safeLeadSource},
       ${meet_slot || null},
-      ${calBookingUid}
+      ${calBookingUid},
+      ${consentIp},
+      ${consentUserAgent}
     )
     RETURNING id
   `;
@@ -294,4 +275,57 @@ contacts.delete('/:id', authMiddleware, async (c) => {
   const id = c.req.param('id');
   await sql`DELETE FROM contacts WHERE id = ${id}`;
   return c.json({ success: true });
+});
+
+// ── Promote a generic contact submission to a lead in the CRM pipeline ──
+// Audit D-004: contact-form rows without an audit-leadsource never make it to
+// /pipeline. This endpoint creates the lead row + back-links contact ↔ lead so
+// admins can convert from the inbox UI with a single click.
+contacts.post('/:id/promote-to-lead', authMiddleware, async (c) => {
+  const id = c.req.param('id');
+
+  const [contact] = await sql`
+    SELECT id, name, email, phone, company, message, source_page, source_service
+    FROM contacts WHERE id = ${id} LIMIT 1
+  ` as Array<{
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    company: string | null;
+    message: string | null;
+    source_page: string | null;
+    source_service: string | null;
+  }>;
+  if (!contact) return c.json({ error: 'Contatto non trovato' }, 404);
+
+  // Idempotent: if a lead already exists for this contact (auto-created by the
+  // audit-sequence flow or by a previous promote click), return it instead of
+  // duplicating.
+  const [existing] = await sql`
+    SELECT id FROM leads WHERE source = 'website_form' AND source_id = ${id} LIMIT 1
+  ` as Array<{ id: string }>;
+  if (existing) {
+    return c.json({ lead: existing, alreadyExisted: true });
+  }
+
+  const [lead] = await sql`
+    INSERT INTO leads (name, email, phone, company, source, source_id, status, notes)
+    VALUES (
+      ${contact.name},
+      ${contact.email},
+      ${contact.phone},
+      ${contact.company},
+      'website_form',
+      ${contact.id},
+      'new',
+      ${contact.message}
+    )
+    RETURNING id
+  ` as Array<{ id: string }>;
+
+  // Mark the contact as read+archived so the inbox stays clean post-promotion.
+  await sql`UPDATE contacts SET is_read = true, is_archived = true WHERE id = ${id}`;
+
+  return c.json({ lead, alreadyExisted: false }, 201);
 });

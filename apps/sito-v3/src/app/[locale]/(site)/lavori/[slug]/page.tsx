@@ -37,7 +37,10 @@ interface Params {
 export const dynamicParams = true;
 
 export async function generateStaticParams(): Promise<Params[]> {
-  const list = await fetchAllPublishedProjects();
+  // generateStaticParams is shared across locales — fetch the IT canonical list
+  // (slugs are the same across locales today; if EN-only slugs are added later
+  // this needs to fan-out per-locale).
+  const list = await fetchAllPublishedProjects('it');
   return list.map((p) => ({ slug: p.slug }));
 }
 
@@ -47,10 +50,10 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const detail = await fetchProjectBySlug(slug);
+  const locale = (await getLocale()) as Locale;
+  const detail = await fetchProjectBySlug(slug, locale);
   if (!detail) return { title: 'Progetto non trovato' };
   const { project } = detail;
-  const locale = (await getLocale()) as Locale;
 
   // SEO override (migration 075). Se l'editor ha valorizzato seo_title /
   // seo_description, vincono sul fallback derivato da title/description.
@@ -83,7 +86,8 @@ export default async function CaseStudyPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const detail = await fetchProjectBySlug(slug);
+  const locale = (await getLocale()) as Locale;
+  const detail = await fetchProjectBySlug(slug, locale);
   if (!detail) notFound();
 
   const project: Project = adaptApiProjectToLegacy(detail.project);

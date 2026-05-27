@@ -10,7 +10,8 @@ import { HowIWork } from '@/components/home/HowIWork';
 import { FinalCTA } from '@/components/home/FinalCTA';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { SiteFooter } from '@/components/layout/SiteFooter';
-import { getServices } from '@/data/services';
+// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
+import { getServiceCatalog } from '@/lib/cms';
 import type { ShowcaseTile } from '@/data/showcase';
 import { getYearsOfExperience } from '@/data/site';
 import type { Locale } from '@/lib/i18n';
@@ -53,8 +54,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const years = getYearsOfExperience();
   const locale = (await getLocale()) as Locale;
-  const services = getServices(locale);
-  const projects = await fetchAllPublishedProjects();
+  const services = (await getServiceCatalog(locale)).all;
+  const projects = await fetchAllPublishedProjects(locale);
   const showcase: ShowcaseTile[] = projects.slice(0, 6).map((p) => ({
     src: p.cover_image ?? '',
     client: '',

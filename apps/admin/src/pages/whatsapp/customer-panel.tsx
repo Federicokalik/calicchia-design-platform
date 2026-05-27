@@ -87,7 +87,15 @@ const INVOICE_STATUS_BADGE: Record<string, string> = {
 
 export function CustomerPanel({ open, onOpenChange, customerId, leadId }: CustomerPanelProps) {
   const isCustomer = Boolean(customerId);
-  const entityHref = isCustomer ? `/clienti/${customerId}` : leadId ? `/leads/${leadId}` : null;
+  // Audit J-K-02: no /leads/:id route exists — leads live in the pipeline
+  // kanban. Same for invoices (no /fatture/:id, billing is a single page).
+  // Surface the linked entity via the existing pages with a query param so the
+  // user lands close to the right card instead of getting catch-all redirected.
+  const entityHref = isCustomer
+    ? `/clienti/${customerId}`
+    : leadId
+      ? `/pipeline?lead=${leadId}`
+      : null;
 
   const { data: customerData, isLoading: loadingCustomer } = useQuery<{ customer: Customer }>({
     queryKey: ['wa-panel-customer', customerId],
@@ -223,7 +231,7 @@ function CustomerBody({ customer, quotes, invoices }: { customer: Customer | und
           <ul className="space-y-2">
             {invoices.map((i) => (
               <li key={i.id} className="rounded-md border bg-card p-2.5">
-                <Link to={`/fatture/${i.id}`} className="block hover:underline">
+                <Link to={`/fatturazione?invoice=${i.id}`} className="block hover:underline">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium truncate">
                       <Receipt className="h-3.5 w-3.5 inline mr-1 opacity-50" />

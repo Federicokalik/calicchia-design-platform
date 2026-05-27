@@ -132,6 +132,10 @@ export interface CreateBookingInput {
   lead_id?: string;
   /** Se true salta invio email confermail (usato dal route contacts che ha già un proprio invio). */
   skip_emails?: boolean;
+  /** Audit trail GDPR art. 7 — IP raccolto al POST. Null se chiamante non lo passa (es. admin manual). */
+  consent_ip?: string | null;
+  /** Audit trail GDPR art. 7 — user-agent raccolto al POST. */
+  consent_user_agent?: string | null;
 }
 
 export interface BookingTokenPayload {

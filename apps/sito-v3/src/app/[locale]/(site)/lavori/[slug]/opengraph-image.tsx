@@ -20,7 +20,7 @@ export default async function CaseOpenGraphImage({ params }: { params: Promise<P
 
   const fontDisplay = await getFunnelDisplay();
 
-  const detail = await fetchProjectBySlug(slug);
+  const detail = await fetchProjectBySlug(slug, locale);
   const project = detail?.project;
 
   const title = project?.seo_title ?? project?.title ?? 'Case study';

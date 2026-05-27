@@ -29,7 +29,8 @@ import { useTurnstile } from '@/hooks/useTurnstile';
 import { useLeadSource } from '@/hooks/useLeadSource';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 import { reportEvent } from '@/instrumentation-client';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: contact email via useSiteConfig().
+import { useSiteConfig } from '@/lib/use-site-config';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -94,6 +95,7 @@ export function ContactFormClient() {
   const t = useTranslations('contatti.form');
   const searchParams = useSearchParams();
   const leadSource = useLeadSource();
+  const SITE = useSiteConfig();
   const auditService = isServiceOption(leadSource.service)
     ? leadSource.service
     : null;

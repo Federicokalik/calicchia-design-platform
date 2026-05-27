@@ -4,6 +4,7 @@
  */
 
 import { Hono } from 'hono';
+import { publicBookingSchema, firstZodIssue } from '@calicchia/shared';
 import { sql } from '../../db';
 import { verifyTurnstileToken } from '../../lib/turnstile';
 import { getClientIp } from '../../lib/client-ip';
@@ -32,7 +33,6 @@ const log = logger.child({ scope: 'calendar-public' });
 
 export const calendarPublic = new Hono();
 
-const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 255;
 const isValidDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
 function publicEventType(et: EventType) {
@@ -131,33 +131,21 @@ calendarPublic.post('/bookings', async (c) => {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
-  // Validation
-  const eventTypeSlug = typeof body.event_type_slug === 'string' ? body.event_type_slug : null;
-  const start = typeof body.start === 'string' ? body.start : null;
-  const attendee = body.attendee || {};
-  const tz = typeof attendee.timezone === 'string' && attendee.timezone.length > 0 && attendee.timezone.length < 80
+  // Audit J-K-11: validate via shared schema. zod trims+lowercases email,
+  // enforces phone regex / length caps / gdpr_consent=true; previously these
+  // were ~25 lines of inline typeof/regex checks here.
+  const parsed = publicBookingSchema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: firstZodIssue(parsed.error) }, 400);
+  }
+  const { event_type_slug: eventTypeSlug, start, attendee } = parsed.data;
+  const tz = attendee.timezone && attendee.timezone.length > 0 && attendee.timezone.length < 80
     ? attendee.timezone : 'Europe/Rome';
-
-  // Type guards e normalizzazione attendee fields
-  const attendeeName = typeof attendee.name === 'string' ? attendee.name.trim() : '';
-  const attendeeEmail = typeof attendee.email === 'string' ? attendee.email.trim().toLowerCase() : '';
-  const attendeePhone = typeof attendee.phone === 'string' ? attendee.phone.trim() : '';
-  const attendeeCompany = typeof attendee.company === 'string' ? attendee.company.trim() : '';
-  const attendeeMessage = typeof attendee.message === 'string' ? attendee.message.trim() : '';
-
-  if (!eventTypeSlug) return c.json({ error: 'event_type_slug richiesto' }, 400);
-  if (!start || isNaN(Date.parse(start))) return c.json({ error: 'start ISO richiesto' }, 400);
-  if (attendeeName.length < 2) return c.json({ error: 'Nome richiesto (min 2 caratteri)' }, 400);
-  if (attendeeName.length > 200) return c.json({ error: 'Nome troppo lungo (max 200)' }, 400);
-  if (!isValidEmail(attendeeEmail)) return c.json({ error: 'Email non valida' }, 400);
-  if (attendeePhone && !/^[+\d][\d\s\-().]{4,49}$/.test(attendeePhone)) {
-    return c.json({ error: 'Numero di telefono non valido' }, 400);
-  }
-  if (attendeeCompany.length > 200) return c.json({ error: 'Nome azienda troppo lungo (max 200)' }, 400);
-  if (attendeeMessage.length > 2000) return c.json({ error: 'Messaggio troppo lungo (max 2000 caratteri)' }, 400);
-  if (body.gdpr_consent !== true) {
-    return c.json({ error: 'Consenso GDPR richiesto' }, 400);
-  }
+  const attendeeName = attendee.name;
+  const attendeeEmail = attendee.email;
+  const attendeePhone = attendee.phone ?? '';
+  const attendeeCompany = attendee.company ?? '';
+  const attendeeMessage = attendee.message ?? '';
 
   // Verifica event type pubblico
   const et = await getEventType(eventTypeSlug, { onlyPublic: true });
@@ -182,6 +170,9 @@ calendarPublic.post('/bookings', async (c) => {
         source_page: typeof body.source_page === 'string' ? body.source_page.slice(0, 255) : null,
         user_agent: c.req.header('user-agent')?.slice(0, 255) || null,
       },
+      // GDPR consent proof (migration 113)
+      consent_ip: clientIp ?? null,
+      consent_user_agent: c.req.header('user-agent')?.slice(0, 512) ?? null,
     });
 
     // Auto-create lead in pipeline (best-effort: errori non bloccano il booking,

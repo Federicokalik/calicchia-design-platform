@@ -15,6 +15,20 @@ export class PortalUnauthorizedError extends Error {
 }
 
 /**
+ * Sollevato quando la sessione e' valida ma il role non ha accesso all'endpoint
+ * (es. un collaboratore che hitta una route `portalClientAuth`). Audit
+ * B-003 + B-020: prima diventava `Error` generico e le pagine catch lo
+ * trattavano come 500 — ora le pagine possono riconoscerlo e redirect a
+ * `/clienti/progetti`.
+ */
+export class PortalForbiddenError extends Error {
+  constructor(public path: string) {
+    super('Portal access forbidden for this role');
+    this.name = 'PortalForbiddenError';
+  }
+}
+
+/**
  * Sollevato da `requirePortalAccess()` quando il customer e` autenticato ma
  * non ha ancora accettato T&C+DPA per le versioni correnti (vedi
  * `apps/api/src/lib/legal-versions.ts`). Le page.tsx del portale catturano
@@ -213,11 +227,19 @@ export interface PortalInvoiceLineItem {
   [key: string]: unknown;
 }
 
-export type PortalPaymentProvider = 'stripe' | 'paypal' | 'revolut' | 'bank_transfer';
+// Audit B-016: payment_links rows in DB can carry any of 4 providers
+// (mig 030 CHECK). The PORTAL pay endpoint
+// (apps/api/src/routes/portal/invoices.ts:111) only accepts 'stripe' |
+// 'paypal' on /pay — the UI was rendering revolut / bank_transfer buttons
+// that the server then rejected. Two distinct types:
+//   - PortalPaymentProvider: the action surface (POST /pay)
+//   - PortalPaymentLinkProvider: the read surface (existing payment_links)
+export type PortalPaymentProvider = 'stripe' | 'paypal';
+export type PortalPaymentLinkProvider = 'stripe' | 'paypal' | 'revolut' | 'bank_transfer';
 
 export interface PortalPaymentLink {
   id: string;
-  provider: PortalPaymentProvider;
+  provider: PortalPaymentLinkProvider;
   checkout_url: string | null;
   status: 'pending' | 'active' | 'paid' | 'expired' | 'cancelled' | 'refunded' | 'partially_refunded';
   amount: number;
@@ -282,7 +304,7 @@ export interface PortalMessage {
   project_id?: string;
   content: string;
   sender_name: string;
-  sender_type: 'client' | 'admin';
+  sender_type: 'client' | 'admin' | 'collaborator';
   is_internal?: boolean;
   attachments?: unknown;
   created_at: string;
@@ -310,6 +332,7 @@ async function authedFetch<T>(path: string, init: RequestInit = {}): Promise<T> 
   });
 
   if (res.status === 401) throw new PortalUnauthorizedError(path);
+  if (res.status === 403) throw new PortalForbiddenError(path);
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
     throw new Error(`Portal API ${path} returned ${res.status}: ${txt.slice(0, 200)}`);
@@ -497,8 +520,17 @@ export async function getInvoice(id: string): Promise<PortalInvoice | null> {
   return data?.invoice ?? null;
 }
 
-export async function getPaymentSchedules(projectId?: string): Promise<PortalPaymentSchedule[]> {
-  const path = projectId ? `/invoices/payments?project_id=${encodeURIComponent(projectId)}` : '/invoices/payments';
+export async function getPaymentSchedules(
+  opts?: { projectId?: string; invoiceId?: string },
+): Promise<PortalPaymentSchedule[]> {
+  // Audit B-022: invoice detail used to list ALL schedules — now scope by
+  // invoice_id when provided so only schedules actually linked to that fattura
+  // appear. project filter kept for the project detail flow.
+  const params = new URLSearchParams();
+  if (opts?.projectId) params.set('project_id', opts.projectId);
+  if (opts?.invoiceId) params.set('invoice_id', opts.invoiceId);
+  const qs = params.toString();
+  const path = qs ? `/invoices/payments?${qs}` : '/invoices/payments';
   const data = await authedFetch<{ schedules: PortalPaymentSchedule[] }>(path);
   return data.schedules ?? [];
 }

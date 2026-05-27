@@ -53,7 +53,7 @@ export default async function FilesPage({ params }: PageProps) {
     ]);
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar
           breadcrumbs={[
             { label: t('nav.items.dashboard'), href: '/clienti/dashboard' },

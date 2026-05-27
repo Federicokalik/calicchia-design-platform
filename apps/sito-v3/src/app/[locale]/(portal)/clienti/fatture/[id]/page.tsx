@@ -47,18 +47,17 @@ export default async function FatturaDetailPage({ params }: PageProps) {
     const [customer, invoice, allSchedules, t, locale] = await Promise.all([
       requirePortalAccess(),
       getInvoice(id),
-      getPaymentSchedules(),
+      // Audit B-022: API now supports ?invoice_id= scoping (added in PR11) +
+      // the response carries `invoice` metadata on each row. Pass id so we
+      // only see schedules actually attached to this fattura instead of the
+      // whole customer's piano di pagamento.
+      getPaymentSchedules({ invoiceId: id }),
       getTranslations('portal'),
       getLocale(),
     ]);
     if (!invoice) notFound();
 
-    const schedules: PortalPaymentSchedule[] = allSchedules.filter((s) => {
-      // Show schedules tied to this invoice OR linked via quote
-      // (we don't have invoice_id on schedule list response — so showing all schedules
-      // is OK in v1; admin scopes them per project anyway)
-      return s.status !== 'cancelled';
-    });
+    const schedules: PortalPaymentSchedule[] = allSchedules.filter((s) => s.status !== 'cancelled');
 
     const lineItems = isLineItemArray(invoice.line_items) ? invoice.line_items : [];
     const currency = invoice.currency ?? 'EUR';
@@ -66,7 +65,7 @@ export default async function FatturaDetailPage({ params }: PageProps) {
     const isPaid = status === 'paid';
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar
           breadcrumbs={[
             { label: t('nav.items.dashboard'), href: '/clienti/dashboard' },

@@ -16,11 +16,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useI18n } from '@/hooks/use-i18n';
 import { cn } from '@/lib/utils';
 import { SidebarNav } from './sidebar-nav';
-
-// Inlined at build time. On Vite the only way to ship a deploy-specific public
-// site URL is to set VITE_SITE_URL as a build-arg in the admin Docker image;
-// the fallback keeps `pnpm dev` working without further configuration.
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || 'http://localhost:3000';
+import { SITE_URL } from '@/lib/public-urls';
 
 interface SidebarProps {
   collapsed: boolean;

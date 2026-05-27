@@ -175,6 +175,8 @@ TODO.md
 task.md
 .serena/
 audit/
+audit-reports/
+AUDIT_*.md
 
 # =====================================================
 # TEMPORARY FILES

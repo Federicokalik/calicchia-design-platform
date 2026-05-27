@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function LavoriIndexPage() {
   const t = await getTranslations('lavori.list');
   const locale = (await getLocale()) as Locale;
-  const apiList = await fetchAllPublishedProjects();
+  const apiList = await fetchAllPublishedProjects(locale);
   const projects = apiList.map((p) => adaptApiListItem(p));
   const count = projects.length;
 

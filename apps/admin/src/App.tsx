@@ -66,6 +66,15 @@ import AnalyticsPage from '@/pages/analytics';
 import ImpostazioniPage from '@/pages/impostazioni';
 import WhatsAppInboxPage from '@/pages/whatsapp';
 import WhatsAppEventsPage from '@/pages/whatsapp/events';
+import ContattiPage from '@/pages/contatti';
+import GdprRequestsPage from '@/pages/privacy/gdpr-requests';
+import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
+import NewsletterPage from '@/pages/marketing/newsletter';
+import FaqCmsPage from '@/pages/cms/faq';
+import TeamCmsPage from '@/pages/cms/team';
+import GlossarioCmsPage from '@/pages/cms/glossario';
+import SeoCitiesCmsPage from '@/pages/cms/seo-cities';
+import ServicesCmsPage from '@/pages/cms/services';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -217,6 +226,24 @@ export default function App() {
         <Route path="billing" element={<FatturazionePage />} />
         <Route path="services" element={<ServiziPage />} />
         <Route path="settings" element={<ImpostazioniPage />} />
+
+        {/* Inbox / CRM intake (audit J-08) */}
+        <Route path="contatti" element={<ContattiPage />} />
+        <Route path="contacts" element={<ContattiPage />} />
+
+        {/* Privacy / GDPR (audit J-10 + J-11) */}
+        <Route path="privacy/gdpr-requests" element={<GdprRequestsPage />} />
+        <Route path="privacy/cookie-consent" element={<CookieConsentAuditPage />} />
+
+        {/* Marketing (audit J-09) */}
+        <Route path="marketing/newsletter" element={<NewsletterPage />} />
+
+        {/* CMS pubblico (audit C-013/C-014) */}
+        <Route path="cms/faq" element={<FaqCmsPage />} />
+        <Route path="cms/team" element={<TeamCmsPage />} />
+        <Route path="cms/glossario" element={<GlossarioCmsPage />} />
+        <Route path="cms/seo-cities" element={<SeoCitiesCmsPage />} />
+        <Route path="cms/services" element={<ServicesCmsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

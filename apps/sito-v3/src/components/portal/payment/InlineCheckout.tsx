@@ -18,8 +18,6 @@ interface InlineCheckoutProps {
   currency: string;
   /** Subset of providers to expose. Defaults to all three. */
   availableProviders?: PaymentProvider[];
-  /** Portal mode: posts {schedule_id, provider} to /api/portal/pay. */
-  scheduleId?: string;
   /** Public mode: link UUID — used for /api/public-pay/:id/* endpoints. */
   linkId?: string;
   /** If true, the panel mounts a single provider directly without tabs (public mode). */
@@ -53,7 +51,6 @@ export function InlineCheckout({
   amount,
   currency,
   availableProviders = ['stripe', 'paypal', 'bank_transfer'],
-  scheduleId,
   linkId,
   singleProvider,
   onSuccess,
@@ -79,23 +76,18 @@ export function InlineCheckout({
     if (state.loading) return;
     setState({ active: provider, loading: true, error: null, data: null });
     try {
-      let res: Response;
-      if (linkId) {
-        // Public flow
-        res = await fetch(`/api/public-pay/${linkId}/checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-      } else if (scheduleId) {
-        // Portal flow
-        res = await fetch('/api/portal/pay', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ schedule_id: scheduleId, provider }),
-        });
-      } else {
-        throw new Error('Missing scheduleId or linkId');
+      // Audit B-017: removed the scheduleId/portal branch — its only
+      // consumer (PortalPaymentRow) was dead, the schema didn't match
+      // what /api/portal/pay returns, and exposing bank_transfer here
+      // through a portal that doesn't route it would have rendered a
+      // button the server rejects. Component is now public-flow only.
+      if (!linkId) {
+        throw new Error('InlineCheckout requires linkId (public-pay flow)');
       }
+      const res = await fetch(`/api/public-pay/${linkId}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error ?? data.message ?? `HTTP ${res.status}`);

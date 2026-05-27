@@ -2,8 +2,12 @@
  * MEGA S4 Storage Client (S3-compatible)
  * Handles multipart uploads for client file uploads.
  *
- * Environment variables:
- * - S4_ACCESS_KEY, S4_SECRET_KEY
+ * Environment variables (canonical names match .env.example + docker-compose.prod.yml):
+ * - S4_ACCESS_KEY_ID, S4_SECRET_ACCESS_KEY (audit J-K-14: legacy S4_ACCESS_KEY /
+ *   S4_SECRET_KEY are still accepted as fallback so existing local .envs keep
+ *   working, but new deploys should set the *_ID / *_ACCESS_* names — that's
+ *   what admin-kb.ts and the prod compose use, and a mismatch made the portal
+ *   upload break in production).
  * - S4_BUCKET (default: client-uploads)
  * - S4_REGION (default: eu-central-1)
  * - S4_ENDPOINT (default: https://s3.eu-central-1.s4.mega.io)
@@ -27,11 +31,11 @@ let _client: S3Client | null = null;
 function getClient(): S3Client {
   if (_client) return _client;
 
-  const accessKeyId = process.env.S4_ACCESS_KEY;
-  const secretAccessKey = process.env.S4_SECRET_KEY;
+  const accessKeyId = process.env.S4_ACCESS_KEY_ID || process.env.S4_ACCESS_KEY;
+  const secretAccessKey = process.env.S4_SECRET_ACCESS_KEY || process.env.S4_SECRET_KEY;
 
   if (!accessKeyId || !secretAccessKey) {
-    throw new Error('S4_ACCESS_KEY and S4_SECRET_KEY are required for MEGA S4 uploads');
+    throw new Error('S4_ACCESS_KEY_ID and S4_SECRET_ACCESS_KEY are required for MEGA S4 uploads');
   }
 
   _client = new S3Client({

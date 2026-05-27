@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
-import { apiFetch, API_BASE } from '@/lib/api';
+import { apiFetch, apiFetchRaw } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -44,6 +44,7 @@ const NAV_GROUPS = [
     items: [
       { id: 'profilo', label: 'Profilo', icon: User },
       { id: 'studio-freelance', label: 'Operatività', icon: Briefcase },
+      { id: 'sito-pubblico', label: 'Sito pubblico', icon: Palette },
     ],
   },
   {
@@ -113,6 +114,9 @@ export default function ImpostazioniPage() {
   const businessProfile = settings['business.profile'] || {};
   const quoteSettings = settings['quote.settings'] || {};
   const freelancerStudio = settings['freelancer.studio'] || {};
+  // Audit C-013/C-014: site.public is the marketing-surface key consumed by
+  // sito-v3 through /api/public/site-config (brand/social/geo/desc/cal).
+  const sitePublic = settings['site.public'] || {};
   const apiKeys = keysData?.keys || [];
   const auditLogs = auditData?.logs || auditData?.entries || [];
 
@@ -149,9 +153,50 @@ export default function ImpostazioniPage() {
     fs[key] !== undefined ? fs[key] : freelancerStudio[key] ?? fallback;
   const setFsField = (key: string, value: any) => setFs((prev) => ({ ...prev, [key]: value }));
 
+  // site.public local state: simple scalars + a JSON-edited social[] and geo{}
+  // (advanced shapes don't justify a custom array editor for now — the
+  // textarea + JSON.parse path is fine because admin authors are trusted).
+  const [sp, setSp] = useState<Record<string, any>>({});
+  const getSp = (key: string, fallback = '') =>
+    sp[key] !== undefined ? sp[key] : sitePublic[key] ?? fallback;
+  const setSpField = (key: string, value: any) => setSp((prev) => ({ ...prev, [key]: value }));
+  const [spSocialText, setSpSocialText] = useState<string | null>(null);
+  const [spGeoText, setSpGeoText] = useState<string | null>(null);
+  const socialJson = spSocialText !== null
+    ? spSocialText
+    : JSON.stringify(sitePublic.social ?? [], null, 2);
+  const geoJson = spGeoText !== null
+    ? spGeoText
+    : JSON.stringify(sitePublic.geo ?? {}, null, 2);
+
   const saveQs = () => { saveMutation.mutate({ key: 'quote.settings', value: { ...quoteSettings, ...qs } }); setQs({}); };
   const saveBp = () => { saveMutation.mutate({ key: 'business.profile', value: { ...businessProfile, ...bp } }); setBp({}); };
   const saveFs = () => { saveMutation.mutate({ key: 'freelancer.studio', value: { ...freelancerStudio, ...fs } }); setFs({}); };
+  const saveSp = () => {
+    // Parse the JSON textareas with a tolerant fallback to the existing value
+    // — the Save button is the user's commit, so a malformed JSON should
+    // surface as an error toast rather than silently discarding their edits.
+    let parsedSocial = sitePublic.social ?? [];
+    let parsedGeo = sitePublic.geo ?? {};
+    if (spSocialText !== null) {
+      try { parsedSocial = JSON.parse(spSocialText); }
+      catch { toast.error('JSON social non valido'); return; }
+    }
+    if (spGeoText !== null) {
+      try { parsedGeo = JSON.parse(spGeoText); }
+      catch { toast.error('JSON geo non valido'); return; }
+    }
+    const value = {
+      ...sitePublic,
+      ...sp,
+      social: parsedSocial,
+      geo: parsedGeo,
+    };
+    saveMutation.mutate({ key: 'site.public', value });
+    setSp({});
+    setSpSocialText(null);
+    setSpGeoText(null);
+  };
 
   useTopbar({ title: 'Impostazioni', subtitle: 'Business, integrazioni, sicurezza, AI e sistema' });
 
@@ -440,6 +485,105 @@ export default function ImpostazioniPage() {
           </>
         )}
 
+        {/* === SITO PUBBLICO === */}
+        {activeTab === 'sito-pubblico' && (
+          <>
+            <div>
+              <h2 className="text-lg font-semibold">Sito pubblico</h2>
+              <p className="text-sm text-muted-foreground">
+                Contenuto editabile del sito pubblico (calicchia.design) — brand, descrizione,
+                CTA prenotazione, social, coordinate geografiche. Modificato qui, riflesso
+                sul sito senza redeploy via{' '}
+                <code className="bg-muted px-1 rounded">/api/public/site-config</code>{' '}
+                (5 min cache).
+              </p>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Email / telefono / indirizzo / P.IVA stanno in <strong>Profilo</strong>{' '}
+                (chiave <code className="bg-muted px-1 rounded">business.profile</code>) —
+                sono condivisi col PDF preventivi.
+              </p>
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Palette className="h-4 w-4 text-muted-foreground" /> Brand
+              </div>
+              <Field
+                label="Brand"
+                value={getSp('brand')}
+                onChange={(v) => setSpField('brand', v)}
+                placeholder="Caldes"
+                description="Nome corto usato in metadata + footer (es. tab title)"
+              />
+              <Field
+                label="Descrizione SEO"
+                value={getSp('description')}
+                onChange={(v) => setSpField('description', v)}
+                rows={3}
+                placeholder="Web Designer & Developer Freelance a Frosinone..."
+                description="<meta name='description'> globale + OG/Twitter."
+              />
+              <Field
+                label="URL prenotazione (cal)"
+                value={getSp('cal')}
+                onChange={(v) => setSpField('cal', v)}
+                placeholder="/prenota/consulenza-gratuita-30min"
+                description="CTA 'Prenota una call' nei menu e pagina contatti."
+              />
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Link2 className="h-4 w-4 text-muted-foreground" /> Social links
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Array JSON di <code className="bg-muted px-1 rounded">{`{ label, url, icon? }`}</code>.
+                Le icone supportate sono Phosphor: <code>instagram-logo</code>, <code>linkedin-logo</code>,{' '}
+                <code>github-logo</code>, <code>facebook-logo</code>, <code>telegram-logo</code>,{' '}
+                <code>whatsapp-logo</code>, <code>mastodon-logo</code>, <code>git-branch</code>.
+                Lasciare vuoto <code>[]</code> per disattivare la sezione social.
+              </p>
+              <Textarea
+                value={socialJson}
+                onChange={(e) => setSpSocialText(e.target.value)}
+                rows={10}
+                className="font-mono text-xs"
+                placeholder='[{"label":"Instagram","url":"https://instagram.com/calicchia.design","icon":"instagram-logo"}]'
+              />
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <MapPin className="h-4 w-4 text-muted-foreground" /> Coordinate geografiche
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Oggetto JSON con <code>lat</code>, <code>lng</code>, <code>city</code>,{' '}
+                <code>province</code>, <code>region</code>, <code>country</code>,{' '}
+                <code>postalCode</code>. Pin sulla mappa del footer + LocalBusiness JSON-LD.
+              </p>
+              <Textarea
+                value={geoJson}
+                onChange={(e) => setSpGeoText(e.target.value)}
+                rows={8}
+                className="font-mono text-xs"
+                placeholder='{"lat":41.60,"lng":13.35,"city":"Ceccano","province":"FR","region":"Lazio","country":"IT","postalCode":"03023"}'
+              />
+            </div>
+
+            <Button
+              onClick={saveSp}
+              disabled={
+                saveMutation.isPending
+                && Object.keys(sp).length === 0
+                && spSocialText === null
+                && spGeoText === null
+              }
+            >
+              {saveMutation.isPending ? 'Salvataggio...' : 'Salva sito pubblico'}
+            </Button>
+          </>
+        )}
+
         {/* === PREVENTIVI === */}
         {activeTab === 'preventivi' && (
           <>
@@ -580,7 +724,6 @@ export default function ImpostazioniPage() {
             <div className="space-y-3">
               {[
                 { key: 'calcom', name: 'Cal.com', desc: 'Booking appuntamenti', category: 'Calendario' },
-                { key: 'google_calendar', name: 'Google Calendar', desc: 'Sync eventi', category: 'Calendario' },
                 { key: 'whatsapp', name: 'WhatsApp (GOWA)', desc: 'Gateway WhatsApp self-hosted', category: 'Comunicazione' },
                 { key: 'resend', name: 'Resend', desc: 'Email transazionali', category: 'Comunicazione' },
                 { key: 'smtp', name: 'SMTP', desc: 'Email operative e notifiche', category: 'Comunicazione' },
@@ -825,11 +968,9 @@ function BackupSection() {
   const exportBackup = async () => {
     setExporting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/backup/export`, { credentials: 'include' });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
+      // apiFetchRaw applies the same 401 refresh flow as apiFetch but returns
+      // the Response so we can stream the blob (audit D-005).
+      const res = await apiFetchRaw('/api/backup/export');
       const blob = await res.blob();
       const disposition = res.headers.get('content-disposition') || '';
       const match = disposition.match(/filename="([^"]+)"/);
@@ -860,12 +1001,22 @@ function BackupSection() {
       return apiFetch('/api/backup/import', { method: 'POST', body: fd });
     },
     onSuccess: (data: any) => {
-      toast.success(`Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe`);
+      // Audit D-006: after restore the users table has been wiped and reloaded,
+      // so the current admin's session cookie likely references a stale or
+      // missing row. Force a logout + redirect so the next page load goes
+      // through /login, instead of silently 401-ing on the next protected fetch.
+      toast.success(
+        `Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe. Devi effettuare nuovamente l'accesso.`,
+        { duration: 6000 },
+      );
       setSelectedFile(null);
       setConfirmText('');
       if (fileRef.current) fileRef.current.value = '';
-      queryClient.invalidateQueries({ queryKey: ['backup-info'] });
-      queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+      // Hard reload to /login — drops in-memory caches and forces a fresh
+      // auth handshake against the restored DB.
+      setTimeout(() => {
+        window.location.assign('/login?restored=1');
+      }, 800);
     },
     onError: (err: any) => toast.error(err?.message || 'Errore ripristino'),
   });

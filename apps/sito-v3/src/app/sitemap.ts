@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { SITE } from '@/data/site';
-import { SERVICES as SITE_SERVICES } from '@/data/services';
-import { SEO_CITIES } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21/22): cities + services ora via DB-backed helper.
+import { getSeoCities, getServiceCatalog } from '@/lib/cms';
 import {
   SEO_SERVICES,
   getProfessionsForService,
@@ -308,7 +308,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
-  for (const service of SITE_SERVICES) {
+  const serviceCatalog = await getServiceCatalog();
+  for (const service of serviceCatalog.all) {
     entries.push(
       ...localizedEntries(`/servizi/${service.slug}`, now, {
         priority: 0.8,
@@ -317,8 +318,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   }
 
-  const tierOneCities = SEO_CITIES.filter((city) => city.tier === 1);
-  const tierOneAndTwoCities = SEO_CITIES.filter((city) => city.tier <= 2);
+  const cityIndex = await getSeoCities();
+  const tierOneCities = cityIndex.all.filter((city) => city.tier === 1);
+  const tierOneAndTwoCities = cityIndex.all.filter((city) => city.tier <= 2);
 
   for (const city of tierOneAndTwoCities) {
     entries.push(

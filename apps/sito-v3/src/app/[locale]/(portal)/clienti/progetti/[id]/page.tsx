@@ -61,7 +61,7 @@ export default async function ProgettoDetailPage({ params }: PageProps) {
     const completedMilestones = milestones.filter((milestone) => milestone.status === 'completed').length;
 
     return (
-      <PortalShell userLabel={getPortalCustomerLabel(customer, t)}>
+      <PortalShell userLabel={getPortalCustomerLabel(customer, t)} role={customer.role}>
         <PortalTopbar
           breadcrumbs={[
             { label: t('nav.items.dashboard'), href: '/clienti/dashboard' },

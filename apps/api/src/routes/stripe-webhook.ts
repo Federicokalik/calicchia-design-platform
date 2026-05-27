@@ -13,25 +13,39 @@ export const stripeWebhook = new Hono();
 
 const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
+// Audit J-K-09: error responses must not leak which check failed (signature
+// missing vs invalid vs payload malformed) — that information turns the
+// endpoint into an oracle for probing. Stripe requires 4xx on rejection so
+// it retries with backoff, so we keep the STATUS code accurate (400 for
+// any pre-processing rejection, 500 for handler failure) but make the BODY
+// uniformly generic. Diagnostics live in `log.warn`/`log.error` +
+// `captureException` (Bugsink) — visible to ops, opaque to probers.
+const STRIPE_GENERIC_REJECT = { error: 'Invalid request' } as const;
+const STRIPE_GENERIC_FAILURE = { error: 'Internal error' } as const;
+
 stripeWebhook.post('/', async (c) => {
   if (!isStripeConfigured() || !STRIPE_WEBHOOK_SECRET) {
-    return c.json({ error: 'Stripe non configurato' }, 503);
+    log.warn('stripe-webhook hit but STRIPE_WEBHOOK_SECRET / stripe client not configured');
+    return c.json(STRIPE_GENERIC_REJECT, 503);
   }
 
   const body = await c.req.text();
   const signature = c.req.header('stripe-signature');
 
-  if (!signature) return c.json({ error: 'Signature mancante' }, 400);
+  if (!signature) {
+    log.warn('stripe-webhook missing stripe-signature header');
+    return c.json(STRIPE_GENERIC_REJECT, 400);
+  }
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    log.error({ err }, 'Errore verifica webhook');
+    log.error({ err }, 'stripe-webhook signature verification failed');
     captureException(err instanceof Error ? err : new Error(String(err)), {
       source: 'stripe-webhook', stage: 'signature-verification',
     });
-    return c.json({ error: 'Webhook signature non valida' }, 400);
+    return c.json(STRIPE_GENERIC_REJECT, 400);
   }
 
   const logRow: Record<string, unknown> = {
@@ -284,6 +298,6 @@ stripeWebhook.post('/', async (c) => {
       })}
       WHERE event_id = ${event.id}
     `;
-    return c.json({ error: 'Webhook processing failed' }, 500);
+    return c.json(STRIPE_GENERIC_FAILURE, 500);
   }
 });

@@ -70,6 +70,55 @@ export async function apiFetch(
   throw new Error(data?.error || `HTTP ${res.status}`);
 }
 
+/**
+ * Same auth + 401-refresh flow as apiFetch, but returns the raw Response so the
+ * caller can stream blobs / read non-JSON bodies. Audit D-005: lib/sdi.ts, the
+ * backup-export button, knowledge-base downloads and the AI extract endpoints
+ * all used raw fetch() and missed the 401 refresh path.
+ */
+export async function apiFetchRaw(
+  endpoint: string,
+  options: RequestInit = {},
+  retryAuth = true,
+): Promise<Response> {
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type') && options.body && !(options.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const locale = getStoredAdminLocale();
+  headers.set('Accept-Language', toIntlLocale(locale));
+  headers.set('X-Admin-Locale', locale);
+
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+    credentials: 'include',
+  });
+
+  if (res.ok) {
+    sessionState.lastActivity = Date.now();
+    return res;
+  }
+
+  if (res.status === 401 && retryAuth && !isAuthRedirectExempt() && endpoint !== '/api/auth/refresh') {
+    const refreshed = await refreshAdminSession();
+    if (refreshed) return apiFetchRaw(endpoint, options, false);
+  }
+
+  if (res.status === 401 && !isAuthRedirectExempt()) {
+    const back = window.location.pathname + window.location.search;
+    window.location.assign(`/login?next=${encodeURIComponent(back)}`);
+  }
+
+  // Try to surface a server-provided error message if the body is JSON.
+  let message = `HTTP ${res.status}`;
+  try {
+    const data = await res.clone().json();
+    if (data?.error) message = data.error;
+  } catch { /* not json — fall through */ }
+  throw new Error(message);
+}
+
 export async function refreshAdminSession(): Promise<boolean> {
   const res = await fetch(`${API_BASE}/api/auth/refresh`, {
     method: 'POST',

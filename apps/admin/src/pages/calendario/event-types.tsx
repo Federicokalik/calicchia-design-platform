@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
+import { SITE_URL } from '@/lib/public-urls';
 
 interface EventType {
   id: string;
@@ -29,8 +30,6 @@ const LOCATION_LABEL: Record<string, string> = {
   in_person: 'In presenza',
   phone: 'Telefono',
 };
-
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || 'http://localhost:3000';
 
 export default function EventTypesPage() {
   const queryClient = useQueryClient();
@@ -151,7 +150,11 @@ function NewEventTypeForm({ onClose }: { onClose: () => void }) {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [duration, setDuration] = useState(30);
-  const [locationType, setLocationType] = useState<'google_meet' | 'custom_url' | 'in_person' | 'phone'>('google_meet');
+  // Audit D-011: default was google_meet but Google Workspace was dismissed —
+  // booking flow would show empty location_value to attendees unless admin
+  // manually pasted a link every time. Default to custom_url so the booking
+  // form's empty state is at least honest.
+  const [locationType, setLocationType] = useState<'google_meet' | 'custom_url' | 'in_person' | 'phone'>('custom_url');
   const [locationValue, setLocationValue] = useState('');
 
   const create = useMutation({

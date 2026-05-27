@@ -56,13 +56,28 @@ function buildPortalAccessMessage(opts: { name: string | null; link: string; cod
 }
 
 async function rotateCustomerPortalCode(id: string): Promise<{ id: string; code: string } | null> {
-  const code = 'PRJ-' + randomBytes(4).toString('hex').toUpperCase();
+  // 128-bit entropy (audit B-010): randomBytes(16) base64url-encoded gives
+  // ~22 chars vs the previous 4-byte hex (32-bit, brute-forceable with botnet).
+  // 'PRJ-' kept intentionally so existing onboarding emails don't break — the
+  // type-leak risk is acceptable trade-off.
+  const random = randomBytes(16).toString('base64url');
+  const code = 'PRJ-' + random;
   const hash = await bcrypt.hash(code, 12);
+  // First 4 chars of the random part feed an indexed lookup (audit B-009 —
+  // findActorByCode used to bcrypt-scan every row; now filters by prefix first).
+  const prefix = random.slice(0, 4);
 
+  // Bump session_version atomically so any cookie still authenticating with the
+  // old code (typical scenario: code leaked, admin clicks "Rigenera") is
+  // invalidated by the portalAuth middleware on the next request. Without this
+  // the new code lived alongside the old session cookie until natural expiry
+  // (audit B-007).
   const [customer] = await sql`
     UPDATE customers
     SET portal_access_code_hash = ${hash},
-        portal_access_code_rotated_at = NOW()
+        portal_access_code_prefix = ${prefix},
+        portal_access_code_rotated_at = NOW(),
+        session_version = session_version + 1
     WHERE id = ${id}
     RETURNING id
   `;

@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { marked } from 'marked';
 import { sql } from '../db';
+import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import * as openai from '../lib/ai/openai';
 import * as perplexity from '../lib/ai/perplexity';
 import * as coverGenerator from '../lib/ai/cover-generator';
@@ -129,6 +130,11 @@ blog.get('/posts/:id', async (c) => {
 
 blog.post('/posts', async (c) => {
   const body = await c.req.json();
+  // Defense in depth: Tiptap strips <script> client-side, but a hand-rolled
+  // POST can carry whatever HTML it wants. Sanitize before persist (audit D-002)
+  // so RSS, OG image, and any future raw renderer can't be turned into an XSS
+  // vector by a compromised or buggy editor session.
+  if (typeof body.content === 'string') body.content = sanitizeBlogHtml(body.content);
   const [post] = await sql`INSERT INTO blog_posts ${sql(body)} RETURNING *`;
   return c.json({ post }, 201);
 });
@@ -136,6 +142,7 @@ blog.post('/posts', async (c) => {
 blog.put('/posts/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json();
+  if (typeof body.content === 'string') body.content = sanitizeBlogHtml(body.content);
   const [post] = await sql`UPDATE blog_posts SET ${sql(body)} WHERE id = ${id} RETURNING *`;
   return c.json({ post });
 });
@@ -213,7 +220,9 @@ blog.patch('/posts/:id/translations/:locale', async (c) => {
     if (value === null || value === '') {
       deleted.push(field);
     } else {
-      rows.push({ post_id: id, locale, field_name: field, field_value: value });
+      // 'content' translation is HTML — same sanitize as the canonical IT body.
+      const safe = field === 'content' ? sanitizeBlogHtml(value) : value;
+      rows.push({ post_id: id, locale, field_name: field, field_value: safe });
     }
   }
 
@@ -1003,19 +1012,9 @@ function calculateNextRun(config: Record<string, unknown>, fromDate: Date): Date
   return next;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Serve interactive code demos (iframe src)
-// ─────────────────────────────────────────────────────────────
-
+// Interactive code demos were previously served at /api/blog/demos/:postId/:index
+// inside this admin-gated router (audit C-002) → 401 for anonymous iframe loads.
+// Moved to /api/public/blog-demos/:postId/:index in routes/public.ts.
 blog.get('/demos/:postId/:index', async (c) => {
-  const postId = c.req.param('postId');
-  const index = parseInt(c.req.param('index'));
-
-  const [post] = await sql`SELECT demos FROM blog_posts WHERE id = ${postId}`;
-  if (!post) return c.text('Post non trovato', 404);
-
-  const demos: string[] = typeof post.demos === 'string' ? JSON.parse(post.demos) : (post.demos || []);
-  if (index < 0 || index >= demos.length) return c.text('Demo non trovata', 404);
-
-  return c.html(demos[index]);
+  return c.text('Moved — see /api/public/blog-demos/:postId/:index', 410);
 });

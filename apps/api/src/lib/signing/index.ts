@@ -8,6 +8,49 @@ export function otpExpiresAt(minutesFromNow = 10): Date {
   return new Date(Date.now() + minutesFromNow * 60_000);
 }
 
+/**
+ * Keyed hash of an OTP code. Stored in DB so a DB-read leak does not expose
+ * the live 6-digit code. The key is JWT_SECRET (reused for symmetry with
+ * private-files.ts; a dedicated OTP_HASH_SECRET would be cleaner — see audit
+ * E-003 follow-up).
+ */
+export function hashOtp(code: string): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET is required for OTP hashing');
+  return crypto.createHmac('sha256', secret).update(code.trim()).digest('hex');
+}
+
+/**
+ * Constant-time check against the stored hash + expiry. Returns false (not
+ * throws) on any malformed input — caller decides 4xx surface.
+ */
+export function verifyOtpHash(
+  otpHash: string | null,
+  otpExpiresAtValue: string | Date | null,
+  providedOtp: string,
+): boolean {
+  if (!otpHash || !otpExpiresAtValue) return false;
+  const expiry = new Date(otpExpiresAtValue).getTime();
+  if (Number.isNaN(expiry) || expiry < Date.now()) return false;
+  let providedHash: string;
+  try {
+    providedHash = hashOtp(providedOtp);
+  } catch {
+    return false;
+  }
+  const a = Buffer.from(providedHash, 'hex');
+  const b = Buffer.from(otpHash, 'hex');
+  if (a.length === 0 || a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
+
+/** Max wrong OTP submissions before the code is invalidated. */
+export const OTP_MAX_ATTEMPTS = 5;
+
+/**
+ * @deprecated Use verifyOtpHash + hashOtp. Kept for callers still on plaintext
+ * otp_code columns until 112_otp_hash_attempts.sql is fully rolled out.
+ */
 export function isOtpValid(
   otpCode: string | null,
   otpExpiresAtValue: string | Date | null,

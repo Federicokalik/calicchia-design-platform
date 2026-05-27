@@ -20,6 +20,11 @@ export function sanitizeBlogHtml(html: string | null | undefined): string {
       img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
       a: ['href', 'name', 'target', 'rel'],
       iframe: ['src', 'width', 'height', 'allow', 'allowfullscreen', 'title'],
+      // div.demo-embed[data-demo-index] is the AI-demo placeholder the client
+      // island BlogDemoIslands hydrates into an iframe (audit C-003). Without
+      // this allowlist sanitize-html stripped the data- attr and the island
+      // couldn't tell which demo to load.
+      div: ['data-demo-index'],
       '*': ['class'],
     },
     allowedSchemes: ['http', 'https', 'mailto'],

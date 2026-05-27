@@ -15,11 +15,14 @@ dashboardRoutes.get('/', portalClientAuth, async (c) => {
       (SELECT COUNT(*) FROM client_projects
        WHERE customer_id = ${customerId} AND visible_to_client = true
        AND status NOT IN ('completed', 'cancelled', 'on_hold', 'draft')) AS active_projects,
+      -- Audit J-K-13: include invoice-only schedules in the pending total
+      -- (was filtering only project/quote-linked schedules).
       (SELECT COALESCE(SUM(ps.amount - COALESCE(ps.paid_amount, 0)), 0)
        FROM payment_schedules ps
        WHERE ps.status IN ('pending', 'due', 'overdue')
        AND (ps.project_id IN (SELECT id FROM client_projects WHERE customer_id = ${customerId})
-            OR ps.quote_id IN (SELECT id FROM quotes WHERE customer_id = ${customerId}))
+            OR ps.quote_id IN (SELECT id FROM quotes WHERE customer_id = ${customerId})
+            OR ps.invoice_id IN (SELECT id FROM invoices WHERE customer_id = ${customerId}))
       ) AS total_pending,
       (SELECT COUNT(*) FROM invoices
        WHERE customer_id = ${customerId} AND status = 'open') AS open_invoices

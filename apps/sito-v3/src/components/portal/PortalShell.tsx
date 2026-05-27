@@ -14,6 +14,13 @@ interface PortalShellProps {
   children: ReactNode;
   /** Optional override of the user-name slot in the sidebar bottom. */
   userLabel?: string;
+  /**
+   * Authenticated role of the current portal user. Drives PortalNav filtering
+   * (audit B-004: collaborator must not see client-only links that would 403).
+   * Defaults to 'client' for backward compatibility with callers that haven't
+   * been migrated yet.
+   */
+  role?: 'client' | 'collaborator';
 }
 
 /**
@@ -25,7 +32,7 @@ interface PortalShellProps {
  *     2026-05-10)
  *   - Mobile (<lg): sidebar slides in/out, small hamburger floats top-left.
  */
-export function PortalShell({ children, userLabel }: PortalShellProps) {
+export function PortalShell({ children, userLabel, role = 'client' }: PortalShellProps) {
   const t = useTranslations('portal.shell');
   const [mobileOpen, setMobileOpen] = useState(false);
   const label = userLabel ?? t('userFallback');
@@ -88,7 +95,7 @@ export function PortalShell({ children, userLabel }: PortalShellProps) {
 
         {/* Nav — flex-1 scrollable */}
         <div className="flex-1 overflow-y-auto py-5">
-          <PortalNav />
+          <PortalNav role={role} />
         </div>
 
         {/* User section */}

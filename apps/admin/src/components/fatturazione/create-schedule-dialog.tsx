@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, type DragEvent, type ChangeEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { apiFetch, API_BASE } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -98,18 +98,11 @@ export function CreateScheduleDialog({
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch(`${API_BASE}/api/ai/extract-invoice`, {
+      // apiFetch handles FormData + 401 refresh (audit D-005).
+      const { extracted } = (await apiFetch('/api/ai/extract-invoice', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
-      });
-
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.error || 'Errore durante l\'estrazione');
-      }
-
-      const { extracted } = (await res.json()) as { extracted: ExtractedData };
+      })) as { extracted: ExtractedData };
 
       // Pre-fill form fields
       if (extracted.description || extracted.invoice_number) {

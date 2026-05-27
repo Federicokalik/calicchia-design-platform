@@ -184,6 +184,48 @@ export function NodeInspector({ node, onChange }: NodeInspectorProps) {
             <Textarea className="text-xs min-h-[60px]" value={data.message || ''} onChange={(e) => set('message', e.target.value)} />
           </Field>
         )}
+
+        {/* Audit J-K-03: inspector for the three server-side tool nodes that
+            were missing from the editor. Schemas mirror configSchema in
+            apps/api/src/lib/workflow/nodes.ts. */}
+
+        {/* Generate cover image (Z-Image / DALL-E / Unsplash) */}
+        {node.type === 'tool_generate_cover' && (
+          <Field label="Provider">
+            <Select value={data.provider || 'zimage'} onValueChange={(v) => set('provider', v)}>
+              <SelectTrigger className="h-7 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="zimage">Z-Image (KIE)</SelectItem>
+                <SelectItem value="dalle">DALL-E</SelectItem>
+                <SelectItem value="unsplash">Unsplash</SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
+
+        {/* Generate interactive HTML demo */}
+        {node.type === 'tool_generate_code_demo' && (
+          <Field label={t('workflow.field.message')}>
+            <Textarea
+              className="text-xs min-h-[60px]"
+              value={data.description || ''}
+              onChange={(e) => set('description', e.target.value)}
+              placeholder="Descrizione demo (es. 'animated 3D card flip with hover effect') · usa {{var}} per interpolare"
+            />
+          </Field>
+        )}
+
+        {/* Create project from quote (uses agent tool) */}
+        {node.type === 'tool_create_project' && (
+          <Field label="Quote ID">
+            <Input
+              className="h-7 text-xs"
+              value={data.quote_id || ''}
+              onChange={(e) => set('quote_id', e.target.value)}
+              placeholder="UUID preventivo · oppure {{quote_id}} per interpolare"
+            />
+          </Field>
+        )}
       </div>
     </div>
   );

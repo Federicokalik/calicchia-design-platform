@@ -7,36 +7,44 @@ import {
   localBusinessSchema,
   serviceSchema,
 } from '@/data/structured-data';
-import { SEO_CITIES } from '@/data/seo-cities';
+// Audit C-013/C-014 (PR21): SEO cities DB-backed via getSeoCities();
+// metadata + page body read the same cached fetch.
+import { getSeoCities } from '@/lib/cms';
 import { Heading } from '@/components/ui/Heading';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Button } from '@/components/ui/Button';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { FinalCTA } from '@/components/home/FinalCTA';
 
-const CIOCIARIA_TIER1 = SEO_CITIES.filter(
-  (c) => c.tipo === 'ciociaria' && c.tier === 1
-);
-const CIOCIARIA_TOTAL = SEO_CITIES.filter((c) => c.tipo === 'ciociaria').length + 1; // + Frosinone capoluogo
+async function ciociariaTotals() {
+  const cityIndex = await getSeoCities();
+  const ciociariaTier1 = cityIndex.ciociaria.filter((c) => c.tier === 1);
+  // + 1 for Frosinone (modeled as capoluogo, not ciociaria, but the
+  // marketing surface counts it as part of the territory).
+  const total = cityIndex.ciociaria.length + 1;
+  const tier1List = [
+    { slug: 'frosinone', nome: 'Frosinone' },
+    ...ciociariaTier1.map((c) => ({ slug: c.slug, nome: c.nome })),
+  ].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+  return { ciociariaTier1, total, tier1List };
+}
 
-const TIER1_LIST = [
-  { slug: 'frosinone', nome: 'Frosinone' },
-  ...CIOCIARIA_TIER1.map((c) => ({ slug: c.slug, nome: c.nome })),
-].sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
-
-export const metadata: Metadata = {
-  title: {
-    absolute: `Web Designer Freelance in Ciociaria · Lavoro a Ceccano e in ${CIOCIARIA_TOTAL} comuni della provincia | Federico Calicchia`,
-  },
-  description: `Web designer freelance in Ciociaria, Frosinone. Sito fisico a Ceccano, lavoro su tutto il territorio ciociaro. ${CIOCIARIA_TOTAL} comuni serviti, partite IVA locali, niente intermediari milanesi.`,
-  alternates: { canonical: '/web-design-freelance-ciociaria' },
-  openGraph: {
-    title: 'Web Designer Freelance in Ciociaria · 91 comuni serviti',
-    description:
-      'Sede a Ceccano, lavoro su tutta la provincia di Frosinone. Niente account manager che pronunciano sbagliato i comuni.',
-    url: '/web-design-freelance-ciociaria',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { total } = await ciociariaTotals();
+  return {
+    title: {
+      absolute: `Web Designer Freelance in Ciociaria · Lavoro a Ceccano e in ${total} comuni della provincia | Federico Calicchia`,
+    },
+    description: `Web designer freelance in Ciociaria, Frosinone. Sito fisico a Ceccano, lavoro su tutto il territorio ciociaro. ${total} comuni serviti, partite IVA locali, niente intermediari milanesi.`,
+    alternates: { canonical: '/web-design-freelance-ciociaria' },
+    openGraph: {
+      title: 'Web Designer Freelance in Ciociaria · 91 comuni serviti',
+      description:
+        'Sede a Ceccano, lavoro su tutta la provincia di Frosinone. Niente account manager che pronunciano sbagliato i comuni.',
+      url: '/web-design-freelance-ciociaria',
+    },
+  };
+}
 
 const RAGIONI = [
   {
@@ -89,7 +97,8 @@ const SERVIZI_PRIORITARI = [
   },
 ];
 
-export default function WebDesignFreelanceCiociariaPage() {
+export default async function WebDesignFreelanceCiociariaPage() {
+  const { total: CIOCIARIA_TOTAL, tier1List: TIER1_LIST } = await ciociariaTotals();
   return (
     <>
       <StructuredData

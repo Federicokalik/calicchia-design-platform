@@ -24,6 +24,43 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
+// JWT_SECRET length floor — same key signs HS256 JWTs, HMACs booking-cancel
+// tokens (lib/calendar/token.ts), HMACs private-file URLs (lib/private-files.ts)
+// and keys the OTP hashes (lib/signing). HMAC-SHA256 with a <32-byte key drops
+// well below the algorithm's security margin. Fail fast in any mode — letting a
+// dev secret like "changeme" through has been the root cause of two prior
+// near-incidents (audit E-003). Set BOOKING_TOKEN_SECRET +
+// PRIVATE_FILE_SIGNING_SECRET when you want to rotate per-purpose.
+if ((process.env.JWT_SECRET ?? '').length < 32) {
+  console.error('FATAL: JWT_SECRET must be at least 32 characters (HMAC-SHA256 key floor).');
+  process.exit(1);
+}
+
+// MAIL_ENC_KEY is not strictly required (mail-sync silently skips and so does
+// the admin mailbox UI), but a non-development deploy without it means the
+// inbox feature is silently dead. Warn at boot so it's visible (audit E-012).
+if (process.env.NODE_ENV !== 'development' && !process.env.MAIL_ENC_KEY) {
+  console.warn('⚠️  MAIL_ENC_KEY not set — mail-sync cron will skip and the admin mailbox UI will fail at every account open. Run scripts/generate-mail-enc-key.ts and add to .env if mail features are needed.');
+}
+
+// COOKIE_DOMAIN sanity check (audit B-024). The portal + admin login flow
+// POSTs cookies cross-origin (sito → api on different subdomains). With
+// SameSite=Lax (our default) the browser DROPS the Set-Cookie from a CORS
+// XHR unless the cookie is scoped to a shared parent domain. If we see
+// ≥2 distinct origins in CORS_ORIGINS in a non-dev deploy and COOKIE_DOMAIN
+// is unset, warn — silent cookie-not-sticking is a deploy nightmare to debug.
+if (process.env.NODE_ENV !== 'development') {
+  const origins = (process.env.CORS_ORIGINS || '')
+    .split(',').map((o) => o.trim()).filter(Boolean);
+  if (origins.length >= 2 && !process.env.COOKIE_DOMAIN) {
+    console.warn(
+      '⚠️  CORS_ORIGINS lists multiple origins but COOKIE_DOMAIN is unset. '
+        + 'Cross-origin auth cookies (portal / admin login) may be silently dropped by the browser. '
+        + 'Set COOKIE_DOMAIN=.your-etld-plus-one and ensure SameSite=None for portal_token in production.',
+    );
+  }
+}
+
 // Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
 // any module that reads them is loaded. The dynamic imports below guarantee
 // that lib/agent (which reads the pricing KB at module load) is evaluated only

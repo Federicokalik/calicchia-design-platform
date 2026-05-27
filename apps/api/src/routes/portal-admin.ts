@@ -286,6 +286,99 @@ portalAdmin.get('/timeline/:projectId', async (c) => {
   return c.json({ events });
 });
 
+// ── Portal messages thread (admin side) ──────────────────
+// Mirrors portal/messages.ts on the client side: GET lists client-visible
+// project_comments (is_internal=false), POST inserts as the admin and emits
+// a timeline_event + customer email notification. Audit B-006: the round-trip
+// was broken — admin received Telegram pings but had no UI to reply.
+portalAdmin.get('/projects/:projectId/messages', async (c) => {
+  const projectId = c.req.param('projectId');
+  if (!/^[a-f0-9-]{36}$/i.test(projectId)) return c.json({ error: 'projectId non valido' }, 400);
+  const limit = Math.min(200, Math.max(1, Number(c.req.query('limit') || '100')));
+
+  // Audit B-013: mirror the portal-side fix so admin sees the same
+  // discrimination between admin and collaborator authors.
+  const messages = await sql`
+    SELECT pc.id, pc.content, pc.sender_name, pc.is_internal, pc.attachments,
+           pc.created_at, pc.updated_at, pc.customer_id,
+           CASE
+             WHEN pc.customer_id IS NOT NULL THEN 'client'
+             WHEN EXISTS (
+               SELECT 1 FROM collaborators
+               WHERE name = pc.sender_name OR company = pc.sender_name
+             ) THEN 'collaborator'
+             ELSE 'admin'
+           END AS sender_type
+    FROM project_comments pc
+    WHERE pc.project_id = ${projectId}
+      AND pc.is_internal = false
+    ORDER BY pc.created_at ASC
+    LIMIT ${limit}
+  ` as Array<Record<string, unknown>>;
+
+  return c.json({ messages });
+});
+
+portalAdmin.post('/projects/:projectId/messages', async (c) => {
+  const projectId = c.req.param('projectId');
+  if (!/^[a-f0-9-]{36}$/i.test(projectId)) return c.json({ error: 'projectId non valido' }, 400);
+
+  const { content, attachment_url, attachment_name, sender_name } = await c.req.json();
+  if (!content || typeof content !== 'string' || !content.trim()) fail('Il messaggio non puo\' essere vuoto', 400);
+  if (content.length > 5000) fail('Messaggio troppo lungo (max 5000 caratteri)', 400);
+  if (attachment_url && !/^https?:\/\//.test(attachment_url)) fail('URL allegato non valido', 400);
+
+  const [project] = await sql`
+    SELECT cp.id, cp.name, cp.customer_id, cu.email AS customer_email, cu.contact_name
+    FROM client_projects cp
+    JOIN customers cu ON cu.id = cp.customer_id
+    WHERE cp.id = ${projectId}
+    LIMIT 1
+  ` as Array<{ id: string; name: string; customer_id: string; customer_email: string | null; contact_name: string | null }>;
+  if (!project) fail('Progetto non trovato', 404);
+
+  const adminName = (typeof sender_name === 'string' && sender_name.trim()) ? sender_name.trim().slice(0, 200) : 'Calicchia';
+  const attachments = attachment_url
+    ? JSON.stringify([{ url: attachment_url, name: attachment_name || 'Allegato' }])
+    : null;
+
+  const [message] = await sql`
+    INSERT INTO project_comments (project_id, customer_id, content, sender_name, is_internal, attachments)
+    VALUES (${projectId}, NULL, ${content.trim()}, ${adminName}, false, ${attachments})
+    RETURNING id, content, sender_name, is_internal, attachments, created_at
+  ` as Array<Record<string, unknown>>;
+
+  await sql`
+    INSERT INTO timeline_events (project_id, customer_id, type, title, description, actor_type)
+    VALUES (${projectId}, ${project.customer_id}, 'message', ${'Messaggio da ' + adminName}, ${content.trim().substring(0, 200)}, 'admin')
+  `;
+
+  // Email customer (best-effort)
+  if (project.customer_email) {
+    try {
+      const { sendEmail } = await import('../lib/email');
+      const portalUrl = process.env.PORTAL_URL || process.env.SITE_URL || 'https://calicchia.design';
+      const subject = `Nuovo messaggio su "${project.name}"`;
+      const safeContent = esc(content.trim()).replace(/\n/g, '<br>');
+      const html = portalEmailHtml(`
+        <h2 style="margin:0 0 16px;color:#fff;font-size:20px;">Hai un nuovo messaggio</h2>
+        <p style="margin:0 0 8px;color:#aaa;font-size:14px;">Progetto: <strong style="color:#fff;">${esc(project.name)}</strong></p>
+        <p style="margin:0 0 24px;color:#aaa;font-size:14px;">Da: ${esc(adminName)}</p>
+        <div style="background:#0f0f1f;border-left:3px solid #888;padding:16px 20px;margin:0 0 24px;color:#ddd;font-size:15px;line-height:1.55;">${safeContent}</div>
+        <a href="${portalUrl}/clienti/progetti/${projectId}" style="display:inline-block;background:#fff;color:#000;padding:12px 24px;border-radius:4px;text-decoration:none;font-weight:500;">Apri nel portale</a>
+      `);
+      await sendEmail({
+        to: project.customer_email,
+        subject,
+        html,
+        text: `${adminName} ti ha scritto sul progetto "${project.name}":\n\n${content.trim()}\n\nApri nel portale: ${portalUrl}/clienti/progetti/${projectId}`,
+      });
+    } catch { /* non-blocking */ }
+  }
+
+  return c.json({ message }, 201);
+});
+
 // ── List reports for a customer (admin view) ─────────────
 portalAdmin.get('/reports/:customerId', async (c) => {
   const customerId = c.req.param('customerId');

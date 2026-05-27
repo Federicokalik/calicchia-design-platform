@@ -19,7 +19,11 @@ import {
 import { useLocale, useTranslations } from 'next-intl';
 import { type ComponentType, useRef } from 'react';
 import { Link } from '@/i18n/navigation';
-import { SITE } from '@/data/site';
+// Audit C-013/C-014: contact email/phone/address/vat + legalName via
+// useSiteConfig() — admin can edit business.profile + site.public from
+// the panel without redeploy. Falls back to data/site.ts until the API
+// responds on first mount.
+import { useSiteConfig } from '@/lib/use-site-config';
 import { CookieConsentBanner } from '@/components/privacy/CookieConsentBanner';
 import { TrustBadge } from '@/components/common/TrustBadge';
 import { FooterMap } from './FooterMap';
@@ -77,6 +81,7 @@ export function SiteFooter() {
   const tFooter = useTranslations('footer');
   const locale = useLocale();
   const tNav = useTranslations('navigation');
+  const SITE = useSiteConfig();
   const root = useRef<HTMLElement>(null);
   const year = new Date().getFullYear();
   const hrefFor = (href: string) => href;

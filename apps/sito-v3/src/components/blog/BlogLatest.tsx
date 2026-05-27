@@ -1,9 +1,10 @@
 import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { fetchBlogList } from '@/lib/blog-api';
 import { BlogCard } from '@/components/blog/BlogCard';
 import { Section } from '@/components/ui/Section';
+import type { Locale } from '@/lib/i18n';
 
 interface BlogLatestProps {
   index?: string;
@@ -27,7 +28,8 @@ export async function BlogLatest({
   title,
   limit = 3,
 }: BlogLatestProps) {
-  const posts = await fetchBlogList(limit);
+  const locale = (await getLocale()) as Locale;
+  const posts = await fetchBlogList(limit, locale);
   if (!posts.length) return null;
 
   const t = await getTranslations('home.blogLatest');

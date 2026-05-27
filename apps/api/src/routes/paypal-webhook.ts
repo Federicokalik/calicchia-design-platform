@@ -47,11 +47,17 @@ function readCaptureIdFromRefund(resource: Record<string, unknown>): string | nu
   return null;
 }
 
+// Audit J-K-09: generic body, accurate status, structured logs. PayPal
+// retries on 4xx with backoff just like Stripe, so we keep the status code
+// but stop differentiating rejection reasons in the response body.
+const PAYPAL_GENERIC_REJECT = { error: 'Invalid request' } as const;
+
 paypalWebhook.post('/', async (c) => {
   // Block early if PayPal isn't configured at all. Mirrors stripe-webhook
   // which returns 503 (Service Unavailable) rather than a generic 400.
   if (!process.env.PAYPAL_WEBHOOK_ID) {
-    return c.json({ error: 'PayPal webhook non configurato' }, 503);
+    log.warn('paypal-webhook hit but PAYPAL_WEBHOOK_ID not configured');
+    return c.json(PAYPAL_GENERIC_REJECT, 503);
   }
 
   const rawBody = await c.req.text();
@@ -59,13 +65,17 @@ paypalWebhook.post('/', async (c) => {
   let event: PaypalWebhookEvent;
   try {
     event = JSON.parse(rawBody) as PaypalWebhookEvent;
-  } catch {
-    throw new HTTPException(400, { message: 'Payload PayPal non valido' });
+  } catch (err) {
+    log.warn({ err }, 'paypal-webhook payload not valid JSON');
+    throw new HTTPException(400, { message: 'Invalid request' });
   }
 
   const eventId = event.id ?? '';
   const eventType = event.event_type ?? 'unknown';
-  if (!eventId) throw new HTTPException(400, { message: 'PayPal event_id mancante' });
+  if (!eventId) {
+    log.warn({ eventType }, 'paypal-webhook missing event_id');
+    throw new HTTPException(400, { message: 'Invalid request' });
+  }
 
   // Signature verification BEFORE touching the DB. Otherwise an attacker can
   // flood `paypal_webhook_logs` with bogus rows and use the duplicate-vs-new
@@ -75,7 +85,7 @@ paypalWebhook.post('/', async (c) => {
   const signatureValid = await verifyPaypalSignature(signatureHeaders, event);
   if (!signatureValid) {
     log.warn({ eventId, eventType }, 'PayPal webhook signature rejected');
-    throw new HTTPException(400, { message: 'Signature PayPal non valida' });
+    throw new HTTPException(400, { message: 'Invalid request' });
   }
 
   const logRow: Record<string, unknown> = {

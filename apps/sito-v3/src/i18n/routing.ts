@@ -92,6 +92,28 @@ export const PATHNAMES = {
   },
   '/clienti/p/[code]': { it: '/clienti/p/[code]', en: '/clients/p/[code]' },
   '/clienti/logout': { it: '/clienti/logout', en: '/clients/logout' },
+  // Portal sections previously missing from PATHNAMES (audit B-012). Without
+  // these entries EN users navigating /clienti/<x> would mix IT + EN segments
+  // in the same session and Links resolved with IT slugs even under /en.
+  '/clienti/fatture': { it: '/clienti/fatture', en: '/clients/invoices' },
+  '/clienti/fatture/[id]': {
+    it: '/clienti/fatture/[id]',
+    en: '/clients/invoices/[id]',
+  },
+  '/clienti/abbonamenti': { it: '/clienti/abbonamenti', en: '/clients/subscriptions' },
+  '/clienti/accettazione-legale': {
+    it: '/clienti/accettazione-legale',
+    en: '/clients/legal-acceptance',
+  },
+  '/clienti/pagamento/successo': {
+    it: '/clienti/pagamento/successo',
+    en: '/clients/payment/success',
+  },
+  '/clienti/pagamento/annullato': {
+    it: '/clienti/pagamento/annullato',
+    en: '/clients/payment/cancelled',
+  },
+  '/clienti/auth/verify': { it: '/clienti/auth/verify', en: '/clients/auth/verify' },
 } as const;
 
 export const routing = defineRouting({

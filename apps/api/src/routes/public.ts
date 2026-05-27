@@ -1,9 +1,35 @@
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { sql } from '../db';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import { logger } from '../lib/logger';
+import { isBotUA } from '../lib/analytics/ua';
 
 const log = logger.child({ scope: 'public' });
+
+/**
+ * Audit A-012: blog views_count was incremented on EVERY GET /api/public/
+ * blog/posts/:slug — including bot crawls, Next RSC prefetches when a user
+ * hovered the card, OG-image generation, ISR revalidation, and feed
+ * scrapers. Real human read count was inflated by an order of magnitude.
+ *
+ * Filter at the HTTP layer (cheap, no DB round-trip on the rejection):
+ *   - bot UA via the same `isbot` library the cookieless analytics uses
+ *   - Next 13+/14/15/16 prefetch signals: Next-Router-Prefetch (legacy),
+ *     Sec-Purpose: prefetch (modern, Chrome speculation rules + Next
+ *     dynamic prefetch), and Purpose: prefetch (Firefox/Safari).
+ *
+ * Returns true when the hit should NOT count toward views_count.
+ */
+function isUncountableViewer(c: Context): boolean {
+  const ua = c.req.header('user-agent');
+  if (isBotUA(ua)) return true;
+  const secPurpose = c.req.header('sec-purpose')?.toLowerCase() || '';
+  if (secPurpose.includes('prefetch')) return true;
+  const purpose = c.req.header('purpose')?.toLowerCase() || '';
+  if (purpose === 'prefetch') return true;
+  if (c.req.header('next-router-prefetch')) return true;
+  return false;
+}
 
 export const publicRoutes = new Hono();
 
@@ -124,10 +150,15 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
   post.excerpt = post.i18n_excerpt;
   post.content = post.i18n_content;
 
-  // Increment views (fire-and-forget)
-  sql`UPDATE blog_posts SET views = COALESCE(views, 0) + 1 WHERE slug = ${slug}`.catch(
-    (err: unknown) => log.error({ err }, 'Failed to increment views'),
-  );
+  // Increment views (fire-and-forget). Column is `views_count` per mig 001 —
+  // the previous `views` reference silently failed in the .catch() and the
+  // counter never moved (audit C-016). Audit A-012: skip bots + prefetch
+  // requests so the count reflects real human reads.
+  if (!isUncountableViewer(c)) {
+    sql`UPDATE blog_posts SET views_count = COALESCE(views_count, 0) + 1 WHERE slug = ${slug}`.catch(
+      (err: unknown) => log.error({ err }, 'Failed to increment views_count'),
+    );
+  }
 
   // Get prev/next navigation
   const allPosts = await sql`
@@ -161,6 +192,8 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
   return c.json({
     locale,
     post: {
+      // id surfaced so sito-v3 BlogDemoIslands can build /api/public/blog-demos/<id>/<idx>.
+      id: post.id,
       slug: post.slug,
       title: post.title,
       excerpt: post.excerpt,
@@ -172,7 +205,7 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
       created_at: post.created_at,
       reading_time: post.reading_time,
       allow_comments: post.allow_comments,
-      views: post.views,
+      views: post.views_count,
       prevSlug,
       nextSlug,
       prevTitle,
@@ -195,19 +228,31 @@ publicRoutes.get('/blog/posts/:slug', async (c) => {
 // ─────────────────────────────────────────────────────────────
 
 publicRoutes.get('/projects', async (c) => {
-  // Optional ?service=<slug> filter — fuzzy match against the free-text
-  // `services` column (which the admin populates with values like
-  // "Web Design, E-commerce"). We normalise both sides: lowercase + hyphen
-  // for spaces, then ILIKE-match the service slug as a substring.
+  // Optional ?service=<slug> filter — admin enters free text like
+  // "Web Design, E-commerce, SEO". Audit C-017: the old ILIKE substring match
+  // over-matched ("seo" ⊂ "seo-onpage", "seokit") and under-matched ("webdesign"
+  // without hyphen). Tokenize on `,`, slug-normalize each token (lowercase +
+  // space→hyphen + strip noise), and require an EXACT match against ANY token.
+  // Schema-clean fix (a project_services junction table) is deferred — this
+  // stopgap removes the false-positive/negative noise without a migration.
   // Optional ?limit=N (default 50, max 50).
   // Optional ?locale=it|en — i18n via projects_translations.
   const serviceFilter = c.req.query('service');
   const limit = parseLimit(c.req.query('limit'), 50, 50);
   const locale = parseLocale(c.req.query('locale'));
 
-  const isValidServiceSlug = serviceFilter ? /^[a-z0-9-]{1,60}$/.test(serviceFilter) : false;
-  const serviceClause = isValidServiceSlug
-    ? sql`AND LOWER(REPLACE(COALESCE(p.services, ''), ' ', '-')) ILIKE ${'%' + serviceFilter + '%'}`
+  const validatedServiceSlug =
+    serviceFilter && /^[a-z0-9-]{1,60}$/.test(serviceFilter) ? serviceFilter : null;
+  // Postgres: split the normalised services column on `,`, trim each token,
+  // and check the slug against the resulting array. ANY(...) handles the
+  // exact-token semantics.
+  const serviceClause = validatedServiceSlug
+    ? sql`AND ${validatedServiceSlug} = ANY(
+            SELECT trim(BOTH '-' FROM regexp_replace(
+              LOWER(REPLACE(token, ' ', '-')), '[^a-z0-9-]', '', 'g'
+            ))
+            FROM unnest(string_to_array(COALESCE(p.services, ''), ',')) AS token
+          )`
     : sql``;
 
   const projects = await sql`
@@ -365,11 +410,133 @@ publicRoutes.get('/blog/rss', async (c) => {
       title: p.title,
       slug: p.slug,
       excerpt: p.excerpt,
-      content: p.content,
+      // Audit J-15 / C-019: defense-in-depth sanitize on RSS too. PR6 sanitize-
+      // on-write covers new writes but legacy rows pre-dating the sanitize
+      // could still carry raw HTML — RSS readers render <script> inline.
+      content: sanitizeBlogHtml(p.content as string | null),
       cover_image: resolveImageUrl(p.cover_image as string | null),
       published_at: p.published_at,
       created_at: p.created_at,
       tags: p.tags || [],
     })),
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// Public blog demo iframe src (audit C-002): the legacy mount was inside
+// /api/blog/* which is in protectedPaths → every iframe loaded by an anonymous
+// visitor 401'd. Surfaced here under the public namespace; the iframe attr is
+// generated client-side in sito-v3 BlogDemoIslands. UUID postId guard +
+// generic 404 on miss to avoid enumerating which post ids exist.
+// ─────────────────────────────────────────────────────────────
+publicRoutes.get('/blog-demos/:postId/:index', async (c) => {
+  const postId = c.req.param('postId');
+  const indexParam = c.req.param('index');
+  if (!/^[a-f0-9-]{36}$/i.test(postId)) return c.text('Not Found', 404);
+  const index = Number.parseInt(indexParam, 10);
+  if (!Number.isInteger(index) || index < 0 || index > 50) return c.text('Not Found', 404);
+
+  const [post] = (await sql`
+    SELECT demos FROM blog_posts WHERE id = ${postId} AND is_published = true
+  `) as Array<{ demos: string | string[] | null }>;
+  if (!post) return c.text('Not Found', 404);
+
+  const demos: string[] = typeof post.demos === 'string'
+    ? JSON.parse(post.demos || '[]')
+    : (post.demos || []);
+  if (index >= demos.length) return c.text('Not Found', 404);
+
+  // Sandbox the iframe content — demos are admin-authored HTML+inline JS but
+  // the response is served on the API origin and embedded as third-party iframe
+  // from sito-v3, so X-Frame-Options/CSP must not block it. Frame-ancestors set
+  // to the canonical public origins.
+  const siteOrigin = process.env.SITE_URL ?? 'https://calicchia.design';
+  c.header('X-Frame-Options', 'ALLOW-FROM ' + siteOrigin); // legacy IE/Safari
+  c.header(
+    'Content-Security-Policy',
+    `frame-ancestors 'self' ${siteOrigin} http://localhost:3000`,
+  );
+  return c.html(demos[index]);
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/public/site-config — DB-backed public site config
+//
+// Audit C-013/C-014: site marketing copy (brand, contact, address, social
+// links, hero description) was hardcoded in apps/sito-v3/src/data/site.ts
+// — every text change required a code edit + Docker rebuild + redeploy.
+// site_settings has been admin-editable since mig 001 but the site never
+// consumed it. This endpoint exposes the editable subset:
+//
+//   - business.profile      → contact email/phone, vat, legal_name, address
+//   - site.public           → brand, description, social[] (new key, optional)
+//
+// Both are read with COALESCE-style fallback: an empty string / missing key
+// returns null so the caller can fall back to the file-defined defaults in
+// data/site.ts. Never throws — public endpoint, must degrade gracefully on
+// DB outage or missing rows. Short cache + SWR matches /api/config.
+// ─────────────────────────────────────────────────────────────
+publicRoutes.get('/site-config', async (c) => {
+  type BizProfile = {
+    company_name?: string; legal_name?: string; vat_number?: string;
+    fiscal_code?: string; pec_email?: string; sdi_code?: string;
+    email?: string; phone?: string; website?: string;
+    address?: { street?: string; city?: string; postal_code?: string; country?: string };
+  };
+  type SitePublic = {
+    brand?: string;
+    description?: string;
+    social?: Array<{ label: string; url: string; icon?: string }>;
+    geo?: { lat?: number; lng?: number; city?: string; province?: string; region?: string; country?: string; postalCode?: string };
+    cal?: string;
+  };
+
+  let bizProfile: BizProfile = {};
+  let sitePublic: SitePublic = {};
+  try {
+    const rows = await sql`
+      SELECT key, value FROM site_settings WHERE key IN ('business.profile', 'site.public')
+    ` as Array<{ key: string; value: unknown }>;
+    for (const r of rows) {
+      if (r.key === 'business.profile' && r.value && typeof r.value === 'object') {
+        bizProfile = r.value as BizProfile;
+      } else if (r.key === 'site.public' && r.value && typeof r.value === 'object') {
+        sitePublic = r.value as SitePublic;
+      }
+    }
+  } catch (err) {
+    log.warn({ err }, 'site-config read failed — falling back to empty');
+  }
+
+  // Drop empty strings so the consumer's fallback chain sees them as missing.
+  function nz(s: string | null | undefined): string | null {
+    return s && s.trim() ? s : null;
+  }
+
+  const addr = bizProfile.address ?? {};
+  const config = {
+    brand: nz(sitePublic.brand),
+    legalName: nz(bizProfile.legal_name) ?? nz(bizProfile.company_name),
+    description: nz(sitePublic.description),
+    contact: {
+      email: nz(bizProfile.email),
+      phone: nz(bizProfile.phone),
+      pec: nz(bizProfile.pec_email),
+      vat: nz(bizProfile.vat_number),
+      sdi: nz(bizProfile.sdi_code),
+      address: {
+        street: nz(addr.street),
+        city: nz(addr.city),
+        postalCode: nz(addr.postal_code),
+        country: nz(addr.country),
+      },
+      cal: nz(sitePublic.cal),
+    },
+    social: Array.isArray(sitePublic.social) ? sitePublic.social : null,
+    geo: sitePublic.geo ?? null,
+  };
+
+  return c.json(config, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
   });
 });

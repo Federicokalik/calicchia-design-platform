@@ -31,12 +31,18 @@ function buildPortalAccessMessage(opts: { name: string | null; link: string; cod
 }
 
 async function rotateCollaboratorPortalCode(id: string): Promise<{ id: string; code: string } | null> {
-  const code = 'COL-' + randomBytes(4).toString('hex').toUpperCase();
+  // 128-bit entropy + indexed prefix — mirrors customers (audit B-009 + B-010).
+  const random = randomBytes(16).toString('base64url');
+  const code = 'COL-' + random;
   const hash = await bcrypt.hash(code, 12);
+  const prefix = random.slice(0, 4);
+  // Bump session_version atomically — see audit B-007 (mirrors customers).
   const [row] = await sql`
     UPDATE collaborators
     SET portal_access_code_hash = ${hash},
-        portal_access_code_rotated_at = NOW()
+        portal_access_code_prefix = ${prefix},
+        portal_access_code_rotated_at = NOW(),
+        session_version = session_version + 1
     WHERE id = ${id}
     RETURNING id
   ` as Array<{ id: string }>;
@@ -105,6 +111,27 @@ collaboratorsV2.get('/:id/projects', async (c) => {
     ORDER BY cp.updated_at DESC
   `;
   return c.json({ projects: rows });
+});
+
+// Audit B-008: clone of customers' revoke-portal-sessions for collaborators.
+// Bumps session_version → portalAuth middleware rejects every cookie carrying
+// the previous version on its next request. Use case: fine collaborazione,
+// dispositivo perso, codice leakato indipendentemente dalla rigenerazione.
+// Note (audit B-011): portal_login_events.customer_id is FK on customers, so
+// collab events aren't persisted there today — we skip the audit log row
+// instead of writing one that violates the FK.
+collaboratorsV2.post('/:id/revoke-portal-sessions', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`
+    UPDATE collaborators
+    SET session_version = session_version + 1
+    WHERE id = ${id}
+    RETURNING id, session_version
+  ` as Array<{ id: string; session_version: number }>;
+
+  if (!row) return c.json({ error: 'Collaboratore non trovato' }, 404);
+
+  return c.json({ ok: true, session_version: row.session_version });
 });
 
 collaboratorsV2.post('/:id/generate-portal-code', async (c) => {

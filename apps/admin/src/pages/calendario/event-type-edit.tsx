@@ -6,8 +6,7 @@ import { ArrowLeft, Save, Trash2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
-
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || 'http://localhost:3000';
+import { SITE_URL } from '@/lib/public-urls';
 
 interface EventTypeForm {
   slug: string;
@@ -108,7 +107,20 @@ export default function EventTypeEditPage() {
             </a>
           </Button>
         )}
-        <Button size="sm" onClick={() => update.mutate()} disabled={update.isPending}>
+        <Button
+          size="sm"
+          onClick={() => {
+            // Audit D-011: google_meet requires the admin to paste the Meet
+            // link manually (Workspace dismissed); empty location_value would
+            // show an empty location to the attendee at booking time.
+            if (form?.location_type === 'google_meet' && !form.location_value?.trim()) {
+              toast.error('Incolla il link Meet prima di salvare (oppure passa a "URL custom").');
+              return;
+            }
+            update.mutate();
+          }}
+          disabled={update.isPending}
+        >
           <Save className="h-3.5 w-3.5 mr-1.5" />
           {update.isPending ? 'Salvataggio…' : 'Salva'}
         </Button>

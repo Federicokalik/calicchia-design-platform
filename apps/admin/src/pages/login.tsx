@@ -12,9 +12,9 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { useTurnstile } from '@/hooks/use-turnstile';
 import { API_BASE } from '@/lib/api';
+import { PORTAL_URL } from '@/lib/public-urls';
 
 const TURNSTILE_SITE_KEY = import.meta.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-const PORTAL_URL = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
 
 const loginSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -81,7 +81,12 @@ export default function LoginPage() {
         return;
       }
       toast.success('Login effettuato');
-      navigate(next && next.startsWith('/') ? next : '/');
+      // Audit D-009: harden against protocol-relative URLs ('//evil.com',
+      // '/\\evil.com') which startsWith('/') alone would let through. Only
+      // accept paths that start with a single '/' followed by anything other
+      // than another '/' or a backslash.
+      const safeNext = next && /^\/(?![/\\])/.test(next) ? next : '/';
+      navigate(safeNext);
     } catch (error) {
       turnstile.reset();
       if (mfaRequired) setMfaCode('');

@@ -232,6 +232,37 @@ const settingsSchemas = {
     notify_revisions_exceeded: z.boolean().default(true),
     payment_received_unlock_next_milestone: z.boolean().default(false),
   }).passthrough(),
+
+  // Audit C-013/C-014: site marketing surface that the public sito-v3 reads
+  // through /api/public/site-config. Lets admin edit brand/description/
+  // social/geo/cal without a code change + redeploy. Contact email/phone/
+  // address/vat continue to live in 'business.profile' (same row drives
+  // invoice PDFs and the public footer). All strings default to empty so
+  // the consumer (see apps/sito-v3/src/lib/site-config.ts) can fall back
+  // to data/site.ts when nothing has been set yet.
+  'site.public': z.object({
+    brand: z.string().default(''),
+    description: z.string().default(''),
+    cal: z.string().default(''),
+    social: z
+      .array(
+        z.object({
+          label: z.string().min(1).max(60),
+          url: z.string().url(),
+          icon: z.string().max(60).optional(),
+        }),
+      )
+      .default([]),
+    geo: z.object({
+      lat: z.number().optional(),
+      lng: z.number().optional(),
+      city: z.string().optional(),
+      province: z.string().optional(),
+      region: z.string().optional(),
+      country: z.string().optional(),
+      postalCode: z.string().optional(),
+    }).default({}),
+  }).passthrough(),
 } as const;
 
 export type SettingKey = keyof typeof settingsSchemas;

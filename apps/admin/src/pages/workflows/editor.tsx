@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -50,6 +50,12 @@ const nodeTypes: NodeTypes = {
   tool_send_whatsapp: ToolNode,
   tool_send_telegram: ToolNode,
   tool_http_request: ToolNode,
+  // Audit J-K-03: server-side nodes that the editor was missing — surfaced in
+  // the palette + mapped here so React Flow renders them with the standard
+  // ToolNode chrome (same visual class as the other tool_* entries).
+  tool_generate_cover: ToolNode,
+  tool_generate_code_demo: ToolNode,
+  tool_create_project: ToolNode,
   logic_condition: LogicNode,
   logic_delay: LogicNode,
   logic_loop: LogicNode,
@@ -58,6 +64,44 @@ const nodeTypes: NodeTypes = {
 };
 
 let nodeIdCounter = 0;
+
+/**
+ * Audit J-K-01: pick the trigger node from the canvas and derive the
+ * `workflows.trigger_type` + `trigger_config` columns the engine + triggerManager
+ * actually read. Previously the editor saved only { name, nodes, edges } so
+ * event/webhook/cron triggers placed on the canvas were never persisted and
+ * `fireEvent()` couldn't discover them. Defaults to 'manual' when no trigger
+ * node is on the canvas (safe — workflow stays inert).
+ */
+function deriveTriggerFromNodes(nodes: Node[]): { trigger_type: string; trigger_config: Record<string, unknown> } {
+  const triggerNode = nodes.find((n) => typeof n.type === 'string' && n.type.startsWith('trigger_'));
+  if (!triggerNode) return { trigger_type: 'manual', trigger_config: {} };
+  const data = (triggerNode.data ?? {}) as Record<string, unknown>;
+  switch (triggerNode.type) {
+    case 'trigger_event':
+      return { trigger_type: 'event', trigger_config: { event_type: data.event_type ?? null } };
+    case 'trigger_cron':
+      return {
+        trigger_type: 'cron',
+        trigger_config: { interval_hours: data.interval_hours ?? 24, time: data.time ?? '09:00' },
+      };
+    case 'trigger_webhook':
+      // Server fills in webhook_id + encrypted webhook_secret on first save —
+      // we send the existing values (if any) so a re-save doesn't regenerate.
+      return {
+        trigger_type: 'webhook',
+        trigger_config: {
+          webhook_id: data.webhook_id,
+          webhook_secret: data.webhook_secret,
+        },
+      };
+    case 'trigger_telegram':
+      return { trigger_type: 'telegram', trigger_config: {} };
+    case 'trigger_manual':
+    default:
+      return { trigger_type: 'manual', trigger_config: {} };
+  }
+}
 
 function WorkflowEditorInner() {
   const { t, formatStatus } = useI18n();
@@ -82,29 +126,40 @@ function WorkflowEditorInner() {
     enabled: !!id,
   });
 
-  // Load data into React Flow
-  if (data?.workflow && !loaded) {
+  // Load data into React Flow. Audit J-K-04: setting state in the render body
+  // breaks under React 19 strict/concurrent rendering — moved to useEffect
+  // keyed on workflow id so reload swap re-hydrates correctly.
+  useEffect(() => {
+    if (!data?.workflow || loaded) return;
     const wf = data.workflow;
     setName(wf.name || '');
-    // Parse nodes/edges — could be JSON string or array
     const rawNodes = typeof wf.nodes === 'string' ? JSON.parse(wf.nodes || '[]') : (wf.nodes || []);
     const rawEdges = typeof wf.edges === 'string' ? JSON.parse(wf.edges || '[]') : (wf.edges || []);
-    // Ensure every node has a valid position
     const validNodes = rawNodes.filter((n: any) => n.position?.x !== undefined && n.position?.y !== undefined);
     setNodes(validNodes);
     setEdges(rawEdges);
     setLoaded(true);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.workflow?.id]);
 
   // Save
   const saveMutation = useMutation({
-    mutationFn: () =>
-      apiFetch(`/api/workflows/${id}`, {
+    mutationFn: () => {
+      const trigger = deriveTriggerFromNodes(nodes);
+      return apiFetch(`/api/workflows/${id}`, {
         method: 'PUT',
-        body: JSON.stringify({ name, nodes, edges }),
-      }),
+        body: JSON.stringify({
+          name,
+          nodes,
+          edges,
+          trigger_type: trigger.trigger_type,
+          trigger_config: trigger.trigger_config,
+        }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-detail', id] });
       toast.success(t('workflow.saved'));
     },
     onError: () => toast.error(t('workflow.saveError')),
@@ -113,8 +168,19 @@ function WorkflowEditorInner() {
   // Execute
   const executeMutation = useMutation({
     mutationFn: async () => {
-      // Save first
-      await apiFetch(`/api/workflows/${id}`, { method: 'PUT', body: JSON.stringify({ name, nodes, edges }) });
+      // Save first (with derived trigger metadata, so the saved state matches
+      // what the engine will dispatch on the next event)
+      const trigger = deriveTriggerFromNodes(nodes);
+      await apiFetch(`/api/workflows/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name,
+          nodes,
+          edges,
+          trigger_type: trigger.trigger_type,
+          trigger_config: trigger.trigger_config,
+        }),
+      });
       return apiFetch(`/api/workflows/${id}/execute`, { method: 'POST', body: '{}' });
     },
     onSuccess: (res: any) => {

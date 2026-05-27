@@ -148,20 +148,23 @@ legalRoutes.post('/accept', portalClientAuth, async (c) => {
   const userAgent = (c.req.header('user-agent') ?? '').slice(0, 512) || null;
 
   // Insert idempotente — ON CONFLICT no-op se la riga (customer, slug, version)
-  // gia` esiste (es. doppio submit, retry rete).
+  // gia` esiste (es. doppio submit, retry rete). Audit B-025: RETURNING tells
+  // us if the row was new vs already accepted so the caller can distinguish
+  // first-accept from re-confirm without a separate query.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inserted = await sql.begin(async (tx: any) => {
-    const results: Array<{ slug: string; version: string }> = [];
+    const results: Array<{ slug: string; version: string; existed: boolean }> = [];
     for (const slug of LEGAL_DOCUMENT_SLUGS) {
       const version = LEGAL_MAJOR_VERSIONS[slug];
-      await tx`
+      const rows = await tx`
         INSERT INTO customer_legal_acceptances
           (customer_id, document_slug, document_version, accepted_ip, accepted_user_agent)
         VALUES
           (${customerId}, ${slug}, ${version}, ${ip}, ${userAgent})
         ON CONFLICT (customer_id, document_slug, document_version) DO NOTHING
-      `;
-      results.push({ slug, version });
+        RETURNING id
+      ` as Array<{ id: string }>;
+      results.push({ slug, version, existed: rows.length === 0 });
     }
     return results;
   });

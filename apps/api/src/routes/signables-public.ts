@@ -1,11 +1,13 @@
 import { Hono, type Context } from 'hono';
 import { sql, sqlv } from '../db';
 import {
+  OTP_MAX_ATTEMPTS,
   extractIpUa,
   generateOtpCode,
-  isOtpValid,
+  hashOtp,
   otpExpiresAt,
   pdfHashOfSignaturePayload,
+  verifyOtpHash,
 } from '../lib/signing';
 import { sendEmail } from '../lib/email';
 import { sendSms } from '../lib/sms';
@@ -31,7 +33,9 @@ type PublicSignableDocument = {
 
 type SignableDocument = PublicSignableDocument & {
   otp_code: string | null;
+  otp_hash: string | null;
   otp_expires_at: string | Date | null;
+  otp_attempts: number | null;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -135,9 +139,15 @@ signablesPublic.post('/:token/request-otp', async (c) => {
   const otp = generateOtpCode();
   const expiresAt = otpExpiresAt(10).toISOString();
 
+  // Store only the keyed hash; reset failure counter. otp_code (legacy plaintext
+  // column) is nulled to prevent stale codes from being accepted by any older
+  // verifier path. See migration 112 + audit J-01.
   await sql`
     UPDATE signable_documents
-    SET otp_code = ${otp}, otp_expires_at = ${expiresAt}
+    SET otp_code = NULL,
+        otp_hash = ${hashOtp(otp)},
+        otp_expires_at = ${expiresAt},
+        otp_attempts = 0
     WHERE id = ${doc.id}
   `;
 
@@ -196,11 +206,37 @@ signablesPublic.post('/:token/sign', async (c) => {
   if (!doc) return c.json({ error: 'Documento non trovato' }, 404);
   if (doc.status === 'signed') return c.json({ error: "Gia' firmato" }, 400);
   if (doc.expires_at && new Date(doc.expires_at) < new Date()) return c.json({ error: 'Documento scaduto' }, 410);
-  if (!isOtpValid(doc.otp_code, doc.otp_expires_at, otp)) {
+
+  const { ip, ua } = extractIpUa({ header: (name) => c.req.header(name) });
+
+  if (!verifyOtpHash(doc.otp_hash, doc.otp_expires_at, otp)) {
+    const attempts = (doc.otp_attempts ?? 0) + 1;
+    if (attempts >= OTP_MAX_ATTEMPTS) {
+      await sql`
+        UPDATE signable_documents
+        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL, otp_attempts = ${attempts}
+        WHERE id = ${doc.id}
+      `;
+      await writeAuditLog({
+        signableId: doc.id,
+        action: 'otp_locked',
+        ipAddress: ip,
+        userAgent: ua,
+        metadata: { attempts },
+      });
+      return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
+    }
+    await sql`UPDATE signable_documents SET otp_attempts = ${attempts} WHERE id = ${doc.id}`;
+    await writeAuditLog({
+      signableId: doc.id,
+      action: 'otp_failed',
+      ipAddress: ip,
+      userAgent: ua,
+      metadata: { attempts },
+    });
     return c.json({ error: 'OTP non valido o scaduto' }, 400);
   }
 
-  const { ip, ua } = extractIpUa({ header: (name) => c.req.header(name) });
   const signedAt = new Date().toISOString();
   const pdfHash = pdfHashOfSignaturePayload({
     title: doc.title,
@@ -222,7 +258,9 @@ signablesPublic.post('/:token/sign', async (c) => {
       pdf_hash_sha256 = ${pdfHash},
       signer_name = ${signerName},
       otp_code = NULL,
-      otp_expires_at = NULL
+      otp_hash = NULL,
+      otp_expires_at = NULL,
+      otp_attempts = 0
     WHERE id = ${doc.id}
   `;
 

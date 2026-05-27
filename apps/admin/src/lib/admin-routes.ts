@@ -46,6 +46,11 @@ const ROUTES: LocalizedRoute[] = [
   { it: '/fatturazione', en: '/billing' },
   { it: '/analytics', en: '/analytics' },
   { it: '/impostazioni', en: '/settings' },
+  // Privacy / GDPR + Marketing surfaces (audit PR4 — admin UIs added 2026-05-27)
+  { it: '/privacy/gdpr-requests', en: '/privacy/gdpr-requests' },
+  { it: '/privacy/cookie-consent', en: '/privacy/cookie-consent' },
+  { it: '/marketing/newsletter', en: '/marketing/newsletter' },
+  { it: '/contatti', en: '/contacts' },
 ];
 
 function splitPath(raw: string) {

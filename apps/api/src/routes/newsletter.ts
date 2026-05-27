@@ -3,6 +3,10 @@ import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { verifyTurnstileToken } from '../lib/turnstile';
 import { getClientIp } from '../lib/client-ip';
+import { sendNewsletterConfirmEmail } from '../lib/email';
+import { logger } from '../lib/logger';
+
+const log = logger.child({ scope: 'newsletter' });
 
 export const newsletter = new Hono();
 
@@ -36,7 +40,11 @@ newsletter.post('/subscribe', async (c) => {
   // user-agent at subscribe time, alongside the existing timestamp. The
   // double-opt-in confirmation later captures `confirmed_ip` to prove that
   // the click came from someone with mailbox access.
-  await sql`
+  // Audit A-010: must read confirmation_token back from the row so we can
+  // mail the double-opt-in link. ON CONFLICT path keeps the existing token
+  // (a re-subscribe must not invalidate an in-flight pending click) but
+  // still RETURNs it so we can re-send the confirm mail.
+  const [subscriber] = await sql`
     INSERT INTO newsletter_subscribers (email, name, status, consent_ip, consent_user_agent)
     VALUES (${email}, ${name || null}, 'pending', ${clientIp}, ${userAgent})
     ON CONFLICT (email) DO UPDATE SET
@@ -45,7 +53,28 @@ newsletter.post('/subscribe', async (c) => {
       consent_ip         = EXCLUDED.consent_ip,
       consent_user_agent = EXCLUDED.consent_user_agent,
       updated_at         = NOW()
-  `;
+    RETURNING confirmation_token, status
+  ` as Array<{ confirmation_token: string; status: string }>;
+
+  // Fire-and-forget the confirm mail: we never block the response on it nor
+  // surface the transport result to the caller. Mail failures (Resend rate-
+  // limit, SMTP outage) must not leak to the public form — UX-wise the user
+  // already saw "controlla la tua email" and a retry is one /subscribe away.
+  if (subscriber?.confirmation_token) {
+    sendNewsletterConfirmEmail({
+      to: email,
+      confirmationToken: subscriber.confirmation_token,
+      name: name || null,
+    })
+      .then((res) => {
+        if (!res.success) {
+          log.warn({ email, err: res.error, via: res.via }, 'newsletter confirm email send failed');
+        }
+      })
+      .catch((err) => log.warn({ email, err }, 'newsletter confirm email threw'));
+  } else {
+    log.error({ email }, 'subscribe INSERT did not return confirmation_token');
+  }
 
   return c.json({ success: true, message: 'Iscrizione ricevuta. Controlla la tua email.' });
 });
