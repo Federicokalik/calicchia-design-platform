@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import {
   ChevronDown, Zap, Clock, Globe, Mail, Sparkles, MessageSquare,
   FileText, Send, Database, GitBranch, Timer, Repeat,
-  ArrowRightFromLine, Brain, Tag,
+  ArrowRightFromLine, Brain, Tag, Image, Code, FolderPlus,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useI18n } from '@/hooks/use-i18n';
@@ -35,6 +35,12 @@ const categories: Array<{ id: string; labelKey: string; color: string; items: Ar
       { nodeType: 'tool_send_whatsapp', labelKey: 'WhatsApp', icon: MessageSquare, descriptionKey: 'workflow.nodes.sendWhatsapp.description' },
       { nodeType: 'tool_http_request', labelKey: 'HTTP', icon: Globe, descriptionKey: 'workflow.nodes.http.description' },
       { nodeType: 'tool_db_query', labelKey: 'workflow.nodes.db.label', icon: Database, descriptionKey: 'workflow.nodes.db.description' },
+      // Audit J-K-03: backend nodes exist (apps/api/src/lib/workflow/nodes.ts)
+      // but the palette stopped at generic tools. Surface them so admin can
+      // actually use the AI cover/demo and quote-to-project automations.
+      { nodeType: 'tool_generate_cover', labelKey: 'workflow.nodes.generateCover.label', icon: Image, descriptionKey: 'workflow.nodes.generateCover.description' },
+      { nodeType: 'tool_generate_code_demo', labelKey: 'workflow.nodes.generateCodeDemo.label', icon: Code, descriptionKey: 'workflow.nodes.generateCodeDemo.description' },
+      { nodeType: 'tool_create_project', labelKey: 'workflow.nodes.createProject.label', icon: FolderPlus, descriptionKey: 'workflow.nodes.createProject.description' },
     ],
   },
   {

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Activity, Globe, Mouse, Wifi, WifiOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { apiFetch, API_BASE } from '@/lib/api';
+import { apiFetch, API_BASE, refreshAdminSession } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 type Realtime = {
@@ -29,6 +29,9 @@ export function RealtimePanel() {
 
   useEffect(() => {
     let cancelled = false;
+    // Audit D-006: one-shot refresh attempt across all SSE retries (declared
+    // here so the closures below share the same flag).
+    let ssTriedRefresh = false;
 
     const startPolling = () => {
       if (cancelled) return;
@@ -80,6 +83,22 @@ export function RealtimePanel() {
           if (sseTimeoutRef.current) {
             clearTimeout(sseTimeoutRef.current);
             sseTimeoutRef.current = null;
+          }
+          // Audit D-006: EventSource errors swallow the HTTP status, so we
+          // can't tell 401 from a real socket drop. Try a session refresh
+          // ONCE before falling back to polling — if the cookie was just
+          // expired, reopening the SSE will work. Bounded by ssTriedRefresh
+          // to avoid loops.
+          if (!ssTriedRefresh) {
+            ssTriedRefresh = true;
+            refreshAdminSession()
+              .then((ok) => {
+                if (cancelled) return;
+                if (ok) startSse();
+                else startPolling();
+              })
+              .catch(() => { if (!cancelled) startPolling(); });
+            return;
           }
           startPolling();
         };

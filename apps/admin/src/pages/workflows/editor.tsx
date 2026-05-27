@@ -50,6 +50,12 @@ const nodeTypes: NodeTypes = {
   tool_send_whatsapp: ToolNode,
   tool_send_telegram: ToolNode,
   tool_http_request: ToolNode,
+  // Audit J-K-03: server-side nodes that the editor was missing — surfaced in
+  // the palette + mapped here so React Flow renders them with the standard
+  // ToolNode chrome (same visual class as the other tool_* entries).
+  tool_generate_cover: ToolNode,
+  tool_generate_code_demo: ToolNode,
+  tool_create_project: ToolNode,
   logic_condition: LogicNode,
   logic_delay: LogicNode,
   logic_loop: LogicNode,
