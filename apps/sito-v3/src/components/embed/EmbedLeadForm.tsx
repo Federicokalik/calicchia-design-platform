@@ -35,6 +35,7 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
   const [phone, setPhone] = useState('');
   const [company, setCompany] = useState('');
   const [message, setMessage] = useState('');
+  const [gdprConsent, setGdprConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +64,10 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
       setError('Nome ed email sono obbligatori.');
       return;
     }
+    if (!gdprConsent) {
+      setError('Devi accettare la Privacy Policy.');
+      return;
+    }
     if (!token) {
       setError('Attendi la verifica anti-bot e riprova.');
       return;
@@ -86,6 +91,7 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
           utm_content: utm.utm_content,
           utm_term: utm.utm_term,
           turnstile_token: token,
+          gdpr_consent: true,
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -192,20 +198,45 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
         />
       </div>
 
+      {/* Audit C-007: explicit GDPR checkbox required for partner-embedded
+          leads. The previous "accetti la Privacy Policy" footer line was
+          implicit consent — Garante 330/2025 wants an active opt-in. */}
+      <label className="flex items-start gap-2 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={gdprConsent}
+          onChange={(e) => setGdprConsent(e.target.checked)}
+          required
+          className="mt-0.5 h-3.5 w-3.5 accent-zinc-900"
+        />
+        <span className="text-[11px] text-zinc-600 leading-snug">
+          Acconsento al trattamento dei miei dati per essere ricontattato/a. *
+          {' '}
+          <a
+            href="https://calicchia.design/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-zinc-900"
+          >
+            Privacy Policy
+          </a>
+        </span>
+      </label>
+
       <div ref={containerRef} style={{ minWidth: 300 }} />
 
       {error && <p className="text-xs text-red-600">{error}</p>}
 
       <button
         type="submit"
-        disabled={submitting || !ready}
+        disabled={submitting || !ready || !gdprConsent}
         className="w-full px-4 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded hover:bg-zinc-800 disabled:bg-zinc-400 disabled:cursor-not-allowed transition-colors"
       >
         {submitting ? 'Invio...' : 'Invia richiesta'}
       </button>
 
       <p className="text-[10px] text-zinc-500 text-center">
-        Inviando il form accetti la nostra Privacy Policy. I dati non saranno condivisi con terzi.
+        I dati non saranno condivisi con terzi.
       </p>
     </form>
   );

@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
-import { apiFetch, API_BASE } from '@/lib/api';
+import { apiFetch, apiFetchRaw } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -824,11 +824,9 @@ function BackupSection() {
   const exportBackup = async () => {
     setExporting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/backup/export`, { credentials: 'include' });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
-      }
+      // apiFetchRaw applies the same 401 refresh flow as apiFetch but returns
+      // the Response so we can stream the blob (audit D-005).
+      const res = await apiFetchRaw('/api/backup/export');
       const blob = await res.blob();
       const disposition = res.headers.get('content-disposition') || '';
       const match = disposition.match(/filename="([^"]+)"/);

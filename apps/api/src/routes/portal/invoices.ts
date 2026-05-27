@@ -52,12 +52,19 @@ invoicesRoutes.get('/payments', portalClientAuth, async (c) => {
 
   const projectFilter = projectId ? sql`AND ps.project_id = ${projectId}` : sql``;
 
+  // Audit J-K-13: payment_schedules can be linked via project_id, quote_id OR
+  // invoice_id (mig 030). The previous filter only matched the first two, so
+  // invoice-only schedules (admin attaches a piano di pagamento directly to a
+  // fattura without a quote/project) silently disappeared from the portal.
+  // Added LEFT JOIN invoices + OR ps.invoice_id IN (...) and surfaced the
+  // invoice metadata too so the UI can group by fattura.
   const schedules = await sql`
     SELECT
       ps.id, ps.title, ps.schedule_type, ps.amount, ps.currency,
       ps.due_date, ps.status, ps.paid_amount, ps.paid_at,
       jsonb_build_object('id', cp.id, 'name', cp.name) AS project,
       jsonb_build_object('id', q.id, 'quote_number', q.quote_number, 'title', q.title) AS quote,
+      jsonb_build_object('id', i.id, 'invoice_number', i.invoice_number, 'total', i.total) AS invoice,
       COALESCE(
         jsonb_agg(
           jsonb_build_object(
@@ -71,14 +78,16 @@ invoicesRoutes.get('/payments', portalClientAuth, async (c) => {
     FROM payment_schedules ps
     LEFT JOIN quotes q ON q.id = ps.quote_id
     LEFT JOIN client_projects cp ON cp.id = ps.project_id
+    LEFT JOIN invoices i ON i.id = ps.invoice_id
     LEFT JOIN payment_links pl ON pl.payment_schedule_id = ps.id
     WHERE ps.status NOT IN ('cancelled')
       AND (
         ps.project_id IN (SELECT id FROM client_projects WHERE customer_id = ${customerId})
         OR ps.quote_id IN (SELECT id FROM quotes WHERE customer_id = ${customerId})
+        OR ps.invoice_id IN (SELECT id FROM invoices WHERE customer_id = ${customerId})
       )
       ${projectFilter}
-    GROUP BY ps.id, cp.id, q.id
+    GROUP BY ps.id, cp.id, q.id, i.id
     ORDER BY ps.due_date ASC NULLS LAST
   ` as Array<Record<string, unknown>>;
 

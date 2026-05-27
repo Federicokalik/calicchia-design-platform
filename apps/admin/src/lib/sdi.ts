@@ -1,28 +1,28 @@
-import { API_BASE } from './api';
+import { apiFetchRaw } from './api';
 
 /**
  * Downloads the FatturaPA XML for an invoice, parses the filename from
  * Content-Disposition, and triggers a browser save. Throws with a
  * human-readable message on failure (including the API's `missing` field
  * so the UI can tell the user exactly which setting/field is empty).
+ *
+ * Uses apiFetchRaw (audit D-005) so 401 triggers the same refresh/redirect
+ * flow as the rest of the admin instead of throwing a local error.
  */
 export async function downloadSdiXml(invoiceId: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/invoices/${invoiceId}/sdi-xml`, {
-    credentials: 'include',
-  });
-
-  if (!res.ok) {
-    let detail = `HTTP ${res.status}`;
-    try {
-      const body = await res.json();
-      if (body?.error) detail = body.error;
-      if (Array.isArray(body?.missing) && body.missing.length > 0) {
-        detail += ` (mancanti: ${body.missing.join(', ')})`;
-      }
-    } catch { /* response wasn't JSON */ }
-    throw new Error(detail);
+  let res: Response;
+  try {
+    res = await apiFetchRaw(`/api/invoices/${invoiceId}/sdi-xml`);
+  } catch (err) {
+    // apiFetchRaw already attempted the auth refresh; surface the original
+    // error to the caller (UI shows a toast).
+    throw err instanceof Error ? err : new Error(String(err));
   }
 
+  // Map the API's structured "missing fields" payload onto the thrown message.
+  // apiFetchRaw never returns a non-ok response (it throws first), but the
+  // body parser only checked res.ok — keep the field extraction here so the
+  // UI gets the "(mancanti: …)" suffix when present.
   const disposition = res.headers.get('Content-Disposition') || '';
   const match = /filename="?([^"]+)"?/.exec(disposition);
   const filename = match?.[1] || `fattura-${invoiceId}.xml`;

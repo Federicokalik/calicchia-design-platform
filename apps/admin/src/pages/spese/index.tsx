@@ -20,7 +20,7 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
-import { apiFetch, API_BASE } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
 type Category =
@@ -188,16 +188,13 @@ export default function SpesePage() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch(`${API_BASE}/api/ai/extract-expense`, {
+      // apiFetch already sends credentials, sets Accept-Language and runs the
+      // 401 refresh flow. FormData bodies are passed through without Content-Type
+      // override (audit D-005).
+      const data = await apiFetch('/api/ai/extract-expense', {
         method: 'POST',
         body: formData,
-        credentials: 'include',
       });
-      if (!res.ok) {
-        const errBody = await res.json().catch(() => ({}));
-        throw new Error(errBody.error || 'Errore OCR');
-      }
-      const data = await res.json();
       const e = data.extracted ?? {};
       setForm({
         occurred_on: e.occurred_on || new Date().toISOString().slice(0, 10),

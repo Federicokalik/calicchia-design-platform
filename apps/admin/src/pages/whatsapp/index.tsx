@@ -454,13 +454,11 @@ export default function WhatsAppInboxPage() {
       fd.append('file', file, file.name);
       if (caption) fd.append('caption', caption);
       if (replyToExternalId) fd.append('reply_to_external_id', replyToExternalId);
-      const res = await fetch(`/api/whatsapp-admin/conversations/${id}/messages/media`, {
-        method: 'POST',
-        credentials: 'include',
-        body: fd,
-      });
-      const data: { ok?: boolean; error?: string } = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      // apiFetch handles FormData + 401 refresh + locale headers (audit D-005).
+      const data: { ok?: boolean; error?: string } = await apiFetch(
+        `/api/whatsapp-admin/conversations/${id}/messages/media`,
+        { method: 'POST', body: fd },
+      );
       return data;
     },
     onSuccess: (_, vars) => {

@@ -80,14 +80,12 @@ export function KnowledgeBaseSection() {
     mutationFn: async (file: File) => {
       const form = new FormData();
       form.append('file', file);
-      // apiFetch sets credentials: 'include' and skips Content-Type for FormData.
-      const res = await fetch(`${API_BASE}/api/admin/kb/upload`, {
+      // apiFetch supports FormData natively and runs the 401 refresh flow
+      // that the previous raw fetch was bypassing (audit D-005).
+      const data = await apiFetch('/api/admin/kb/upload', {
         method: 'POST',
         body: form,
-        credentials: 'include',
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `Upload fallito (HTTP ${res.status})`);
       return data as { file: { name: string; size_bytes: number } };
     },
     onSuccess: (res) => {

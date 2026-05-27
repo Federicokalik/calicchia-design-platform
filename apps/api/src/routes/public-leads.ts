@@ -21,6 +21,8 @@ interface LeadBody {
   utm_content?: string;
   utm_term?: string;
   turnstile_token?: string;
+  /** Audit C-007: explicit GDPR consent required for partner-embedded leads. */
+  gdpr_consent?: boolean;
 }
 
 const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 255;
@@ -50,11 +52,19 @@ publicLeads.post('/', async (c) => {
       return c.json({ error: 'Dati non validi' }, 400);
     }
 
+    // Audit C-007: strict GDPR consent check (boolean true, not just truthy).
+    if (body.gdpr_consent !== true) {
+      return c.json({ error: 'Consenso GDPR richiesto' }, 400);
+    }
+
     const turnstileOk = await verifyTurnstileToken(turnstileToken, {
       remoteIp: getClientIp(c) ?? undefined,
       expectedAction: 'embed_lead',
     });
     if (!turnstileOk) return c.json({ error: 'Verifica anti-bot fallita.' }, 403);
+
+    const consentIp = getClientIp(c) ?? null;
+    const consentUserAgent = c.req.header('user-agent')?.slice(0, 512) ?? null;
 
     const tags: string[] = [];
     if (sourceToken) tags.push(`embed:${sourceToken}`);
@@ -65,7 +75,10 @@ publicLeads.post('/', async (c) => {
     if (utmTerm) tags.push(`utm_term:${utmTerm}`);
 
     const [lead] = await sql`
-      INSERT INTO leads (name, email, phone, company, source, source_id, status, notes, tags)
+      INSERT INTO leads (
+        name, email, phone, company, source, source_id, status, notes, tags,
+        gdpr_consent, consent_ip, consent_user_agent
+      )
       VALUES (
         ${name},
         ${email},
@@ -75,7 +88,10 @@ publicLeads.post('/', async (c) => {
         ${sourceToken || null},
         ${'new'},
         ${message || null},
-        ${tags}
+        ${tags},
+        true,
+        ${consentIp},
+        ${consentUserAgent}
       )
       RETURNING id, created_at
     `;
