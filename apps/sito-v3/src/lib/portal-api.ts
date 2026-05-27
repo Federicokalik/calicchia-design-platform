@@ -421,10 +421,81 @@ export async function getFiles(): Promise<PortalFile[]> {
   return (data.files as PortalFile[]) ?? [];
 }
 
-// Audit B-014: removed server-side uploadFile() that streamed every byte
-// through the Next.js server. The browser now PUTs chunks directly to S4
-// via lib/portal-upload-client.ts; this file keeps only the file list
-// helper above.
+export async function uploadFile(formData: FormData): Promise<{ id: string; key: string; url: string }> {
+  const file = formData.get('file');
+  const projectId = String(formData.get('projectId') ?? '').trim();
+
+  if (!(file instanceof File)) {
+    throw new Error('Seleziona un file da caricare.');
+  }
+
+  const init = await authedFetch<{
+    uploadId: string;
+    key: string;
+    totalParts: number;
+    chunkSize: number;
+    dbId: string;
+  }>('/upload/init', {
+    method: 'POST',
+    body: JSON.stringify({
+      fileName: file.name,
+      fileSize: file.size,
+      contentType: file.type || 'application/octet-stream',
+      projectId: projectId || undefined,
+    }),
+  });
+
+  const parts: Array<{ PartNumber: number; ETag: string }> = [];
+
+  try {
+    for (let partNumber = 1; partNumber <= init.totalParts; partNumber += 1) {
+      const start = (partNumber - 1) * init.chunkSize;
+      const end = Math.min(start + init.chunkSize, file.size);
+      const { url } = await authedFetch<{ url: string; partNumber: number; expiresIn: number }>(
+        '/upload/url',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            uploadId: init.uploadId,
+            key: init.key,
+            partNumber,
+          }),
+        }
+      );
+
+      const uploadRes = await fetch(url, {
+        method: 'PUT',
+        body: file.slice(start, end),
+        cache: 'no-store',
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error(`Upload part ${partNumber} failed with ${uploadRes.status}`);
+      }
+
+      const etag = uploadRes.headers.get('ETag') ?? uploadRes.headers.get('etag');
+      if (!etag) throw new Error(`Upload part ${partNumber} did not return an ETag`);
+      parts.push({ PartNumber: partNumber, ETag: etag });
+    }
+
+    const done = await authedFetch<{ ok: true; id: string; key: string }>('/upload/done', {
+      method: 'POST',
+      body: JSON.stringify({
+        uploadId: init.uploadId,
+        key: init.key,
+        parts,
+      }),
+    });
+
+    return { id: done.id, key: done.key, url: getMediaUrl(done.key) };
+  } catch (error) {
+    await authedFetch('/upload/abort', {
+      method: 'POST',
+      body: JSON.stringify({ uploadId: init.uploadId, key: init.key }),
+    }).catch(() => undefined);
+    throw error;
+  }
+}
 
 export async function getInvoices(): Promise<PortalInvoice[]> {
   const data = await authedFetch<{

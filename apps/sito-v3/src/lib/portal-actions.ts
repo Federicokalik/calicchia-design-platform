@@ -5,6 +5,7 @@ import {
   approveDeliverable,
   postMessage,
   requestRevisions,
+  uploadFile,
 } from '@/lib/portal-api';
 
 /**
@@ -36,13 +37,13 @@ export async function postProjectMessageAction(projectId: string, formData: Form
   revalidatePath(`/clienti/progetti/${projectId}`);
 }
 
-/**
- * Audit B-014: the upload itself now runs entirely client-side (see
- * lib/portal-upload-client.ts) so the file blob doesn't pass through the
- * Next.js server anymore. This Server Action is invoked AFTER a successful
- * upload to refresh the file-list pages — no FormData crosses the boundary.
- */
-export async function revalidatePortalFilesAction() {
+export async function uploadPortalFileAction(formData: FormData) {
+  try {
+    await uploadFile(formData);
+  } catch (err) {
+    logActionError('uploadFile', undefined, err);
+    throw err;
+  }
   revalidatePath('/clienti/file');
   revalidatePath('/clienti/upload');
 }
