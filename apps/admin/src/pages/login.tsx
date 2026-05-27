@@ -12,9 +12,9 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { useTurnstile } from '@/hooks/use-turnstile';
 import { API_BASE } from '@/lib/api';
+import { PORTAL_URL } from '@/lib/public-urls';
 
 const TURNSTILE_SITE_KEY = import.meta.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-const PORTAL_URL = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
 
 const loginSchema = z.object({
   email: z.string().email('Email non valida'),

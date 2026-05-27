@@ -28,6 +28,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
+import { PORTAL_URL } from '@/lib/public-urls';
 
 export default function CollaboratoreDetailPage() {
   const { id } = useParams();
@@ -37,7 +38,7 @@ export default function CollaboratoreDetailPage() {
   const [projectForm, setProjectForm] = useState({ name: '', project_type: 'website', customer_id: '', notes: '' });
   const [copiedLink, setCopiedLink] = useState(false);
   const [portalAccess, setPortalAccess] = useState<{ code: string; link: string } | null>(null);
-  const portalUrl = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
+  const portalUrl = PORTAL_URL;
 
   const { data, isLoading } = useQuery({
     queryKey: ['collaborator', id],

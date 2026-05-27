@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -116,16 +116,22 @@ export default function PipelinePage() {
     },
   });
 
-  // Sync local leads when query data changes
-  if (leads.length > 0 && localLeads.length === 0 && !activeLead) {
-    setLocalLeads(leads);
-  }
-  // Keep in sync when not dragging
-  if (leads !== localLeads && !activeLead && leads.length > 0) {
+  // Audit D-007: setState during render — under React 19 strict/concurrent
+  // rendering this caused the setter to fire twice per render plus an O(N)
+  // JSON.stringify on every pass. Moved into useEffect; the drag guard keeps
+  // mid-drag snapshots from clobbering the optimistic local copy.
+  useEffect(() => {
+    if (activeLead) return;
+    if (leads.length === 0) return;
+    if (localLeads.length === 0) {
+      setLocalLeads(leads);
+      return;
+    }
     if (JSON.stringify(leads) !== JSON.stringify(localLeads)) {
       setLocalLeads(leads);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leads, activeLead]);
 
   const displayLeads = localLeads.length > 0 ? localLeads : leads;
 

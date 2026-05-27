@@ -32,6 +32,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { downloadSdiXml } from '@/lib/sdi';
 import { cn } from '@/lib/utils';
+import { PORTAL_URL } from '@/lib/public-urls';
 import { LoadingState } from '@/components/shared/loading-state';
 import type { Customer, CustomerNote } from '@/types/customer';
 import { CUSTOMER_STATUS_CONFIG, NOTE_TYPE_CONFIG } from '@/types/customer';
@@ -135,7 +136,7 @@ export default function ClienteDetailPage() {
   // Portal access
   const [copiedLink, setCopiedLink] = useState(false);
   const [portalAccess, setPortalAccess] = useState<{ code: string; link: string } | null>(null);
-  const portalUrl = import.meta.env.VITE_PORTAL_URL || 'http://localhost:3000';
+  const portalUrl = PORTAL_URL;
 
   const generateCodeMutation = useMutation({
     mutationFn: async () => {

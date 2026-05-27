@@ -86,14 +86,36 @@ function actorPayload(actor: PortalActor) {
   };
 }
 
+/**
+ * Audit B-009: extract the 4-char lookup prefix from a provided portal access
+ * code. New-format codes are `PRJ-<22ch base64url>` / `COL-<22ch base64url>`;
+ * the prefix is the first 4 chars of the random part (matches what
+ * rotate*PortalCode persisted to portal_access_code_prefix).
+ *
+ * For legacy short codes (`PRJ-XXXXXXXX` hex, 4 bytes) we return null →
+ * findActorByCode falls back to the full scan path for those rows.
+ */
+function extractCodePrefix(provided: string): string | null {
+  const tail = provided.replace(/^(PRJ-|COL-)/, '');
+  // Legacy codes were 8 hex chars; new codes are 22 base64url chars. Treat
+  // anything shorter than 16 chars as legacy to keep old emails working.
+  if (tail.length < 16) return null;
+  return tail.slice(0, 4);
+}
+
 async function findActorByCode(accessCode: string, normalizedEmail?: string): Promise<PortalActor | null> {
   const provided = accessCode.trim();
   if (!provided) return null;
+  const prefix = extractCodePrefix(provided);
 
+  // When the prefix lookup matches we test ~1 row of bcrypt; legacy codes
+  // without a prefix still go through the full scan path (kept for back-compat
+  // until all customers rotate to the new format).
   const customerRows = (await sql`
     SELECT id, email, contact_name, company_name, portal_access_code_hash, portal_logo, session_version
     FROM customers
     WHERE portal_access_code_hash IS NOT NULL
+      ${prefix ? sql`AND (portal_access_code_prefix = ${prefix} OR portal_access_code_prefix IS NULL)` : sql``}
       ${normalizedEmail ? sql`AND LOWER(email) = ${normalizedEmail}` : sql``}
   `) as Array<Omit<ClientActor, 'role'>>;
 
@@ -108,6 +130,7 @@ async function findActorByCode(accessCode: string, normalizedEmail?: string): Pr
     SELECT id, email, name, company, portal_access_code_hash, session_version
     FROM collaborators
     WHERE portal_access_code_hash IS NOT NULL
+      ${prefix ? sql`AND (portal_access_code_prefix = ${prefix} OR portal_access_code_prefix IS NULL)` : sql``}
       ${normalizedEmail ? sql`AND LOWER(email) = ${normalizedEmail}` : sql``}
   `) as Array<Omit<CollaboratorActor, 'role'>>;
 
@@ -377,6 +400,8 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
 
   await auditPortalEvent(c, 'code_login_success', {
     customer_id: actor.role === 'client' ? actor.id : undefined,
+    actor_id: actor.id,
+    actor_role: actor.role,
     email: actor.email ?? normalizedEmail,
     success: true,
     metadata: { with_email: Boolean(normalizedEmail), role: actor.role },
@@ -422,6 +447,8 @@ authRoutes.post('/login-by-code', portalLoginLimit, async (c) => {
 
   await auditPortalEvent(c, 'code_login_success', {
     customer_id: actor.role === 'client' ? actor.id : undefined,
+    actor_id: actor.id,
+    actor_role: actor.role,
     email: actor.email ?? '',
     success: true,
     metadata: { with_email: false, role: actor.role },
@@ -432,19 +459,34 @@ authRoutes.post('/login-by-code', portalLoginLimit, async (c) => {
 
 authRoutes.post('/logout', async (c) => {
   let customerId: string | null = null;
+  let actorId: string | null = null;
+  let actorRole: 'client' | 'collaborator' | null = null;
   try {
     const cookieHeader = c.req.header('cookie') || '';
     const match = cookieHeader.match(/portal_token=([^;]+)/);
     if (match) {
       const { payload } = await jwtVerify(match[1], getJwtSecret());
-      if (payload.role === 'client' && payload.sub) customerId = String(payload.sub);
+      const sub = payload.sub ? String(payload.sub) : null;
+      if (payload.role === 'client' && sub) {
+        customerId = sub;
+        actorId = sub;
+        actorRole = 'client';
+      } else if (payload.role === 'collaborator' && sub) {
+        actorId = sub;
+        actorRole = 'collaborator';
+      }
     }
   } catch {
     /* logout always succeeds client-side */
   }
 
   clearPortalCookie(c);
-  await auditPortalEvent(c, 'logout', { customer_id: customerId, success: true });
+  await auditPortalEvent(c, 'logout', {
+    customer_id: customerId,
+    actor_id: actorId,
+    actor_role: actorRole,
+    success: true,
+  });
   return c.json({ ok: true });
 });
 

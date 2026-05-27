@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
+import { SITE_URL } from '@/lib/public-urls';
 
 interface EventType {
   id: string;
@@ -29,8 +30,6 @@ const LOCATION_LABEL: Record<string, string> = {
   in_person: 'In presenza',
   phone: 'Telefono',
 };
-
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || 'http://localhost:3000';
 
 export default function EventTypesPage() {
   const queryClient = useQueryClient();

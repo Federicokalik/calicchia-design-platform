@@ -6,8 +6,7 @@ import { ArrowLeft, Save, Trash2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
-
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || 'http://localhost:3000';
+import { SITE_URL } from '@/lib/public-urls';
 
 interface EventTypeForm {
   slug: string;

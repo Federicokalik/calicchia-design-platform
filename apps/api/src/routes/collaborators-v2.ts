@@ -31,12 +31,16 @@ function buildPortalAccessMessage(opts: { name: string | null; link: string; cod
 }
 
 async function rotateCollaboratorPortalCode(id: string): Promise<{ id: string; code: string } | null> {
-  const code = 'COL-' + randomBytes(4).toString('hex').toUpperCase();
+  // 128-bit entropy + indexed prefix — mirrors customers (audit B-009 + B-010).
+  const random = randomBytes(16).toString('base64url');
+  const code = 'COL-' + random;
   const hash = await bcrypt.hash(code, 12);
+  const prefix = random.slice(0, 4);
   // Bump session_version atomically — see audit B-007 (mirrors customers).
   const [row] = await sql`
     UPDATE collaborators
     SET portal_access_code_hash = ${hash},
+        portal_access_code_prefix = ${prefix},
         portal_access_code_rotated_at = NOW(),
         session_version = session_version + 1
     WHERE id = ${id}
