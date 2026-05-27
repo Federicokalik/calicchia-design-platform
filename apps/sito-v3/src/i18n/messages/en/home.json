@@ -84,7 +84,7 @@
       },
       "results": {
         "title": "Results, not promises",
-        "body": "Numbers you can verify: load time, Google rankings, conversions.\nNiente \"we are creative\" pitch.\nOnly what gets measured counts."
+        "body": "Numbers you can verify: load time, Google rankings, conversions.\nNo \"we are creative\" pitch.\nOnly what gets measured counts."
       }
     }
   },
@@ -105,7 +105,7 @@
       "design": {
         "label": "Design",
         "title": "Pixels carry weight.",
-        "body": "Interactive mockups, not static frames.\nVedi le animazioni, ascolti come si muove.\nCambiamo prima di scrivere codice — quando costa zero sistemare."
+        "body": "Interactive mockups, not static frames.\nYou see the animations, hear how it moves.\nWe change things before writing code — when fixing costs nothing."
       },
       "build": {
         "label": "Build",
@@ -115,7 +115,7 @@
       "launch": {
         "label": "Launch",
         "title": "I fix, I test, I ship.",
-        "body": "Tests on ten real devices, analytics monitoring, a 30-minute training session.\nPoi un anno di assistenza inclusa — perché i siti veri vivono dopo il lancio."
+        "body": "Tests on ten real devices, analytics monitoring, a 30-minute training session.\nThen a full year of support included — because real sites live on after launch."
       }
     }
   },
