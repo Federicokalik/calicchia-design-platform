@@ -24,6 +24,7 @@ import {
   getEventType,
 } from './availability';
 import { getLocalBusyRanges } from './local-busy';
+import { filterSlotsByWeeklyCapacity } from './capacity';
 import type { EventType, Slot } from './types';
 
 interface Range {
@@ -199,6 +200,7 @@ export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<C
   const slotsList: Slot[] = finalSlots
     .map((r) => ({ start: fromMs(r.start), end: fromMs(r.end) }))
     .sort((a, b) => a.start.localeCompare(b.start));
+  const capacityFilteredSlots = await filterSlotsByWeeklyCapacity(slotsList, eventType.duration_minutes);
 
   // Raggruppa per data nel timezone
   const tz = sched.schedule.timezone;
@@ -209,13 +211,13 @@ export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<C
   const localDateFmt = new Intl.DateTimeFormat('en-CA', {
     timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
   });
-  for (const slot of slotsList) {
+  for (const slot of capacityFilteredSlots) {
     const dateLocal = localDateFmt.format(new Date(slot.start));
     if (!slotsByDate[dateLocal]) slotsByDate[dateLocal] = [];
     slotsByDate[dateLocal].push(slot);
   }
 
-  return { eventType, timezone: tz, slotsByDate, slots: slotsList };
+  return { eventType, timezone: tz, slotsByDate, slots: capacityFilteredSlots };
 }
 
 /** Filtra slot allineati che a causa del clamp/realign potrebbero ricadere in busy. */

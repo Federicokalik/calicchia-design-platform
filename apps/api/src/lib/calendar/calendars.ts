@@ -31,7 +31,7 @@ export class CalendarSystemError extends Error {
 
 const COLUMNS = sql`
   id, slug, name, description, color, icon, timezone,
-  is_default, is_system, ics_feed_token, ics_feed_enabled,
+  is_default, is_system, blocks_availability, ics_feed_token, ics_feed_enabled,
   sort_order, created_at, updated_at
 `;
 
@@ -117,6 +117,7 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
       timezone: input.timezone || 'Europe/Rome',
       is_default: !!input.is_default,
       is_system: false,
+      blocks_availability: input.blocks_availability !== false,
       ics_feed_token: generateFeedToken(),
       ics_feed_enabled: true,
       sort_order: input.sort_order || 0,
@@ -128,7 +129,7 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
 
 export async function updateCalendar(
   id: string,
-  input: Partial<Pick<Calendar, 'name' | 'description' | 'color' | 'icon' | 'timezone' | 'is_default' | 'ics_feed_enabled' | 'sort_order'>>
+  input: Partial<Pick<Calendar, 'name' | 'description' | 'color' | 'icon' | 'timezone' | 'is_default' | 'blocks_availability' | 'ics_feed_enabled' | 'sort_order'>>
 ): Promise<Calendar | null> {
   const updates: Record<string, unknown> = {};
   if (input.name !== undefined) updates.name = String(input.name).trim().slice(0, 200);
@@ -136,6 +137,7 @@ export async function updateCalendar(
   if (input.color !== undefined && /^#[0-9a-f]{6}$/i.test(input.color)) updates.color = input.color;
   if (input.icon !== undefined) updates.icon = input.icon;
   if (input.timezone !== undefined) updates.timezone = input.timezone;
+  if (input.blocks_availability !== undefined) updates.blocks_availability = !!input.blocks_availability;
   if (input.ics_feed_enabled !== undefined) updates.ics_feed_enabled = !!input.ics_feed_enabled;
   if (input.sort_order !== undefined) updates.sort_order = parseInt(String(input.sort_order)) || 0;
 

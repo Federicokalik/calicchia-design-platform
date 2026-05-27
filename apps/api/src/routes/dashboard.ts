@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { getAdminLocale, type AdminLocale } from '../lib/admin-locale';
+import { getCapacityWeeks } from '../lib/calendar/capacity';
 
 export const dashboard = new Hono();
 
@@ -208,69 +209,21 @@ dashboard.get('/upcoming-bookings', async (c) => {
 });
 
 dashboard.get('/capacity-week', async (c) => {
-  const [
-    settingsRows,
-    boundsRows,
-    timeEntries,
-    events,
-    eventsBySource,
-  ] = await Promise.all([
-    sql`
-      SELECT (value->>'weekly_capacity_hours')::int AS hours
-      FROM site_settings WHERE key = 'freelancer.studio' LIMIT 1
-    ` as Promise<Array<{ hours: number | string | null }>>,
-    sql`
-      SELECT
-        (date_trunc('week', now() AT TIME ZONE 'Europe/Rome'))::date AS start_date,
-        ((date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '6 days'))::date AS end_date
-    ` as Promise<Array<{ start_date: string | Date; end_date: string | Date }>>,
-    sql`
-      SELECT
-        COALESCE(SUM(CASE WHEN end_time IS NOT NULL THEN COALESCE(duration_minutes, 0) ELSE 0 END), 0)::int AS minutes,
-        COALESCE(SUM(CASE WHEN end_time IS NOT NULL AND is_billable THEN COALESCE(duration_minutes, 0) ELSE 0 END), 0)::int AS billable_minutes,
-        COUNT(*) FILTER (WHERE end_time IS NULL)::int AS running_count,
-        COUNT(*) FILTER (WHERE end_time IS NOT NULL)::int AS entries_count
-      FROM time_entries
-      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
-        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
-    ` as Promise<Array<{
-      minutes: number | string;
-      billable_minutes: number | string;
-      running_count: number | string;
-      entries_count: number | string;
-    }>>,
-    sql`
-      SELECT
-        COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 0)::int AS minutes,
-        COUNT(*)::int AS events_count
-      FROM calendar_events
-      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
-        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
-        AND status = 'confirmed'
-        AND rrule IS NULL
-        AND all_day = false
-    ` as Promise<Array<{ minutes: number | string; events_count: number | string }>>,
-    sql`
-      SELECT
-        source,
-        COUNT(*)::int AS count,
-        COALESCE(SUM(EXTRACT(EPOCH FROM (end_time - start_time)) / 60), 0)::int AS minutes
-      FROM calendar_events
-      WHERE start_time >= date_trunc('week', now() AT TIME ZONE 'Europe/Rome') AT TIME ZONE 'Europe/Rome'
-        AND start_time < (date_trunc('week', now() AT TIME ZONE 'Europe/Rome') + INTERVAL '7 days') AT TIME ZONE 'Europe/Rome'
-        AND status = 'confirmed'
-        AND rrule IS NULL
-        AND all_day = false
-      GROUP BY source
-      ORDER BY minutes DESC
-    ` as Promise<Array<{ source: string; count: number | string; minutes: number | string }>>,
-  ]);
+  const nowIso = new Date().toISOString();
+  const capacity = (await getCapacityWeeks(nowIso, nowIso))[0];
+  const billableRows = await sql<Array<{ billable_minutes: number | string }>>`
+    SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (
+      LEAST(end_time, ${capacity.weekEndIso}::timestamptz) - GREATEST(start_time, ${capacity.weekStartIso}::timestamptz)
+    )) / 60), 0)::int AS billable_minutes
+    FROM time_entries
+    WHERE is_billable = true
+      AND end_time IS NOT NULL
+      AND start_time < ${capacity.weekEndIso}::timestamptz
+      AND end_time > ${capacity.weekStartIso}::timestamptz
+  `;
 
-  const cfg = settingsRows[0];
-  const hoursAvailable = cfg && Number.isFinite(Number(cfg.hours)) ? Number(cfg.hours) : 40;
-  const timeMinutes = Number(timeEntries[0]?.minutes ?? 0);
-  const eventMinutes = Number(events[0]?.minutes ?? 0);
-  const totalMinutes = timeMinutes + eventMinutes;
+  const hoursAvailable = capacity.hoursAvailable;
+  const totalMinutes = capacity.minutesUsed;
   const hoursPlanned = Math.round((totalMinutes / 60) * 100) / 100;
   const ratio = hoursAvailable > 0 ? hoursPlanned / hoursAvailable : 0;
 
@@ -279,33 +232,33 @@ dashboard.get('/capacity-week', async (c) => {
   else if (ratio <= 1.0) status = 'optimal';
   else status = 'overbooked';
 
-  const toIsoDate = (value: string | Date | undefined): string => {
-    if (value instanceof Date) return value.toISOString().slice(0, 10);
-    return (value ?? '').slice(0, 10);
-  };
-
   const breakdown = [
     {
       source: 'time_entries',
-      hours: Math.round((timeMinutes / 60) * 100) / 100,
-      count: Number(timeEntries[0]?.entries_count ?? 0),
+      hours: Math.round((capacity.timeEntryMinutes / 60) * 100) / 100,
+      count: capacity.timeEntryCount,
     },
-    ...eventsBySource.map((row) => ({
-      source: `calendar:${row.source}`,
-      hours: Math.round((Number(row.minutes) / 60) * 100) / 100,
-      count: Number(row.count),
+    {
+      source: 'calendar:booking',
+      hours: Math.round((capacity.bookingMinutes / 60) * 100) / 100,
+      count: capacity.bookingCount,
+    },
+    ...Object.entries(capacity.calendarBySource).map(([source, row]) => ({
+      source: `calendar:${source}`,
+      hours: Math.round((row.minutes / 60) * 100) / 100,
+      count: row.count,
     })),
   ];
 
   return c.json({
-    week_start: toIsoDate(boundsRows[0]?.start_date),
-    week_end: toIsoDate(boundsRows[0]?.end_date),
+    week_start: capacity.weekStartIso.slice(0, 10),
+    week_end: new Date(new Date(capacity.weekEndIso).getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
     hours_planned: hoursPlanned,
     hours_available: hoursAvailable,
     ratio: Math.round(ratio * 100) / 100,
     status,
-    billable_hours: Math.round((Number(timeEntries[0]?.billable_minutes ?? 0) / 60) * 100) / 100,
-    running_timers: Number(timeEntries[0]?.running_count ?? 0),
+    billable_hours: Math.round((Number(billableRows[0]?.billable_minutes ?? 0) / 60) * 100) / 100,
+    running_timers: capacity.runningTimers,
     breakdown,
   });
 });

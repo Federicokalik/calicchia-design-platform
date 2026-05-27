@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Plus, Copy, RotateCw, Trash2, Eye, EyeOff, Save, X, RefreshCw, Link as LinkIcon } from 'lucide-react';
+import { Plus, Copy, RotateCw, Trash2, Eye, EyeOff, Save, X, RefreshCw, Link as LinkIcon, Lock, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
@@ -18,6 +18,7 @@ interface Calendar {
   timezone: string;
   is_default: boolean;
   is_system: boolean;
+  blocks_availability: boolean;
   ics_feed_token: string;
   ics_feed_enabled: boolean;
   ics_feed_url: string | null;
@@ -53,6 +54,18 @@ export default function CalendariPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-calendars'] });
       toast.success('Token rigenerato — il vecchio link non funziona più');
+    },
+  });
+
+  const toggleBlocking = useMutation({
+    mutationFn: ({ id, blocks_availability }: { id: string; blocks_availability: boolean }) =>
+      apiFetch(`/api/admin/calendar/calendars/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ blocks_availability }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-calendars'] });
+      toast.success('Blocco disponibilita aggiornato');
     },
   });
 
@@ -105,6 +118,7 @@ export default function CalendariPage() {
                 <div className="flex gap-1 shrink-0">
                   {cal.is_default && <Badge variant="default" className="text-[10px]">Default</Badge>}
                   {cal.is_system && <Badge variant="outline" className="text-[10px]">Sistema</Badge>}
+                  {cal.blocks_availability && <Badge variant="outline" className="text-[10px]">Blocca slot</Badge>}
                 </div>
               </div>
 
@@ -150,8 +164,18 @@ export default function CalendariPage() {
                   variant="ghost"
                   className="h-7 px-2 text-xs"
                   onClick={() => toggleFeed.mutate({ id: cal.id, ics_feed_enabled: !cal.ics_feed_enabled })}
+                  title={cal.ics_feed_enabled ? 'Disattiva feed ICS' : 'Attiva feed ICS'}
                 >
                   {cal.ics_feed_enabled ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-xs"
+                  onClick={() => toggleBlocking.mutate({ id: cal.id, blocks_availability: !cal.blocks_availability })}
+                  title={cal.blocks_availability ? 'Non bloccare slot e capacity' : 'Blocca slot e capacity'}
+                >
+                  {cal.blocks_availability ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
                 </Button>
                 <Button
                   size="sm"
@@ -444,6 +468,7 @@ function CalendarForm({ onClose, initial }: { onClose: () => void; initial: Cale
   const [color, setColor] = useState(initial?.color || '#7c3aed');
   const [timezone, setTimezone] = useState(initial?.timezone || 'Europe/Rome');
   const [isDefault, setIsDefault] = useState(initial?.is_default || false);
+  const [blocksAvailability, setBlocksAvailability] = useState(initial?.blocks_availability ?? true);
 
   function autoSlug(value: string) {
     return value.trim().toLowerCase()
@@ -461,6 +486,7 @@ function CalendarForm({ onClose, initial }: { onClose: () => void; initial: Cale
         color,
         timezone,
         is_default: isDefault,
+        blocks_availability: blocksAvailability,
       });
       return initial
         ? apiFetch(`/api/admin/calendar/calendars/${initial.id}`, { method: 'PUT', body })
@@ -537,6 +563,15 @@ function CalendarForm({ onClose, initial }: { onClose: () => void; initial: Cale
             <input type="checkbox" checked={isDefault} onChange={(e) => setIsDefault(e.target.checked)} />
             Imposta come calendario di default
           </label>
+        </div>
+        <div className="md:col-span-2">
+          <label className="inline-flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={blocksAvailability} onChange={(e) => setBlocksAvailability(e.target.checked)} />
+            Blocca disponibilita e capacity
+          </label>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            Gli eventi confermati di questo calendario impediscono nuovi booking e pesano sul limite settimanale.
+          </p>
         </div>
       </div>
       <div className="flex justify-end gap-2 pt-2">

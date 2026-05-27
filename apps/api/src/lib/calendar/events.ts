@@ -225,6 +225,8 @@ export interface ListEventsOptions {
   toIso: string;
   /** Se true include anche eventi cancellati */
   includeCancelled?: boolean;
+  /** Se true limita agli eventi di calendari che bloccano disponibilita/capacity */
+  blockingOnly?: boolean;
 }
 
 /**
@@ -247,12 +249,19 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
   const statusFilter = opts.includeCancelled
     ? sql``
     : sql`AND status != 'cancelled'`;
+  const blockingFilter = opts.blockingOnly
+    ? sql`AND EXISTS (
+        SELECT 1 FROM calendars c
+        WHERE c.id = calendar_events.calendar_id
+          AND c.blocks_availability = true
+      )`
+    : sql``;
 
   // Carica eventi master+single che possono interessare il range
   // (i master ricorrenti possono iniziare prima del range e generare occorrenze dentro)
   const events = await sql<CalendarEvent[]>`
     SELECT ${COLUMNS} FROM calendar_events
-    WHERE 1=1 ${calendarFilter} ${statusFilter}
+    WHERE 1=1 ${calendarFilter} ${statusFilter} ${blockingFilter}
       AND (
         recurrence_master_id IS NOT NULL
         OR rrule IS NOT NULL
@@ -343,7 +352,7 @@ export interface BusyRange {
 }
 
 export async function getBusyRanges(fromIso: string, toIso: string): Promise<BusyRange[]> {
-  const occ = await listOccurrences({ fromIso, toIso });
+  const occ = await listOccurrences({ fromIso, toIso, blockingOnly: true });
   return occ
     .filter((o) => o.status === 'confirmed' && !o.all_day) // all-day non blocca slot di booking
     .map((o) => ({ start: o.start_time, end: o.end_time }));

@@ -593,6 +593,7 @@ calendarAdmin.post('/calendars', async (c) => {
       icon: body.icon || null,
       timezone: body.timezone || 'Europe/Rome',
       is_default: !!body.is_default,
+      blocks_availability: body.blocks_availability !== false,
       sort_order: safeInt(body.sort_order, 0),
     });
     return c.json({ calendar: { ...cal, ics_feed_url: buildFeedUrl(cal) } });
@@ -644,30 +645,40 @@ calendarAdmin.post('/calendars/:id/rotate-token', async (c) => {
 // ============================================
 
 calendarAdmin.get('/events', async (c) => {
-  const calendarId = c.req.query('calendar_id');
-  const from = c.req.query('from');
-  const to = c.req.query('to');
-  const includeCancelled = c.req.query('include_cancelled') === 'true';
+  try {
+    const calendarId = c.req.query('calendar_id');
+    const from = c.req.query('from');
+    const to = c.req.query('to');
+    const includeCancelled = c.req.query('include_cancelled') === 'true';
 
-  if (!from || !to) return c.json({ error: 'from e to richiesti (ISO datetime)' }, 400);
+    if (!from || !to) return c.json({ error: 'from e to richiesti (ISO datetime)' }, 400);
 
-  const fromDate = new Date(from);
-  const toDate = new Date(to);
-  if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
-    return c.json({ error: 'from/to devono essere ISO datetime validi' }, 400);
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+    if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+      return c.json({ error: 'from/to devono essere ISO datetime validi' }, 400);
+    }
+    if (toDate.getTime() - fromDate.getTime() > 366 * 24 * 60 * 60 * 1000) {
+      return c.json({ error: 'Range massimo 366 giorni' }, 400);
+    }
+
+    const occurrences = await listOccurrences({
+      calendarId: calendarId || undefined,
+      fromIso: fromDate.toISOString(),
+      toIso: toDate.toISOString(),
+      includeCancelled,
+    });
+
+    return c.json({ events: occurrences });
+  } catch (err) {
+    log.error({ err }, 'calendar events list failed');
+    const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
+      || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
+    if (code === '42P01' || code === '42703' || code === 'ECONNREFUSED') {
+      return c.json({ error: 'Schema calendario non disponibile. Esegui le migrazioni e riprova.', code }, 503);
+    }
+    throw err;
   }
-  if (toDate.getTime() - fromDate.getTime() > 366 * 24 * 60 * 60 * 1000) {
-    return c.json({ error: 'Range massimo 366 giorni' }, 400);
-  }
-
-  const occurrences = await listOccurrences({
-    calendarId: calendarId || undefined,
-    fromIso: fromDate.toISOString(),
-    toIso: toDate.toISOString(),
-    includeCancelled,
-  });
-
-  return c.json({ events: occurrences });
 });
 
 calendarAdmin.get('/events/:id', async (c) => {

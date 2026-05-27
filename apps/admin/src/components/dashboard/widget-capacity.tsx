@@ -22,6 +22,7 @@ const SOURCE_LABEL: Record<string, string> = {
   'calendar:admin': 'Eventi admin',
   'calendar:mcp': 'Eventi MCP',
   'calendar:agent': 'Eventi agent',
+  'calendar:ics_pull': 'Calendari importati',
 };
 
 const STATUS_LABEL: Record<CapacityWeek['status'], string> = {

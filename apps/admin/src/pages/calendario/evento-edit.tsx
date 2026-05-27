@@ -48,20 +48,31 @@ function localInputToIso(input: string): string {
   return new Date(input).toISOString();
 }
 
-function parseRRule(rrule: string | null): { type: RecurrenceType; count?: number; until?: string; byDay?: string[] } {
-  if (!rrule) return { type: 'none' };
+function parseUntil(value?: string): string | undefined {
+  if (!value) return undefined;
+  const compact = value.match(/^(\d{4})(\d{2})(\d{2})T?/);
+  if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
+}
+
+function parseRRule(rrule: string | null): { type: RecurrenceType; count?: number; until?: string; byDay?: string[]; raw?: string; useRaw?: boolean } {
+  if (!rrule) return { type: 'none', raw: '' };
   const parts = Object.fromEntries(rrule.split(';').map((p) => p.split('=')));
   const freq = parts.FREQ as RecurrenceType;
-  if (!['DAILY', 'WEEKLY', 'MONTHLY'].includes(freq)) return { type: 'none' };
+  if (!['DAILY', 'WEEKLY', 'MONTHLY'].includes(freq)) return { type: 'none', raw: rrule, useRaw: true };
   return {
     type: freq,
     count: parts.COUNT ? parseInt(parts.COUNT) : undefined,
-    until: parts.UNTIL,
+    until: parseUntil(parts.UNTIL),
     byDay: parts.BYDAY ? parts.BYDAY.split(',') : undefined,
+    raw: rrule,
+    useRaw: false,
   };
 }
 
-function buildRRule(opts: { type: RecurrenceType; count?: number; until?: string; byDay?: string[] }): string | null {
+function buildRRule(opts: { type: RecurrenceType; count?: number; until?: string; byDay?: string[]; raw?: string; useRaw?: boolean }): string | null {
+  if (opts.useRaw) return opts.raw?.trim() || null;
   if (opts.type === 'none') return null;
   const parts: string[] = [`FREQ=${opts.type}`];
   if (opts.byDay && opts.byDay.length) parts.push(`BYDAY=${opts.byDay.join(',')}`);
@@ -266,7 +277,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                   size="sm"
                   variant={recurrence.type === t ? 'default' : 'outline'}
                   className="text-xs"
-                  onClick={() => setRecurrence({ type: t })}
+                  onClick={() => setRecurrence({ ...recurrence, type: t, useRaw: false })}
                 >
                   {t === 'none' ? 'Mai' : t === 'DAILY' ? 'Giornaliero' : t === 'WEEKLY' ? 'Settimanale' : 'Mensile'}
                 </Button>
@@ -314,10 +325,38 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                   <input
                     type="date"
                     value={recurrence.until ? recurrence.until.slice(0, 10) : ''}
-                    onChange={(e) => setRecurrence({ ...recurrence, until: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                    onChange={(e) => setRecurrence({ ...recurrence, until: e.target.value || undefined })}
                     className="w-full px-2 py-1 text-sm rounded-md border bg-background"
                   />
                 </div>
+              </div>
+            )}
+
+            <label className="inline-flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={!!recurrence.useRaw}
+                onChange={(e) => setRecurrence({
+                  ...recurrence,
+                  useRaw: e.target.checked,
+                  raw: recurrence.raw || buildRRule({ ...recurrence, useRaw: false }) || '',
+                })}
+              />
+              RRULE avanzata
+            </label>
+
+            {recurrence.useRaw && (
+              <div>
+                <textarea
+                  value={recurrence.raw || ''}
+                  onChange={(e) => setRecurrence({ ...recurrence, raw: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 text-sm rounded-md border bg-background font-mono"
+                  placeholder="FREQ=WEEKLY;BYDAY=MO,TU,TH,FR"
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Esempio: FREQ=WEEKLY;BYDAY=MO,TU,TH,FR. Non includere il prefisso RRULE:.
+                </p>
               </div>
             )}
           </div>

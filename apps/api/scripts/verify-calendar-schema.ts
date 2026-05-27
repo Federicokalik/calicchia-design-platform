@@ -94,7 +94,7 @@ async function main() {
 
   console.log('\nCalendar seed data (expected 4):');
   const calendars = await sql`
-    SELECT slug, name, color, is_default, is_system, ics_feed_token
+    SELECT slug, name, color, is_default, is_system, blocks_availability, ics_feed_token
     FROM calendars
     ORDER BY sort_order
   `;
@@ -103,6 +103,7 @@ async function main() {
     const flags = [
       calendar.is_default ? '[default]' : '',
       calendar.is_system ? '[system]' : '',
+      calendar.blocks_availability ? '[blocks]' : '[informative]',
     ].filter(Boolean).join('');
     console.log(`  - ${String(calendar.slug).padEnd(12)} "${calendar.name}" ${calendar.color} ${flags} token=${token}...`);
   }

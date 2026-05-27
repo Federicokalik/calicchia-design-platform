@@ -153,6 +153,7 @@ export interface Calendar {
   timezone: string;
   is_default: boolean;
   is_system: boolean;
+  blocks_availability: boolean;
   ics_feed_token: string;
   ics_feed_enabled: boolean;
   sort_order: number;
@@ -161,7 +162,7 @@ export interface Calendar {
 }
 
 export type CalendarEventStatus = 'confirmed' | 'tentative' | 'cancelled';
-export type CalendarEventSource = 'manual' | 'booking' | 'admin' | 'mcp' | 'agent';
+export type CalendarEventSource = 'manual' | 'booking' | 'admin' | 'mcp' | 'agent' | 'ics_pull';
 
 export interface CalendarEvent {
   id: string;
@@ -204,6 +205,7 @@ export interface CreateCalendarInput {
   icon?: string | null;
   timezone?: string;
   is_default?: boolean;
+  blocks_availability?: boolean;
   sort_order?: number;
 }
 

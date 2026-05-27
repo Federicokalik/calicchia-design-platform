@@ -13,6 +13,7 @@ import { sql, sqlv } from '../../db';
 import { getEventType } from './availability';
 import { resolveLocationForBooking, deleteGoogleEvent } from './meeting-url';
 import { getBookingsCalendar } from './calendars';
+import { hasWeeklyCapacityForBooking } from './capacity';
 import { createEvent, getEventBySource, updateEvent } from './events';
 import type {
   Booking,
@@ -80,6 +81,10 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   }
   if (startDate > maxStart) {
     throw new BookingValidationError(`Puoi prenotare al massimo ${eventType.max_advance_days} giorni in anticipo`);
+  }
+  const hasCapacity = await hasWeeklyCapacityForBooking(startDate.toISOString(), eventType.duration_minutes);
+  if (!hasCapacity) {
+    throw new BookingConflictError('Capacita settimanale esaurita: scegli un altro slot');
   }
 
   // 1. Pre-risolvi location PRIMA dell'INSERT per evitare ghost booking.
