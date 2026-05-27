@@ -227,11 +227,19 @@ export interface PortalInvoiceLineItem {
   [key: string]: unknown;
 }
 
-export type PortalPaymentProvider = 'stripe' | 'paypal' | 'revolut' | 'bank_transfer';
+// Audit B-016: payment_links rows in DB can carry any of 4 providers
+// (mig 030 CHECK). The PORTAL pay endpoint
+// (apps/api/src/routes/portal/invoices.ts:111) only accepts 'stripe' |
+// 'paypal' on /pay — the UI was rendering revolut / bank_transfer buttons
+// that the server then rejected. Two distinct types:
+//   - PortalPaymentProvider: the action surface (POST /pay)
+//   - PortalPaymentLinkProvider: the read surface (existing payment_links)
+export type PortalPaymentProvider = 'stripe' | 'paypal';
+export type PortalPaymentLinkProvider = 'stripe' | 'paypal' | 'revolut' | 'bank_transfer';
 
 export interface PortalPaymentLink {
   id: string;
-  provider: PortalPaymentProvider;
+  provider: PortalPaymentLinkProvider;
   checkout_url: string | null;
   status: 'pending' | 'active' | 'paid' | 'expired' | 'cancelled' | 'refunded' | 'partially_refunded';
   amount: number;

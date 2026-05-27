@@ -381,7 +381,10 @@ publicRoutes.get('/blog/rss', async (c) => {
       title: p.title,
       slug: p.slug,
       excerpt: p.excerpt,
-      content: p.content,
+      // Audit J-15 / C-019: defense-in-depth sanitize on RSS too. PR6 sanitize-
+      // on-write covers new writes but legacy rows pre-dating the sanitize
+      // could still carry raw HTML — RSS readers render <script> inline.
+      content: sanitizeBlogHtml(p.content as string | null),
       cover_image: resolveImageUrl(p.cover_image as string | null),
       published_at: p.published_at,
       created_at: p.created_at,
