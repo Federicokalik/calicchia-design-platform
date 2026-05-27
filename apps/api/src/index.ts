@@ -36,6 +36,13 @@ if ((process.env.JWT_SECRET ?? '').length < 32) {
   process.exit(1);
 }
 
+// MAIL_ENC_KEY is not strictly required (mail-sync silently skips and so does
+// the admin mailbox UI), but a non-development deploy without it means the
+// inbox feature is silently dead. Warn at boot so it's visible (audit E-012).
+if (process.env.NODE_ENV !== 'development' && !process.env.MAIL_ENC_KEY) {
+  console.warn('⚠️  MAIL_ENC_KEY not set — mail-sync cron will skip and the admin mailbox UI will fail at every account open. Run scripts/generate-mail-enc-key.ts and add to .env if mail features are needed.');
+}
+
 // Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
 // any module that reads them is loaded. The dynamic imports below guarantee
 // that lib/agent (which reads the pricing KB at module load) is evaluated only

@@ -128,11 +128,13 @@ app.use('/api/media/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
-// In production, refuse to start without an explicit allowlist —
-// silently falling back to localhost would either break browser
-// auth or accidentally expose dev origins.
-if (process.env.NODE_ENV === 'production' && !process.env.CORS_ORIGINS) {
-  throw new Error('CORS_ORIGINS environment variable is required in production');
+// Refuse to start outside development without an explicit allowlist —
+// silently falling back to localhost would either break browser auth or
+// accidentally expose dev origins. Using !== 'development' (instead of
+// === 'production') also catches staging/preview/test deploys that conventionally
+// use NODE_ENV=staging (audit E-012).
+if (process.env.NODE_ENV !== 'development' && !process.env.CORS_ORIGINS) {
+  throw new Error('CORS_ORIGINS environment variable is required when NODE_ENV is not "development"');
 }
 
 // Outer middleware: strip Access-Control-Allow-Credentials from /api/track responses.
@@ -194,9 +196,17 @@ const publicFormRateLimit = createRateLimit(3, 10 * 60 * 1000);
 const postOnly = (mw: MiddlewareHandler): MiddlewareHandler =>
   (c, next) => (c.req.method === 'POST' ? mw(c, next) : next());
 app.use('/api/contacts', postOnly(publicFormRateLimit));
+// Invariant: /api/contacts/:id/* sub-paths are admin-only via inline
+// authMiddleware in contacts.ts. No public sub-paths exist that bypass the
+// rate-limit; if you add one, switch this mount to a wildcard.
 app.use('/api/public-leads', postOnly(publicFormRateLimit));
 app.use('/api/newsletter/*', postOnly(publicFormRateLimit));
+// Both the exact mount and the wildcard are required: app.use(path) without
+// a trailing /* matches ONLY the exact path under Hono, so cancel/reschedule
+// at /api/calendar/bookings/:uid/* were entirely unthrottled despite the
+// surface looking guarded (audit E-005, same pattern fix as /api/backup).
 app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
+app.use('/api/calendar/bookings/*', postOnly(publicFormRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
 app.route('/api/public-leads', publicLeads);
@@ -229,6 +239,11 @@ app.route('/api/sign', signablesPublic);
 // OAuth roundtrip to PayPal, so cap per-IP to avoid abuse.
 app.use('/api/paypal/client-token', createRateLimit(10, 60 * 1000));
 app.route('/api/paypal', paypal);
+// public-pay capability endpoints (UUID-as-capability) — rate-limited because
+// each /checkout call performs a Stripe/PayPal OAuth roundtrip (audit E-008,
+// same rationale as /api/paypal/client-token above). 20 req/min is generous
+// for legitimate 3DS-redirect retry loops while making URL probing pointless.
+app.use('/api/public-pay/*', createRateLimit(20, 60 * 1000));
 app.route('/api/public-pay', publicPay);
 // Telegram webhook (no auth — verified by bot secret token).
 // BK-14: rate-limited so a leaked/guessed webhook path can't be flooded.
@@ -242,24 +257,39 @@ app.post('/api/wh/:webhookId', async (c) => {
   // Generic 404 for invalid format → no enumeration (valid vs malformed)
   if (!/^[a-f0-9-]{36}$/.test(webhookId)) return c.json({ error: 'Not Found' }, 404);
 
-  const rows = await sql`
-    SELECT id, status, trigger_config FROM workflows
-    WHERE trigger_type = 'webhook'
-      AND trigger_config->>'webhook_id' = ${webhookId}
-      AND status = 'active'
-    LIMIT 1
-  ` as Array<{ id: string; status: string; trigger_config: any }>;
-  if (!rows.length) return c.json({ error: 'Not Found' }, 404);
+  // Lookup + decrypt MUST stay inside try/catch (audit E-013): the previous
+  // version let decryptSecret throw on a tampered/legacy payload, which surfaced
+  // as 500 via app.onError — distinguishable from the 404 returned on
+  // invalid/unknown webhookId, leaking webhook existence to a probe.
+  let workflowId: string;
+  let secret: string;
+  try {
+    const rows = await sql`
+      SELECT id, status, trigger_config FROM workflows
+      WHERE trigger_type = 'webhook'
+        AND trigger_config->>'webhook_id' = ${webhookId}
+        AND status = 'active'
+      LIMIT 1
+    ` as Array<{ id: string; status: string; trigger_config: any }>;
+    if (!rows.length) return c.json({ error: 'Not Found' }, 404);
 
-  const config = typeof rows[0].trigger_config === 'string'
-    ? JSON.parse(rows[0].trigger_config)
-    : rows[0].trigger_config;
-  const storedSecret: string | undefined = config?.webhook_secret;
-  const secret = storedSecret && isEncryptedSecret(storedSecret)
-    ? decryptSecret(storedSecret)
-    : storedSecret;
-  if (!secret) {
-    // Workflow legacy without secret — reject and force regen via admin
+    const config = typeof rows[0].trigger_config === 'string'
+      ? JSON.parse(rows[0].trigger_config)
+      : rows[0].trigger_config;
+    const storedSecret: string | undefined = config?.webhook_secret;
+    const resolved = storedSecret && isEncryptedSecret(storedSecret)
+      ? decryptSecret(storedSecret)
+      : storedSecret;
+    if (!resolved) {
+      // Workflow legacy without secret — reject and force regen via admin
+      return c.json({ error: 'Not Found' }, 404);
+    }
+    workflowId = rows[0].id;
+    secret = resolved;
+  } catch (err) {
+    // Log for operators (decrypt failures may indicate key rotation or
+    // tampering) but never differentiate the HTTP shape from the miss path.
+    log.warn({ err, webhookId }, 'webhook lookup/decrypt failed');
     return c.json({ error: 'Not Found' }, 404);
   }
 
@@ -275,7 +305,7 @@ app.post('/api/wh/:webhookId', async (c) => {
   let body: any = {};
   try { body = rawBody ? JSON.parse(rawBody) : {}; } catch {}
   const { executeWorkflow } = await import('./lib/workflow/engine');
-  const result = await executeWorkflow(rows[0].id, { webhook: true, ...body });
+  const result = await executeWorkflow(workflowId, { webhook: true, ...body });
   return c.json(result);
 });
 app.route('/api/portal', portal);
@@ -283,7 +313,10 @@ app.route('/api/portal', portal);
 // (audit J-03). Schema-validated in the route handler with strict zod object.
 app.use('/api/cookie-consent', createRateLimit(10, 60 * 1000));
 app.route('/api/cookie-consent', cookieConsent);
-app.use('/api/gdpr-requests', publicFormRateLimit);
+// postOnly so the 3 req / 10 min cap throttles only the public submission,
+// not the admin GET listing (audit E-006: admin loading the queue 3x burned
+// the limit and got 429).
+app.use('/api/gdpr-requests', postOnly(publicFormRateLimit));
 app.route('/api/gdpr-requests', gdprRequests);
 
 // WhatsApp (GOWA) — webhook ingress + endpoint pubblico preferences-by-token.
@@ -345,7 +378,7 @@ const protectedPaths = [
   '/api/search',
   '/api/notes',
   '/api/boards',
-  '/api/ai/knowledge',
+  // '/api/ai/knowledge' is shadowed by /api/ai/* (audit E-011) — removed.
   '/api/knowledge',
   '/api/brain',
   '/api/portal-admin',
