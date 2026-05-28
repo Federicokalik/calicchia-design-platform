@@ -74,16 +74,19 @@ export function formatPortalStatus(status: string | null | undefined, t: PortalT
 /**
  * Throw-redirect al login del portale preservando `?next=<original-path>`.
  *
- * Importante: usa il `redirect` nativo di `next/navigation`, NON quello
- * tipato di `@/i18n/navigation`. Il wrapper next-intl parsa l'argomento
- * con `new URL()` per matcharlo contro PATHNAMES e una stringa con query
- * (`/clienti/login?next=...`) fa esplodere con `ERR_INVALID_URL` (URL
- * relativi non hanno base). I call site esistenti hanno la forma:
- *   redirect(portalLoginRedirect('/clienti/x'));
- * Visto che questa funzione ora throw `NEXT_REDIRECT` prima di tornare,
- * il `redirect(...)` esterno non viene mai eseguito — compatibilita`
- * mantenuta senza toccare i 14+ call site del portale.
+ * Storia del bug (incident 2026-05-28):
+ *   - V1: ritornava la stringa, chi chiamava la passava a `redirect()` di
+ *     `@/i18n/navigation` (wrapper next-intl). Il wrapper fa `new URL(href)`
+ *     per matchare PATHNAMES → URL relativo con query → ERR_INVALID_URL.
+ *   - V2: throw direttamente con `redirect` di `next/navigation`. Stesso 500
+ *     perche` `createNextIntlPlugin()` in next.config.ts patcha pure il
+ *     redirect nativo (riscrive Location header col locale).
+ *   - V3 (questa): URL ASSOLUTO costruito con PUBLIC_SITE_URL (build arg
+ *     nel Dockerfile sito-v3 riga 22-39). `new URL()` su URL assoluto non
+ *     throw e next-intl skip il rewrite per URL absoluti.
  */
+const PUBLIC_SITE_URL = (process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+
 export function portalLoginRedirect(next: string): never {
-  redirect(`/clienti/login?next=${encodeURIComponent(next)}`);
+  redirect(`${PUBLIC_SITE_URL}/clienti/login?next=${encodeURIComponent(next)}`);
 }
