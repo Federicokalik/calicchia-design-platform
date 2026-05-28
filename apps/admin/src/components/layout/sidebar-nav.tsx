@@ -36,6 +36,9 @@ import {
   BookText,
   MapPin,
   Layers,
+  Lightbulb,
+  Compass,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -108,6 +111,16 @@ const navigation: NavGroup[] = [
       { labelKey: 'nav.blog', icon: FileText, path: '/blog', end: true },
       { labelKey: 'nav.portfolio', icon: Image, path: '/portfolio' },
       { labelKey: 'nav.aiGenerator', icon: Sparkles, path: '/blog/ai' },
+      // CMS pubblico — unito qui con Blog/Portfolio invece di un gruppo
+      // separato in fondo alla sidebar (era nav.cms in bottomNavigation).
+      { labelKey: 'nav.cmsServices', icon: Layers, path: '/cms/services' },
+      { labelKey: 'nav.cmsTeam', icon: UsersRound, path: '/cms/team' },
+      { labelKey: 'nav.cmsFaq', icon: HelpCircle, path: '/cms/faq' },
+      { labelKey: 'nav.cmsGlossario', icon: BookText, path: '/cms/glossario' },
+      { labelKey: 'nav.cmsSeoCities', icon: MapPin, path: '/cms/seo-cities' },
+      { labelKey: 'nav.cmsCuriosita', icon: Lightbulb, path: '/cms/curiosita' },
+      { labelKey: 'nav.cmsApproach', icon: Compass, path: '/cms/approach' },
+      { labelKey: 'nav.cmsClients', icon: Briefcase, path: '/cms/clients' },
     ],
   },
 ];
@@ -145,16 +158,6 @@ const bottomNavigation: NavGroup[] = [
     items: [
       { labelKey: 'nav.gdprRequests', icon: ShieldAlert, path: '/privacy/gdpr-requests' },
       { labelKey: 'nav.cookieConsent', icon: Cookie, path: '/privacy/cookie-consent' },
-    ],
-  },
-  {
-    labelKey: 'nav.cms',
-    items: [
-      { labelKey: 'nav.cmsFaq', icon: HelpCircle, path: '/cms/faq' },
-      { labelKey: 'nav.cmsTeam', icon: UsersRound, path: '/cms/team' },
-      { labelKey: 'nav.cmsGlossario', icon: BookText, path: '/cms/glossario' },
-      { labelKey: 'nav.cmsSeoCities', icon: MapPin, path: '/cms/seo-cities' },
-      { labelKey: 'nav.cmsServices', icon: Layers, path: '/cms/services' },
     ],
   },
 ];

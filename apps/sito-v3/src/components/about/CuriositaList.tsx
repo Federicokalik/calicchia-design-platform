@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Section } from '@/components/ui/Section';
-import { CURIOSITA_BIO_LINK, getCuriosita } from '@/data/curiosita';
+import { CURIOSITA_BIO_LINK } from '@/data/curiosita';
+import { getCuriosita } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 
 interface CuriositaListProps {
@@ -20,7 +21,7 @@ export async function CuriositaList({
 }: CuriositaListProps) {
   const locale = (await getLocale()) as Locale;
   const t = await getTranslations('curiosita');
-  const items = getCuriosita(locale);
+  const items = await getCuriosita(locale);
 
   const eyebrowText = eyebrow ?? t('eyebrow');
 

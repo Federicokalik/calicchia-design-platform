@@ -119,13 +119,31 @@ export async function apiFetchRaw(
   throw new Error(message);
 }
 
-export async function refreshAdminSession(): Promise<boolean> {
-  const res = await fetch(`${API_BASE}/api/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-  }).catch(() => null);
+// Single-flight: refresh-token rotation invalidates the previous secret, so
+// parallel `/api/auth/refresh` calls would race — the second one presents the
+// just-rotated old hash, the server treats it as token reuse and *revokes*
+// the whole session, kicking remember-me users to /login the moment they
+// refocus the tab (TanStack `refetchOnWindowFocus` + several polling widgets
+// fire many 401s at once). Coalesce all concurrent callers onto one fetch.
+let inFlightRefresh: Promise<boolean> | null = null;
 
-  if (!res?.ok) return false;
-  sessionState.lastActivity = Date.now();
-  return true;
+export async function refreshAdminSession(): Promise<boolean> {
+  if (inFlightRefresh) return inFlightRefresh;
+
+  inFlightRefresh = (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => null);
+
+      if (!res?.ok) return false;
+      sessionState.lastActivity = Date.now();
+      return true;
+    } finally {
+      inFlightRefresh = null;
+    }
+  })();
+
+  return inFlightRefresh;
 }

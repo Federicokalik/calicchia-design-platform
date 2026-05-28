@@ -2,13 +2,22 @@
 
 import Image from 'next/image';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Heading } from '@/components/ui/Heading';
 import { Section } from '@/components/ui/Section';
-import { CLIENTS } from '@/data/clients';
+import { CLIENTS, type Client } from '@/data/clients';
 import { TrustIndexEmbed } from './TrustIndexEmbed';
 
 const ROTATION_MS = 4500;
+
+interface TrustBentoProps {
+  /**
+   * Client roster (DB-backed via lib/cms.ts getClients, passato dal parent
+   * server). Se omesso ricade sui CLIENTS hardcoded del file: utile per
+   * call site legacy o testing isolato.
+   */
+  clients?: Client[];
+}
 
 /**
  * Trust block — editorial, not "bento card".
@@ -20,13 +29,16 @@ const ROTATION_MS = 4500;
  * No rounded cards, no diffusion shadows — sticks to the Swiss-restraint
  * pattern used by StatsSection and the rest of the home.
  */
-export function TrustBento() {
+export function TrustBento({ clients }: TrustBentoProps = {}) {
   const t = useTranslations('home.trust');
   const locale = useLocale();
   const root = useRef<HTMLElement>(null);
   const [activeClient, setActiveClient] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const visibleClients = CLIENTS.filter((c) => c.url && c.url !== '#' && c.logo);
+  const visibleClients = useMemo(
+    () => (clients ?? CLIENTS).filter((c) => c.url && c.url !== '#' && c.logo),
+    [clients],
+  );
 
   // Auto-rotate; pause on hover/focus and when reduced motion is preferred.
   useEffect(() => {

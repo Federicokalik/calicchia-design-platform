@@ -29,8 +29,17 @@ cmsAdmin.use('*', async (c, next) => {
 const localeSchema = z.enum(['it', 'en']);
 
 // ── FAQS ─────────────────────────────────────────────────────────
+// `section` distingue le FAQ generiche di /faq (default 'general') dalle
+// FAQ section-specific di /perche-scegliere-me ('perche'). Estendibile a
+// 'service:<slug>' per FAQ per-servizio senza moltiplicare le tabelle.
+const faqSectionSchema = z.string().trim().regex(
+  /^(general|perche|service:[a-z0-9-]+)$/,
+  'Sezione non valida',
+);
+
 const faqUpsertSchema = z.object({
   locale: localeSchema.default('it'),
+  section: faqSectionSchema.default('general'),
   question: z.string().trim().min(1, 'Domanda richiesta'),
   answer: z.string().trim().min(1, 'Risposta richiesta'),
   sort_order: z.number().int().nullable().optional(),
@@ -39,12 +48,19 @@ const faqUpsertSchema = z.object({
 
 cmsAdmin.get('/faqs', async (c) => {
   const locale = c.req.query('locale');
-  const rows = await sql`
-    SELECT * FROM site_faqs
-    ${locale === 'it' || locale === 'en' ? sql`WHERE locale = ${locale}` : sql``}
-    ORDER BY locale ASC, sort_order NULLS LAST, created_at DESC
-    LIMIT 500
-  `;
+  const sectionRaw = c.req.query('section');
+  const section = sectionRaw && faqSectionSchema.safeParse(sectionRaw).success ? sectionRaw : null;
+  const localeOk = locale === 'it' || locale === 'en';
+  let rows;
+  if (localeOk && section) {
+    rows = await sql`SELECT * FROM site_faqs WHERE locale = ${locale} AND section = ${section} ORDER BY sort_order NULLS LAST, created_at DESC LIMIT 500`;
+  } else if (localeOk) {
+    rows = await sql`SELECT * FROM site_faqs WHERE locale = ${locale} ORDER BY section ASC, sort_order NULLS LAST, created_at DESC LIMIT 500`;
+  } else if (section) {
+    rows = await sql`SELECT * FROM site_faqs WHERE section = ${section} ORDER BY locale ASC, sort_order NULLS LAST, created_at DESC LIMIT 500`;
+  } else {
+    rows = await sql`SELECT * FROM site_faqs ORDER BY locale ASC, section ASC, sort_order NULLS LAST, created_at DESC LIMIT 500`;
+  }
   return c.json({ rows });
 });
 
@@ -54,8 +70,8 @@ cmsAdmin.post('/faqs', async (c) => {
   if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
   const v = parsed.data;
   const [row] = await sql`
-    INSERT INTO site_faqs (locale, question, answer, sort_order, is_published, source)
-    VALUES (${v.locale}, ${v.question}, ${v.answer}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
+    INSERT INTO site_faqs (locale, section, question, answer, sort_order, is_published, source)
+    VALUES (${v.locale}, ${v.section}, ${v.question}, ${v.answer}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
     RETURNING *
   `;
   return c.json({ row }, 201);
@@ -69,7 +85,7 @@ cmsAdmin.put('/faqs/:id', async (c) => {
 
   // Whitelist update to avoid arbitrary column writes (audit B-023 pattern).
   const patch: Record<string, unknown> = {};
-  for (const k of ['locale', 'question', 'answer', 'sort_order', 'is_published'] as const) {
+  for (const k of ['locale', 'section', 'question', 'answer', 'sort_order', 'is_published'] as const) {
     if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
   }
   if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
@@ -417,6 +433,181 @@ cmsAdmin.put('/team/:id', async (c) => {
 cmsAdmin.delete('/team/:id', async (c) => {
   const id = c.req.param('id');
   const [row] = await sql`DELETE FROM site_team WHERE id = ${id} RETURNING id`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
+// ── CURIOSITA (fun facts /perche-scegliere-me) ───────────────────
+const curiositaUpsertSchema = z.object({
+  locale: localeSchema.default('it'),
+  label: z.string().trim().min(1, 'Etichetta richiesta'),
+  body: z.string().trim().min(1, 'Testo richiesto'),
+  sort_order: z.number().int().nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+cmsAdmin.get('/curiosita', async (c) => {
+  const locale = c.req.query('locale');
+  const rows = await sql`
+    SELECT * FROM site_curiosita
+    ${locale === 'it' || locale === 'en' ? sql`WHERE locale = ${locale}` : sql``}
+    ORDER BY locale ASC, sort_order NULLS LAST, created_at DESC
+    LIMIT 200
+  `;
+  return c.json({ rows });
+});
+
+cmsAdmin.post('/curiosita', async (c) => {
+  const body = await c.req.json();
+  const parsed = curiositaUpsertSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+  const v = parsed.data;
+  const [row] = await sql`
+    INSERT INTO site_curiosita (locale, label, body, sort_order, is_published, source)
+    VALUES (${v.locale}, ${v.label}, ${v.body}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
+    RETURNING *
+  `;
+  return c.json({ row }, 201);
+});
+
+cmsAdmin.put('/curiosita/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const parsed = curiositaUpsertSchema.partial().safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+
+  const patch: Record<string, unknown> = {};
+  for (const k of ['locale', 'label', 'body', 'sort_order', 'is_published'] as const) {
+    if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  const [row] = await sql`UPDATE site_curiosita SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ row });
+});
+
+cmsAdmin.delete('/curiosita/:id', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`DELETE FROM site_curiosita WHERE id = ${id} RETURNING id`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
+// ── APPROACH (5 pillar /perche-scegliere-me) ─────────────────────
+const approachUpsertSchema = z.object({
+  locale: localeSchema.default('it'),
+  title: z.string().trim().min(1, 'Titolo richiesto'),
+  description: z.string().trim().min(1, 'Descrizione richiesta'),
+  phosphor_icon: z.string().trim().regex(/^ph-[a-z0-9-]+$/, 'Icona Phosphor non valida (es. ph-rocket-launch)').default('ph-circle'),
+  sort_order: z.number().int().nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+cmsAdmin.get('/approach', async (c) => {
+  const locale = c.req.query('locale');
+  const rows = await sql`
+    SELECT * FROM site_approach
+    ${locale === 'it' || locale === 'en' ? sql`WHERE locale = ${locale}` : sql``}
+    ORDER BY locale ASC, sort_order NULLS LAST, created_at DESC
+    LIMIT 200
+  `;
+  return c.json({ rows });
+});
+
+cmsAdmin.post('/approach', async (c) => {
+  const body = await c.req.json();
+  const parsed = approachUpsertSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+  const v = parsed.data;
+  const [row] = await sql`
+    INSERT INTO site_approach (locale, title, description, phosphor_icon, sort_order, is_published, source)
+    VALUES (${v.locale}, ${v.title}, ${v.description}, ${v.phosphor_icon}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
+    RETURNING *
+  `;
+  return c.json({ row }, 201);
+});
+
+cmsAdmin.put('/approach/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const parsed = approachUpsertSchema.partial().safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+
+  const patch: Record<string, unknown> = {};
+  for (const k of ['locale', 'title', 'description', 'phosphor_icon', 'sort_order', 'is_published'] as const) {
+    if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  const [row] = await sql`UPDATE site_approach SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ row });
+});
+
+cmsAdmin.delete('/approach/:id', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`DELETE FROM site_approach WHERE id = ${id} RETURNING id`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true });
+});
+
+// ── CLIENTS (logo TrustBento + case-study backlinks) ─────────────
+// Single-locale: i nomi cliente sono universali.
+const clientUpsertSchema = z.object({
+  name: z.string().trim().min(1, 'Nome cliente richiesto'),
+  url: z.string().trim().default('#').refine(
+    (v) => v === '#' || /^https?:\/\//.test(v),
+    'URL deve iniziare con http:// o https://, oppure essere "#"',
+  ),
+  industry: z.string().trim().nullable().optional().or(z.literal('').transform(() => null)),
+  logo_url: z.string().trim().nullable().optional().or(z.literal('').transform(() => null)),
+  sort_order: z.number().int().nullable().optional(),
+  is_published: z.boolean().default(true),
+});
+
+cmsAdmin.get('/clients', async (c) => {
+  const rows = await sql`
+    SELECT * FROM site_clients
+    ORDER BY sort_order NULLS LAST, name ASC
+    LIMIT 200
+  `;
+  return c.json({ rows });
+});
+
+cmsAdmin.post('/clients', async (c) => {
+  const body = await c.req.json();
+  const parsed = clientUpsertSchema.safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+  const v = parsed.data;
+  const [row] = await sql`
+    INSERT INTO site_clients (name, url, industry, logo_url, sort_order, is_published, source)
+    VALUES (${v.name}, ${v.url}, ${v.industry ?? null}, ${v.logo_url ?? null}, ${v.sort_order ?? null}, ${v.is_published}, 'admin')
+    RETURNING *
+  `;
+  return c.json({ row }, 201);
+});
+
+cmsAdmin.put('/clients/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json();
+  const parsed = clientUpsertSchema.partial().safeParse(body);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
+
+  const patch: Record<string, unknown> = {};
+  for (const k of ['name', 'url', 'industry', 'logo_url', 'sort_order', 'is_published'] as const) {
+    if (parsed.data[k] !== undefined) patch[k] = parsed.data[k];
+  }
+  if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  const [row] = await sql`UPDATE site_clients SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
+  if (!row) return c.json({ error: 'Not found' }, 404);
+  return c.json({ row });
+});
+
+cmsAdmin.delete('/clients/:id', async (c) => {
+  const id = c.req.param('id');
+  const [row] = await sql`DELETE FROM site_clients WHERE id = ${id} RETURNING id`;
   if (!row) return c.json({ error: 'Not found' }, 404);
   return c.json({ ok: true });
 });

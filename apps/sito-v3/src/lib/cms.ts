@@ -17,6 +17,10 @@ import { GLOSSARIO, GLOSSARIO_LETTERS, type GlossarioEntry } from '@/data/glossa
 import { SEO_CITIES, type SeoCity } from '@/data/seo-cities';
 import { getServices, getMatrixServices, getStandaloneServices } from '@/data/services';
 import type { Service } from '@/data/types';
+import { getCuriosita as getCuriositaFromFile, type Curiosita } from '@/data/curiosita';
+import { getApproach as getApproachFromFile, type ApproachClaim } from '@/data/approach';
+import { CLIENTS, type Client } from '@/data/clients';
+import { getPerchiFaqs as getPerchiFaqsFromFile, type FaqItem } from '@/data/perchi-faqs';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001';
 
@@ -53,16 +57,38 @@ async function fetchCms<T>(path: string): Promise<T | null> {
   }
 }
 
+type FaqSection = 'general' | 'perche' | `service:${string}`;
+
 /**
- * Returns the FAQ list for the given locale. Falls back to data/faqs.ts
+ * Returns the FAQ list for the given locale + section. Falls back to the
+ * appropriate file constants:
+ *   - section='general' → data/faqs.ts (FAQS)
+ *   - section='perche'  → data/perchi-faqs.ts
  * when the DB is empty (fresh install) or the API is unreachable.
  */
-export async function getFaqs(locale: Locale = 'it'): Promise<FaqEntry[]> {
-  const res = await fetchCms<{ faqs: FaqRow[] }>(`/api/public/cms/faqs?locale=${locale}`);
+export async function getFaqs(
+  locale: Locale = 'it',
+  section: FaqSection = 'general',
+): Promise<FaqEntry[]> {
+  const res = await fetchCms<{ faqs: FaqRow[] }>(
+    `/api/public/cms/faqs?locale=${locale}&section=${encodeURIComponent(section)}`,
+  );
   if (res && Array.isArray(res.faqs) && res.faqs.length > 0) {
     return res.faqs.map((r) => ({ question: r.question, answer: r.answer }));
   }
-  return FAQS;
+  // File fallback varies by section: only 'general' and 'perche' have a
+  // file equivalent today; per-service FAQ would 404 → empty array.
+  if (section === 'perche') return getPerchiFaqsFromFile(locale) as FaqItem[];
+  if (section === 'general') return FAQS;
+  return [];
+}
+
+/**
+ * Wrapper for /perche-scegliere-me FAQs (section='perche').
+ * Returns the FaqItem shape from data/perchi-faqs.ts (same as FaqEntry).
+ */
+export async function getPerchiFaqs(locale: Locale = 'it'): Promise<FaqItem[]> {
+  return (await getFaqs(locale, 'perche')) as FaqItem[];
 }
 
 interface ServiceRow {
@@ -247,4 +273,80 @@ export async function getTeam(locale: Locale = 'it'): Promise<TeamMember[]> {
     }));
   }
   return TEAM;
+}
+
+interface CuriositaRow {
+  id: string;
+  label: string;
+  body: string;
+  sort_order: number | null;
+}
+
+/**
+ * Returns the curiosita list (fun facts mostrate in /perche-scegliere-me)
+ * per il locale. Fallback a data/curiosita.ts quando il DB è vuoto o
+ * l'API è irraggiungibile. Mappa `body` (colonna DB) → `text` (interfaccia
+ * file) per non rompere i consumer esistenti.
+ */
+export async function getCuriosita(locale: Locale = 'it'): Promise<Curiosita[]> {
+  const res = await fetchCms<{ curiosita: CuriositaRow[] }>(
+    `/api/public/cms/curiosita?locale=${locale}`,
+  );
+  if (res && Array.isArray(res.curiosita) && res.curiosita.length > 0) {
+    return res.curiosita.map((r) => ({ label: r.label, text: r.body }));
+  }
+  return getCuriositaFromFile(locale);
+}
+
+interface ApproachRow {
+  id: string;
+  title: string;
+  description: string;
+  phosphor_icon: string;
+  sort_order: number | null;
+}
+
+/**
+ * Returns the approach pillars per il locale. Fallback a data/approach.ts.
+ * Mappa `phosphor_icon` (snake_case DB) → `phosphorIcon` (camelCase interfaccia).
+ */
+export async function getApproach(locale: Locale = 'it'): Promise<ApproachClaim[]> {
+  const res = await fetchCms<{ approach: ApproachRow[] }>(
+    `/api/public/cms/approach?locale=${locale}`,
+  );
+  if (res && Array.isArray(res.approach) && res.approach.length > 0) {
+    return res.approach.map((r) => ({
+      title: r.title,
+      description: r.description,
+      phosphorIcon: r.phosphor_icon,
+    }));
+  }
+  return getApproachFromFile(locale);
+}
+
+interface ClientRow {
+  id: string;
+  name: string;
+  url: string;
+  industry: string | null;
+  logo_url: string | null;
+  sort_order: number | null;
+}
+
+/**
+ * Returns the client roster (used by TrustBento + case-study back-links).
+ * Single-locale: i nomi cliente sono universali. Fallback a data/clients.ts.
+ * Mappa `logo_url` (snake_case DB) → `logo` (interfaccia file).
+ */
+export async function getClients(): Promise<Client[]> {
+  const res = await fetchCms<{ clients: ClientRow[] }>('/api/public/cms/clients');
+  if (res && Array.isArray(res.clients) && res.clients.length > 0) {
+    return res.clients.map((r) => ({
+      name: r.name,
+      url: r.url,
+      industry: r.industry ?? undefined,
+      logo: r.logo_url ?? undefined,
+    }));
+  }
+  return CLIENTS;
 }

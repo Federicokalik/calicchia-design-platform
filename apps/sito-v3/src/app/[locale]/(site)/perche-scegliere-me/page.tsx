@@ -15,9 +15,8 @@ import { FinalCTA } from '@/components/home/FinalCTA';
 import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema } from '@/data/structured-data';
-import { getPerchiFaqs } from '@/data/perchi-faqs';
-// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
-import { getServiceCatalog } from '@/lib/cms';
+// Audit C-013/C-014: services + perchi-faqs + approach + clients ora DB-backed.
+import { getServiceCatalog, getPerchiFaqs, getApproach, getClients } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
@@ -61,8 +60,12 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 export default async function PercheScegliereMePage() {
   const locale = (await getLocale()) as Locale;
-  const services = (await getServiceCatalog(locale)).all;
-  const faqs = getPerchiFaqs(locale);
+  const [services, faqs, approachItems, clients] = await Promise.all([
+    getServiceCatalog(locale).then((c) => c.all),
+    getPerchiFaqs(locale),
+    getApproach(locale),
+    getClients(),
+  ]);
   const tSkills = await getTranslations('perche.skillsOverride');
   const tBlog = await getTranslations('perche.blogLatestOverride');
   const tBreadcrumbs = await getTranslations('perche.structuredData');
@@ -83,8 +86,8 @@ export default async function PercheScegliereMePage() {
       <ServicesGrid services={services} />
       <ManifestoSlides />
       <TeamSection index="05" eyebrow="Team" />
-      <PerchiFaqs index="06" />
-      <ApproachStack index="07" />
+      <PerchiFaqs index="06" faqs={faqs} />
+      <ApproachStack index="07" items={approachItems} />
       <SkillsGravity
         index="08"
         eyebrow={tSkills('eyebrow')}
@@ -94,7 +97,7 @@ export default async function PercheScegliereMePage() {
       />
       <CuriositaList index="09" />
       <PerChiLavoro index="10" />
-      <TrustBento />
+      <TrustBento clients={clients} />
       <BlogLatest index="12" title={tBlog('title')} />
       <FinalCTA />
     </article>

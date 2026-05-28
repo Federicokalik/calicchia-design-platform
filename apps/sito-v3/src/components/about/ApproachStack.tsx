@@ -1,31 +1,31 @@
 'use client';
 
 import { useRef } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Section } from '@/components/ui/Section';
-import { getApproach } from '@/data/approach';
-import type { Locale } from '@/lib/i18n';
+import type { ApproachClaim } from '@/data/approach';
 
 interface ApproachStackProps {
   /** Section number shown in the eyebrow */
   index?: string;
   /** Optional override; falls back to t('approachStack.eyebrowDefault'). */
   eyebrow?: string;
+  /** Pillars (DB-backed via lib/cms.ts getApproach, passati dal parent server). */
+  items: ApproachClaim[];
 }
 
 /**
  * 5-pillar editorial stack — riprende il pattern di ManifestoLongform ma
- * leggibile dai dati di `data/approach.ts` con icona Phosphor a sinistra.
+ * leggibile dai dati passati come prop, con icona Phosphor a sinistra.
  * Usato in `/perche-scegliere-me` (e potenzialmente nella home).
  */
 export function ApproachStack({
   index = '02',
   eyebrow,
+  items,
 }: ApproachStackProps) {
   const root = useRef<HTMLElement>(null);
-  const locale = useLocale() as Locale;
   const t = useTranslations('approachStack');
-  const items = getApproach(locale);
 
   const eyebrowText = eyebrow ?? t('eyebrowDefault');
 

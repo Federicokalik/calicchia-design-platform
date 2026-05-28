@@ -75,6 +75,9 @@ import TeamCmsPage from '@/pages/cms/team';
 import GlossarioCmsPage from '@/pages/cms/glossario';
 import SeoCitiesCmsPage from '@/pages/cms/seo-cities';
 import ServicesCmsPage from '@/pages/cms/services';
+import CuriositaCmsPage from '@/pages/cms/curiosita';
+import ApproachCmsPage from '@/pages/cms/approach';
+import ClientsCmsPage from '@/pages/cms/clients';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -244,6 +247,9 @@ export default function App() {
         <Route path="cms/glossario" element={<GlossarioCmsPage />} />
         <Route path="cms/seo-cities" element={<SeoCitiesCmsPage />} />
         <Route path="cms/services" element={<ServicesCmsPage />} />
+        <Route path="cms/curiosita" element={<CuriositaCmsPage />} />
+        <Route path="cms/approach" element={<ApproachCmsPage />} />
+        <Route path="cms/clients" element={<ClientsCmsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

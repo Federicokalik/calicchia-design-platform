@@ -10,8 +10,8 @@ import { HowIWork } from '@/components/home/HowIWork';
 import { FinalCTA } from '@/components/home/FinalCTA';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { SiteFooter } from '@/components/layout/SiteFooter';
-// Audit C-013/C-014 (PR22): services catalog DB-backed via getServiceCatalog.
-import { getServiceCatalog } from '@/lib/cms';
+// Audit C-013/C-014: services + clients DB-backed via lib/cms.
+import { getServiceCatalog, getClients } from '@/lib/cms';
 import type { ShowcaseTile } from '@/data/showcase';
 import { getYearsOfExperience } from '@/data/site';
 import type { Locale } from '@/lib/i18n';
@@ -54,8 +54,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const years = getYearsOfExperience();
   const locale = (await getLocale()) as Locale;
-  const services = (await getServiceCatalog(locale)).all;
-  const projects = await fetchAllPublishedProjects(locale);
+  const [services, projects, clients] = await Promise.all([
+    getServiceCatalog(locale).then((c) => c.all),
+    fetchAllPublishedProjects(locale),
+    getClients(),
+  ]);
   const showcase: ShowcaseTile[] = projects.slice(0, 6).map((p) => ({
     src: p.cover_image ?? '',
     client: '',
@@ -76,7 +79,7 @@ export default async function HomePage() {
         {/* 03 — Lavori (UNICO pin della home) — top 6 più recenti dal DB */}
         {showcase.length > 0 ? <WorksHorizontal showcase={showcase} /> : null}
         {/* 04 — Trust block (TrustIndex widget carica recensioni Google reali) */}
-        <TrustBento />
+        <TrustBento clients={clients} />
         {/* 05 — Servizi (asymmetric 12-col) — primary conversion driver */}
         <ServicesGrid services={services} />
         {/* 06 — Come lavoro (manifesto + process unificati) */}

@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useLocale, useTranslations } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import { Section } from '@/components/ui/Section';
-import { getPerchiFaqs } from '@/data/perchi-faqs';
-import type { Locale } from '@/lib/i18n';
+import type { FaqItem } from '@/data/perchi-faqs';
 
 interface PerchiFaqsProps {
   index?: string;
@@ -14,6 +13,8 @@ interface PerchiFaqsProps {
   title?: string;
   /** Optional override; falls back to t('perchiFaqs.subtitleDefault'). */
   subtitle?: string;
+  /** FAQ items (DB-backed via lib/cms.ts getPerchiFaqs, passati dal parent server). */
+  faqs: FaqItem[];
 }
 
 /**
@@ -26,10 +27,9 @@ export function PerchiFaqs({
   eyebrow,
   title,
   subtitle,
+  faqs,
 }: PerchiFaqsProps) {
-  const locale = useLocale() as Locale;
   const t = useTranslations('perchiFaqs');
-  const faqs = getPerchiFaqs(locale);
 
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 

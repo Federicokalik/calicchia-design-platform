@@ -20,22 +20,32 @@ function parseLocale(raw: string | undefined): 'it' | 'en' {
   return raw === 'en' ? 'en' : 'it';
 }
 
-// ── GET /api/public/cms/faqs?locale=it|en ────────────────────────
+// ── GET /api/public/cms/faqs?locale=it|en&section=general|perche ─
+// Default section='general' (FAQ pubbliche di /faq). Sezione 'perche' è
+// usata da /perche-scegliere-me. Future: 'service:<slug>' per FAQ per-servizio.
+function parseSection(raw: string | undefined): string {
+  if (!raw) return 'general';
+  if (raw === 'general' || raw === 'perche') return raw;
+  if (/^service:[a-z0-9-]+$/.test(raw)) return raw;
+  return 'general';
+}
+
 cmsPublic.get('/faqs', async (c) => {
   const locale = parseLocale(c.req.query('locale'));
+  const section = parseSection(c.req.query('section'));
   let rows: Array<{ id: string; question: string; answer: string; sort_order: number | null }> = [];
   try {
     rows = await sql`
       SELECT id, question, answer, sort_order
       FROM site_faqs
-      WHERE is_published = true AND locale = ${locale}
+      WHERE is_published = true AND locale = ${locale} AND section = ${section}
       ORDER BY sort_order NULLS LAST, id ASC
       LIMIT 200
     ` as typeof rows;
   } catch (err) {
-    log.warn({ err, locale }, 'faqs read failed');
+    log.warn({ err, locale, section }, 'faqs read failed');
   }
-  return c.json({ locale, faqs: rows }, 200, {
+  return c.json({ locale, section, faqs: rows }, 200, {
     'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
   });
 });
@@ -132,6 +142,66 @@ cmsPublic.get('/team', async (c) => {
     log.warn({ err, locale }, 'team read failed');
   }
   return c.json({ locale, team: rows }, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});
+
+// ── GET /api/public/cms/curiosita?locale=it|en ───────────────────
+cmsPublic.get('/curiosita', async (c) => {
+  const locale = parseLocale(c.req.query('locale'));
+  let rows: Array<{ id: string; label: string; body: string; sort_order: number | null }> = [];
+  try {
+    rows = await sql`
+      SELECT id, label, body, sort_order
+      FROM site_curiosita
+      WHERE is_published = true AND locale = ${locale}
+      ORDER BY sort_order NULLS LAST, id ASC
+      LIMIT 100
+    ` as typeof rows;
+  } catch (err) {
+    log.warn({ err, locale }, 'curiosita read failed');
+  }
+  return c.json({ locale, curiosita: rows }, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});
+
+// ── GET /api/public/cms/approach?locale=it|en ────────────────────
+cmsPublic.get('/approach', async (c) => {
+  const locale = parseLocale(c.req.query('locale'));
+  let rows: Array<{ id: string; title: string; description: string; phosphor_icon: string; sort_order: number | null }> = [];
+  try {
+    rows = await sql`
+      SELECT id, title, description, phosphor_icon, sort_order
+      FROM site_approach
+      WHERE is_published = true AND locale = ${locale}
+      ORDER BY sort_order NULLS LAST, id ASC
+      LIMIT 50
+    ` as typeof rows;
+  } catch (err) {
+    log.warn({ err, locale }, 'approach read failed');
+  }
+  return c.json({ locale, approach: rows }, 200, {
+    'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
+  });
+});
+
+// ── GET /api/public/cms/clients ──────────────────────────────────
+// Single-locale: i nomi cliente sono universali.
+cmsPublic.get('/clients', async (c) => {
+  let rows: Array<{ id: string; name: string; url: string; industry: string | null; logo_url: string | null; sort_order: number | null }> = [];
+  try {
+    rows = await sql`
+      SELECT id, name, url, industry, logo_url, sort_order
+      FROM site_clients
+      WHERE is_published = true
+      ORDER BY sort_order NULLS LAST, name ASC
+      LIMIT 200
+    ` as typeof rows;
+  } catch (err) {
+    log.warn({ err }, 'clients read failed');
+  }
+  return c.json({ clients: rows }, 200, {
     'Cache-Control': 'public, max-age=0, s-maxage=300, stale-while-revalidate=60',
   });
 });

@@ -15,9 +15,22 @@ import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
 
+/**
+ * Le FAQ sono partizionate per `section`:
+ *   - 'general' → /faq pubblico (data/faqs.ts)
+ *   - 'perche'  → /perche-scegliere-me (data/perchi-faqs.ts)
+ *   - 'service:<slug>' (futuro) → FAQ per servizio
+ */
+type FaqSection = 'general' | 'perche';
+const SECTION_LABEL: Record<FaqSection, string> = {
+  general: 'Generale (/faq)',
+  perche: 'Perché scegliere me',
+};
+
 interface FaqRow {
   id: string;
   locale: 'it' | 'en';
+  section: string;
   question: string;
   answer: string;
   sort_order: number | null;
@@ -30,6 +43,7 @@ interface FaqRow {
 interface DraftRow {
   id: string | null;
   locale: 'it' | 'en';
+  section: FaqSection;
   question: string;
   answer: string;
   sort_order: string;
@@ -39,6 +53,7 @@ interface DraftRow {
 const EMPTY_DRAFT: DraftRow = {
   id: null,
   locale: 'it',
+  section: 'general',
   question: '',
   answer: '',
   sort_order: '',
@@ -46,24 +61,36 @@ const EMPTY_DRAFT: DraftRow = {
 };
 
 export default function FaqCmsPage() {
-  useTopbar({ title: 'CMS — FAQ', subtitle: 'Domande frequenti del sito pubblico (/faq).' });
+  useTopbar({ title: 'CMS — FAQ', subtitle: 'Domande frequenti per /faq e per /perche-scegliere-me.' });
 
   const queryClient = useQueryClient();
   const [localeFilter, setLocaleFilter] = useState<'all' | 'it' | 'en'>('all');
+  const [sectionFilter, setSectionFilter] = useState<'all' | FaqSection>('all');
   const [draft, setDraft] = useState<DraftRow | null>(null);
 
+  const queryString = useMemo(() => {
+    const params = new URLSearchParams();
+    if (localeFilter !== 'all') params.set('locale', localeFilter);
+    if (sectionFilter !== 'all') params.set('section', sectionFilter);
+    const qs = params.toString();
+    return qs ? `?${qs}` : '';
+  }, [localeFilter, sectionFilter]);
+
   const { data, isLoading } = useQuery<{ rows: FaqRow[] }>({
-    queryKey: ['cms-faqs', localeFilter],
-    queryFn: () => apiFetch(`/api/cms/faqs${localeFilter !== 'all' ? `?locale=${localeFilter}` : ''}`),
+    queryKey: ['cms-faqs', localeFilter, sectionFilter],
+    queryFn: () => apiFetch(`/api/cms/faqs${queryString}`),
   });
   const rows = data?.rows ?? [];
 
-  const byLocale = useMemo(() => {
-    const groups = new Map<string, FaqRow[]>();
+  // Raggruppa per section → locale per una vista bi-livello.
+  const grouped = useMemo(() => {
+    const groups = new Map<string, Map<string, FaqRow[]>>();
     for (const row of rows) {
-      const list = groups.get(row.locale) ?? [];
+      const bySection = groups.get(row.section) ?? new Map<string, FaqRow[]>();
+      const list = bySection.get(row.locale) ?? [];
       list.push(row);
-      groups.set(row.locale, list);
+      bySection.set(row.locale, list);
+      groups.set(row.section, bySection);
     }
     return groups;
   }, [rows]);
@@ -72,6 +99,7 @@ export default function FaqCmsPage() {
     mutationFn: async (d: DraftRow) => {
       const body = {
         locale: d.locale,
+        section: d.section,
         question: d.question.trim(),
         answer: d.answer.trim(),
         sort_order: d.sort_order.trim() === '' ? null : Number(d.sort_order),
@@ -99,6 +127,7 @@ export default function FaqCmsPage() {
   const editRow = (row: FaqRow) => setDraft({
     id: row.id,
     locale: row.locale,
+    section: (row.section === 'perche' ? 'perche' : 'general'),
     question: row.question,
     answer: row.answer,
     sort_order: row.sort_order?.toString() ?? '',
@@ -109,6 +138,7 @@ export default function FaqCmsPage() {
     saveMutation.mutate({
       id: row.id,
       locale: row.locale,
+      section: (row.section === 'perche' ? 'perche' : 'general'),
       question: row.question,
       answer: row.answer,
       sort_order: row.sort_order?.toString() ?? '',
@@ -118,20 +148,30 @@ export default function FaqCmsPage() {
 
   if (isLoading) return <LoadingState />;
 
+  const newDraftSection: FaqSection = sectionFilter === 'perche' ? 'perche' : 'general';
+
   return (
     <div className="space-y-6 max-w-4xl">
-      <div className="flex items-center justify-between">
-        <Select value={localeFilter} onValueChange={(v) => setLocaleFilter(v as typeof localeFilter)}>
-          <SelectTrigger className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutte le lingue</SelectItem>
-            <SelectItem value="it">Italiano</SelectItem>
-            <SelectItem value="en">English</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button onClick={() => setDraft({ ...EMPTY_DRAFT, locale: localeFilter === 'en' ? 'en' : 'it' })}>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Select value={sectionFilter} onValueChange={(v) => setSectionFilter(v as typeof sectionFilter)}>
+            <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutte le sezioni</SelectItem>
+              <SelectItem value="general">{SECTION_LABEL.general}</SelectItem>
+              <SelectItem value="perche">{SECTION_LABEL.perche}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={localeFilter} onValueChange={(v) => setLocaleFilter(v as typeof localeFilter)}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutte le lingue</SelectItem>
+              <SelectItem value="it">Italiano</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Button onClick={() => setDraft({ ...EMPTY_DRAFT, locale: localeFilter === 'en' ? 'en' : 'it', section: newDraftSection })}>
           <Plus className="h-4 w-4 mr-2" /> Nuova FAQ
         </Button>
       </div>
@@ -144,7 +184,17 @@ export default function FaqCmsPage() {
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-4 gap-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Sezione</Label>
+              <Select value={draft.section} onValueChange={(v) => setDraft({ ...draft, section: v as FaqSection })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">{SECTION_LABEL.general}</SelectItem>
+                  <SelectItem value="perche">{SECTION_LABEL.perche}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="space-y-1">
               <Label className="text-xs">Lingua</Label>
               <Select value={draft.locale} onValueChange={(v) => setDraft({ ...draft, locale: v as 'it' | 'en' })}>
@@ -199,47 +249,61 @@ export default function FaqCmsPage() {
       {rows.length === 0 ? (
         <EmptyState
           title="Nessuna FAQ"
-          description="Aggiungi la prima FAQ qui sopra. Finché la tabella è vuota, il sito usa le FAQ hardcoded di apps/sito-v3/src/data/faqs.ts."
+          description="Aggiungi la prima FAQ qui sopra. Finché la sezione è vuota, il sito usa le FAQ hardcoded di apps/sito-v3/src/data/faqs.ts o perchi-faqs.ts."
         />
       ) : (
-        <div className="space-y-6">
-          {Array.from(byLocale.entries()).map(([locale, list]) => (
-            <div key={locale} className="space-y-2">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold uppercase tracking-wide">{locale === 'it' ? 'Italiano' : 'English'}</h2>
-                <Badge variant="outline">{list.length}</Badge>
+        <div className="space-y-8">
+          {Array.from(grouped.entries()).map(([section, byLocale]) => (
+            <section key={section} className="space-y-3">
+              <div className="flex items-center gap-2 border-b pb-2">
+                <h2 className="text-sm font-semibold">
+                  {section === 'perche' ? SECTION_LABEL.perche : section === 'general' ? SECTION_LABEL.general : section}
+                </h2>
+                <Badge variant="outline" className="text-[10px]">
+                  {Array.from(byLocale.values()).reduce((sum, list) => sum + list.length, 0)} totali
+                </Badge>
               </div>
-              <div className="space-y-2">
-                {list.map((row) => (
-                  <div key={row.id} className="rounded-lg border bg-card p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{row.question}</p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{row.answer}</p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {row.sort_order !== null && (
-                          <Badge variant="outline" className="font-mono text-[10px]">#{row.sort_order}</Badge>
-                        )}
-                        <Button variant="ghost" size="sm" onClick={() => togglePublish(row)} title={row.is_published ? 'Nascondi' : 'Pubblica'}>
-                          {row.is_published ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />}
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => editRow(row)}>Modifica</Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            if (window.confirm('Eliminare definitivamente questa FAQ?')) deleteMutation.mutate(row.id);
-                          }}
-                        >
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
+              {Array.from(byLocale.entries()).map(([locale, list]) => (
+                <div key={`${section}-${locale}`} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {locale === 'it' ? 'Italiano' : 'English'}
+                    </h3>
+                    <Badge variant="outline">{list.length}</Badge>
                   </div>
-                ))}
-              </div>
-            </div>
+                  <div className="space-y-2">
+                    {list.map((row) => (
+                      <div key={row.id} className="rounded-lg border bg-card p-4 space-y-2">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm">{row.question}</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{row.answer}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {row.sort_order !== null && (
+                              <Badge variant="outline" className="font-mono text-[10px]">#{row.sort_order}</Badge>
+                            )}
+                            <Button variant="ghost" size="sm" onClick={() => togglePublish(row)} title={row.is_published ? 'Nascondi' : 'Pubblica'}>
+                              {row.is_published ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />}
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => editRow(row)}>Modifica</Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (window.confirm('Eliminare definitivamente questa FAQ?')) deleteMutation.mutate(row.id);
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </section>
           ))}
         </div>
       )}
