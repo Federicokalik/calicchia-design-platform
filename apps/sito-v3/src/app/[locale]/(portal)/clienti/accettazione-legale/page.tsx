@@ -1,12 +1,11 @@
-import { redirect } from '@/i18n/navigation';
 import { Link } from '@/i18n/navigation';
 import { Logo } from '@/components/Logo/Logo';
+import { PortalRedirect } from '@/components/portal/PortalRedirect';
 import {
   getCustomer,
   getLegalStatus,
   PortalUnauthorizedError,
 } from '@/lib/portal-api';
-import { portalLoginRedirect } from '@/lib/portal-format';
 import { LegalAcceptanceForm } from '@/components/portal/LegalAcceptanceForm';
 import type { Locale } from '@/lib/i18n';
 
@@ -33,23 +32,23 @@ export default async function AccettazioneLegalePage({ params }: PageProps) {
   let status;
   try {
     customer = await getCustomer();
-    if (!customer) redirect(portalLoginRedirect('/clienti/accettazione-legale'));
+    if (!customer) return <PortalRedirect to="/clienti/login" />;
     // Collaborators don't sign the client-side T&C+DPA — they operate under the
     // owner's existing acceptance. Without this gate, /legal/status returns 403
     // (clientOnly route) and crashes the page (audit B-003 + B-020).
     if (customer.role === 'collaborator') {
-      redirect('/clienti/progetti');
+      return <PortalRedirect to="/clienti/progetti" />;
     }
     status = await getLegalStatus();
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
-      redirect(portalLoginRedirect('/clienti/accettazione-legale'));
+      return <PortalRedirect to="/clienti/login" />;
     }
     throw error;
   }
 
-  if (!status.requires_acceptance) {
-    redirect('/clienti/dashboard');
+  if (!status?.requires_acceptance) {
+    return <PortalRedirect to="/clienti/dashboard" />;
   }
 
   return (

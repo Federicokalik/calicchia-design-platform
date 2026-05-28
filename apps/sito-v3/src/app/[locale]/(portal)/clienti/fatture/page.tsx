@@ -1,4 +1,4 @@
-import { redirect } from '@/i18n/navigation';
+import { PortalRedirect } from '@/components/portal/PortalRedirect';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ArrowRight, FileText } from 'lucide-react';
@@ -29,7 +29,6 @@ import {
   formatPortalDate,
   formatPortalStatus,
   getPortalCustomerLabel,
-  portalLoginRedirect,
 } from '@/lib/portal-format';
 import type { Locale } from '@/lib/i18n';
 
@@ -256,10 +255,10 @@ export default async function FatturePage({ params }: PageProps) {
     );
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
-      redirect(portalLoginRedirect('/clienti/fatture'));
+      return <PortalRedirect to="/clienti/login" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
-      redirect('/clienti/accettazione-legale');
+      return <PortalRedirect to="/clienti/accettazione-legale" />;
     }
     throw error;
   }

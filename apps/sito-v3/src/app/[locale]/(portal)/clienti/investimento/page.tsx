@@ -1,4 +1,4 @@
-import { redirect } from '@/i18n/navigation';
+import { PortalRedirect } from '@/components/portal/PortalRedirect';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { PortalShell } from '@/components/portal/PortalShell';
 import { PortalTopbar } from '@/components/portal/PortalTopbar';
@@ -23,7 +23,6 @@ import {
   formatPortalDate,
   formatPortalStatus,
   getPortalCustomerLabel,
-  portalLoginRedirect,
 } from '@/lib/portal-format';
 import type { Locale } from '@/lib/i18n';
 
@@ -154,10 +153,10 @@ export default async function InvestmentPage({ params }: PageProps) {
     );
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
-      redirect(portalLoginRedirect('/clienti/investimento'));
+      return <PortalRedirect to="/clienti/login" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
-      redirect('/clienti/accettazione-legale');
+      return <PortalRedirect to="/clienti/accettazione-legale" />;
     }
     throw error;
   }
