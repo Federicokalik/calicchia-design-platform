@@ -9,6 +9,7 @@ import { sql } from '../../db';
 import { generateText, callOpenAICompatible, getProviderForTask } from '../agent/llm-router';
 import { sendEmail } from '../email';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
+import { canSendWhatsApp, type WhatsAppCategory } from '../whatsapp-policy';
 import { sendTelegramMessage, isTelegramConfigured } from '../telegram';
 import { addFact } from '../agent/memory';
 import type { AdminLocale } from '../admin-locale';
@@ -364,14 +365,24 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
   },
   tool_send_whatsapp: {
     type: 'tool_send_whatsapp', label: 'Invia WhatsApp', category: 'tool', color: '#3b82f6', icon: 'MessageCircle',
-    description: 'Invia un messaggio WhatsApp',
-    configSchema: { phone: '', message: '' },
+    description: "Invia un messaggio WhatsApp. Rispetta gli opt-out in `communication_preferences` per la categoria scelta (transactional/operational/marketing).",
+    configSchema: { phone: '', message: '', category: 'operational' },
     execute: async (config, input) => {
       if (!isWhatsAppConfigured()) return { sent: false, error: 'WhatsApp non configurato' };
       const phone = interpolate(config.phone, input);
       const message = interpolate(config.message, input);
+      const category: WhatsAppCategory =
+        config.category === 'transactional' || config.category === 'marketing'
+          ? config.category
+          : 'operational';
+      const customerId = typeof input?.customer_id === 'string' ? input.customer_id : null;
+      const leadId = typeof input?.lead_id === 'string' ? input.lead_id : null;
+      const policy = await canSendWhatsApp(phone, category, { customerId, leadId });
+      if (!policy.allowed) {
+        return { sent: false, phone, category, error: `opt-out: ${policy.reason ?? 'unknown'}` };
+      }
       await sendWhatsAppText(phone, message);
-      return { sent: true, phone };
+      return { sent: true, phone, category };
     },
   },
   tool_send_telegram: {
@@ -567,7 +578,7 @@ const NODE_TYPE_I18N: Record<string, Partial<Record<AdminLocale, { label: string
   llm_classify: { en: { label: 'Classify', description: 'Classifies input into configured categories' } },
   tool_db_query: { en: { label: 'DB Query', description: 'Runs a SQL query on the database' } },
   tool_send_email: { en: { label: 'Send Email', description: 'Sends an email' } },
-  tool_send_whatsapp: { en: { label: 'Send WhatsApp', description: 'Sends a WhatsApp message' } },
+  tool_send_whatsapp: { en: { label: 'Send WhatsApp', description: 'Sends a WhatsApp message. Honours opt-outs in `communication_preferences` for the chosen category (transactional/operational/marketing).' } },
   tool_send_telegram: { en: { label: 'Telegram Notification', description: 'Sends a Telegram message' } },
   tool_http_request: { en: { label: 'HTTP Request', description: 'Calls an external API' } },
   logic_condition: { en: { label: 'Condition', description: 'If/else split based on a condition' } },

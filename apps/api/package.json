@@ -11,6 +11,7 @@
     "migrate:new": "tsx --env-file=../../.env scripts/migrate.ts",
     "verify:calendar": "tsx --env-file=../../.env scripts/verify-calendar-schema.ts",
     "seed": "tsx scripts/seed.ts",
+    "seed:workflows": "tsx --env-file=../../.env scripts/seed-default-workflows.ts",
     "test:e2e": "tsx scripts/test-e2e.ts"
   },
   "dependencies": {
