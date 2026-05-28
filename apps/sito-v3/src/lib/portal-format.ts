@@ -72,21 +72,21 @@ export function formatPortalStatus(status: string | null | undefined, t: PortalT
 }
 
 /**
- * Throw-redirect al login del portale preservando `?next=<original-path>`.
+ * Throw-redirect al login del portale.
  *
- * Storia del bug (incident 2026-05-28):
- *   - V1: ritornava la stringa, chi chiamava la passava a `redirect()` di
- *     `@/i18n/navigation` (wrapper next-intl). Il wrapper fa `new URL(href)`
- *     per matchare PATHNAMES → URL relativo con query → ERR_INVALID_URL.
- *   - V2: throw direttamente con `redirect` di `next/navigation`. Stesso 500
- *     perche` `createNextIntlPlugin()` in next.config.ts patcha pure il
- *     redirect nativo (riscrive Location header col locale).
- *   - V3 (questa): URL ASSOLUTO costruito con PUBLIC_SITE_URL (build arg
- *     nel Dockerfile sito-v3 riga 22-39). `new URL()` su URL assoluto non
- *     throw e next-intl skip il rewrite per URL absoluti.
+ * V4 (incident 2026-05-28): `?next=<path>` rimosso. Le V1/V2/V3 esplodevano
+ * con ERR_INVALID_URL perche` il plugin di next-intl (createNextIntlPlugin
+ * in next.config.ts) patcha il `redirect` e fa `new URL(href)` su un href
+ * che — anche se passato assoluto — viene strippato dell'origin same-domain
+ * prima del parse. Eliminata la query stringa il problema sparisce.
+ *
+ * Trade-off accettato: dopo il login si torna SEMPRE a /clienti/dashboard
+ * (deep-link return temporaneamente perso). Da riabilitare in futuro o via
+ * cookie temporaneo o via Server Action separata, non via redirect server.
+ *
+ * Il parametro `next` resta nella signature per compatibilita` con i 14+
+ * call site esistenti, ma viene ignorato.
  */
-const PUBLIC_SITE_URL = (process.env.PUBLIC_SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-
-export function portalLoginRedirect(next: string): never {
-  redirect(`${PUBLIC_SITE_URL}/clienti/login?next=${encodeURIComponent(next)}`);
+export function portalLoginRedirect(_next: string): never {
+  redirect('/clienti/login');
 }
