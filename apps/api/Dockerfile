@@ -41,6 +41,12 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY apps/api/package.json apps/api/tsconfig.json ./apps/api/
 COPY apps/api/src ./apps/api/src
+# Workspace package: pnpm symlinks node_modules/@calicchia/shared → here. The
+# `deps` stage only copied packages/shared/package.json for install resolution
+# — without the source, runtime resolves the symlink to a non-existent dir
+# and crashes with `ERR_MODULE_NOT_FOUND: Cannot find package '@calicchia/shared'`
+# the moment any route imports from it (e.g. contacts.ts).
+COPY packages/shared ./packages/shared
 # Migration runner + SQL files — used by the one-off `migrate` service in
 # docker-compose.prod.yml. scripts/migrate.ts resolves apps/api/database/
 # (base schema) and database/migrations/ (numbered files) by relative path.
