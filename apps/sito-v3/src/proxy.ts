@@ -117,17 +117,29 @@ function isPublicPortalPath(portalPath: string[]) {
 
 function redirectToPortalLogin(req: NextRequest, locale: string | null) {
   const prefix = locale ? `/${locale}` : '';
-  const loginPath = `${prefix}/clienti/login`;
-  const search = new URLSearchParams({
-    next: req.nextUrl.pathname + req.nextUrl.search,
-  }).toString();
 
-  // Path-only Location: avoids leaking the internal standalone/container port
-  // (for example calicchia.design:3000) when the app runs behind a reverse proxy.
-  return new NextResponse(null, {
-    status: 307,
-    headers: { Location: `${loginPath}?${search}` },
-  });
+  // Incident 2026-05-28: la versione precedente faceva
+  //   new NextResponse(null, { status: 307, headers: { Location: '/clienti/login?next=...' } })
+  // con path RELATIVO. Next.js 16 core processa ogni middleware Response e
+  // chiama `new NextURL(Location)` per riscriverla — fallisce con
+  // ERR_INVALID_URL su path relativi senza base, crashando ogni accesso non
+  // autenticato a /clienti/* con 500.
+  //
+  // Fix: costruiamo un URL ASSOLUTO clonando req.nextUrl, e onoriamo
+  // x-forwarded-host/proto per non leakare la porta interna :3000 dietro
+  // CloudPanel/reverse proxy (motivo del commento "path-only Location" prima).
+  const loginUrl = req.nextUrl.clone();
+  const fwdHost = req.headers.get('x-forwarded-host');
+  if (fwdHost) {
+    loginUrl.host = fwdHost;
+    loginUrl.port = '';
+  }
+  const fwdProto = req.headers.get('x-forwarded-proto');
+  if (fwdProto) loginUrl.protocol = fwdProto;
+  loginUrl.pathname = `${prefix}/clienti/login`;
+  loginUrl.search = `?next=${encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search)}`;
+
+  return NextResponse.redirect(loginUrl, 307);
 }
 
 const intlMiddleware = createMiddleware(routing);
