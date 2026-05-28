@@ -3,12 +3,22 @@ import { sql } from '../db';
 import * as openai from '../lib/ai/openai';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import { logger } from '../lib/logger';
+import { revalidateSito } from '../lib/sito-revalidate';
 
 const log = logger.child({ scope: 'project-ai-logs' });
 
 type Env = { Variables: { user: { id: string; email?: string } } };
 
 export const projects = new Hono<Env>();
+
+// On any successful mutation, trigger sito-v3 ISR rivalidate so sitemap.xml,
+// llms.txt and the public /lavori list reflect the change within seconds.
+projects.use('*', async (c, next) => {
+  await next();
+  if (c.req.method !== 'GET' && c.res.status < 400) {
+    void revalidateSito();
+  }
+});
 
 // ========== LIST ==========
 

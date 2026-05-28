@@ -8,13 +8,13 @@ import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 // Pagina IT-only (route guard blocca /en/termini-e-condizioni con 404). No hreflang.
 export const metadata: Metadata = {
   title: {
-    absolute: 'Termini e Condizioni · Caldes / Calicchia Design',
+    absolute: 'Termini e Condizioni · Federico Calicchia',
   },
   description:
     "Termini e condizioni d'uso del sito e dei rapporti contrattuali per i servizi professionali: preventivi, pagamenti, tempistiche, proprietà intellettuale, recesso, foro competente.",
   alternates: { canonical: buildCanonical('/termini-e-condizioni', 'it') },
   openGraph: {
-    title: 'Termini e Condizioni · Caldes / Calicchia Design',
+    title: 'Termini e Condizioni · Federico Calicchia',
     description:
       "Condizioni generali per uso sito e rapporti contrattuali con il prestatore.",
     url: buildCanonical('/termini-e-condizioni', 'it'),

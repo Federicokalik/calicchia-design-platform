@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { sql, sqlv } from '../db';
 import { logger } from '../lib/logger';
+import { revalidateSito } from '../lib/sito-revalidate';
 
 const log = logger.child({ scope: 'cms-admin' });
 
@@ -14,6 +15,16 @@ const log = logger.child({ scope: 'cms-admin' });
  * special-casing each entity.
  */
 export const cmsAdmin = new Hono();
+
+// On any successful mutation (services, faqs, cities, glossario, team),
+// trigger sito-v3 ISR rivalidate so sitemap.xml, llms.txt and the public
+// CMS-driven pages reflect the change within seconds.
+cmsAdmin.use('*', async (c, next) => {
+  await next();
+  if (c.req.method !== 'GET' && c.res.status < 400) {
+    void revalidateSito();
+  }
+});
 
 const localeSchema = z.enum(['it', 'en']);
 

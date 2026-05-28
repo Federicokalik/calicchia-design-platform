@@ -116,7 +116,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
               'Email, telefono, nome, token e indirizzo IP vengono filtrati lato client e sostituiti con [redacted] prima dell\'invio (hook `beforeSend` dello SDK Sentry). Bugsink è ospitato sulla mia infrastruttura, nessun trasferimento extra-UE.'
             ],
             list: [
-              'Bugsink (self-hosted): stack trace, breadcrumb UI, URL anonimizzato (querystring rimossa). Conservazione 90 giorni. Titolare: Caldes (self-hosted).'
+              'Bugsink (self-hosted): stack trace, breadcrumb UI, URL anonimizzato (querystring rimossa). Conservazione 90 giorni. Titolare: Calicchia Design (self-hosted).'
             ]
           },
           {
@@ -388,7 +388,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         number: '02',
         heading: 'Oggetto',
         paragraphs: [
-          'I presenti Termini e Condizioni regolano l’utilizzo del sito Caldes / Calicchia Design\ne i rapporti contrattuali relativi ai servizi professionali offerti.\nL’uso del sito comporta accettazione integrale di queste condizioni.'
+          'I presenti Termini e Condizioni regolano l’utilizzo del sito Calicchia Design (Federico Calicchia)\ne i rapporti contrattuali relativi ai servizi professionali offerti.\nL’uso del sito comporta accettazione integrale di queste condizioni.'
         ]
       },
       {

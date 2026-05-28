@@ -5,6 +5,8 @@ import { getServiceCatalog } from '@/lib/cms';
 import { PerChiLavoro } from '@/components/seo/PerChiLavoro';
 import { PageHero } from '@/components/layout/PageHero';
 import { ServiziCardLink } from '@/components/service-detail/ServiziCardLink';
+import { StructuredData } from '@/components/seo/StructuredData';
+import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
@@ -32,9 +34,28 @@ export default async function ServiziIndexPage() {
   const locale = (await getLocale()) as Locale;
   const catalog = await getServiceCatalog(locale);
   const ALL_SERVICES = [...catalog.matrix, ...catalog.standalone];
+  const servicesSegment = locale === 'en' ? 'services' : 'servizi';
 
   return (
     <>
+      <StructuredData
+        json={[
+          collectionPageSchema({
+            name: t('pageTitle'),
+            description: t('pageLead'),
+            url: buildCanonical('/servizi', locale),
+            items: ALL_SERVICES.map((s) => ({
+              name: s.title,
+              url: `/${servicesSegment}/${s.slug}`,
+            })),
+            locale,
+          }),
+          breadcrumbSchema([
+            { name: locale === 'en' ? 'Home' : 'Home', url: '/' },
+            { name: locale === 'en' ? 'Services' : 'Servizi', url: '/servizi' },
+          ]),
+        ]}
+      />
       <PageHero
         breadcrumbs={[
           { name: 'Home', url: '/' },

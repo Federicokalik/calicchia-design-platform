@@ -26,6 +26,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/api/',
+          // Internal markdown mirror handler. The public URLs are `/<path>.md`
+          // (allowed by `Allow: /`). The rewrite destination `/_md/*` is an
+          // implementation detail — keep crawlers out so they don't index a
+          // parallel non-canonical URL space.
+          '/_md/',
           // Portal: serves 200 with IT content on EN (Phase 2 traduzione full
           // deferred). Routes respond to avoid 404 at login from
           // Accept-Language redirects, but stay hidden from crawlers.

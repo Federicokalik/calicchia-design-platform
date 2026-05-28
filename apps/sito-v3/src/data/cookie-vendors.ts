@@ -39,7 +39,7 @@ export const VENDOR_DISCLOSURE: readonly VendorDisclosure[] = [
       en: 'Stores the cookie preferences you set; suppresses the banner within the silence window.',
     },
     duration: { it: '6 mesi', en: '6 months' },
-    processor: 'Caldes (self-hosted)',
+    processor: 'calicchia.design (self-hosted)',
     policyUrl: '/cookie-policy',
   },
   {
@@ -52,7 +52,7 @@ export const VENDOR_DISCLOSURE: readonly VendorDisclosure[] = [
       en: 'Remembers the language you chose (IT/EN) for subsequent visits.',
     },
     duration: { it: '1 anno', en: '1 year' },
-    processor: 'Caldes (self-hosted)',
+    processor: 'calicchia.design (self-hosted)',
     policyUrl: '/cookie-policy',
   },
   {
@@ -65,7 +65,7 @@ export const VENDOR_DISCLOSURE: readonly VendorDisclosure[] = [
       en: 'Stores the dismissal of the English-version suggestion so it is not shown again on every visit.',
     },
     duration: { it: '1 anno', en: '1 year' },
-    processor: 'Caldes (self-hosted)',
+    processor: 'calicchia.design (self-hosted)',
     policyUrl: '/cookie-policy',
   },
   {
@@ -92,7 +92,7 @@ export const VENDOR_DISCLOSURE: readonly VendorDisclosure[] = [
       en: 'Collects stack traces and technical breadcrumbs for debugging. Email, phone, tokens and IP are filtered client-side before transmission (beforeSend scrubber). Legal basis: legitimate interest, GDPR art. 6(1)(f).',
     },
     duration: { it: '90 giorni', en: '90 days' },
-    processor: 'Caldes (self-hosted Bugsink instance)',
+    processor: 'calicchia.design (self-hosted Bugsink instance)',
     policyUrl: '/cookie-policy',
   },
 

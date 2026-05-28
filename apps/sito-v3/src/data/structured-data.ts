@@ -119,6 +119,14 @@ export interface LocalBusinessArgs {
   comune?: string;
   areaServed?: string[];
   locale?: Locale;
+  /**
+   * Catalogo servizi dinamico dal CMS. Quando passato, popola
+   * `hasOfferCatalog` con un Offer per ciascun servizio, con `Service` come
+   * itemOffered e URL canonico → dà a Google materiale ricco per i sitelinks
+   * della sezione "Servizi". Se omesso, ricade sulla lista hardcoded
+   * `SERVICE_CATALOG_ITEMS` (default safe per pagine senza accesso al CMS).
+   */
+  services?: ReadonlyArray<{ slug: string; title: string; lead?: string }>;
 }
 
 export function localBusinessSchema(args: LocalBusinessArgs = {}) {
@@ -129,6 +137,24 @@ export function localBusinessSchema(args: LocalBusinessArgs = {}) {
       : args.comune
         ? [args.comune]
         : undefined;
+  const servicesSegment = locale === 'en' ? 'services' : 'servizi';
+  const localePrefix = locale === 'en' ? '/en' : '';
+  const dynamicCatalog =
+    args.services && args.services.length > 0
+      ? args.services.map((svc) => ({
+          '@type': 'Offer' as const,
+          itemOffered: {
+            '@type': 'Service' as const,
+            name: svc.title,
+            ...(svc.lead ? { description: svc.lead } : {}),
+            url: `${SITE.url}${localePrefix}/${servicesSegment}/${svc.slug}`,
+            provider: { '@id': BUSINESS_ID },
+          },
+        }))
+      : SERVICE_CATALOG_ITEMS[locale].map((name) => ({
+          '@type': 'Offer' as const,
+          itemOffered: { '@type': 'Service' as const, name },
+        }));
 
   return {
     '@context': 'https://schema.org',
@@ -170,13 +196,10 @@ export function localBusinessSchema(args: LocalBusinessArgs = {}) {
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: SERVICE_CATALOG_NAME[locale],
-      itemListElement: SERVICE_CATALOG_ITEMS[locale].map((name) => ({
-        '@type': 'Offer',
-        itemOffered: { '@type': 'Service', name },
-      })),
+      itemListElement: dynamicCatalog,
     },
     inLanguage: bcp47(locale),
-  } as const;
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -189,9 +212,51 @@ export function websiteSchema(locale: Locale = 'it') {
     '@id': WEBSITE_ID,
     url: SITE.url,
     name: SITE.brand,
+    alternateName: SITE.legalName,
     description: SITE.description,
     publisher: { '@id': BUSINESS_ID },
     inLanguage: bcp47(locale),
+  } as const;
+}
+
+/* ------------------------------------------------------------------ */
+/* SiteNavigationElement — aiuta Google a costruire i sitelinks       */
+/* ------------------------------------------------------------------ */
+const NAV_ITEMS: Record<Locale, ReadonlyArray<{ name: string; path: string; description: string }>> = {
+  it: [
+    { name: 'Home', path: '/', description: 'Federico Calicchia — Web Designer & Developer Freelance' },
+    { name: 'Portfolio', path: '/lavori', description: 'Case study e lavori di web design, sviluppo e SEO' },
+    { name: 'Servizi', path: '/servizi', description: 'Web design, sviluppo, e-commerce, SEO, accessibilità, WordPress' },
+    { name: 'Perché scegliermi', path: '/perche-scegliere-me', description: 'Approccio, metodo di lavoro, garanzie' },
+    { name: 'Blog', path: '/blog', description: 'Approfondimenti su web design, SEO, accessibilità' },
+    { name: 'Contatti', path: '/contatti', description: 'Email, telefono, prenota una consulenza gratuita' },
+  ],
+  en: [
+    { name: 'Home', path: '/en', description: 'Federico Calicchia — Freelance Web Designer & Developer' },
+    { name: 'Portfolio', path: '/en/works', description: 'Case studies and work in web design, development, SEO' },
+    { name: 'Services', path: '/en/services', description: 'Web design, development, e-commerce, SEO, accessibility, WordPress' },
+    { name: 'Why choose me', path: '/en/why-choose-me', description: 'Approach, working method, guarantees' },
+    { name: 'Blog', path: '/en/blog', description: 'Insights on web design, SEO, accessibility' },
+    { name: 'Contact', path: '/en/contact', description: 'Email, phone, book a free consultation' },
+  ],
+} as const;
+
+export function siteNavigationSchema(locale: Locale = 'it') {
+  const items = NAV_ITEMS[locale];
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${SITE.url}/#nav-${locale}`,
+    name: locale === 'en' ? 'Main navigation' : 'Navigazione principale',
+    itemListOrder: 'https://schema.org/ItemListOrderAscending',
+    numberOfItems: items.length,
+    itemListElement: items.map((item, i) => ({
+      '@type': 'SiteNavigationElement',
+      position: i + 1,
+      name: item.name,
+      description: item.description,
+      url: `${SITE.url}${item.path}`,
+    })),
   } as const;
 }
 

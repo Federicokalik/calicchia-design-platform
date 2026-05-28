@@ -128,6 +128,22 @@ const config: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: SECURITY_HEADERS }];
   },
+  async rewrites() {
+    return [
+      // Markdown mirror per LLM: ogni URL `/<path>.md` viene servito dal route
+      // handler `app/_md/[[...slug]]/route.ts` che restituisce text/markdown.
+      // Coerente con l'hint nel commento HTML iniettato dal RootLayout e con
+      // l'indice in /llms.txt.
+      // - `/.md`             → `/_md`             (homepage IT)
+      // - `/en.md`           → `/_md/en`          (homepage EN)
+      // - `/lavori.md`       → `/_md/lavori`
+      // - `/servizi/seo.md`  → `/_md/servizi/seo`
+      // - `/blog/2026/05/post.md` → `/_md/blog/2026/05/post`
+      // Pattern: path-to-regexp `:path*.md` cattura 0+ segment con suffix `.md`.
+      { source: '/.md', destination: '/_md' },
+      { source: '/:path*.md', destination: '/_md/:path*' },
+    ];
+  },
 };
 
 export default withSentryConfig(withNextIntl(config), {

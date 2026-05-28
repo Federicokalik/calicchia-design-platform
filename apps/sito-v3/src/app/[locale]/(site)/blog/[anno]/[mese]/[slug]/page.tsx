@@ -8,6 +8,8 @@ import { BlogDemoIslands } from '@/components/blog/BlogDemoIslands';
 import { BlogTOC } from '@/components/blog/BlogTOC';
 import { BlogShare } from '@/components/blog/BlogShare';
 import { BlogComments } from '@/components/blog/BlogComments';
+import { StructuredData } from '@/components/seo/StructuredData';
+import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
@@ -84,7 +86,8 @@ export default async function BlogArticlePage({
   if (!data) notFound();
 
   const { post, author } = data;
-  const fullUrl = `${SITE.url}${buildBlogUrl(post)}`;
+  const blogPath = buildBlogUrl(post);
+  const fullUrl = `${SITE.url}${blogPath}`;
 
   // Server-side h2 count: TOC mountato solo se ≥3 sezioni
   const h2Count = (post.content ?? '').match(/<h2(\s|>)/gi)?.length ?? 0;
@@ -92,6 +95,26 @@ export default async function BlogArticlePage({
 
   return (
     <article>
+      <StructuredData
+        json={[
+          articleSchema({
+            title: post.title,
+            description: post.excerpt ?? `Articolo di ${author?.full_name ?? 'Federico Calicchia'}`,
+            url: blogPath,
+            image: post.cover_image ?? undefined,
+            datePublished: post.published_at ?? post.created_at ?? undefined,
+            dateModified: post.published_at ?? undefined,
+            section: post.category ?? undefined,
+            locale,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', url: '/' },
+            { name: 'Blog', url: '/blog' },
+            { name: post.title, url: blogPath },
+          ]),
+        ]}
+      />
+
       <BlogHero
         title={post.title}
         excerpt={post.excerpt}

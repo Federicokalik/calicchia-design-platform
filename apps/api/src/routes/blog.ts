@@ -9,6 +9,7 @@ import { generateText } from '../lib/agent/llm-router';
 import { getAdminLocale } from '../lib/admin-locale';
 import { verifyCronSecret } from '../lib/cron-auth';
 import { logger } from '../lib/logger';
+import { revalidateSito } from '../lib/sito-revalidate';
 
 const blogLog = logger.child({ scope: 'blog' });
 
@@ -25,6 +26,16 @@ function mdToHtml(content: string): string {
 }
 
 export const blog = new Hono();
+
+// On any successful mutation, trigger sito-v3 ISR rivalidate so sitemap.xml,
+// llms.txt and the public blog list reflect the change within seconds.
+// GET requests are skipped. Fire-and-forget — does not block the response.
+blog.use('*', async (c, next) => {
+  await next();
+  if (c.req.method !== 'GET' && c.res.status < 400) {
+    void revalidateSito();
+  }
+});
 
 function appendSourcesMd(content: string, sources: string[]): string {
   if (!sources || sources.length === 0) return content;

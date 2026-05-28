@@ -8,13 +8,13 @@ import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 // Pagina IT-only (route guard blocca /en/cookie-policy con 404). No hreflang.
 export const metadata: Metadata = {
   title: {
-    absolute: 'Cookie Policy · Caldes / Calicchia Design',
+    absolute: 'Cookie Policy · Federico Calicchia',
   },
   description:
     'Informativa sui cookie utilizzati dal sito: cookie tecnici, di sicurezza, analitici aggregati. Come gestire il consenso e quali strumenti sono attivi.',
   alternates: { canonical: buildCanonical('/cookie-policy', 'it') },
   openGraph: {
-    title: 'Cookie Policy · Caldes / Calicchia Design',
+    title: 'Cookie Policy · Federico Calicchia',
     description: 'Informativa cookie aggiornata, con elenco strumenti attivi.',
     url: buildCanonical('/cookie-policy', 'it'),
     ...buildOgLocale('it'),

@@ -248,7 +248,7 @@ async function fetchProjects(): Promise<ApiProject[]> {
     // ST-07: bound the wait — an unreachable/hanging API must not stall the
     // sitemap; on timeout the catch below falls back to a static-only sitemap.
     const res = await fetch(`${apiBase()}/api/public/projects?limit=50`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 300, tags: ['sitemap'] },
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) {
@@ -268,7 +268,7 @@ async function fetchBlogPosts(): Promise<ApiBlogPost[]> {
 
   try {
     const res = await fetch(`${apiBase()}/api/public/blog/posts?limit=100`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 300, tags: ['sitemap'] },
       signal: AbortSignal.timeout(5000),
     });
     if (res.status === 404) return [];

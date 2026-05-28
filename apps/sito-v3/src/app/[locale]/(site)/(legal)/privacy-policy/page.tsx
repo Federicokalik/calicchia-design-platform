@@ -11,13 +11,13 @@ import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 // col resto del sito (URL assoluti con metadataBase).
 export const metadata: Metadata = {
   title: {
-    absolute: 'Privacy Policy · Caldes / Calicchia Design',
+    absolute: 'Privacy Policy · Federico Calicchia',
   },
   description:
     "Informativa privacy: dati raccolti, finalità, base giuridica, diritti dell'interessato, tempi di conservazione, modalità di esercizio dei diritti GDPR.",
   alternates: { canonical: buildCanonical('/privacy-policy', 'it') },
   openGraph: {
-    title: 'Privacy Policy · Caldes / Calicchia Design',
+    title: 'Privacy Policy · Federico Calicchia',
     description:
       "Informativa privacy completa, con dati raccolti, finalità e diritti dell'interessato.",
     url: buildCanonical('/privacy-policy', 'it'),

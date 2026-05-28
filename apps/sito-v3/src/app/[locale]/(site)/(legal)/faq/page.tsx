@@ -12,18 +12,14 @@ import { getFaqs } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 
 export const metadata: Metadata = {
-  title: {
-    absolute:
-      'FAQ Web Design Freelance · Quello che le agenzie non vogliono che tu sappia | Federico Calicchia',
-  },
+  title: 'FAQ Web Design Freelance',
   description:
     'Risposte secche a 7 domande sul web design freelance: tempi, processo, manutenzione, SEO, prezzi. Niente fronzoli, niente promesse vuote.',
   alternates: { canonical: '/faq' },
   openGraph: {
-    title:
-      'FAQ Web Design Freelance · Quello che le agenzie non vogliono che tu sappia',
+    title: 'FAQ Web Design Freelance — Federico Calicchia',
     description:
-      "Risposte secche a 7 domande su tempi, processo, manutenzione, SEO.",
+      "Risposte secche su tempi, processo, manutenzione, SEO. Niente fronzoli, niente promesse vuote.",
     url: '/faq',
   },
 };

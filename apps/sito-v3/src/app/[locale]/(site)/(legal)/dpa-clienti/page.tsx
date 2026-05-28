@@ -8,13 +8,13 @@ import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 // Pagina IT-only (route guard blocca /en/dpa-clienti con 404). No hreflang.
 export const metadata: Metadata = {
   title: {
-    absolute: 'Data Processing Agreement (DPA) · Caldes / Calicchia Design',
+    absolute: 'DPA · Federico Calicchia',
   },
   description:
     "Accordo standard sul trattamento dei dati personali ai sensi dell'art. 28 GDPR. Parte integrante dei Termini e Condizioni, si applica automaticamente ai servizi che comportano trattamento per conto del cliente.",
   alternates: { canonical: buildCanonical('/dpa-clienti', 'it') },
   openGraph: {
-    title: 'Data Processing Agreement (DPA) · Caldes / Calicchia Design',
+    title: 'DPA · Federico Calicchia',
     description:
       "Accordo standard art. 28 GDPR per i servizi che comportano trattamento dati per conto del cliente.",
     url: buildCanonical('/dpa-clienti', 'it'),

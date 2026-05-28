@@ -40,7 +40,7 @@ export async function generateMetadata({
     description: svc.description,
     alternates: buildI18nAlternates(`/servizi/${slug}`, locale),
     openGraph: {
-      title: `${svc.title} — Caldes`,
+      title: `${svc.title} — Web Designer & Developer Freelance`,
       description: svc.description,
       type: 'article',
       url: buildCanonical(`/servizi/${slug}`, locale),

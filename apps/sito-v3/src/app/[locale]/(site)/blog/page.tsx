@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { fetchBlogList } from '@/lib/blog-api';
+import { fetchBlogList, buildBlogUrl } from '@/lib/blog-api';
 import { BlogList } from '@/components/blog/BlogList';
 import { PageHero } from '@/components/layout/PageHero';
+import { StructuredData } from '@/components/seo/StructuredData';
+import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 
@@ -34,6 +36,28 @@ export default async function BlogIndexPage() {
 
   return (
     <>
+      <StructuredData
+        json={[
+          collectionPageSchema({
+            name: t('pageTitle'),
+            description: t('pageLead'),
+            url: buildCanonical('/blog', locale),
+            items: posts.map((p) => ({
+              name: p.title,
+              url: buildBlogUrl({
+                slug: p.slug,
+                published_at: p.published_at ?? null,
+                created_at: p.created_at ?? null,
+              }),
+            })),
+            locale,
+          }),
+          breadcrumbSchema([
+            { name: 'Home', url: '/' },
+            { name: 'Blog', url: '/blog' },
+          ]),
+        ]}
+      />
       <PageHero
         breadcrumbs={[
           { name: 'Home', url: '/' },

@@ -10,9 +10,11 @@ import { MorphTicker } from '@/components/layout/MorphTicker';
 import { LanguagePromptBanner } from '@/components/layout/LanguagePromptBanner';
 import { AvailabilityTopbar } from '@/components/layout/AvailabilityTopbar';
 import { StructuredData } from '@/components/seo/StructuredData';
-import { personSchema, localBusinessSchema, websiteSchema } from '@/data/structured-data';
+import { LLMHint } from '@/components/seo/LLMHint';
+import { personSchema, localBusinessSchema, websiteSchema, siteNavigationSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
 import { getSiteConfig } from '@/lib/site-config';
+import { getServiceCatalog } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 import './globals.css';
 
@@ -41,45 +43,54 @@ const funnelSans = localFont({
   preload: true,
 });
 
-// Audit C-013/C-014: root metadata now async via generateMetadata so
-// brand/legalName/description come from getSiteConfig() (DB → file fallback).
+// Audit C-013/C-014: root metadata via generateMetadata. description/contact
+// surfaces come from getSiteConfig() (DB → file fallback), but the title
+// template, brand and tagline are SEO-load-bearing and hardcoded to SITE so
+// they can never be corrupted by an editable admin setting.
 // SITE.url stays from the file because it's the deploy origin, not editable.
 const OG_DEFAULT = `${SITE.url}/img/federico-calicchia-ritratto-web-designer.webp`;
+const TITLE_DEFAULT = `${SITE.brand} — ${SITE.tagline}`;
+const TITLE_TEMPLATE = `%s — ${SITE.tagline}`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
   return {
     metadataBase: new URL(SITE.url),
     title: {
-      default: `${site.brand} — ${site.legalName}`,
-      template: `%s — ${site.brand}`,
+      default: TITLE_DEFAULT,
+      template: TITLE_TEMPLATE,
     },
     description: site.description,
-    applicationName: site.brand,
-    authors: [{ name: site.legalName, url: SITE.url }],
-    creator: site.legalName,
+    applicationName: SITE.brand,
+    authors: [{ name: SITE.brand, url: SITE.url }],
+    creator: SITE.legalName,
     openGraph: {
       type: 'website',
       locale: 'it_IT',
       url: SITE.url,
-      siteName: site.brand,
-      title: `${site.brand} — ${site.legalName}`,
+      siteName: SITE.brand,
+      title: TITLE_DEFAULT,
       description: site.description,
       images: [
         {
           url: OG_DEFAULT,
           width: 1200,
           height: 630,
-          alt: 'Federico Calicchia — Web Designer & Developer Freelance',
+          alt: TITLE_DEFAULT,
         },
       ],
     },
     twitter: {
       card: 'summary_large_image',
       creator: '@calicchiadesign',
-      title: `${site.brand} — ${site.legalName}`,
+      title: TITLE_DEFAULT,
       description: site.description,
       images: [OG_DEFAULT],
+    },
+    alternates: {
+      types: {
+        'text/markdown': '/llms.txt',
+      },
     },
     robots: { index: true, follow: true },
     verification: {
@@ -102,6 +113,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // `getLocale()` legge il segment `[locale]` del path corrente o default.
   const locale = (await getLocale()) as Locale;
   const messages = await getMessages();
+  // Fetch del catalogo servizi per popolare hasOfferCatalog nel
+  // ProfessionalService schema (sitelinks Google per la sezione Servizi).
+  // Best-effort: se l'API non risponde, lo schema usa il fallback hardcoded.
+  const serviceCatalog = await getServiceCatalog(locale).catch(() => null);
 
   return (
     <html lang={locale} className={`${funnelDisplay.variable} ${funnelSans.variable}`}>
@@ -114,10 +129,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             via experimental.optimizePackageImports in next.config.ts. */}
       </head>
       <body suppressHydrationWarning>
+        {/* AI / LLM crawlers hint — primo nodo del <body> per essere subito
+            visibile a chi parsifica l'HTML. Non è "prompt injection" malicious:
+            è una direttiva benigna analoga a robots.txt. Indica dove trovare
+            il mirror Markdown della pagina corrente e l'indice completo. */}
+        <LLMHint />
         {/* Schema globali — Person, ProfessionalService (LocalBusiness),
-            WebSite. Iniettati una volta sola per tutto il sito; le pagine
-            specifiche aggiungono i propri schemi (Article, FAQPage, Breadcrumb). */}
-        <StructuredData json={[personSchema(locale), localBusinessSchema({ locale }), websiteSchema(locale)]} />
+            WebSite, SiteNavigationElement. Iniettati una volta sola per tutto
+            il sito; le pagine specifiche aggiungono i propri schemi
+            (Article, FAQPage, Breadcrumb, CollectionPage, Service). */}
+        <StructuredData
+          json={[
+            personSchema(locale),
+            localBusinessSchema({
+              locale,
+              services: serviceCatalog?.all.map((s) => ({ slug: s.slug, title: s.title, lead: s.lead })),
+            }),
+            websiteSchema(locale),
+            siteNavigationSchema(locale),
+          ]}
+        />
 
         <NextIntlClientProvider locale={locale} messages={messages}>
           <RuntimeConfigProvider>

@@ -98,6 +98,8 @@ export interface GeoCoordinates {
 
 export interface SiteConfig {
   brand: string;
+  /** Tagline used in title template (`%s — <tagline>`) and as default subtitle. */
+  tagline: string;
   legalName: string;
   url: string;
   description: string;

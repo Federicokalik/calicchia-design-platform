@@ -53,6 +53,13 @@ RUN apk add --no-cache wget
 COPY --from=builder /app/apps/sito-v3/.next/standalone ./
 COPY --from=builder /app/apps/sito-v3/.next/static ./apps/sito-v3/.next/static
 COPY --from=builder /app/apps/sito-v3/public ./apps/sito-v3/public
+# Markdown source for the LLM mirror (`<path>.md`). These files are read at
+# runtime by `app/_md/[[...slug]]/route.ts` via `fs.readFile` — they are NOT
+# imported as JS modules so Next standalone tracing skips them. Copying the
+# entire `src/content` directory keeps current + future static MD content
+# (and the `static-md-pages.ts` fallback const, which IS bundled and would
+# also work alone, just with less rich output).
+COPY --from=builder /app/apps/sito-v3/src/content ./apps/sito-v3/src/content
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD wget -q --spider http://localhost:3000/ || exit 1

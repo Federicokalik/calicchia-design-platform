@@ -1,7 +1,8 @@
 import type { SiteConfig } from './types';
 
 export const SITE: SiteConfig = {
-  brand: 'Caldes',
+  brand: 'Federico Calicchia',
+  tagline: 'Web Designer & Developer Freelance',
   legalName: 'Calicchia Design',
   url: 'https://calicchia.design',
   description:
