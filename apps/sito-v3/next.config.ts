@@ -131,17 +131,20 @@ const config: NextConfig = {
   async rewrites() {
     return [
       // Markdown mirror per LLM: ogni URL `/<path>.md` viene servito dal route
-      // handler `app/_md/[[...slug]]/route.ts` che restituisce text/markdown.
+      // handler `app/md/[[...slug]]/route.ts` che restituisce text/markdown.
       // Coerente con l'hint nel commento HTML iniettato dal RootLayout e con
       // l'indice in /llms.txt.
-      // - `/.md`             → `/_md`             (homepage IT)
-      // - `/en.md`           → `/_md/en`          (homepage EN)
-      // - `/lavori.md`       → `/_md/lavori`
-      // - `/servizi/seo.md`  → `/_md/servizi/seo`
-      // - `/blog/2026/05/post.md` → `/_md/blog/2026/05/post`
+      // - `/.md`             → `/md`             (homepage IT)
+      // - `/en.md`           → `/md/en`          (homepage EN)
+      // - `/lavori.md`       → `/md/lavori`
+      // - `/servizi/seo.md`  → `/md/servizi/seo`
+      // - `/blog/2026/05/post.md` → `/md/blog/2026/05/post`
+      // NB: cartella `md/` (no underscore prefix). In Next.js App Router le
+      // cartelle che iniziano con `_` sono "private folders" e NON vengono
+      // routate — `_md/` qui sarebbe 404 indipendentemente dal rewrite.
       // Pattern: path-to-regexp `:path*.md` cattura 0+ segment con suffix `.md`.
-      { source: '/.md', destination: '/_md' },
-      { source: '/:path*.md', destination: '/_md/:path*' },
+      { source: '/.md', destination: '/md' },
+      { source: '/:path*.md', destination: '/md/:path*' },
     ];
   },
 };

@@ -2,9 +2,14 @@
  * Markdown mirror unico per il sito (`/<path>.md`).
  *
  * Routing: i rewrites in `next.config.ts` mappano ogni `/<path>.md` (e `/.md`
- * per la home) a `/_md/<path>`. Questo handler ricostruisce locale + path
+ * per la home) a `/md/<path>`. Questo handler ricostruisce locale + path
  * IT-canonical, decide la "sorgente" (CMS via API o sintetico-da-metadata) e
  * restituisce `text/markdown; charset=utf-8`.
+ *
+ * NB cartella `md/` senza underscore: in Next.js App Router le cartelle che
+ * iniziano con `_` sono "private folders" e NON vengono routate — un handler
+ * in `app/_md/` non sarebbe mai raggiungibile (404 silenzioso anche col
+ * rewrite). Errore individuato in produzione, fix nel commit di rinomina.
  *
  * Header X-Robots-Tag: noindex — il mirror è per LLM, non deve competere con
  * la pagina HTML nei risultati di ricerca Google. Cache pubblica 5min edge.
