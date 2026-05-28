@@ -14,6 +14,8 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { siteAsset } from '@/lib/public-urls';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 interface TeamRow {
   id: string;
@@ -192,9 +194,15 @@ export default function TeamCmsPage() {
               <Input value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value })} placeholder="Graphic Design & Comunicazione" />
             </div>
             <div className="space-y-1 col-span-2">
-              <Label className="text-xs">Avatar URL</Label>
-              <Input value={draft.avatar_url} onChange={(e) => setDraft({ ...draft, avatar_url: e.target.value })} placeholder="/img/team/nome-cognome.webp" />
-              <p className="text-[10px] text-muted-foreground">600x600 webp. Path relativo a /public o URL assoluto.</p>
+              <Label className="text-xs">Avatar</Label>
+              <ImageUpload
+                value={draft.avatar_url}
+                onChange={(url) => setDraft({ ...draft, avatar_url: url })}
+                folder="team"
+                aspectRatio="square"
+                placeholder="Carica avatar (600x600)"
+              />
+              <p className="text-[10px] text-muted-foreground">Caricamento via /api/media/upload. Quadrato 600x600, webp/jpg/png. URL salvato nel campo avatar_url.</p>
             </div>
             <div className="space-y-1 col-span-2">
               <Label className="text-xs">Bio (opzionale)</Label>
@@ -244,7 +252,7 @@ export default function TeamCmsPage() {
                 {list.map((row) => (
                   <div key={row.id} className="rounded-lg border bg-card p-4 flex gap-4 items-start">
                     {row.avatar_url && (
-                      <img src={row.avatar_url} alt={row.name} className="h-14 w-14 rounded-md object-cover bg-muted" />
+                      <img src={siteAsset(row.avatar_url)} alt={row.name} className="h-14 w-14 rounded-md object-cover bg-muted" />
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm">{row.name}</p>

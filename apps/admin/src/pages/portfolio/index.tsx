@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { siteAsset } from '@/lib/public-urls';
 
 interface PortfolioProject {
   id: string;
@@ -84,7 +85,7 @@ export default function PortfolioPage() {
           {projects.map((project) => (
             <div key={project.id} className="rounded-lg border bg-card overflow-hidden group hover:shadow-md transition-shadow">
               {project.cover_image ? (
-                <img src={project.cover_image} alt={project.title} className="h-40 w-full object-cover" />
+                <img src={siteAsset(project.cover_image)} alt={project.title} className="h-40 w-full object-cover" />
               ) : (
                 <div className="h-40 bg-muted flex items-center justify-center">
                   <span className="text-3xl text-muted-foreground/30">📷</span>

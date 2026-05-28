@@ -34,3 +34,20 @@ export const PORTAL_URL = readPublicUrl(
   'VITE_PORTAL_URL',
   'http://localhost:3000',
 );
+
+/**
+ * Resolves a public-site asset path to an absolute URL.
+ *
+ * Le tabelle CMS (site_clients.logo_url, site_team.avatar_url, ecc.) salvano
+ * path relativi a apps/sito-v3/public/ (es. `/img/works/foo.webp`). Caricarli
+ * direttamente nell'admin (porta 5173) restituisce 404 perché Vite cerca i
+ * file in apps/admin/public/. Qui anteponiamo SITE_URL solo quando il path
+ * inizia con `/` (relativo); URL assoluti e data: URI restano invariati.
+ */
+export function siteAsset(path: string | null | undefined): string {
+  if (!path) return '';
+  if (/^(https?:|data:|blob:)/i.test(path)) return path;
+  if (path.startsWith('/')) return `${SITE_URL}${path}`;
+  // Path senza `/` iniziale: lo trattiamo come relativo a SITE_URL/.
+  return `${SITE_URL}/${path}`;
+}

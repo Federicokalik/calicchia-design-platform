@@ -3,6 +3,7 @@ import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import { siteAsset } from '@/lib/public-urls';
 
 interface ImageUploadProps {
   value?: string;
@@ -127,7 +128,7 @@ export function ImageUpload({
           )}
         >
           <img
-            src={value}
+            src={siteAsset(value)}
             alt="Preview"
             className="w-full h-full object-cover"
           />
@@ -268,7 +269,7 @@ export function MultiImageUpload({
             className="relative aspect-square rounded-lg overflow-hidden border bg-muted group"
           >
             <img
-              src={url}
+              src={siteAsset(url)}
               alt={`Image ${index + 1}`}
               className="w-full h-full object-cover"
             />

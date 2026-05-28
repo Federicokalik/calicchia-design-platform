@@ -10,6 +10,8 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { siteAsset } from '@/lib/public-urls';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 interface ClientRow {
   id: string;
@@ -138,9 +140,15 @@ export default function ClientsCmsPage() {
               <p className="text-[10px] text-muted-foreground">Usa <code>#</code> se il cliente non vuole essere linkato.</p>
             </div>
             <div className="space-y-1 col-span-2">
-              <Label className="text-xs">Logo URL</Label>
-              <Input value={draft.logo_url} onChange={(e) => setDraft({ ...draft, logo_url: e.target.value })} placeholder="/img/works/nome-cliente.webp" />
-              <p className="text-[10px] text-muted-foreground">Path relativo a /public/img/works/ o URL assoluto. Preferire webp.</p>
+              <Label className="text-xs">Logo</Label>
+              <ImageUpload
+                value={draft.logo_url}
+                onChange={(url) => setDraft({ ...draft, logo_url: url })}
+                folder="clients"
+                aspectRatio="square"
+                placeholder="Carica logo cliente"
+              />
+              <p className="text-[10px] text-muted-foreground">Caricamento via /api/media/upload. Preferire webp/png trasparente. URL salvato nel campo logo_url.</p>
             </div>
             <div className="space-y-1">
               <Label className="text-xs">Ordine</Label>
@@ -173,7 +181,7 @@ export default function ClientsCmsPage() {
           {rows.map((row) => (
             <div key={row.id} className="rounded-lg border bg-card p-4 flex gap-4 items-start">
               {row.logo_url && (
-                <img src={row.logo_url} alt={row.name} className="h-12 w-12 rounded-md object-contain bg-muted p-1" />
+                <img src={siteAsset(row.logo_url)} alt={row.name} className="h-12 w-12 rounded-md object-contain bg-muted p-1" />
               )}
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm flex items-center gap-1.5">
