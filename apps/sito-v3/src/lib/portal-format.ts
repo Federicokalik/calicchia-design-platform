@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import type { PortalCustomer } from '@/lib/portal-api';
 
 /**
@@ -70,6 +71,19 @@ export function formatPortalStatus(status: string | null | undefined, t: PortalT
   return translated;
 }
 
-export function portalLoginRedirect(next: string) {
-  return `/clienti/login?next=${encodeURIComponent(next)}`;
+/**
+ * Throw-redirect al login del portale preservando `?next=<original-path>`.
+ *
+ * Importante: usa il `redirect` nativo di `next/navigation`, NON quello
+ * tipato di `@/i18n/navigation`. Il wrapper next-intl parsa l'argomento
+ * con `new URL()` per matcharlo contro PATHNAMES e una stringa con query
+ * (`/clienti/login?next=...`) fa esplodere con `ERR_INVALID_URL` (URL
+ * relativi non hanno base). I call site esistenti hanno la forma:
+ *   redirect(portalLoginRedirect('/clienti/x'));
+ * Visto che questa funzione ora throw `NEXT_REDIRECT` prima di tornare,
+ * il `redirect(...)` esterno non viene mai eseguito — compatibilita`
+ * mantenuta senza toccare i 14+ call site del portale.
+ */
+export function portalLoginRedirect(next: string): never {
+  redirect(`/clienti/login?next=${encodeURIComponent(next)}`);
 }
