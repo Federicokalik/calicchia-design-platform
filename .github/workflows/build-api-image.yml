@@ -14,6 +14,10 @@ on:
     paths:
       - 'apps/api/**'
       - 'packages/shared/**'
+      # Le migrations vengono COPY-ate nel runtime image (vedi Dockerfile riga
+      # 63). Senza questo path, nuove migrazioni atterrano su main ma l'image
+      # non viene rebuiltata e in prod restano fuori.
+      - 'database/migrations/**'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
       - '.github/workflows/build-api-image.yml'
