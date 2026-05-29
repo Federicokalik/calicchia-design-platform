@@ -13,10 +13,35 @@ import { NextResponse } from 'next/server';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+export type CaptchaFormId =
+  | 'admin_login'
+  | 'portal_login'
+  | 'contact_form'
+  | 'newsletter_subscribe'
+  | 'gdpr_request'
+  | 'booking_create'
+  | 'booking_reschedule'
+  | 'embed_lead';
+
+export interface PublicCaptchaConfig {
+  /**
+   * Provider attivo. `turnstile` = legacy Cloudflare; `cap` = Cap self-hosted
+   * (https://trycap.dev). Default `turnstile` finche` pilot Cap non e` validato.
+   */
+  provider: 'turnstile' | 'cap';
+  /** Base URL del container Cap (es. `https://cap.calicchia.design`). Vuoto se non in uso. */
+  capEndpoint: string;
+  /** Site key Cap per form-id (mappate da env `CAP_SITEKEY_<UPPER>`). */
+  siteKeys: Partial<Record<CaptchaFormId, string>>;
+}
+
 export interface PublicRuntimeConfig {
   gaMeasurementId: string;
   mouseflowId: string;
+  /** @deprecated In transizione a `captcha.siteKeys`. Tenuto per back-compat (`useTurnstile`). */
   turnstileSiteKey: string;
+  /** Provider-agnostic captcha config — consumato da `useCaptcha`. */
+  captcha: PublicCaptchaConfig;
   googleMapsKey: string;
   /** Stripe publishable key (pk_test_ / pk_live_). Used by @stripe/stripe-js loadStripe(). */
   stripePublishableKey: string;
@@ -31,11 +56,43 @@ export interface PublicRuntimeConfig {
 // whitespace — la pulizia vera del file env resta ops-side.
 const env = (name: string): string => (process.env[name] ?? '').trim();
 
+/**
+ * Costruisce la mappa form-id → Cap site key leggendo `CAP_SITEKEY_<UPPER>` per
+ * ogni form-id conosciuto. Le entry mancanti restano `undefined` (la chiamata
+ * `captcha.verify` server-side fallira` con `cap-keypair-not-configured`).
+ */
+function buildCapSiteKeys(): Partial<Record<CaptchaFormId, string>> {
+  const ids: CaptchaFormId[] = [
+    'admin_login',
+    'portal_login',
+    'contact_form',
+    'newsletter_subscribe',
+    'gdpr_request',
+    'booking_create',
+    'booking_reschedule',
+    'embed_lead',
+  ];
+  const out: Partial<Record<CaptchaFormId, string>> = {};
+  for (const id of ids) {
+    const value = env(`CAP_SITEKEY_${id.toUpperCase()}`);
+    if (value) out[id] = value;
+  }
+  return out;
+}
+
 export async function GET() {
+  const providerEnv = env('CAPTCHA_PROVIDER').toLowerCase();
+  const provider: 'turnstile' | 'cap' = providerEnv === 'cap' ? 'cap' : 'turnstile';
+
   const config: PublicRuntimeConfig = {
     gaMeasurementId: env('GA_MEASUREMENT_ID'),
     mouseflowId: env('MOUSEFLOW_ID'),
     turnstileSiteKey: env('TURNSTILE_SITE_KEY'),
+    captcha: {
+      provider,
+      capEndpoint: env('CAP_PUBLIC_URL'),
+      siteKeys: buildCapSiteKeys(),
+    },
     googleMapsKey: env('GOOGLE_MAPS_KEY'),
     stripePublishableKey: env('STRIPE_PUBLISHABLE_KEY'),
     // PayPal SDK reads the same merchant client_id that the server uses

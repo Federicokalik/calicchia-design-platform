@@ -164,6 +164,9 @@ importers:
       '@xyflow/react':
         specifier: ^12.10.2
         version: 12.10.2(@types/react@19.2.9)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      cap-widget:
+        specifier: ^0.1.53
+        version: 0.1.53
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -455,6 +458,9 @@ importers:
       '@stripe/stripe-js':
         specifier: ^9.4.0
         version: 9.5.0
+      cap-widget:
+        specifier: ^0.1.53
+        version: 0.1.53
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -4587,6 +4593,9 @@ packages:
 
   canvas-roundrect-polyfill@0.0.1:
     resolution: {integrity: sha512-yWq+R3U3jE+coOeEb3a3GgE2j/0MMiDKM/QpLb6h9ihf5fGY9UXtvK9o4vNqjWXoZz7/3EaSVU3IX53TvFFUOw==}
+
+  cap-widget@0.1.53:
+    resolution: {integrity: sha512-sF8exFiaOwQOuTkxAh8mDtA6VU/x3O9L5ZXNRmmAlEjPtOzbczcO0mleLnPq9R/7qM0KcenYl9roqBNUfdTcXw==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -13198,6 +13207,8 @@ snapshots:
   caniuse-lite@1.0.30001792: {}
 
   canvas-roundrect-polyfill@0.0.1: {}
+
+  cap-widget@0.1.53: {}
 
   ccount@2.0.1: {}
 

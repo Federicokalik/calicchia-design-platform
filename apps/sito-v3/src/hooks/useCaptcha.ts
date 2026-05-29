@@ -1,0 +1,177 @@
+'use client';
+
+/**
+ * Hook captcha polimorfico — wrapper su Turnstile (legacy) o Cap (self-host).
+ *
+ * Stesso shape pubblico di `useTurnstile`: il consumer non sa quale provider
+ * stia girando. Il provider viene scelto via `config.captcha.provider`
+ * (default `turnstile` finché il pilot Cap non e` validato).
+ *
+ * Migrazione progressiva:
+ *   - I form esistenti continuano a usare `useTurnstile` finche` non vengono
+ *     migrati uno-a-uno a `useCaptcha` (Step D = pilot PortalLoginForm,
+ *     Step E = rollout completo).
+ *   - In dev e prod con `CAPTCHA_PROVIDER` non settato → comportamento identico
+ *     a oggi (Turnstile).
+ *
+ * Vedi piano migrazione 2026-05-29.
+ */
+
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useTurnstile } from './useTurnstile';
+import { useRuntimeConfig } from '@/lib/runtime-config';
+import type { CaptchaFormId } from '@/app/api/config/route';
+
+// cap-widget registra il custom element <cap-widget> globale.
+// Importato solo come side-effect; il widget viene mountato via JSX nel
+// `containerRef`, quindi non serve un'API React esposta.
+import 'cap-widget';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace JSX {
+    interface IntrinsicElements {
+      'cap-widget': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          'data-cap-api-endpoint': string;
+          'data-cap-hidden-field-name'?: string;
+          'data-cap-worker-count'?: string | number;
+        },
+        HTMLElement
+      >;
+    }
+  }
+
+  interface HTMLElementEventMap {
+    solve: CustomEvent<{ token: string }>;
+    error: CustomEvent<{ message: string }>;
+    reset: CustomEvent;
+    progress: CustomEvent<{ progress: number }>;
+  }
+}
+
+export interface UseCaptchaResult {
+  /** Container ref dove il widget si renderizza. */
+  containerRef: RefObject<HTMLDivElement | null>;
+  /** Token corrente (null finche` non risolto / dopo reset). */
+  token: string | null;
+  /** Trigger un reset esplicito (es. dopo submit fallito). */
+  reset: () => void;
+  /** Widget pronto a produrre token. */
+  ready: boolean;
+  /** Stringa errore se il provider ha riportato fault. */
+  error: string | null;
+  /** Provider attivo (utile in DevTools per debug). */
+  provider: 'turnstile' | 'cap';
+}
+
+/**
+ * Hook captcha polimorfico.
+ *
+ * @param action  identificativo del form (es. `portal_login`, `contact_form`).
+ *                Per Turnstile = `expectedAction` binding.
+ *                Per Cap = chiave per selezionare la site key (CAP_SITEKEY_<UPPER>).
+ */
+export function useCaptcha(action: CaptchaFormId): UseCaptchaResult {
+  const { config } = useRuntimeConfig();
+  const captchaCfg = config.captcha;
+  const provider = captchaCfg?.provider ?? 'turnstile';
+
+  // Cas (B): provider 'turnstile' — delega al hook esistente con back-compat.
+  // `useTurnstile` accetta la siteKey legacy come argomento; passiamo quella
+  // attuale (config.turnstileSiteKey) per zero impatto.
+  const turnstileResult = useTurnstile(
+    provider === 'turnstile' ? config.turnstileSiteKey : undefined,
+    action,
+  );
+
+  // Cas (A): provider 'cap' — montiamo <cap-widget> e ascoltiamo `solve`/`error`/`reset`.
+  const capContainerRef = useRef<HTMLDivElement | null>(null);
+  const [capToken, setCapToken] = useState<string | null>(null);
+  const [capReady, setCapReady] = useState(false);
+  const [capError, setCapError] = useState<string | null>(null);
+
+  const capReset = useCallback(() => {
+    setCapToken(null);
+    setCapError(null);
+    const widget = capContainerRef.current?.querySelector('cap-widget');
+    // cap-widget non espone un metodo `reset()` pubblico — rimontare la
+    // sub-tree e` la strada ufficiale. Lo facciamo settando un trigger sotto.
+    if (widget) {
+      widget.dispatchEvent(new CustomEvent('cap:reset'));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (provider !== 'cap') return;
+    const container = capContainerRef.current;
+    if (!container || !captchaCfg?.capEndpoint) return;
+
+    const siteKey = captchaCfg.siteKeys?.[action];
+    if (!siteKey) {
+      setCapError(`Site key Cap mancante per "${action}"`);
+      return;
+    }
+
+    // Pulisci eventuali widget precedenti (in caso di re-mount).
+    container.innerHTML = '';
+
+    const widget = document.createElement('cap-widget');
+    widget.setAttribute(
+      'data-cap-api-endpoint',
+      `${captchaCfg.capEndpoint.replace(/\/$/, '')}/${siteKey}/`,
+    );
+    widget.setAttribute('data-cap-hidden-field-name', 'cap-token');
+
+    const handleSolve = (e: Event) => {
+      const detail = (e as CustomEvent<{ token: string }>).detail;
+      setCapToken(detail.token);
+      setCapError(null);
+    };
+    const handleError = (e: Event) => {
+      const detail = (e as CustomEvent<{ message: string }>).detail;
+      setCapToken(null);
+      setCapError(detail?.message ?? 'Verifica anti-bot non riuscita.');
+    };
+    const handleReset = () => {
+      setCapToken(null);
+      setCapError(null);
+    };
+
+    widget.addEventListener('solve', handleSolve);
+    widget.addEventListener('error', handleError);
+    widget.addEventListener('reset', handleReset);
+
+    container.appendChild(widget);
+    setCapReady(true);
+
+    return () => {
+      widget.removeEventListener('solve', handleSolve);
+      widget.removeEventListener('error', handleError);
+      widget.removeEventListener('reset', handleReset);
+      if (widget.parentElement === container) container.removeChild(widget);
+      setCapReady(false);
+    };
+  }, [provider, captchaCfg, action]);
+
+  if (provider === 'cap') {
+    return {
+      containerRef: capContainerRef,
+      token: capToken,
+      reset: capReset,
+      ready: capReady,
+      error: capError,
+      provider: 'cap',
+    };
+  }
+
+  // provider === 'turnstile'
+  return {
+    containerRef: turnstileResult.containerRef,
+    token: turnstileResult.token,
+    reset: turnstileResult.reset,
+    ready: turnstileResult.ready,
+    error: turnstileResult.error,
+    provider: 'turnstile',
+  };
+}

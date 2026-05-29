@@ -12,6 +12,7 @@ import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { MfaSection } from './impostazioni/mfa-section';
 import { KnowledgeBaseSection } from './impostazioni/knowledge-base-section';
+import { CaptchaSection } from './impostazioni/captcha-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -66,6 +67,7 @@ const NAV_GROUPS = [
       { id: 'sicurezza', label: '2FA', icon: Shield },
       { id: 'api-keys', label: 'API Keys', icon: Key },
       { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
+      { id: 'captcha', label: 'Captcha (Cap)', icon: Shield },
     ],
   },
   {
@@ -906,6 +908,9 @@ export default function ImpostazioniPage() {
         {activeTab === 'sicurezza' && <MfaSection />}
 
         {activeTab === 'mcp-tokens' && <McpTokensSection />}
+
+        {/* === CAPTCHA (Cap) === */}
+        {activeTab === 'captcha' && <CaptchaSection />}
 
         {/* === WHATSAPP === */}
         {activeTab === 'whatsapp' && <WhatsAppSection />}

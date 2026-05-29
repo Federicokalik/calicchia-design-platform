@@ -26,6 +26,7 @@
     "@sentry/nextjs": "^10.52.0",
     "@stripe/react-stripe-js": "^6.3.0",
     "@stripe/stripe-js": "^9.4.0",
+    "cap-widget": "^0.1.53",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gsap": "^3.14.0",

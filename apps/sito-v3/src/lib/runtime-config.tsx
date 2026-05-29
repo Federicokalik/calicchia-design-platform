@@ -18,6 +18,11 @@ const EMPTY_CONFIG: PublicRuntimeConfig = {
   gaMeasurementId: '',
   mouseflowId: '',
   turnstileSiteKey: '',
+  captcha: {
+    provider: 'turnstile',
+    capEndpoint: '',
+    siteKeys: {},
+  },
   googleMapsKey: '',
   stripePublishableKey: '',
   paypalClientId: '',
