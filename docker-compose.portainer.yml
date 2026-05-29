@@ -199,10 +199,39 @@ services:
     ports:
       - "127.0.0.1:8081:80"
 
+  # Cap (https://trycap.dev) — self-hosted captcha PoW (Apache 2.0). Sostituisce
+  # progressivamente Cloudflare Turnstile (vedi piano migrazione Cap 2026-05-29).
+  # Esposto sul subdomain `cap.calicchia.design` via CloudPanel reverse-proxy →
+  # `http://127.0.0.1:3010`. Dashboard built-in in /dashboard, auth via
+  # CAP_ADMIN_PASSWORD (set una volta, manuale). Site key per-form configurate
+  # dalla dashboard e referenziate in `.env.dockhand` come CAP_SITEKEY_*.
+  valkey:
+    image: valkey/valkey:alpine
+    restart: always
+    volumes:
+      - valkey_data:/data
+    networks:
+      - app-net
+
+  cap:
+    image: tiago2/cap:latest
+    restart: always
+    environment:
+      REDIS_URL: redis://valkey:6379
+      ADMIN_PASSWORD: ${CAP_ADMIN_PASSWORD}
+      PUBLIC_URL: https://cap.calicchia.design
+    depends_on:
+      - valkey
+    networks:
+      - app-net
+    ports:
+      - "127.0.0.1:3010:3000"
+
 volumes:
   postgres_data:
   uploads_data:
   private_data:
+  valkey_data:
 
 networks:
   app-net:
