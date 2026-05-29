@@ -14,10 +14,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   const { locale, code } = await params;
   const decodedCode = decodeURIComponent(code).trim();
 
-  // Relative Location paths: the browser resolves them against the request
-  // origin, so this works behind a reverse proxy whose Host header isn't
-  // rewritten (request.url would otherwise contain HOSTNAME=0.0.0.0:3000).
-  const loginErrorPath = `/${locale}/clienti/login?error=invalid_code`;
+  // Relative Location paths: il browser le risolve sull'origin della request.
+  // localePrefix 'as-needed': IT (default) non ha prefix, EN sì → evita un
+  // 308 extra di next-intl che rewriterebbe /it/... → /...
+  const localePrefix = locale === 'it' ? '' : `/${locale}`;
+  const loginErrorPath = `${localePrefix}/clienti/login?error=invalid_code`;
 
   if (!decodedCode) {
     return new NextResponse(null, { status: 307, headers: { Location: loginErrorPath } });
@@ -39,8 +40,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   };
   const destinationPath =
     data.customer?.role === 'collaborator'
-      ? `/${locale}/clienti/progetti`
-      : `/${locale}/clienti/dashboard`;
+      ? `${localePrefix}/clienti/progetti`
+      : `${localePrefix}/clienti/dashboard`;
 
   const response = new NextResponse(null, { status: 307, headers: { Location: destinationPath } });
 
