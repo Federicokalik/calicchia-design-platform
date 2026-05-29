@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useState, type Ref } from 'react';
 import 'cap-widget';
 
 /**
@@ -31,7 +31,7 @@ const I18N: Record<string, string> = {
 };
 
 export interface UseCaptchaResult {
-  containerRef: RefObject<HTMLDivElement | null>;
+  containerRef: Ref<HTMLDivElement>;
   token: string | null;
   reset: () => void;
   ready: boolean;
@@ -41,9 +41,15 @@ export interface UseCaptchaResult {
 /**
  * Monta `<cap-widget>` nel container e ritorna il token quando l'utente
  * risolve il PoW. L'admin ha un solo form: `admin_login`.
+ *
+ * Callback ref + state: gestisce correttamente il container montato in
+ * ritardo (es. login form renderizzato solo dopo `checkingSetup` false).
  */
 export function useCaptcha(action: 'admin_login' = 'admin_login'): UseCaptchaResult {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [container, setContainer] = useState<HTMLDivElement | null>(null);
+  const containerRef = useCallback((el: HTMLDivElement | null) => {
+    setContainer(el);
+  }, []);
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +60,6 @@ export function useCaptcha(action: 'admin_login' = 'admin_login'): UseCaptchaRes
   }, []);
 
   useEffect(() => {
-    const container = containerRef.current;
     if (!container) return;
     if (!CAP_PUBLIC_URL || !ADMIN_LOGIN_SITEKEY) {
       setError('Captcha non configurato (VITE_CAP_* env mancanti)');
@@ -96,7 +101,7 @@ export function useCaptcha(action: 'admin_login' = 'admin_login'): UseCaptchaRes
       if (widget.parentElement === container) container.removeChild(widget);
       setReady(false);
     };
-  }, [action]);
+  }, [action, container]);
 
   return { containerRef, token, reset, ready, error };
 }
