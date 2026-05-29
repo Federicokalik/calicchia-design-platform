@@ -156,6 +156,20 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # JWT_SECRET: il middleware proxy.ts valida il cookie portal_token (firmato
+      # dall'api con lo STESSO secret). Senza, hasValidPortalToken() ritorna sempre
+      # false → ogni accesso /clienti/* viene redirezionato a /clienti/login anche
+      # subito dopo un magic-link riuscito (incident 2026-05-29).
+      JWT_SECRET: ${JWT_SECRET}
+      # COOKIE_DOMAIN: necessario per cancellare cookie portal_token settati con
+      # Domain=.calicchia.design quando il token risulta invalido lato middleware.
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
+      # PUBLIC_SITE_URL: base assoluta che proxy.ts usa per costruire il redirect
+      # a /clienti/login. Il Dockerfile lo setta solo nel BUILDER stage (per il
+      # build), ma il runtime stage non lo eredita → senza questo env il middleware
+      # cade sul fallback http://localhost:3000 e il browser segue lì (incident
+      # 2026-05-29). Riusa SITE_URL gia` presente nel .env.
+      PUBLIC_SITE_URL: ${SITE_URL}
       # Runtime public config (consumato da /api/config -> RuntimeConfigProvider).
       # Cambiare valore = restart container, nessun rebuild dell'immagine.
       TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
