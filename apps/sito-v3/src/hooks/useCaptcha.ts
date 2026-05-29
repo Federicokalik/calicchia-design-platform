@@ -17,7 +17,7 @@
  * Vedi piano migrazione 2026-05-29.
  */
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type Ref } from 'react';
 import { useTurnstile } from './useTurnstile';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 import type { CaptchaFormId } from '@/app/api/config/route';
@@ -51,8 +51,12 @@ declare global {
 }
 
 export interface UseCaptchaResult {
-  /** Container ref dove il widget si renderizza. */
-  containerRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Ref del container dove il widget si renderizza. Implementato come callback
+   * ref + state per gestire correttamente i container montati condizionalmente
+   * (es. BookingWidget mostra il form solo dopo la scelta dello slot).
+   */
+  containerRef: Ref<HTMLDivElement>;
   /** Token corrente (null finche` non risolto / dopo reset). */
   token: string | null;
   /** Trigger un reset esplicito (es. dopo submit fallito). */
@@ -119,7 +123,12 @@ export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptch
   );
 
   // Cas (A): provider 'cap' — montiamo <cap-widget> e ascoltiamo `solve`/`error`/`reset`.
-  const capContainerRef = useRef<HTMLDivElement | null>(null);
+  // Callback ref + state: re-mount funziona anche se il container viene reso
+  // dopo l'iniziale (es. dopo selezione slot in BookingWidget).
+  const [capContainer, setCapContainer] = useState<HTMLDivElement | null>(null);
+  const capContainerRef = useCallback((el: HTMLDivElement | null) => {
+    setCapContainer(el);
+  }, []);
   const [capToken, setCapToken] = useState<string | null>(null);
   const [capReady, setCapReady] = useState(false);
   const [capError, setCapError] = useState<string | null>(null);
@@ -127,17 +136,15 @@ export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptch
   const capReset = useCallback(() => {
     setCapToken(null);
     setCapError(null);
-    const widget = capContainerRef.current?.querySelector('cap-widget');
-    // cap-widget non espone un metodo `reset()` pubblico — rimontare la
-    // sub-tree e` la strada ufficiale. Lo facciamo settando un trigger sotto.
+    const widget = capContainer?.querySelector('cap-widget');
     if (widget) {
       widget.dispatchEvent(new CustomEvent('cap:reset'));
     }
-  }, []);
+  }, [capContainer]);
 
   useEffect(() => {
     if (provider !== 'cap') return;
-    const container = capContainerRef.current;
+    const container = capContainer;
     if (!container || !captchaCfg?.capEndpoint) return;
 
     const siteKey = captchaCfg.siteKeys?.[action];
@@ -205,7 +212,7 @@ export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptch
       if (widget.parentElement === container) container.removeChild(widget);
       setCapReady(false);
     };
-  }, [provider, captchaCfg, action]);
+  }, [provider, captchaCfg, action, capContainer, i18n]);
 
   if (provider === 'cap') {
     return {
