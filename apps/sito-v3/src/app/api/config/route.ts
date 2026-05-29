@@ -24,17 +24,24 @@ export interface PublicRuntimeConfig {
   paypalClientId: string;
 }
 
+// .trim() difensivo: il parser dotenv di Docker Compose NON strippa i commenti
+// inline (`KEY=value  # nota` arriva al container con `  # nota` letterale).
+// Incident 2026-05-29: Turnstile site key + Google Maps key con commenti inline
+// in .env.dockhand finivano corrotti. Qui togliamo almeno trailing/leading
+// whitespace — la pulizia vera del file env resta ops-side.
+const env = (name: string): string => (process.env[name] ?? '').trim();
+
 export async function GET() {
   const config: PublicRuntimeConfig = {
-    gaMeasurementId: process.env.GA_MEASUREMENT_ID ?? '',
-    mouseflowId: process.env.MOUSEFLOW_ID ?? '',
-    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY ?? '',
-    googleMapsKey: process.env.GOOGLE_MAPS_KEY ?? '',
-    stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? '',
+    gaMeasurementId: env('GA_MEASUREMENT_ID'),
+    mouseflowId: env('MOUSEFLOW_ID'),
+    turnstileSiteKey: env('TURNSTILE_SITE_KEY'),
+    googleMapsKey: env('GOOGLE_MAPS_KEY'),
+    stripePublishableKey: env('STRIPE_PUBLISHABLE_KEY'),
     // PayPal SDK reads the same merchant client_id that the server uses
     // for OAuth. Allow override via PAYPAL_PUBLIC_CLIENT_ID for the rare
     // case where you want a sandbox SDK against a live API (or vice versa).
-    paypalClientId: process.env.PAYPAL_PUBLIC_CLIENT_ID ?? process.env.PAYPAL_CLIENT_ID ?? '',
+    paypalClientId: env('PAYPAL_PUBLIC_CLIENT_ID') || env('PAYPAL_CLIENT_ID'),
   };
 
   return NextResponse.json(config, {

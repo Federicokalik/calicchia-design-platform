@@ -61,7 +61,12 @@ function send(payload: Record<string, unknown>): void {
   try {
     const body = JSON.stringify(payload);
     if (navigator.sendBeacon) {
-      const blob = new Blob([body], { type: 'application/json' });
+      // text/plain → simple cross-origin POST, no CORS preflight. sendBeacon non
+      // puo` omettere credentials per spec; con application/json scattava
+      // preflight + ACAC check, e /api/track strippa Access-Control-Allow-
+      // Credentials per invariante cookieless (apps/api/src/app.ts:165). L'api
+      // accetta text/plain in analytics-track.ts:62.
+      const blob = new Blob([body], { type: 'text/plain' });
       navigator.sendBeacon(TRACK_URL, blob);
       return;
     }
