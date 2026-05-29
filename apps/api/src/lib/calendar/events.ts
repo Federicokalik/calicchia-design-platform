@@ -12,7 +12,7 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv } from '../../db';
+import { sql, sqlv, sqlInsert } from '../../db';
 import { expandRRule, validateRRule } from './rrule';
 import type {
   CalendarEvent,
@@ -73,7 +73,7 @@ export async function createEvent(input: CreateEventInput): Promise<CalendarEven
   }
 
   const rows = await sql<CalendarEvent[]>`
-    INSERT INTO calendar_events ${sqlv({
+    INSERT INTO calendar_events ${sqlInsert({
       calendar_id: input.calendar_id,
       uid: generateEventUid(),
       summary: input.summary.trim().slice(0, 500),
@@ -192,7 +192,7 @@ export async function createOccurrenceOverride(opts: {
   const newEnd = opts.newEndIso ? new Date(opts.newEndIso) : new Date(newStart.getTime() + duration);
 
   const rows = await sql<CalendarEvent[]>`
-    INSERT INTO calendar_events ${sqlv({
+    INSERT INTO calendar_events ${sqlInsert({
       calendar_id: master.calendar_id,
       uid: generateEventUid(),
       summary: opts.newSummary || master.summary,

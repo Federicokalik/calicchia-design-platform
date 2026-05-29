@@ -25,3 +25,15 @@ export const sql = postgres(process.env.DATABASE_URL, {
 // Helper to cast complex objects (Stripe/Google/external APIs) for sql() inserts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sqlv = (obj: Record<string, unknown>): any => obj;
+
+// Helper per la sintassi INSERT-shorthand di postgres-js 3.x:
+//   sql`INSERT INTO foo ${sqlInsert({col1: val1, col2: val2})}`
+// → genera `INSERT INTO foo (col1, col2) VALUES ($1, $2)`.
+//
+// Un raw object (es. `${sqlv(obj)}`) NON viene riconosciuto come "columns helper"
+// e finisce trattato come singolo parametro `$1` → syntax error Postgres
+// (incident 2026-05-29: createEvent crashava con "syntax error at or near \"$1\"").
+// `sql(obj)` invocato come funzione (NON tagged template) produce il marker
+// `is_insert` interno che il library espande nella forma corretta.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const sqlInsert = (obj: Record<string, unknown>): any => (sql as any)(obj);

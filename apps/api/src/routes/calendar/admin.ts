@@ -4,7 +4,7 @@
  */
 
 import { Hono } from 'hono';
-import { sql, sqlv } from '../../db';
+import { sql, sqlv, sqlInsert } from '../../db';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
 import {
@@ -117,7 +117,7 @@ calendarAdmin.post('/event-types', async (c) => {
 
   try {
     const rows = await sql<EventType[]>`
-      INSERT INTO calendar_event_types ${sqlv({
+      INSERT INTO calendar_event_types ${sqlInsert({
         slug,
         title: String(body.title).slice(0, 200),
         description: body.description ? String(body.description).slice(0, 5000) : null,
@@ -327,7 +327,7 @@ calendarAdmin.post('/schedule/overrides', async (c) => {
   if (!schedule) return c.json({ error: 'Schedule default non trovato' }, 404);
 
   const rows = await sql<AvailabilityOverride[]>`
-    INSERT INTO calendar_availability_overrides ${sqlv({
+    INSERT INTO calendar_availability_overrides ${sqlInsert({
       schedule_id: schedule.id,
       override_date: body.override_date,
       is_unavailable: isUnavail,

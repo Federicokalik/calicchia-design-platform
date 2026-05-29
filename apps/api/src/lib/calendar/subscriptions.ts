@@ -16,7 +16,7 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv } from '../../db';
+import { sql, sqlv, sqlInsert } from '../../db';
 import { fetchIcs, parseIcs, IcsImportError, type ParsedEvent } from './ics-import';
 import { logger } from '../logger';
 
@@ -82,7 +82,7 @@ export async function createSubscription(input: CreateSubscriptionInput): Promis
   }
 
   const rows = await sql<CalendarSubscription[]>`
-    INSERT INTO calendar_subscriptions ${sqlv({
+    INSERT INTO calendar_subscriptions ${sqlInsert({
       calendar_id: input.calendar_id,
       name: input.name.trim().slice(0, 200),
       ics_url: input.ics_url.trim(),
@@ -232,7 +232,7 @@ async function replaceSubscriptionEvents(
     for (const ev of masters) {
       const localUid = generateEventUid();
       const insertedRows = await tx<{ id: string }[]>`
-        INSERT INTO calendar_events ${sqlv({
+        INSERT INTO calendar_events ${sqlInsert({
           calendar_id: calendarId,
           subscription_id: subscriptionId,
           uid: localUid,
@@ -263,7 +263,7 @@ async function replaceSubscriptionEvents(
     for (const ov of overrides) {
       const masterId = remoteUidToLocalId.get(ov.remote_uid) || null;
       await tx`
-        INSERT INTO calendar_events ${sqlv({
+        INSERT INTO calendar_events ${sqlInsert({
           calendar_id: calendarId,
           subscription_id: subscriptionId,
           uid: generateEventUid(),

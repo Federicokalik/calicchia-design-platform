@@ -9,7 +9,7 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv } from '../../db';
+import { sql, sqlv, sqlInsert } from '../../db';
 import { getEventType } from './availability';
 import { resolveLocationForBooking, deleteGoogleEvent } from './meeting-url';
 import { getBookingsCalendar } from './calendars';
@@ -113,7 +113,7 @@ export async function createBooking(input: CreateBookingInput): Promise<CreateBo
   let inserted: Booking;
   try {
     const rows = await sql<Booking[]>`
-      INSERT INTO calendar_bookings ${sqlv({
+      INSERT INTO calendar_bookings ${sqlInsert({
         uid,
         event_type_id: eventType.id,
         attendee_name: input.attendee.name.trim().slice(0, 200),
