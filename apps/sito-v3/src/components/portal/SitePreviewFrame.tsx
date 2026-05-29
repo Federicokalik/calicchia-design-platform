@@ -158,11 +158,9 @@ export function SitePreviewFrame({
         </div>
       </div>
 
-      {slow && (
-        <p className="text-portal-caption text-muted-foreground">
-          {labels.blockedHint}
-        </p>
-      )}
+      <p className="text-portal-caption text-muted-foreground">
+        {labels.blockedHint}
+      </p>
     </div>
   );
 }
