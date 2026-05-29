@@ -65,14 +65,46 @@ export interface UseCaptchaResult {
   provider: 'turnstile' | 'cap';
 }
 
+/** Etichette i18n del widget Cap (usato solo quando provider=cap). */
+export interface CaptchaI18n {
+  initialState?: string;
+  verifyingLabel?: string;
+  solvedLabel?: string;
+  errorLabel?: string;
+  troubleshootingLabel?: string;
+  wasmDisabled?: string;
+  verifyAriaLabel?: string;
+  verifyingAriaLabel?: string;
+  verifiedAriaLabel?: string;
+  requiredLabel?: string;
+  errorAriaLabel?: string;
+}
+
+/** Default in italiano per il portale (IT-only). Altri form passano override. */
+const CAPTCHA_I18N_IT: Required<CaptchaI18n> = {
+  initialState: 'Verifica che sei umano',
+  verifyingLabel: 'Verifica in corso…',
+  solvedLabel: 'Verifica completata',
+  errorLabel: 'Errore',
+  troubleshootingLabel: 'Aiuto',
+  wasmDisabled: 'Abilita WebAssembly per una verifica piu` rapida',
+  verifyAriaLabel: 'Clicca per verificare che sei umano',
+  verifyingAriaLabel: 'Verifica in corso, attendi',
+  verifiedAriaLabel: 'Verifica completata',
+  requiredLabel: 'Per inviare il modulo, completa la verifica anti-bot',
+  errorAriaLabel: 'Si e` verificato un errore, riprova',
+};
+
 /**
  * Hook captcha polimorfico.
  *
  * @param action  identificativo del form (es. `portal_login`, `contact_form`).
  *                Per Turnstile = `expectedAction` binding.
  *                Per Cap = chiave per selezionare la site key (CAP_SITEKEY_<UPPER>).
+ * @param i18n    override delle etichette Cap (default = italiano). Per form
+ *                bilingual, passare le stringhe tradotte via `useTranslations`.
  */
-export function useCaptcha(action: CaptchaFormId): UseCaptchaResult {
+export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptchaResult {
   const { config } = useRuntimeConfig();
   const captchaCfg = config.captcha;
   // Provider risolto: prima override per-form, poi default globale.
@@ -123,6 +155,26 @@ export function useCaptcha(action: CaptchaFormId): UseCaptchaResult {
       `${captchaCfg.capEndpoint.replace(/\/$/, '')}/${siteKey}/`,
     );
     widget.setAttribute('data-cap-hidden-field-name', 'cap-token');
+
+    // i18n: merge default IT + override caller. Ogni etichetta si applica come
+    // attributo `data-cap-i18n-<kebab>` letta da cap-widget al render.
+    const labels: Required<CaptchaI18n> = { ...CAPTCHA_I18N_IT, ...i18n };
+    const i18nMap: Record<keyof CaptchaI18n, string> = {
+      initialState: 'data-cap-i18n-initial-state',
+      verifyingLabel: 'data-cap-i18n-verifying-label',
+      solvedLabel: 'data-cap-i18n-solved-label',
+      errorLabel: 'data-cap-i18n-error-label',
+      troubleshootingLabel: 'data-cap-i18n-troubleshooting-label',
+      wasmDisabled: 'data-cap-i18n-wasm-disabled',
+      verifyAriaLabel: 'data-cap-i18n-verify-aria-label',
+      verifyingAriaLabel: 'data-cap-i18n-verifying-aria-label',
+      verifiedAriaLabel: 'data-cap-i18n-verified-aria-label',
+      requiredLabel: 'data-cap-i18n-required-label',
+      errorAriaLabel: 'data-cap-i18n-error-aria-label',
+    };
+    for (const key of Object.keys(i18nMap) as Array<keyof CaptchaI18n>) {
+      widget.setAttribute(i18nMap[key], labels[key]);
+    }
 
     const handleSolve = (e: Event) => {
       const detail = (e as CustomEvent<{ token: string }>).detail;
