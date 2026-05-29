@@ -218,7 +218,9 @@ services:
     restart: always
     environment:
       REDIS_URL: redis://valkey:6379
-      ADMIN_PASSWORD: ${CAP_ADMIN_PASSWORD}
+      # Cap richiede ADMIN_KEY (non ADMIN_PASSWORD). Verificato dai log al boot:
+      # `if (!ADMIN_KEY) throw new Error("auth: Admin key missing")`.
+      ADMIN_KEY: ${CAP_ADMIN_KEY}
       PUBLIC_URL: https://cap.calicchia.design
     depends_on:
       - valkey
