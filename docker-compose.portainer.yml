@@ -141,6 +141,18 @@ services:
       CAP_SECRET_BOOKING_CREATE: ${CAP_SECRET_BOOKING_CREATE}
       CAP_SECRET_BOOKING_RESCHEDULE: ${CAP_SECRET_BOOKING_RESCHEDULE}
       CAP_SECRET_EMBED_LEAD: ${CAP_SECRET_EMBED_LEAD}
+      # Anche le site key servono server-side: `resolveKeyPair` in cap.ts
+      # richiede ENTRAMBI sitekey+secret per costruire il path
+      # `${CAP_URL}/<sitekey>/siteverify`. Senza la sitekey ritorna null →
+      # "cap-keypair-not-configured" → 403 al form submit.
+      CAP_SITEKEY_ADMIN_LOGIN: ${CAP_SITEKEY_ADMIN_LOGIN}
+      CAP_SITEKEY_PORTAL_LOGIN: ${CAP_SITEKEY_PORTAL_LOGIN}
+      CAP_SITEKEY_CONTACT_FORM: ${CAP_SITEKEY_CONTACT_FORM}
+      CAP_SITEKEY_NEWSLETTER_SUBSCRIBE: ${CAP_SITEKEY_NEWSLETTER_SUBSCRIBE}
+      CAP_SITEKEY_GDPR_REQUEST: ${CAP_SITEKEY_GDPR_REQUEST}
+      CAP_SITEKEY_BOOKING_CREATE: ${CAP_SITEKEY_BOOKING_CREATE}
+      CAP_SITEKEY_BOOKING_RESCHEDULE: ${CAP_SITEKEY_BOOKING_RESCHEDULE}
+      CAP_SITEKEY_EMBED_LEAD: ${CAP_SITEKEY_EMBED_LEAD}
     volumes:
       - uploads_data:/data/uploads
       - private_data:/data/private
