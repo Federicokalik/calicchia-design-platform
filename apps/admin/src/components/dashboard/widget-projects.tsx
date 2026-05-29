@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { FolderKanban } from 'lucide-react';
+import { FolderKanban, ExternalLink, SquareArrowOutUpRight, Link as LinkIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/hooks/use-i18n';
@@ -33,8 +35,30 @@ export function WidgetProjects() {
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-thin px-4 pb-4">
         <div className="space-y-3">
-          {projects.map((p: any) => (
-            <div key={p.id} className="rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate(`/progetti/${p.id}`)}>
+          {projects.map((p: any) => {
+            const path = `/progetti/${p.id}`;
+            const actions: RowAction[] = [
+              { label: 'Apri', icon: ExternalLink, onClick: () => navigate(path) },
+              {
+                label: 'Apri in nuova scheda',
+                icon: SquareArrowOutUpRight,
+                onClick: () => window.open(path, '_blank', 'noopener,noreferrer'),
+              },
+              {
+                label: 'Copia link',
+                icon: LinkIcon,
+                onClick: () => {
+                  const url = window.location.origin + path;
+                  navigator.clipboard?.writeText(url).then(
+                    () => toast.success('Link copiato'),
+                    () => toast.error('Copia fallita'),
+                  );
+                },
+              },
+            ];
+            return (
+            <RowContextMenu key={p.id} actions={actions}>
+            <div className="rounded-lg p-3 hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => navigate(path)}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-medium truncate">{p.name}</p>
@@ -49,7 +73,9 @@ export function WidgetProjects() {
                 <span className="text-xs text-muted-foreground w-8 text-right">{p.progress_percentage || 0}%</span>
               </div>
             </div>
-          ))}
+            </RowContextMenu>
+            );
+          })}
           {projects.length === 0 && (
             <p className="text-xs text-muted-foreground text-center py-8">{t('dashboard.widgets.projects.empty')}</p>
           )}

@@ -2,6 +2,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask, TaskStatus } from '@/types/projects';
 import { TASK_STATUS_CONFIG } from '@/types/projects';
 import { TaskCard } from './task-card';
@@ -14,9 +15,10 @@ interface KanbanColumnProps {
   onTaskClick: (task: ProjectTask) => void;
   onQuickAdd: (title: string, status: TaskStatus) => void;
   showProject?: boolean;
+  getTaskActions?: (task: ProjectTask) => RowAction[];
 }
 
-export function KanbanColumn({ status, tasks, onTaskClick, onQuickAdd, showProject }: KanbanColumnProps) {
+export function KanbanColumn({ status, tasks, onTaskClick, onQuickAdd, showProject, getTaskActions }: KanbanColumnProps) {
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const config = TASK_STATUS_CONFIG[status];
 
@@ -54,6 +56,7 @@ export function KanbanColumn({ status, tasks, onTaskClick, onQuickAdd, showProje
               task={task}
               onClick={onTaskClick}
               showProject={showProject}
+              actions={getTaskActions?.(task)}
             />
           ))}
         </SortableContext>

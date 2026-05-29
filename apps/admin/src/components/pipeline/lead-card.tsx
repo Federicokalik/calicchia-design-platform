@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Mail, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import type { Lead } from '@/types/lead';
 import { getLeadSourceConfig } from '@/types/lead';
 import { useI18n } from '@/hooks/use-i18n';
@@ -9,9 +10,11 @@ import { useI18n } from '@/hooks/use-i18n';
 interface LeadCardProps {
   lead: Lead;
   onClick: (lead: Lead) => void;
+  /** Azioni del right-click context menu. Se assenti o vuote, nessun menu. */
+  actions?: RowAction[];
 }
 
-export function LeadCard({ lead, onClick }: LeadCardProps) {
+export function LeadCard({ lead, onClick, actions }: LeadCardProps) {
   const { t, formatCurrency, formatRelativeTime } = useI18n();
   const {
     attributes,
@@ -28,7 +31,7 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
   };
 
   const sourceConfig = getLeadSourceConfig(lead.source);
-  return (
+  const body = (
     <div
       ref={setNodeRef}
       style={style}
@@ -99,4 +102,9 @@ export function LeadCard({ lead, onClick }: LeadCardProps) {
       </div>
     </div>
   );
+
+  if (actions && actions.length > 0) {
+    return <RowContextMenu actions={actions}>{body}</RowContextMenu>;
+  }
+  return body;
 }

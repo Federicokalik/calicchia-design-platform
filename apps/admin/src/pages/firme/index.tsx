@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch, API_BASE } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -350,8 +351,34 @@ export default function FirmePage() {
               </tr>
             </thead>
             <tbody>
-              {filteredDocs.map((d) => (
-                <tr key={d.id} className="border-b last:border-0 hover:bg-muted/30">
+              {filteredDocs.map((d) => {
+                const actions: RowAction[] = [];
+                if (d.status === 'draft') {
+                  actions.push({
+                    label: 'Invia',
+                    icon: Send,
+                    onClick: () => sendMutation.mutate(d.id),
+                  });
+                }
+                if (['sent', 'viewed'].includes(d.status)) {
+                  actions.push({
+                    label: 'Copia link firma',
+                    icon: Copy,
+                    onClick: () => copyLink(d.sign_token),
+                  });
+                }
+                if (['draft', 'sent', 'viewed'].includes(d.status)) {
+                  if (actions.length > 0) actions.push({ divider: true });
+                  actions.push({
+                    label: 'Annulla documento',
+                    icon: Trash2,
+                    destructive: true,
+                    onClick: () => { if (window.confirm('Annullare questo documento?')) deleteMutation.mutate(d.id); },
+                  });
+                }
+                return (
+                <RowContextMenu key={d.id} actions={actions}>
+                <tr className="border-b last:border-0 hover:bg-muted/30">
                   <td className="px-4 py-3">
                     <div className="font-medium">{d.title}</div>
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -428,7 +455,9 @@ export default function FirmePage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                </RowContextMenu>
+                );
+              })}
             </tbody>
           </table>
         </div>

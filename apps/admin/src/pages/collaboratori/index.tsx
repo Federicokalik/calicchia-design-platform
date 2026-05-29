@@ -19,6 +19,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
@@ -60,6 +61,18 @@ export default function CollaboratoriPage() {
 
   const collabs = data?.collaborators || [];
 
+  // Azioni shared per riga: usate sia dal kebab DropdownMenu sia dal RowContextMenu (right-click).
+  const rowActions = (c: any): RowAction[] => [
+    { label: 'Dettaglio', icon: Pencil, onClick: () => navigate(`/collaboratori/${c.id}`) },
+    { divider: true },
+    {
+      label: 'Elimina',
+      icon: Trash2,
+      destructive: true,
+      onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(c.id); },
+    },
+  ];
+
   const topbarActions = useMemo(() => (
     <Button size="sm" onClick={() => setShowNew(true)}>
       <Plus className="h-4 w-4 mr-1.5" /> Nuovo Collaboratore
@@ -87,8 +100,10 @@ export default function CollaboratoriPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {collabs.map((c: any) => {
             const typeCfg = TYPE_CONFIG[c.type] || TYPE_CONFIG.partner;
+            const actions = rowActions(c);
             return (
-              <div key={c.id} className="rounded-xl border bg-card p-4 space-y-3 hover:shadow-md transition-shadow">
+              <RowContextMenu key={c.id} actions={actions}>
+                <div className="rounded-xl border bg-card p-4 space-y-3 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between">
                   <div className="min-w-0 cursor-pointer" onClick={() => navigate(`/collaboratori/${c.id}`)}>
                     <h3 className="text-sm font-semibold truncate">{c.name}</h3>
@@ -104,13 +119,23 @@ export default function CollaboratoriPage() {
                       <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => navigate(`/collaboratori/${c.id}`)}>
-                        <Pencil className="h-3.5 w-3.5 mr-2" /> Dettaglio
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive" onClick={() => { if (confirm('Eliminare?')) deleteMutation.mutate(c.id); }}>
-                        <Trash2 className="h-3.5 w-3.5 mr-2" /> Elimina
-                      </DropdownMenuItem>
+                      {actions.map((action, i) => {
+                        if ('divider' in action) {
+                          return <DropdownMenuSeparator key={`sep-${i}`} />;
+                        }
+                        const Icon = action.icon;
+                        return (
+                          <DropdownMenuItem
+                            key={`${action.label}-${i}`}
+                            disabled={action.disabled}
+                            onClick={action.onClick}
+                            className={action.destructive ? 'text-destructive' : undefined}
+                          >
+                            {Icon && <Icon className="h-3.5 w-3.5 mr-2" />}
+                            {action.label}
+                          </DropdownMenuItem>
+                        );
+                      })}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -129,7 +154,8 @@ export default function CollaboratoriPage() {
                   <span>{c.total_projects || 0} progetti</span>
                   <span>€{parseFloat(c.total_revenue || '0').toLocaleString('it-IT')}</span>
                 </div>
-              </div>
+                </div>
+              </RowContextMenu>
             );
           })}
         </div>

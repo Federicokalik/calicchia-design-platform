@@ -10,6 +10,7 @@ import {
   type DragEndEvent,
   type DragOverEvent,
 } from '@dnd-kit/core';
+import type { RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask, TaskStatus } from '@/types/projects';
 import { KanbanColumn } from './kanban-column';
 import { TaskCard } from './task-card';
@@ -23,6 +24,7 @@ interface KanbanBoardProps {
   onTaskClick: (task: ProjectTask) => void;
   onQuickAdd: (title: string, status: TaskStatus) => void;
   showProject?: boolean;
+  getTaskActions?: (task: ProjectTask) => RowAction[];
 }
 
 export function KanbanBoard({
@@ -32,6 +34,7 @@ export function KanbanBoard({
   onTaskClick,
   onQuickAdd,
   showProject,
+  getTaskActions,
 }: KanbanBoardProps) {
   const [activeTask, setActiveTask] = useState<ProjectTask | null>(null);
   const [localTasks, setLocalTasks] = useState<ProjectTask[]>(tasks);
@@ -172,6 +175,7 @@ export function KanbanBoard({
             onTaskClick={onTaskClick}
             onQuickAdd={onQuickAdd}
             showProject={showProject}
+            getTaskActions={getTaskActions}
           />
         ))}
       </div>

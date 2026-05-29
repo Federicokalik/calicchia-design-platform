@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -20,6 +21,7 @@ interface PortfolioProject {
 
 export default function PortfolioPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['portfolio-projects'],
@@ -82,8 +84,25 @@ export default function PortfolioPage() {
         </EmptyState>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <div key={project.id} className="rounded-lg border bg-card overflow-hidden group hover:shadow-md transition-shadow">
+          {projects.map((project) => {
+            const actions: RowAction[] = [
+              { label: 'Modifica', icon: Pencil, onClick: () => navigate(`/portfolio/${project.id}`) },
+              {
+                label: project.is_published ? 'Metti in bozza' : 'Pubblica',
+                icon: project.is_published ? EyeOff : Eye,
+                onClick: () => toggleMutation.mutate(project.id),
+              },
+              { divider: true },
+              {
+                label: 'Elimina',
+                icon: Trash2,
+                destructive: true,
+                onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(project.id); },
+              },
+            ];
+            return (
+            <RowContextMenu key={project.id} actions={actions}>
+            <div className="rounded-lg border bg-card overflow-hidden group hover:shadow-md transition-shadow">
               {project.cover_image ? (
                 <img src={siteAsset(project.cover_image)} alt={project.title} className="h-40 w-full object-cover" />
               ) : (
@@ -127,7 +146,9 @@ export default function PortfolioPage() {
                 </div>
               </div>
             </div>
-          ))}
+            </RowContextMenu>
+            );
+          })}
         </div>
       )}
     </div>

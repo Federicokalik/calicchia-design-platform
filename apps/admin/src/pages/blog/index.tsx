@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, Sparkles, Loader2,
@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 
 const PAGE_SIZE = 25;
@@ -31,6 +32,7 @@ interface BlogListPayload {
 
 export default function BlogPage() {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   // Audit D-010: was loading every post in one shot. Added a status filter +
   // cursor-less pagination consuming the server's existing limit/offset/count
   // (routes/blog.ts already supports them — the admin just wasn't passing).
@@ -175,8 +177,25 @@ export default function BlogPage() {
         </div>
       ) : posts.length > 0 ? (
         <div className="space-y-4">
-          {posts.map((post) => (
-            <Card key={post.id}>
+          {posts.map((post) => {
+            const actions: RowAction[] = [
+              { label: 'Modifica', icon: Pencil, onClick: () => navigate(`/blog/${post.id}`) },
+              {
+                label: post.is_published ? 'Metti in bozza' : 'Pubblica',
+                icon: post.is_published ? EyeOff : Eye,
+                onClick: () => togglePublishMutation.mutate({ id: post.id, is_published: post.is_published }),
+              },
+              { divider: true },
+              {
+                label: 'Elimina',
+                icon: Trash2,
+                destructive: true,
+                onClick: () => { if (confirm('Eliminare questo articolo?')) deleteMutation.mutate(post.id); },
+              },
+            ];
+            return (
+            <RowContextMenu key={post.id} actions={actions}>
+            <Card>
               <CardContent className="flex items-center justify-between p-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
@@ -228,7 +247,9 @@ export default function BlogPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            </RowContextMenu>
+            );
+          })}
         </div>
       ) : (
         <Card>

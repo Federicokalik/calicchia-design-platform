@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask, TaskStatus } from '@/types/projects';
 import { TASK_STATUS_CONFIG } from '@/types/projects';
 
@@ -8,6 +9,7 @@ interface TaskGanttViewProps {
   projectStart?: string | null;
   projectEnd?: string | null;
   onItemClick?: (task: ProjectTask) => void;
+  getTaskActions?: (task: ProjectTask) => RowAction[];
 }
 
 const STATUS_BAR_COLORS: Record<TaskStatus, string> = {
@@ -44,7 +46,7 @@ interface ComputedTask {
   spanDays: number;
 }
 
-export function TaskGanttView({ tasks, projectStart, projectEnd, onItemClick }: TaskGanttViewProps) {
+export function TaskGanttView({ tasks, projectStart, projectEnd, onItemClick, getTaskActions }: TaskGanttViewProps) {
   const { rangeStart, totalDays, computed } = useMemo(() => {
     // Base range: project dates if present, otherwise min/max of task due_dates ± 7 days
     const taskDates = tasks
@@ -180,7 +182,8 @@ export function TaskGanttView({ tasks, projectStart, projectEnd, onItemClick }: 
           )}
           {computed.map((c) => {
             const barColor = STATUS_BAR_COLORS[c.task.status];
-            return (
+            const actions = getTaskActions?.(c.task);
+            const row = (
               <div key={c.task.id} className="flex border-b last:border-b-0 hover:bg-muted/30">
                 {/* Label */}
                 <button
@@ -225,6 +228,9 @@ export function TaskGanttView({ tasks, projectStart, projectEnd, onItemClick }: 
                 </div>
               </div>
             );
+            return actions && actions.length > 0
+              ? <RowContextMenu key={c.task.id} actions={actions}>{row}</RowContextMenu>
+              : row;
           })}
         </div>
       </div>

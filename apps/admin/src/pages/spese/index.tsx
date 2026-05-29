@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
@@ -474,8 +475,18 @@ export default function SpesePage() {
         />
       ) : (
         <div className="rounded-lg border bg-card divide-y">
-          {filteredExpenses.map((e) => (
-            <div key={e.id} className="px-4 py-3 flex items-center gap-3">
+          {filteredExpenses.map((e) => {
+            const actions: RowAction[] = [
+              {
+                label: 'Elimina',
+                icon: Trash2,
+                destructive: true,
+                onClick: () => { if (window.confirm('Eliminare questa spesa?')) deleteMutation.mutate(e.id); },
+              },
+            ];
+            return (
+            <RowContextMenu key={e.id} actions={actions}>
+            <div className="px-4 py-3 flex items-center gap-3">
               <div className="size-9 shrink-0 rounded-md bg-muted flex items-center justify-center">
                 <Receipt className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -523,7 +534,9 @@ export default function SpesePage() {
                 <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             </div>
-          ))}
+            </RowContextMenu>
+            );
+          })}
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -154,9 +155,23 @@ export default function NotesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {notes.map((note) => {
             const SourceIcon = SOURCE_ICONS[note.source] || AppWindow;
+            const actions: RowAction[] = [
+              {
+                label: note.is_pinned ? 'Rimuovi pin' : 'Pinna',
+                icon: note.is_pinned ? PinOff : Pin,
+                onClick: () => pinMutation.mutate(note.id),
+              },
+              { divider: true },
+              {
+                label: t('common.delete'),
+                icon: Trash2,
+                destructive: true,
+                onClick: () => { if (confirm(t('common.confirm'))) deleteMutation.mutate(note.id); },
+              },
+            ];
             return (
+              <RowContextMenu key={note.id} actions={actions}>
               <div
-                key={note.id}
                 onClick={() => navigate(`/notes/${note.id}`)}
                 className={cn(
                   'group rounded-xl border bg-card p-4 cursor-pointer transition-all hover:shadow-md hover:border-primary/20',
@@ -198,6 +213,7 @@ export default function NotesPage() {
                   </div>
                 </div>
               </div>
+              </RowContextMenu>
             );
           })}
         </div>

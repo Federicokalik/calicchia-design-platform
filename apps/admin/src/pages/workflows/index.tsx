@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Plus, Play, Trash2, MoreHorizontal, Zap,
-  AlertTriangle, Sparkles,
+  AlertTriangle, Sparkles, Pencil,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -72,6 +73,19 @@ export default function WorkflowsPage() {
 
   const wfs = data?.workflows || [];
 
+  // Azioni shared per riga: usate sia dal kebab DropdownMenu sia dal RowContextMenu (right-click).
+  const rowActions = (wf: any): RowAction[] => [
+    { label: t('common.edit'), icon: Pencil, onClick: () => navigate(`/workflows/${wf.id}`) },
+    { label: t('common.runNow'), icon: Play, onClick: () => executeMutation.mutate(wf.id) },
+    { divider: true },
+    {
+      label: t('common.delete'),
+      icon: Trash2,
+      destructive: true,
+      onClick: () => { if (confirm(t('workflow.confirmDelete'))) deleteMutation.mutate(wf.id); },
+    },
+  ];
+
   const topbarActions = useMemo(() => (
     <Button size="sm" onClick={() => createMutation.mutate()}>
       <Plus className="h-4 w-4 mr-1.5" /> {t('workflow.new')}
@@ -97,8 +111,11 @@ export default function WorkflowsPage() {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {wfs.map((wf: any) => (
-          <div key={wf.id} className="rounded-xl border bg-card p-4 space-y-3 hover:shadow-md transition-shadow">
+        {wfs.map((wf: any) => {
+          const actions = rowActions(wf);
+          return (
+          <RowContextMenu key={wf.id} actions={actions}>
+            <div className="rounded-xl border bg-card p-4 space-y-3 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between">
               <div className="min-w-0 cursor-pointer" onClick={() => navigate(`/workflows/${wf.id}`)}>
                 <h3 className="text-sm font-semibold truncate">{wf.name}</h3>
@@ -109,14 +126,23 @@ export default function WorkflowsPage() {
                   <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0"><MoreHorizontal className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => navigate(`/workflows/${wf.id}`)}>{t('common.edit')}</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => executeMutation.mutate(wf.id)}>
-                    <Play className="h-3.5 w-3.5 mr-2" /> {t('common.runNow')}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-destructive" onClick={() => { if (confirm(t('workflow.confirmDelete'))) deleteMutation.mutate(wf.id); }}>
-                    <Trash2 className="h-3.5 w-3.5 mr-2" /> {t('common.delete')}
-                  </DropdownMenuItem>
+                  {actions.map((action, i) => {
+                    if ('divider' in action) {
+                      return <DropdownMenuSeparator key={`sep-${i}`} />;
+                    }
+                    const Icon = action.icon;
+                    return (
+                      <DropdownMenuItem
+                        key={`${action.label}-${i}`}
+                        disabled={action.disabled}
+                        onClick={action.onClick}
+                        className={action.destructive ? 'text-destructive' : undefined}
+                      >
+                        {Icon && <Icon className="h-3.5 w-3.5 mr-2" />}
+                        {action.label}
+                      </DropdownMenuItem>
+                    );
+                  })}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -152,8 +178,10 @@ export default function WorkflowsPage() {
                 </div>
               )}
             </div>
-          </div>
-        ))}
+            </div>
+          </RowContextMenu>
+          );
+        })}
       </div>
     </div>
   );

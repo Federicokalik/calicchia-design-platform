@@ -14,6 +14,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -69,6 +70,31 @@ export default function PreventiviPage() {
   const quotes = data?.quotes || [];
   const stats = data?.stats || { total: 0, draft: 0, sent: 0, signed: 0, totalValue: 0 };
 
+  // Azioni shared per riga: usate sia dal kebab DropdownMenu sia dal RowContextMenu (right-click).
+  const rowActions = (q: any): RowAction[] => {
+    const items: RowAction[] = [
+      { label: 'Dettaglio', icon: Eye, onClick: () => navigate(`/preventivi/${q.id}`) },
+    ];
+    if (q.status !== 'signed') {
+      items.push({
+        label: 'Invia',
+        icon: Send,
+        onClick: () => setSendDialog({
+          id: q.id, title: q.title,
+          hasEmail: !!q.customer_email, hasPhone: !!q.customer_phone,
+        }),
+      });
+      items.push({ divider: true });
+      items.push({
+        label: 'Elimina',
+        icon: Trash2,
+        destructive: true,
+        onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(q.id); },
+      });
+    }
+    return items;
+  };
+
   const topbarActions = useMemo(() => (
     <Button size="sm" onClick={() => navigate('/preventivi/new')}>
       <Plus className="h-4 w-4 mr-1.5" />
@@ -112,76 +138,73 @@ export default function PreventiviPage() {
           {quotes.map((q: any) => {
             const statusCfg = STATUS_CONFIG[q.status] || STATUS_CONFIG.draft;
             const StatusIcon = statusCfg.icon;
+            const actions = rowActions(q);
             return (
-              <div
-                key={q.id}
-                className="flex items-center gap-4 px-4 py-3 border-b last:border-b-0 hover:bg-muted/30 transition-colors"
-              >
-                {/* Status icon */}
-                <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', statusCfg.color)}>
-                  <StatusIcon className="h-4 w-4" />
-                </div>
+              <RowContextMenu key={q.id} actions={actions}>
+                <div className="flex items-center gap-4 px-4 py-3 border-b last:border-b-0 hover:bg-muted/30 transition-colors">
+                  {/* Status icon */}
+                  <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', statusCfg.color)}>
+                    <StatusIcon className="h-4 w-4" />
+                  </div>
 
-                {/* Info */}
-                <div
-                  className="flex-1 min-w-0 cursor-pointer"
-                  onClick={() => navigate(`/preventivi/${q.id}`)}
-                >
-                  <p className="text-sm font-medium truncate">{q.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {q.customer_name || 'Nessun cliente'}
-                    {q.company_name ? ` · ${q.company_name}` : ''}
-                    {' · '}
-                    {new Date(q.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
-                  </p>
-                </div>
-
-                {/* Amount */}
-                <div className="text-right shrink-0">
-                  <p className="text-sm font-semibold">€{parseFloat(q.total || '0').toLocaleString('it-IT')}</p>
-                  {q.valid_until && (
-                    <p className="text-[10px] text-muted-foreground">
-                      Valido fino: {new Date(q.valid_until).toLocaleDateString('it-IT')}
+                  {/* Info */}
+                  <div
+                    className="flex-1 min-w-0 cursor-pointer"
+                    onClick={() => navigate(`/preventivi/${q.id}`)}
+                  >
+                    <p className="text-sm font-medium truncate">{q.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {q.customer_name || 'Nessun cliente'}
+                      {q.company_name ? ` · ${q.company_name}` : ''}
+                      {' · '}
+                      {new Date(q.created_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })}
                     </p>
-                  )}
+                  </div>
+
+                  {/* Amount */}
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-semibold">€{parseFloat(q.total || '0').toLocaleString('it-IT')}</p>
+                    {q.valid_until && (
+                      <p className="text-[10px] text-muted-foreground">
+                        Valido fino: {new Date(q.valid_until).toLocaleDateString('it-IT')}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Status badge */}
+                  <Badge variant="outline" className={cn('shrink-0 text-[10px] px-1.5', statusCfg.color)}>
+                    {statusCfg.label}
+                  </Badge>
+
+                  {/* Actions */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {actions.map((action, i) => {
+                        if ('divider' in action) {
+                          return <DropdownMenuSeparator key={`sep-${i}`} />;
+                        }
+                        const Icon = action.icon;
+                        return (
+                          <DropdownMenuItem
+                            key={`${action.label}-${i}`}
+                            disabled={action.disabled}
+                            onClick={action.onClick}
+                            className={action.destructive ? 'text-destructive' : undefined}
+                          >
+                            {Icon && <Icon className="h-3.5 w-3.5 mr-2" />}
+                            {action.label}
+                          </DropdownMenuItem>
+                        );
+                      })}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-
-                {/* Status badge */}
-                <Badge variant="outline" className={cn('shrink-0 text-[10px] px-1.5', statusCfg.color)}>
-                  {statusCfg.label}
-                </Badge>
-
-                {/* Actions */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => navigate(`/preventivi/${q.id}`)}>
-                      <Eye className="h-3.5 w-3.5 mr-2" /> Dettaglio
-                    </DropdownMenuItem>
-                    {q.status !== 'signed' && (
-                      <DropdownMenuItem onClick={() => setSendDialog({
-                        id: q.id, title: q.title,
-                        hasEmail: !!q.customer_email, hasPhone: !!q.customer_phone,
-                      })}>
-                        <Send className="h-3.5 w-3.5 mr-2" /> Invia
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    {q.status !== 'signed' && (
-                      <DropdownMenuItem
-                        className="text-destructive"
-                        onClick={() => { if (confirm('Eliminare?')) deleteMutation.mutate(q.id); }}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-2" /> Elimina
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              </RowContextMenu>
             );
           })}
         </div>

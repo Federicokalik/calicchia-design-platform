@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
 
@@ -164,6 +164,21 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
       onSaved();
       onClose();
     },
+  });
+
+  const duplicate = useMutation({
+    mutationFn: () =>
+      apiFetch(`/api/admin/calendar/events/${initial!.id}/duplicate`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success('Evento duplicato');
+      onSaved();
+      onClose();
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore duplicazione'),
   });
 
   return (
@@ -362,19 +377,32 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 p-4 border-t">
-          {isEdit && !isBookingAuto && (
-            <Button
-              size="sm"
-              variant="outline"
-              className="text-destructive"
-              onClick={() => {
-                if (confirm('Eliminare questo evento?')) remove.mutate();
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Elimina
-            </Button>
-          )}
+        <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-t">
+          <div className="flex flex-wrap gap-2">
+            {isEdit && !isBookingAuto && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive"
+                onClick={() => {
+                  if (confirm('Eliminare questo evento?')) remove.mutate();
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Elimina
+              </Button>
+            )}
+            {isEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={duplicate.isPending}
+                onClick={() => duplicate.mutate()}
+              >
+                <Copy className="h-3.5 w-3.5 mr-1.5" />
+                {duplicate.isPending ? 'Duplico…' : 'Duplica'}
+              </Button>
+            )}
+          </div>
           <div className="flex gap-2 ml-auto">
             <Button size="sm" variant="ghost" onClick={onClose}>Annulla</Button>
             <Button size="sm" onClick={() => save.mutate()} disabled={!summary || !calendarId || save.isPending}>

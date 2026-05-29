@@ -1,21 +1,28 @@
 import { useState, useRef, useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, DateSelectArg } from '@fullcalendar/core';
+import type { EventClickArg, DateSelectArg, EventMountArg } from '@fullcalendar/core';
 import {
-  Clock, MapPin, X, Plus, Settings, ExternalLink,
+  Clock, MapPin, X, Plus, Settings, ExternalLink, Copy, Pencil, Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { FloatingActionMenu } from '@/components/ui/floating-action-menu';
+import type { RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
 import EventoEditModal from '@/pages/calendario/evento-edit';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
+
+// Source di eventi su cui sono permesse modifiche dirette dal calendario
+// (duplicate, edit, delete). Project/domain/calcom sono read-only aggregati.
+const EDITABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp', 'booking']);
 
 // Colors per source (fallback se evento non ha colore custom dal calendario)
 const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: string; textColor: string }> = {
@@ -74,6 +81,7 @@ export default function CalendarioPage() {
   const [creatingFromSlot, setCreatingFromSlot] = useState<{ start: string; end: string } | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ event: CalendarEventOcc; x: number; y: number } | null>(null);
 
   // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
   const { data: eventsData } = useQuery({
@@ -198,10 +206,93 @@ export default function CalendarioPage() {
     const { data, source } = info.event.extendedProps;
     setSelectedEvent(data);
     // Per eventi calendar interni: apri editor cliccando "Modifica" nel pannello dettaglio
-    if (['manual', 'admin', 'agent', 'mcp', 'booking'].includes(source)) {
+    if (EDITABLE_SOURCES.has(source)) {
       // resta sul pannello detail; user può cliccare Edit
     }
   };
+
+  const duplicateMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/api/admin/calendar/events/${id}/duplicate`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success('Evento duplicato');
+      // Apri il modal sulla copia per consentire ritocchi immediati
+      const copy = data?.event;
+      if (copy) {
+        setSelectedEvent(null);
+        setEditingEvent(copy);
+        setCreatingFromSlot(null);
+        setShowEditor(true);
+      }
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore duplicazione'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch(`/api/admin/calendar/events/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success('Evento eliminato');
+      setSelectedEvent(null);
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore eliminazione'),
+  });
+
+  // Right-click su un evento → menu contestuale (solo per source editabili).
+  const handleEventDidMount = (arg: EventMountArg) => {
+    const source = arg.event.extendedProps.source as string | undefined;
+    if (!source || !EDITABLE_SOURCES.has(source)) return;
+    const data = arg.event.extendedProps.data as CalendarEventOcc | undefined;
+    if (!data?.id || !data.uid) return;
+    const handler = (e: MouseEvent) => {
+      e.preventDefault();
+      setCtxMenu({ event: data, x: e.clientX, y: e.clientY });
+    };
+    arg.el.addEventListener('contextmenu', handler);
+    (arg.el as HTMLElement & { __ctxHandler?: (e: MouseEvent) => void }).__ctxHandler = handler;
+  };
+
+  const handleEventWillUnmount = (arg: EventMountArg) => {
+    const el = arg.el as HTMLElement & { __ctxHandler?: (e: MouseEvent) => void };
+    if (el.__ctxHandler) {
+      el.removeEventListener('contextmenu', el.__ctxHandler);
+      delete el.__ctxHandler;
+    }
+  };
+
+  // Right-click context menu actions per evento del calendario. Mirror delle
+  // azioni del detail panel: Modifica / Duplica / Elimina.
+  const buildEventActions = (ev: CalendarEventOcc): RowAction[] => [
+    {
+      label: 'Modifica',
+      icon: Pencil,
+      onClick: () => {
+        setEditingEvent(ev);
+        setCreatingFromSlot(null);
+        setShowEditor(true);
+        setSelectedEvent(null);
+      },
+    },
+    {
+      label: 'Duplica',
+      icon: Copy,
+      onClick: () => duplicateMutation.mutate(ev.id),
+    },
+    { divider: true },
+    {
+      label: 'Elimina',
+      icon: Trash2,
+      destructive: true,
+      onClick: () => {
+        if (confirm('Eliminare questo evento?')) deleteMutation.mutate(ev.id);
+      },
+    },
+  ];
 
   const handleDateSelect = (selectInfo: DateSelectArg) => {
     setCreatingFromSlot({ start: selectInfo.startStr, end: selectInfo.endStr });
@@ -280,6 +371,8 @@ export default function CalendarioPage() {
             height="auto"
             events={calendarEvents}
             eventClick={handleEventClick}
+            eventDidMount={handleEventDidMount}
+            eventWillUnmount={handleEventWillUnmount}
             datesSet={handleDatesSet}
             select={handleDateSelect}
             selectable
@@ -294,6 +387,15 @@ export default function CalendarioPage() {
 
         {/* Event detail */}
         <div className="space-y-3">
+          {ctxMenu && (
+            <FloatingActionMenu
+              actions={buildEventActions(ctxMenu.event)}
+              x={ctxMenu.x}
+              y={ctxMenu.y}
+              onClose={() => setCtxMenu(null)}
+            />
+          )}
+
           {selectedEvent ? (
             <div className="rounded-lg border bg-card p-4 space-y-3">
               <div className="flex items-start justify-between">
@@ -345,21 +447,33 @@ export default function CalendarioPage() {
                 <p className="text-xs text-muted-foreground whitespace-pre-wrap">{selectedEvent.description}</p>
               )}
 
-              {/* Edit button — solo per eventi del nuovo sistema, no per legacy calcom */}
+              {/* Action buttons — solo per eventi del nuovo sistema, no per legacy calcom/project/domain */}
               {selectedEvent.id && selectedEvent.uid && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs"
-                  onClick={() => {
-                    setEditingEvent(selectedEvent);
-                    setCreatingFromSlot(null);
-                    setShowEditor(true);
-                    setSelectedEvent(null);
-                  }}
-                >
-                  Modifica evento
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() => {
+                      setEditingEvent(selectedEvent);
+                      setCreatingFromSlot(null);
+                      setShowEditor(true);
+                      setSelectedEvent(null);
+                    }}
+                  >
+                    <Pencil className="h-3 w-3 mr-1.5" /> Modifica
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    disabled={duplicateMutation.isPending}
+                    onClick={() => duplicateMutation.mutate(selectedEvent.id)}
+                  >
+                    <Copy className="h-3 w-3 mr-1.5" />
+                    {duplicateMutation.isPending ? 'Duplico…' : 'Duplica'}
+                  </Button>
+                </div>
               )}
             </div>
           ) : (

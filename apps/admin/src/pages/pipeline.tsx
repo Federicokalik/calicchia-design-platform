@@ -14,12 +14,13 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ExternalLink, ArrowRight, FileText, UserPlus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useTopbar } from '@/hooks/use-topbar';
 import { LoadingState } from '@/components/shared/loading-state';
+import type { RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
 import type { Lead, LeadStatus } from '@/types/lead';
 import { LEAD_STATUS_CONFIG, LEAD_COLUMN_ORDER } from '@/types/lead';
@@ -33,10 +34,12 @@ function PipelineColumn({
   status,
   leads,
   onLeadClick,
+  getLeadActions,
 }: {
   status: LeadStatus;
   leads: Lead[];
   onLeadClick: (lead: Lead) => void;
+  getLeadActions?: (lead: Lead) => RowAction[];
 }) {
   const { t } = useI18n();
   const config = LEAD_STATUS_CONFIG[status];
@@ -61,7 +64,7 @@ function PipelineColumn({
       <div ref={setNodeRef} className="flex-1 overflow-y-auto p-2 space-y-2 scrollbar-thin">
         <SortableContext items={leads.map((l) => l.id)} strategy={verticalListSortingStrategy}>
           {leads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} onClick={onLeadClick} />
+            <LeadCard key={lead.id} lead={lead} onClick={onLeadClick} actions={getLeadActions?.(lead)} />
           ))}
         </SortableContext>
 
@@ -280,6 +283,47 @@ export default function PipelinePage() {
     convertToQuoteMutation.mutate({ id: lead.id });
   };
 
+  // Right-click context menu actions per lead. Flat list — submenu non sono
+  // ancora supportati nell'helper RowContextMenu. Eliminazione richiede conferma.
+  const buildLeadActions = useCallback((lead: Lead): RowAction[] => {
+    const items: RowAction[] = [
+      { label: t('common.open') || 'Apri', icon: ExternalLink, onClick: () => setSelectedLead(lead) },
+      { divider: true },
+    ];
+    for (const s of LEAD_COLUMN_ORDER) {
+      if (s === lead.status) continue;
+      items.push({
+        label: `Sposta in “${t(LEAD_STATUS_CONFIG[s].labelKey)}”`,
+        icon: ArrowRight,
+        onClick: () => statusMutation.mutate({ id: lead.id, status: s }),
+      });
+    }
+    items.push({ divider: true });
+    items.push({
+      label: 'Crea preventivo',
+      icon: FileText,
+      onClick: () => handleCreateQuote(lead),
+    });
+    items.push({
+      label: 'Converti in cliente + progetto',
+      icon: UserPlus,
+      onClick: () => handleConvert(lead),
+    });
+    items.push({ divider: true });
+    items.push({
+      label: t('common.delete') || 'Elimina',
+      icon: Trash2,
+      destructive: true,
+      onClick: () => {
+        if (window.confirm(t('lead.confirmDelete') || 'Eliminare questo lead?')) {
+          deleteMutation.mutate(lead.id);
+        }
+      },
+    });
+    return items;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
+
   // Pipeline value
   const pipelineValue = displayLeads
     .filter((l) => l.status !== 'lost')
@@ -343,6 +387,7 @@ export default function PipelinePage() {
                     status={status}
                     leads={getColumnLeads(status)}
                     onLeadClick={setSelectedLead}
+                    getLeadActions={buildLeadActions}
                   />
                 </div>
               ))}

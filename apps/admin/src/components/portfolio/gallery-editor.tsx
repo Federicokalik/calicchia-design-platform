@@ -1,8 +1,10 @@
 import { useRef, useState } from 'react';
-import { Upload, X, Loader2, ChevronUp, ChevronDown } from 'lucide-react';
+import { Upload, X, Loader2, ChevronUp, ChevronDown, SquareArrowOutUpRight, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 
@@ -107,9 +109,49 @@ export function GalleryEditor({
         </p>
       ) : (
         <ul className="space-y-3">
-          {value.map((item, i) => (
+          {value.map((item, i) => {
+            const actions: RowAction[] = [
+              {
+                label: 'Apri in nuova scheda',
+                icon: SquareArrowOutUpRight,
+                onClick: () => window.open(item.src, '_blank', 'noopener,noreferrer'),
+                disabled: !item.src,
+              },
+              {
+                label: 'Copia URL',
+                icon: LinkIcon,
+                onClick: () => {
+                  navigator.clipboard?.writeText(item.src).then(
+                    () => toast.success('URL copiato'),
+                    () => toast.error('Copia fallita'),
+                  );
+                },
+                disabled: !item.src,
+              },
+              { divider: true },
+              {
+                label: 'Sposta su',
+                icon: ChevronUp,
+                onClick: () => move(i, -1),
+                disabled: i === 0,
+              },
+              {
+                label: 'Sposta giù',
+                icon: ChevronDown,
+                onClick: () => move(i, 1),
+                disabled: i === value.length - 1,
+              },
+              { divider: true },
+              {
+                label: 'Rimuovi',
+                icon: Trash2,
+                destructive: true,
+                onClick: () => removeAt(i),
+              },
+            ];
+            return (
+            <RowContextMenu key={`${item.src}-${i}`} actions={actions}>
             <li
-              key={`${item.src}-${i}`}
               className="flex gap-3 items-start rounded-lg border bg-muted/20 p-3"
             >
               {/* Reorder arrows column */}
@@ -182,7 +224,9 @@ export function GalleryEditor({
                 <X className="h-3.5 w-3.5 text-destructive" />
               </Button>
             </li>
-          ))}
+            </RowContextMenu>
+            );
+          })}
         </ul>
       )}
 

@@ -2,6 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Calendar, CheckSquare, Clock, GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask } from '@/types/projects';
 import { REQUEST_CATEGORY_CONFIG, SOURCE_CONFIG } from '@/types/projects';
 import type { RequestCategory } from '@/types/projects';
@@ -10,6 +11,8 @@ interface TaskCardProps {
   task: ProjectTask;
   onClick: (task: ProjectTask) => void;
   showProject?: boolean;
+  /** Azioni del right-click context menu. Se assenti o vuote, nessun menu. */
+  actions?: RowAction[];
 }
 
 const priorityColors: Record<string, string> = {
@@ -24,7 +27,7 @@ function getPriorityLabel(priority: number): { label: string; key: string } {
   return { label: 'Bassa', key: 'low' };
 }
 
-export function TaskCard({ task, onClick, showProject }: TaskCardProps) {
+export function TaskCard({ task, onClick, showProject, actions }: TaskCardProps) {
   const {
     attributes,
     listeners,
@@ -44,7 +47,7 @@ export function TaskCard({ task, onClick, showProject }: TaskCardProps) {
   const checklistTotal = task.checklist?.length || 0;
   const isOverdue = task.due_date && new Date(task.due_date) < new Date() && task.status !== 'done';
 
-  return (
+  const body = (
     <div
       ref={setNodeRef}
       style={style}
@@ -142,4 +145,9 @@ export function TaskCard({ task, onClick, showProject }: TaskCardProps) {
       </div>
     </div>
   );
+
+  if (actions && actions.length > 0) {
+    return <RowContextMenu actions={actions}>{body}</RowContextMenu>;
+  }
+  return body;
 }

@@ -730,6 +730,57 @@ calendarAdmin.delete('/events/:id', async (c) => {
   return c.json({ success: true });
 });
 
+/**
+ * Duplica un evento esistente.
+ *
+ * Body opzionale:
+ *   - copyRecurrence?: boolean   se l'evento sorgente è un master ricorrente,
+ *                                copia anche la rrule. Default: false (la copia
+ *                                diventa un evento singolo, l'intento usuale).
+ *   - shiftMinutes?: number      sposta start/end di N minuti rispetto all'originale.
+ *   - summary?: string           override del titolo (se assente: stesso titolo).
+ *
+ * source = 'admin', source_id = id originale (tracciabilità).
+ * Un nuovo uid viene generato automaticamente da createEvent().
+ */
+calendarAdmin.post('/events/:id/duplicate', async (c) => {
+  const original = await getEvent(c.req.param('id'));
+  if (!original) return c.json({ error: 'Evento non trovato' }, 404);
+
+  const body = await c.req.json().catch(() => ({} as Record<string, unknown>));
+  const copyRecurrence = body.copyRecurrence === true;
+  const shiftMinutes = safeInt(body.shiftMinutes, 0, -525600, 525600);
+  const summaryOverride = typeof body.summary === 'string' && body.summary.trim()
+    ? String(body.summary).trim()
+    : null;
+
+  const shiftMs = shiftMinutes * 60_000;
+  const newStart = new Date(new Date(original.start_time).getTime() + shiftMs).toISOString();
+  const newEnd = new Date(new Date(original.end_time).getTime() + shiftMs).toISOString();
+
+  try {
+    const copy = await createEvent({
+      calendar_id: original.calendar_id,
+      summary: summaryOverride || original.summary,
+      description: original.description,
+      location: original.location,
+      url: original.url,
+      start_time: newStart,
+      end_time: newEnd,
+      all_day: original.all_day,
+      rrule: copyRecurrence ? original.rrule : null,
+      exdates: copyRecurrence ? (original.exdates || []) : [],
+      source: 'admin',
+      source_id: original.id,
+      status: 'confirmed',
+    });
+    return c.json({ event: copy });
+  } catch (err) {
+    if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
 // Crea override per occorrenza singola di evento ricorrente
 // (es. "sposta SOLO il standup di mercoledi a 12:00 invece di 09:00")
 calendarAdmin.post('/events/:id/exception', async (c) => {

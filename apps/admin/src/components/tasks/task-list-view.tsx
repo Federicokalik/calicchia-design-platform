@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, Flag, Calendar as CalendarIcon, User as UserIcon, Tag as TagIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask } from '@/types/projects';
 import { TASK_STATUS_CONFIG } from '@/types/projects';
 import type { GroupByOption } from '@/components/entity-view/entity-view.types';
@@ -13,6 +14,7 @@ interface TaskListViewProps {
   groupConfig?: GroupByOption<ProjectTask>;
   onItemClick?: (t: ProjectTask) => void;
   onUpdate?: (taskId: string, patch: Partial<ProjectTask>) => void;
+  getTaskActions?: (task: ProjectTask) => RowAction[];
 }
 
 const PRIORITY_COLORS: Record<number, string> = {
@@ -38,15 +40,17 @@ function TaskRow({
   task,
   onClick,
   onUpdate,
+  actions,
 }: {
   task: ProjectTask;
   onClick?: (t: ProjectTask) => void;
   onUpdate?: (taskId: string, patch: Partial<ProjectTask>) => void;
+  actions?: RowAction[];
 }) {
   const status = TASK_STATUS_CONFIG[task.status];
   const overdue = isOverdue(task.due_date) && task.status !== 'done';
 
-  return (
+  const body = (
     <div
       className="group flex items-center gap-3 px-3 py-2 border-b border-border/60 hover:bg-muted/40 cursor-pointer transition-colors"
       onClick={() => onClick?.(task)}
@@ -104,6 +108,11 @@ function TaskRow({
       {onUpdate && <TaskQuickActions task={task} onUpdate={onUpdate} />}
     </div>
   );
+
+  if (actions && actions.length > 0) {
+    return <RowContextMenu actions={actions}>{body}</RowContextMenu>;
+  }
+  return body;
 }
 
 function GroupSection({
@@ -111,12 +120,14 @@ function GroupSection({
   tasks,
   onItemClick,
   onUpdate,
+  getTaskActions,
   defaultOpen = true,
 }: {
   label: string;
   tasks: ProjectTask[];
   onItemClick?: (t: ProjectTask) => void;
   onUpdate?: (taskId: string, patch: Partial<ProjectTask>) => void;
+  getTaskActions?: (task: ProjectTask) => RowAction[];
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -132,12 +143,14 @@ function GroupSection({
         <span>{label}</span>
         <span className="text-[10px] font-normal normal-case">({tasks.length})</span>
       </button>
-      {open && tasks.map((t) => <TaskRow key={t.id} task={t} onClick={onItemClick} onUpdate={onUpdate} />)}
+      {open && tasks.map((t) => (
+        <TaskRow key={t.id} task={t} onClick={onItemClick} onUpdate={onUpdate} actions={getTaskActions?.(t)} />
+      ))}
     </div>
   );
 }
 
-export function TaskListView({ tasks, groupedTasks, groupConfig, onItemClick, onUpdate }: TaskListViewProps) {
+export function TaskListView({ tasks, groupedTasks, groupConfig, onItemClick, onUpdate, getTaskActions }: TaskListViewProps) {
   if (groupedTasks) {
     return (
       <div className="rounded-md border bg-card overflow-hidden">
@@ -150,6 +163,7 @@ export function TaskListView({ tasks, groupedTasks, groupConfig, onItemClick, on
               tasks={list}
               onItemClick={onItemClick}
               onUpdate={onUpdate}
+              getTaskActions={getTaskActions}
             />
           );
         })}
@@ -159,7 +173,9 @@ export function TaskListView({ tasks, groupedTasks, groupConfig, onItemClick, on
 
   return (
     <div className="rounded-md border bg-card overflow-hidden">
-      {tasks.map((t) => <TaskRow key={t.id} task={t} onClick={onItemClick} onUpdate={onUpdate} />)}
+      {tasks.map((t) => (
+        <TaskRow key={t.id} task={t} onClick={onItemClick} onUpdate={onUpdate} actions={getTaskActions?.(t)} />
+      ))}
     </div>
   );
 }

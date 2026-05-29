@@ -1,9 +1,10 @@
-import { LayoutList, Kanban as KanbanIcon, Calendar as CalendarIcon, BarChart3 } from 'lucide-react';
+import { LayoutList, Kanban as KanbanIcon, Calendar as CalendarIcon, BarChart3, ExternalLink, ArrowRight, Trash2 } from 'lucide-react';
 import { KanbanBoard } from '@/components/kanban/kanban-board';
 import { TaskListView } from './task-list-view';
 import { TaskCalendarView } from './task-calendar-view';
 import { TaskGanttView } from './task-gantt-view';
 import type { EntityViewConfig, GroupByOption } from '@/components/entity-view';
+import type { RowAction } from '@/components/ui/row-context-menu';
 import type { ProjectTask, ProjectMilestone, TaskStatus } from '@/types/projects';
 import { TASK_STATUS_CONFIG } from '@/types/projects';
 
@@ -25,10 +26,42 @@ interface BuildOptions {
   onReorder: (payload: Array<{ id: string; sort_order: number; status?: string }>) => void;
   onItemClick: (task: ProjectTask) => void;
   onUpdate?: (taskId: string, patch: Partial<ProjectTask>) => void;
+  onDelete?: (task: ProjectTask) => void;
 }
 
 export function buildTasksConfig(opts: BuildOptions): EntityViewConfig<ProjectTask> {
-  const { tasks, milestones = [], projectStart, projectEnd, onCreate, onReorder, onItemClick, onUpdate } = opts;
+  const { tasks, milestones = [], projectStart, projectEnd, onCreate, onReorder, onItemClick, onUpdate, onDelete } = opts;
+
+  // Azioni shared usate dal context menu (right-click) di tutte le view: Kanban, List, Gantt, Calendar.
+  // Submenu non sono ancora supportati nell'helper RowContextMenu, quindi i cambi status sono flat.
+  const buildTaskActions = (task: ProjectTask): RowAction[] => {
+    const items: RowAction[] = [
+      { label: 'Apri', icon: ExternalLink, onClick: () => onItemClick(task) },
+    ];
+    if (onUpdate) {
+      const otherStatuses = STATUS_ORDER.filter((s) => s !== task.status);
+      if (otherStatuses.length > 0) {
+        items.push({ divider: true });
+        for (const s of otherStatuses) {
+          items.push({
+            label: `Sposta in “${TASK_STATUS_CONFIG[s]?.label ?? s}”`,
+            icon: ArrowRight,
+            onClick: () => onUpdate(task.id, { status: s }),
+          });
+        }
+      }
+    }
+    if (onDelete) {
+      items.push({ divider: true });
+      items.push({
+        label: 'Elimina',
+        icon: Trash2,
+        destructive: true,
+        onClick: () => onDelete(task),
+      });
+    }
+    return items;
+  };
 
   const milestoneMap = new Map<string, string>();
   milestones.forEach((m) => milestoneMap.set(m.id, m.name));
@@ -108,6 +141,7 @@ export function buildTasksConfig(opts: BuildOptions): EntityViewConfig<ProjectTa
               groupConfig={groupConfig}
               onItemClick={onItemClick}
               onUpdate={onUpdate}
+              getTaskActions={buildTaskActions}
             />
           );
         },
@@ -122,6 +156,7 @@ export function buildTasksConfig(opts: BuildOptions): EntityViewConfig<ProjectTa
             onTaskReorder={onReorder}
             onTaskClick={onItemClick}
             onQuickAdd={(title, status) => onCreate(title, { status })}
+            getTaskActions={buildTaskActions}
           />
         ),
       },
@@ -143,6 +178,7 @@ export function buildTasksConfig(opts: BuildOptions): EntityViewConfig<ProjectTa
             projectStart={projectStart}
             projectEnd={projectEnd}
             onItemClick={onItemClick}
+            getTaskActions={buildTaskActions}
           />
         ),
       },

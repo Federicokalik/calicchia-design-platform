@@ -18,6 +18,7 @@ import {
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
+import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
 import { useLocalizedPath } from '@/hooks/use-localized-navigation';
 
@@ -141,9 +142,42 @@ export default function ContattiPage() {
         />
       ) : (
         <div className="rounded-lg border bg-card divide-y">
-          {contacts.map((c) => (
+          {contacts.map((c) => {
+            const actions: RowAction[] = [
+              {
+                label: 'Apri',
+                icon: Eye,
+                onClick: () => {
+                  setOpened(c);
+                  if (!c.is_read) markRead.mutate({ id: c.id, is_read: true });
+                },
+              },
+              {
+                label: `Segna come ${c.is_read ? 'non letto' : 'letto'}`,
+                icon: Eye,
+                onClick: () => markRead.mutate({ id: c.id, is_read: !c.is_read }),
+              },
+              {
+                label: 'Promuovi a Lead',
+                icon: UserPlus,
+                onClick: () => promoteMutation.mutate(c.id),
+              },
+              {
+                label: c.is_archived ? 'Rimuovi archivio' : 'Archivia',
+                icon: c.is_archived ? ArchiveRestore : Archive,
+                onClick: () => toggleArchive.mutate({ id: c.id, is_archived: !c.is_archived }),
+              },
+              { divider: true },
+              {
+                label: 'Elimina',
+                icon: Trash2,
+                destructive: true,
+                onClick: () => setDeleteFor(c),
+              },
+            ];
+            return (
+            <RowContextMenu key={c.id} actions={actions}>
             <button
-              key={c.id}
               type="button"
               onClick={() => {
                 setOpened(c);
@@ -170,7 +204,9 @@ export default function ContattiPage() {
                 </div>
               </div>
             </button>
-          ))}
+            </RowContextMenu>
+            );
+          })}
         </div>
       )}
 
