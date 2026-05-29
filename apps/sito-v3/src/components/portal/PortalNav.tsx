@@ -121,25 +121,41 @@ export function PortalNav({ role = 'client' }: { role?: PortalRole }) {
             {g.items.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
+              // /clienti/logout e` un Route Handler che ritorna 307 redirect:
+              // next-intl Link fa client-side navigation che non segue redirect
+              // server, quindi serve un plain <a> per la navigation full-page.
+              const isLogout = item.href === '/clienti/logout';
+              const classes = cn(
+                'group flex items-center gap-3 px-3 py-2 text-portal-body transition-colors border-l-2',
+                active
+                  ? 'bg-primary/10 text-primary border-primary font-medium'
+                  : 'text-muted-foreground hover:text-foreground border-transparent hover:bg-muted/60'
+              );
+              const content = (
+                <>
+                  <Icon
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden
+                    strokeWidth={active ? 2.25 : 1.75}
+                  />
+                  <span>{tNav(`items.${item.key}`)}</span>
+                </>
+              );
               return (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'group flex items-center gap-3 px-3 py-2 text-portal-body transition-colors border-l-2',
-                      active
-                        ? 'bg-primary/10 text-primary border-primary font-medium'
-                        : 'text-muted-foreground hover:text-foreground border-transparent hover:bg-muted/60'
-                    )}
-                  >
-                    <Icon
-                      className="h-4 w-4 shrink-0"
-                      aria-hidden
-                      strokeWidth={active ? 2.25 : 1.75}
-                    />
-                    <span>{tNav(`items.${item.key}`)}</span>
-                  </Link>
+                  {isLogout ? (
+                    <a href={item.href} className={classes}>
+                      {content}
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      aria-current={active ? 'page' : undefined}
+                      className={classes}
+                    >
+                      {content}
+                    </Link>
+                  )}
                 </li>
               );
             })}

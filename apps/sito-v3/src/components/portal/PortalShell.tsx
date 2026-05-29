@@ -113,13 +113,17 @@ export function PortalShell({ children, userLabel, role = 'client' }: PortalShel
               </PortalCaption>
             </div>
           </div>
-          <Link
+          {/* Plain <a> invece di next-intl Link: /clienti/logout e` un Route
+              Handler che ritorna 307 redirect — il client-side router di
+              next-intl non segue redirect server, mentre la navigation
+              full-page del browser si`. */}
+          <a
             href="/clienti/logout"
             className="flex items-center justify-center gap-2 rounded-sm border border-transparent px-3 py-1.5 text-portal-caption text-destructive hover:bg-destructive/10 transition-colors"
           >
             <LogOut className="h-3.5 w-3.5" />
             {t('logout')}
-          </Link>
+          </a>
           <div className="flex justify-center pt-1">
             <LanguageSwitcher variant="light" />
           </div>
