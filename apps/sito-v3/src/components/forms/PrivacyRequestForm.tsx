@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/form/Input';
 import { Textarea } from '@/components/ui/form/Textarea';
 import { MonoLabel } from '@/components/ui/MonoLabel';
 import { Button } from '@/components/ui/Button';
-import { useTurnstile } from '@/hooks/useTurnstile';
+import { useCaptcha } from '@/hooks/useCaptcha';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 
 // Italian copy keyed by the API enum values (request_type).
@@ -39,8 +39,13 @@ export function PrivacyRequestForm() {
   const [state, setState] = useState<FormState>({ kind: 'idle' });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof PrivacyRequestInput, string>>>({});
   const { config } = useRuntimeConfig();
-  const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey, 'gdpr_request');
+  const turnstile = useCaptcha('gdpr_request');
+  const captchaCfg = config.captcha;
+  const provider = captchaCfg?.providers?.gdpr_request ?? captchaCfg?.provider ?? 'turnstile';
+  const captchaConfigured =
+    provider === 'cap'
+      ? Boolean(captchaCfg?.capEndpoint && captchaCfg?.siteKeys?.gdpr_request)
+      : Boolean(config.turnstileSiteKey);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -249,7 +254,7 @@ export function PrivacyRequestForm() {
       {/* Turnstile interaction-only widget (lazy script via useTurnstile).
           NOT aria-hidden: must remain accessible when CF asks for a click. */}
       <div ref={turnstile.containerRef} style={{ minWidth: 300 }} />
-      {!turnstileSiteKey ? (
+      {!captchaConfigured ? (
         <MonoLabel as="p">
           Anti-bot · verifica server-side al submit
         </MonoLabel>

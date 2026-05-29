@@ -10,11 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
-import { useTurnstile } from '@/hooks/use-turnstile';
+import { useCaptcha } from '@/hooks/use-captcha';
 import { API_BASE } from '@/lib/api';
 import { PORTAL_URL } from '@/lib/public-urls';
 
-const TURNSTILE_SITE_KEY = import.meta.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+const CAPTCHA_CONFIGURED = Boolean(
+  import.meta.env.VITE_CAP_PUBLIC_URL && import.meta.env.VITE_CAP_SITEKEY_ADMIN_LOGIN,
+);
 
 const loginSchema = z.object({
   email: z.string().email('Email non valida'),
@@ -30,7 +32,7 @@ export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const next = searchParams.get('next');
   const { signIn } = useAuth();
-  const turnstile = useTurnstile(TURNSTILE_SITE_KEY, 'admin_login');
+  const turnstile = useCaptcha('admin_login');
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -54,7 +56,7 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    if (TURNSTILE_SITE_KEY && !turnstile.token) {
+    if (CAPTCHA_CONFIGURED && !turnstile.token) {
       toast.error(turnstile.error ?? 'Verifica anti-bot in corso. Attendi un istante e riprova.');
       return;
     }

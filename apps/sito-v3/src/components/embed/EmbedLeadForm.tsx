@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTurnstile } from '@/hooks/useTurnstile';
-import { useRuntimeConfig } from '@/lib/runtime-config';
+import { useCaptcha } from '@/hooks/useCaptcha';
 
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
 
@@ -41,11 +40,7 @@ export function EmbedLeadForm({ sourceToken, utm }: Props) {
   const [error, setError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const { config } = useRuntimeConfig();
-  const { containerRef, token, ready, reset } = useTurnstile(
-    config.turnstileSiteKey,
-    'embed_lead',
-  );
+  const { containerRef, token, ready, reset } = useCaptcha('embed_lead');
 
   // Resize observer: report height to parent ogni volta che cambia
   useEffect(() => {

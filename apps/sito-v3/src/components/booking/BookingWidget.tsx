@@ -19,7 +19,7 @@ import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Button } from '@/components/ui/Button';
 import { PhoneInput } from '@/components/forms/PhoneInput';
 import { GdprCheckbox } from '@/components/forms/GdprCheckbox';
-import { useTurnstile } from '@/hooks/useTurnstile';
+import { useCaptcha } from '@/hooks/useCaptcha';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 import { SlotPicker } from './SlotPicker';
 import { createBooking, type BookingSlot } from '@/lib/booking-api';
@@ -70,8 +70,13 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
   const router = useRouter();
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
   const { config } = useRuntimeConfig();
-  const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey, 'booking_create');
+  const turnstile = useCaptcha('booking_create');
+  const captchaCfg = config.captcha;
+  const provider = captchaCfg?.providers?.booking_create ?? captchaCfg?.provider ?? 'turnstile';
+  const captchaConfigured =
+    provider === 'cap'
+      ? Boolean(captchaCfg?.capEndpoint && captchaCfg?.siteKeys?.booking_create)
+      : Boolean(config.turnstileSiteKey);
 
   const {
     register,
@@ -102,7 +107,7 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
       setError('root', { type: 'manual', message: 'Seleziona prima uno slot.' });
       return;
     }
-    if (!turnstile.token && turnstileSiteKey) {
+    if (!turnstile.token && captchaConfigured) {
       setError('root', {
         type: 'manual',
         message: 'Verifica anti-bot non completata. Riprova tra qualche secondo.',

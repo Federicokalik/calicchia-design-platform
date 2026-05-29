@@ -82,10 +82,13 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
           # Valori pubblici inlinati nel bundle: vanno definiti come repo Variables.
+          # Cap admin captcha (Step E rollout): VITE_CAP_PUBLIC_URL + VITE_CAP_SITEKEY_ADMIN_LOGIN
+          # vanno settate nelle GitHub repo Variables prima del prossimo build.
           build-args: |
             VITE_API_URL=${{ vars.VITE_API_URL }}
             VITE_SITE_URL=${{ vars.VITE_SITE_URL }}
             VITE_PORTAL_URL=${{ vars.VITE_PORTAL_URL }}
             VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
-            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+            VITE_CAP_PUBLIC_URL=${{ vars.VITE_CAP_PUBLIC_URL }}
+            VITE_CAP_SITEKEY_ADMIN_LOGIN=${{ vars.VITE_CAP_SITEKEY_ADMIN_LOGIN }}

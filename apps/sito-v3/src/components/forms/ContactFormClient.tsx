@@ -25,7 +25,7 @@ import {
   SERVICE_OPTIONS,
   type ContactInput,
 } from '@/lib/schemas/contact';
-import { useTurnstile } from '@/hooks/useTurnstile';
+import { useCaptcha } from '@/hooks/useCaptcha';
 import { useLeadSource } from '@/hooks/useLeadSource';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 import { reportEvent } from '@/instrumentation-client';
@@ -127,8 +127,13 @@ export function ContactFormClient() {
     message ? validationMessages.get(message) ?? message : undefined;
 
   const { config } = useRuntimeConfig();
-  const turnstileSiteKey = config.turnstileSiteKey;
-  const turnstile = useTurnstile(turnstileSiteKey, 'contact_form');
+  const turnstile = useCaptcha('contact_form');
+  const captchaCfg = config.captcha;
+  const provider = captchaCfg?.providers?.contact_form ?? captchaCfg?.provider ?? 'turnstile';
+  const captchaConfigured =
+    provider === 'cap'
+      ? Boolean(captchaCfg?.capEndpoint && captchaCfg?.siteKeys?.contact_form)
+      : Boolean(config.turnstileSiteKey);
 
   const {
     register,
@@ -447,7 +452,7 @@ export function ContactFormClient() {
           challenge if it appears. min-width 300px is Cloudflare's hard
           minimum for `size: flexible`. */}
       <div ref={turnstile.containerRef} className="mt-6" style={{ minWidth: 300 }} />
-      {!turnstileSiteKey ? (
+      {!captchaConfigured ? (
         <MonoLabel as="p" className="mt-3">
           {t('turnstileDisabled')}
         </MonoLabel>
