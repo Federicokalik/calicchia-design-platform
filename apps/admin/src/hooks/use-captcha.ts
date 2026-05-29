@@ -53,10 +53,17 @@ export function useCaptcha(action: 'admin_login' = 'admin_login'): UseCaptchaRes
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Nonce trigger: incrementato in reset() per forzare il useEffect a rimontare
+  // il widget. Cap non espone un metodo `reset()` pubblico — il widget post-
+  // solve resta in stato "Verifica completata ✓" e non puo` essere ri-solto
+  // senza essere distrutto e ricreato (necessario in flussi 2FA dove l'api
+  // consuma il token allo step 1 e ne richiede uno fresco allo step 2).
+  const [nonce, setNonce] = useState(0);
 
   const reset = useCallback(() => {
     setToken(null);
     setError(null);
+    setNonce((n) => n + 1);
   }, []);
 
   useEffect(() => {
@@ -101,7 +108,7 @@ export function useCaptcha(action: 'admin_login' = 'admin_login'): UseCaptchaRes
       if (widget.parentElement === container) container.removeChild(widget);
       setReady(false);
     };
-  }, [action, container]);
+  }, [action, container, nonce]);
 
   return { containerRef, token, reset, ready, error };
 }

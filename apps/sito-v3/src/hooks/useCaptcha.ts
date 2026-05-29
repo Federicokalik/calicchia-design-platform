@@ -132,15 +132,18 @@ export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptch
   const [capToken, setCapToken] = useState<string | null>(null);
   const [capReady, setCapReady] = useState(false);
   const [capError, setCapError] = useState<string | null>(null);
+  // Nonce: incrementato in reset() per forzare la remount del widget. Cap non
+  // espone un metodo reset() pubblico — post-solve il widget mostra "Verifica
+  // completata ✓" e non puo` essere ri-solto. Per flussi che consumano il token
+  // e richiedono fresh challenge (es. 2FA step 2, retry dopo submit fail)
+  // occorre distruggere e ricreare il widget.
+  const [capNonce, setCapNonce] = useState(0);
 
   const capReset = useCallback(() => {
     setCapToken(null);
     setCapError(null);
-    const widget = capContainer?.querySelector('cap-widget');
-    if (widget) {
-      widget.dispatchEvent(new CustomEvent('cap:reset'));
-    }
-  }, [capContainer]);
+    setCapNonce((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     if (provider !== 'cap') return;
@@ -212,7 +215,7 @@ export function useCaptcha(action: CaptchaFormId, i18n?: CaptchaI18n): UseCaptch
       if (widget.parentElement === container) container.removeChild(widget);
       setCapReady(false);
     };
-  }, [provider, captchaCfg, action, capContainer, i18n]);
+  }, [provider, captchaCfg, action, capContainer, capNonce, i18n]);
 
   if (provider === 'cap') {
     return {
