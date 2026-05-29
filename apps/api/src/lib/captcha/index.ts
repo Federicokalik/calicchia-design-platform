@@ -2,11 +2,13 @@
  * Provider-agnostic captcha verification.
  *
  * Switcha tra Cloudflare Turnstile (provider legacy) e Cap (https://trycap.dev,
- * self-hosted PoW WASM, Apache 2.0). Selezione via env `CAPTCHA_PROVIDER`:
- *   - `cap`        → Cap self-host (preferito, GDPR-aligned)
- *   - `turnstile`  → Cloudflare Turnstile (default per back-compat)
+ * self-hosted PoW WASM, Apache 2.0). Selezione del provider:
+ *   1. Override per-form: `CAPTCHA_PROVIDER_<UPPER_SITEKEY_ID>` (es.
+ *      `CAPTCHA_PROVIDER_PORTAL_LOGIN=cap`). Permette pilot mirato di un
+ *      singolo form senza muovere tutta l'app.
+ *   2. Fallback globale: `CAPTCHA_PROVIDER` (`turnstile` di default).
  *
- * Vedi piano migrazione 2026-05-29 in plans/.
+ * Vedi piano migrazione Step D (pilot) e Step E (rollout completo).
  */
 
 import { capProvider } from './cap';
@@ -39,12 +41,51 @@ export interface CaptchaProvider {
   readonly name: 'turnstile' | 'cap';
 }
 
-function pickProvider(): CaptchaProvider {
-  const explicit = (process.env.CAPTCHA_PROVIDER ?? '').toLowerCase().trim();
-  if (explicit === 'cap') return capProvider;
-  if (explicit === 'turnstile') return turnstileProvider;
-  // Default: turnstile (back-compat finché il pilot Cap non è validato).
+function parseProvider(raw: string | undefined): CaptchaProvider | null {
+  const v = (raw ?? '').toLowerCase().trim();
+  if (v === 'cap') return capProvider;
+  if (v === 'turnstile') return turnstileProvider;
+  return null;
+}
+
+/** Provider risolto al momento della chiamata in base a `siteKeyId`. */
+function resolveProvider(siteKeyId?: string): CaptchaProvider {
+  // 1. Override per-form (priorita` massima per i pilot).
+  if (siteKeyId) {
+    const override = parseProvider(process.env[`CAPTCHA_PROVIDER_${siteKeyId.toUpperCase()}`]);
+    if (override) return override;
+  }
+  // 2. Fallback globale.
+  const global = parseProvider(process.env.CAPTCHA_PROVIDER);
+  if (global) return global;
+  // 3. Default sicuro: Turnstile (back-compat).
   return turnstileProvider;
 }
 
-export const captcha: CaptchaProvider = pickProvider();
+/**
+ * Facade `captcha`: dispatch dinamico al provider giusto in base al
+ * `siteKeyId` di ogni chiamata. Consumatori chiamano sempre `captcha.verify`
+ * senza preoccuparsi di quale provider stia girando dietro.
+ */
+export const captcha = {
+  get name(): CaptchaProvider['name'] {
+    // Nome del provider globale (default), per logging generale.
+    return resolveProvider().name;
+  },
+  isConfigured(): boolean {
+    // True se almeno un provider globale e` configurato.
+    return resolveProvider().isConfigured();
+  },
+  async verify(token: string, opts: CaptchaVerifyOptions = {}): Promise<CaptchaVerifyResult> {
+    const provider = resolveProvider(opts.siteKeyId);
+    return provider.verify(token, opts);
+  },
+};
+
+/**
+ * Utility per debug/diagnostica — espone il provider che verrebbe scelto per
+ * un dato `siteKeyId`. Non usato in produzione; utile per i test.
+ */
+export function captchaProviderFor(siteKeyId?: string): CaptchaProvider {
+  return resolveProvider(siteKeyId);
+}

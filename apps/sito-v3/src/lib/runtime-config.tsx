@@ -20,6 +20,7 @@ const EMPTY_CONFIG: PublicRuntimeConfig = {
   turnstileSiteKey: '',
   captcha: {
     provider: 'turnstile',
+    providers: {},
     capEndpoint: '',
     siteKeys: {},
   },

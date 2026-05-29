@@ -25,10 +25,16 @@ export type CaptchaFormId =
 
 export interface PublicCaptchaConfig {
   /**
-   * Provider attivo. `turnstile` = legacy Cloudflare; `cap` = Cap self-hosted
-   * (https://trycap.dev). Default `turnstile` finche` pilot Cap non e` validato.
+   * Provider GLOBAL default (back-compat). `turnstile` = legacy Cloudflare;
+   * `cap` = Cap self-hosted (https://trycap.dev).
    */
   provider: 'turnstile' | 'cap';
+  /**
+   * Override per-form: se settato, prevale sul `provider` globale per quello
+   * specifico form. Permette di fare pilot mirati (es. solo `portal_login`).
+   * Specchia gli env server-side `CAPTCHA_PROVIDER_<UPPER>`.
+   */
+  providers: Partial<Record<CaptchaFormId, 'turnstile' | 'cap'>>;
   /** Base URL del container Cap (es. `https://cap.calicchia.design`). Vuoto se non in uso. */
   capEndpoint: string;
   /** Site key Cap per form-id (mappate da env `CAP_SITEKEY_<UPPER>`). */
@@ -56,26 +62,41 @@ export interface PublicRuntimeConfig {
 // whitespace — la pulizia vera del file env resta ops-side.
 const env = (name: string): string => (process.env[name] ?? '').trim();
 
+const FORM_IDS: CaptchaFormId[] = [
+  'admin_login',
+  'portal_login',
+  'contact_form',
+  'newsletter_subscribe',
+  'gdpr_request',
+  'booking_create',
+  'booking_reschedule',
+  'embed_lead',
+];
+
 /**
  * Costruisce la mappa form-id → Cap site key leggendo `CAP_SITEKEY_<UPPER>` per
  * ogni form-id conosciuto. Le entry mancanti restano `undefined` (la chiamata
  * `captcha.verify` server-side fallira` con `cap-keypair-not-configured`).
  */
 function buildCapSiteKeys(): Partial<Record<CaptchaFormId, string>> {
-  const ids: CaptchaFormId[] = [
-    'admin_login',
-    'portal_login',
-    'contact_form',
-    'newsletter_subscribe',
-    'gdpr_request',
-    'booking_create',
-    'booking_reschedule',
-    'embed_lead',
-  ];
   const out: Partial<Record<CaptchaFormId, string>> = {};
-  for (const id of ids) {
+  for (const id of FORM_IDS) {
     const value = env(`CAP_SITEKEY_${id.toUpperCase()}`);
     if (value) out[id] = value;
+  }
+  return out;
+}
+
+/**
+ * Mappa form-id → provider, leggendo gli override `CAPTCHA_PROVIDER_<UPPER>`.
+ * Le entry mancanti restano `undefined` → il consumer cade sul `provider`
+ * globale.
+ */
+function buildProviderOverrides(): Partial<Record<CaptchaFormId, 'turnstile' | 'cap'>> {
+  const out: Partial<Record<CaptchaFormId, 'turnstile' | 'cap'>> = {};
+  for (const id of FORM_IDS) {
+    const raw = env(`CAPTCHA_PROVIDER_${id.toUpperCase()}`).toLowerCase();
+    if (raw === 'cap' || raw === 'turnstile') out[id] = raw;
   }
   return out;
 }
@@ -90,6 +111,7 @@ export async function GET() {
     turnstileSiteKey: env('TURNSTILE_SITE_KEY'),
     captcha: {
       provider,
+      providers: buildProviderOverrides(),
       capEndpoint: env('CAP_PUBLIC_URL'),
       siteKeys: buildCapSiteKeys(),
     },

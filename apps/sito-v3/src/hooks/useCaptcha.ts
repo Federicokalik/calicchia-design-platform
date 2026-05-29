@@ -75,7 +75,8 @@ export interface UseCaptchaResult {
 export function useCaptcha(action: CaptchaFormId): UseCaptchaResult {
   const { config } = useRuntimeConfig();
   const captchaCfg = config.captcha;
-  const provider = captchaCfg?.provider ?? 'turnstile';
+  // Provider risolto: prima override per-form, poi default globale.
+  const provider = captchaCfg?.providers?.[action] ?? captchaCfg?.provider ?? 'turnstile';
 
   // Cas (B): provider 'turnstile' — delega al hook esistente con back-compat.
   // `useTurnstile` accetta la siteKey legacy come argomento; passiamo quella

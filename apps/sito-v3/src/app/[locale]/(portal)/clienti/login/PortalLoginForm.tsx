@@ -9,7 +9,7 @@ import { Button } from '@/components/portal/ui/button';
 import { Input } from '@/components/portal/ui/input';
 import { Label } from '@/components/portal/ui/label';
 import { PortalCaption } from '@/components/portal/ui/typography';
-import { useTurnstile } from '@/hooks/useTurnstile';
+import { useCaptcha } from '@/hooks/useCaptcha';
 import { useRuntimeConfig } from '@/lib/runtime-config';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -53,10 +53,21 @@ export function PortalLoginForm() {
   );
 
   const { config } = useRuntimeConfig();
-  const turnstileSiteKey = config.turnstileSiteKey;
-  // Same action label for both magic-link request and code login: server
-  // accepts either via the same expectedAction = 'portal_login'.
-  const turnstile = useTurnstile(turnstileSiteKey, 'portal_login');
+  // Provider-agnostico: il hook risolve Turnstile o Cap via runtime config,
+  // permettendo a Step D di pilotare solo `portal_login` (override env
+  // CAPTCHA_PROVIDER_PORTAL_LOGIN=cap) senza muovere gli altri form.
+  // Same action/siteKeyId per magic-link e code login: il server accetta
+  // entrambi con siteKeyId='portal_login'.
+  const turnstile = useCaptcha('portal_login');
+  // Per il guard pre-submit "token mancante" controlliamo se il provider e`
+  // configurato: per Turnstile = siteKey presente; per Cap = endpoint + sitekey
+  // per `portal_login` presenti nel config runtime.
+  const captchaCfg = config.captcha;
+  const portalProvider = captchaCfg?.providers?.portal_login ?? captchaCfg?.provider ?? 'turnstile';
+  const captchaConfigured =
+    portalProvider === 'cap'
+      ? Boolean(captchaCfg?.capEndpoint && captchaCfg?.siteKeys?.portal_login)
+      : Boolean(config.turnstileSiteKey);
 
   const requestLink = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,7 +75,7 @@ export function PortalLoginForm() {
     const email = String(fd.get('email') ?? '').trim();
     if (!email) return setErrors({ email: t('errors.emailRequired') });
     if (!EMAIL_RE.test(email)) return setErrors({ email: t('errors.emailInvalid') });
-    if (turnstileSiteKey && !turnstile.token) {
+    if (captchaConfigured && !turnstile.token) {
       return setErrors({ global: t('errors.turnstilePending') });
     }
     setErrors({});
@@ -106,7 +117,7 @@ export function PortalLoginForm() {
     const errs: FieldErrors = {};
     if (!access_code) errs.access_code = t('errors.accessCodeRequired');
     if (Object.keys(errs).length) return setErrors(errs);
-    if (turnstileSiteKey && !turnstile.token) {
+    if (captchaConfigured && !turnstile.token) {
       return setErrors({ global: t('errors.turnstilePending') });
     }
 
