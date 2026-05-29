@@ -1,8 +1,9 @@
 name: build-api-image
 
-# Builda l'immagine Docker di @calicchia/api e la pubblica su ghcr.io, poi notifica
-# Dokploy. Sostituisce il vecchio job "deploy" di ci.yml: Dokploy non builda piu'
-# da sorgente, pulla l'immagine gia' pronta da ghcr.io.
+# Builda l'immagine Docker di @calicchia/api e la pubblica su ghcr.io.
+# Il redeploy in prod e' delegato a Dockhand sul VPS, che fa Git polling del
+# repo e `docker compose pull && up -d` quando vede un nuovo commit / tag.
+# Sostituisce il vecchio job "deploy" di ci.yml.
 #
 # La knowledge base NON e' nell'immagine: arriva a runtime da MEGA S4 —
 # bootstrapKBs() la scarica al boot (apps/api/src/lib/agent/kb-bootstrap.ts).
@@ -87,19 +88,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-
-      # Notifica Portainer: una POST nuda al webhook dello stack scatena il
-      # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
-      - name: Notifica Portainer per il redeploy
-        # Non bloccante: l'immagine e' gia' su ghcr. Se il webhook fallisce
-        # (es. WAF Cloudflare che blocca gli IP dei runner) si redeploya a mano.
-        continue-on-error: true
-        env:
-          WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "PORTAINER_DEPLOY_WEBHOOK non impostato — redeploy saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Redeploy Portainer notificato."

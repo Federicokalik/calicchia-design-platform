@@ -74,15 +74,3 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-
-      - name: Notifica Portainer per il redeploy
-        continue-on-error: true
-        env:
-          WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "PORTAINER_DEPLOY_WEBHOOK non impostato - redeploy saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Redeploy Portainer notificato."

@@ -1,7 +1,8 @@
 name: build-sito-image
 
-# Builda l'immagine Docker di @calicchia/sito-v3 e la pubblica su ghcr.io,
-# poi notifica Dokploy. Gemello di build-api-image.yml.
+# Builda l'immagine Docker di @calicchia/sito-v3 e la pubblica su ghcr.io.
+# Il redeploy in prod e' delegato a Dockhand sul VPS (Git polling).
+# Gemello di build-api-image.yml.
 #
 # ATTENZIONE: Next.js inlina le NEXT_PUBLIC_* a BUILD time. Quindi i loro valori
 # vanno passati QUI come build-args (da GitHub repo Variables, non sono segreti:
@@ -88,19 +89,3 @@ jobs:
             NEXT_PUBLIC_BUGSINK_DSN=${{ vars.NEXT_PUBLIC_BUGSINK_DSN }}
             GOOGLE_SITE_VERIFICATION=${{ vars.GOOGLE_SITE_VERIFICATION }}
             PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL }}
-
-      # Notifica Portainer: una POST nuda al webhook dello stack scatena il
-      # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
-      - name: Notifica Portainer per il redeploy
-        # Non bloccante: l'immagine e' gia' su ghcr. Se il webhook fallisce
-        # (es. WAF Cloudflare che blocca gli IP dei runner) si redeploya a mano.
-        continue-on-error: true
-        env:
-          WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "PORTAINER_DEPLOY_WEBHOOK non impostato — redeploy saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Redeploy Portainer notificato."

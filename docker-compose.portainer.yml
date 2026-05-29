@@ -1,17 +1,21 @@
 # Production stack — Calicchia Design Platform
-# Variant for: Portainer (container management) + CloudPanel (reverse proxy + TLS).
+# Variant for: Dockhand (container management) + CloudPanel (reverse proxy + TLS).
+# (Filename retained as `portainer.yml` per migration: lo stack è identico, non
+# dipende dall'orchestratore. Dockhand carica i compose dal repo via Git
+# polling — vedi docs/portainer-cloudpanel.md per il setup.)
 #
-# Deploy: in Portainer crea uno "Stack" puntando a questo file (sorgente git o
-# upload). Le variabili ${...} vengono da un .env nello stack o dai compose env
-# di Portainer (lo stesso .env.prod che usavi su Dokploy, vedi .env.prod.example).
+# Deploy: in Dockhand crea uno "Stack" con sorgente Git e path a questo file.
+# Le variabili ${...} vengono da un .env nello stack o dalle env dell'UI Dockhand
+# (lo stesso .env.prod che usavi su Dokploy/Portainer, vedi .env.prod.example).
 #
 # Routing: le 3 web app pubblicano le porte SOLO su 127.0.0.1; CloudPanel
 # (nginx + Let's Encrypt sull'host) fa il reverse proxy verso quei loopback.
 # Vedi docs/portainer-cloudpanel.md per gli snippet dei 3 siti CloudPanel.
 #
 # Le immagini sono pre-buildate dai workflow GitHub Actions
-# (.github/workflows/build-*-image.yml) e pubblicate su ghcr.io. Configura
-# in Portainer una registry credential ghcr.io (PAT read:packages).
+# (.github/workflows/build-*-image.yml) e pubblicate su ghcr.io. Dockhand
+# delega il pull al Docker daemon dell'host: assicurati che l'host sia loggato
+# (`docker login ghcr.io -u <user> --password-stdin`, PAT con `read:packages`).
 
 services:
   postgres:

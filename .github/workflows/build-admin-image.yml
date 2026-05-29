@@ -1,7 +1,8 @@
 name: build-admin-image
 
-# Builda l'immagine Docker di @calicchia/admin e la pubblica su ghcr.io,
-# poi notifica Dokploy. Gemello di build-api-image.yml.
+# Builda l'immagine Docker di @calicchia/admin e la pubblica su ghcr.io.
+# Il redeploy in prod e' delegato a Dockhand sul VPS (Git polling).
+# Gemello di build-api-image.yml.
 #
 # ATTENZIONE 1: Vite inlina le VITE_*/PUBLIC_* a BUILD time — i loro valori
 # vanno passati QUI come build-args (da GitHub repo Variables, non segreti).
@@ -88,19 +89,3 @@ jobs:
             VITE_BUGSINK_DSN=${{ vars.VITE_BUGSINK_DSN }}
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
             NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
-
-      # Notifica Portainer: una POST nuda al webhook dello stack scatena il
-      # redeploy. Skip se PORTAINER_DEPLOY_WEBHOOK non e' impostato.
-      - name: Notifica Portainer per il redeploy
-        # Non bloccante: l'immagine e' gia' su ghcr. Se il webhook fallisce
-        # (es. WAF Cloudflare che blocca gli IP dei runner) si redeploya a mano.
-        continue-on-error: true
-        env:
-          WEBHOOK: ${{ secrets.PORTAINER_DEPLOY_WEBHOOK }}
-        run: |
-          if [ -z "$WEBHOOK" ]; then
-            echo "PORTAINER_DEPLOY_WEBHOOK non impostato — redeploy saltato."
-            exit 0
-          fi
-          curl -fsSL -X POST "$WEBHOOK"
-          echo "Redeploy Portainer notificato."

@@ -1,0 +1,28 @@
+# Dockhand — UI di gestione container/stacks Docker sul VPS.
+# Stack SEPARATO dall'app: gira di fianco a `docker-compose.portainer.yml`
+# (l'app stack), non vi si attacca via network. Dockhand parla con Docker
+# tramite il socket UNIX dell'host.
+#
+# Deploy sul VPS: NON va orchestrato da Dockhand stesso. Lancialo a mano:
+#   docker compose -f docker-compose.dockhand.yml up -d
+#
+# UI esposta SOLO su 127.0.0.1:9000 — CloudPanel proxa il subdomain (lo stesso
+# che usavi per Portainer). Vedi docs/portainer-cloudpanel.md §1.
+#
+# Dati persistenti: volume `dockhand_data` (config, sessioni, stacks importati).
+# Backup periodico consigliato: `docker run --rm -v dockhand_data:/from
+# -v $(pwd):/to alpine tar czf /to/dockhand-backup.tgz -C /from .`
+
+services:
+  dockhand:
+    image: fnsys/dockhand:latest
+    container_name: dockhand
+    restart: always
+    ports:
+      - "127.0.0.1:9000:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dockhand_data:/app/data
+
+volumes:
+  dockhand_data:
