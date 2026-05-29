@@ -42,7 +42,7 @@ export default function ProgettiPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showNew, setShowNew] = useState(false);
-  const [newForm, setNewForm] = useState({ name: '', customer_id: '', project_type: 'website' });
+  const [newForm, setNewForm] = useState({ name: '', customer_id: '', project_type: 'website', is_external: false });
 
   const { data, isLoading } = useQuery({
     queryKey: ['client-projects', search, statusFilter],
@@ -65,7 +65,7 @@ export default function ProgettiPage() {
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['client-projects'] });
       setShowNew(false);
-      setNewForm({ name: '', customer_id: '', project_type: 'website' });
+      setNewForm({ name: '', customer_id: '', project_type: 'website', is_external: false });
       toast.success('Progetto creato');
       if (res?.project?.id) navigate(`/progetti/${res.project.id}`);
     },
@@ -228,8 +228,8 @@ export default function ProgettiPage() {
               createMutation.mutate({
                 name: newForm.name.trim(),
                 customer_id: newForm.customer_id || null,
-                project_type: newForm.project_type,
-                status: 'draft',
+                project_type: newForm.is_external ? (newForm.project_type || 'other') : newForm.project_type,
+                status: newForm.is_external ? 'in_progress' : 'draft',
                 priority: 5,
               });
             }}
@@ -261,6 +261,21 @@ export default function ProgettiPage() {
                 </SelectContent>
               </Select>
             </div>
+            <label className="flex items-start gap-2 rounded-md border border-dashed border-amber-300 bg-amber-50/50 p-2.5 text-xs cursor-pointer dark:border-amber-700 dark:bg-amber-950/20">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 accent-amber-600"
+                checked={newForm.is_external}
+                onChange={(e) => setNewForm({ ...newForm, is_external: e.target.checked })}
+              />
+              <span className="flex-1">
+                <span className="font-medium text-amber-800 dark:text-amber-300">Lavoro esterno (senza preventivo)</span>
+                <br />
+                <span className="text-muted-foreground">
+                  Crea il progetto direttamente in <em>In corso</em> invece di <em>Bozza</em>. Adatto a lavori off-platform o ricevuti via referral.
+                </span>
+              </span>
+            </label>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowNew(false)}>Annulla</Button>
               <Button type="submit" disabled={!newForm.name.trim() || createMutation.isPending}>Crea</Button>

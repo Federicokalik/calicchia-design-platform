@@ -54,7 +54,34 @@ export interface ClientProjectView extends ClientProject {
   total_milestones: number;
   completed_milestones: number;
   is_overdue: boolean;
+  /** Computed: true when at least one quote (legacy `quotes` or `quotes_v2`) references this project. */
+  has_quote?: boolean;
 }
+
+export const PAYMENT_METHODS = [
+  'bank_transfer', 'cash', 'check', 'paypal', 'stripe', 'revolut', 'other',
+] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  bank_transfer: 'Bonifico',
+  cash: 'Contanti',
+  check: 'Assegno',
+  paypal: 'PayPal',
+  stripe: 'Stripe',
+  revolut: 'Revolut',
+  other: 'Altro',
+};
+
+export const PAYMENT_METHOD_COLORS: Record<PaymentMethod, string> = {
+  bank_transfer: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+  cash: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+  check: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  paypal: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300',
+  stripe: 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300',
+  revolut: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  other: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+};
 
 export type ProjectPreviewProvider = 'netlify' | 'vercel' | 'wordpress' | 'custom';
 export type ProjectPreviewStatus = 'draft' | 'review' | 'approved' | 'archived';

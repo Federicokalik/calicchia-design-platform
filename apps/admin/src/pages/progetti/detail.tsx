@@ -19,6 +19,7 @@ import {
   ArrowLeft, CheckSquare, Milestone, StickyNote,
   Plus, Calendar, Clock, User, LayoutList, X, GripVertical,
   Activity, Send, Languages, TrendingUp, Receipt, MessageSquare, Package,
+  Wallet, CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,19 +35,20 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { EmptyState } from '@/components/shared/empty-state';
-import { StatusBadge } from '@/components/shared/status-badge';
 import { EntityView } from '@/components/entity-view';
 import { buildTasksConfig } from '@/components/tasks/task-entity-config';
 import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
 import { PortalMessageThread } from '@/components/projects/portal-message-thread';
 import { DeliverablesPanel } from '@/components/projects/deliverables-panel';
 import { ProjectPreviewsPanel } from '@/components/projects/project-previews-panel';
+import { ProjectIncomePanel } from '@/components/projects/project-income-panel';
+import { ProjectExpensesPanel } from '@/components/projects/project-expenses-panel';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
-import type { ProjectTask, ProjectMilestone, TaskStatus } from '@/types/projects';
+import type { ProjectTask, ProjectMilestone, TaskStatus, ProjectStatus } from '@/types/projects';
 import { PROJECT_STATUS_CONFIG } from '@/types/projects';
 
 function SortablePipelineStep({ id, step, index, currentStep, onRemove }: {
@@ -293,6 +295,7 @@ export default function ProgettoDetailPage() {
 
   const statusCfg = PROJECT_STATUS_CONFIG[project.status as keyof typeof PROJECT_STATUS_CONFIG];
   const completedTasks = tasks.filter((t) => t.status === 'done').length;
+  const hasQuote: boolean = Boolean(project.has_quote);
 
   return (
     <div className="space-y-6">
@@ -304,7 +307,36 @@ export default function ProgettoDetailPage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-bold tracking-tight truncate">{project.name}</h1>
-            {statusCfg && <StatusBadge {...statusCfg} bgColor={statusCfg.color.replace('text-', 'bg-').replace('-700', '-100')} />}
+            <Select
+              value={project.status}
+              onValueChange={(val) => updateProjectMutation.mutate({ status: val as ProjectStatus })}
+              disabled={updateProjectMutation.isPending}
+            >
+              <SelectTrigger
+                className={cn(
+                  'h-7 w-auto min-w-[8rem] gap-1.5 rounded-full border-0 px-3 text-xs font-medium',
+                  statusCfg?.color,
+                )}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(PROJECT_STATUS_CONFIG) as ProjectStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {PROJECT_STATUS_CONFIG[s].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {!hasQuote && (
+              <Badge
+                variant="outline"
+                className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300"
+                title="Lavoro non collegato a un preventivo"
+              >
+                Esterno
+              </Badge>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
             {project.customer_name && (
@@ -365,6 +397,14 @@ export default function ProgettoDetailPage() {
             {timelineEvents.length > 0 && (
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{timelineEvents.length}</Badge>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="incassi" className="gap-1.5">
+            <Wallet className="h-3.5 w-3.5" />
+            Incassi
+          </TabsTrigger>
+          <TabsTrigger value="spese" className="gap-1.5">
+            <CreditCard className="h-3.5 w-3.5" />
+            Spese
           </TabsTrigger>
           <TabsTrigger value="profittabilita" className="gap-1.5">
             <TrendingUp className="h-3.5 w-3.5" />
@@ -637,6 +677,16 @@ export default function ProgettoDetailPage() {
               </div>
             )}
           </div>
+        </TabsContent>
+
+        {/* Incassi — payment_tracker + auto Stripe/PayPal/Revolut filtrati per progetto */}
+        <TabsContent value="incassi">
+          {id && <ProjectIncomePanel projectId={id} />}
+        </TabsContent>
+
+        {/* Spese — expenses filtrate per progetto */}
+        <TabsContent value="spese">
+          {id && <ProjectExpensesPanel projectId={id} />}
         </TabsContent>
 
         {/* Profittabilità — KPI economici basati su time_entries + budget */}

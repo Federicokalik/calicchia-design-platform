@@ -25,6 +25,11 @@ type ExpenseRow = Record<string, unknown> & {
   _total_count?: unknown;
 };
 
+const PAYMENT_METHODS = [
+  'bank_transfer', 'cash', 'check', 'paypal', 'stripe', 'revolut', 'other',
+] as const;
+type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 type ExpenseMutation = {
   occurred_on?: string;
   vendor?: string | null;
@@ -40,12 +45,18 @@ type ExpenseMutation = {
   deductible_percent?: number;
   currency?: string | null;
   notes?: string | null;
+  payment_method?: PaymentMethod | null;
 };
 
 const categorySet = new Set<string>(EXPENSE_CATEGORIES);
+const paymentMethodSet = new Set<string>(PAYMENT_METHODS);
 
 function isExpenseCategory(value: unknown): value is ExpenseCategory {
   return typeof value === 'string' && categorySet.has(value);
+}
+
+function isPaymentMethod(value: unknown): value is PaymentMethod {
+  return typeof value === 'string' && paymentMethodSet.has(value);
 }
 
 function parseLimit(value: string | undefined): number {
@@ -153,6 +164,16 @@ function buildExpensePayload(
   }
 
   if (body.ocr_raw_json !== undefined) payload.ocr_raw_json = body.ocr_raw_json;
+
+  if (body.payment_method !== undefined) {
+    if (body.payment_method === null || body.payment_method === '') {
+      payload.payment_method = null;
+    } else if (isPaymentMethod(body.payment_method)) {
+      payload.payment_method = body.payment_method;
+    } else {
+      return { error: 'payment_method non valido' };
+    }
+  }
 
   return { payload };
 }

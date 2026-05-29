@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { TrendingUp } from 'lucide-react';
 import {
@@ -5,6 +6,10 @@ import {
 } from 'recharts';
 import { apiFetch } from '@/lib/api';
 import { useI18n } from '@/hooks/use-i18n';
+import { cn } from '@/lib/utils';
+import {
+  PAYMENT_METHOD_LABELS, PAYMENT_METHOD_COLORS, type PaymentMethod,
+} from '@/types/projects';
 
 export function WidgetRevenue() {
   const { t, intlLocale, formatCurrency } = useI18n();
@@ -15,9 +20,12 @@ export function WidgetRevenue() {
 
   const payments = data?.payments || [];
 
+  // Build the 7-month window once so chart + breakdown share the same range.
+  const now = new Date();
+  const windowStart = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+
   // Group by month
   const monthMap = new Map<string, number>();
-  const now = new Date();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = d.toLocaleDateString(intlLocale, { month: 'short' });
@@ -34,6 +42,21 @@ export function WidgetRevenue() {
   }
 
   const chartData = Array.from(monthMap.entries()).map(([month, revenue]) => ({ month, revenue }));
+
+  const byMethod = useMemo(() => {
+    const map = new Map<PaymentMethod | 'unknown', number>();
+    for (const p of payments) {
+      if (p.status !== 'pagata' || !p.paid_date) continue;
+      const d = new Date(p.paid_date);
+      if (d < windowStart) continue;
+      const method = (p.payment_method as PaymentMethod | null) ?? 'unknown';
+      const amount = parseFloat(p.paid_amount ?? p.amount ?? 0);
+      if (!Number.isFinite(amount)) continue;
+      map.set(method, (map.get(method) || 0) + amount);
+    }
+    return Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [payments]);
 
   return (
     <div className="flex flex-col h-full">
@@ -62,6 +85,24 @@ export function WidgetRevenue() {
           </AreaChart>
         </ResponsiveContainer>
       </div>
+      {byMethod.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1 px-4 pb-3 pt-1 border-t">
+          {byMethod.slice(0, 5).map(([method, value]) => (
+            <span
+              key={method}
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium',
+                method !== 'unknown' && PAYMENT_METHOD_COLORS[method as PaymentMethod],
+                method === 'unknown' && 'bg-muted text-muted-foreground',
+              )}
+              title={method === 'unknown' ? 'Metodo non specificato' : PAYMENT_METHOD_LABELS[method as PaymentMethod]}
+            >
+              <span>{method === 'unknown' ? '—' : PAYMENT_METHOD_LABELS[method as PaymentMethod]}</span>
+              <span className="font-semibold">{formatCurrency(value)}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

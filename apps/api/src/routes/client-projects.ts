@@ -382,7 +382,7 @@ clientProjects.get('/:id', async (c) => {
   const projectRows = await sql`SELECT * FROM client_projects_view WHERE id = ${id}`;
   if (!projectRows.length) return c.json({ error: 'Progetto non trovato' }, 404);
 
-  const [tasks, milestones] = await Promise.all([
+  const [tasks, milestones, hasQuoteRows] = await Promise.all([
     sql`
       SELECT t.*,
         p.email AS assignee_email,
@@ -394,9 +394,18 @@ clientProjects.get('/:id', async (c) => {
       ORDER BY t.sort_order ASC
     `,
     sql`SELECT * FROM project_milestones WHERE project_id = ${id} ORDER BY sort_order ASC`,
+    sql`
+      SELECT (
+        EXISTS (SELECT 1 FROM quotes WHERE project_id = ${id})
+        OR EXISTS (SELECT 1 FROM quotes_v2 WHERE project_id = ${id})
+      ) AS has_quote
+    `,
   ]);
 
-  return c.json({ project: projectRows[0], tasks, milestones });
+  const has_quote = Boolean((hasQuoteRows[0] as { has_quote?: boolean })?.has_quote);
+  const project = { ...(projectRows[0] as Record<string, unknown>), has_quote };
+
+  return c.json({ project, tasks, milestones });
 });
 
 clientProjects.post('/', async (c) => {

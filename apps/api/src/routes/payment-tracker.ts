@@ -20,6 +20,7 @@ paymentTracker.get('/', async (c) => {
   const manual = await sql`
     SELECT pt.id, pt.description, pt.amount, pt.status, pt.due_date,
            pt.paid_date, pt.paid_amount, pt.notes, pt.external_ref,
+           pt.payment_method,
            pt.customer_id, pt.project_id, pt.created_at,
            c.contact_name AS customer_name,
            c.company_name,
@@ -74,6 +75,7 @@ paymentTracker.get('/', async (c) => {
            END AS paid_amount,
            NULL::text AS notes,
            pl.provider_order_id AS external_ref,
+           pl.provider AS payment_method,
            COALESCE(q.customer_id, i.customer_id, cp.customer_id) AS customer_id,
            ps.project_id,
            pl.created_at,
@@ -104,14 +106,34 @@ paymentTracker.get('/', async (c) => {
   return c.json({ payments });
 });
 
+const PAYMENT_METHODS = new Set([
+  'bank_transfer', 'cash', 'check', 'paypal', 'stripe', 'revolut', 'other',
+]);
+
+function normalizePaymentMethod(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  return PAYMENT_METHODS.has(value) ? value : null;
+}
+
 // POST /api/payment-tracker
 paymentTracker.post('/', async (c) => {
-  const { customer_id, project_id, description, amount, status, due_date, notes, external_ref } = await c.req.json();
+  const {
+    customer_id, project_id, description, amount, status,
+    due_date, paid_date, paid_amount, notes, external_ref, payment_method,
+  } = await c.req.json();
   if (!description || !amount) return c.json({ error: 'description e amount richiesti' }, 400);
 
+  const method = normalizePaymentMethod(payment_method);
+
   const rows = await sql`
-    INSERT INTO payment_tracker (customer_id, project_id, description, amount, status, due_date, notes, external_ref)
-    VALUES (${customer_id || null}, ${project_id || null}, ${description}, ${amount}, ${status || 'emessa'}, ${due_date || null}, ${notes || null}, ${external_ref || null})
+    INSERT INTO payment_tracker (
+      customer_id, project_id, description, amount, status,
+      due_date, paid_date, paid_amount, notes, external_ref, payment_method
+    )
+    VALUES (
+      ${customer_id || null}, ${project_id || null}, ${description}, ${amount}, ${status || 'emessa'},
+      ${due_date || null}, ${paid_date || null}, ${paid_amount ?? 0}, ${notes || null}, ${external_ref || null}, ${method}
+    )
     RETURNING *
   `;
 
@@ -122,18 +144,24 @@ paymentTracker.post('/', async (c) => {
 paymentTracker.put('/:id', async (c) => {
   const { id } = c.req.param();
   const body = await c.req.json();
+  const method = body.payment_method !== undefined
+    ? normalizePaymentMethod(body.payment_method)
+    : null;
 
   const rows = await sql`
     UPDATE payment_tracker SET
-      description = COALESCE(${body.description || null}, description),
-      amount = COALESCE(${body.amount || null}, amount),
-      status = COALESCE(${body.status || null}, status),
-      due_date = ${body.due_date !== undefined ? body.due_date : null},
-      paid_date = ${body.paid_date !== undefined ? body.paid_date : null},
-      paid_amount = COALESCE(${body.paid_amount || null}, paid_amount),
-      notes = ${body.notes !== undefined ? body.notes : null},
-      external_ref = ${body.external_ref !== undefined ? body.external_ref : null},
-      updated_at = now()
+      description   = COALESCE(${body.description || null}, description),
+      amount        = COALESCE(${body.amount || null}, amount),
+      status        = COALESCE(${body.status || null}, status),
+      due_date      = ${body.due_date !== undefined ? body.due_date : null},
+      paid_date     = ${body.paid_date !== undefined ? body.paid_date : null},
+      paid_amount   = COALESCE(${body.paid_amount ?? null}, paid_amount),
+      notes         = ${body.notes !== undefined ? body.notes : null},
+      external_ref  = ${body.external_ref !== undefined ? body.external_ref : null},
+      payment_method = ${body.payment_method !== undefined ? method : null},
+      customer_id   = COALESCE(${body.customer_id ?? null}, customer_id),
+      project_id    = COALESCE(${body.project_id ?? null}, project_id),
+      updated_at    = now()
     WHERE id = ${id}
     RETURNING *
   `;

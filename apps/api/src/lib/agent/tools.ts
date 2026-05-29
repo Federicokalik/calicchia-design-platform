@@ -2026,6 +2026,166 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       return JSON.stringify({ period: args.period || '30d', countries: rows });
     },
   },
+
+  // === LAVORI ESTERNI + LEDGER INCASSI/SPESE NON TRACCIATI ===
+  {
+    name: 'create_external_project',
+    description: 'Crea un lavoro esterno (senza preventivo), già in stato "in_progress". Per progetti off-platform, referral o pagamenti diretti. Passa customer_id oppure customer_email, oppure ometti entrambi per progetti senza cliente in CRM.',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        customer_id: { type: 'string', description: 'UUID cliente (opzionale)' },
+        customer_email: { type: 'string', description: 'Alternativa: email cliente da cui risalire all\'id' },
+        name: { type: 'string', description: 'Nome del progetto' },
+        description: { type: 'string' },
+        project_type: {
+          type: 'string',
+          enum: ['website', 'landing_page', 'ecommerce', 'maintenance', 'website_template', 'consulting', 'other'],
+          description: 'Default: other',
+        },
+        budget_amount: { type: 'number', description: 'Budget atteso in euro (opzionale)' },
+        start_date: { type: 'string', description: 'YYYY-MM-DD' },
+        target_end_date: { type: 'string', description: 'YYYY-MM-DD' },
+      },
+      required: ['name'],
+    },
+    execute: async (args) => {
+      let customerId = args.customer_id as string | undefined;
+      if (!customerId && args.customer_email) {
+        const [c] = await sql`SELECT id FROM customers WHERE email = ${(args.customer_email as string).toLowerCase().trim()} AND deleted_at IS NULL LIMIT 1`;
+        if (c) customerId = c.id as string;
+      }
+      const [row] = await sql`
+        INSERT INTO client_projects (
+          customer_id, name, description, project_type, status,
+          budget_amount, start_date, target_end_date
+        ) VALUES (
+          ${customerId || null},
+          ${args.name as string},
+          ${(args.description as string) || null},
+          ${(args.project_type as string) || 'other'}::project_type,
+          'in_progress'::project_status,
+          ${(args.budget_amount as number) || null},
+          ${(args.start_date as string) || null},
+          ${(args.target_end_date as string) || null}
+        )
+        RETURNING id, name, status, customer_id
+      `;
+      return JSON.stringify({ created: row, external: true });
+    },
+  },
+  {
+    name: 'log_untracked_income',
+    description: 'Registra un incasso non tracciato (PayPal manuale, contanti, bonifico fuori-flusso). Confluisce nel widget revenue. Specifica project_id (preferito) o customer_id; descrivi il pagamento.',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        project_id: { type: 'string', description: 'UUID progetto (opzionale)' },
+        customer_id: { type: 'string', description: 'UUID cliente (opzionale)' },
+        customer_email: { type: 'string', description: 'Alternativa per risolvere customer_id' },
+        amount: { type: 'number', description: 'Importo in euro (>0)' },
+        payment_method: {
+          type: 'string',
+          enum: ['bank_transfer', 'cash', 'check', 'paypal', 'stripe', 'revolut', 'other'],
+          description: 'Metodo: bonifico, contanti, assegno, paypal, stripe, revolut, altro',
+        },
+        description: { type: 'string', description: 'Es. "Acconto lavoro X"' },
+        paid_date: { type: 'string', description: 'YYYY-MM-DD (default: oggi)' },
+        external_ref: { type: 'string', description: 'Riferimento (txn ID PayPal, n. bonifico, ecc.)' },
+        notes: { type: 'string' },
+      },
+      required: ['amount', 'description'],
+    },
+    execute: async (args) => {
+      const amount = Number(args.amount);
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return JSON.stringify({ error: 'amount non valido (>0 richiesto)' });
+      }
+      let customerId = args.customer_id as string | undefined;
+      if (!customerId && args.customer_email) {
+        const [c] = await sql`SELECT id FROM customers WHERE email = ${(args.customer_email as string).toLowerCase().trim()} AND deleted_at IS NULL LIMIT 1`;
+        if (c) customerId = c.id as string;
+      }
+      const paidDate = (args.paid_date as string) || new Date().toISOString().slice(0, 10);
+      const status = 'pagata';
+      const [row] = await sql`
+        INSERT INTO payment_tracker (
+          customer_id, project_id, description, amount, status,
+          paid_date, paid_amount, payment_method, external_ref, notes
+        ) VALUES (
+          ${customerId || null},
+          ${(args.project_id as string) || null},
+          ${args.description as string},
+          ${amount},
+          ${status},
+          ${paidDate},
+          ${amount},
+          ${(args.payment_method as string) || null},
+          ${(args.external_ref as string) || null},
+          ${(args.notes as string) || null}
+        )
+        RETURNING id, description, amount, payment_method, paid_date, status
+      `;
+      return JSON.stringify({ logged: row });
+    },
+  },
+  {
+    name: 'log_untracked_expense',
+    description: 'Registra una spesa relativa a un progetto (contanti, PayPal, bonifico). Confluisce nel widget spese e nelle deduzioni fiscali.',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        project_id: { type: 'string', description: 'UUID progetto (opzionale)' },
+        customer_id: { type: 'string', description: 'UUID cliente (opzionale)' },
+        amount: { type: 'number', description: 'Importo in euro (>=0)' },
+        vat_amount: { type: 'number', description: 'IVA in euro (default 0)' },
+        category: {
+          type: 'string',
+          enum: ['software', 'hardware', 'office', 'travel', 'meals', 'training', 'marketing', 'professional_services', 'utilities', 'other'],
+        },
+        payment_method: {
+          type: 'string',
+          enum: ['bank_transfer', 'cash', 'check', 'paypal', 'stripe', 'revolut', 'other'],
+        },
+        vendor: { type: 'string', description: 'Fornitore' },
+        occurred_on: { type: 'string', description: 'YYYY-MM-DD (default: oggi)' },
+        description: { type: 'string' },
+        notes: { type: 'string' },
+        deductible_percent: { type: 'number', description: '0-100, default 100' },
+      },
+      required: ['amount', 'category'],
+    },
+    execute: async (args) => {
+      const amount = Number(args.amount);
+      if (!Number.isFinite(amount) || amount < 0) {
+        return JSON.stringify({ error: 'amount non valido (>=0 richiesto)' });
+      }
+      const occurredOn = (args.occurred_on as string) || new Date().toISOString().slice(0, 10);
+      const [row] = await sql`
+        INSERT INTO expenses (
+          occurred_on, vendor, amount, vat_amount, category, description, notes,
+          project_id, customer_id, payment_method, deductible_percent
+        ) VALUES (
+          ${occurredOn},
+          ${(args.vendor as string) || null},
+          ${amount},
+          ${(args.vat_amount as number) || 0},
+          ${args.category as string},
+          ${(args.description as string) || null},
+          ${(args.notes as string) || null},
+          ${(args.project_id as string) || null},
+          ${(args.customer_id as string) || null},
+          ${(args.payment_method as string) || null},
+          ${(args.deductible_percent as number) ?? 100}
+        )
+        RETURNING id, vendor, amount, category, payment_method, occurred_on
+      `;
+      return JSON.stringify({ logged: row });
+    },
+  },
 ];
 
 /**
