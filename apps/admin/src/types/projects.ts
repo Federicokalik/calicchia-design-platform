@@ -56,6 +56,23 @@ export interface ClientProjectView extends ClientProject {
   is_overdue: boolean;
 }
 
+export type ProjectPreviewProvider = 'netlify' | 'vercel' | 'wordpress' | 'custom';
+export type ProjectPreviewStatus = 'draft' | 'review' | 'approved' | 'archived';
+
+export interface ProjectPreview {
+  id: string;
+  project_id: string;
+  title: string;
+  url: string;
+  provider: ProjectPreviewProvider;
+  status: ProjectPreviewStatus;
+  visible_to_client: boolean;
+  sort_order: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ProjectTask {
   id: string;
   project_id: string;

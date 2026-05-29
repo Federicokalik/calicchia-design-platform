@@ -40,6 +40,7 @@ import { buildTasksConfig } from '@/components/tasks/task-entity-config';
 import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
 import { PortalMessageThread } from '@/components/projects/portal-message-thread';
 import { DeliverablesPanel } from '@/components/projects/deliverables-panel';
+import { ProjectPreviewsPanel } from '@/components/projects/project-previews-panel';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
@@ -444,6 +445,8 @@ export default function ProgettoDetailPage() {
         {/* Portal — Pipeline Steps + Current Step */}
         <TabsContent value="portal">
           <div className="space-y-6">
+            <ProjectPreviewsPanel projectId={id!} />
+
             {/* Pipeline Steps Editor */}
             <div className="rounded-lg border bg-card p-6 space-y-4">
               <h3 className="text-sm font-semibold">Pipeline Steps</h3>

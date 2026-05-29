@@ -3,6 +3,131 @@ import { sql } from '../db';
 
 export const clientProjects = new Hono();
 
+const PREVIEW_PROVIDERS = ['netlify', 'vercel', 'wordpress', 'custom'] as const;
+const PREVIEW_STATUSES = ['draft', 'review', 'approved', 'archived'] as const;
+type PreviewProvider = typeof PREVIEW_PROVIDERS[number];
+type PreviewStatus = typeof PREVIEW_STATUSES[number];
+
+interface ProjectPreviewRow {
+  id: string;
+  project_id: string;
+  title: string;
+  url: string;
+  provider: PreviewProvider;
+  status: PreviewStatus;
+  visible_to_client: boolean;
+  sort_order: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function derivePreviewProvider(hostname: string): PreviewProvider {
+  const host = hostname.toLowerCase();
+  if (host.endsWith('.netlify.app') || host.includes('netlify')) return 'netlify';
+  if (host.endsWith('.vercel.app') || host.includes('vercel')) return 'vercel';
+  if (host.endsWith('.wordpress.com') || host.includes('wpengine') || host.includes('wordpress')) return 'wordpress';
+  return 'custom';
+}
+
+function isPrivateIpv4(hostname: string): boolean {
+  const match = hostname.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (!match) return false;
+  const octets = match.slice(1).map(Number);
+  if (octets.some((n) => n < 0 || n > 255)) return true;
+  const [a, b] = octets;
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168)
+  );
+}
+
+function normalizePreviewUrl(value: unknown): { url?: string; provider?: PreviewProvider; error?: string } {
+  if (typeof value !== 'string' || !value.trim()) return { error: 'URL richiesto' };
+  let parsed: URL;
+  try {
+    parsed = new URL(value.trim());
+  } catch {
+    return { error: 'URL non valido' };
+  }
+
+  if (parsed.protocol !== 'https:') return { error: 'Sono ammessi solo URL https' };
+  if (parsed.username || parsed.password) return { error: 'URL con credenziali non ammessi' };
+
+  const host = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  const blockedHosts = new Set(['localhost', '127.0.0.1', '0.0.0.0', '::1']);
+  if (
+    blockedHosts.has(host) ||
+    host.endsWith('.localhost') ||
+    host.endsWith('.local') ||
+    host.endsWith('.lan') ||
+    host.endsWith('.internal') ||
+    host.endsWith('.test') ||
+    host.endsWith('.invalid') ||
+    host.endsWith('.example') ||
+    isPrivateIpv4(host) ||
+    (host.includes(':') && (host.startsWith('fc') || host.startsWith('fd') || host.startsWith('fe80')))
+  ) {
+    return { error: 'URL non pubblico non ammesso' };
+  }
+  if (!host.includes('.') && !host.includes(':')) return { error: 'Hostname pubblico richiesto' };
+
+  parsed.hash = '';
+  return { url: parsed.toString(), provider: derivePreviewProvider(host) };
+}
+
+function previewPayload(body: Record<string, unknown>, partial = false) {
+  const out: Record<string, unknown> = {};
+
+  if (!partial || body.title !== undefined) {
+    const title = typeof body.title === 'string' ? body.title.trim().slice(0, 160) : '';
+    if (!title) return { error: 'Titolo richiesto' };
+    out.title = title;
+  }
+
+  let derivedProvider: PreviewProvider | undefined;
+  if (!partial || body.url !== undefined) {
+    const normalized = normalizePreviewUrl(body.url);
+    if (normalized.error) return { error: normalized.error };
+    out.url = normalized.url;
+    derivedProvider = normalized.provider;
+  }
+
+  if (!partial || body.provider !== undefined || derivedProvider) {
+    const provider = typeof body.provider === 'string' && PREVIEW_PROVIDERS.includes(body.provider as PreviewProvider)
+      ? body.provider as PreviewProvider
+      : derivedProvider || 'custom';
+    out.provider = provider;
+  }
+
+  if (!partial || body.status !== undefined) {
+    const status = typeof body.status === 'string' && PREVIEW_STATUSES.includes(body.status as PreviewStatus)
+      ? body.status
+      : 'draft';
+    out.status = status;
+  }
+
+  if (!partial || body.visible_to_client !== undefined) {
+    out.visible_to_client = body.visible_to_client !== false;
+  }
+  if (!partial || body.sort_order !== undefined) {
+    const n = Number(body.sort_order);
+    out.sort_order = Number.isFinite(n) ? Math.max(0, Math.trunc(n)) : 0;
+  }
+  if (!partial || body.notes !== undefined) {
+    out.notes = typeof body.notes === 'string' && body.notes.trim()
+      ? body.notes.trim().slice(0, 1000)
+      : null;
+  }
+
+  return { data: out };
+}
+
 clientProjects.get('/', async (c) => {
   const status = c.req.query('status');
   const customerId = c.req.query('customer_id');
@@ -187,6 +312,68 @@ clientProjects.post('/:id/create-invoice', async (c) => {
     return c.json({ error: result.__error }, 404);
   }
   return c.json(result, 201);
+});
+
+clientProjects.get('/:id/previews', async (c) => {
+  const id = c.req.param('id');
+  const [project] = await sql`SELECT id FROM client_projects WHERE id = ${id} LIMIT 1`;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+
+  const previews = await sql<ProjectPreviewRow[]>`
+    SELECT *
+    FROM project_previews
+    WHERE project_id = ${id}
+    ORDER BY sort_order ASC, created_at ASC
+  `;
+  return c.json({ previews });
+});
+
+clientProjects.post('/:id/previews', async (c) => {
+  const id = c.req.param('id');
+  const [project] = await sql`SELECT id FROM client_projects WHERE id = ${id} LIMIT 1`;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
+  const payload = previewPayload(body);
+  if (payload.error) return c.json({ error: payload.error }, 400);
+
+  const [preview] = await sql<ProjectPreviewRow[]>`
+    INSERT INTO project_previews ${sql({ ...payload.data, project_id: id })}
+    RETURNING *
+  `;
+  return c.json({ preview }, 201);
+});
+
+clientProjects.put('/:id/previews/:previewId', async (c) => {
+  const id = c.req.param('id');
+  const previewId = c.req.param('previewId');
+  const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
+  const payload = previewPayload(body, true);
+  if (payload.error) return c.json({ error: payload.error }, 400);
+  if (!payload.data || Object.keys(payload.data).length === 0) {
+    return c.json({ error: 'Nessun campo da aggiornare' }, 400);
+  }
+
+  const [preview] = await sql<ProjectPreviewRow[]>`
+    UPDATE project_previews
+    SET ${sql(payload.data)}
+    WHERE id = ${previewId} AND project_id = ${id}
+    RETURNING *
+  `;
+  if (!preview) return c.json({ error: 'Anteprima non trovata' }, 404);
+  return c.json({ preview });
+});
+
+clientProjects.delete('/:id/previews/:previewId', async (c) => {
+  const id = c.req.param('id');
+  const previewId = c.req.param('previewId');
+  const [deleted] = await sql`
+    DELETE FROM project_previews
+    WHERE id = ${previewId} AND project_id = ${id}
+    RETURNING id
+  `;
+  if (!deleted) return c.json({ error: 'Anteprima non trovata' }, 404);
+  return c.json({ success: true });
 });
 
 clientProjects.get('/:id', async (c) => {

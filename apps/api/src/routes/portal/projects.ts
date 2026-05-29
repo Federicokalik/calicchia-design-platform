@@ -5,6 +5,39 @@ import { portalAuth, type PortalEnv } from './auth';
 
 export const projectsRoutes = new Hono<PortalEnv>();
 
+function legacyPreviewProvider(value: unknown): 'netlify' | 'vercel' | 'wordpress' | 'custom' {
+  if (typeof value !== 'string') return 'custom';
+  let host = '';
+  try {
+    host = new URL(value).hostname.toLowerCase();
+  } catch {
+    return 'custom';
+  }
+  if (host.endsWith('.netlify.app') || host.includes('netlify')) return 'netlify';
+  if (host.endsWith('.vercel.app') || host.includes('vercel')) return 'vercel';
+  if (host.endsWith('.wordpress.com') || host.includes('wpengine') || host.includes('wordpress')) return 'wordpress';
+  return 'custom';
+}
+
+function legacyPreview(project: Record<string, unknown>) {
+  const stagingUrl = typeof project.staging_url === 'string' ? project.staging_url : '';
+  if (!stagingUrl.startsWith('https://')) return null;
+  return {
+    id: `legacy-staging-${project.id}`,
+    project_id: project.id,
+    title: 'Staging',
+    url: stagingUrl,
+    provider: legacyPreviewProvider(stagingUrl),
+    status: 'review',
+    visible_to_client: true,
+    sort_order: 0,
+    notes: null,
+    created_at: null,
+    updated_at: null,
+    is_legacy: true,
+  };
+}
+
 // ── List all projects for this customer ──────────────────
 projectsRoutes.get('/', portalAuth, async (c) => {
   const role = c.get('actor_role');
@@ -155,5 +188,17 @@ projectsRoutes.get('/:id', portalAuth, async (c) => {
     locale
   );
 
-  return c.json({ project, milestones, deliverables });
+  let previews = (await sql`
+    SELECT id, project_id, title, url, provider, status, visible_to_client,
+           sort_order, notes, created_at, updated_at, false AS is_legacy
+    FROM project_previews
+    WHERE project_id = ${id} AND visible_to_client = true
+    ORDER BY sort_order ASC, created_at ASC
+  `) as Array<Record<string, unknown>>;
+  if (previews.length === 0) {
+    const fallback = legacyPreview(project);
+    if (fallback) previews = [fallback];
+  }
+
+  return c.json({ project, milestones, deliverables, previews });
 });

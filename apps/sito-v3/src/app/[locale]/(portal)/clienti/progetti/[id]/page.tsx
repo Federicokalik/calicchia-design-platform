@@ -10,6 +10,7 @@ import { PortalTimeline } from '@/components/portal/PortalTimeline';
 import { PipelineSteps } from '@/components/portal/PipelineSteps';
 import { MessageThread } from '@/components/portal/MessageThread';
 import { DeliverableReview } from '@/components/portal/DeliverableReview';
+import { SitePreviewFrame } from '@/components/portal/SitePreviewFrame';
 import {
   PortalDisplay,
   PortalH1,
@@ -56,6 +57,7 @@ export default async function ProgettoDetailPage({ params }: PageProps) {
 
     const milestones = project.milestones ?? [];
     const deliverables = project.deliverables ?? [];
+    const previews = project.previews ?? [];
     const pipelineSteps = Array.isArray(project.pipeline_steps) ? project.pipeline_steps : [];
     const completedMilestones = milestones.filter((milestone) => milestone.status === 'completed').length;
 
@@ -141,10 +143,28 @@ export default async function ProgettoDetailPage({ params }: PageProps) {
             )}
           </section>
 
+          {previews.length > 0 && (
+            <section className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1">
+                <PortalLabel>{t('projects.detail.preview.eyebrow')}</PortalLabel>
+                <PortalH1>{t('projects.detail.sections.preview')}</PortalH1>
+              </div>
+              <SitePreviewFrame
+                previews={previews}
+                labels={{
+                  openExternal: t('projects.detail.preview.openExternal'),
+                  refresh: t('projects.detail.preview.refresh'),
+                  blockedHint: t('projects.detail.preview.blockedHint'),
+                  loading: t('projects.detail.preview.loading'),
+                }}
+              />
+            </section>
+          )}
+
           <section className="flex flex-col gap-5">
             <div className="flex items-baseline justify-between gap-3">
               <PortalH1>{t('projects.detail.sections.deliverables')}</PortalH1>
-              {project.staging_url && (
+              {project.staging_url && previews.length === 0 && (
                 <PortalLabel
                   as={Link}
                   href={project.staging_url}

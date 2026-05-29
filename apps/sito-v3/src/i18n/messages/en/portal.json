@@ -158,8 +158,16 @@
       "sections": {
         "pipeline": "Pipeline",
         "milestones": "Milestones",
+        "preview": "Website preview",
         "deliverables": "Deliverables",
         "messages": "Messages"
+      },
+      "preview": {
+        "eyebrow": "Navigable drafts",
+        "openExternal": "Open",
+        "refresh": "Refresh",
+        "loading": "Loading...",
+        "blockedHint": "If the preview stays blank, the site may block iframe embedding. Open it in a new tab."
       },
       "milestonesEmpty": {
         "eyebrow": "Roadmap",

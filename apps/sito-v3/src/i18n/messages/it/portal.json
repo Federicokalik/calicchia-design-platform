@@ -158,8 +158,16 @@
       "sections": {
         "pipeline": "Pipeline",
         "milestones": "Milestone",
+        "preview": "Anteprima sito",
         "deliverables": "Deliverable",
         "messages": "Messaggi"
+      },
+      "preview": {
+        "eyebrow": "Bozze navigabili",
+        "openExternal": "Apri",
+        "refresh": "Ricarica",
+        "loading": "Caricamento...",
+        "blockedHint": "Se l'anteprima resta vuota, il sito potrebbe bloccare l'apertura in iframe. Aprila in una nuova scheda."
       },
       "milestonesEmpty": {
         "eyebrow": "Roadmap",

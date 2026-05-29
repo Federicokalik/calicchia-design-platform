@@ -127,6 +127,21 @@ export interface PortalDeliverable {
   versions: PortalDeliverableVersion[];
 }
 
+export interface PortalProjectPreview {
+  id: string;
+  project_id: string;
+  title: string;
+  url: string;
+  provider: 'netlify' | 'vercel' | 'wordpress' | 'custom';
+  status: 'draft' | 'review' | 'approved' | 'archived';
+  visible_to_client: boolean;
+  sort_order: number;
+  notes: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  is_legacy?: boolean;
+}
+
 export interface PortalProject {
   id: string;
   name: string;
@@ -148,6 +163,7 @@ export interface PortalProject {
   unread_messages?: number;
   milestones?: PortalMilestone[];
   deliverables?: PortalDeliverable[];
+  previews?: PortalProjectPreview[];
 }
 
 export interface PortalReport {
@@ -395,12 +411,14 @@ export async function getProject(id: string): Promise<PortalProject | null> {
     project: PortalProject;
     milestones: PortalMilestone[];
     deliverables: PortalDeliverable[];
+    previews?: PortalProjectPreview[];
   }>(`/projects/${encodeURIComponent(id)}`);
   if (!data) return null;
   return {
     ...data.project,
     milestones: data.milestones,
     deliverables: data.deliverables,
+    previews: data.previews ?? [],
   };
 }
 
