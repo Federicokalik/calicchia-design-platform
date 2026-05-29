@@ -3,7 +3,7 @@ import { publicContactSchema, firstZodIssue } from '@calicchia/shared';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { sendContactNotification } from '../lib/email';
-import { verifyTurnstileToken } from '../lib/turnstile';
+import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import {
   createBooking,
@@ -68,12 +68,12 @@ contacts.post('/', async (c) => {
   const body = await c.req.json();
   const { turnstile_token } = body as { turnstile_token?: string };
 
-  // Turnstile verification (action binds the token to the public contact form)
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+  // Captcha verification (siteKeyId binds the token to the public contact form)
+  const captchaResult = await captcha.verify(turnstile_token || '', {
     remoteIp: getClientIp(c) ?? undefined,
-    expectedAction: 'contact_form',
+    siteKeyId: 'contact_form',
   });
-  if (!turnstileOk) {
+  if (!captchaResult.ok) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 

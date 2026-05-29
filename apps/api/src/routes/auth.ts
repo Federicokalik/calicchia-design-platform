@@ -6,7 +6,7 @@ import { authMiddleware } from '../middleware/auth';
 import { createRateLimit } from '../middleware/rate-limit';
 import { adminMessage, isAdminLocale } from '../lib/admin-locale';
 import { setAuthCookie, clearAuthCookie, setAdminRefreshCookie, clearAdminRefreshCookie } from '../lib/cookies';
-import { verifyTurnstileToken } from '../lib/turnstile';
+import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { generateTotpSecret, verifyTotp, otpauthUri } from '../lib/totp';
 import { encryptSecret, decryptSecret } from '../lib/crypto';
@@ -44,11 +44,11 @@ auth.post('/login', loginRateLimit, async (c) => {
   }
 
   // Anti-bot check before any DB lookup / bcrypt work.
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+  const captchaResult = await captcha.verify(turnstile_token || '', {
     remoteIp: getClientIp(c) ?? undefined,
-    expectedAction: 'admin_login',
+    siteKeyId: 'admin_login',
   });
-  if (!turnstileOk) {
+  if (!captchaResult.ok) {
     return c.json({ error: adminMessage(c, 'turnstileFailed') }, 403);
   }
 

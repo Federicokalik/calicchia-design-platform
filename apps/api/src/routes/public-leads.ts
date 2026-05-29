@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
-import { verifyTurnstileToken } from '../lib/turnstile';
+import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { logger } from '../lib/logger';
 
@@ -67,11 +67,11 @@ publicLeads.post('/', async (c) => {
       return c.json({ error: 'Consenso GDPR richiesto' }, 400);
     }
 
-    const turnstileOk = await verifyTurnstileToken(turnstileToken, {
+    const captchaResult = await captcha.verify(turnstileToken, {
       remoteIp: getClientIp(c) ?? undefined,
-      expectedAction: 'embed_lead',
+      siteKeyId: 'embed_lead',
     });
-    if (!turnstileOk) return c.json({ error: 'Verifica anti-bot fallita.' }, 403);
+    if (!captchaResult.ok) return c.json({ error: 'Verifica anti-bot fallita.' }, 403);
 
     const consentIp = getClientIp(c) ?? null;
     const consentUserAgent = c.req.header('user-agent')?.slice(0, 512) ?? null;

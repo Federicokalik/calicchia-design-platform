@@ -8,7 +8,7 @@ import { createRateLimit } from '../../middleware/rate-limit';
 import { setPortalCookie, clearPortalCookie } from '../../lib/cookies';
 import { auditPortalEvent } from '../../lib/portal-audit';
 import { issueMagicLink, consumeMagicLink } from '../../lib/portal-tokens';
-import { verifyTurnstileToken } from '../../lib/turnstile';
+import { captcha } from '../../lib/captcha';
 import { getClientIp } from '../../lib/client-ip';
 import { sendEmail } from '../../lib/email';
 import { renderMagicLinkEmail } from '../../templates/magic-link';
@@ -235,10 +235,10 @@ authRoutes.post('/request-link', magicLinkRequestLimit, async (c) => {
   }
 
   if (
-    !(await verifyTurnstileToken(body.turnstile_token ?? '', {
+    !(await captcha.verify(body.turnstile_token ?? '', {
       remoteIp: getClientIp(c) ?? undefined,
-      expectedAction: 'portal_login',
-    }))
+      siteKeyId: 'portal_login',
+    })).ok
   ) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
@@ -367,10 +367,10 @@ authRoutes.post('/login', portalLoginLimit, async (c) => {
   }
 
   if (
-    !(await verifyTurnstileToken(turnstile_token ?? '', {
+    !(await captcha.verify(turnstile_token ?? '', {
       remoteIp: getClientIp(c) ?? undefined,
-      expectedAction: 'portal_login',
-    }))
+      siteKeyId: 'portal_login',
+    })).ok
   ) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }

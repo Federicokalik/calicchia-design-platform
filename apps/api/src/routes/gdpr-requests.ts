@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { verifyTurnstileToken } from '../lib/turnstile';
+import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { sendEmail } from '../lib/email';
 import { renderGdprRequestEmail } from '../templates/gdpr-request';
@@ -30,12 +30,12 @@ gdprRequests.post('/', async (c) => {
   const body = await c.req.json();
   const { email, name, request_type, message, turnstile_token } = body;
 
-  // Turnstile verification (action binds token to the GDPR request form)
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+  // Captcha verification (siteKeyId binds token to the GDPR request form)
+  const captchaResult = await captcha.verify(turnstile_token || '', {
     remoteIp: getClientIp(c) ?? undefined,
-    expectedAction: 'gdpr_request',
+    siteKeyId: 'gdpr_request',
   });
-  if (!turnstileOk) {
+  if (!captchaResult.ok) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 

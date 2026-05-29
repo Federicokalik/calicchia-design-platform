@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
-import { verifyTurnstileToken } from '../lib/turnstile';
+import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { sendNewsletterConfirmEmail } from '../lib/email';
 import { logger } from '../lib/logger';
@@ -20,12 +20,12 @@ newsletter.post('/subscribe', async (c) => {
   // if a client sends an abusive header.
   const userAgent = (c.req.header('user-agent') ?? '').slice(0, 512) || null;
 
-  // Turnstile verification (action binds token to the newsletter signup form)
-  const turnstileOk = await verifyTurnstileToken(turnstile_token || '', {
+  // Captcha verification (siteKeyId binds token to the newsletter signup form)
+  const captchaResult = await captcha.verify(turnstile_token || '', {
     remoteIp: clientIp ?? undefined,
-    expectedAction: 'newsletter_subscribe',
+    siteKeyId: 'newsletter_subscribe',
   });
-  if (!turnstileOk) {
+  if (!captchaResult.ok) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 

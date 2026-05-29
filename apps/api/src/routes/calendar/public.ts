@@ -6,7 +6,7 @@
 import { Hono } from 'hono';
 import { publicBookingSchema, firstZodIssue } from '@calicchia/shared';
 import { sql } from '../../db';
-import { verifyTurnstileToken } from '../../lib/turnstile';
+import { captcha } from '../../lib/captcha';
 import { getClientIp } from '../../lib/client-ip';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType } from '../../lib/calendar/availability';
@@ -121,13 +121,13 @@ calendarPublic.post('/bookings', async (c) => {
     return c.json({ error: 'Body JSON richiesto' }, 400);
   }
 
-  // Turnstile (skippa in dev se TURNSTILE_SECRET_KEY non configurato)
+  // Captcha (skippa in dev se provider non configurato)
   const clientIp = getClientIp(c) ?? undefined;
-  const turnstileOk = await verifyTurnstileToken(body.turnstile_token || '', {
+  const captchaResult = await captcha.verify(body.turnstile_token || '', {
     remoteIp: clientIp,
-    expectedAction: 'booking_create',
+    siteKeyId: 'booking_create',
   });
-  if (!turnstileOk) {
+  if (!captchaResult.ok) {
     return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
   }
 
@@ -327,11 +327,11 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
   // in depth — and it closes a previous gap where the client sent the field
   // and the server silently ignored it.
   if (body.turnstile_token) {
-    const ok = await verifyTurnstileToken(body.turnstile_token, {
+    const result = await captcha.verify(body.turnstile_token, {
       remoteIp: getClientIp(c) ?? undefined,
-      expectedAction: 'booking_reschedule',
+      siteKeyId: 'booking_reschedule',
     });
-    if (!ok) return c.json({ error: 'Verifica anti-bot fallita. Riprova.' }, 403);
+    if (!result.ok) return c.json({ error: 'Verifica anti-bot fallita. Riprova.' }, 403);
   }
 
   const newStart = typeof body.start === 'string' ? body.start : null;
