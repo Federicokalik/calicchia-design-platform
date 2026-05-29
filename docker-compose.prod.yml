@@ -148,6 +148,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      # JWT_SECRET: il middleware proxy.ts valida il cookie portal_token (firmato
+      # dall'api con lo STESSO secret). Senza, hasValidPortalToken() ritorna sempre
+      # false → ogni accesso /clienti/* viene redirezionato a /clienti/login anche
+      # subito dopo un magic-link riuscito (incident 2026-05-29).
+      JWT_SECRET: ${JWT_SECRET}
+      # COOKIE_DOMAIN: necessario per cancellare cookie portal_token settati con
+      # Domain=.calicchia.design quando il token risulta invalido lato middleware.
+      COOKIE_DOMAIN: ${COOKIE_DOMAIN}
       # Runtime public config (consumato da /api/config -> RuntimeConfigProvider).
       # Cambiare valore = restart container, nessun rebuild dell'immagine.
       TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
