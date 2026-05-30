@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { NOTE_TEMPLATES } from '@/data/note-templates';
 import type { Note } from '@/types/notes';
 import { useI18n } from '@/hooks/use-i18n';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const SOURCE_ICONS: Record<string, React.ElementType> = {
   app: AppWindow,
@@ -34,6 +35,7 @@ export default function NotesPage() {
   const { t, formatRelativeTime } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [search, setSearch] = useState('');
   const [sourceFilter, setSourceFilter] = useState('');
   const [showTemplates, setShowTemplates] = useState(false);
@@ -166,7 +168,7 @@ export default function NotesPage() {
                 label: t('common.delete'),
                 icon: Trash2,
                 destructive: true,
-                onClick: () => { if (confirm(t('common.confirm'))) deleteMutation.mutate(note.id); },
+                onClick: async () => { if (await confirm({ title: t('common.confirm'), variant: 'destructive' })) deleteMutation.mutate(note.id); },
               },
             ];
             return (
@@ -188,7 +190,7 @@ export default function NotesPage() {
                       {note.is_pinned ? <PinOff className="h-3.5 w-3.5 text-primary" /> : <Pin className="h-3.5 w-3.5 text-muted-foreground" />}
                     </button>
                     <button
-                      onClick={(e) => { e.stopPropagation(); if (confirm(t('common.confirm'))) deleteMutation.mutate(note.id); }}
+                      onClick={async (e) => { e.stopPropagation(); if (await confirm({ title: t('common.confirm'), variant: 'destructive' })) deleteMutation.mutate(note.id); }}
                       className="p-1 rounded hover:bg-muted"
                     >
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />

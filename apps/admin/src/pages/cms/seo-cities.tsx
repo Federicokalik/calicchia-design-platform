@@ -10,6 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useConfirm } from '@/hooks/use-confirm';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -68,6 +69,7 @@ export default function SeoCitiesCmsPage() {
   });
 
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [tipoFilter, setTipoFilter] = useState<'all' | 'capoluogo' | 'ciociaria'>('all');
   const [tierFilter, setTierFilter] = useState<'all' | '1' | '2' | '3'>('all');
   const [draft, setDraft] = useState<DraftRow | null>(null);
@@ -284,8 +286,8 @@ export default function SeoCitiesCmsPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          if (window.confirm(`Eliminare "${row.nome}"?`)) deleteMutation.mutate(row.id);
+                        onClick={async () => {
+                          if (await confirm({ title: `Eliminare "${row.nome}"?`, variant: 'destructive' })) deleteMutation.mutate(row.id);
                         }}
                       >
                         <Trash2 className="h-3.5 w-3.5 text-destructive" />

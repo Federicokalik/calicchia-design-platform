@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { X, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 
 interface Calendar {
   id: string;
@@ -96,6 +97,7 @@ const DAYS_OF_WEEK = [
 
 export default function EventoEditModal({ initial, initialStart, initialEnd, onClose, onSaved }: Props) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const isEdit = !!initial?.id;
 
   const { data: calData } = useQuery({
@@ -384,8 +386,8 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                 size="sm"
                 variant="outline"
                 className="text-destructive"
-                onClick={() => {
-                  if (confirm('Eliminare questo evento?')) remove.mutate();
+                onClick={async () => {
+                  if (await confirm({ title: 'Eliminare questo evento?', variant: 'destructive' })) remove.mutate();
                 }}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Elimina

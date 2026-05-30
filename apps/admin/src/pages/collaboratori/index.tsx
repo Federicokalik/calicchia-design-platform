@@ -24,6 +24,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 
 const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
@@ -34,6 +35,7 @@ const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
 export default function CollaboratoriPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [search, setSearch] = useState('');
   const [showNew, setShowNew] = useState(false);
   const [newForm, setNewForm] = useState({ name: '', company: '', email: '', phone: '', type: 'partner', specialization: '' });
@@ -69,7 +71,7 @@ export default function CollaboratoriPage() {
       label: 'Elimina',
       icon: Trash2,
       destructive: true,
-      onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(c.id); },
+      onClick: async () => { if (await confirm({ title: 'Eliminare collaboratore?', variant: 'destructive' })) deleteMutation.mutate(c.id); },
     },
   ];
 

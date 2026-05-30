@@ -34,11 +34,11 @@ const EVENT_OPTIONS = [
 ];
 
 function eventBadgeColor(type: string): string {
-  if (type.startsWith('group.')) return 'bg-blue-500/15 text-blue-700 border-blue-500/30';
-  if (type.startsWith('newsletter.')) return 'bg-purple-500/15 text-purple-700 border-purple-500/30';
-  if (type === 'call.offer') return 'bg-red-500/15 text-red-700 border-red-500/30';
-  if (type === 'chat_presence') return 'bg-gray-500/15 text-gray-700 border-gray-500/30';
-  return 'bg-amber-500/15 text-amber-700 border-amber-500/30';
+  if (type.startsWith('group.')) return 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30';
+  if (type.startsWith('newsletter.')) return 'bg-purple-500/15 text-purple-700 dark:text-purple-300 border-purple-500/30';
+  if (type === 'call.offer') return 'bg-red-500/15 text-red-700 dark:text-red-300 border-red-500/30';
+  if (type === 'chat_presence') return 'bg-muted text-muted-foreground border-border';
+  return 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30';
 }
 
 function shortJid(jid: string | null): string {
@@ -82,7 +82,7 @@ export default function WhatsAppEventsPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-semibold">Eventi WhatsApp</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Eventi WhatsApp</h1>
             <p className="text-sm text-muted-foreground">
               Audit log eventi side-channel ricevuti da GOWA: gruppi, newsletter,
               presenza, chiamate. Le chat normali stanno in{' '}

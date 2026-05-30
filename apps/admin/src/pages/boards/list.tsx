@@ -10,6 +10,7 @@ import { apiFetch } from '@/lib/api';
 import { MINDMAP_TEMPLATES } from '@/data/mindmap-templates';
 import type { Board } from '@/types/notes';
 import { useI18n } from '@/hooks/use-i18n';
+import { useConfirm } from '@/hooks/use-confirm';
 
 interface BoardListProps {
   type: 'sketch' | 'mindmap';
@@ -24,6 +25,7 @@ export default function BoardListPage({ type }: BoardListProps) {
   const { t, formatRelativeTime } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const config = TYPE_CONFIG[type];
   const [showTemplates, setShowTemplates] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -173,7 +175,7 @@ export default function BoardListPage({ type }: BoardListProps) {
               <p className="text-[10px] text-muted-foreground mt-0.5">{formatRelativeTime(board.updated_at)}</p>
             </div>
             <button
-              onClick={(e) => { e.stopPropagation(); if (confirm(t('common.confirm'))) deleteMutation.mutate(board.id); }}
+              onClick={async (e) => { e.stopPropagation(); if (await confirm({ title: t('common.confirm'), variant: 'destructive' })) deleteMutation.mutate(board.id); }}
               className="p-1.5 rounded-md opacity-0 group-hover:opacity-100 hover:bg-muted transition"
             >
               <Trash2 className="h-3.5 w-3.5 text-destructive" />

@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { apiFetch, API_BASE } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 
 interface KbFileInfo {
   name: string;
@@ -58,6 +59,7 @@ function formatDate(iso: string | null | undefined): string {
 
 export function KnowledgeBaseSection() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -307,8 +309,8 @@ export function KnowledgeBaseSection() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => {
-                    if (confirm(`Cancellare ${file.name}?`)) deleteMutation.mutate(file.name);
+                  onClick={async () => {
+                    if (await confirm({ title: `Cancellare ${file.name}?`, variant: 'destructive' })) deleteMutation.mutate(file.name);
                   }}
                   disabled={deleteMutation.isPending}
                   className="text-destructive hover:text-destructive"

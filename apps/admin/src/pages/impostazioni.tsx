@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch, apiFetchRaw } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -88,6 +89,7 @@ const NAV_GROUPS = [
 
 export default function ImpostazioniPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const location = useLocation();
   // Allow deep-link from KB warning banner: <Link state={{ activeTab: 'knowledge-base' }} />.
   const initialTab =
@@ -889,8 +891,8 @@ export default function ImpostazioniPage() {
                     <span className="text-[10px] text-muted-foreground">
                       {key.created_at ? new Date(key.created_at).toLocaleDateString('it-IT') : ''}
                     </span>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
-                      if (confirm('Eliminare?')) deleteKeyMutation.mutate(key.id);
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={async () => {
+                      if (await confirm({ title: 'Eliminare questa chiave?', variant: 'destructive' })) deleteKeyMutation.mutate(key.id);
                     }}>
                       <Trash2 className="h-3.5 w-3.5 text-destructive" />
                     </Button>

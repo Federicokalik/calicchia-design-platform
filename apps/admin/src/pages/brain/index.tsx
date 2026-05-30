@@ -15,6 +15,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/hooks/use-i18n';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const TABS = [
   { id: 'overview', labelKey: 'secondBrain.tabs.overview', icon: Brain },
@@ -224,6 +225,7 @@ function ConversationsTab() {
 function FactsTab() {
   const { t, formatRelativeTime } = useI18n();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -315,7 +317,7 @@ function FactsTab() {
                   <button onClick={() => { setEditingId(fact.id); setEditContent(fact.content); }} className="p-1 rounded hover:bg-muted">
                     <Edit3 className="h-3 w-3 text-muted-foreground" />
                   </button>
-                  <button onClick={() => { if (confirm(t('common.confirm'))) deleteMutation.mutate(fact.id); }} className="p-1 rounded hover:bg-muted">
+                  <button onClick={async () => { if (await confirm({ title: t('common.confirm'), variant: 'destructive' })) deleteMutation.mutate(fact.id); }} className="p-1 rounded hover:bg-muted">
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </button>
                 </div>

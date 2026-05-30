@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { useI18n } from '@/hooks/use-i18n';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
@@ -43,6 +44,7 @@ const STATUS_VARIANT: Record<string, 'default' | 'outline' | 'secondary' | 'dest
 export default function PrenotazioniPage() {
   const { t, formatDateTime } = useI18n();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [filter, setFilter] = useState<'all' | 'confirmed' | 'cancelled' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<BookingRow | null>(null);
@@ -243,8 +245,8 @@ export default function PrenotazioniPage() {
                   <Button size="sm" variant="outline" onClick={() => resend.mutate(selected.uid)}>
                     <Send className="h-3.5 w-3.5 mr-1.5" /> {t('calendar.bookings.resend')}
                   </Button>
-                  <Button size="sm" variant="destructive" className="ml-auto" onClick={() => {
-                    if (confirm(t('calendar.bookings.confirmCancel'))) {
+                  <Button size="sm" variant="destructive" className="ml-auto" onClick={async () => {
+                    if (await confirm({ title: t('calendar.bookings.confirmCancel'), variant: 'destructive' })) {
                       cancel.mutate(selected.uid);
                     }
                   }}>

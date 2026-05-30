@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 interface Calendar {
@@ -28,6 +29,7 @@ interface Calendar {
 
 export default function CalendariPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [showNew, setShowNew] = useState(false);
   const [editing, setEditing] = useState<Calendar | null>(null);
 
@@ -181,8 +183,8 @@ export default function CalendariPage() {
                   size="sm"
                   variant="ghost"
                   className="h-7 px-2 text-xs"
-                  onClick={() => {
-                    if (confirm('Rigenerare il token? I client che usano l\'URL attuale smetteranno di sincronizzare.')) {
+                  onClick={async () => {
+                    if (await confirm({ title: 'Rigenerare il token?', description: 'I client che usano l\'URL attuale smetteranno di sincronizzare.', confirmText: 'Rigenera', variant: 'destructive' })) {
                       rotateToken.mutate(cal.id);
                     }
                   }}
@@ -195,8 +197,8 @@ export default function CalendariPage() {
                     size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-xs text-destructive ml-auto"
-                    onClick={() => {
-                      if (confirm(`Eliminare "${cal.name}" e tutti i suoi ${cal.event_count} eventi? Operazione non reversibile.`)) {
+                    onClick={async () => {
+                      if (await confirm({ title: `Eliminare "${cal.name}"?`, description: `Verranno rimossi anche i suoi ${cal.event_count} eventi. Operazione non reversibile.`, variant: 'destructive' })) {
                         remove.mutate(cal.id);
                       }
                     }}
@@ -234,6 +236,7 @@ interface Subscription {
 
 function SubscriptionsPanel({ calendars }: { calendars: Calendar[] }) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [showNew, setShowNew] = useState(false);
 
   const { data, isLoading } = useQuery({
@@ -360,8 +363,8 @@ function SubscriptionsPanel({ calendars }: { calendars: Calendar[] }) {
                     size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-xs text-destructive ml-auto"
-                    onClick={() => {
-                      if (confirm(`Eliminare la sottoscrizione "${sub.name}"? Verranno rimossi anche i ${sub.event_count} eventi importati.`)) {
+                    onClick={async () => {
+                      if (await confirm({ title: `Eliminare la sottoscrizione "${sub.name}"?`, description: `Verranno rimossi anche i ${sub.event_count} eventi importati.`, variant: 'destructive' })) {
                         remove.mutate(sub.id);
                       }
                     }}

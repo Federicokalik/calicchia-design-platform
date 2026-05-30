@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/react';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/hooks/use-theme';
 import { I18nProvider } from '@/hooks/use-i18n';
+import { ConfirmProvider } from '@/hooks/use-confirm';
 import { bugsink } from '@/lib/bugsink';
 import App from './App';
 import './index.css';
@@ -32,12 +33,14 @@ createRoot(document.getElementById('root')!).render(
     <ThemeProvider>
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <Sentry.ErrorBoundary fallback={<div role="alert">Errore applicazione.</div>}>
-              <App />
-            </Sentry.ErrorBoundary>
-            <Toaster richColors position="top-right" />
-          </BrowserRouter>
+          <ConfirmProvider>
+            <BrowserRouter>
+              <Sentry.ErrorBoundary fallback={<div role="alert">Errore applicazione.</div>}>
+                <App />
+              </Sentry.ErrorBoundary>
+              <Toaster richColors position="top-right" />
+            </BrowserRouter>
+          </ConfirmProvider>
         </QueryClientProvider>
       </I18nProvider>
     </ThemeProvider>

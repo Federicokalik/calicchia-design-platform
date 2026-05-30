@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { CreateScheduleDialog } from './create-schedule-dialog';
 import CreateLinkDialog from './create-link-dialog';
@@ -86,6 +87,7 @@ function isOverdue(dateStr: string, status: string): boolean {
 
 export default function SchedulesTab() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
@@ -313,12 +315,8 @@ export default function SchedulesTab() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="text-red-600 dark:text-red-400"
-                      onClick={() => {
-                        if (
-                          window.confirm(
-                            'Eliminare questa scadenza? L\'azione non e reversibile.',
-                          )
-                        ) {
+                      onClick={async () => {
+                        if (await confirm({ title: 'Eliminare questa scadenza?', description: 'L\'azione non è reversibile.', variant: 'destructive' })) {
                           deleteMutation.mutate(schedule.id);
                         }
                       }}

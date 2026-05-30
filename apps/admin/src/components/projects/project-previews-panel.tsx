@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import type { ProjectPreview } from '@/types/projects';
 
 const PROVIDERS = ['netlify', 'vercel', 'wordpress', 'custom'] as const;
@@ -51,6 +52,7 @@ function SelectField({
 
 export function ProjectPreviewsPanel({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const createFormRef = useRef<HTMLFormElement>(null);
   const queryKey = ['project-previews', projectId];
 
@@ -223,8 +225,8 @@ export function ProjectPreviewsPanel({ projectId }: { projectId: string }) {
                   size="sm"
                   variant="destructive"
                   disabled={deleteMutation.isPending}
-                  onClick={() => {
-                    if (confirm('Eliminare questa anteprima?')) deleteMutation.mutate(preview.id);
+                  onClick={async () => {
+                    if (await confirm({ title: 'Eliminare questa anteprima?', variant: 'destructive' })) deleteMutation.mutate(preview.id);
                   }}
                 >
                   <Trash2 className="h-3.5 w-3.5" />

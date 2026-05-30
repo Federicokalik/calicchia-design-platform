@@ -8,6 +8,7 @@ import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { siteAsset } from '@/lib/public-urls';
 
 interface PortfolioProject {
@@ -21,6 +22,7 @@ interface PortfolioProject {
 
 export default function PortfolioPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const navigate = useNavigate();
 
   const { data: projects = [], isLoading } = useQuery({
@@ -97,7 +99,7 @@ export default function PortfolioPage() {
                 label: 'Elimina',
                 icon: Trash2,
                 destructive: true,
-                onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(project.id); },
+                onClick: async () => { if (await confirm({ title: 'Eliminare progetto?', variant: 'destructive' })) deleteMutation.mutate(project.id); },
               },
             ];
             return (
@@ -139,7 +141,7 @@ export default function PortfolioPage() {
                     variant="outline"
                     size="sm"
                     className="h-7 w-7 p-0"
-                    onClick={() => { if (confirm('Eliminare?')) deleteMutation.mutate(project.id); }}
+                    onClick={async () => { if (await confirm({ title: 'Eliminare progetto?', variant: 'destructive' })) deleteMutation.mutate(project.id); }}
                   >
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>

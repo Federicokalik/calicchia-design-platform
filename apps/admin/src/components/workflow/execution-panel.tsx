@@ -26,8 +26,8 @@ interface ExecutionPanelProps {
 const statusConfig = {
   pending: {
     icon: Clock,
-    color: 'text-gray-400',
-    bg: 'bg-gray-50',
+    color: 'text-muted-foreground',
+    bg: 'bg-muted',
     label: 'In attesa',
   },
   running: {
@@ -85,38 +85,38 @@ export function ExecutionPanel({ steps, executionStatus }: ExecutionPanelProps) 
   const failedCount = steps.filter((s) => s.status === 'failed').length;
 
   return (
-    <div className="border-t bg-white">
+    <div className="border-t bg-background">
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between px-4 py-2 hover:bg-gray-50"
+        className="flex w-full items-center justify-between px-4 py-2 hover:bg-muted"
       >
         <div className="flex items-center gap-3">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             {t('workflow.executionPanel.title')}
           </h4>
           <span
             className={cn(
               'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium',
-              executionStatus === 'running' && 'bg-blue-50 text-blue-700',
-              executionStatus === 'completed' && 'bg-green-50 text-green-700',
-              executionStatus === 'failed' && 'bg-red-50 text-red-700',
-              executionStatus === 'idle' && 'bg-gray-100 text-gray-500'
+              executionStatus === 'running' && 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
+              executionStatus === 'completed' && 'bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-300',
+              executionStatus === 'failed' && 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300',
+              executionStatus === 'idle' && 'bg-muted text-muted-foreground'
             )}
           >
             {t(`workflow.executionStatus.${executionStatus}`)}
           </span>
           {steps.length > 0 && (
-            <span className="text-[11px] text-gray-400">
+            <span className="text-[11px] text-muted-foreground">
               {t('workflow.executionPanel.progress', { completed: completedCount, total: steps.length })}
               {failedCount > 0 && ` - ${t('workflow.executionPanel.errors', { count: failedCount })}`}
             </span>
           )}
         </div>
         {expanded ? (
-          <ChevronDown className="h-4 w-4 text-gray-400" />
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
         ) : (
-          <ChevronUp className="h-4 w-4 text-gray-400" />
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
         )}
       </button>
 
@@ -124,13 +124,13 @@ export function ExecutionPanel({ steps, executionStatus }: ExecutionPanelProps) 
       {expanded && (
         <div className="max-h-48 overflow-y-auto border-t">
           {steps.length === 0 ? (
-            <div className="px-4 py-6 text-center text-sm text-gray-400">
+            <div className="px-4 py-6 text-center text-sm text-muted-foreground">
               {t('workflow.executionPanel.empty')}
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-gray-50/50 text-left text-[11px] uppercase tracking-wider text-gray-400">
+                <tr className="border-b bg-muted/50 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-1.5 font-medium">{t('common.status')}</th>
                   <th className="px-4 py-1.5 font-medium">{t('workflow.executionPanel.node')}</th>
                   <th className="px-4 py-1.5 font-medium">{t('workflow.executionPanel.type')}</th>
@@ -147,7 +147,7 @@ export function ExecutionPanel({ steps, executionStatus }: ExecutionPanelProps) 
                       key={`${step.node_id}-${i}`}
                       className={cn(
                         'border-b last:border-0',
-                        step.status === 'failed' && 'bg-red-50/30'
+                        step.status === 'failed' && 'bg-red-50/30 dark:bg-red-950/20'
                       )}
                     >
                       <td className="px-4 py-1.5">
@@ -167,17 +167,17 @@ export function ExecutionPanel({ steps, executionStatus }: ExecutionPanelProps) 
                         </div>
                       </td>
                       <td className="px-4 py-1.5">
-                        <span className="font-mono text-xs text-gray-500">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {step.node_id}
                         </span>
                       </td>
                       <td className="px-4 py-1.5">
-                        <span className="text-xs text-gray-700">
+                        <span className="text-xs text-foreground">
                           {locale === 'en' ? step.node_type.replace(/_/g, ' ') : (nodeTypeLabels[step.node_type] ?? step.node_type)}
                         </span>
                       </td>
                       <td className="px-4 py-1.5 text-right">
-                        <span className="font-mono text-xs text-gray-500">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {formatDuration(step.duration_ms)}
                         </span>
                       </td>
@@ -194,12 +194,12 @@ export function ExecutionPanel({ steps, executionStatus }: ExecutionPanelProps) 
             .map((step, i) => (
               <div
                 key={`err-${step.node_id}-${i}`}
-                className="border-t border-red-100 bg-red-50/50 px-4 py-2"
+                className="border-t border-red-100 bg-red-50/50 px-4 py-2 dark:border-red-900/40 dark:bg-red-950/20"
               >
-                <p className="text-xs font-medium text-red-600">
+                <p className="text-xs font-medium text-red-600 dark:text-red-400">
                   {t('workflow.executionPanel.errorIn', { node: nodeTypeLabels[step.node_type] ?? step.node_type, id: step.node_id })}
                 </p>
-                <p className="mt-0.5 font-mono text-xs text-red-500">
+                <p className="mt-0.5 font-mono text-xs text-red-500 dark:text-red-400">
                   {step.error}
                 </p>
               </div>

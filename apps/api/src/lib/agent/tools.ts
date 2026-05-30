@@ -23,6 +23,7 @@ export interface ToolDefinition {
   parameters: Record<string, unknown>;
   riskLevel?: 'low' | 'medium' | 'high';
   requiresConfirmation?: boolean; // If true, agent must ask user before executing
+  confirmLabel?: string; // Human-readable label for the confirmation button (admin AI bar)
   execute: (args: Record<string, unknown>) => Promise<string>;
 }
 

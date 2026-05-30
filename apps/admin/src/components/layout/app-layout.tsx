@@ -6,6 +6,7 @@ import { useCommandPalette } from '@/hooks/use-command-palette';
 import { useSessionWarning } from '@/hooks/use-session-warning';
 import { TopbarProvider } from '@/hooks/use-topbar';
 import { AiEntityContextProvider } from '@/hooks/use-ai-entity-context';
+import { AiPanelProvider } from '@/hooks/use-ai-panel';
 import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { CommandPalette } from './command-palette';
@@ -23,6 +24,7 @@ export function AppLayout() {
   return (
     <TopbarProvider>
     <AiEntityContextProvider>
+    <AiPanelProvider>
     <TooltipProvider>
       <div className="min-h-screen bg-muted/40">
         <Sidebar
@@ -67,6 +69,7 @@ export function AppLayout() {
         />
       </div>
     </TooltipProvider>
+    </AiPanelProvider>
     </AiEntityContextProvider>
     </TopbarProvider>
   );

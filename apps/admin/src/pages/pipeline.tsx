@@ -22,6 +22,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { LoadingState } from '@/components/shared/loading-state';
 import type { RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import type { Lead, LeadStatus } from '@/types/lead';
 import { LEAD_STATUS_CONFIG, LEAD_COLUMN_ORDER } from '@/types/lead';
 import { LeadCard } from '@/components/pipeline/lead-card';
@@ -82,6 +83,7 @@ function PipelineColumn({
 export default function PipelinePage() {
   const { t, formatCurrency } = useI18n();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   const [activeLead, setActiveLead] = useState<Lead | null>(null);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -314,8 +316,8 @@ export default function PipelinePage() {
       label: t('common.delete') || 'Elimina',
       icon: Trash2,
       destructive: true,
-      onClick: () => {
-        if (window.confirm(t('lead.confirmDelete') || 'Eliminare questo lead?')) {
+      onClick: async () => {
+        if (await confirm({ title: t('lead.confirmDelete') || 'Eliminare questo lead?', variant: 'destructive' })) {
           deleteMutation.mutate(lead.id);
         }
       },

@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { Logo } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -118,11 +119,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
         <div className="absolute inset-0 flex flex-col justify-between p-12">
           <div>
-            <img
-              src="/img/logo-white.png"
-              alt="Calicchia Design"
-              className="h-12 w-auto drop-shadow-lg"
-            />
+            <Logo className="h-12 w-auto text-white drop-shadow-lg" />
           </div>
           <div className="space-y-4">
             <blockquote className="text-white/90 text-lg leading-relaxed max-w-sm font-light">
@@ -138,11 +135,7 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden flex justify-center">
-            <img
-              src="/img/logo.png"
-              alt="Calicchia Design"
-              className="h-10 w-auto"
-            />
+            <Logo className="h-10 w-auto text-foreground" />
           </div>
 
           {/* Title */}

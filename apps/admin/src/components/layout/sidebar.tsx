@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import {
   ChevronsLeft,
-  ChevronsRight,
   LogOut,
   ExternalLink,
   X,
+  Sparkles,
 } from 'lucide-react';
+import { Logo } from '@/components/brand/logo';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/use-auth';
 import { useI18n } from '@/hooks/use-i18n';
+import { useAiPanel } from '@/hooks/use-ai-panel';
 import { cn } from '@/lib/utils';
 import { SidebarNav } from './sidebar-nav';
 import { SITE_URL } from '@/lib/public-urls';
@@ -28,6 +30,7 @@ interface SidebarProps {
 export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: SidebarProps) {
   const { user, signOut } = useAuth();
   const { t } = useI18n();
+  const aiPanel = useAiPanel();
 
   const handleSignOut = async () => {
     await signOut();
@@ -78,8 +81,7 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
         )}>
           {!collapsed && (
             <>
-              <img src="/img/logo.png" alt="Logo" className="h-7 dark:hidden" />
-              <img src="/img/logo-white.png" alt="Logo" className="h-7 hidden dark:block" />
+              <Logo className="h-7 text-foreground" />
               <Button variant="ghost" size="icon" className="hidden lg:flex h-7 w-7" onClick={onToggle}>
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -96,9 +98,13 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
             </>
           )}
           {collapsed && (
-            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onToggle}>
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
+            <button
+              onClick={onToggle}
+              aria-label="Espandi menu"
+              className="flex h-8 w-8 items-center justify-center rounded-md hover:bg-foreground/5 transition-colors"
+            >
+              <Logo collapsed className="h-5" />
+            </button>
           )}
         </div>
 
@@ -119,6 +125,19 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
                   <p className="text-sm font-medium truncate">{user?.email}</p>
                 </div>
               </div>
+              <button
+                onClick={aiPanel.toggle}
+                aria-pressed={aiPanel.open}
+                className={cn(
+                  'flex w-full items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs transition-colors',
+                  aiPanel.open
+                    ? 'bg-primary/15 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <Sparkles className="h-3 w-3" />
+                {t('ai.assistant')}
+              </button>
               <div className="flex gap-1">
                 <a
                   href={SITE_URL}
@@ -140,6 +159,22 @@ export function Sidebar({ collapsed, onToggle, mobileOpen, onCloseMobile }: Side
             </div>
           ) : (
             <div className="flex flex-col items-center gap-0.5">
+              <Tooltip delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={aiPanel.toggle}
+                    aria-pressed={aiPanel.open}
+                    aria-label={t('ai.assistant')}
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded transition-colors',
+                      aiPanel.open ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    )}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right">{t('ai.assistant')}</TooltipContent>
+              </Tooltip>
               <Tooltip delayDuration={0}>
                 <TooltipTrigger asChild>
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-medium cursor-default">

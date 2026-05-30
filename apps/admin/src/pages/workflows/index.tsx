@@ -16,6 +16,7 @@ import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 import { useI18n } from '@/hooks/use-i18n';
@@ -31,6 +32,7 @@ export default function WorkflowsPage() {
   const { t, formatStatus } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const { data, isLoading } = useQuery({
     queryKey: ['workflows'],
@@ -82,7 +84,7 @@ export default function WorkflowsPage() {
       label: t('common.delete'),
       icon: Trash2,
       destructive: true,
-      onClick: () => { if (confirm(t('workflow.confirmDelete'))) deleteMutation.mutate(wf.id); },
+      onClick: async () => { if (await confirm({ title: t('workflow.confirmDelete'), variant: 'destructive' })) deleteMutation.mutate(wf.id); },
     },
   ];
 

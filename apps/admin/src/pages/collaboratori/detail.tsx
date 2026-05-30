@@ -25,6 +25,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
@@ -65,6 +66,16 @@ export default function CollaboratoreDetailPage() {
     title: collab?.name || 'Collaboratore',
     subtitle: collab?.company || '',
   });
+  useSetAiEntityContext(
+    collab
+      ? {
+          kind: 'collaboratore',
+          id: String(collab.id ?? id ?? ''),
+          title: collab.name || 'Collaboratore',
+          summary: [collab.company, collab.specialization].filter(Boolean).join(' · ') || undefined,
+        }
+      : null,
+  );
 
   const updateMutation = useMutation({
     mutationFn: (body: any) => apiFetch(`/api/collaborators-v2/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
@@ -149,7 +160,7 @@ export default function CollaboratoreDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold truncate">{collab.name}</h1>
+            <h1 className="text-2xl font-bold tracking-tight truncate">{collab.name}</h1>
             <Badge variant="outline" className="text-xs">{collab.type === 'partner' ? 'Partner' : 'Sub-fornitore'}</Badge>
           </div>
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">

@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useConfirm } from '@/hooks/use-confirm';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -64,6 +65,7 @@ export default function FaqCmsPage() {
   useTopbar({ title: 'CMS — FAQ', subtitle: 'Domande frequenti per /faq e per /perche-scegliere-me.' });
 
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [localeFilter, setLocaleFilter] = useState<'all' | 'it' | 'en'>('all');
   const [sectionFilter, setSectionFilter] = useState<'all' | FaqSection>('all');
   const [draft, setDraft] = useState<DraftRow | null>(null);
@@ -290,8 +292,8 @@ export default function FaqCmsPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {
-                                if (window.confirm('Eliminare definitivamente questa FAQ?')) deleteMutation.mutate(row.id);
+                              onClick={async () => {
+                                if (await confirm({ title: 'Eliminare definitivamente questa FAQ?', variant: 'destructive' })) deleteMutation.mutate(row.id);
                               }}
                             >
                               <Trash2 className="h-3.5 w-3.5 text-destructive" />

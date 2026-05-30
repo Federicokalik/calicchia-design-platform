@@ -17,6 +17,7 @@ import type { RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import EventoEditModal from '@/pages/calendario/evento-edit';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
@@ -74,6 +75,7 @@ interface CalendarEventOcc {
 export default function CalendarioPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const { intlLocale, locale } = useI18n();
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventOcc | null>(null);
@@ -288,8 +290,8 @@ export default function CalendarioPage() {
       label: 'Elimina',
       icon: Trash2,
       destructive: true,
-      onClick: () => {
-        if (confirm('Eliminare questo evento?')) deleteMutation.mutate(ev.id);
+      onClick: async () => {
+        if (await confirm({ title: 'Eliminare questo evento?', variant: 'destructive' })) deleteMutation.mutate(ev.id);
       },
     },
   ];

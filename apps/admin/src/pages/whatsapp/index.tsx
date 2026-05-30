@@ -32,6 +32,7 @@ import { apiFetch } from '@/lib/api';
 import { formatPhoneE164, initialsOf, avatarColorFor } from '@/lib/format';
 import { useWhatsAppStream } from '@/hooks/use-whatsapp-stream';
 import { useBrowserNotifications } from '@/hooks/use-browser-notifications';
+import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { CustomerPanel } from './customer-panel';
 
 // ---------- types ----------
@@ -307,6 +308,20 @@ export default function WhatsAppInboxPage() {
   const selectedConv: ConversationSummary | undefined = baseSelectedConv
     ? { ...baseSelectedConv, ...(convDetail || {}) }
     : convDetail || undefined;
+
+  // Tell the AI bar WHO the user is chatting with, so "rispondi a questo" /
+  // "chi è" resolve to the open conversation without naming it.
+  useSetAiEntityContext(
+    selectedConv
+      ? {
+          kind: 'whatsapp',
+          id: selectedConv.id,
+          title: displayNameOf(selectedConv),
+          summary: [formatPhoneE164(selectedConv.phone) || selectedConv.phone, selectedConv.last_message_preview].filter(Boolean).join(' · ') || undefined,
+        }
+      : null,
+  );
+
   const groupedMessages = useMemo(() => groupMessagesByDay(messages), [messages]);
   const canLoadMore = latestMessages.length === 100 && olderMessages.length === 0
     || (olderMessages.length > 0 && olderMessages.length % 50 === 0);
@@ -1738,7 +1753,7 @@ function MessageBubble({
               <Textarea
                 value={editingText}
                 onChange={(e) => onEditChange(e.target.value)}
-                className="min-h-[80px] text-sm bg-white text-foreground"
+                className="min-h-[80px] text-sm bg-background text-foreground"
               />
               <div className="flex gap-1 justify-end">
                 <Button size="sm" variant="ghost" onClick={onCancelEdit}>Annulla</Button>

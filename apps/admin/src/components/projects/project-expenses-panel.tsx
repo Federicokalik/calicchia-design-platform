@@ -16,6 +16,7 @@ import {
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import {
   PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_METHOD_COLORS,
@@ -96,6 +97,7 @@ function formatDate(value: string | null) {
 
 export function ProjectExpensesPanel({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const queryKey = ['project-expenses', projectId];
 
   const { data, isLoading } = useQuery<{ expenses: ExpenseRow[] }>({
@@ -298,8 +300,8 @@ export function ProjectExpensesPanel({ projectId }: { projectId: string }) {
                         variant="ghost"
                         size="icon"
                         className="h-7 w-7 text-red-600 hover:text-red-700"
-                        onClick={() => {
-                          if (confirm('Eliminare questa spesa?')) deleteMutation.mutate(r.id);
+                        onClick={async () => {
+                          if (await confirm({ title: 'Eliminare questa spesa?', variant: 'destructive' })) deleteMutation.mutate(r.id);
                         }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />

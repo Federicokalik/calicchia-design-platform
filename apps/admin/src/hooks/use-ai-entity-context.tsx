@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 
 export interface AiEntityContext {
-  kind: 'progetto' | 'cliente' | 'lead' | 'preventivo' | 'fattura' | 'task' | 'email';
+  kind: 'progetto' | 'cliente' | 'lead' | 'preventivo' | 'fattura' | 'task' | 'email' | 'collaboratore' | 'whatsapp' | 'evento';
   id: string;
   title: string;
   summary?: string;

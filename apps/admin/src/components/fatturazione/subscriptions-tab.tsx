@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { CreateSubscriptionDialog } from './create-subscription-dialog';
 
@@ -119,6 +120,7 @@ function parseReminderDaysCsv(csv: string): number[] {
 
 export default function SubscriptionsTab() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<SubscriptionRow | null>(null);
   const [form, setForm] = useState<DunningForm>({
@@ -298,8 +300,8 @@ export default function SubscriptionsTab() {
                             size="icon"
                             variant="ghost"
                             className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => {
-                              if (confirm(`Cancellare l'abbonamento "${sub.name}" alla fine del periodo corrente?`)) {
+                            onClick={async () => {
+                              if (await confirm({ title: `Cancellare l'abbonamento "${sub.name}"?`, description: 'La cancellazione avverrà alla fine del periodo corrente.', confirmText: 'Cancella', variant: 'destructive' })) {
                                 cancelMutation.mutate({ id: sub.id, atPeriodEnd: true });
                               }
                             }}

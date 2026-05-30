@@ -6,6 +6,7 @@ import { ArrowLeft, Save, Trash2, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { SITE_URL } from '@/lib/public-urls';
 
 interface EventTypeForm {
@@ -31,6 +32,7 @@ export default function EventTypeEditPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-event-type', id],
@@ -242,8 +244,8 @@ export default function EventTypeEditPage() {
           variant="outline"
           size="sm"
           className="text-destructive hover:text-destructive"
-          onClick={() => {
-            if (confirm('Disattivare questo event type? I bookings storici restano accessibili.')) {
+          onClick={async () => {
+            if (await confirm({ title: 'Disattivare questo event type?', description: 'I bookings storici restano accessibili.', confirmText: 'Disattiva', variant: 'destructive' })) {
               remove.mutate();
             }
           }}

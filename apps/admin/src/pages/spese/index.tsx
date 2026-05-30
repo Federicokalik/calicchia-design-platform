@@ -22,6 +22,7 @@ import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 
 type Category =
@@ -96,6 +97,7 @@ const EMPTY_FORM: ExpenseForm = {
 export default function SpesePage() {
   const { formatCurrency } = useI18n();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
 
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -481,7 +483,7 @@ export default function SpesePage() {
                 label: 'Elimina',
                 icon: Trash2,
                 destructive: true,
-                onClick: () => { if (window.confirm('Eliminare questa spesa?')) deleteMutation.mutate(e.id); },
+                onClick: async () => { if (await confirm({ title: 'Eliminare questa spesa?', variant: 'destructive' })) deleteMutation.mutate(e.id); },
               },
             ];
             return (
@@ -524,8 +526,8 @@ export default function SpesePage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => {
-                  if (window.confirm('Eliminare questa spesa?')) {
+                onClick={async () => {
+                  if (await confirm({ title: 'Eliminare questa spesa?', variant: 'destructive' })) {
                     deleteMutation.mutate(e.id);
                   }
                 }}

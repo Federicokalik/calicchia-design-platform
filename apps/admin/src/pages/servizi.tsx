@@ -19,6 +19,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { ServiceFormDialog } from '@/components/servizi/service-form-dialog';
 
@@ -61,6 +62,7 @@ function formatEUR(amount: number | string, currency = 'EUR'): string {
 
 export default function ServiziPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [editing, setEditing] = useState<Service | null>(null);
   const [creating, setCreating] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -144,8 +146,8 @@ export default function ServiziPage() {
             <Button
               variant="destructive"
               size="sm"
-              onClick={() => {
-                if (confirm(`Eliminare ${selected.size} servizi selezionati?\nI servizi linkati ad abbonamenti attivi saranno saltati.`)) {
+              onClick={async () => {
+                if (await confirm({ title: `Eliminare ${selected.size} servizi selezionati?`, description: 'I servizi linkati ad abbonamenti attivi saranno saltati.', variant: 'destructive' })) {
                   bulkDeleteMutation.mutate([...selected]);
                 }
               }}
@@ -288,8 +290,8 @@ export default function ServiziPage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
-                          onClick={() => {
-                            if (confirm(`Eliminare il servizio "${svc.name}"?`)) {
+                          onClick={async () => {
+                            if (await confirm({ title: `Eliminare il servizio "${svc.name}"?`, variant: 'destructive' })) {
                               deleteMutation.mutate(svc.id);
                             }
                           }}

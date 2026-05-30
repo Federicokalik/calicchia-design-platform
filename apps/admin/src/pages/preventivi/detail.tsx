@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/shared/empty-state';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
@@ -41,6 +42,16 @@ export default function PreventivoDetailPage() {
   const audit = data?.audit || [];
 
   useTopbar({ title: quote?.title || 'Dettaglio Preventivo', subtitle: quote ? '€' + parseFloat(quote.total || '0').toLocaleString('it-IT') : '' });
+  useSetAiEntityContext(
+    quote
+      ? {
+          kind: 'preventivo',
+          id: String(quote.id ?? id ?? ''),
+          title: quote.title || 'Preventivo',
+          summary: [`€${parseFloat(quote.total || '0').toLocaleString('it-IT')}`, quote.status].filter(Boolean).join(' · '),
+        }
+      : null,
+  );
 
   if (isLoading) return <LoadingState />;
   if (!quote) return <EmptyState title="Preventivo non trovato" />;
@@ -66,7 +77,7 @@ export default function PreventivoDetailPage() {
         </Button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-2xl font-bold tracking-tight">{quote.title}</h1>
+            <h1 className="text-2xl font-bold tracking-tight truncate">{quote.title}</h1>
             <Badge variant="outline" className="text-xs capitalize">{quote.status}</Badge>
           </div>
           <p className="text-sm text-muted-foreground mt-1">

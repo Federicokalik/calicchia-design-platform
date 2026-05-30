@@ -7,7 +7,7 @@ import { readFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { getToolsForLLM, executeTool, tools, type ToolDefinition } from './tools';
+import { getToolsForLLM, executeTool, tools, checkRateLimit, checkBudgetCap, type ToolDefinition } from './tools';
 import { recallMemory, saveConversation, addFact, addPreference } from './memory';
 import { getProviderForTask, callOpenAICompatible } from './llm-router';
 import { logger } from '../logger';
@@ -136,14 +136,61 @@ interface AgentOptions {
   maxIterations?: number;
 }
 
+interface PendingAction {
+  tool: string;
+  args: Record<string, unknown>;
+  label: string;
+}
+
 interface AgentResult {
   reply: string;
   toolsUsed: string[];
+  pendingActions?: PendingAction[];
+}
+
+// Human-readable label for the confirmation button. Prefers an explicit
+// confirmLabel on the tool; otherwise derives the first sentence of the
+// description, stripping the "RICHIEDE CONFERMA" guardrail note.
+function actionLabel(t: ToolDefinition): string {
+  if (t.confirmLabel) return t.confirmLabel;
+  const firstSentence = t.description.split(/(?<=\.)\s/)[0] || t.description;
+  return firstSentence.replace(/RICHIEDE CONFERMA( UTENTE)?\.?/i, '').trim() || t.name;
+}
+
+// Executes a confirmation-gated tool directly (used by the "Esegui" button in
+// the admin AI bar). Bypasses the LLM: runs exactly the previewed tool+args,
+// reusing the same rate-limit and budget guardrails as the agent loop.
+export async function executeConfirmedAction(
+  toolName: string,
+  args: Record<string, unknown>,
+  channel: 'admin' | 'telegram' | 'cron' = 'admin',
+): Promise<{ ok: boolean; reply: string; result?: unknown }> {
+  const toolDef = allTools.find((t) => t.name === toolName);
+  if (!toolDef) return { ok: false, reply: `Azione sconosciuta: ${toolName}` };
+  if (!toolDef.requiresConfirmation) {
+    return { ok: false, reply: 'Questa azione non è eseguibile tramite il pulsante di conferma.' };
+  }
+  if (!checkRateLimit(channel)) {
+    return { ok: false, reply: 'Rate limit raggiunto (max 20 azioni/min). Riprova tra poco.' };
+  }
+  if (toolName.startsWith('llm_') || toolName === 'generate_quote' || toolName === 'create_project_from_quote') {
+    const withinBudget = await checkBudgetCap();
+    if (!withinBudget) return { ok: false, reply: 'Budget AI mensile raggiunto. Aumenta il cap nelle impostazioni.' };
+  }
+  const raw = await executeAnyTool(toolName, args);
+  let result: unknown;
+  try { result = JSON.parse(raw); } catch { result = raw; }
+  if (result && typeof result === 'object' && 'error' in (result as Record<string, unknown>)) {
+    return { ok: false, reply: String((result as Record<string, unknown>).error), result };
+  }
+  log.info(`Confirmed action executed: ${toolName}`);
+  return { ok: true, reply: `✓ ${actionLabel(toolDef)}`, result };
 }
 
 export async function runAgent(options: AgentOptions): Promise<AgentResult> {
   const { message, context, entity, history = [], channel = 'admin', maxIterations = 5 } = options;
   const toolsUsed: string[] = [];
+  const pendingActions: PendingAction[] = [];
 
   const provider = getProviderForTask('tool_calling');
   if (!provider.apiKey()) {
@@ -204,18 +251,21 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
         // GUARDRAIL: Check if tool requires confirmation
         const toolDef = allTools.find((t) => t.name === toolName);
         if (toolDef?.requiresConfirmation && channel !== 'cron') {
-          // Check if user message contains explicit confirmation
+          // Only true affirmations count as confirmation. Action verbs
+          // (invia/manda/crea) were removed so every gated action surfaces an
+          // "Esegui" button instead of silently auto-executing on the first turn.
           const lastUserMsg = message.toLowerCase();
-          const isConfirmed = /\b(sì|si|ok|conferma|confermo|procedi|vai|fallo|invia|manda|crea)\b/.test(lastUserMsg);
+          const isConfirmed = /\b(sì|si|ok|conferma|confermo|procedi|vai|fallo)\b/.test(lastUserMsg);
 
           if (!isConfirmed) {
-            // Block execution, ask for confirmation
+            // Block execution and surface a structured pending action so the
+            // admin AI bar can render an "Esegui" button (full args, not truncated).
             log.info(`BLOCKED: ${toolName} requires confirmation`);
-            const argsPreview = JSON.stringify(args).slice(0, 200);
+            pendingActions.push({ tool: toolName, args, label: actionLabel(toolDef) });
             messages.push({
               role: 'tool',
               tool_call_id: tc.id,
-              content: JSON.stringify({ blocked: true, reason: 'Azione bloccata — richiede conferma utente', tool: toolName, args_preview: argsPreview }),
+              content: JSON.stringify({ blocked: true, reason: 'Azione bloccata — richiede conferma utente', tool: toolName, args_preview: JSON.stringify(args).slice(0, 200) }),
             });
             toolsUsed.push(`${toolName}:BLOCKED`);
             continue;
@@ -255,7 +305,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
     const fullHistory = [...history, { role: 'user', content: message }, { role: 'assistant', content: reply }];
     saveConversation(channel, fullHistory, context).catch((err) => log.error({ err }, 'Save error'));
 
-    return { reply, toolsUsed };
+    return { reply, toolsUsed, pendingActions: pendingActions.length ? pendingActions : undefined };
   }
 
   // If we hit the limit, try one last call without tools to force a text response
@@ -265,7 +315,7 @@ export async function runAgent(options: AgentOptions): Promise<AgentResult> {
       { role: 'user', content: 'Rispondi in base alle informazioni raccolte finora. Non chiamare altri tool.' },
     ], { temperature: 0.5, max_tokens: 1000, _task: 'chat', _channel: channel });
     const lastReply = lastData.choices?.[0]?.message?.content;
-    if (lastReply) return { reply: lastReply, toolsUsed };
+    if (lastReply) return { reply: lastReply, toolsUsed, pendingActions: pendingActions.length ? pendingActions : undefined };
   } catch {}
-  return { reply: 'Non sono riuscito a completare la richiesta. Prova con una domanda più specifica.', toolsUsed };
+  return { reply: 'Non sono riuscito a completare la richiesta. Prova con una domanda più specifica.', toolsUsed, pendingActions: pendingActions.length ? pendingActions : undefined };
 }

@@ -29,6 +29,7 @@ import {
 import { StatusBadge } from '@/components/shared/status-badge';
 import { EmptyState } from '@/components/shared/empty-state';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { apiFetch } from '@/lib/api';
 import { downloadSdiXml } from '@/lib/sdi';
 import { cn } from '@/lib/utils';
@@ -118,6 +119,16 @@ export default function ClienteDetailPage() {
   const payments = paymentsData?.payments || [];
 
   useTopbar({ title: customer?.contact_name || 'Dettaglio Cliente', subtitle: customer?.company_name || '' });
+  useSetAiEntityContext(
+    customer
+      ? {
+          kind: 'cliente',
+          id: String(customer.id ?? id ?? ''),
+          title: customer.contact_name || customer.company_name || 'Cliente',
+          summary: [customer.company_name, customer.status].filter(Boolean).join(' · ') || undefined,
+        }
+      : null,
+  );
 
   // Note form
   const [noteContent, setNoteContent] = useState('');

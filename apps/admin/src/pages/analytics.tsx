@@ -19,6 +19,7 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch, API_BASE } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { StatCard } from '@/components/analytics/stat-card';
 import { PeriodSelector, type PeriodValue } from '@/components/analytics/period-selector';
 import { TimeseriesChart } from '@/components/analytics/timeseries-chart';
@@ -324,6 +325,7 @@ function WebVitalsTab({ period }: { period: PeriodValue }) {
 
 function GoalsTab({ period }: { period: PeriodValue }) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<'pageview' | 'event'>('pageview');
@@ -422,8 +424,8 @@ function GoalsTab({ period }: { period: PeriodValue }) {
                   <CardTitle className="text-sm font-medium">{g.name}</CardTitle>
                   <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">{g.type}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-7 w-7 -mt-1" onClick={() => {
-                  if (confirm('Eliminare questo goal?')) deleteGoal.mutate(g.id);
+                <Button variant="ghost" size="icon" className="h-7 w-7 -mt-1" onClick={async () => {
+                  if (await confirm({ title: 'Eliminare questo goal?', variant: 'destructive' })) deleteGoal.mutate(g.id);
                 }}>
                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
                 </Button>

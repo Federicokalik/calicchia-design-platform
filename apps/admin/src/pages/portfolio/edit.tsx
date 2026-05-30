@@ -23,6 +23,7 @@ import {
 import { RichEditor } from '@/components/ui/rich-editor';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import {
   SERVICE_OPTIONS,
   parseServicesString,
@@ -80,6 +81,7 @@ export default function PortfolioEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const isNew = !id || id === 'new';
 
   // Migration 090: challenge/solution states rimossi. Brief vive in form.brief.
@@ -655,10 +657,10 @@ export default function PortfolioEditorPage() {
                   variant="outline"
                   className="h-8 text-xs shrink-0"
                   disabled={isNew || seoMutation.isPending}
-                  onClick={() => {
+                  onClick={async () => {
                     const hasTitle = (form.getValues('seo_title') || '').trim().length > 0;
                     const hasDesc = (form.getValues('seo_description') || '').trim().length > 0;
-                    if ((hasTitle || hasDesc) && !window.confirm('Sovrascrivo i campi SEO esistenti?')) return;
+                    if ((hasTitle || hasDesc) && !(await confirm({ title: 'Sovrascrivo i campi SEO esistenti?', variant: 'default' }))) return;
                     seoMutation.mutate();
                   }}
                   title={isNew ? 'Salva prima il progetto per usare la generazione AI' : 'Genera seo_title + seo_description da contenuto IT'}

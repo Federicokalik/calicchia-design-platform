@@ -1,32 +1,51 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Markdown from 'react-markdown';
-import { Send, Sparkles, X, Minimize2 } from 'lucide-react';
+import { Send, Sparkles, X, Minimize2, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
 import { useAiEntityContext, useClearAiEntityContext } from '@/hooks/use-ai-entity-context';
+import { useAiPanel } from '@/hooks/use-ai-panel';
 import { useI18n } from '@/hooks/use-i18n';
+
+interface PendingAction {
+  tool: string;
+  args: Record<string, unknown>;
+  label: string;
+}
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  pendingAction?: PendingAction | null;
+  actionState?: 'pending' | 'running' | 'done' | 'cancelled';
 }
 
 const CONTEXT_BY_PREFIX: Array<readonly [string, string]> = [
   ['/pipeline', 'pipeline'],
   ['/clienti', 'clienti'],
+  ['/contatti', 'contatti'],
   ['/preventivi', 'preventivi'],
   ['/progetti', 'progetti'],
   ['/calendario', 'calendario'],
+  ['/time-tracking', 'time-tracking'],
   ['/blog', 'blog'],
   ['/portfolio', 'portfolio'],
+  ['/cms', 'cms'],
+  ['/servizi', 'servizi'],
   ['/domini', 'domini'],
   ['/fatturazione', 'fatturazione'],
+  ['/spese', 'spese'],
+  ['/tasse', 'tasse'],
+  ['/firme', 'firme'],
   ['/analytics', 'analytics'],
   ['/oggi', 'oggi'],
   ['/posta', 'posta'],
+  ['/whatsapp', 'whatsapp'],
+  ['/marketing', 'marketing'],
+  ['/privacy', 'privacy'],
   ['/impostazioni', 'impostazioni'],
   ['/workflows', 'workflows'],
   ['/brain', 'brain'],
@@ -53,10 +72,11 @@ export function AiBar() {
   const { t } = useI18n();
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
-  // Start collapsed (FAB-only) everywhere. The user opens with click or ⌘J;
-  // the always-expanded desktop default was perceived as visual clutter that
-  // couldn't be dismissed (X clears messages, only the minimize icon collapses).
-  const [collapsed, setCollapsed] = useState(true);
+  // Open-state is shared (sidebar trigger + ⌘J + FAB all drive it). At rest the
+  // panel is closed; on desktop nothing is shown (the sidebar holds the trigger),
+  // on mobile a FAB remains. `collapsed` mirrors the legacy local flag.
+  const { open, setOpen } = useAiPanel();
+  const collapsed = !open;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -71,13 +91,13 @@ export function AiBar() {
     : pageContext;
   const suggestions = SUGGESTIONS[pageContext] || SUGGESTIONS.default;
 
-  // ⌘J shortcut — collapsed → expand to full chat; otherwise toggle chat panel.
+  // ⌘J shortcut — closed → open full chat; otherwise toggle the chat panel.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
         e.preventDefault();
-        if (collapsed) {
-          setCollapsed(false);
+        if (!open) {
+          setOpen(true);
           setExpanded(true);
         } else {
           setExpanded((v) => !v);
@@ -85,24 +105,24 @@ export function AiBar() {
       }
       if (e.key === 'Escape') {
         if (expanded) setExpanded(false);
-        else if (!collapsed) setCollapsed(true);
+        else if (open) setOpen(false);
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [expanded, collapsed]);
+  }, [expanded, open, setOpen]);
 
   useEffect(() => {
     if (expanded && !collapsed) setTimeout(() => inputRef.current?.focus(), 100);
   }, [expanded, collapsed]);
 
   const openFromFab = () => {
-    setCollapsed(false);
+    setOpen(true);
     setExpanded(true);
   };
 
   const collapseToFab = () => {
-    setCollapsed(true);
+    setOpen(false);
     setExpanded(false);
   };
 
@@ -129,7 +149,16 @@ export function AiBar() {
           history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
         }),
       });
-      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: res.reply || t('ai.noReply') }]);
+      const pending: PendingAction | null = Array.isArray(res.pending_actions) && res.pending_actions.length > 0
+        ? res.pending_actions[0]
+        : null;
+      setMessages((prev) => [...prev, {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: res.reply || t('ai.noReply'),
+        pendingAction: pending,
+        actionState: pending ? 'pending' : undefined,
+      }]);
     } catch {
       setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: t('ai.connectionError') }]);
     } finally {
@@ -137,13 +166,38 @@ export function AiBar() {
     }
   };
 
-  // Collapsed state: render only the FAB. Tap opens straight into chat mode.
+  // "Esegui" button — runs exactly the previewed tool+args via the dedicated
+  // endpoint (no second LLM round-trip), so the user never has to re-type "sì".
+  const runAction = async (messageId: string, action: PendingAction) => {
+    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, actionState: 'running' } : m)));
+    try {
+      const res = await apiFetch('/api/ai/execute-action', {
+        method: 'POST',
+        body: JSON.stringify({ tool: action.tool, args: action.args }),
+      });
+      // ok:false (rate limit / tool error) → keep the button available to retry.
+      setMessages((prev) => [
+        ...prev.map((m) => (m.id === messageId ? { ...m, actionState: res.ok ? ('done' as const) : ('pending' as const) } : m)),
+        { id: (Date.now() + 1).toString(), role: 'assistant', content: res.reply || t('ai.noReply') },
+      ]);
+    } catch {
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, actionState: 'pending' } : m)));
+      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: t('ai.connectionError') }]);
+    }
+  };
+
+  const cancelAction = (messageId: string) => {
+    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, actionState: 'cancelled' } : m)));
+  };
+
+  // Closed state: mobile keeps a FAB; desktop shows nothing (the sidebar holds
+  // the trigger) so the assistant never overlaps page content at rest.
   if (collapsed) {
     return (
       <button
         type="button"
         onClick={openFromFab}
-        className="fixed bottom-4 left-4 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center z-[var(--z-ai-bubble)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="lg:hidden fixed bottom-4 left-4 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center z-[var(--z-ai-bubble)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         aria-label={t('ai.openAssistant')}
       >
         <Sparkles className="h-5 w-5" />
@@ -238,6 +292,45 @@ export function AiBar() {
                   </div>
                 ) : (
                   <p className="whitespace-pre-wrap">{msg.content}</p>
+                )}
+
+                {/* Action confirmation — replaces re-typing "sì": one click runs
+                    exactly the previewed tool+args. */}
+                {msg.role === 'assistant' && msg.pendingAction && (
+                  <div className="mt-2 flex items-center gap-2">
+                    {msg.actionState === 'done' ? (
+                      <span className="inline-flex items-center gap-1 text-[12px] text-primary">
+                        <Check className="h-3.5 w-3.5" /> {msg.pendingAction.label}
+                      </span>
+                    ) : msg.actionState === 'cancelled' ? (
+                      <span className="text-[12px] text-muted-foreground">{t('ai.actionCancelled')}</span>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          className="h-7 px-3 text-xs rounded-full"
+                          disabled={msg.actionState === 'running'}
+                          onClick={() => runAction(msg.id, msg.pendingAction!)}
+                        >
+                          {msg.actionState === 'running' ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Check className="h-3.5 w-3.5" />
+                          )}
+                          {t('ai.execute')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-7 px-3 text-xs rounded-full"
+                          disabled={msg.actionState === 'running'}
+                          onClick={() => cancelAction(msg.id)}
+                        >
+                          {t('ai.cancel')}
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

@@ -21,6 +21,7 @@ import { LoadingState } from '@/components/shared/loading-state';
 import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch, API_BASE } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 
 type SignableType = 'nda' | 'contract' | 'sow' | 'other';
@@ -183,6 +184,7 @@ const EMPTY_FORM: FormState = {
 
 export default function FirmePage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -373,7 +375,7 @@ export default function FirmePage() {
                     label: 'Annulla documento',
                     icon: Trash2,
                     destructive: true,
-                    onClick: () => { if (window.confirm('Annullare questo documento?')) deleteMutation.mutate(d.id); },
+                    onClick: async () => { if (await confirm({ title: 'Annullare questo documento?', variant: 'destructive' })) deleteMutation.mutate(d.id); },
                   });
                 }
                 return (
@@ -443,8 +445,8 @@ export default function FirmePage() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => {
-                            if (window.confirm('Annullare questo documento?')) {
+                          onClick={async () => {
+                            if (await confirm({ title: 'Annullare questo documento?', variant: 'destructive' })) {
                               deleteMutation.mutate(d.id);
                             }
                           }}

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -32,6 +33,7 @@ interface BlogListPayload {
 
 export default function BlogPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const navigate = useNavigate();
   // Audit D-010: was loading every post in one shot. Added a status filter +
   // cursor-less pagination consuming the server's existing limit/offset/count
@@ -190,7 +192,7 @@ export default function BlogPage() {
                 label: 'Elimina',
                 icon: Trash2,
                 destructive: true,
-                onClick: () => { if (confirm('Eliminare questo articolo?')) deleteMutation.mutate(post.id); },
+                onClick: async () => { if (await confirm({ title: 'Eliminare questo articolo?', variant: 'destructive' })) deleteMutation.mutate(post.id); },
               },
             ];
             return (
@@ -236,8 +238,8 @@ export default function BlogPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      if (confirm('Eliminare questo articolo?')) {
+                    onClick={async () => {
+                      if (await confirm({ title: 'Eliminare questo articolo?', variant: 'destructive' })) {
                         deleteMutation.mutate(post.id);
                       }
                     }}

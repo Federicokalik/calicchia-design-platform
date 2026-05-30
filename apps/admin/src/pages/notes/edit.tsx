@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { LinkEntityPicker } from '@/components/shared/link-entity-picker';
 import TiptapEditor from '@/components/notes/tiptap-editor';
 import type { JSONContent } from '@tiptap/react';
@@ -21,6 +22,7 @@ export default function NoteEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState<JSONContent | null>(null);
   const [tags, setTags] = useState<string[]>([]);
@@ -163,7 +165,7 @@ export default function NoteEditorPage() {
         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => pinMutation.mutate()}>
           {note.is_pinned ? <PinOff className="h-4 w-4 text-primary" /> : <Pin className="h-4 w-4" />}
         </Button>
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { if (confirm('Eliminare questa nota?')) deleteMutation.mutate(); }}>
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={async () => { if (await confirm({ title: 'Eliminare questa nota?', variant: 'destructive' })) deleteMutation.mutate(); }}>
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       </div>

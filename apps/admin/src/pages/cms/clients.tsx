@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useTopbar } from '@/hooks/use-topbar';
+import { useConfirm } from '@/hooks/use-confirm';
 import { LoadingState } from '@/components/shared/loading-state';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
@@ -50,6 +51,7 @@ export default function ClientsCmsPage() {
   useTopbar({ title: 'CMS — Clients', subtitle: 'Logo TrustBento + back-link case-study (single-locale, i nomi non si traducono).' });
 
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [draft, setDraft] = useState<DraftRow | null>(null);
 
   const { data, isLoading } = useQuery<{ rows: ClientRow[] }>({
@@ -206,8 +208,8 @@ export default function ClientsCmsPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      if (window.confirm(`Eliminare ${row.name}?`)) deleteMutation.mutate(row.id);
+                    onClick={async () => {
+                      if (await confirm({ title: `Eliminare ${row.name}?`, variant: 'destructive' })) deleteMutation.mutate(row.id);
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5 text-destructive" />

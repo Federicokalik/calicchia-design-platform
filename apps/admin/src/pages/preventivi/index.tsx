@@ -21,6 +21,7 @@ import {
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 
@@ -36,6 +37,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof
 export default function PreventiviPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [statusFilter, setStatusFilter] = useState('all');
   const [sendDialog, setSendDialog] = useState<{ id: string; title: string; hasEmail: boolean; hasPhone: boolean } | null>(null);
 
@@ -89,7 +91,7 @@ export default function PreventiviPage() {
         label: 'Elimina',
         icon: Trash2,
         destructive: true,
-        onClick: () => { if (confirm('Eliminare?')) deleteMutation.mutate(q.id); },
+        onClick: async () => { if (await confirm({ title: 'Eliminare preventivo?', variant: 'destructive' })) deleteMutation.mutate(q.id); },
       });
     }
     return items;

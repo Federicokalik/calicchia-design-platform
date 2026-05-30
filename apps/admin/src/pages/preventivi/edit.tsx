@@ -405,7 +405,7 @@ export default function PreventivoEditorPage() {
         <Button variant="ghost" size="icon" onClick={() => navigate('/preventivi')}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h1 className="text-xl font-bold tracking-tight flex-1 truncate">
+        <h1 className="text-2xl font-bold tracking-tight flex-1 truncate">
           {isNew ? 'Nuovo Preventivo' : title || 'Modifica Preventivo'}
         </h1>
         <Button onClick={() => saveMutation.mutate()} disabled={!title.trim() || saveMutation.isPending} size="sm">

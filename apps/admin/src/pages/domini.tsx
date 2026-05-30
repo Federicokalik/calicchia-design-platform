@@ -21,6 +21,7 @@ import {
 import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
 import { LoadingState } from '@/components/shared/loading-state';
 
@@ -43,6 +44,7 @@ const EMPTY_FORM = {
 
 export default function DominiPage() {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -174,7 +176,7 @@ export default function DominiPage() {
                       <Pencil className="h-3.5 w-3.5 mr-2" /> Modifica
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-destructive" onClick={() => { if (confirm('Eliminare?')) deleteMutation.mutate(d.id); }}>
+                    <DropdownMenuItem className="text-destructive" onClick={async () => { if (await confirm({ title: 'Eliminare dominio?', variant: 'destructive' })) deleteMutation.mutate(d.id); }}>
                       <Trash2 className="h-3.5 w-3.5 mr-2" /> Elimina
                     </DropdownMenuItem>
                   </DropdownMenuContent>

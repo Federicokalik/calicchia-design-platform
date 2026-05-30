@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { apiFetch } from '@/lib/api';
+import { useConfirm } from '@/hooks/use-confirm';
 
 const TRANSLATABLE_FIELDS = [
   { key: 'title', label: 'Titolo', type: 'input', maxChars: 200 },
@@ -47,6 +48,7 @@ interface TranslationsPanelENProps {
  */
 export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelENProps) {
   const queryClient = useQueryClient();
+  const confirm = useConfirm();
   const [enValues, setEnValues] = useState<Translations>({});
 
   const { data, isLoading } = useQuery<TranslationsResponse>({
@@ -151,10 +153,10 @@ export function TranslationsPanelEN({ projectId, itValues }: TranslationsPanelEN
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => {
+            onClick={async () => {
               // Warn if any EN field has manual content that would be overwritten.
               const hasManual = TRANSLATABLE_FIELDS.some((f) => (enValues[f.key] || '').trim().length > 0);
-              if (hasManual && !window.confirm('Sovrascrivo le traduzioni EN già inserite?')) return;
+              if (hasManual && !(await confirm({ title: 'Sovrascrivo le traduzioni EN già inserite?', variant: 'default' }))) return;
               translateMutation.mutate();
             }}
             disabled={translateMutation.isPending || saveMutation.isPending}
