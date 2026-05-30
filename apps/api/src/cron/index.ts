@@ -24,13 +24,37 @@ import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
 
+interface LongTimer {
+  clear: () => void;
+}
+
 interface CronJob {
   name: string;
   intervalMs: number;
   runAtHour?: number; // Run at this hour (0-23). If set, first run waits until this hour.
   run: () => Promise<void>;
   lastRun?: Date;
-  timer?: ReturnType<typeof setTimeout>;
+  timer?: LongTimer;
+}
+
+// Node's setTimeout stores the delay in a 32-bit signed int. A delay greater
+// than this is NOT honoured — it silently wraps to 1ms and emits a
+// TimeoutOverflowWarning, turning a long-interval job into a busy-loop (this
+// is exactly what happened to analytics-geo-refresh: a ~30-day interval fired
+// every ~1ms). Chain timers so any delay, however long, is respected.
+const MAX_TIMEOUT_MS = 2_147_483_647; // 2^31 - 1 ≈ 24.8 days
+
+function longTimeout(fn: () => void, delayMs: number): LongTimer {
+  let timer: ReturnType<typeof setTimeout>;
+  const arm = (remaining: number) => {
+    if (remaining <= MAX_TIMEOUT_MS) {
+      timer = setTimeout(fn, Math.max(0, remaining));
+    } else {
+      timer = setTimeout(() => arm(remaining - MAX_TIMEOUT_MS), MAX_TIMEOUT_MS);
+    }
+  };
+  arm(delayMs);
+  return { clear: () => clearTimeout(timer) };
 }
 
 const jobs: CronJob[] = [
@@ -91,7 +115,7 @@ const jobs: CronJob[] = [
   },
   {
     name: 'analytics-geo-refresh',
-    intervalMs: 30 * 24 * 60 * 60 * 1000, // ~monthly
+    intervalMs: 7 * 24 * 60 * 60 * 1000, // weekly (MaxMind ships GeoLite2 twice a week)
     runAtHour: 4,
     run: runAnalyticsGeoRefresh,
   },
@@ -148,7 +172,7 @@ function scheduleJob(job: CronJob) {
         job: job.name,
       });
     }
-    job.timer = setTimeout(execute, job.intervalMs);
+    job.timer = longTimeout(execute, job.intervalMs);
   };
 
   // If runAtHour is set, wait until that hour. Otherwise start after 30s.
@@ -157,7 +181,7 @@ function scheduleJob(job: CronJob) {
     : 30_000;
 
   log.info(`${job.name} — next run in ${Math.round(delay / 60000)}min`);
-  job.timer = setTimeout(execute, delay);
+  job.timer = longTimeout(execute, delay);
 }
 
 export function startCronEngine() {
@@ -169,7 +193,7 @@ export function startCronEngine() {
 
 export function stopCronEngine() {
   for (const job of jobs) {
-    if (job.timer) clearTimeout(job.timer);
+    if (job.timer) job.timer.clear();
   }
 }
 

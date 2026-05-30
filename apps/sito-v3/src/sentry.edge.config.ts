@@ -13,6 +13,16 @@ Sentry.init({
   environment: process.env.NODE_ENV,
   integrations: [],
   tracesSampleRate: 0,
+  // Same connection/stream-abort noise as the Node runtime (see
+  // sentry.server.config.ts): client disconnects mid-stream are not actionable.
+  ignoreErrors: [
+    'failed to pipe response',
+    'ResponseAborted',
+    'aborted',
+    'EPIPE',
+    'ECONNRESET',
+    'The user aborted a request',
+  ],
   // PII scrubber — shared hook across client/server/edge runtimes. See
   // apps/sito-v3/src/lib/sentry-scrub.ts for the redaction logic.
   beforeSend: scrubEvent,

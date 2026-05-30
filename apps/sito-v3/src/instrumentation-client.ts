@@ -11,6 +11,28 @@ Sentry.init({
   environment: process.env.NODE_ENV,
   integrations: [],
   tracesSampleRate: 0,
+  // Drop errors that originate in browser extensions / injected third-party
+  // scripts rather than our code. We saw a burst of `Cannot read properties of
+  // null (reading '_ensureSize')` and `... (reading 'document')` from a single
+  // mobile UA across unrelated routes — none of these symbols exist in our
+  // bundle (our only iframe access, ProjectPreviewEmbed/SitePreviewFrame, is
+  // optional-chained). Matched by InboundFilters (a default integration;
+  // `integrations: []` adds nothing, it does not disable defaults).
+  ignoreErrors: [
+    "Cannot read properties of null (reading '_ensureSize')",
+    "null is not an object (evaluating",
+    'contentWindow is null',
+    "can't access property \"document\"",
+    'ResizeObserver loop limit exceeded',
+    'ResizeObserver loop completed with undelivered notifications',
+  ],
+  denyUrls: [
+    /^chrome-extension:\/\//i,
+    /^moz-extension:\/\//i,
+    /^safari-(web-)?extension:\/\//i,
+    /^chrome:\/\//i,
+    /extensions\//i,
+  ],
   // PII scrubber: removes email, phone, tokens, IP, etc. from every event
   // before it leaves the browser. Documented in cookie-policy as the safeguard
   // that lets us run error tracking on legitimate-interest basis (GDPR

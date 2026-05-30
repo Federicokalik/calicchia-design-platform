@@ -80,6 +80,7 @@ services:
       BUGSINK_DSN: ${BUGSINK_DSN}
       CRON_SECRET: ${CRON_SECRET}
       ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
+      MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY}
       BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
       # Integrazioni opzionali (degradano graceful se vuote)
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
