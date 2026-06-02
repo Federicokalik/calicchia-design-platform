@@ -20,6 +20,7 @@ import { runIcsPull } from './ics-pull';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppScheduled } from './whatsapp-scheduled';
 import { runDataRetention } from './data-retention';
+import { runItalianHolidays } from './italian-holidays';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
@@ -145,6 +146,14 @@ const jobs: CronJob[] = [
     intervalMs: 24 * 60 * 60 * 1000,
     runAtHour: 5,
     run: runDataRetention,
+  },
+  {
+    // Festività nazionali italiane: nessun runAtHour → prima esecuzione ~30s
+    // dopo il boot (seed immediato al deploy), poi settimanale. Idempotente,
+    // mantiene una finestra mobile di 6 anni (Pasqua inclusa, auto-calcolata).
+    name: 'italian-holidays',
+    intervalMs: 7 * 24 * 60 * 60 * 1000,
+    run: runItalianHolidays,
   },
 ];
 
