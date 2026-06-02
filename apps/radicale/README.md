@@ -19,29 +19,8 @@ htpasswd -B -c apps/radicale/config/users federico
 ```
 Il file `apps/radicale/config/users` è **gitignorato** (contiene un hash) e sopravvive ai `git pull` di Dockhand perché untracked.
 
-### 3. Servizio nel compose
-Aggiungi a `docker-compose.portainer.yml` (servizi) — **tag patch da confermare** (è l'output di questa fase: fissa la versione esatta):
-```yaml
-  radicale:
-    image: tomsquest/docker-radicale:3.5.4.0   # ← CONFERMA il tag corrente e pinna esatto
-    restart: always
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    cap_drop: [ALL]
-    cap_add: [CHOWN, SETUID, SETGID, KILL]
-    tmpfs:
-      - /run
-      - /tmp
-    volumes:
-      - ./apps/radicale/config:/config:ro
-      - radicale_data:/data
-    networks:
-      - app-net
-    ports:
-      - "127.0.0.1:3011:5232"
-```
-e in fondo, sotto `volumes:`, aggiungi `radicale_data:`.
+### 3. Servizio nel compose — ✅ GIÀ FATTO
+Il servizio `radicale` (image **`tomsquest/docker-radicale:3.7.3.0`**, pinnato) e il volume `radicale_data` sono già in `docker-compose.portainer.yml`. Si auto-deploya con Dockhand al push. Il container parte su `127.0.0.1:3011` e resta innocuo finché non fai DNS+CloudPanel (passi 1 e 4) e crei l'htpasswd (passo 2).
 
 ### 4. Vhost CloudPanel per `dav.calicchia.design`
 Nuovo **Site → Reverse Proxy** verso `http://127.0.0.1:3011`, TLS Let's Encrypt attivo. Nella config nginx del site servono le direttive CalDAV (il proxy nudo non basta):
@@ -67,7 +46,7 @@ location = /.well-known/carddav { return 301 /; }
 ```
 
 ### 5. Deploy
-Commit + push del compose modificato (Dockhand fa pull e `up -d`). Il container resta su `127.0.0.1` finché CloudPanel non lo espone — innocuo.
+Il compose è già committato → Dockhand fa pull e `up -d` da solo. Devi solo aver fatto: **htpasswd** (passo 2, sul server), **DNS** (passo 1) e **vhost CloudPanel** (passo 4). Verifica che il container sia su: `docker ps | grep radicale` e `docker logs <radicale>`.
 
 ---
 

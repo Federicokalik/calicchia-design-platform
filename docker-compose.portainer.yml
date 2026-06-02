@@ -287,11 +287,41 @@ services:
     ports:
       - "127.0.0.1:3010:3000"
 
+  # CalDAV server — FASE 0 spike (storage a FILE + auth htpasswd). Vedi
+  # apps/radicale/README.md. In Fase 3 l'image diventerà l'immagine custom con i
+  # plugin che parlano con l'API (Postgres resta l'unica fonte di verità).
+  # Richiede sul server: apps/radicale/config/users (htpasswd, creato a mano) +
+  # vhost CloudPanel dav.calicchia.design → http://127.0.0.1:3011.
+  radicale:
+    image: tomsquest/docker-radicale:3.7.3.0
+    restart: always
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - KILL
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - ./apps/radicale/config:/config:ro
+      - radicale_data:/data
+    networks:
+      - app-net
+    ports:
+      - "127.0.0.1:3011:5232"
+
 volumes:
   postgres_data:
   uploads_data:
   private_data:
   valkey_data:
+  radicale_data:
 
 networks:
   app-net:
