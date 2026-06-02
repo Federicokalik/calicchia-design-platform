@@ -295,7 +295,7 @@ services:
   radicale:
     image: tomsquest/docker-radicale:3.7.3.0
     restart: always
-    read_only: true
+    init: true
     security_opt:
       - no-new-privileges:true
     cap_drop:
@@ -305,9 +305,12 @@ services:
       - SETUID
       - SETGID
       - KILL
-    tmpfs:
-      - /run
-      - /tmp
+    environment:
+      # Volume Docker (non bind-mount): il chown automatico di /data falliva
+      # ("chown: /data: Permission denied"). Lo saltiamo — il volume nasce già
+      # di proprietà dell'utente radicale (2999) ereditata dall'immagine.
+      # (NB: le env dell'immagine NON funzionano con read_only → niente read_only.)
+      TAKE_FILE_OWNERSHIP: "false"
     volumes:
       - ./apps/radicale/config:/config:ro
       - radicale_data:/data
