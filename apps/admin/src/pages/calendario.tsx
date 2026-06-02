@@ -89,6 +89,14 @@ export default function CalendarioPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null);
   const [ctxMenu, setCtxMenu] = useState<{ event: CalendarEventOcc; x: number; y: number } | null>(null);
+  // Scelta "questa occorrenza / tutta la serie" per eventi ricorrenti.
+  const [recurringAction, setRecurringAction] = useState<{
+    kind: 'move' | 'resize' | 'delete';
+    data: CalendarEventOcc;
+    startIso?: string;
+    endIso?: string;
+    revert?: () => void;
+  } | null>(null);
 
   // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
   const { data: eventsData } = useQuery({
@@ -213,11 +221,14 @@ export default function CalendarioPage() {
     return events;
   })();
 
+  // Una "occorrenza ricorrente" è un'istanza espansa da un master (ha
+  // original_start e NON è un override già materializzato come riga a sé).
+  const isRecurringOccurrence = (ev: CalendarEventOcc) => !!ev.original_start && !ev.is_override;
+
   // Drag (sposta) + resize (cambia durata: verticale in settimana/giorno,
-  // orizzontale in mese). Per le occorrenze di un master ricorrente crea
-  // un'eccezione (solo quella occorrenza), come Google Calendar; per gli eventi
-  // singoli/override fa un PUT diretto. In errore, revert visivo.
-  const handleEventMoveOrResize = async (info: EventDropArg | EventResizeDoneArg) => {
+  // orizzontale in mese). Per gli eventi ricorrenti apre la scelta
+  // "questa / tutta la serie"; per singoli/override fa un PUT diretto.
+  const applyMoveOrResize = async (kind: 'move' | 'resize', info: EventDropArg | EventResizeDoneArg) => {
     const source = info.event.extendedProps.source as string | undefined;
     const data = info.event.extendedProps.data as CalendarEventOcc | undefined;
     if (!source || !DRAGGABLE_SOURCES.has(source) || !data?.id || !info.event.start) {
@@ -233,26 +244,98 @@ export default function CalendarioPage() {
             (new Date(data.end_time).getTime() - new Date(data.start_time).getTime()),
         ).toISOString();
 
+    if (isRecurringOccurrence(data)) {
+      // Chiedi prima: solo questa o tutta la serie. Il revert resta disponibile
+      // se l'utente annulla o l'operazione fallisce.
+      setRecurringAction({ kind, data, startIso, endIso, revert: () => info.revert() });
+      return;
+    }
+
     try {
-      if (data.original_start && !data.is_override) {
-        // Occorrenza espansa di un master ricorrente → eccezione singola
-        await apiFetch(`/api/admin/calendar/events/${data.id}/exception`, {
-          method: 'POST',
-          body: JSON.stringify({ original_start: data.original_start, new_start: startIso, new_end: endIso }),
-        });
-        toast.success('Spostata solo questa occorrenza');
-      } else {
-        await apiFetch(`/api/admin/calendar/events/${data.id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ start_time: startIso, end_time: endIso }),
-        });
-        toast.success('Evento aggiornato');
-      }
+      await apiFetch(`/api/admin/calendar/events/${data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ start_time: startIso, end_time: endIso }),
+      });
+      toast.success('Evento aggiornato');
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
     } catch (err) {
       info.revert();
       toast.error(err instanceof Error ? err.message : 'Spostamento non riuscito');
     }
+  };
+
+  const handleEventDrop = (info: EventDropArg) => { void applyMoveOrResize('move', info); };
+  const handleEventResize = (info: EventResizeDoneArg) => { void applyMoveOrResize('resize', info); };
+
+  // Applica l'azione ricorrente alla SOLA occorrenza (crea un'eccezione).
+  const applyToThisOccurrence = async () => {
+    const a = recurringAction;
+    if (!a) return;
+    try {
+      const body: Record<string, unknown> = { original_start: a.data.original_start };
+      if (a.kind === 'delete') body.status = 'cancelled';
+      else { body.new_start = a.startIso; body.new_end = a.endIso; }
+      await apiFetch(`/api/admin/calendar/events/${a.data.id}/exception`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      toast.success(a.kind === 'delete' ? 'Occorrenza eliminata' : 'Modificata solo questa occorrenza');
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      setSelectedEvent(null);
+    } catch (err) {
+      a.revert?.();
+      toast.error(err instanceof Error ? err.message : 'Operazione non riuscita');
+    } finally {
+      setRecurringAction(null);
+    }
+  };
+
+  // Applica l'azione ricorrente a TUTTA la serie (agisce sul master).
+  const applyToWholeSeries = async () => {
+    const a = recurringAction;
+    if (!a) return;
+    try {
+      if (a.kind === 'delete') {
+        await apiFetch(`/api/admin/calendar/events/${a.data.id}`, { method: 'DELETE' });
+        toast.success('Serie eliminata');
+      } else {
+        const res = await apiFetch(`/api/admin/calendar/events/${a.data.id}`);
+        const master = res?.event as { start_time: string; end_time: string } | undefined;
+        if (!master) throw new Error('Evento master non trovato');
+        const masterStart = new Date(master.start_time).getTime();
+        const masterEnd = new Date(master.end_time).getTime();
+        if (a.kind === 'move') {
+          const delta = new Date(a.startIso!).getTime() - new Date(a.data.original_start!).getTime();
+          await apiFetch(`/api/admin/calendar/events/${a.data.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              start_time: new Date(masterStart + delta).toISOString(),
+              end_time: new Date(masterEnd + delta).toISOString(),
+            }),
+          });
+          toast.success('Spostata tutta la serie');
+        } else {
+          const newDuration = new Date(a.endIso!).getTime() - new Date(a.startIso!).getTime();
+          await apiFetch(`/api/admin/calendar/events/${a.data.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ end_time: new Date(masterStart + newDuration).toISOString() }),
+          });
+          toast.success('Durata aggiornata su tutta la serie');
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      setSelectedEvent(null);
+    } catch (err) {
+      a.revert?.();
+      toast.error(err instanceof Error ? err.message : 'Operazione non riuscita');
+    } finally {
+      setRecurringAction(null);
+    }
+  };
+
+  const cancelRecurringAction = () => {
+    recurringAction?.revert?.();
+    setRecurringAction(null);
   };
 
   const handleEventClick = (info: EventClickArg) => {
@@ -342,6 +425,11 @@ export default function CalendarioPage() {
       icon: Trash2,
       destructive: true,
       onClick: async () => {
+        // Ricorrente → chiedi questa/serie; singolo → conferma semplice.
+        if (isRecurringOccurrence(ev)) {
+          setRecurringAction({ kind: 'delete', data: ev });
+          return;
+        }
         if (await confirm({ title: 'Eliminare questo evento?', variant: 'destructive' })) deleteMutation.mutate(ev.id);
       },
     },
@@ -377,6 +465,40 @@ export default function CalendarioPage() {
   return (
     <div className="space-y-4">
       <CalendarTabs />
+
+      {/* Scelta questa-occorrenza / tutta-la-serie per eventi ricorrenti */}
+      {recurringAction && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={cancelRecurringAction}>
+          <div className="bg-card border rounded-lg shadow-lg max-w-sm w-full p-5 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div>
+              <h3 className="font-semibold text-sm">
+                {recurringAction.kind === 'delete' ? 'Eliminare evento ricorrente' : 'Modificare evento ricorrente'}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                «{recurringAction.data.summary}» fa parte di una serie. A cosa applichi la modifica?
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Button
+                variant={recurringAction.kind === 'delete' ? 'destructive' : 'default'}
+                size="sm"
+                onClick={applyToThisOccurrence}
+              >
+                Solo questa occorrenza
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className={recurringAction.kind === 'delete' ? 'text-destructive' : ''}
+                onClick={applyToWholeSeries}
+              >
+                Tutta la serie
+              </Button>
+              <Button variant="ghost" size="sm" onClick={cancelRecurringAction}>Annulla</Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modale crea/edit evento */}
       {showEditor && (
@@ -432,8 +554,8 @@ export default function CalendarioPage() {
             eventStartEditable
             eventDurationEditable
             eventResizableFromStart
-            eventDrop={handleEventMoveOrResize}
-            eventResize={handleEventMoveOrResize}
+            eventDrop={handleEventDrop}
+            eventResize={handleEventResize}
             selectable
             selectMirror
             buttonText={locale === 'en'

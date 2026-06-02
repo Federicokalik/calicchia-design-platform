@@ -1720,10 +1720,24 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     requiresConfirmation: true,
     execute: async (args) => {
       const { createEvent, EventValidationError } = await import('../calendar/events');
-      const { getCalendar } = await import('../calendar/calendars');
+      const { getCalendar, listCalendars } = await import('../calendar/calendars');
       try {
-        const cal = await getCalendar(args.calendar as string);
-        if (!cal) return JSON.stringify({ error: 'Calendario non trovato' });
+        // Risolvi il calendario per slug/id e, in fallback, per NOME (esatto o
+        // contenuto, case-insensitive). Prima accettava solo slug/id: passando
+        // il nome (es. "Creattivamente SRL") falliva in silenzio e la chat lo
+        // riportava come successo. Ora l'errore è esplicito e lista le opzioni.
+        const needle = String(args.calendar || '').trim().toLowerCase();
+        let cal = await getCalendar(args.calendar as string);
+        if (!cal && needle) {
+          const all = await listCalendars();
+          cal = all.find((c) => c.name.toLowerCase() === needle)
+            || all.find((c) => c.name.toLowerCase().includes(needle))
+            || null;
+        }
+        if (!cal) {
+          const opts = (await listCalendars()).map((c) => `${c.name} (slug: ${c.slug})`).join(', ');
+          return JSON.stringify({ error: `ERRORE: calendario "${args.calendar}" non trovato — evento NON creato. Calendari disponibili: ${opts}` });
+        }
         const ev = await createEvent({
           calendar_id: cal.id,
           summary: args.summary as string,
