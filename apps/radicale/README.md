@@ -12,12 +12,20 @@ Obiettivo di questa fase: **provare che un device (iPhone/Mac/DAVx5) riesce a co
 Crea un record per `dav.calicchia.design` che punta al server (come gli altri sottodomini).
 
 ### 2. Utente htpasswd (password del device)
-Sul server, nella working copy del repo:
+L'htpasswd vive nel **volume persistente** `radicale_data` (montato su `/data`), NON nel checkout git → sopravvive ai redeploy di Dockhand. Crealo una volta sul server:
 ```bash
+# path host del volume:
+VOL=$(docker volume inspect $(docker volume ls -q | grep radicale_data) -f '{{.Mountpoint}}')
 # bcrypt; ti chiede la password (questa la metterai sul telefono)
-htpasswd -B -c apps/radicale/config/users federico
+htpasswd -B -c "$VOL/users" federico
+chmod 644 "$VOL/users"   # l'utente radicale (2999) deve poterlo leggere
 ```
-Il file `apps/radicale/config/users` è **gitignorato** (contiene un hash) e sopravvive ai `git pull` di Dockhand perché untracked.
+Se `htpasswd` non c'è, genera la riga con l'immagine (ha bcrypt):
+```bash
+docker run --rm tomsquest/docker-radicale:3.7.3.0 \
+  python3 -c "from passlib.hash import bcrypt; print('federico:'+bcrypt.using(rounds=12).hash('LA_TUA_PASSWORD'))" \
+  | tee "$VOL/users" && chmod 644 "$VOL/users"
+```
 
 ### 3. Servizio nel compose — ✅ GIÀ FATTO
 Il servizio `radicale` (image **`tomsquest/docker-radicale:3.7.3.0`**, pinnato) e il volume `radicale_data` sono già in `docker-compose.portainer.yml`. Si auto-deploya con Dockhand al push. Il container parte su `127.0.0.1:3011` e resta innocuo finché non fai DNS+CloudPanel (passi 1 e 4) e crei l'htpasswd (passo 2).

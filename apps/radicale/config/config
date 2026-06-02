@@ -9,8 +9,10 @@ hosts = 0.0.0.0:5232
 
 [auth]
 type = htpasswd
-htpasswd_filename = /config/users
-# bcrypt: genera la riga con  htpasswd -B -c apps/radicale/config/users <utente>
+# Il file utenti vive nel VOLUME persistente /data (radicale_data), NON nel
+# checkout git: così sopravvive ai redeploy di Dockhand (che possono ripulire i
+# file non tracciati nella working copy). Va creato a mano una volta (vedi README).
+htpasswd_filename = /data/users
 htpasswd_encryption = bcrypt
 
 [storage]
