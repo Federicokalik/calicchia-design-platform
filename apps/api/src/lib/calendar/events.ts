@@ -11,6 +11,7 @@
  * (frontend admin, ICS feed, slot calculator busy ranges).
  */
 
+import { createHash } from 'node:crypto';
 import { customAlphabet } from 'nanoid';
 import { sql, sqlv, sqlInsert } from '../../db';
 import { expandRRule, validateRRule } from './rrule';
@@ -370,4 +371,43 @@ export async function getBusyRanges(fromIso: string, toIso: string): Promise<Bus
   return occ
     .filter((o) => o.status === 'confirmed' && !o.all_day) // all-day non blocca slot di booking
     .map((o) => ({ start: o.start_time, end: o.end_time }));
+}
+
+// ============================================
+// CalDAV: una risorsa = un UID (master + override). NON espande le ricorrenze:
+// il client CalDAV espande la RRULE da solo.
+// ============================================
+
+/**
+ * Righe "risorsa" di un calendario per CalDAV: master ricorrenti + eventi
+ * singoli (NO override, che vengono inglobati nella risorsa del master).
+ * Esclude i cancellati (la loro href sparisce → il client li tratta come rimossi).
+ */
+export async function listEventsForCollection(calendarId: string): Promise<CalendarEvent[]> {
+  return await sql<CalendarEvent[]>`
+    SELECT ${COLUMNS} FROM calendar_events
+    WHERE calendar_id = ${calendarId}::uuid
+      AND recurrence_master_id IS NULL
+      AND status != 'cancelled'
+    ORDER BY start_time
+  `;
+}
+
+/** Override (occorrenze materializzate) di un master ricorrente. */
+export async function getEventOverrides(masterId: string): Promise<CalendarEvent[]> {
+  return await sql<CalendarEvent[]>`
+    SELECT ${COLUMNS} FROM calendar_events
+    WHERE recurrence_master_id = ${masterId}::uuid
+    ORDER BY recurrence_id
+  `;
+}
+
+/**
+ * ETag CalDAV per una risorsa: hash di uid|updated_at|status. updated_at è
+ * mantenuto dal trigger, quindi ogni modifica cambia l'ETag (serve a If-Match).
+ */
+export function caldavEtag(event: { uid: string; updated_at: string | Date; status: string }): string {
+  const updated = event.updated_at instanceof Date ? event.updated_at.toISOString() : event.updated_at;
+  const h = createHash('sha256').update(`${event.uid}|${updated}|${event.status}`).digest('hex').slice(0, 32);
+  return `"${h}"`;
 }

@@ -118,6 +118,34 @@ export function buildIcsFeed(opts: BuildOpts): string {
     .join(CRLF) + CRLF;
 }
 
+/**
+ * Una singola risorsa CalDAV (RFC 4791): un VCALENDAR con il VEVENT master e i
+ * suoi override (RECURRENCE-ID), TUTTI con lo stesso UID del master. È ciò che
+ * il backend CalDAV serve su GET .../items/:uid e accetta su PUT.
+ */
+export function buildIcsResource(opts: {
+  calendar: Calendar;
+  master: CalendarEvent;
+  overrides?: CalendarEvent[];
+  uidDomain?: string;
+}): string {
+  const uidDomain = opts.uidDomain || 'caldes.it';
+  const lines: string[] = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Caldes//Calendar//IT',
+    'CALSCALE:GREGORIAN',
+    VTIMEZONE_EUROPE_ROME,
+  ];
+  lines.push(...buildVEvent(opts.master, uidDomain));
+  for (const ov of opts.overrides || []) {
+    // L'override condivide l'UID del master (lo distingue il RECURRENCE-ID).
+    lines.push(...buildVEvent({ ...ov, uid: opts.master.uid }, uidDomain));
+  }
+  lines.push('END:VCALENDAR');
+  return lines.filter(Boolean).map((l) => fold(l)).join(CRLF) + CRLF;
+}
+
 function buildVEvent(ev: CalendarEvent, uidDomain: string): string[] {
   const uid = `${ev.uid}@${uidDomain}`;
   const lines: string[] = [

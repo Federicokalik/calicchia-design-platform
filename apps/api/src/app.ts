@@ -53,6 +53,7 @@ import { calcom } from './routes/calcom';
 import { calendarPublic } from './routes/calendar/public';
 import { calendarAdmin } from './routes/calendar/admin';
 import { calendarFeed } from './routes/calendar/feed';
+import { caldavBackend } from './routes/calendar/caldav-backend';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -101,6 +102,7 @@ import { mcpTokens } from './routes/mcp-tokens';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
+import { caldavServiceAuth } from './middleware/caldav-service-auth';
 import { whatsappPublic, whatsappAdmin } from './routes/whatsapp';
 import { preferencesPublic } from './routes/preferences-public';
 
@@ -501,6 +503,13 @@ app.route('/api/backup', backup);
 app.use('/api/mcp', mcpAuthMiddleware);
 app.use('/api/mcp/*', mcpAuthMiddleware);
 app.route('/api/mcp', mcp);
+
+// CalDAV backend — endpoint interni per il plugin Radicale (service-token auth).
+// Path top-level (NON sotto /api/calendar, che è il router pubblico). Mai
+// esposto dal reverse proxy: raggiungibile solo da Radicale su app-net.
+app.use('/api/caldav-backend', caldavServiceAuth);
+app.use('/api/caldav-backend/*', caldavServiceAuth);
+app.route('/api/caldav-backend', caldavBackend);
 
 // 404 handler
 app.notFound((c) => {
