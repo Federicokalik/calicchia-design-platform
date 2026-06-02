@@ -328,6 +328,18 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
   return occurrences;
 }
 
+/**
+ * Il driver `postgres` restituisce le colonne timestamptz come oggetti `Date`,
+ * ma il tipo CalendarEventOccurrence (e il ramo di espansione dei master in
+ * listOccurrences) usano ISO string. Senza questa normalizzazione gli eventi
+ * singoli/override mantengono `Date` e il sort string-based a fine
+ * listOccurrences (a.start_time.localeCompare) lancia "localeCompare is not a
+ * function" — rompendo sia GET /events (calendario admin) sia il calcolo slot.
+ */
+function toIsoString(value: string | Date): string {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
 function toOccurrence(
   event: CalendarEvent,
   originalStart: string | null,
@@ -337,6 +349,8 @@ function toOccurrence(
   void _r; void _e; void _m;
   return {
     ...rest,
+    start_time: toIsoString(event.start_time),
+    end_time: toIsoString(event.end_time),
     original_start: originalStart,
     is_override: isOverride,
   };

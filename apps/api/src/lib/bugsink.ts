@@ -26,22 +26,28 @@ interface ErrorPayload {
 
 let endpoint: string | null = null;
 let publicKey: string | null = null;
+let dsnString: string | null = null;
 let enabled = false;
 
 export function initBugsink() {
   const dsn = process.env.BUGSINK_DSN;
   if (!dsn) return;
 
-  // Parse DSN: https://publicKey@host/projectId
-  const match = dsn.match(/^(https?:\/\/)([^@]+)@([^\/]+)(.*)$/);
+  // Parse DSN: https://<publicKey>@<host>/<projectId>
+  const match = dsn.match(/^(https?:\/\/)([^@]+)@([^/]+)\/(.+)$/);
   if (!match) {
     log.warn('invalid DSN format');
     return;
   }
 
-  const [, protocol, key, host, path] = match;
-  endpoint = `${protocol}${host}${path}/envelope/`;
+  const [, protocol, key, host, projectId] = match;
+  // Sentry/Bugsink ingest URL REQUIRES the `/api/<projectId>/envelope/` shape.
+  // The previous build produced `<host>/<projectId>/envelope/` (no `/api/`) and
+  // posted a bare event JSON instead of an envelope, so nothing was ever
+  // ingested — backend errors were silently lost (see calendar 500 incident).
+  endpoint = `${protocol}${host}/api/${projectId}/envelope/`;
   publicKey = key;
+  dsnString = dsn;
   enabled = true;
 }
 
@@ -69,9 +75,13 @@ export function captureException(error: Error, context?: Record<string, unknown>
     return;
   }
 
-  const payload: ErrorPayload = {
-    event_id: crypto.randomUUID(),
-    timestamp: new Date().toISOString(),
+  // Sentry event_id is a 32-char hex without dashes.
+  const eventId = crypto.randomUUID().replace(/-/g, '');
+  const sentAt = new Date().toISOString();
+
+  const event: ErrorPayload = {
+    event_id: eventId,
+    timestamp: sentAt,
     platform: 'node',
     sdk: { name: 'bugsink-api', version: '1.0.0' },
     server_name: 'caldes-api',
@@ -88,13 +98,21 @@ export function captureException(error: Error, context?: Record<string, unknown>
     tags: { app: 'api', environment: process.env.NODE_ENV || 'development' },
   };
 
+  // Sentry/Bugsink envelope = NDJSON: envelope header, item header, item payload.
+  // JSON.stringify never emits raw newlines, so each item stays on one line and
+  // the `length` field can be omitted (payload runs to the next newline).
+  const envelope =
+    JSON.stringify({ event_id: eventId, sent_at: sentAt, dsn: dsnString }) + '\n' +
+    JSON.stringify({ type: 'event', content_type: 'application/json' }) + '\n' +
+    JSON.stringify(event) + '\n';
+
   fetch(endpoint, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'X-Bugsink-Auth': `Bugsink sentry_key=${publicKey}`,
+      'Content-Type': 'application/x-sentry-envelope',
+      'X-Sentry-Auth': `Sentry sentry_version=7, sentry_key=${publicKey}, sentry_client=caldes-api/1.0.0`,
     },
-    body: JSON.stringify(payload),
+    body: envelope,
   }).catch((fetchError) => {
     log.error({ err: fetchError }, 'failed to send error');
   });
