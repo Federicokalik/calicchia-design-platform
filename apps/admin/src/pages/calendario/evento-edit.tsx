@@ -57,26 +57,52 @@ function parseUntil(value?: string): string | undefined {
   return isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
 }
 
-function parseRRule(rrule: string | null): { type: RecurrenceType; count?: number; until?: string; byDay?: string[]; raw?: string; useRaw?: boolean } {
+interface RecurrenceState {
+  type: RecurrenceType;
+  count?: number;
+  until?: string;
+  byDay?: string[];
+  raw?: string;
+  useRaw?: boolean;
+  /** Solo MONTHLY: 'monthday' = stesso giorno del mese; 'weekday' = per posizione (es. 2° martedì). */
+  monthlyMode?: 'monthday' | 'weekday';
+  setpos?: number;   // 1..4 oppure -1 (ultimo)
+  setposDay?: string; // MO..SU
+}
+
+function parseRRule(rrule: string | null): RecurrenceState {
   if (!rrule) return { type: 'none', raw: '' };
   const parts = Object.fromEntries(rrule.split(';').map((p) => p.split('=')));
   const freq = parts.FREQ as RecurrenceType;
   if (!['DAILY', 'WEEKLY', 'MONTHLY'].includes(freq)) return { type: 'none', raw: rrule, useRaw: true };
-  return {
+  const state: RecurrenceState = {
     type: freq,
     count: parts.COUNT ? parseInt(parts.COUNT) : undefined,
     until: parseUntil(parts.UNTIL),
-    byDay: parts.BYDAY ? parts.BYDAY.split(',') : undefined,
     raw: rrule,
     useRaw: false,
   };
+  if (freq === 'MONTHLY' && parts.BYDAY && parts.BYSETPOS) {
+    state.monthlyMode = 'weekday';
+    state.setposDay = parts.BYDAY.split(',')[0];
+    state.setpos = parseInt(parts.BYSETPOS);
+  } else if (freq === 'MONTHLY') {
+    state.monthlyMode = 'monthday';
+  } else if (parts.BYDAY) {
+    state.byDay = parts.BYDAY.split(',');
+  }
+  return state;
 }
 
-function buildRRule(opts: { type: RecurrenceType; count?: number; until?: string; byDay?: string[]; raw?: string; useRaw?: boolean }): string | null {
+function buildRRule(opts: RecurrenceState): string | null {
   if (opts.useRaw) return opts.raw?.trim() || null;
   if (opts.type === 'none') return null;
   const parts: string[] = [`FREQ=${opts.type}`];
-  if (opts.byDay && opts.byDay.length) parts.push(`BYDAY=${opts.byDay.join(',')}`);
+  if (opts.type === 'WEEKLY' && opts.byDay && opts.byDay.length) parts.push(`BYDAY=${opts.byDay.join(',')}`);
+  if (opts.type === 'MONTHLY' && opts.monthlyMode === 'weekday' && opts.setposDay && opts.setpos) {
+    parts.push(`BYDAY=${opts.setposDay}`);
+    parts.push(`BYSETPOS=${opts.setpos}`);
+  }
   if (opts.count) parts.push(`COUNT=${opts.count}`);
   if (opts.until) {
     const d = new Date(opts.until);
@@ -111,8 +137,11 @@ function describeRecurrence(r: ReturnType<typeof parseRRule>): string {
     base = r.byDay && r.byDay.length
       ? `Ogni settimana il ${r.byDay.map((d) => DAY_LABELS_FULL[d] || d).join(', ')}`
       : 'Ogni settimana';
+  } else if (r.monthlyMode === 'weekday' && r.setposDay && r.setpos) {
+    const pos = r.setpos === -1 ? 'ultimo' : `${r.setpos}°`;
+    base = `Ogni mese il ${pos} ${DAY_LABELS_FULL[r.setposDay] || r.setposDay}`;
   } else {
-    base = 'Ogni mese';
+    base = 'Ogni mese (stesso giorno)';
   }
   if (r.count) return `${base}, per ${r.count} volte`;
   if (r.until) return `${base}, fino al ${r.until.slice(0, 10)}`;
@@ -351,6 +380,65 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                     </Button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {recurrence.type === 'MONTHLY' && (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    variant={recurrence.monthlyMode !== 'weekday' ? 'default' : 'outline'}
+                    className="text-xs"
+                    onClick={() => setRecurrence({ ...recurrence, monthlyMode: 'monthday' })}
+                  >
+                    Stesso giorno del mese
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={recurrence.monthlyMode === 'weekday' ? 'default' : 'outline'}
+                    className="text-xs"
+                    onClick={() => {
+                      // Default posizione/giorno dalla data di inizio (es. 2° martedì).
+                      const d = new Date(startInput);
+                      const pos = isNaN(d.getTime()) ? 1 : Math.ceil(d.getDate() / 7);
+                      const day = isNaN(d.getTime()) ? 'MO' : ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'][d.getDay()];
+                      setRecurrence({
+                        ...recurrence,
+                        monthlyMode: 'weekday',
+                        setpos: recurrence.setpos ?? pos,
+                        setposDay: recurrence.setposDay ?? day,
+                      });
+                    }}
+                  >
+                    Per posizione
+                  </Button>
+                </div>
+
+                {recurrence.monthlyMode === 'weekday' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={recurrence.setpos ?? 1}
+                      onChange={(e) => setRecurrence({ ...recurrence, setpos: parseInt(e.target.value) })}
+                      className="w-full px-2 py-1 text-sm rounded-md border bg-background"
+                    >
+                      <option value={1}>1°</option>
+                      <option value={2}>2°</option>
+                      <option value={3}>3°</option>
+                      <option value={4}>4°</option>
+                      <option value={-1}>Ultimo</option>
+                    </select>
+                    <select
+                      value={recurrence.setposDay ?? 'MO'}
+                      onChange={(e) => setRecurrence({ ...recurrence, setposDay: e.target.value })}
+                      className="w-full px-2 py-1 text-sm rounded-md border bg-background"
+                    >
+                      {DAYS_OF_WEEK.map((d) => (
+                        <option key={d.value} value={d.value}>{DAY_LABELS_FULL[d.value]}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
             )}
 

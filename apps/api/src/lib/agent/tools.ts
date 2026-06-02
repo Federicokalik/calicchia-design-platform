@@ -1758,6 +1758,48 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     },
   },
   {
+    name: 'create_calendar',
+    description: 'Crea un nuovo calendario. Imposta blocks_availability=true se gli eventi del calendario devono bloccare la disponibilità per le prenotazioni (es. festività, ferie).',
+    parameters: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', description: 'Nome del calendario (es. "Festività")' },
+        slug: { type: 'string', description: 'Slug opzionale (a-z, 0-9, -). Se assente viene derivato dal nome.' },
+        color: { type: 'string', description: 'Colore hex (es. #ef4444). Default viola.' },
+        blocks_availability: { type: 'boolean', description: 'Se true gli eventi bloccano le prenotazioni. Default true.' },
+        timezone: { type: 'string', description: 'IANA timezone. Default Europe/Rome.' },
+      },
+      required: ['name'],
+    },
+    riskLevel: 'medium',
+    requiresConfirmation: true,
+    execute: async (args) => {
+      const { createCalendar, CalendarValidationError, CalendarConflictError } = await import('../calendar/calendars');
+      const name = String(args.name || '').trim();
+      if (!name) return JSON.stringify({ error: 'ERRORE: nome richiesto — calendario NON creato.' });
+      const slug = (String(args.slug || name).toLowerCase().trim()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80)) || 'calendario';
+      try {
+        const cal = await createCalendar({
+          slug,
+          name,
+          color: typeof args.color === 'string' && /^#[0-9a-f]{6}$/i.test(args.color) ? args.color : '#7c3aed',
+          timezone: (args.timezone as string) || 'Europe/Rome',
+          blocks_availability: args.blocks_availability !== false,
+        });
+        return JSON.stringify({ success: true, calendar: { id: cal.id, slug: cal.slug, name: cal.name } });
+      } catch (err) {
+        if (err instanceof CalendarValidationError || err instanceof CalendarConflictError) {
+          return JSON.stringify({ error: `ERRORE: ${err.message} — calendario NON creato.` });
+        }
+        if ((err as { code?: string }).code === '23505') {
+          return JSON.stringify({ error: `ERRORE: slug "${slug}" già in uso — calendario NON creato. Scegli un nome/slug diverso.` });
+        }
+        return JSON.stringify({ error: `ERRORE: ${err instanceof Error ? err.message : 'creazione fallita'} — calendario NON creato.` });
+      }
+    },
+  },
+  {
     name: 'update_event',
     description: 'Sposta o modifica un evento esistente (per id o uid). Per ricorrenti: questa modifica si applica al MASTER e quindi a tutte le occorrenze future. Per modificare singola occorrenza usa "create_event_exception".',
     parameters: {

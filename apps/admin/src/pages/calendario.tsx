@@ -30,6 +30,21 @@ const EDITABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp', 'booking'])
 // NON aggiornerebbe la prenotazione né avviserebbe il partecipante (desync).
 const DRAGGABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp']);
 
+// ─── Helper RRULE per "questa e le successive" ───────────────────────────────
+function rruleCompact(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+/** Imposta UNTIL (rimuovendo COUNT/UNTIL preesistenti) → tronca la serie. */
+function rruleWithUntil(rrule: string, until: Date): string {
+  const parts = rrule.split(';').filter((p) => p && !/^(UNTIL|COUNT)=/i.test(p));
+  parts.push(`UNTIL=${rruleCompact(until)}`);
+  return parts.join(';');
+}
+/** Rimuove COUNT (per la nuova serie scorporata da "questa e successive"). */
+function rruleStripCount(rrule: string): string {
+  return rrule.split(';').filter((p) => p && !/^COUNT=/i.test(p)).join(';');
+}
+
 // Colors per source (fallback se evento non ha colore custom dal calendario)
 const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: string; textColor: string }> = {
   manual:  { backgroundColor: '#7c3aed', borderColor: '#6d28d9', textColor: '#fff' },
@@ -97,6 +112,13 @@ export default function CalendarioPage() {
     endIso?: string;
     revert?: () => void;
   } | null>(null);
+  // Calendari/sorgenti nascosti dalla legenda (toggle mostra/nascondi).
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const toggleHidden = (key: string) => setHidden((prev) => {
+    const next = new Set(prev);
+    if (next.has(key)) next.delete(key); else next.add(key);
+    return next;
+  });
 
   // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
   const { data: eventsData } = useQuery({
@@ -158,6 +180,7 @@ export default function CalendarioPage() {
 
     // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
     for (const ev of (eventsData?.events || []) as CalendarEventOcc[]) {
+      if (hidden.has(ev.calendar_id)) continue;
       const cal = calendarById.get(ev.calendar_id);
       const sourceColor = SOURCE_COLORS[ev.source] || SOURCE_COLORS.manual;
       events.push({
@@ -175,7 +198,7 @@ export default function CalendarioPage() {
     }
 
     // Cal.com storico (se ancora presente nel DB legacy)
-    for (const b of calcomData?.bookings || []) {
+    for (const b of (hidden.has('calcom') ? [] : calcomData?.bookings || [])) {
       if (b.status === 'cancelled') continue;
       events.push({
         id: `calcom-${b.id}`,
@@ -190,7 +213,7 @@ export default function CalendarioPage() {
     }
 
     // Projects (start → end as background bars)
-    for (const p of projectsData?.projects || []) {
+    for (const p of (hidden.has('project') ? [] : projectsData?.projects || [])) {
       if (!p.start_date) continue;
       events.push({
         id: `proj-${p.id}`,
@@ -205,7 +228,7 @@ export default function CalendarioPage() {
     }
 
     // Domains (expiry as single-day event)
-    for (const d of domainsData?.domains || []) {
+    for (const d of (hidden.has('domain') ? [] : domainsData?.domains || [])) {
       if (!d.expiry_date) continue;
       events.push({
         id: `domain-${d.id}`,
@@ -322,6 +345,57 @@ export default function CalendarioPage() {
           });
           toast.success('Durata aggiornata su tutta la serie');
         }
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      setSelectedEvent(null);
+    } catch (err) {
+      a.revert?.();
+      toast.error(err instanceof Error ? err.message : 'Operazione non riuscita');
+    } finally {
+      setRecurringAction(null);
+    }
+  };
+
+  // "Questa e le successive": tronca il master a prima di questa occorrenza e,
+  // per move/resize, crea una nuova serie da qui in poi con i nuovi orari.
+  const applyToThisAndFollowing = async () => {
+    const a = recurringAction;
+    if (!a) return;
+    try {
+      const res = await apiFetch(`/api/admin/calendar/events/${a.data.id}`);
+      const master = res?.event as {
+        rrule: string | null; calendar_id: string; summary: string;
+        description: string | null; location: string | null; url: string | null; all_day: boolean;
+      } | undefined;
+      if (!master?.rrule) throw new Error('Serie non trovata');
+
+      const cutoff = new Date(a.data.original_start!);
+      // 1. tronca la serie originale a prima di questa occorrenza
+      await apiFetch(`/api/admin/calendar/events/${a.data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ rrule: rruleWithUntil(master.rrule, new Date(cutoff.getTime() - 60_000)) }),
+      });
+
+      if (a.kind !== 'delete') {
+        // 2. nuova serie da questa occorrenza in poi con i nuovi orari
+        await apiFetch('/api/admin/calendar/events', {
+          method: 'POST',
+          body: JSON.stringify({
+            calendar_id: master.calendar_id,
+            summary: master.summary,
+            description: master.description,
+            location: master.location,
+            url: master.url,
+            start_time: a.startIso,
+            end_time: a.endIso,
+            all_day: master.all_day,
+            rrule: rruleStripCount(master.rrule),
+            source: 'admin',
+          }),
+        });
+        toast.success('Aggiornate questa e le successive');
+      } else {
+        toast.success('Eliminate questa e le successive');
       }
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       setSelectedEvent(null);
@@ -486,6 +560,9 @@ export default function CalendarioPage() {
               >
                 Solo questa occorrenza
               </Button>
+              <Button variant="outline" size="sm" onClick={applyToThisAndFollowing}>
+                Questa e le successive
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -513,20 +590,38 @@ export default function CalendarioPage() {
         />
       )}
 
-      {/* Legend — mostra calendari + sources speciali */}
-      <div className="flex flex-wrap items-center gap-3">
-        {calendars.map((cal) => (
-          <div key={cal.id} className="flex items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cal.color }} />
-            <span className="text-xs text-muted-foreground">{cal.name}</span>
-          </div>
-        ))}
-        {(['project', 'domain', 'calcom'] as const).map((key) => (
-          <div key={key} className="flex items-center gap-1.5">
-            <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SOURCE_COLORS[key].backgroundColor }} />
-            <span className="text-xs text-muted-foreground">{SOURCE_LABELS[key]}</span>
-          </div>
-        ))}
+      {/* Legend — click per mostrare/nascondere calendari e sorgenti speciali */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {calendars.map((cal) => {
+          const off = hidden.has(cal.id);
+          return (
+            <button
+              key={cal.id}
+              type="button"
+              onClick={() => toggleHidden(cal.id)}
+              title={off ? 'Mostra' : 'Nascondi'}
+              className={`flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs transition-opacity hover:bg-accent ${off ? 'opacity-40 line-through' : ''}`}
+            >
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cal.color }} />
+              <span className="text-muted-foreground">{cal.name}</span>
+            </button>
+          );
+        })}
+        {(['project', 'domain', 'calcom'] as const).map((key) => {
+          const off = hidden.has(key);
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => toggleHidden(key)}
+              title={off ? 'Mostra' : 'Nascondi'}
+              className={`flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs transition-opacity hover:bg-accent ${off ? 'opacity-40 line-through' : ''}`}
+            >
+              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: SOURCE_COLORS[key].backgroundColor }} />
+              <span className="text-muted-foreground">{SOURCE_LABELS[key]}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Calendar + Detail */}
