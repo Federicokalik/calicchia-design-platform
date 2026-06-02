@@ -76,7 +76,7 @@ export async function createEvent(input: CreateEventInput): Promise<CalendarEven
   const rows = await sql<CalendarEvent[]>`
     INSERT INTO calendar_events ${sqlInsert({
       calendar_id: input.calendar_id,
-      uid: generateEventUid(),
+      uid: input.uid?.trim().slice(0, 255) || generateEventUid(),
       summary: input.summary.trim().slice(0, 500),
       description: input.description?.trim().slice(0, 5000) || null,
       location: input.location?.trim().slice(0, 500) || null,

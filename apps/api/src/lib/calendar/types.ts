@@ -215,6 +215,8 @@ export interface CreateCalendarInput {
 
 export interface CreateEventInput {
   calendar_id: string;
+  /** UID stabile fornito dal client (CalDAV). Se assente ne genera uno nuovo. */
+  uid?: string;
   summary: string;
   description?: string | null;
   location?: string | null;
