@@ -1,0 +1,25 @@
+# Radicale — config FASE 0 (spike trasporto).
+# Storage a FILE + auth htpasswd: serve SOLO a validare proxy/TLS/WebDAV/device.
+# In Fase 3 verrà sostituita da storage+auth plugin che parlano con l'API
+# (Postgres unica fonte di verità). NON è la config definitiva.
+
+[server]
+# Loopback gestito da Docker; CloudPanel fa da TLS terminator davanti.
+hosts = 0.0.0.0:5232
+
+[auth]
+type = htpasswd
+htpasswd_filename = /config/users
+# bcrypt: genera la riga con  htpasswd -B -c apps/radicale/config/users <utente>
+htpasswd_encryption = bcrypt
+
+[storage]
+filesystem_folder = /data/collections
+
+[rights]
+# owner_only: ogni utente vede solo le proprie collezioni (mono-utente OK).
+type = owner_only
+
+[logging]
+# Alza a debug se la discovery dei device non va.
+# level = debug

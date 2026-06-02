@@ -1,0 +1,3 @@
+# Il file utenti htpasswd contiene un hash di password: NON committarlo.
+# Va creato a mano sul server in apps/radicale/config/users (vedi README).
+config/users
