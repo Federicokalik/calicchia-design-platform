@@ -95,6 +95,30 @@ const DAYS_OF_WEEK = [
   { value: 'SU', label: 'Dom' },
 ];
 
+const DAY_LABELS_FULL: Record<string, string> = {
+  MO: 'lunedì', TU: 'martedì', WE: 'mercoledì', TH: 'giovedì',
+  FR: 'venerdì', SA: 'sabato', SU: 'domenica',
+};
+
+/** Riepilogo in italiano della ricorrenza, così la RRULE è leggibile senza testo. */
+function describeRecurrence(r: ReturnType<typeof parseRRule>): string {
+  if (r.useRaw) return r.raw ? `Regola personalizzata: ${r.raw}` : 'Nessuna ricorrenza';
+  if (r.type === 'none') return 'Non si ripete';
+  let base: string;
+  if (r.type === 'DAILY') {
+    base = 'Ogni giorno';
+  } else if (r.type === 'WEEKLY') {
+    base = r.byDay && r.byDay.length
+      ? `Ogni settimana il ${r.byDay.map((d) => DAY_LABELS_FULL[d] || d).join(', ')}`
+      : 'Ogni settimana';
+  } else {
+    base = 'Ogni mese';
+  }
+  if (r.count) return `${base}, per ${r.count} volte`;
+  if (r.until) return `${base}, fino al ${r.until.slice(0, 10)}`;
+  return `${base}, senza fine`;
+}
+
 export default function EventoEditModal({ initial, initialStart, initialEnd, onClose, onSaved }: Props) {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
@@ -300,6 +324,12 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                 </Button>
               ))}
             </div>
+
+            {(recurrence.type !== 'none' || recurrence.useRaw) && (
+              <p className="text-xs rounded-md bg-muted/60 px-2 py-1.5 text-muted-foreground">
+                🔁 {describeRecurrence(recurrence)}
+              </p>
+            )}
 
             {recurrence.type === 'WEEKLY' && (
               <div>

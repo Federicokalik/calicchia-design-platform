@@ -5,7 +5,8 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, DateSelectArg, EventMountArg } from '@fullcalendar/core';
+import type { EventClickArg, DateSelectArg, EventMountArg, EventDropArg } from '@fullcalendar/core';
+import type { EventResizeDoneArg } from '@fullcalendar/interaction';
 import {
   Clock, MapPin, X, Plus, Settings, ExternalLink, Copy, Pencil, Trash2,
 } from 'lucide-react';
@@ -24,6 +25,10 @@ import { CalendarTabs } from '@/components/layout/calendar-tabs';
 // Source di eventi su cui sono permesse modifiche dirette dal calendario
 // (duplicate, edit, delete). Project/domain/calcom sono read-only aggregati.
 const EDITABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp', 'booking']);
+
+// Source trascinabili/ridimensionabili. 'booking' è escluso: spostare l'evento
+// NON aggiornerebbe la prenotazione né avviserebbe il partecipante (desync).
+const DRAGGABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp']);
 
 // Colors per source (fallback se evento non ha colore custom dal calendario)
 const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: string; textColor: string }> = {
@@ -156,6 +161,7 @@ export default function CalendarioPage() {
         backgroundColor: cal?.color || sourceColor.backgroundColor,
         borderColor: cal?.color || sourceColor.borderColor,
         textColor: '#fff',
+        editable: DRAGGABLE_SOURCES.has(ev.source),
         extendedProps: { source: ev.source, data: ev, calendar: cal },
       });
     }
@@ -169,6 +175,7 @@ export default function CalendarioPage() {
         start: b.start_time,
         end: b.end_time,
         allDay: false,
+        editable: false,
         ...SOURCE_COLORS.calcom,
         extendedProps: { source: 'calcom', data: b },
       });
@@ -183,6 +190,7 @@ export default function CalendarioPage() {
         start: p.start_date,
         end: p.target_end_date || p.start_date,
         allDay: true,
+        editable: false,
         ...SOURCE_COLORS.project,
         extendedProps: { source: 'project', data: p },
       });
@@ -196,6 +204,7 @@ export default function CalendarioPage() {
         title: `🌐 ${d.domain_name} scade`,
         start: d.expiry_date,
         allDay: true,
+        editable: false,
         ...SOURCE_COLORS.domain,
         extendedProps: { source: 'domain', data: d },
       });
@@ -203,6 +212,48 @@ export default function CalendarioPage() {
 
     return events;
   })();
+
+  // Drag (sposta) + resize (cambia durata: verticale in settimana/giorno,
+  // orizzontale in mese). Per le occorrenze di un master ricorrente crea
+  // un'eccezione (solo quella occorrenza), come Google Calendar; per gli eventi
+  // singoli/override fa un PUT diretto. In errore, revert visivo.
+  const handleEventMoveOrResize = async (info: EventDropArg | EventResizeDoneArg) => {
+    const source = info.event.extendedProps.source as string | undefined;
+    const data = info.event.extendedProps.data as CalendarEventOcc | undefined;
+    if (!source || !DRAGGABLE_SOURCES.has(source) || !data?.id || !info.event.start) {
+      info.revert();
+      return;
+    }
+
+    const startIso = info.event.start.toISOString();
+    const endIso = info.event.end
+      ? info.event.end.toISOString()
+      : new Date(
+          info.event.start.getTime() +
+            (new Date(data.end_time).getTime() - new Date(data.start_time).getTime()),
+        ).toISOString();
+
+    try {
+      if (data.original_start && !data.is_override) {
+        // Occorrenza espansa di un master ricorrente → eccezione singola
+        await apiFetch(`/api/admin/calendar/events/${data.id}/exception`, {
+          method: 'POST',
+          body: JSON.stringify({ original_start: data.original_start, new_start: startIso, new_end: endIso }),
+        });
+        toast.success('Spostata solo questa occorrenza');
+      } else {
+        await apiFetch(`/api/admin/calendar/events/${data.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({ start_time: startIso, end_time: endIso }),
+        });
+        toast.success('Evento aggiornato');
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+    } catch (err) {
+      info.revert();
+      toast.error(err instanceof Error ? err.message : 'Spostamento non riuscito');
+    }
+  };
 
   const handleEventClick = (info: EventClickArg) => {
     const { data, source } = info.event.extendedProps;
@@ -377,6 +428,12 @@ export default function CalendarioPage() {
             eventWillUnmount={handleEventWillUnmount}
             datesSet={handleDatesSet}
             select={handleDateSelect}
+            editable
+            eventStartEditable
+            eventDurationEditable
+            eventResizableFromStart
+            eventDrop={handleEventMoveOrResize}
+            eventResize={handleEventMoveOrResize}
             selectable
             selectMirror
             buttonText={locale === 'en'
