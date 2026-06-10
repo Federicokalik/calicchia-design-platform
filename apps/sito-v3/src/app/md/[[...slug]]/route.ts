@@ -35,6 +35,7 @@ import {
 } from '@/lib/i18n';
 import { buildCanonical } from '@/lib/canonical';
 import { STATIC_PAGES } from '@/content/static-md-pages';
+import { getServiceDetail } from '@/data/services-detail';
 
 interface Params {
   slug?: string[];
@@ -153,6 +154,58 @@ async function renderProject(slug: string, locale: Locale): Promise<NextResponse
     'For an aggregated index of every page in Markdown, see <' + SITE.url + '/llms.txt>.',
     '',
   ].filter(Boolean).join('\n');
+  return new NextResponse(md, { headers: HEADERS });
+}
+
+/**
+ * Service detail (`/servizi/<slug>`): markdown completo da SERVICES_DETAIL
+ * (file-based, bilingue, stessa fonte della pagina HTML). A differenza di
+ * blog/projects qui il contenuto è strutturato e voice-aligned, quindi lo
+ * esponiamo per intero: niente rimando "leggi la pagina" — l'agente trova
+ * features, processo e FAQ direttamente nel mirror.
+ */
+function renderService(slug: string, locale: Locale): NextResponse {
+  const detail = getServiceDetail(slug, locale);
+  if (!detail) return notFoundMd(`service ${slug} not found`);
+
+  const canonical = buildCanonical(`/servizi/${slug}`, locale);
+  // description/feature/lead nel data layer usano \n per i ritmi di lettura
+  // della pagina HTML: in markdown romperebbero blockquote e list item.
+  const oneLine = (text: string) => text.replace(/\s*\n\s*/g, ' ').trim();
+  const L = locale === 'en'
+    ? { includes: "What's included", process: 'How I work', faq: 'FAQ', related: 'Related services' }
+    : { includes: 'Cosa include', process: 'Come lavoro', faq: 'FAQ', related: 'Servizi correlati' };
+
+  const md = [
+    frontMatter({
+      title: detail.title,
+      description: detail.description,
+      locale,
+      canonical,
+    }),
+    `# ${detail.title}`,
+    '',
+    `> ${oneLine(detail.description)}`,
+    '',
+    detail.longDescription,
+    '',
+    `## ${L.includes}`,
+    ...detail.features.map((f) => `- **${f.title}** — ${oneLine(f.description)}`),
+    '',
+    `## ${L.process}`,
+    ...detail.process.map((p) => `${p.step}. **${p.title}** — ${oneLine(p.description)}`),
+    '',
+    detail.faqs.length > 0 ? `## ${L.faq}` : '',
+    ...detail.faqs.flatMap((f) => [`### ${f.question}`, '', f.answer, '']),
+    detail.related?.length
+      ? [`## ${L.related}`, ...detail.related.map((r) => `- [${r.title}](${SITE.url}/servizi/${r.slug}.md) — ${r.shortPitch}`)].join('\n')
+      : '',
+    '',
+    '---',
+    `Full page: <${canonical}>  ·  Site index: <${SITE.url}/llms.txt>`,
+    '',
+  ].filter((line) => line !== null).join('\n');
+
   return new NextResponse(md, { headers: HEADERS });
 }
 
@@ -294,8 +347,10 @@ export async function GET(
   } else if (segments[0] === 'lavori' && segments.length === 2) {
     // Project detail: /lavori/<slug>
     res = await renderProject(segments[1], locale);
+  } else if (segments[0] === 'servizi' && segments.length === 2) {
+    // Service detail: /servizi/<slug> (EN /services/<slug> già denormalizzato)
+    res = renderService(segments[1], locale);
   } else {
-    // Service detail and other CMS-style dynamic pages: fall back to static for now.
     res = await renderStaticPage(itPath, locale);
   }
 
