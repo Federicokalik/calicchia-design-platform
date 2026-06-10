@@ -21,7 +21,7 @@
  * Per pagine statiche (home, contatti, servizi, perché, pillar, glossari):
  * markdown sintetico con title, description, canonical, link interni.
  */
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fetchBlogArticle, buildBlogUrl } from '@/lib/blog-api';
@@ -239,28 +239,85 @@ async function renderStaticPage(
   return new NextResponse(md, { headers: HEADERS });
 }
 
+// ─── Request logging (Agenti AI, admin analytics) ──────────────────────
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+
+/**
+ * Log fire-and-forget su /api/track/md (ingestione dedicata, il tracker
+ * browser /api/track scarta i bot — qui i client SONO crawler AI).
+ * Lo user-agent dell'agente viene inoltrato come header: l'API lo legge da
+ * lì e lo classifica server-side. `source` distingue URL `.md` (rewrite
+ * next.config) da content negotiation `Accept: text/markdown` (rewrite
+ * proxy, che marca la richiesta con `x-md-source: negotiation`).
+ */
+function logMdRequest(opts: {
+  page: string;
+  locale: Locale;
+  status: 'ok' | 'not_found';
+  source: 'suffix' | 'negotiation';
+  ua: string;
+  tokens?: number;
+}): void {
+  after(() =>
+    fetch(`${API_BASE}/api/track/md`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'user-agent': opts.ua },
+      body: JSON.stringify({
+        page: opts.page,
+        locale: opts.locale,
+        status: opts.status,
+        source: opts.source,
+        ...(opts.tokens != null ? { tokens: opts.tokens } : {}),
+      }),
+    }).catch(() => {}),
+  );
+}
+
 // ─── Route handler ─────────────────────────────────────────────────────
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<Params> },
 ): Promise<Response> {
   const { slug } = await params;
   const { locale, itPath, segments } = parseSlug(slug);
 
   // Dispatch CMS-driven detail pages first (they take precedence over statics).
-  // Blog post detail: /blog/<anno>/<mese>/<slug>
+  let res: NextResponse;
   if (segments[0] === 'blog' && segments.length === 4) {
+    // Blog post detail: /blog/<anno>/<mese>/<slug>
     const [, anno, mese, postSlug] = segments;
-    return renderBlogPost(anno, mese, postSlug, locale);
+    res = await renderBlogPost(anno, mese, postSlug, locale);
+  } else if (segments[0] === 'lavori' && segments.length === 2) {
+    // Project detail: /lavori/<slug>
+    res = await renderProject(segments[1], locale);
+  } else {
+    // Service detail and other CMS-style dynamic pages: fall back to static for now.
+    res = await renderStaticPage(itPath, locale);
   }
-  // Project detail: /lavori/<slug>
-  if (segments[0] === 'lavori' && segments.length === 2) {
-    return renderProject(segments[1], locale);
-  }
-  // Service detail and other CMS-style dynamic pages: fall back to static for now.
 
-  return renderStaticPage(itPath, locale);
+  const ok = res.status === 200;
+  let tokens: number | undefined;
+  if (ok) {
+    // Stima token (~4 char/token) per l'header x-markdown-tokens — stessa
+    // convenzione di Cloudflare Markdown for Agents. Il body è una stringa
+    // piccola: il clone è economico.
+    const text = await res.clone().text();
+    tokens = Math.ceil(text.length / 4);
+    res.headers.set('x-markdown-tokens', String(tokens));
+  }
+
+  logMdRequest({
+    page: itPath,
+    locale,
+    status: ok ? 'ok' : 'not_found',
+    source: req.headers.get('x-md-source') === 'negotiation' ? 'negotiation' : 'suffix',
+    ua: req.headers.get('user-agent') ?? '',
+    tokens,
+  });
+
+  return res;
 }

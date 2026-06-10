@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
   Eye, Users, Activity, MousePointer2, Clock, Smartphone,
   Trash2, Download, Plus, Target, Zap, FileBarChart, Layers, MapPin, Gauge,
+  Bot, Hash, FileWarning, FileCheck,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -102,6 +103,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="tech" className="gap-1.5"><Smartphone className="h-3.5 w-3.5" />Tecnologia</TabsTrigger>
           <TabsTrigger value="geo" className="gap-1.5"><MapPin className="h-3.5 w-3.5" />Geo</TabsTrigger>
           <TabsTrigger value="events" className="gap-1.5"><MousePointer2 className="h-3.5 w-3.5" />Eventi</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Agenti AI</TabsTrigger>
           <TabsTrigger value="perf" className="gap-1.5"><Gauge className="h-3.5 w-3.5" />Performance</TabsTrigger>
           <TabsTrigger value="goals" className="gap-1.5"><Target className="h-3.5 w-3.5" />Goals</TabsTrigger>
           <TabsTrigger value="realtime" className="gap-1.5"><Zap className="h-3.5 w-3.5" />Real-time</TabsTrigger>
@@ -168,6 +170,11 @@ export default function AnalyticsPage() {
         {/* ─── EVENTI ─────────────────────────────────────────────────────────── */}
         <TabsContent value="events">
           <EventsTab period={period} />
+        </TabsContent>
+
+        {/* ─── AGENTI AI (markdown mirror) ───────────────────────────────────── */}
+        <TabsContent value="ai">
+          <AiAgentsTab period={period} />
         </TabsContent>
 
         {/* ─── PERFORMANCE (Web Vitals) ──────────────────────────────────────── */}
@@ -268,6 +275,132 @@ function EventsTab({ period }: { period: PeriodValue }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+const AGENT_LABELS: Record<string, string> = {
+  gptbot: 'OpenAI (GPTBot / ChatGPT)',
+  claudebot: 'Anthropic (ClaudeBot / Claude)',
+  perplexity: 'Perplexity',
+  google: 'Google (Gemini / AI Overviews)',
+  other: 'Altri',
+};
+
+type AiAgentsData = {
+  total: number;
+  notFound: number;
+  viaNegotiation: number;
+  totalTokens: number;
+  pagesServed: number;
+  byAgent: Array<{ agent: string; count: number }>;
+  topPages: Array<{ path: string; count: number }>;
+  missingPages: Array<{ path: string; count: number }>;
+};
+
+function AiAgentsTab({ period }: { period: PeriodValue }) {
+  const { data } = useQuery<AiAgentsData>({
+    queryKey: ['analytics-ai-agents', period],
+    queryFn: () => apiFetch(`/api/analytics/ai-agents?period=${period}`),
+  });
+
+  if (data && data.total === 0) {
+    return (
+      <EmptyState
+        title="Nessuna richiesta da agenti AI"
+        description="Le richieste al mirror markdown (URL .md o header Accept: text/markdown) appariranno qui."
+        icon={Bot}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard title="Richieste markdown" value={(data?.total ?? 0).toLocaleString('it-IT')} icon={Bot} />
+        <StatCard title="Token serviti" value={(data?.totalTokens ?? 0).toLocaleString('it-IT')} icon={Hash} />
+        <StatCard title="Via negotiation" value={(data?.viaNegotiation ?? 0).toLocaleString('it-IT')} icon={FileCheck} />
+        <StatCard title="Senza markdown" value={(data?.notFound ?? 0).toLocaleString('it-IT')} icon={FileWarning} />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Per agente</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(!data?.byAgent || data.byAgent.length === 0) ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Nessun dato per il periodo</p>
+            ) : (
+              <div className="space-y-3">
+                {data.byAgent.map((a) => {
+                  const pct = data.total > 0 ? ((a.count / data.total) * 100).toFixed(1) : '0';
+                  return (
+                    <div key={a.agent}>
+                      <div className="flex justify-between mb-1 text-xs">
+                        <span className="font-medium">{AGENT_LABELS[a.agent] ?? a.agent}</span>
+                        <span className="text-muted-foreground tabular-nums">{a.count} · {pct}%</span>
+                      </div>
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Pagine più richieste</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(!data?.topPages || data.topPages.length === 0) ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Nessun dato per il periodo</p>
+            ) : (
+              <div className="divide-y divide-border/50">
+                {data.topPages.map((p, i) => (
+                  <div key={p.path} className="flex items-center gap-3 py-1.5 text-xs">
+                    <span className="text-muted-foreground w-4">{i + 1}.</span>
+                    <span className="flex-1 truncate font-medium">{p.path}</span>
+                    <span className="tabular-nums font-semibold">{p.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Richieste senza markdown</CardTitle>
+            <p className="text-[10px] text-muted-foreground">
+              Gap di copertura: aggiungi la sorgente in src/content/_md/ o STATIC_PAGES
+            </p>
+          </CardHeader>
+          <CardContent>
+            {(!data?.missingPages || data.missingPages.length === 0) ? (
+              <p className="text-xs text-muted-foreground text-center py-4">Nessun gap — tutte le richieste servite</p>
+            ) : (
+              <div className="divide-y divide-border/50">
+                {data.missingPages.map((p, i) => (
+                  <div key={p.path} className="flex items-center gap-3 py-1.5 text-xs">
+                    <span className="text-muted-foreground w-4">{i + 1}.</span>
+                    <span className="flex-1 truncate font-medium">{p.path}</span>
+                    <span className="tabular-nums font-semibold">{p.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <p className="text-[10px] text-muted-foreground">
+        {data?.pagesServed ?? 0} pagine distinte servite in markdown nel periodo · sorgenti: URL .md + content negotiation (Accept: text/markdown)
+      </p>
+    </div>
   );
 }
 

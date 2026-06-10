@@ -364,6 +364,10 @@ app.route('/api/preferences', preferencesPublic);
 // Public cookieless analytics tracker — rate-limited to 60 req/min per IP.
 const trackRateLimit = createRateLimit(60, 60 * 1000);
 app.use('/api/track', trackRateLimit);
+// Markdown mirror tracking: chiamato server-to-server da sito-v3 (single IP),
+// quindi limite più alto del tracker browser — un crawl AI intenso supera
+// 60 req/min e perderebbe log.
+app.use('/api/track/md', createRateLimit(240, 60 * 1000));
 app.route('/api/track', analyticsTrack);
 
 // Protected routes (auth required — admin gestionale).

@@ -205,6 +205,71 @@ analytics.get('/realtime/stream', async (c) => {
   });
 });
 
+// ─── Agenti AI (markdown mirror) ─────────────────────────────────────────────
+// Aggregati delle richieste al mirror markdown (event_name='markdown_request',
+// ingestione in analytics-track.ts /md). metadata: { agent, status, source,
+// tokens?, locale? }.
+
+analytics.get('/ai-agents', async (c) => {
+  const period = periodFromQuery(c.req.query('period'));
+  const websiteId = getWebsite(c);
+
+  const [totals] = await sql`
+    SELECT
+      COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE metadata->>'status' = 'not_found')::int AS not_found,
+      COUNT(*) FILTER (WHERE metadata->>'source' = 'negotiation')::int AS via_negotiation,
+      COALESCE(SUM((metadata->>'tokens')::int), 0)::int AS total_tokens,
+      COUNT(DISTINCT page_path) FILTER (WHERE metadata->>'status' = 'ok')::int AS pages_served
+    FROM analytics
+    WHERE website_id = ${websiteId}
+      AND event_type = 'event' AND event_name = 'markdown_request'
+      AND created_at >= NOW() - CAST(${period} AS INTERVAL)
+  ` as Array<{ total: number; not_found: number; via_negotiation: number; total_tokens: number; pages_served: number }>;
+
+  const byAgent = await sql`
+    SELECT COALESCE(metadata->>'agent', 'other') AS agent, COUNT(*)::int AS count
+    FROM analytics
+    WHERE website_id = ${websiteId}
+      AND event_type = 'event' AND event_name = 'markdown_request'
+      AND created_at >= NOW() - CAST(${period} AS INTERVAL)
+    GROUP BY 1 ORDER BY 2 DESC
+  ` as Array<{ agent: string; count: number }>;
+
+  const topPages = await sql`
+    SELECT page_path AS path, COUNT(*)::int AS count
+    FROM analytics
+    WHERE website_id = ${websiteId}
+      AND event_type = 'event' AND event_name = 'markdown_request'
+      AND metadata->>'status' = 'ok'
+      AND created_at >= NOW() - CAST(${period} AS INTERVAL)
+    GROUP BY 1 ORDER BY 2 DESC LIMIT 15
+  ` as Array<{ path: string; count: number }>;
+
+  // Pagine richieste dagli agenti ma SENZA sorgente markdown: gap di copertura
+  // azionabile (aggiungere il .md in src/content/_md/ o in STATIC_PAGES).
+  const missingPages = await sql`
+    SELECT page_path AS path, COUNT(*)::int AS count
+    FROM analytics
+    WHERE website_id = ${websiteId}
+      AND event_type = 'event' AND event_name = 'markdown_request'
+      AND metadata->>'status' = 'not_found'
+      AND created_at >= NOW() - CAST(${period} AS INTERVAL)
+    GROUP BY 1 ORDER BY 2 DESC LIMIT 15
+  ` as Array<{ path: string; count: number }>;
+
+  return c.json({
+    total: totals?.total ?? 0,
+    notFound: totals?.not_found ?? 0,
+    viaNegotiation: totals?.via_negotiation ?? 0,
+    totalTokens: totals?.total_tokens ?? 0,
+    pagesServed: totals?.pages_served ?? 0,
+    byAgent,
+    topPages,
+    missingPages,
+  });
+});
+
 // ─── Custom events ───────────────────────────────────────────────────────────
 
 analytics.get('/events', async (c) => {

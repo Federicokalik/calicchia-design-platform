@@ -55,6 +55,62 @@ function sanitizeReferrer(raw: string | null | undefined): { full: string | null
   }
 }
 
+// ─── Markdown mirror tracking (/api/track/md) ────────────────────────────────
+// Ingestione server-to-server chiamata dal route handler `/md` di sito-v3 per
+// ogni richiesta del mirror markdown (URL `/<path>.md` o content negotiation
+// `Accept: text/markdown`). A differenza del tracker browser sopra, qui i bot
+// sono i benvenuti: i client di questo endpoint SONO crawler/assistenti AI.
+// Niente session/visit id (nessuna identità da derivare), niente geo.
+
+const mdTrackSchema = z.object({
+  page: z.string().max(2048),
+  locale: z.string().max(8).nullable().optional(),
+  status: z.enum(['ok', 'not_found']),
+  source: z.enum(['suffix', 'negotiation']),
+  tokens: z.number().int().min(0).max(10_000_000).nullable().optional(),
+});
+
+/** Classifica lo user-agent nei vendor AI principali. */
+function classifyAgent(ua: string): 'gptbot' | 'claudebot' | 'perplexity' | 'google' | 'other' {
+  const lower = ua.toLowerCase();
+  if (/gptbot|oai-searchbot|chatgpt/.test(lower)) return 'gptbot';
+  if (/claudebot|claude-user|claude-searchbot|anthropic/.test(lower)) return 'claudebot';
+  if (/perplexity/.test(lower)) return 'perplexity';
+  if (/google-extended|googleother|gemini/.test(lower)) return 'google';
+  return 'other';
+}
+
+analyticsTrack.post('/md', async (c) => {
+  let raw: unknown = {};
+  try {
+    raw = await c.req.json();
+  } catch {
+    return c.body(null, 204);
+  }
+  const parsed = mdTrackSchema.safeParse(raw);
+  if (!parsed.success) return c.body(null, 204);
+
+  const body = parsed.data;
+  const userAgent = c.req.header('user-agent') || '';
+
+  await sql`
+    INSERT INTO analytics (
+      website_id, event_type, event_name, page_path, user_agent, metadata
+    ) VALUES (
+      'main', 'event', 'markdown_request', ${body.page}, ${userAgent || null},
+      ${sqlv({
+        agent: classifyAgent(userAgent),
+        status: body.status,
+        source: body.source,
+        ...(body.tokens != null ? { tokens: body.tokens } : {}),
+        ...(body.locale ? { locale: body.locale } : {}),
+      })}
+    )
+  `;
+
+  return c.body(null, 204);
+});
+
 analyticsTrack.post('/', async (c) => {
   // Parse JSON body. sendBeacon sends Blob/text; accept both.
   let raw: unknown = {};

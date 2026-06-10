@@ -51,6 +51,10 @@ export async function GET(): Promise<Response> {
   sections.push('');
   sections.push(`> Site: <${SITE.url}>  ·  Sitemap: <${SITE.url}/sitemap.xml>  ·  Author: Federico Calicchia (<${SITE.contact.email}>)`);
   sections.push('');
+  sections.push(
+    '> Markdown access: append `.md` to any page URL, or request any page with the `Accept: text/markdown` header (HTML stays the default for browsers).',
+  );
+  sections.push('');
 
   // ─── Main pages ────────────────────────────────────────────────────
   sections.push('## Pages');

@@ -96,6 +96,20 @@ function isEnPathAvailable(pathname: string): boolean {
   return true;
 }
 
+/**
+ * Path idonei alla rappresentazione markdown via content negotiation.
+ * Esclude portale clienti (privato), /pay (checkout) e il mirror stesso.
+ */
+function isMarkdownEligible(pathname: string): boolean {
+  const parts = pathname.split('/').filter(Boolean);
+  const first = parts[0];
+  const rest = (LOCALES as readonly string[]).includes(first) ? parts.slice(1) : parts;
+  const head = rest[0];
+  if (head === 'clienti' || head === 'clients' || head === 'pay') return false;
+  if (first === 'md') return false;
+  return true;
+}
+
 function getPortalMatch(pathname: string) {
   const parts = pathname.split('/').filter(Boolean);
   const first = parts[0];
@@ -233,8 +247,46 @@ export default async function proxy(req: NextRequest) {
     return new NextResponse(null, { status: 404 });
   }
 
+  // 2.5 Markdown for Agents — content negotiation: `Accept: text/markdown`
+  // su una pagina pubblica → rewrite al mirror markdown esistente
+  // (`app/md/[[...slug]]/route.ts`, lo stesso che serve gli URL `/<path>.md`
+  // via rewrite next.config). Substring match sull'Accept: i q-values sono
+  // ignorati, gli agenti reali mandano l'header esplicito. L'header
+  // `x-md-source` distingue questa via dal suffisso `.md` nel tracking.
+  // Il rewrite NON ri-esegue il middleware → nessun rischio di loop.
+  const accept = req.headers.get('accept') ?? '';
+  if (
+    req.method === 'GET' &&
+    accept.includes('text/markdown') &&
+    !portal &&
+    isMarkdownEligible(pathname)
+  ) {
+    const url = req.nextUrl.clone();
+    url.pathname = pathname === '/' ? '/md' : `/md${pathname}`;
+    url.search = '';
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-md-source', 'negotiation');
+    const mdRes = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+    mdRes.headers.append('Vary', 'Accept');
+    return mdRes;
+  }
+
   // 3. Delega a next-intl
-  return intlMiddleware(req);
+  const res = intlMiddleware(req);
+
+  // Discovery markdown per agenti AI: appende /llms.txt all'header `Link`
+  // accanto agli hreflang di next-intl. Qui e non in next.config headers():
+  // next-intl fa set() di Link e sovrascriverebbe la entry. Speculare a
+  // metadata.alternates.types nel root layout.
+  // NB: Vary: Accept sulle risposte HTML non è impostabile — Next sovrascrive
+  // il Vary delle pagine con i propri header RSC. Rischio reale ~zero finché
+  // Cloudflare non cache-a HTML; la risposta text/markdown il suo Vary ce l'ha.
+  res.headers.append(
+    'Link',
+    '</llms.txt>; rel="alternate"; type="text/markdown"; title="LLM-friendly content index"',
+  );
+
+  return res;
 }
 
 export const config = {
