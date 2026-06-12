@@ -30,6 +30,14 @@ export const PATH_SEGMENTS_IT_TO_EN = {
   // routing, questa da buildCanonical/buildI18nAlternates per gli URL nel
   // metadata (canonical, hreflang).
   'servizi-per-professioni': 'services-by-profession',
+  // Pillar bilingual con slug EN tradotto (PATHNAMES in i18n/routing.ts).
+  // Senza queste entry localizedPath/buildCanonical emettevano l'URL EN con
+  // slug IT (/en/migrazione-google-analytics-4), che 307-redirige: sitemap e
+  // canonical puntavano a URL non-canonici (GSC coverage audit 2026-06-12).
+  'migrazione-google-analytics-4': 'google-analytics-4-migration',
+  'freelance-vs-agenzia-2026': 'freelance-vs-agency-2026',
+  'glossario-seo': 'seo-glossary',
+  'glossario-e-commerce': 'e-commerce-glossary',
 } as const satisfies Record<string, string>;
 
 /** Reverse map per normalizzare URL EN → IT canonical (middleware, routing). */

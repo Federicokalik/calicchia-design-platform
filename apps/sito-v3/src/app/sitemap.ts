@@ -5,6 +5,8 @@ import { getSeoCities, getServiceCatalog } from '@/lib/cms';
 import {
   SEO_SERVICES,
   getProfessionsForService,
+  getServiceUrlPrefix,
+  getProfessionSlugForLocale,
 } from '@/data/seo-service-matrix';
 import { LOCALES, localizedPath, type Locale } from '@/lib/i18n';
 
@@ -119,6 +121,20 @@ const IT_ONLY_PATHS = new Set<string>([
   '/faq',
 ]);
 
+/**
+ * Prefissi IT-only (match su path E sotto-path). `/zone/*` è bloccata su EN
+ * via `EN_PATH_DISALLOWED_PREFIXES` in proxy.ts: emettere le entry /en/zone/*
+ * in sitemap produceva 187 URL in 404 su GSC (coverage audit 2026-06-12).
+ */
+const IT_ONLY_PREFIXES = ['/zone'] as const;
+
+function isItOnly(path: string): boolean {
+  if (IT_ONLY_PATHS.has(path)) return true;
+  return IT_ONLY_PREFIXES.some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+  );
+}
+
 const TOP_WEEKLY = new Set(['/', '/lavori', '/blog']);
 const TOP_MONTHLY = new Set([
   '/servizi',
@@ -207,7 +223,7 @@ function localizedEntries(
 
   // IT-only path: solo entry IT, no hreflang alternates EN (evita duplicate
   // content e direct Google a indicizzare solo IT).
-  if (IT_ONLY_PATHS.has(path)) {
+  if (isItOnly(path)) {
     return [
       {
         url: `${base}${localizedPath(path, 'it' as Locale)}`,
@@ -342,17 +358,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
+  // Matrix profession-only: gli slug EN sono tradotti (website-for-lawyers,
+  // non sito-web-per-avvocati) — stessa logica di buildMatrixCanonicalUrl in
+  // [...matrix]/page.tsx. localizedEntries non basta perché traduce solo i
+  // prefissi noti, non gli slug matrix: emetteva URL EN non-canonici che GSC
+  // marcava "pagina alternativa con canonical" (coverage audit 2026-06-12).
+  const base = siteBase();
   for (const service of SEO_SERVICES) {
     const professions = getProfessionsForService(service.slug).filter(
       (profession) => profession.tier <= 2,
     );
+    const enPrefix = getServiceUrlPrefix(service, 'en');
     for (const profession of professions) {
-      entries.push(
-        ...localizedEntries(`/${service.urlPrefix}-${profession.slug}`, now, {
-          priority: 0.6,
+      const itUrl = `${base}/${service.urlPrefix}-${profession.slug}`;
+      const enProfSlug = getProfessionSlugForLocale(profession.slug, 'en');
+      const enUrl = `${base}/en/${enPrefix}-${enProfSlug}`;
+      const alternates = { languages: { it: itUrl, en: enUrl } };
+      for (const url of [itUrl, enUrl]) {
+        entries.push({
+          url,
+          lastModified: now,
           changeFrequency: 'monthly',
-        }),
-      );
+          priority: 0.6,
+          alternates,
+        });
+      }
     }
   }
 
