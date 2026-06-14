@@ -34,6 +34,8 @@ interface KbStatusResponse {
   };
   files: KbFileInfo[];
   kb_dir: string;
+  snoozed_until: string | null;
+  s4_sync_pending: { since: string; reason: string } | null;
 }
 
 function formatBytes(n: number): string {
@@ -88,21 +90,39 @@ export function KnowledgeBaseSection() {
         method: 'POST',
         body: form,
       });
-      return data as { file: { name: string; size_bytes: number } };
+      return data as { file: { name: string; size_bytes: number }; s4_synced: boolean };
     },
     onSuccess: (res) => {
       toast.success(`Caricato ${res.file.name}`);
+      if (data?.s4_configured && !res.s4_synced) {
+        toast.warning('Salvato in locale, ma il backup su S4 non è riuscito — riproverò automaticamente.');
+      }
       queryClient.invalidateQueries({ queryKey: ['admin-kb-status'] });
+      queryClient.invalidateQueries({ queryKey: ['kb-health'] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (name: string) =>
-      apiFetch(`/api/admin/kb/files/${encodeURIComponent(name)}`, { method: 'DELETE' }),
-    onSuccess: (_, name) => {
+      apiFetch(`/api/admin/kb/files/${encodeURIComponent(name)}`, { method: 'DELETE' }) as Promise<{ s4_synced: boolean }>,
+    onSuccess: (res, name) => {
       toast.success(`Cancellato ${name}`);
+      if (data?.s4_configured && !res?.s4_synced) {
+        toast.warning('Rimosso in locale, ma il backup su S4 non è riuscito — riproverò automaticamente.');
+      }
       queryClient.invalidateQueries({ queryKey: ['admin-kb-status'] });
+      queryClient.invalidateQueries({ queryKey: ['kb-health'] });
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const unsnoozeMutation = useMutation({
+    mutationFn: () => apiFetch('/api/admin/kb/snooze', { method: 'DELETE' }),
+    onSuccess: () => {
+      toast.success('Avviso KB riattivato');
+      queryClient.invalidateQueries({ queryKey: ['admin-kb-status'] });
+      queryClient.invalidateQueries({ queryKey: ['kb-health'] });
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -129,9 +149,10 @@ export function KnowledgeBaseSection() {
 
   if (!data) return null;
 
-  const { metadata, files, s4_configured, kb_dir } = data;
+  const { metadata, files, s4_configured, kb_dir, snoozed_until, s4_sync_pending } = data;
   const empty = files.length === 0;
   const isFromS4 = metadata.source === 's4';
+  const snoozeActive = Boolean(snoozed_until) && new Date(snoozed_until as string).getTime() > Date.now();
 
   return (
     <div className="space-y-6">
@@ -173,6 +194,43 @@ export function KnowledgeBaseSection() {
           </div>
         </div>
       </div>
+
+      {/* S4 backup pending — a previous edit couldn't reach the bucket */}
+      {s4_sync_pending && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-amber-900">Backup su S4 in sospeso</p>
+              <p className="text-xs text-amber-800 mt-1">
+                Le modifiche sono salvate in locale, ma l&apos;ultimo invio a MEGA S4 è fallito
+                (dal {formatDate(s4_sync_pending.since)}). Riprovo automaticamente ogni giorno.
+                Possibile causa: S4 offline o abbonamento scaduto.
+              </p>
+              <p className="text-[10px] text-amber-700 mt-1 font-mono break-all">
+                {s4_sync_pending.reason}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Snooze status — stale banner currently silenced */}
+      {snoozeActive && (
+        <div className="rounded-lg border bg-muted/30 p-4 flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-xs text-muted-foreground">
+            Avviso &quot;KB obsoleta&quot; silenziato fino al {formatDate(snoozed_until)}.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => unsnoozeMutation.mutate()}
+            disabled={unsnoozeMutation.isPending}
+          >
+            Riattiva avviso
+          </Button>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="rounded-lg border p-4 space-y-4">

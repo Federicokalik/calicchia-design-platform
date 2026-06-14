@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
 import { readKbMetadata } from '../lib/agent/kb-bootstrap';
+import { getKbSnoozeUntil } from '../lib/agent/kb-sync';
 
 export const health = new Hono();
 
@@ -34,7 +35,7 @@ health.get('/readyz', (c) => {
  * running image. Reports `degraded` when the KB is empty or older than
  * KB_STALE_DAYS — always HTTP 200, so it never triggers a container restart.
  */
-health.get('/kb', (c) => {
+health.get('/kb', async (c) => {
   const meta = readKbMetadata();
   const ageDays =
     meta.latest_modified === null
@@ -42,6 +43,9 @@ health.get('/kb', (c) => {
       : Math.floor((Date.now() - new Date(meta.latest_modified).getTime()) / DAY_MS);
   const stale = ageDays !== null && ageDays > KB_STALE_DAYS;
   const empty = meta.file_count === 0;
+  // A snooze silences the *stale* warning only — an empty KB always reports
+  // degraded (the quote generator is genuinely unavailable, not just dated).
+  const snoozedUntil = await getKbSnoozeUntil().catch(() => null);
 
   return c.json({
     status: stale || empty ? 'degraded' : 'healthy',
@@ -52,6 +56,7 @@ health.get('/kb', (c) => {
     stale,
     stale_threshold_days: KB_STALE_DAYS,
     loaded_at: meta.loaded_at ?? null,
+    snoozed_until: snoozedUntil,
     timestamp: new Date().toISOString(),
   });
 });

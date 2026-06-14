@@ -22,6 +22,7 @@ import { runWhatsAppScheduled } from './whatsapp-scheduled';
 import { runWhatsAppContactsSync } from './whatsapp-contacts-sync';
 import { runDataRetention } from './data-retention';
 import { runItalianHolidays } from './italian-holidays';
+import { runKbS4Sync } from './kb-sync';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
@@ -162,6 +163,14 @@ const jobs: CronJob[] = [
     name: 'italian-holidays',
     intervalMs: 7 * 24 * 60 * 60 * 1000,
     run: runItalianHolidays,
+  },
+  {
+    // KB → S4 backup: retries a pending push (admin edit that didn't reach S4).
+    // No-op when nothing is owed; re-alerts on Telegram daily if S4 stays down.
+    name: 'kb-s4-sync',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 7,
+    run: runKbS4Sync,
   },
 ];
 

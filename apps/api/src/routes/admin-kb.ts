@@ -1,7 +1,14 @@
 import { Hono } from 'hono';
 import { readdirSync, readFileSync, statSync, unlinkSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve } from 'path';
-import { bootstrapKBs, readKbMetadata, KB_DIR } from '../lib/agent/kb-bootstrap';
+import { bootstrapKBs, readKbMetadata, refreshKbMetadata, KB_DIR } from '../lib/agent/kb-bootstrap';
+import {
+  reconcileKbToS4,
+  getKbSyncPending,
+  getKbSnoozeUntil,
+  setKbSnooze,
+  clearKbSnooze,
+} from '../lib/agent/kb-sync';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'admin-kb' });
@@ -59,14 +66,43 @@ function sanitizeFilename(raw: string): string | null {
 }
 
 // GET /api/admin/kb/status — combined status + files for the admin page.
-adminKb.get('/status', (c) => {
+adminKb.get('/status', async (c) => {
   const meta = readKbMetadata();
+  const [snoozedUntil, syncPending] = await Promise.all([
+    getKbSnoozeUntil(),
+    getKbSyncPending(),
+  ]);
   return c.json({
     s4_configured: isS4Configured(),
     metadata: meta,
     files: listKbFiles(),
     kb_dir: KB_DIR,
+    snoozed_until: snoozedUntil,
+    s4_sync_pending: syncPending,
   });
+});
+
+// POST /api/admin/kb/snooze — silence the "KB obsoleta" banner for a while.
+// Body: { days?: number } (default 7, max 365). Does not touch KB content.
+adminKb.post('/snooze', async (c) => {
+  let body: Record<string, unknown> = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    // empty body is fine — fall back to the default window
+  }
+  const raw = Number(body?.days);
+  const days = Number.isFinite(raw) && raw > 0 ? Math.min(raw, 365) : 7;
+  const until = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  await setKbSnooze(until);
+  log.info({ until }, 'KB stale banner snoozed');
+  return c.json({ success: true, snoozed_until: until });
+});
+
+// DELETE /api/admin/kb/snooze — re-enable the banner immediately.
+adminKb.delete('/snooze', async (c) => {
+  await clearKbSnooze();
+  return c.json({ success: true, snoozed_until: null });
 });
 
 // POST /api/admin/kb/import — re-runs bootstrapKBs() and reports the outcome.
@@ -156,8 +192,19 @@ adminKb.post('/upload', async (c) => {
     return c.json({ error: 'Scrittura fallita', detail: message }, 500);
   }
 
+  // Back up to S4 so the edit survives a restart. On failure the local file is
+  // kept and the push is retried by the daily cron — reconcileKbToS4 never throws.
+  let s4Synced = false;
+  if (isS4Configured()) {
+    const res = await reconcileKbToS4('admin');
+    s4Synced = res.ok;
+  }
+  // Refresh freshness metadata so /api/health/kb clears the stale banner at once.
+  refreshKbMetadata(s4Synced ? 's4' : 'local');
+
   return c.json({
     success: true,
+    s4_synced: s4Synced,
     file: {
       name,
       size_bytes: file.size,
@@ -167,7 +214,7 @@ adminKb.post('/upload', async (c) => {
 });
 
 // DELETE /api/admin/kb/files/:name — remove a single .md from KB_DIR.
-adminKb.delete('/files/:name', (c) => {
+adminKb.delete('/files/:name', async (c) => {
   const raw = c.req.param('name');
   const name = sanitizeFilename(raw);
   if (!name) {
@@ -186,7 +233,15 @@ adminKb.delete('/files/:name', (c) => {
     return c.json({ error: 'Cancellazione fallita', detail: message }, 500);
   }
 
-  return c.json({ success: true, files: listKbFiles() });
+  // Mirror the delete to S4 (reconcile removes kb/ objects no longer on disk).
+  let s4Synced = false;
+  if (isS4Configured()) {
+    const res = await reconcileKbToS4('admin');
+    s4Synced = res.ok;
+  }
+  refreshKbMetadata(s4Synced ? 's4' : 'local');
+
+  return c.json({ success: true, s4_synced: s4Synced, files: listKbFiles() });
 });
 
 // GET /api/admin/kb/files/:name — download/preview a single .md.

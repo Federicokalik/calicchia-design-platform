@@ -111,7 +111,9 @@ services:
       GOWA_WEBHOOK_SECRET: ${GOWA_WEBHOOK_SECRET}
       GOWA_DEVICE_ID: ${GOWA_DEVICE_ID}
       # MEGA S4 (object storage): consegna dei knowledge base gitignored al boot.
-      # KB_DIR=/data/kb è già impostato nel Dockerfile.
+      # KB_DIR=/data/kb è già impostato nel Dockerfile ed è montato sul volume
+      # kb_data (vedi sotto): le modifiche da admin sopravvivono ai riavvii anche
+      # se il push su S4 fallisce, e il cron kb-s4-sync le ricarica appena torna.
       S4_ENDPOINT: ${S4_ENDPOINT}
       S4_REGION: ${S4_REGION}
       S4_BUCKET: ${S4_BUCKET}
@@ -120,6 +122,7 @@ services:
     volumes:
       - uploads_data:/data/uploads
       - private_data:/data/private
+      - kb_data:/data/kb
     depends_on:
       postgres:
         condition: service_healthy
@@ -188,6 +191,7 @@ volumes:
   postgres_data:
   uploads_data:
   private_data:
+  kb_data:
 
 networks:
   dokploy-network:

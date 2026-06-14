@@ -11,10 +11,16 @@
  * No-op when the `S4_*` env vars are not set — local dev reads the files that
  * already exist on disk in this directory.
  */
-import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, statSync, existsSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { S3Client, GetObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'kb-bootstrap' });
@@ -91,19 +97,40 @@ export async function bootstrapKBs(): Promise<void> {
   }
 
   let downloaded = 0;
+  let keptLocal = 0;
   let latestModified: Date | null = null;
+  const noteLatest = (ms: number) => {
+    if (ms > 0 && (!latestModified || ms > latestModified.getTime())) {
+      latestModified = new Date(ms);
+    }
+  };
   for (const key of keys) {
     const filename = key.slice(KB_PREFIX.length);
     if (!filename || filename.includes('/')) continue; // skip nested paths
     try {
       const res = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+      const dest = resolve(KB_DIR, filename);
+
+      // Don't clobber a local edit that is newer than the S4 copy: an earlier
+      // push that failed (S4 down) leaves the only fresh copy on disk. Keep it —
+      // the kb-s4-sync cron re-pushes it once S4 is back (the pending marker
+      // lives in the DB and survives restarts). NOTE: this protection only holds
+      // if KB_DIR is a persisted volume; on an ephemeral fs the local edit is
+      // already gone by the time we boot.
+      const localMtime = existsSync(dest) ? statSync(dest).mtimeMs : 0;
+      const s4Mtime = res.LastModified ? res.LastModified.getTime() : 0;
+      if (localMtime > 0 && s4Mtime > 0 && localMtime > s4Mtime + 2000) {
+        log.warn({ filename }, 'local KB newer than S4 — keeping local copy (push still pending)');
+        keptLocal++;
+        noteLatest(localMtime);
+        continue;
+      }
+
       const body = await res.Body?.transformToString('utf-8');
       if (body) {
-        writeFileSync(resolve(KB_DIR, filename), body, 'utf-8');
+        writeFileSync(dest, body, 'utf-8');
         downloaded++;
-        if (res.LastModified && (!latestModified || res.LastModified > latestModified)) {
-          latestModified = res.LastModified;
-        }
+        noteLatest(s4Mtime);
       }
     } catch (err) {
       log.error(
@@ -112,14 +139,17 @@ export async function bootstrapKBs(): Promise<void> {
       );
     }
   }
-  log.info(`downloaded ${downloaded} knowledge-base file(s) from S4 into ${KB_DIR}`);
+  log.info(
+    `downloaded ${downloaded} knowledge-base file(s) from S4 into ${KB_DIR}` +
+      (keptLocal ? ` (kept ${keptLocal} newer local file(s))` : ''),
+  );
 
   // Persist freshness metadata so /api/health/kb can report staleness without
   // re-hitting S4. Best-effort: a write failure must not abort the boot.
   const metadata: KbMetadata = {
     source: 's4',
-    file_count: downloaded,
-    latest_modified: latestModified ? latestModified.toISOString() : null,
+    file_count: downloaded + keptLocal,
+    latest_modified: latestModified ? (latestModified as Date).toISOString() : null,
     loaded_at: new Date().toISOString(),
   };
   try {
@@ -171,4 +201,119 @@ export function readKbMetadata(): KbMetadata {
     file_count: fileCount,
     latest_modified: latestMs === null ? null : new Date(latestMs).toISOString(),
   };
+}
+
+/** True when the S4_* env vars needed to reach the KB bucket are all set. */
+export function isS4Configured(): boolean {
+  return getS4() !== null;
+}
+
+/** Names of the real KB `.md` files on disk (skips `*.example.md` templates). */
+function listLocalKbFiles(): string[] {
+  try {
+    return readdirSync(KB_DIR).filter(
+      (name) => name.endsWith('.md') && !name.endsWith('.example.md'),
+    );
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Recompute KB freshness from the `.md` files currently on disk and persist
+ * `.kb-metadata.json`. Call this after an admin upload/delete so
+ * `/api/health/kb` reflects the change immediately — otherwise the boot-time
+ * metadata (written by {@link bootstrapKBs} with the OLD S4 `LastModified`)
+ * keeps the "stale" banner lit even though the local files are fresh.
+ */
+export function refreshKbMetadata(source: 's4' | 'local'): KbMetadata {
+  const names = listLocalKbFiles();
+  let latestMs: number | null = null;
+  for (const name of names) {
+    try {
+      const { mtimeMs } = statSync(resolve(KB_DIR, name));
+      if (latestMs === null || mtimeMs > latestMs) latestMs = mtimeMs;
+    } catch {
+      // file vanished between readdir and stat — ignore
+    }
+  }
+
+  const metadata: KbMetadata = {
+    source,
+    file_count: names.length,
+    latest_modified: latestMs === null ? null : new Date(latestMs).toISOString(),
+    loaded_at: new Date().toISOString(),
+  };
+  try {
+    writeFileSync(
+      resolve(KB_DIR, KB_METADATA_FILE),
+      JSON.stringify(metadata, null, 2),
+      'utf-8',
+    );
+  } catch (err) {
+    log.error(
+      { err: err instanceof Error ? err.message : err },
+      'cannot write KB metadata file',
+    );
+  }
+  return metadata;
+}
+
+export interface KbSyncResult {
+  ok: boolean;
+  /** True when S4 is not configured — nothing was attempted. */
+  skipped: boolean;
+  pushed: number;
+  deleted: number;
+  error?: string;
+}
+
+/**
+ * Mirror the on-disk KB to the S4 bucket so admin edits survive a container
+ * restart (the boot bootstrap is download-only and would otherwise re-fetch the
+ * old version). Local disk is the source of truth: every local `.md` is pushed
+ * under `kb/`, and any `kb/*.md` object that no longer exists locally is removed.
+ *
+ * Throws on the first S4 error — the caller is expected to keep the local files,
+ * flag the sync as pending, and retry later. No-op (skipped) without S4 creds.
+ */
+export async function syncKbToS4(): Promise<KbSyncResult> {
+  const s4 = getS4();
+  if (!s4) return { ok: false, skipped: true, pushed: 0, deleted: 0 };
+  const { client, bucket } = s4;
+
+  const localNames = listLocalKbFiles();
+  let pushed = 0;
+  let deleted = 0;
+
+  // Push every local KB file. Content is tiny (<100 KB) so an unconditional
+  // PUT is cheaper than a list+compare and guarantees S4 holds the latest text.
+  for (const name of localNames) {
+    const body = readFileSync(resolve(KB_DIR, name), 'utf-8');
+    await client.send(
+      new PutObjectCommand({
+        Bucket: bucket,
+        Key: KB_PREFIX + name,
+        Body: body,
+        ContentType: 'text/markdown; charset=utf-8',
+      }),
+    );
+    pushed++;
+  }
+
+  // Mirror deletes: drop kb/*.md objects that are no longer on disk.
+  const listed = await client.send(
+    new ListObjectsV2Command({ Bucket: bucket, Prefix: KB_PREFIX }),
+  );
+  for (const obj of listed.Contents || []) {
+    if (!obj.Key || !obj.Key.endsWith('.md')) continue;
+    const name = obj.Key.slice(KB_PREFIX.length);
+    if (!name || name.includes('/')) continue; // skip nested paths
+    if (!localNames.includes(name)) {
+      await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: obj.Key }));
+      deleted++;
+    }
+  }
+
+  return { ok: true, skipped: false, pushed, deleted };
 }
