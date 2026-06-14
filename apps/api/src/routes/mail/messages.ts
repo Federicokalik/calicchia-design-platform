@@ -3,6 +3,8 @@ import { sql } from '../../db';
 import { extractToken } from '../../middleware/auth';
 import { jwtVerify } from 'jose';
 import { getJwtSecret } from '../../lib/jwt';
+import { withImap } from '../../lib/mail/imap-client';
+import { parseRawMail } from '../../lib/mail/mail-parser';
 
 export const mailMessages = new Hono();
 
@@ -209,6 +211,104 @@ mailMessages.get('/:id', async (c) => {
   `;
   if (!msg) return c.json({ error: 'Messaggio non trovato' }, 404);
   return c.json({ message: msg });
+});
+
+// GET /api/mail/messages/:id/attachments/:attachmentId — download attachment bytes.
+// Attachment blobs are not cached locally (sync stores metadata only), so we
+// re-fetch the raw message from IMAP on demand and extract the requested part.
+mailMessages.get('/:id/attachments/:attachmentId', async (c) => {
+  const userId = await getUserId(c);
+  if (!userId) return c.json({ error: 'Non autorizzato' }, 401);
+
+  const messageId = c.req.param('id');
+  const attachmentId = c.req.param('attachmentId');
+
+  const [row] = await sql<Array<{
+    filename: string;
+    content_type: string | null;
+    size_bytes: number | null;
+    folder: string;
+    uid: number;
+    imap_host: string;
+    imap_port: number;
+    imap_secure: boolean;
+    username: string;
+    password_enc: Buffer;
+    password_iv: Buffer;
+    password_tag: Buffer;
+  }>>`
+    SELECT att.filename, att.content_type, att.size_bytes,
+           m.folder, m.uid,
+           acc.imap_host, acc.imap_port, acc.imap_secure, acc.username,
+           acc.password_enc, acc.password_iv, acc.password_tag
+    FROM email_attachments att
+    JOIN email_messages m ON m.id = att.message_id
+    JOIN email_accounts acc ON acc.id = m.account_id AND acc.user_id = ${userId}
+    WHERE att.id = ${attachmentId} AND att.message_id = ${messageId}
+    LIMIT 1
+  `;
+  if (!row) return c.json({ error: 'Allegato non trovato' }, 404);
+
+  // Stable ordinal of this attachment among the message's parts, matching the
+  // order they were parsed and inserted at sync time.
+  const ordered = await sql<Array<{ id: string }>>`
+    SELECT id FROM email_attachments
+    WHERE message_id = ${messageId}
+    ORDER BY created_at ASC, id ASC
+  `;
+  const attIndex = ordered.findIndex((r) => r.id === attachmentId);
+
+  interface AttachmentPayload { content: Buffer; contentType: string; filename: string }
+  let payload: AttachmentPayload | null;
+  try {
+    payload = await withImap(
+      {
+        host: row.imap_host,
+        port: row.imap_port,
+        secure: row.imap_secure,
+        username: row.username,
+        passwordBlob: { cipher: row.password_enc, iv: row.password_iv, tag: row.password_tag },
+      },
+      async (client): Promise<AttachmentPayload | null> => {
+        await client.mailboxOpen(row.folder, { readOnly: true });
+        const fetched = await client.fetchOne(String(row.uid), { uid: true, source: true }, { uid: true });
+        if (!fetched || !fetched.source) return null;
+
+        const parsed = await parseRawMail(fetched.source);
+        const atts = parsed.attachments;
+
+        // Prefer the ordinal match; fall back to filename (+size) when the
+        // parser yields a different order than at sync time.
+        let match = attIndex >= 0 && attIndex < atts.length ? atts[attIndex] : undefined;
+        if (!match || match.filename !== row.filename) {
+          match =
+            atts.find((a) => a.filename === row.filename && (row.size_bytes == null || a.size === row.size_bytes)) ??
+            atts.find((a) => a.filename === row.filename) ??
+            match;
+        }
+        if (!match) return null;
+        return {
+          content: match.content,
+          contentType: match.contentType || row.content_type || 'application/octet-stream',
+          filename: match.filename || row.filename,
+        };
+      },
+    );
+  } catch {
+    return c.json({ error: 'Impossibile recuperare l’allegato dal server di posta' }, 502);
+  }
+
+  if (!payload) return c.json({ error: 'Allegato non più disponibile sul server' }, 404);
+
+  const { content, contentType, filename } = payload;
+  const asciiName = filename.replace(/[^\x20-\x7E]/g, '_').replace(/"/g, '');
+  c.header('Content-Type', contentType);
+  c.header(
+    'Content-Disposition',
+    `attachment; filename="${asciiName}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
+  );
+  c.header('Content-Length', String(content.length));
+  return c.body(content);
 });
 
 // PATCH /api/mail/messages/:id/flags — update flags (mark read/starred)

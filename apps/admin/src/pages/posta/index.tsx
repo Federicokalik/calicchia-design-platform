@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useSetAiEntityContext } from '@/hooks/use-ai-entity-context';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, apiFetchRaw } from '@/lib/api';
 import { SetupWizard } from './setup-wizard';
 import { ComposeDialog, type ComposePrefill } from './compose-dialog';
 import { RulesDialog } from './rules-dialog';
@@ -55,7 +55,7 @@ interface FullMessage extends MessageSummary {
   to_addrs: Array<{ address: string; name: string }>;
   body_text: string | null;
   body_html: string | null;
-  attachments: Array<{ filename: string; content_type: string; size_bytes: number }>;
+  attachments: Array<{ id: string; filename: string; content_type: string; size_bytes: number }>;
   links: Array<{ id: string; entity_type: string; entity_id: string; auto: boolean }>;
 }
 
@@ -147,7 +147,7 @@ export default function PostaPage() {
       message: {
         ...m,
         to_addrs: asArray<{ address: string; name: string }>(m.to_addrs),
-        attachments: asArray<{ filename: string; content_type: string; size_bytes: number }>(m.attachments),
+        attachments: asArray<{ id: string; filename: string; content_type: string; size_bytes: number }>(m.attachments),
         links: asArray<{ id: string; entity_type: string; entity_id: string; auto: boolean }>(m.links),
         flags: asArray<string>(m.flags),
       },
@@ -228,6 +228,30 @@ export default function PostaPage() {
     // markReadMutation is stable from useMutation; we intentionally exclude it
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fullMsgId, fullMsgFlags]);
+
+  // Attachment download: blobs aren't cached, so the API re-fetches them from
+  // IMAP on demand. Stream the response to a blob and trigger a browser save.
+  const [downloadingAtt, setDownloadingAtt] = useState<string | null>(null);
+  const downloadAttachment = async (att: { id: string; filename: string }) => {
+    if (!selectedId) return;
+    setDownloadingAtt(att.id);
+    try {
+      const res = await apiFetchRaw(`/api/mail/messages/${selectedId}/attachments/${att.id}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = att.filename || 'allegato';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toast.error(`Download fallito: ${(err as Error).message}`);
+    } finally {
+      setDownloadingAtt(null);
+    }
+  };
 
   // Deep-link: ?draft=<id> → fetch the AI/manual draft and pre-fill Compose
   useEffect(() => {
@@ -565,11 +589,21 @@ export default function PostaPage() {
             {fullMsg.message.attachments.length > 0 && (
               <div className="border-t px-4 py-2 flex flex-wrap gap-2">
                 {fullMsg.message.attachments.map((a, i) => (
-                  <div key={i} className="inline-flex items-center gap-2 rounded border px-2 py-1 text-xs text-muted-foreground">
-                    <Paperclip className="h-3 w-3" />
+                  <button
+                    key={a.id || i}
+                    type="button"
+                    onClick={() => downloadAttachment(a)}
+                    disabled={downloadingAtt === a.id}
+                    title={`Scarica ${a.filename}`}
+                    className="inline-flex items-center gap-2 rounded border px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:opacity-60"
+                  >
+                    {downloadingAtt === a.id
+                      ? <Loader2 className="h-3 w-3 animate-spin" />
+                      : <Paperclip className="h-3 w-3" />}
                     {a.filename}
                     <span className="text-[10px]">{Math.ceil(a.size_bytes / 1024)} KB</span>
-                  </div>
+                    <Download className="h-3 w-3" />
+                  </button>
                 ))}
               </div>
             )}
