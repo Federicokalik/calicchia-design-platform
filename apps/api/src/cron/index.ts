@@ -19,6 +19,7 @@ import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppScheduled } from './whatsapp-scheduled';
+import { runWhatsAppContactsSync } from './whatsapp-contacts-sync';
 import { runDataRetention } from './data-retention';
 import { runItalianHolidays } from './italian-holidays';
 import { logger } from '../lib/logger';
@@ -140,6 +141,13 @@ const jobs: CronJob[] = [
     name: 'whatsapp-scheduled',
     intervalMs: 60 * 1000,
     run: runWhatsAppScheduled,
+  },
+  {
+    // Nomi rubrica WhatsApp (GOWA /user/my/contacts): sync giornaliero.
+    name: 'whatsapp-contacts-sync',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 6,
+    run: async () => { await runWhatsAppContactsSync(); },
   },
   {
     name: 'data-retention',

@@ -361,6 +361,60 @@ export async function fetchGowaChatMessages(
   };
 }
 
+// ---------- Contacts (rubrica) ----------
+
+export interface GowaContact {
+  /** Numero normalizzato (solo cifre), estratto dal jid. */
+  phone: string;
+  /** Nome salvato in rubrica (FullName), NON il pushname. */
+  name: string;
+}
+
+/**
+ * Estrae il numero da un jid che GOWA puo' serializzare come stringa
+ * ("39...@s.whatsapp.net") o come oggetto types.JID ({ User, Server, ... }).
+ * Ritorna '' per jid non telefonici (es. @lid, @g.us) cosi' da non
+ * sporcare il match per numero.
+ */
+function jidToPhone(jid: unknown): string {
+  if (!jid) return '';
+  if (typeof jid === 'string') {
+    const [user, server] = jid.split('@');
+    if (server && server !== 's.whatsapp.net' && server !== 'c.us') return '';
+    return (user || '').replace(/[^0-9]/g, '');
+  }
+  if (typeof jid === 'object') {
+    const o = jid as { User?: unknown; user?: unknown; Server?: unknown; server?: unknown };
+    const server = o.Server ?? o.server;
+    if (server && server !== 's.whatsapp.net' && server !== 'c.us') return '';
+    const user = o.User ?? o.user;
+    if (typeof user === 'string') return user.replace(/[^0-9]/g, '');
+  }
+  return '';
+}
+
+/**
+ * Lista dei contatti salvati in rubrica (sincronizzati da WhatsApp).
+ * GOWA: GET /user/my/contacts → { results: { data: [{ jid, name }] } }
+ * dove `name` e' il FullName della rubrica (NON il pushname del contatto).
+ * Ritorna [] se GOWA non e' configurato.
+ */
+export async function fetchGowaContacts(): Promise<GowaContact[]> {
+  if (!isWhatsAppConfigured()) return [];
+  const res = await gowaFetch<{ results?: { data?: Array<{ jid: unknown; name?: string | null }> } }>(
+    '/user/my/contacts',
+    { method: 'GET' },
+  );
+  const data = res.results?.data ?? [];
+  const out: GowaContact[] = [];
+  for (const c of data) {
+    const phone = jidToPhone(c.jid);
+    const name = (c.name || '').trim();
+    if (phone && name) out.push({ phone, name });
+  }
+  return out;
+}
+
 /**
  * Scarica un media da GOWA e lo salva nello store privato (SEC-10).
  * Ritorna il nome file (es. "<uuid>.jpg") da inserire in

@@ -41,6 +41,7 @@ import {
   type WhatsAppCategory,
 } from '../lib/whatsapp-policy';
 import { runWhatsAppTriage } from '../lib/ai/whatsapp-triage';
+import { runWhatsAppContactsSync } from '../cron/whatsapp-contacts-sync';
 import { logger } from '../lib/logger';
 import { publishWaEvent, subscribeWaEvents } from '../lib/whatsapp-events';
 import { extname } from 'node:path';
@@ -213,29 +214,38 @@ async function emitTypingFromPresence(payload: any): Promise<void> {
 
 // ----- message inbound -----
 
+// GOWA v6+ mette testo e caption nel campo top-level `body`. I media stanno in
+// chiavi top-level (`image`/`document`/...) che possono essere una stringa
+// (path scaricato) o un oggetto { path|url, caption, filename }. Manteniamo i
+// vecchi fallback (message.*) per robustezza verso versioni/forward diversi.
 function extractMessageBody(p: any): string {
+  const mediaCaption =
+    (p?.image && typeof p.image === 'object' && p.image.caption)
+    || (p?.video && typeof p.video === 'object' && p.video.caption)
+    || (p?.document && typeof p.document === 'object' && p.document.caption)
+    || (p?.audio && typeof p.audio === 'object' && p.audio.caption)
+    || '';
   return (
-    p?.message?.text
-    || p?.message?.body
-    || p?.message?.conversation
+    p?.body
+    || mediaCaption
     || p?.text
-    || p?.body
-    || p?.message?.image?.caption
-    || p?.message?.video?.caption
-    || p?.message?.document?.caption
+    || p?.message?.text
+    || p?.message?.conversation
+    || p?.message?.body
     || ''
   ).toString();
 }
 
 function extractMessageType(p: any): string {
-  if (p?.message?.text || p?.message?.conversation || p?.text) return 'text';
-  if (p?.message?.image) return 'image';
-  if (p?.message?.video) return 'video';
-  if (p?.message?.audio || p?.message?.ptt) return 'audio';
-  if (p?.message?.document) return 'document';
-  if (p?.message?.sticker) return 'sticker';
-  if (p?.message?.location) return 'location';
-  if (p?.message?.contacts || p?.message?.contact) return 'contact';
+  // Chiavi top-level GOWA v6+ (stringa o oggetto). Ordine: media prima del testo
+  // perche' un media con caption porta anche `body`.
+  if (p?.image || p?.message?.image) return 'image';
+  if (p?.video || p?.message?.video) return 'video';
+  if (p?.audio || p?.ptt || p?.message?.audio || p?.message?.ptt) return 'audio';
+  if (p?.document || p?.message?.document) return 'document';
+  if (p?.sticker || p?.message?.sticker) return 'sticker';
+  if (p?.location || p?.message?.location) return 'location';
+  if (p?.contact || p?.contacts || p?.message?.contact || p?.message?.contacts) return 'contact';
   return 'text';
 }
 
@@ -244,17 +254,32 @@ function chatIdToPhone(chatId: string): string {
   return chatId.split('@')[0].replace(/[^0-9]/g, '');
 }
 
+type ConversationKind = 'chat' | 'group' | 'broadcast' | 'status' | 'newsletter';
+
+// Classifica una chat dal suo jid. Allinea il valore alla colonna
+// whatsapp_conversations.kind (mig 131).
+function chatKindOf(chatId: string): ConversationKind {
+  if (chatId === 'status@broadcast') return 'status';
+  if (chatId.endsWith('@broadcast')) return 'broadcast';
+  if (chatId.endsWith('@newsletter')) return 'newsletter';
+  if (chatId.endsWith('@g.us')) return 'group';
+  return 'chat';
+}
+
 async function ensureConversation(opts: {
   chatId: string;
   phone: string;
   contactName?: string;
   isGroup: boolean;
+  kind?: ConversationKind;
 }): Promise<{ id: string; aiMode: 'off' | 'triage' | 'auto_reply' }> {
+  const kind: ConversationKind = opts.kind ?? chatKindOf(opts.chatId);
   const existing = await sql`
     SELECT id, ai_mode FROM whatsapp_conversations WHERE chat_id = ${opts.chatId} LIMIT 1
   ` as Array<{ id: string; ai_mode: 'off' | 'triage' | 'auto_reply' }>;
   if (existing[0]) {
-    // Aggiorna contact_name se vuoto
+    // Aggiorna contact_name se vuoto + ripara kind se obsoleto (es. riga creata
+    // prima della mig 131 o da un vecchio backfill).
     if (opts.contactName) {
       await sql`
         UPDATE whatsapp_conversations
@@ -262,6 +287,11 @@ async function ensureConversation(opts: {
         WHERE id = ${existing[0].id}
       `;
     }
+    await sql`
+      UPDATE whatsapp_conversations
+      SET kind = ${kind}
+      WHERE id = ${existing[0].id} AND kind <> ${kind}
+    `;
     return { id: existing[0].id, aiMode: existing[0].ai_mode };
   }
 
@@ -295,9 +325,9 @@ async function ensureConversation(opts: {
 
   const inserted = await sql`
     INSERT INTO whatsapp_conversations
-      (chat_id, phone, contact_name, is_group, customer_id, lead_id, ai_mode)
+      (chat_id, phone, contact_name, is_group, kind, customer_id, lead_id, ai_mode)
     VALUES
-      (${opts.chatId}, ${opts.phone}, ${opts.contactName ?? null}, ${opts.isGroup},
+      (${opts.chatId}, ${opts.phone}, ${opts.contactName ?? null}, ${opts.isGroup}, ${kind},
        ${customer[0]?.id ?? null}, ${lead[0]?.id ?? null}, ${defaultAiMode})
     RETURNING id, ai_mode
   ` as Array<{ id: string; ai_mode: 'off' | 'triage' | 'auto_reply' }>;
@@ -305,28 +335,93 @@ async function ensureConversation(opts: {
 }
 
 async function handleMessageEvent(p: any): Promise<void> {
-  // GOWA payload shape (semplificato): { from, chat_id, message:{...}, id, push_name, timestamp, from_me }
+  // GOWA v6+ payload (semplificato): { id, chat_id, from, from_name, body,
+  //   is_from_me, timestamp, image|document|..., replied_to_id, quoted_body }
   const chatId: string = p?.chat_id || p?.from || p?.key?.remoteJid || '';
   if (!chatId) return;
-  // Ignoriamo i nostri stessi outbound (li registriamo già lato admin send).
-  if (p?.from_me === true || p?.fromMe === true || p?.key?.fromMe === true) return;
-  // Skip newsletter (canali WhatsApp) e broadcast — non sono chat 1:1/gruppo.
-  // I newsletter.message dovrebbero arrivare come evento `newsletter.message`
-  // (gia' persistiti in whatsapp_events_log), ma alcuni payload li mandano
-  // come `event: message` con jid `@newsletter`. Defense in depth.
-  if (chatId.endsWith('@newsletter') || chatId.endsWith('@broadcast') || chatId === 'status@broadcast') return;
+
+  const kind = chatKindOf(chatId);
+  // Le newsletter (canali WhatsApp) restano side-channel: l'evento dedicato
+  // `newsletter.message` e' gia' persistito in whatsapp_events_log. Non le
+  // proiettiamo in whatsapp_conversations. broadcast/status invece SI: hanno la
+  // loro tab dedicata in inbox (kind = broadcast|status).
+  if (kind === 'newsletter') return;
+
+  // GOWA v6+ usa `is_from_me`. I fallback coprono forward/integrazioni custom.
+  const isFromMe: boolean =
+    p?.is_from_me === true || p?.from_me === true || p?.fromMe === true || p?.key?.fromMe === true;
 
   const phone = chatIdToPhone(chatId);
-  const isGroup = chatId.endsWith('@g.us');
-  const contactName = (p?.push_name || p?.pushName || p?.notify || '').toString() || undefined;
+  const isGroup = kind === 'group';
+  // `from_name` = pushname GOWA v6+ (il nome rubrica arriva dal cron contacts-sync).
+  const contactName = (p?.from_name || p?.push_name || p?.pushName || p?.notify || '').toString() || undefined;
   const body = extractMessageBody(p);
   const type = extractMessageType(p);
   const externalId: string | undefined = p?.id || p?.key?.id || p?.message_id;
+  const hasMedia = ['image', 'document', 'audio', 'video', 'sticker'].includes(type);
 
-  const conv = await ensureConversation({ chatId, phone, contactName, isGroup });
+  const conv = await ensureConversation({
+    chatId,
+    phone,
+    contactName: isFromMe ? undefined : contactName,
+    isGroup,
+    kind,
+  });
 
-  // Handler STOP / opt-out (solo se text)
-  if (type === 'text' && body) {
+  // GOWA v6+: reply via `replied_to_id` (+ `quoted_body`). Fallback per altre forme.
+  const replyToExternalId: string | null =
+    p?.replied_to_id
+    || p?.quoted_message?.id
+    || p?.quoted?.id
+    || p?.context?.quoted_message_id
+    || p?.message?.context_info?.quoted_message_id
+    || p?.message?.context_info?.stanza_id
+    || null;
+
+  // ----- Messaggio inviato DA ME dal telefono (fuori dal gestionale) -----
+  // GOWA fa eco anche degli outbound del gestionale: quelli hanno gia' lo
+  // stesso external_id in whatsapp_messages, quindi ON CONFLICT li salta. Le
+  // righe nuove sono i messaggi scritti dal telefono → outbound "da telefono".
+  if (isFromMe) {
+    const insertedRows = await sql`
+      INSERT INTO whatsapp_messages
+        (conversation_id, external_id, direction, category, type, body, reply_to_external_id, sender_kind, meta)
+      VALUES
+        (${conv.id}, ${externalId ?? null}, 'outbound', 'operational', ${type}, ${body || null}, ${replyToExternalId},
+         'admin',
+         ${sql.json({
+           via: 'phone',
+           media_pending: hasMedia,
+           quoted_body: p?.quoted_body ?? null,
+           raw: stripBig(p),
+         })})
+      ON CONFLICT DO NOTHING
+      RETURNING id
+    ` as Array<{ id: string }>;
+    // Niente unread (l'ho scritto io); aggiorno solo preview/last_message_at.
+    await sql`
+      UPDATE whatsapp_conversations
+      SET last_message_at = now(),
+          last_message_preview = ${(body || `[${type}]`).slice(0, 200)}
+      WHERE id = ${conv.id}
+    `;
+    if (insertedRows[0]?.id) {
+      publishWaEvent({
+        type: 'message:inserted',
+        conversationId: conv.id,
+        direction: 'outbound',
+        messageId: insertedRows[0].id,
+        externalId: externalId ?? null,
+        unread: false,
+      });
+      publishWaEvent({ type: 'conversation:updated', conversationId: conv.id, reason: 'message' });
+    }
+    return;
+  }
+
+  // ----- Messaggio inbound dal contatto -----
+  // STOP / opt-out e triage solo per chat 1:1 (non gruppi/broadcast).
+  if (kind === 'chat' && type === 'text' && body) {
     const norm = body.trim().toUpperCase();
     if (norm === 'STOP' || norm === 'STOP ALL') {
       try { await applyStopAll(phone, 'wa-stop'); } catch { /* ignore */ }
@@ -348,18 +443,6 @@ async function handleMessageEvent(p: any): Promise<void> {
     }
   }
 
-  // GOWA may encode a "reply-to" reference in several shapes depending on
-  // version. We try the common spots and fall back to null. The column has
-  // existed since mig 096 but until now nothing wrote to it.
-  const replyToExternalId: string | null =
-    p?.quoted_message?.id
-    || p?.quoted?.id
-    || p?.context?.quoted_message_id
-    || p?.message?.context_info?.quoted_message_id
-    || p?.message?.context_info?.stanza_id
-    || null;
-
-  // Insert messaggio inbound + bump conversation.
   const insertedRows = await sql`
     INSERT INTO whatsapp_messages
       (conversation_id, external_id, direction, category, type, body, reply_to_external_id, sender_kind, meta)
@@ -367,8 +450,9 @@ async function handleMessageEvent(p: any): Promise<void> {
       (${conv.id}, ${externalId ?? null}, 'inbound', 'inbound', ${type}, ${body || null}, ${replyToExternalId},
        'user',
        ${sql.json({
-         media_pending: type !== 'text' && type !== 'reaction' && type !== 'system',
+         media_pending: hasMedia,
          push_name: contactName ?? null,
+         quoted_body: p?.quoted_body ?? null,
          raw: stripBig(p),
        })})
     ON CONFLICT DO NOTHING
@@ -394,8 +478,8 @@ async function handleMessageEvent(p: any): Promise<void> {
   }
   publishWaEvent({ type: 'conversation:updated', conversationId: conv.id, reason: 'message' });
 
-  // Trigger AI triage (best-effort, non blocca il webhook).
-  if (conv.aiMode !== 'off' && type === 'text' && body) {
+  // Trigger AI triage (best-effort, non blocca il webhook). Solo chat 1:1.
+  if (kind === 'chat' && conv.aiMode !== 'off' && type === 'text' && body) {
     runWhatsAppTriage(conv.id, body).catch(() => { /* logged inside */ });
   }
 }
@@ -428,19 +512,33 @@ function stripBig(p: any): any {
 }
 
 // ----- ack -----
+// GOWA v6+: { ids: [...], chat_id, receipt_type } — l'ack copre uno o piu'
+// message id e usa `receipt_type` (delivery/read/...) invece di `status`.
+function normalizeAckStatus(raw: string): 'sent' | 'delivered' | 'read' | null {
+  const r = raw.toLowerCase();
+  if (r === 'read' || r === 'read-self' || r === 'played' || r === 'played-self') return 'read';
+  if (r === 'delivered' || r === 'delivery') return 'delivered';
+  if (r === 'sent' || r === 'server' || r === 'server-ack' || r === 'sender') return 'sent';
+  return null;
+}
+
 async function handleAckEvent(p: any): Promise<void> {
-  const externalId: string = p?.id || p?.message_id || p?.key?.id;
-  if (!externalId) return;
-  const status: string = p?.status || p?.ack || '';
-  if (!status) return;
-  const norm = String(status).toLowerCase();
-  if (!['sent', 'delivered', 'read'].includes(norm)) return;
+  // ids[] (GOWA v6+) oppure singolo id (fallback legacy).
+  const ids: string[] = Array.isArray(p?.ids)
+    ? p.ids.filter((x: unknown): x is string => typeof x === 'string' && x.length > 0)
+    : [p?.id || p?.message_id || p?.key?.id].filter((x): x is string => typeof x === 'string' && x.length > 0);
+  if (!ids.length) return;
+  const rawStatus: string = (p?.receipt_type || p?.status || p?.ack || '').toString();
+  const norm = normalizeAckStatus(rawStatus);
+  if (!norm) return;
   await sql`
     UPDATE whatsapp_messages
     SET ack_status = ${norm}
-    WHERE external_id = ${externalId}
+    WHERE external_id = ANY(${ids})
   `;
-  publishWaEvent({ type: 'message:ack', externalId, status: norm as 'sent' | 'delivered' | 'read' });
+  for (const externalId of ids) {
+    publishWaEvent({ type: 'message:ack', externalId, status: norm });
+  }
 }
 
 // ----- reaction -----
@@ -454,19 +552,32 @@ async function handleAckEvent(p: any): Promise<void> {
 async function handleReactionEvent(p: any): Promise<void> {
   const chatId: string = p?.chat_id || p?.from || '';
   if (!chatId) return;
+  const kind = chatKindOf(chatId);
+  if (kind === 'newsletter') return;
   const phone = chatIdToPhone(chatId);
-  const isGroup = chatId.endsWith('@g.us');
-  const conv = await ensureConversation({ chatId, phone, contactName: p?.push_name, isGroup });
+  const isGroup = kind === 'group';
+  const isFromMe: boolean = p?.is_from_me === true || p?.from_me === true;
+  const conv = await ensureConversation({
+    chatId,
+    phone,
+    contactName: isFromMe ? undefined : (p?.from_name || p?.push_name || undefined),
+    isGroup,
+    kind,
+  });
 
+  // GOWA v6+: { reaction, reacted_message_id, is_from_me }.
   const emoji: string = (p?.reaction || p?.emoji || p?.message?.reaction?.text || '').toString();
   const targetExternalId: string | null =
-    (typeof p?.target === 'string' && p.target)
+    p?.reacted_message_id
+    || (typeof p?.target === 'string' && p.target)
     || p?.target?.id
     || p?.message_id
     || p?.reaction?.target_id
     || p?.message?.reaction?.key?.id
     || null;
-  const from: string | null = p?.from_jid || p?.sender || p?.participant || null;
+  // Una reazione mia (dal telefono) la attribuiamo a 'admin' per coerenza con
+  // l'overlay delle reazioni inviate dal gestionale.
+  const from: string | null = isFromMe ? 'admin' : (p?.from || p?.from_jid || p?.sender || p?.participant || null);
   const at = new Date().toISOString();
 
   if (targetExternalId) {
@@ -506,7 +617,7 @@ async function handleReactionEvent(p: any): Promise<void> {
 
 // ----- revoke/delete/edit (soft markers) -----
 async function handleRevokeEvent(p: any): Promise<void> {
-  const externalId: string = p?.id || p?.message_id || p?.key?.id;
+  const externalId: string = p?.revoked_message_id || p?.deleted_message_id || p?.id || p?.message_id || p?.key?.id;
   if (!externalId) return;
   await sql`
     UPDATE whatsapp_messages
@@ -516,7 +627,7 @@ async function handleRevokeEvent(p: any): Promise<void> {
 }
 
 async function handleEditEvent(p: any): Promise<void> {
-  const externalId: string = p?.id || p?.message_id || p?.key?.id;
+  const externalId: string = p?.edited_message_id || p?.id || p?.message_id || p?.key?.id;
   if (!externalId) return;
   const newBody = extractMessageBody(p);
   const rows = await sql`
@@ -1366,14 +1477,12 @@ whatsappAdmin.post('/sync', async (c) => {
   const msgsPerChat = Math.min(parseInt(c.req.query('messages_per_chat') || '200'), 500);
   const maxChats = Math.min(parseInt(c.req.query('max_chats') || '200'), 500);
 
-  // Cleanup difensivo: rimuove dalle inbox eventuali newsletter/broadcast che
-  // erano finiti li' da run precedenti del sync (prima del filtro). I messaggi
-  // collegati cadono via ON DELETE CASCADE.
+  // Cleanup difensivo: rimuove dalle inbox solo le newsletter (canali WA), che
+  // restano side-channel in whatsapp_events_log. broadcast/status NON vengono
+  // piu' rimossi: hanno la loro tab dedicata (kind = broadcast|status).
   const cleaned = await sql`
     DELETE FROM whatsapp_conversations
     WHERE chat_id LIKE '%@newsletter'
-       OR chat_id LIKE '%@broadcast'
-       OR chat_id = 'status@broadcast'
     RETURNING id
   ` as Array<{ id: string }>;
   const removedLegacy = cleaned.length;
@@ -1429,6 +1538,15 @@ whatsappAdmin.post('/sync', async (c) => {
     }, 502);
   }
 
+  // Aggiorna i nomi dalla rubrica WhatsApp (best-effort: non far fallire il sync).
+  let contactsUpdated = 0;
+  try {
+    const res = await runWhatsAppContactsSync();
+    contactsUpdated = res.updated;
+  } catch (err) {
+    log.error({ err }, 'contacts sync during /sync failed');
+  }
+
   return c.json({
     ok: true,
     totalChats,
@@ -1439,6 +1557,7 @@ whatsappAdmin.post('/sync', async (c) => {
     skippedBroadcast,
     skippedUnknown,
     removedLegacy,
+    contactsUpdated,
     errors,
   });
 });
@@ -1450,20 +1569,22 @@ async function importChatFromGowa(chat: GowaChat, msgsPerChat: number): Promise<
   skipped?: 'newsletter' | 'broadcast' | 'unknown_jid';
 }> {
   const chatId = chat.jid;
-  // Skip newsletter / WhatsApp channels e status broadcast — non sono chat
-  // 1:1 o di gruppo e l'UI inbox non e' progettata per gestirli.
-  // Sono comunque registrati in whatsapp_events_log via webhook newsletter.*.
-  if (chatId.endsWith('@newsletter')) {
+  const kind = chatKindOf(chatId);
+  // Le newsletter (canali WA) restano side-channel: registrate in
+  // whatsapp_events_log via webhook newsletter.*, non in inbox.
+  if (kind === 'newsletter') {
     return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'newsletter' };
   }
-  if (chatId.endsWith('@broadcast') || chatId === 'status@broadcast') {
-    return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'broadcast' };
-  }
-  // Accept solo individui (@s.whatsapp.net) e gruppi (@g.us).
-  if (!chatId.endsWith('@s.whatsapp.net') && !chatId.endsWith('@g.us')) {
+  // Jid non riconosciuto (ne' chat/group/broadcast/status/newsletter): skip.
+  if (
+    !chatId.endsWith('@s.whatsapp.net')
+    && !chatId.endsWith('@c.us')
+    && !chatId.endsWith('@g.us')
+    && !chatId.endsWith('@broadcast')
+  ) {
     return { createdConv: false, fetchedMessages: 0, createdMessages: 0, skipped: 'unknown_jid' };
   }
-  const isGroup = chatId.endsWith('@g.us');
+  const isGroup = kind === 'group';
   const phone = chatIdToPhone(chatId);
   const contactName = chat.name?.trim() || undefined;
 
@@ -1471,7 +1592,7 @@ async function importChatFromGowa(chat: GowaChat, msgsPerChat: number): Promise<
   const existing = await sql`
     SELECT id FROM whatsapp_conversations WHERE chat_id = ${chatId} LIMIT 1
   ` as Array<{ id: string }>;
-  const conv = await ensureConversation({ chatId, phone, contactName, isGroup });
+  const conv = await ensureConversation({ chatId, phone, contactName, isGroup, kind });
   const createdConv = existing.length === 0;
 
   // Fetch storico messaggi (max msgsPerChat, paginazione 100).
@@ -1514,20 +1635,31 @@ async function upsertGowaMessage(conversationId: string, msg: GowaChatMessage): 
   }
 
   const direction = msg.is_from_me ? 'outbound' : 'inbound';
-  const type = msg.media_type || (msg.content ? 'text' : 'unknown');
+  // Clamp al CHECK di whatsapp_messages.type (mig 096): valori non mappati
+  // (es. mime) → 'document' se media, 'text' altrimenti.
+  const ALLOWED_TYPES = new Set([
+    'text', 'image', 'document', 'audio', 'video', 'sticker', 'location', 'contact', 'reaction', 'system',
+  ]);
+  let type: string;
+  if (msg.media_type && ALLOWED_TYPES.has(msg.media_type)) type = msg.media_type;
+  else if (msg.media_type) type = 'document';
+  else type = 'text';
   const body = msg.content || null;
   const senderKind: 'user' | 'admin' = msg.is_from_me ? 'admin' : 'user';
   // Per i media salviamo l'URL GOWA come hint (no download immediato — vedi
   // commento sul `/sync` endpoint).
   const mediaUrl = msg.url || null;
+  // Outbound da backfill = inviati fuori dal gestionale (storico/telefono):
+  // li marchiamo 'via: phone' per coerenza con la UI ("da telefono").
+  const meta = msg.is_from_me ? { via: 'phone' } : {};
 
   await sql`
     INSERT INTO whatsapp_messages
       (conversation_id, external_id, direction, category, type, body,
-       media_url, media_mime, sender_kind, created_at)
+       media_url, media_mime, sender_kind, meta, created_at)
     VALUES
       (${conversationId}, ${msg.id ?? null}, ${direction}, 'operational', ${type}, ${body},
-       ${mediaUrl}, ${null}, ${senderKind}, ${msg.timestamp ?? null}::timestamptz)
+       ${mediaUrl}, ${null}, ${senderKind}, ${sql.json(meta)}, ${msg.timestamp ?? null}::timestamptz)
   `;
   return 1;
 }

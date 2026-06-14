@@ -7,7 +7,7 @@ import {
   Loader2, RefreshCw, Inbox, AlertCircle, Activity, DownloadCloud, Users, User as UserIcon,
   Phone, MoreHorizontal, ArrowLeft, Trash2, UserPlus, MailOpen, Link2, Zap, MessageSquare,
   Paperclip, FileText, Smile, Reply, Pin, PinOff, BellOff, Bell, CircleDot, StickyNote,
-  BrainCircuit, Tag, Clock,
+  BrainCircuit, Tag, Clock, Radio, Smartphone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,7 @@ interface ConversationSummary {
   unread_count: number;
   archived: boolean;
   is_group: boolean;
+  kind: 'chat' | 'group' | 'broadcast' | 'status' | 'newsletter';
   pinned: boolean;
   muted_until: string | null;
   status: 'open' | 'waiting' | 'resolved';
@@ -92,13 +93,14 @@ interface WaMessage {
     target?: string | null;
     revoked?: boolean;
     edited?: boolean;
+    via?: string;
     [k: string]: unknown;
   } | null;
 }
 
 interface QuickReply { label: string; text: string }
 
-type TabKey = 'chats' | 'groups' | 'archived';
+type TabKey = 'chats' | 'groups' | 'broadcast' | 'archived';
 
 // ---------- helpers ----------
 
@@ -265,17 +267,32 @@ export default function WhatsAppInboxPage() {
 
   const conversations = useMemo<ConversationSummary[]>(() => convData?.conversations ?? [], [convData]);
 
+  // kind discriminante (fallback su is_group per righe legacy senza kind).
+  const kindOf = (c: ConversationSummary): ConversationSummary['kind'] =>
+    c.kind || (c.is_group ? 'group' : 'chat');
+
   const visibleConversations = useMemo(() => {
     if (activeTab === 'archived') return conversations;
-    return conversations.filter((c) => (activeTab === 'groups' ? c.is_group : !c.is_group));
+    return conversations.filter((c) => {
+      const k = kindOf(c);
+      if (activeTab === 'groups') return k === 'group';
+      if (activeTab === 'broadcast') return k === 'broadcast' || k === 'status';
+      // 'chats' tab: solo 1:1 (esclude gruppi, broadcast, status, newsletter).
+      return k === 'chat';
+    });
   }, [conversations, activeTab]);
 
   // Counters for the tab labels (across active list — archived tab has its own filter)
   const tabCounts = useMemo(() => {
-    const chats = conversations.filter((c) => !c.is_group);
-    const groups = conversations.filter((c) => c.is_group);
+    const chats = conversations.filter((c) => kindOf(c) === 'chat');
+    const groups = conversations.filter((c) => kindOf(c) === 'group');
+    const broadcast = conversations.filter((c) => kindOf(c) === 'broadcast' || kindOf(c) === 'status');
     const unreadOf = (arr: ConversationSummary[]) => arr.reduce((s, c) => s + (c.unread_count > 0 ? 1 : 0), 0);
-    return { chats: chats.length, chatsUnread: unreadOf(chats), groups: groups.length, groupsUnread: unreadOf(groups) };
+    return {
+      chats: chats.length, chatsUnread: unreadOf(chats),
+      groups: groups.length, groupsUnread: unreadOf(groups),
+      broadcast: broadcast.length, broadcastUnread: unreadOf(broadcast),
+    };
   }, [conversations]);
 
   const selectedId = conversationId || searchParams.get('id') || undefined;
@@ -774,6 +791,7 @@ export default function WhatsAppInboxPage() {
           <div className="flex gap-1 bg-muted rounded-md p-1">
             <TabButton active={activeTab === 'chats'} onClick={() => setActiveTab('chats')} icon={<MessageSquare className="h-3.5 w-3.5" />} label="Chat" count={tabCounts.chats} unread={tabCounts.chatsUnread} />
             <TabButton active={activeTab === 'groups'} onClick={() => setActiveTab('groups')} icon={<Users className="h-3.5 w-3.5" />} label="Gruppi" count={tabCounts.groups} unread={tabCounts.groupsUnread} />
+            <TabButton active={activeTab === 'broadcast'} onClick={() => setActiveTab('broadcast')} icon={<Radio className="h-3.5 w-3.5" />} label="Broadcast" count={tabCounts.broadcast} unread={tabCounts.broadcastUnread} />
             <TabButton active={activeTab === 'archived'} onClick={() => setActiveTab('archived')} icon={<Archive className="h-3.5 w-3.5" />} label="Archivio" />
           </div>
 
@@ -810,7 +828,8 @@ export default function WhatsAppInboxPage() {
             <EmptyState
               title={
                 activeTab === 'archived' ? 'Nessuna conversazione archiviata' :
-                activeTab === 'groups' ? 'Nessun gruppo' : 'Nessuna conversazione'
+                activeTab === 'groups' ? 'Nessun gruppo' :
+                activeTab === 'broadcast' ? 'Nessun broadcast o stato' : 'Nessuna conversazione'
               }
               description={activeTab === 'archived' ? '' : 'I messaggi WhatsApp appariranno qui appena arrivano.'}
               icon={Inbox}
@@ -1657,6 +1676,9 @@ function MessageBubble({
   const isOut = m.direction === 'outbound';
   const isDraft = m.ai_draft && !m.ai_draft_approved_at;
   const groupSender = isGroup && !isOut ? m.meta?.push_name || null : null;
+  // Outbound inviato dal telefono (fuori dal gestionale): lo distinguiamo da
+  // quelli mandati dal gestionale con una piccola etichetta nella riga meta.
+  const fromPhone = isOut && m.meta?.via === 'phone';
   const reactions = Array.isArray(m.meta?.reactions) ? m.meta!.reactions : [];
 
   // Resolve the quoted message — if we have it loaded locally we render its
@@ -1765,6 +1787,11 @@ function MessageBubble({
               <MediaContent m={m} />
               <div className={cn('flex items-center gap-1 mt-0.5 text-[10px]', isOut ? 'justify-end wa-meta' : 'wa-meta')}>
                 <span>{formatRelativeTime(m.created_at)}</span>
+                {fromPhone && (
+                  <span className="flex items-center gap-0.5" title="Inviato dal telefono, fuori dal gestionale">
+                    <Smartphone className="h-2.5 w-2.5" />da telefono
+                  </span>
+                )}
                 {isOut && !isDraft && <AckTicks status={m.ack_status} />}
                 {m.sender_kind === 'ai' && !isDraft && (
                   <span className="flex items-center gap-0.5"><Sparkles className="h-2.5 w-2.5" />AI</span>
