@@ -274,11 +274,16 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
   const singletons = events.filter((e) => !e.recurrence_master_id && !e.rrule);
   const masters = events.filter((e) => !e.recurrence_master_id && e.rrule);
 
-  // Mappa override per (master_id, recurrence_id)
+  // Mappa override per (master_id, recurrence_id).
+  // recurrence_id è timestamptz → il driver `postgres` lo restituisce come Date:
+  // va normalizzato a ISO canonico, altrimenti la chiave non combacia mai con
+  // overrideKey (basato su startIso ISO) e l'override non sostituisce mai
+  // l'occorrenza del master (cancellazione/modifica di una singola occorrenza
+  // ignorate → il giorno eliminato ricompare e quello modificato si duplica).
   const overrideMap = new Map<string, CalendarEvent>();
   for (const ov of overrides) {
     if (ov.recurrence_master_id && ov.recurrence_id) {
-      overrideMap.set(`${ov.recurrence_master_id}|${ov.recurrence_id}`, ov);
+      overrideMap.set(occurrenceKey(ov.recurrence_master_id, ov.recurrence_id), ov);
     }
   }
 
@@ -303,7 +308,7 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
       exdates: master.exdates || [],
     });
     for (const startIso of occStarts) {
-      const overrideKey = `${master.id}|${startIso}`;
+      const overrideKey = occurrenceKey(master.id, startIso);
       const override = overrideMap.get(overrideKey);
       if (override) {
         // L'override sostituisce questa occorrenza — la includeremo nel passo 3
@@ -339,6 +344,17 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
  */
 function toIsoString(value: string | Date): string {
   return value instanceof Date ? value.toISOString() : value;
+}
+
+/**
+ * Chiave canonica per abbinare un override alla sua occorrenza nel master.
+ * Normalizza il timestamp (Date dal driver o stringa ISO da expandRRule) a una
+ * forma ISO canonica, così i due lati del confronto combaciano sempre.
+ */
+function occurrenceKey(masterId: string, start: string | Date): string {
+  const d = start instanceof Date ? start : new Date(start);
+  const iso = isNaN(d.getTime()) ? String(start) : d.toISOString();
+  return `${masterId}|${iso}`;
 }
 
 function toOccurrence(
