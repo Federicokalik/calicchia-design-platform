@@ -149,11 +149,26 @@ const config: NextConfig = {
   },
 };
 
+// Upload source maps to Bugsink only when a build-time auth token is present
+// (CI / Docker builder stage). Local + dev builds without the token are
+// unchanged: generation/upload stays disabled so they never fail on a missing
+// token. Bugsink is Sentry-compatible and resolves frames via debug IDs that
+// the bundler plugin injects, so release names don't need to match.
+const enableSourcemapUpload = Boolean(process.env.SENTRY_AUTH_TOKEN);
+
 export default withSentryConfig(withNextIntl(config), {
   silent: true,
   telemetry: false,
+  // Self-hosted Bugsink has no orgs; project = the Bugsink project slug.
+  sentryUrl: 'https://bug.calicchia.design/',
+  org: 'bugsinkhasnoorgs',
+  project: 'portfolio',
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   sourcemaps: {
-    disable: true,
+    disable: !enableSourcemapUpload,
+    // Hidden maps: deleted from the build output after upload, so they are
+    // never served publicly — only Bugsink holds them for de-minification.
+    deleteSourcemapsAfterUpload: true,
   },
   bundleSizeOptimizations: {
     excludeDebugStatements: true,

@@ -27,6 +27,11 @@ Sentry.init({
     'EPIPE',
     'ECONNRESET',
     'The user aborted a request',
+    // Deployment-mismatch noise: a stale client (or bot) POSTs a server-action
+    // ID that no longer exists after a redeploy. The matrix route has no server
+    // actions at all, so this is never code-actionable — it only buries real
+    // errors. Matched as a substring by InboundFilters.
+    'Failed to find Server Action',
   ],
   // PII scrubber — see apps/sito-v3/src/lib/sentry-scrub.ts. Same hook is
   // wired into the client and edge configs so events leaving any runtime

@@ -89,3 +89,7 @@ jobs:
             NEXT_PUBLIC_BUGSINK_DSN=${{ vars.NEXT_PUBLIC_BUGSINK_DSN }}
             GOOGLE_SITE_VERIFICATION=${{ vars.GOOGLE_SITE_VERIFICATION }}
             PUBLIC_SITE_URL=${{ vars.PUBLIC_SITE_URL }}
+            # Segreto (NON una Variable): abilita l'upload dei source map a
+            # Bugsink durante il build. Se il secret non è impostato, l'upload
+            # viene saltato senza far fallire il build.
+            SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}

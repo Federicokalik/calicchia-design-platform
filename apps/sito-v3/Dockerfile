@@ -21,6 +21,11 @@ ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_BUGSINK_DSN
 ARG PUBLIC_SITE_URL
 ARG GOOGLE_SITE_VERIFICATION
+# Build-time secret for source map upload to Bugsink (next.config.ts). NOT a
+# NEXT_PUBLIC_* var: it is never inlined into the client bundle, only the
+# Sentry bundler plugin reads it during `next build`. Omit it and the upload
+# is skipped (build still succeeds).
+ARG SENTRY_AUTH_TOKEN
 # Turnstile / Google Maps / GA / Mouseflow NON sono piu' build-args:
 # vengono iniettate a runtime tramite /api/config (vedi
 # apps/sito-v3/src/app/api/config/route.ts) leggendo le env del container:
@@ -38,6 +43,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_BUGSINK_DSN=$NEXT_PUBLIC_BUGSINK_DSN \
     PUBLIC_SITE_URL=$PUBLIC_SITE_URL \
     GOOGLE_SITE_VERIFICATION=$GOOGLE_SITE_VERIFICATION \
+    SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN \
     NEXT_TELEMETRY_DISABLED=1 \
     NODE_ENV=production
 COPY apps/sito-v3 ./apps/sito-v3
