@@ -79,6 +79,11 @@ export const PATHNAMES = {
     it: '/clienti/progetti/[id]',
     en: '/clients/projects/[id]',
   },
+  '/clienti/campagne': { it: '/clienti/campagne', en: '/clients/campaigns' },
+  '/clienti/campagne/[id]': {
+    it: '/clienti/campagne/[id]',
+    en: '/clients/campaigns/[id]',
+  },
   '/clienti/file': { it: '/clienti/file', en: '/clients/files' },
   '/clienti/upload': { it: '/clienti/upload', en: '/clients/upload' },
   '/clienti/investimento': { it: '/clienti/investimento', en: '/clients/billing' },

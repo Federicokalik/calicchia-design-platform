@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard,
   FolderOpen,
+  Megaphone,
   FileText,
   File,
   Upload,
@@ -47,6 +48,7 @@ const GROUPS: NavGroup[] = [
     items: [
       { href: '/clienti/dashboard', key: 'dashboard', icon: LayoutDashboard, roles: ['client'] },
       { href: '/clienti/progetti', key: 'projects', icon: FolderOpen, roles: ['client', 'collaborator'] },
+      { href: '/clienti/campagne', key: 'campaigns', icon: Megaphone, roles: ['client'] },
       { href: '/clienti/report', key: 'reports', icon: FileText, roles: ['client'] },
     ],
   },
@@ -93,6 +95,7 @@ export function PortalNav({ role = 'client' }: { role?: PortalRole }) {
     const enHref = itHref
       .replace('/clienti', '/clients')
       .replace('/progetti', '/projects')
+      .replace('/campagne', '/campaigns')
       .replace('/file', '/files')
       .replace('/investimento', '/billing')
       .replace('/rinnovi', '/renewals')

@@ -70,6 +70,8 @@ import ContattiPage from '@/pages/contatti';
 import GdprRequestsPage from '@/pages/privacy/gdpr-requests';
 import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
 import NewsletterPage from '@/pages/marketing/newsletter';
+import CampagnePage from '@/pages/marketing/campagne';
+import CampagnaDetailPage from '@/pages/marketing/campagne/detail';
 import FaqCmsPage from '@/pages/cms/faq';
 import TeamCmsPage from '@/pages/cms/team';
 import GlossarioCmsPage from '@/pages/cms/glossario';
@@ -240,6 +242,10 @@ export default function App() {
 
         {/* Marketing (audit J-09) */}
         <Route path="marketing/newsletter" element={<NewsletterPage />} />
+        <Route path="marketing/campagne" element={<CampagnePage />} />
+        <Route path="marketing/campagne/:id" element={<CampagnaDetailPage />} />
+        <Route path="marketing/campaigns" element={<CampagnePage />} />
+        <Route path="marketing/campaigns/:id" element={<CampagnaDetailPage />} />
 
         {/* CMS pubblico (audit C-013/C-014) */}
         <Route path="cms/faq" element={<FaqCmsPage />} />

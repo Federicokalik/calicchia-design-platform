@@ -25,9 +25,12 @@ const REPORT_PERIODS = new Set(['daily', 'weekly', 'monthly', 'quarterly', 'fina
 // GET /api/marketing/campaigns
 // =====================================================
 marketing.get('/campaigns', async (c) => {
-  const { project_id, status, channel } = c.req.query();
+  const { project_id, customer_id, status, channel } = c.req.query();
 
   const projectFilter = project_id ? sql`AND mc.project_id = ${project_id}` : sql``;
+  const customerFilter = customer_id
+    ? sql`AND COALESCE(mc.customer_id, cp.customer_id) = ${customer_id}`
+    : sql``;
   const statusFilter = status ? sql`AND mc.status = ${status}` : sql``;
   const channelFilter = channel ? sql`AND mc.channel = ${channel}` : sql``;
 
@@ -35,17 +38,21 @@ marketing.get('/campaigns', async (c) => {
     SELECT
       mc.*,
       cp.name AS project_name,
-      cu.id AS customer_id,
+      cu.id AS resolved_customer_id,
       cu.contact_name AS customer_name,
       cu.company_name AS customer_company,
       (SELECT COUNT(*)::int FROM campaign_assets a WHERE a.campaign_id = mc.id) AS asset_count,
+      (SELECT COUNT(*)::int FROM campaign_assets a
+        WHERE a.campaign_id = mc.id AND a.approval_status IN ('pending', 'revision_requested')
+      ) AS pending_approval_count,
       (SELECT json_build_object('report_date', r.report_date, 'metrics_json', r.metrics_json, 'summary', r.summary)
        FROM campaign_reports r WHERE r.campaign_id = mc.id ORDER BY r.report_date DESC LIMIT 1) AS last_report
     FROM marketing_campaigns mc
     LEFT JOIN client_projects cp ON cp.id = mc.project_id
-    LEFT JOIN customers cu ON cu.id = cp.customer_id
+    LEFT JOIN customers cu ON cu.id = COALESCE(mc.customer_id, cp.customer_id)
     WHERE 1=1
       ${projectFilter}
+      ${customerFilter}
       ${statusFilter}
       ${channelFilter}
     ORDER BY mc.created_at DESC
@@ -60,7 +67,7 @@ marketing.get('/campaigns', async (c) => {
 marketing.post('/campaigns', async (c) => {
   const body = await c.req.json();
   const {
-    project_id, quote_id, campaign_name, campaign_type, channel,
+    project_id, customer_id, quote_id, campaign_name, campaign_type, channel,
     status = 'brief', budget_planned, budget_actual, currency = 'EUR',
     kpi_target = {}, kpi_actual = {},
     start_date, end_date, notes, objective, target_audience,
@@ -72,11 +79,11 @@ marketing.post('/campaigns', async (c) => {
 
   const rows = await sql`
     INSERT INTO marketing_campaigns
-      (project_id, quote_id, campaign_name, campaign_type, channel, status,
+      (project_id, customer_id, quote_id, campaign_name, campaign_type, channel, status,
        budget_planned, budget_actual, currency, kpi_target, kpi_actual,
        start_date, end_date, notes, objective, target_audience)
     VALUES
-      (${project_id || null}, ${quote_id || null}, ${campaign_name}, ${campaign_type}, ${channel}, ${status},
+      (${project_id || null}, ${customer_id || null}, ${quote_id || null}, ${campaign_name}, ${campaign_type}, ${channel}, ${status},
        ${budget_planned || null}, ${budget_actual || null}, ${currency},
        ${JSON.stringify(kpi_target)}, ${JSON.stringify(kpi_actual)},
        ${start_date || null}, ${end_date || null}, ${notes || null},
@@ -97,7 +104,7 @@ marketing.get('/campaigns/:id', async (c) => {
     SELECT
       mc.*,
       cp.name AS project_name,
-      cu.id AS customer_id,
+      cu.id AS resolved_customer_id,
       cu.contact_name AS customer_name,
       cu.company_name AS customer_company,
       (SELECT json_agg(a ORDER BY a.sort_order) FROM campaign_assets a WHERE a.campaign_id = mc.id) AS assets,
@@ -105,7 +112,7 @@ marketing.get('/campaigns/:id', async (c) => {
        FROM campaign_reports r WHERE r.campaign_id = mc.id ORDER BY r.report_date DESC LIMIT 1) AS last_report
     FROM marketing_campaigns mc
     LEFT JOIN client_projects cp ON cp.id = mc.project_id
-    LEFT JOIN customers cu ON cu.id = cp.customer_id
+    LEFT JOIN customers cu ON cu.id = COALESCE(mc.customer_id, cp.customer_id)
     WHERE mc.id = ${id}
   ` as Row[];
 
@@ -125,6 +132,8 @@ marketing.patch('/campaigns/:id', async (c) => {
 
   const rows = await sql`
     UPDATE marketing_campaigns SET
+      project_id = ${body.project_id !== undefined ? body.project_id : sql`project_id`},
+      customer_id = ${body.customer_id !== undefined ? body.customer_id : sql`customer_id`},
       campaign_name = COALESCE(${body.campaign_name ?? null}, campaign_name),
       campaign_type = COALESCE(${body.campaign_type ?? null}, campaign_type),
       channel = COALESCE(${body.channel ?? null}, channel),
@@ -163,15 +172,22 @@ marketing.post('/campaigns/:id/assets', async (c) => {
   const body = await c.req.json();
   const {
     asset_type, asset_name, file_url,
-    status = 'draft', version = 1, sort_order = 0, notes,
+    status = 'draft', sort_order = 0, notes,
   } = body;
 
   if (!asset_name) return c.json({ error: 'asset_name obbligatorio' }, 400);
   if (!asset_type || !ASSET_TYPES.has(asset_type)) return c.json({ error: 'asset_type non valido' }, 400);
 
+  // Versioning: a re-upload with the same asset_name becomes a new version (history kept).
+  const versionRows = await sql`
+    SELECT COALESCE(MAX(version), 0)::int AS maxv
+    FROM campaign_assets WHERE campaign_id = ${id} AND asset_name = ${asset_name}
+  ` as Array<{ maxv: number }>;
+  const nextVersion = (body.version as number) || versionRows[0].maxv + 1;
+
   const rows = await sql`
     INSERT INTO campaign_assets (campaign_id, asset_type, asset_name, file_url, status, version, sort_order, notes)
-    VALUES (${id}, ${asset_type}, ${asset_name}, ${file_url || null}, ${status}, ${version}, ${sort_order}, ${notes || null})
+    VALUES (${id}, ${asset_type}, ${asset_name}, ${file_url || null}, ${status}, ${nextVersion}, ${sort_order}, ${notes || null})
     RETURNING *
   ` as Row[];
 
@@ -247,4 +263,107 @@ marketing.post('/campaigns/:id/reports', async (c) => {
   ` as Row[];
 
   return c.json({ report: rows[0] }, 201);
+});
+
+// =====================================================
+// POST /api/marketing/campaigns/:id/assets/:assetId/submit
+// Send an asset for client approval (review state)
+// =====================================================
+marketing.post('/campaigns/:id/assets/:assetId/submit', async (c) => {
+  const { assetId } = c.req.param();
+
+  const rows = await sql`
+    UPDATE campaign_assets
+    SET status = 'review', approval_status = 'pending'
+    WHERE id = ${assetId}
+    RETURNING *
+  ` as Row[];
+
+  if (!rows.length) return c.json({ error: 'Not found' }, 404);
+  return c.json({ asset: rows[0] });
+});
+
+// =====================================================
+// GET /api/marketing/campaigns/:id/assets/:assetId/feedback
+// =====================================================
+marketing.get('/campaigns/:id/assets/:assetId/feedback', async (c) => {
+  const { assetId } = c.req.param();
+  const rows = await sql`
+    SELECT * FROM campaign_asset_feedback
+    WHERE asset_id = ${assetId}
+    ORDER BY created_at ASC
+  ` as Row[];
+  return c.json({ feedback: rows });
+});
+
+// =====================================================
+// POST /api/marketing/campaigns/:id/ai/copy
+// Generate marketing copy for an asset (reuses LLM router)
+// =====================================================
+marketing.post('/campaigns/:id/ai/copy', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+  const { brief, tone, kind = 'social_post' } = body;
+
+  const campaignRows = await sql`
+    SELECT campaign_name, channel, objective, target_audience
+    FROM marketing_campaigns WHERE id = ${id}
+  ` as Array<Record<string, string | null>>;
+  if (!campaignRows.length) return c.json({ error: 'Not found' }, 404);
+  const camp = campaignRows[0];
+
+  const context = [
+    `Campagna: ${camp.campaign_name}`,
+    `Canale: ${camp.channel}`,
+    camp.objective ? `Obiettivo: ${camp.objective}` : '',
+    camp.target_audience ? `Target: ${camp.target_audience}` : '',
+    tone ? `Tono di voce: ${tone}` : '',
+    brief ? `Brief: ${brief}` : '',
+  ].filter(Boolean).join('\n');
+
+  try {
+    const { generateText } = await import('../lib/agent/llm-router');
+    const text = await generateText('email_copy', [
+      {
+        role: 'system',
+        content: 'Sei un copywriter di marketing. Scrivi copy in italiano, pronto alla pubblicazione, adatto al canale indicato. Restituisci SOLO il testo del copy, senza spiegazioni.',
+      },
+      { role: 'user', content: `Genera un "${kind}" per questa campagna.\n\n${context}` },
+    ], { temperature: 0.8, max_tokens: 600 });
+
+    return c.json({ copy: text.trim() });
+  } catch (err) {
+    return c.json({ error: err instanceof Error ? err.message : 'Generazione copy fallita' }, 502);
+  }
+});
+
+// =====================================================
+// POST /api/marketing/campaigns/:id/ai/image
+// Generate an image asset (reuses cover-generator)
+// =====================================================
+marketing.post('/campaigns/:id/ai/image', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+  const { prompt, provider } = body;
+
+  const campaignRows = await sql`
+    SELECT campaign_name, objective FROM marketing_campaigns WHERE id = ${id}
+  ` as Array<Record<string, string | null>>;
+  if (!campaignRows.length) return c.json({ error: 'Not found' }, 404);
+
+  const topic = prompt || campaignRows[0].objective || campaignRows[0].campaign_name || '';
+  if (!topic) return c.json({ error: 'prompt obbligatorio' }, 400);
+
+  try {
+    const { generateCover, getConfiguredProviders } = await import('../lib/ai/cover-generator');
+    const configured = getConfiguredProviders();
+    const chosen = provider
+      || (configured.zimage ? 'zimage' : configured.dalle ? 'dalle' : configured.unsplash ? 'unsplash' : 'none');
+    if (chosen === 'none') return c.json({ error: 'Nessun provider immagini configurato' }, 503);
+
+    const result = await generateCover({ topic, provider: chosen });
+    return c.json({ url: result.url, provider: result.provider, metadata: result.metadata });
+  } catch (err) {
+    return c.json({ error: err instanceof Error ? err.message : 'Generazione immagine fallita' }, 502);
+  }
 });

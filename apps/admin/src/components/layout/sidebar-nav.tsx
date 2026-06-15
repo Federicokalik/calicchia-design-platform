@@ -29,6 +29,7 @@ import {
   Wallet,
   Inbox,
   MailPlus,
+  Megaphone,
   ShieldAlert,
   Cookie,
   HelpCircle,
@@ -150,6 +151,7 @@ const bottomNavigation: NavGroup[] = [
   {
     labelKey: 'nav.marketing',
     items: [
+      { labelKey: 'nav.campaigns', icon: Megaphone, path: '/marketing/campagne' },
       { labelKey: 'nav.newsletter', icon: MailPlus, path: '/marketing/newsletter' },
     ],
   },

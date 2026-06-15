@@ -21,6 +21,7 @@ const DEFAULT_LAYOUT: WidgetConfig[] = [
   { id: 'revenue', type: 'revenue', title: 'Revenue', titleKey: 'dashboard.widgets.revenue.title', w: 2, h: 2, visible: true },
   { id: 'tasse', type: 'tasse', title: 'Tasse stimate', titleKey: 'dashboard.widgets.tasse.title', w: 2, h: 1, visible: true },
   { id: 'capacity', type: 'capacity', title: 'Capacità settimanale', titleKey: 'dashboard.widgets.capacity.title', w: 2, h: 1, visible: true },
+  { id: 'marketing', type: 'marketing', title: 'Marketing', titleKey: 'dashboard.widgets.marketing.title', w: 2, h: 1, visible: true },
   { id: 'feed', type: 'feed', title: 'Attività Recente', titleKey: 'dashboard.widgets.feed.title', w: 2, h: 2, visible: true },
   { id: 'knowledge', type: 'knowledge', title: 'Knowledge Base', titleKey: 'dashboard.widgets.knowledge.title', w: 2, h: 2, visible: true },
 ];

@@ -11,6 +11,7 @@ import { WidgetFeed } from '@/components/dashboard/widget-feed';
 import { WidgetKnowledge } from '@/components/dashboard/widget-knowledge';
 import { WidgetTasse } from '@/components/dashboard/widget-tasse';
 import { WidgetCapacity } from '@/components/dashboard/widget-capacity';
+import { WidgetMarketing } from '@/components/dashboard/widget-marketing';
 import { useI18n } from '@/hooks/use-i18n';
 
 const widgetComponents: Record<string, React.ComponentType> = {
@@ -24,6 +25,7 @@ const widgetComponents: Record<string, React.ComponentType> = {
   knowledge: WidgetKnowledge,
   tasse: WidgetTasse,
   capacity: WidgetCapacity,
+  marketing: WidgetMarketing,
 };
 
 function renderWidget(widget: WidgetConfig) {

@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import {
+  approveCampaignAsset,
   approveDeliverable,
   postMessage,
+  requestCampaignAssetRevision,
   requestRevisions,
   uploadFile,
 } from '@/lib/portal-api';
@@ -72,4 +74,32 @@ export async function requestRevisionsAction(
     throw err;
   }
   revalidatePath(`/clienti/progetti/${projectId}`);
+}
+
+export async function approveCampaignAssetAction(assetId: string, campaignId: string) {
+  try {
+    await approveCampaignAsset(assetId);
+  } catch (err) {
+    logActionError(`approveCampaignAsset(${assetId})`, undefined, err);
+    throw err;
+  }
+  revalidatePath('/clienti/campagne');
+  revalidatePath(`/clienti/campagne/${campaignId}`);
+}
+
+export async function requestCampaignAssetRevisionAction(
+  assetId: string,
+  campaignId: string,
+  formData: FormData,
+) {
+  const notes = String(formData.get('notes') ?? '').trim();
+  if (!notes) return;
+  try {
+    await requestCampaignAssetRevision(assetId, notes);
+  } catch (err) {
+    logActionError(`requestCampaignAssetRevision(${assetId})`, undefined, err);
+    throw err;
+  }
+  revalidatePath('/clienti/campagne');
+  revalidatePath(`/clienti/campagne/${campaignId}`);
 }

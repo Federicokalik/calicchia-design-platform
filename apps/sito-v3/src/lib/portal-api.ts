@@ -627,6 +627,82 @@ export async function requestRevisions(deliverableId: string, notes: string): Pr
   });
 }
 
+// ── Marketing campaigns (asset review/approval) ──────────
+export interface PortalCampaignAssetFeedback {
+  id: string;
+  author_type: 'client' | 'freelancer';
+  author_name: string | null;
+  feedback_text: string;
+  feedback_type: 'revision' | 'approval' | 'comment';
+  created_at: string;
+}
+
+export interface PortalCampaignAsset {
+  id: string;
+  asset_type: string;
+  asset_name: string;
+  file_url: string | null;
+  status: string;
+  approval_status: 'pending' | 'approved' | 'rejected' | 'revision_requested';
+  version: number;
+  notes: string | null;
+  created_at: string;
+  feedback: PortalCampaignAssetFeedback[] | null;
+}
+
+export interface PortalCampaignSummary {
+  id: string;
+  campaign_name: string;
+  campaign_type: string;
+  channel: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  objective: string | null;
+  project_name: string | null;
+  asset_count: number;
+  pending_count: number;
+}
+
+export interface PortalCampaignDetail {
+  id: string;
+  campaign_name: string;
+  campaign_type: string;
+  channel: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  objective: string | null;
+  project_name: string | null;
+}
+
+export async function getPortalCampaigns(): Promise<PortalCampaignSummary[]> {
+  const data = await authedFetch<{ campaigns: PortalCampaignSummary[] }>('/campaigns');
+  return data.campaigns ?? [];
+}
+
+export async function getPortalCampaign(
+  id: string,
+): Promise<{ campaign: PortalCampaignDetail; assets: PortalCampaignAsset[] } | null> {
+  return authedFetchNullable<{ campaign: PortalCampaignDetail; assets: PortalCampaignAsset[] }>(
+    `/campaigns/${encodeURIComponent(id)}`,
+  );
+}
+
+export async function approveCampaignAsset(assetId: string, comment = ''): Promise<void> {
+  await authedFetch(`/campaigns/assets/${encodeURIComponent(assetId)}/approve`, {
+    method: 'POST',
+    body: JSON.stringify({ comment }),
+  });
+}
+
+export async function requestCampaignAssetRevision(assetId: string, notes: string): Promise<void> {
+  await authedFetch(`/campaigns/assets/${encodeURIComponent(assetId)}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ comment: notes }),
+  });
+}
+
 // Communication preferences (opt-in/opt-out per canale e categoria)
 export interface PortalPreferences {
   id: string;

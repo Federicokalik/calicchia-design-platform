@@ -4,6 +4,7 @@ import { dashboardRoutes } from './dashboard';
 import { projectsRoutes } from './projects';
 import { timelineRoutes } from './timeline';
 import { deliverableRoutes } from './deliverables';
+import { campaignRoutes } from './campaigns';
 import { messagesRoutes } from './messages';
 import { uploadRoutes } from './upload';
 import { filesRoutes } from './files';
@@ -29,6 +30,9 @@ portal.route('/', timelineRoutes);
 
 // Deliverables actions
 portal.route('/', deliverableRoutes);
+
+// Marketing campaigns (asset review/approval — paths include /campaigns/...)
+portal.route('/', campaignRoutes);
 
 // Messages (mounted at root because paths include /projects/:id/messages)
 portal.route('/', messagesRoutes);

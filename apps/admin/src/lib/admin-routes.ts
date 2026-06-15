@@ -50,6 +50,8 @@ const ROUTES: LocalizedRoute[] = [
   { it: '/privacy/gdpr-requests', en: '/privacy/gdpr-requests' },
   { it: '/privacy/cookie-consent', en: '/privacy/cookie-consent' },
   { it: '/marketing/newsletter', en: '/marketing/newsletter' },
+  { it: '/marketing/campagne/:id', en: '/marketing/campaigns/:id' },
+  { it: '/marketing/campagne', en: '/marketing/campaigns' },
   { it: '/contatti', en: '/contacts' },
 ];
 
