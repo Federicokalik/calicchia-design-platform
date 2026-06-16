@@ -20,7 +20,7 @@ import {
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -41,6 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage('Web Designer Freelance in Italia · La guida onesta', locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard('Web Designer Freelance in Italia · La guida onesta', 'Cosa fa, quanto costa, come riconoscerlo. Niente fumo, niente promesse vuote.', locale),
   };
 }
 

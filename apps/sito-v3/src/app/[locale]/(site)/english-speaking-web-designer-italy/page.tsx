@@ -3,7 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     images: buildOgImage('English-Speaking Web Designer in Italy', 'en'),
   },
+  twitter: buildTwitterCard('English-Speaking Web Designer in Italy', "For expats, international businesses entering Italy, and Italian businesses serving foreign clients. Bilingual native Italian + fluent English.", 'en'),
 };
 
 const TYPICAL_CLIENTS = [

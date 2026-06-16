@@ -4,7 +4,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { EditorialArticleLayout } from '@/components/layout/EditorialArticleLayout';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 import { FREELANCE_VS_AGENZIA_CONTENT, chapterEntries } from './content';
 
@@ -25,6 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(c.ogTitle, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(c.ogTitle, c.ogDescription, locale),
   };
 }
 

@@ -22,7 +22,7 @@ import { SITE } from '@/data/site';
 import { breadcrumbSchema as buildBreadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { getLocale } from 'next-intl/server';
 
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -79,6 +79,7 @@ export async function generateMetadata({
       images: buildOgImage(title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(title, description, locale),
   };
 }
 

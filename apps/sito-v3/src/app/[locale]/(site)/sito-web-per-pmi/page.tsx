@@ -14,7 +14,7 @@ import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 export const metadata: Metadata = {
   title: {
@@ -32,6 +32,7 @@ export const metadata: Metadata = {
     url: '/sito-web-per-pmi',
     images: buildOgImage('Sito Web per PMI · Quello che hai adesso ti sta facendo perdere clienti', 'it'),
   },
+  twitter: buildTwitterCard('Sito Web per PMI · Quello che hai adesso ti sta facendo perdere clienti', '5 segnali, errori comuni, come scegliere chi te lo fa. Senza buzzword.', 'it'),
 };
 
 const FAQS = [

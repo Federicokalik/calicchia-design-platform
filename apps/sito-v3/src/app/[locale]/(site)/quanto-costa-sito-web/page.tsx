@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     url: '/quanto-costa-sito-web',
     images: buildOgImage('Quanto costa un sito web · I 5 fattori che decidono il prezzo', 'it'),
   },
+  twitter: buildTwitterCard('Quanto costa un sito web · I 5 fattori che decidono il prezzo', 'I 5 fattori reali che muovono il preventivo. Niente cifre da listino, niente bullshit.', 'it'),
 };
 
 const COST_FACTORS = [

@@ -21,7 +21,7 @@ import { ServiceShowcase } from '@/components/service-detail/ServiceShowcase';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 interface Params {
@@ -74,6 +74,7 @@ export async function generateMetadata({
       images: buildOgImage(title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(title, description, locale),
   };
 }
 

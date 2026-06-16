@@ -7,7 +7,7 @@ import { PrivacyRequestForm } from '@/components/forms/PrivacyRequestForm';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/privacy-request con 404). No hreflang.
 export const metadata: Metadata = {
@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     images: buildOgImage('Richiesta dati personali · GDPR', 'it'),
     ...buildOgLocale('it'),
   },
+  twitter: buildTwitterCard(
+    'Richiesta dati personali · GDPR',
+    "Esercita i tuoi diritti GDPR (accesso, cancellazione, portabilità, rettifica, opposizione, limitazione).",
+    'it',
+  ),
 };
 
 export default function PrivacyRequestPage() {

@@ -13,7 +13,7 @@ import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
 import { LOCALES, type Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 interface Params {
   locale: string;
@@ -73,6 +73,7 @@ export async function generateMetadata({
       publishedTime: post.published_at ?? undefined,
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(post.title, post.excerpt ?? undefined, locale),
   };
 }
 

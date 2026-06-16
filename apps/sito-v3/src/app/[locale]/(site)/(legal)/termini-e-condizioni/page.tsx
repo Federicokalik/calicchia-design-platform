@@ -4,7 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/termini-e-condizioni con 404). No hreflang.
 export const metadata: Metadata = {
@@ -23,6 +23,11 @@ export const metadata: Metadata = {
     images: buildOgImage('Termini e Condizioni · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
+  twitter: buildTwitterCard(
+    'Termini e Condizioni · Federico Calicchia',
+    "Condizioni generali per uso sito e rapporti contrattuali con il prestatore.",
+    'it',
+  ),
 };
 
 export default function TerminiECondizioniPage() {

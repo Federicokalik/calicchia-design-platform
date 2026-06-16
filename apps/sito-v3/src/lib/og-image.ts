@@ -40,3 +40,40 @@ export function buildOgImage(title: string, locale: Locale = DEFAULT_LOCALE): Og
     },
   ];
 }
+
+/** X/Twitter handle for card attribution — mirrors the root layout. */
+const TWITTER_CREATOR = '@calicchiadesign';
+
+export interface TwitterCard {
+  card: 'summary_large_image';
+  creator: string;
+  title: string;
+  description?: string;
+  images: string[];
+}
+
+/**
+ * Full Twitter/X card block for a page's `generateMetadata`.
+ *
+ * X does NOT reliably fall back to `og:image` when only `twitter:card` is set
+ * (no `twitter:image`) — it downgrades to the small `summary` thumbnail. So
+ * every page must emit an explicit `twitter` block with `images`. Pass the
+ * SAME title used for `openGraph.images` so the generated card matches.
+ *
+ * A page-level `twitter` REPLACES the root layout's (Next merges top-level
+ * metadata keys shallowly), so `creator` is re-emitted here to preserve the
+ * attribution the root would otherwise have provided.
+ */
+export function buildTwitterCard(
+  title: string,
+  description: string | undefined,
+  locale: Locale = DEFAULT_LOCALE,
+): TwitterCard {
+  return {
+    card: 'summary_large_image',
+    creator: TWITTER_CREATOR,
+    title,
+    description,
+    images: buildOgImage(title, locale).map((i) => i.url),
+  };
+}

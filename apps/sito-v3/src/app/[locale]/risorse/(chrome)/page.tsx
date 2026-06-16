@@ -5,7 +5,7 @@ import { PageHero } from '@/components/layout/PageHero';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 import { listResources } from '@/data/risorse';
 
@@ -43,6 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(m.title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(m.title, m.description, locale),
   };
 }
 

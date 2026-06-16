@@ -9,7 +9,7 @@ import {
 // Falls back to data/glossario.ts on fresh installs / API outages.
 import { getGlossario } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/Button';
 import { MonoLabel } from '@/components/ui/MonoLabel';
@@ -38,6 +38,11 @@ export const metadata: Metadata = {
       'it',
     ),
   },
+  twitter: buildTwitterCard(
+    'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca',
+    "30 termini tecnici spiegati semplici. Cos'è, perché ti riguarda, cosa pretendere.",
+    'it',
+  ),
 };
 
 export default async function GlossarioPage() {

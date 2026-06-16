@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { Hero } from '@/components/home/Hero';
 import { PortraitBlock } from '@/components/home/PortraitBlock';
 import { WorksHorizontal } from '@/components/home/WorksHorizontal';
@@ -36,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(t('ogTitle'), t('ogDescription'), locale),
   };
 }
 

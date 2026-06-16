@@ -16,7 +16,7 @@ import {
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 
 const PATH = '/risorse/glossario-e-commerce';
@@ -36,6 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(m.ogTitle, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(m.ogTitle, m.ogDescription, locale),
   };
 }
 

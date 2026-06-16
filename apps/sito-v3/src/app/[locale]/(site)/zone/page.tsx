@@ -14,7 +14,7 @@ import { FinalCTA } from '@/components/home/FinalCTA';
 import { getSeoCities } from '@/lib/cms';
 import type { SeoCity } from '@/data/seo-cities';
 import { SITE } from '@/data/site';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 const PATH = '/zone';
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -45,6 +45,11 @@ export const metadata: Metadata = {
     url: PATH,
     images: buildOgImage('Zone in cui lavoro · Web design freelance Ciociaria + Italia', 'it'),
   },
+  twitter: buildTwitterCard(
+    'Zone in cui lavoro · Web design freelance Ciociaria + Italia',
+    'Comuni serviti in Ciociaria e capoluoghi italiani con landing dedicate.',
+    'it',
+  ),
 };
 
 export default async function ZoneHubPage() {

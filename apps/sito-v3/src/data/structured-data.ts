@@ -164,6 +164,15 @@ export function localBusinessSchema(args: LocalBusinessArgs = {}) {
     alternateName: SITE.brand,
     url: SITE.url,
     image: `${SITE.url}/img/federico-calicchia-ritratto-web-designer.webp`,
+    // Brand mark (the `~` tilde on dark) as the Organization logo. This is the
+    // Google-recognized logo source (knowledge panel / SERP), unlike the
+    // non-standard og:logo meta. ImageObject so Google has explicit dimensions.
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE.url}/img/favicon/apple-touch-icon.png`,
+      width: 180,
+      height: 180,
+    },
     description: SITE.description,
     founder: { '@id': PERSON_ID },
     provider: { '@id': PERSON_ID },

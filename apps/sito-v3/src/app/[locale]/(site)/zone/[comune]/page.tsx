@@ -6,7 +6,7 @@ import { getSeoCities } from '@/lib/cms';
 import { SEO_SERVICES } from '@/data/seo-service-matrix';
 import { COMUNE_ATTRIBUTES, getPreposizione } from '@/lib/comune-attributes';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, localBusinessSchema } from '@/data/structured-data';
@@ -49,6 +49,7 @@ export async function generateMetadata({
       images: buildOgImage(title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(title, description, locale),
   };
 }
 

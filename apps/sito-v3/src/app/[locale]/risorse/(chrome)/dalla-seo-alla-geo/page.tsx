@@ -3,7 +3,7 @@ import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 import { GEO_WP_CSS, GEO_WP_BODY } from '@/data/risorse/geo-whitepaper';
 import { GeoWhitepaperClient } from './GeoWhitepaperClient';
@@ -56,6 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(m.title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(m.title, m.description, locale),
   };
 }
 
@@ -83,6 +84,15 @@ export default async function GeoWhitepaperPage() {
 .geo-wp{padding-top:7rem}
 @media(min-width:768px){.geo-wp{padding-top:8.5rem}}
 main:has(.geo-wp) + footer{margin-top:0}
+/* Mobile overflow fix: la griglia interna delle sezioni usava 1fr (=minmax(auto,1fr)),
+   quindi la traccia cresceva fino alla min-content dei widget demo (~633px) sfondando
+   la sezione; body/html hanno overflow-x:hidden e tagliavano testo ed elenchi a metà.
+   minmax(0,1fr) permette alla traccia di restringersi alla viewport. */
+.geo-wp .sec-grid{grid-template-columns:minmax(0,1fr)}
+@media(min-width:781px){.geo-wp .sec-grid{grid-template-columns:140px minmax(0,1fr)}}
+.geo-wp .demo{max-width:100%}
+.geo-wp .demo-head{flex-wrap:wrap}
+.geo-wp .mast-top{flex-wrap:wrap;gap:6px 14px}
 `;
   // EN override per l'etichetta CSS-baked della demo 04.
   const css = `${GEO_WP_CSS}${

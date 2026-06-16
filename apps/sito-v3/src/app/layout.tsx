@@ -54,6 +54,11 @@ const TITLE_TEMPLATE = `%s — ${SITE.tagline}`;
 // Site-wide fallback share card — the generated branded OG (logo + IT/EN +
 // title). Any page that doesn't set its own openGraph.images inherits this.
 const OG_DEFAULT = buildOgImageUrl(TITLE_DEFAULT, 'it');
+// Brand mark used for the (non-standard) og:logo meta. og:logo isn't part of
+// the Open Graph protocol — platforms ignore it — but some SEO crawlers flag
+// its absence. The Google-recognized logo lives in the Organization JSON-LD
+// (see localBusinessSchema). Same 180×180 asset for both.
+const OG_LOGO = `${SITE.url}/img/favicon/apple-touch-icon.png`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
@@ -95,6 +100,12 @@ export async function generateMetadata(): Promise<Metadata> {
       types: {
         'text/markdown': '/llms.txt',
       },
+    },
+    // og:logo is non-standard (not in the OG protocol) so Next has no typed
+    // field for it — emitted via `other`. Real logo signal is the JSON-LD
+    // Organization.logo. Inherited site-wide; pages don't need to repeat it.
+    other: {
+      'og:logo': OG_LOGO,
     },
     robots: { index: true, follow: true },
     verification: {

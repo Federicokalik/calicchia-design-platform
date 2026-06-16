@@ -16,7 +16,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { serviceOfferCatalogSchema } from '@/lib/seo/service-schemas';
 
 interface Params {
@@ -48,6 +48,7 @@ export async function generateMetadata({
       images: buildOgImage(svc.title, locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(svc.title, svc.description, locale),
   };
 }
 

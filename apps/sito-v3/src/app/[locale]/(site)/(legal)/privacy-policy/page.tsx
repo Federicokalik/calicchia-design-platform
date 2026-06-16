@@ -4,7 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/privacy-policy con 404). NON usa
 // buildI18nAlternates per non emettere hreflang verso una variante EN
@@ -26,6 +26,11 @@ export const metadata: Metadata = {
     images: buildOgImage('Privacy Policy · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
+  twitter: buildTwitterCard(
+    'Privacy Policy · Federico Calicchia',
+    "Informativa privacy completa, con dati raccolti, finalità e diritti dell'interessato.",
+    'it',
+  ),
 };
 
 export default function PrivacyPolicyPage() {

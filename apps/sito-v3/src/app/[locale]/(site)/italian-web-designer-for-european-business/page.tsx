@@ -3,7 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     locale: 'en_GB',
     images: buildOgImage('Italian Web Designer for European B2B Businesses', 'en'),
   },
+  twitter: buildTwitterCard('Italian Web Designer for European B2B Businesses', 'EU-quality, EU-rates, GDPR-native. For SaaS, manufacturing, professional services, agencies needing reliable EU partner.', 'en'),
 };
 
 const TARGET_BUSINESSES = [

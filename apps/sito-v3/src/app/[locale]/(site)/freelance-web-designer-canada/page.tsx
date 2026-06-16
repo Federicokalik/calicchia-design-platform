@@ -3,7 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
     locale: 'en_CA',
     images: buildOgImage('Freelance Web Designer & Developer for Canadian Businesses', 'en'),
   },
+  twitter: buildTwitterCard('Freelance Web Designer & Developer for Canadian Businesses', "Italy-based, bilingual EN/IT, EU-quality engineering, CAD-friendly rates. For Canadian small businesses and Italian-Canadian community.", 'en'),
 };
 
 const ADVANTAGES = [

@@ -10,7 +10,7 @@ import { FinalCTA } from '@/components/home/FinalCTA';
 // for fresh installs / API outages.
 import { getFaqs } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 export const metadata: Metadata = {
   title: 'FAQ Web Design Freelance',
@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     url: '/faq',
     images: buildOgImage('FAQ Web Design Freelance — Federico Calicchia', 'it'),
   },
+  twitter: buildTwitterCard(
+    'FAQ Web Design Freelance — Federico Calicchia',
+    "Risposte secche su tempi, processo, manutenzione, SEO. Niente fronzoli, niente promesse vuote.",
+    'it',
+  ),
 };
 
 /**

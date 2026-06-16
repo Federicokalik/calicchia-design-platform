@@ -4,7 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/dpa-clienti con 404). No hreflang.
 export const metadata: Metadata = {
@@ -23,6 +23,11 @@ export const metadata: Metadata = {
     images: buildOgImage('DPA · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
+  twitter: buildTwitterCard(
+    'DPA · Federico Calicchia',
+    "Accordo standard art. 28 GDPR per i servizi che comportano trattamento dati per conto del cliente.",
+    'it',
+  ),
   // DPA non e` un documento "marketing": robots normale, ma di solito non ha
   // valore di ranking. Lasciamo indicizzabile per trasparenza.
 };

@@ -16,7 +16,7 @@ import { adaptApiListItem } from '@/lib/projects-adapter';
 import { SITE } from '@/data/site';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 const PATH = '/lavori';
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -39,6 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(t('ogTitle'), t('ogDescription'), locale),
   };
 }
 

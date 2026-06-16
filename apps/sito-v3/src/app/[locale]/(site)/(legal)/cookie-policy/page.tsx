@@ -4,7 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/cookie-policy con 404). No hreflang.
 export const metadata: Metadata = {
@@ -22,6 +22,11 @@ export const metadata: Metadata = {
     images: buildOgImage('Cookie Policy · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
+  twitter: buildTwitterCard(
+    'Cookie Policy · Federico Calicchia',
+    'Informativa cookie aggiornata, con elenco strumenti attivi.',
+    'it',
+  ),
 };
 
 export default function CookiePolicyPage() {

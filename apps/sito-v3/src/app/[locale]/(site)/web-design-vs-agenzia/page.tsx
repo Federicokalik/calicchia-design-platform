@@ -13,7 +13,7 @@ import {
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -34,6 +34,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage("Freelance vs Agenzia · Perché un'agenzia ti costa il triplo", locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard("Freelance vs Agenzia · Perché un'agenzia ti costa il triplo", 'Confronto onesto: costi reali, tempi, responsabilità, rischi. Senza vendere niente.', locale),
   };
 }
 

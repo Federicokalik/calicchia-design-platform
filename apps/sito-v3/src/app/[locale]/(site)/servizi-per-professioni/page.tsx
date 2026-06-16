@@ -29,7 +29,7 @@ import {
   buildI18nAlternates,
   buildOgLocale,
 } from '@/lib/canonical';
-import { buildOgImage } from '@/lib/og-image';
+import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 
 // IT-canonical path. EN is translated to /services-by-profession via PATHNAMES;
@@ -53,6 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
+    twitter: buildTwitterCard(t('ogTitle'), t('ogDescription'), locale),
   };
 }
 
