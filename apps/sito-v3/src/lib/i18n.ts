@@ -36,8 +36,8 @@ export const PATH_SEGMENTS_IT_TO_EN = {
   // canonical puntavano a URL non-canonici (GSC coverage audit 2026-06-12).
   'migrazione-google-analytics-4': 'google-analytics-4-migration',
   'freelance-vs-agenzia-2026': 'freelance-vs-agency-2026',
-  'glossario-seo': 'seo-glossary',
-  'glossario-e-commerce': 'e-commerce-glossary',
+  // glossario-seo / glossario-e-commerce: migrati sotto /risorse con slug
+  // same-locale (2026-06-16) → niente traduzione di primo segmento qui.
 } as const satisfies Record<string, string>;
 
 /** Reverse map per normalizzare URL EN → IT canonical (middleware, routing). */

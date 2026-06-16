@@ -108,31 +108,31 @@ export const STATIC_PAGES: Record<string, StaticPageMeta> = {
       'Accordo standard sul trattamento dei dati personali ai sensi dell\'art. 28 GDPR. Parte integrante dei Termini e Condizioni.',
     related: [{ name: 'Privacy Policy', path: '/privacy-policy' }],
   },
-  '/glossario-seo': {
+  '/risorse/glossario-seo': {
     title: 'Glossario SEO',
     description:
       'Termini chiave SEO spiegati senza fumo: cosa significano, perché ti interessano e cosa pretendere dal tuo professionista.',
     related: [
-      { name: 'Glossario Web Design', path: '/glossario-web-design' },
-      { name: 'Glossario E-Commerce', path: '/glossario-e-commerce' },
+      { name: 'Glossario Web Design', path: '/risorse/glossario-web-design' },
+      { name: 'Glossario E-Commerce', path: '/risorse/glossario-e-commerce' },
     ],
   },
-  '/glossario-e-commerce': {
+  '/risorse/glossario-e-commerce': {
     title: 'Glossario E-Commerce',
     description:
       'Termini chiave dell\'e-commerce spiegati senza fumo: dropshipping, checkout, conversion rate, AOV, CAC, LTV.',
     related: [
-      { name: 'Glossario SEO', path: '/glossario-seo' },
-      { name: 'Glossario Web Design', path: '/glossario-web-design' },
+      { name: 'Glossario SEO', path: '/risorse/glossario-seo' },
+      { name: 'Glossario Web Design', path: '/risorse/glossario-web-design' },
     ],
   },
-  '/glossario-web-design': {
+  '/risorse/glossario-web-design': {
     title: 'Glossario Web Design',
     description:
       'Termini chiave del web design spiegati senza fumo: cosa significano, perché ti interessano e cosa pretendere dal tuo web designer.',
     related: [
-      { name: 'Glossario SEO', path: '/glossario-seo' },
-      { name: 'Glossario E-Commerce', path: '/glossario-e-commerce' },
+      { name: 'Glossario SEO', path: '/risorse/glossario-seo' },
+      { name: 'Glossario E-Commerce', path: '/risorse/glossario-e-commerce' },
     ],
   },
   '/zone': {

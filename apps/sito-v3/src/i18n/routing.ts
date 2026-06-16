@@ -60,14 +60,10 @@ export const PATHNAMES = {
     it: '/migrazione-google-analytics-4',
     en: '/google-analytics-4-migration',
   },
-  '/glossario-seo': {
-    it: '/glossario-seo',
-    en: '/seo-glossary',
-  },
-  '/glossario-e-commerce': {
-    it: '/glossario-e-commerce',
-    en: '/e-commerce-glossary',
-  },
+  // Glossari migrati sotto /risorse (2026-06-16) con slug same-locale
+  // (/risorse/glossario-seo, /risorse/glossario-e-commerce). Niente entry
+  // PATHNAMES: i path /risorse/* usano lo stesso slug in IT ed EN (come /blog).
+  // I vecchi /glossario-* e /en/{seo,e-commerce}-glossary fanno 301 (next.config).
   // wordpress-vs-headless: same slug both locales (already EN-friendly), no entry needed
   // Portal area — segment-translated URLs (clienti→clients, progetti→projects, ecc.).
   // Filesystem resta IT-canonical in app/[locale]/(portal)/clienti/*, next-intl

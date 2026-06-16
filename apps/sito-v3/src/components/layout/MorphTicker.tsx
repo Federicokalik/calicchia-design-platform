@@ -4,6 +4,7 @@ import { ArrowRight } from '@phosphor-icons/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
+import { isStandaloneResourcePath } from '@/lib/resource-docs';
 import {
   getMatrixServices,
   getMatrixProfessions,
@@ -99,6 +100,8 @@ export function MorphTicker() {
   const onMatrixRoute = useMemo(() => isMatrixPathname(pathname), [pathname]);
   const onBlogPostRoute = useMemo(() => isBlogPostPathname(pathname), [pathname]);
   const onPortalRoute = useMemo(() => isPortalPathname(pathname), [pathname]);
+  // Standalone resource documents (white paper): own design, no global CTA.
+  const onResourceDocRoute = useMemo(() => isStandaloneResourcePath(pathname), [pathname]);
 
   const [phase, setPhase] = useState<'idle' | 'active'>('idle');
   const [service, setService] = useState<MatrixService | null>(null);
@@ -331,6 +334,7 @@ export function MorphTicker() {
     onMatrixRoute ||
     onBlogPostRoute ||
     onPortalRoute ||
+    onResourceDocRoute ||
     dismissed
   )
     return null;

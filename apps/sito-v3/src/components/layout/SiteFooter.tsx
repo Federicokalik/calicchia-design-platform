@@ -42,6 +42,7 @@ const FOOTER_NAV: FooterLink[] = [
   { label: 'Servizi per professioni', href: '/servizi-per-professioni' },
   { label: 'Zone servite', href: '/zone/frosinone' },
   { label: 'Blog', href: '/blog' },
+  { label: 'Risorse', href: '/risorse' },
   { label: 'Contatti', href: '/contatti' },
 ];
 
@@ -94,6 +95,7 @@ export function SiteFooter() {
       '/servizi-per-professioni': tNav('nav.serviziPerProfessioni'),
       '/zone/frosinone': tNav('nav.zoneServite'),
       '/blog': tNav('nav.blog'),
+      '/risorse': tNav('nav.risorse'),
       '/contatti': tNav('nav.contatti'),
     })[href] ?? fallback;
   const legalLabel = (href: string, fallback: string) =>

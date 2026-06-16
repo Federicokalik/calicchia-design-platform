@@ -123,6 +123,16 @@ const config: NextConfig = {
       { source: '/:locale(it|en)/automazioni-ai-per-:slug', destination: '/:locale/servizi/sviluppo-web', permanent: true },
       { source: '/:locale(it|en)/web-app-per-:slug', destination: '/:locale/sviluppo-web-per-:slug', permanent: true },
       { source: '/:locale(it|en)/servizi/web-app', destination: '/:locale/servizi/sviluppo-web', permanent: true },
+      // Glossari migrati sotto /risorse (2026-06-16). 301 dai vecchi URL IT e
+      // dagli slug EN tradotti (PATHNAMES rimossi) ai nuovi same-slug.
+      { source: '/glossario-seo', destination: '/risorse/glossario-seo', permanent: true },
+      { source: '/glossario-e-commerce', destination: '/risorse/glossario-e-commerce', permanent: true },
+      { source: '/glossario-web-design', destination: '/risorse/glossario-web-design', permanent: true },
+      { source: '/it/glossario-seo', destination: '/risorse/glossario-seo', permanent: true },
+      { source: '/it/glossario-e-commerce', destination: '/risorse/glossario-e-commerce', permanent: true },
+      { source: '/it/glossario-web-design', destination: '/risorse/glossario-web-design', permanent: true },
+      { source: '/en/seo-glossary', destination: '/en/risorse/glossario-seo', permanent: true },
+      { source: '/en/e-commerce-glossary', destination: '/en/risorse/glossario-e-commerce', permanent: true },
     ];
   },
   async headers() {

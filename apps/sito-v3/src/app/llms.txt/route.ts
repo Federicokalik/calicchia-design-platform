@@ -103,9 +103,9 @@ export async function GET(): Promise<Response> {
 
   // ─── Glossari ─────────────────────────────────────────────────────
   sections.push('## Glossaries');
-  sections.push(mdLink('Glossario SEO', '/glossario-seo', '.md', 'Termini chiave SEO spiegati senza fumo'));
-  sections.push(mdLink('Glossario E-Commerce', '/glossario-e-commerce', '.md', 'Dropshipping, checkout, conversion rate, AOV, CAC, LTV'));
-  sections.push(mdLink('Glossario Web Design', '/glossario-web-design', '.md', 'Termini chiave del web design'));
+  sections.push(mdLink('Glossario SEO', '/risorse/glossario-seo', '.md', 'Termini chiave SEO spiegati senza fumo'));
+  sections.push(mdLink('Glossario E-Commerce', '/risorse/glossario-e-commerce', '.md', 'Dropshipping, checkout, conversion rate, AOV, CAC, LTV'));
+  sections.push(mdLink('Glossario Web Design', '/risorse/glossario-web-design', '.md', 'Termini chiave del web design'));
   sections.push('');
 
   // ─── Local SEO (top-tier cities only) ─────────────────────────────

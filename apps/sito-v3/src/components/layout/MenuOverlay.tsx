@@ -72,6 +72,7 @@ const NAV: NavEntry[] = [
 ];
 
 const SECONDARY_LINKS = [
+  { label: 'Risorse', href: '/risorse', description: 'White paper e glossari curati.' },
   { label: 'Area Clienti', href: '/clienti/login', description: 'Documenti, file e avanzamento progetto.' },
   { label: 'Servizi per professioni', href: '/servizi-per-professioni', description: 'Landing verticali per categorie e attività.' },
   { label: 'FAQ', href: '/faq', description: 'Dubbi frequenti prima di iniziare.' },
@@ -211,12 +212,14 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
     })[href] ?? fallback;
   const secondaryLabel = (href: string, fallback: string) =>
     ({
+      '/risorse': t('nav.risorse'),
       '/clienti/login': t('nav.areaClienti'),
       '/servizi-per-professioni': t('nav.serviziPerProfessioni'),
       '/faq': t('nav.faq'),
     })[href] ?? fallback;
   const secondaryDescription = (href: string, fallback: string) =>
     ({
+      '/risorse': t('menuOverlay.secondary.resourcesDescription'),
       '/clienti/login': t('menuOverlay.secondary.clientAreaDescription'),
       '/servizi-per-professioni': t('menuOverlay.secondary.professionsDescription'),
       '/faq': t('menuOverlay.secondary.faqDescription'),

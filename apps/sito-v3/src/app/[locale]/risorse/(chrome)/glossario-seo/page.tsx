@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
+import { breadcrumbSchema, definedTermListSchema } from '@/data/structured-data';
 import {
-  breadcrumbSchema,
-  definedTermListSchema,
-} from '@/data/structured-data';
-// Audit C-013/C-014 (PR20): glossario now DB-backed via getGlossario().
-// Falls back to data/glossario.ts on fresh installs / API outages.
-import { getGlossario } from '@/lib/cms';
-import type { Locale } from '@/lib/i18n';
+  GLOSSARIO_SEO_LETTERS,
+  GLOSSARIO_SEO_META,
+  localiseTerms,
+  type SeoTermLocalised,
+} from '@/data/glossario-seo';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/Button';
 import { MonoLabel } from '@/components/ui/MonoLabel';
@@ -16,86 +15,82 @@ import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
+import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
+import type { Locale } from '@/lib/i18n';
 
-export const metadata: Metadata = {
-  title: {
-    absolute:
-      'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca | Federico Calicchia',
-  },
-  description:
-    "LCP, CLS, CMS, SEO, SSL, schema markup, hreflang… 30 termini tecnici spiegati semplici. Per ogni termine: cos'è, perché ti riguarda, cosa pretendere dal fornitore.",
-  alternates: { canonical: '/glossario-web-design' },
-  openGraph: {
-    title:
-      'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca',
-    description:
-      "30 termini tecnici spiegati semplici. Cos'è, perché ti riguarda, cosa pretendere.",
-    url: '/glossario-web-design',
-  },
-};
+const PATH = '/risorse/glossario-seo';
 
-export default async function GlossarioPage() {
+export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
-  const { entries: GLOSSARIO, letters: GLOSSARIO_LETTERS } = await getGlossario(locale);
+  const m = GLOSSARIO_SEO_META[locale];
+  return {
+    title: { absolute: m.metaTitle },
+    description: m.description,
+    alternates: buildI18nAlternates(PATH, locale),
+    openGraph: {
+      title: m.ogTitle,
+      description: m.ogDescription,
+      url: buildCanonical(PATH, locale),
+      ...buildOgLocale(locale),
+    },
+  };
+}
 
-  // Group terms by letter for A-Z layout
-  const termsByLetter = new Map<string, typeof GLOSSARIO>();
-  for (const t of GLOSSARIO) {
+export default async function GlossarioSeoPage() {
+  const locale = (await getLocale()) as Locale;
+  const m = GLOSSARIO_SEO_META[locale];
+  const terms = localiseTerms(locale);
+
+  const termsByLetter = new Map<string, SeoTermLocalised[]>();
+  for (const t of terms) {
     if (!termsByLetter.has(t.letter)) termsByLetter.set(t.letter, []);
     termsByLetter.get(t.letter)!.push(t);
   }
 
-  const chapters: EditorialChapterEntry[] = GLOSSARIO_LETTERS.map((letter) => ({
+  const chapters: EditorialChapterEntry[] = GLOSSARIO_SEO_LETTERS.map((letter) => ({
     id: `letter-${letter}`,
     number: letter,
-    label: `${termsByLetter.get(letter)!.length} termini`,
+    label: locale === 'en'
+      ? `${termsByLetter.get(letter)!.length} terms`
+      : `${termsByLetter.get(letter)!.length} termini`,
   }));
+
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: m.breadcrumbServiceName, url: '/servizi' },
+    { name: m.breadcrumbGlossaryName, url: PATH },
+  ];
 
   return (
     <>
       <StructuredData
         json={[
           definedTermListSchema(
-            GLOSSARIO.map((t) => ({
+            terms.map((t) => ({
               name: t.term,
               description: t.whatItIs,
               slug: t.slug,
             })),
-            '/glossario-web-design'
+            PATH,
           ),
-          breadcrumbSchema([
-            { name: 'Home', url: '/' },
-            { name: 'Web Designer Freelance', url: '/web-design-freelance' },
-            { name: 'Glossario', url: '/glossario-web-design' },
-          ]),
+          breadcrumbSchema(breadcrumbs),
         ]}
       />
 
       <EditorialArticleLayout
-        breadcrumbs={[
-          { name: 'Home', url: '/' },
-          { name: 'Web Designer Freelance', url: '/web-design-freelance' },
-          { name: 'Glossario', url: '/glossario-web-design' },
-        ]}
-        eyebrow={`Glossario — ${GLOSSARIO.length} termini · ordine A-Z`}
-        title="Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca."
-        lead={
-          <>
-            Il modo più veloce per farti vendere fumo è usare termini tecnici che non
-            capisci. Eccoli, spiegati per quello che sono — e perché ti riguardano.
-            Per ogni termine: cos'è, perché ti riguarda, cosa pretendere dal
-            fornitore.
-          </>
-        }
+        breadcrumbs={breadcrumbs}
+        eyebrow={m.eyebrow}
+        title={m.pageTitle}
+        lead={<>{m.lead}</>}
         chapters={chapters}
         indexVariant="alphabet"
-        readTime="lettura libera"
-        updatedAt="5 maggio 2026"
+        readTime={m.readTime}
+        updatedAt={m.updatedAt}
         showFinalCta={false}
       >
         <div className="flex flex-col">
-          {GLOSSARIO_LETTERS.map((letter) => {
-            const terms = termsByLetter.get(letter)!;
+          {GLOSSARIO_SEO_LETTERS.map((letter) => {
+            const list = termsByLetter.get(letter)!;
             return (
               <section
                 key={letter}
@@ -113,7 +108,7 @@ export default async function GlossarioPage() {
                 </Heading>
 
                 <ul role="list" className="flex flex-col gap-12 md:gap-16">
-                  {terms.map((t) => (
+                  {list.map((t) => (
                     <li
                       key={t.slug}
                       id={t.slug}
@@ -123,44 +118,39 @@ export default async function GlossarioPage() {
                         <Heading as="h3" size="card" className="mb-2">
                           {t.term}
                         </Heading>
-                        {t.fullName ? (
-                          <MonoLabel as="p">{t.fullName}</MonoLabel>
-                        ) : null}
+                        {t.fullName ? <MonoLabel as="p">{t.fullName}</MonoLabel> : null}
                       </div>
 
                       <div className="md:col-span-8 space-y-4">
                         <div>
                           <MonoLabel as="p" tone="accent" className="mb-2">
-                            Cos&apos;è
+                            {m.sectionWhatItIs}
                           </MonoLabel>
                           <p
                             className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
                             style={{ color: 'var(--color-text-primary)' }}
-                          >
-                            {t.whatItIs}
-                          </p>
+                            dangerouslySetInnerHTML={{ __html: t.whatItIs }}
+                          />
                         </div>
                         <div>
                           <MonoLabel as="p" tone="accent" className="mb-2">
-                            Perché ti riguarda
+                            {m.sectionWhyYouCare}
                           </MonoLabel>
                           <p
                             className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
                             style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {t.whyYouCare}
-                          </p>
+                            dangerouslySetInnerHTML={{ __html: t.whyYouCare }}
+                          />
                         </div>
                         <div>
                           <MonoLabel as="p" tone="accent" className="mb-2">
-                            Cosa pretendere
+                            {m.sectionWhatToDemand}
                           </MonoLabel>
                           <p
                             className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
                             style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {t.whatToDemand}
-                          </p>
+                            dangerouslySetInnerHTML={{ __html: t.whatToDemand }}
+                          />
                         </div>
                       </div>
                     </li>
@@ -182,23 +172,17 @@ export default async function GlossarioPage() {
             as="p"
             size="display-sm"
             className="mb-6"
-            style={{ maxWidth: '42ch' }}
+            style={{ maxWidth: '52ch' }}
           >
-            Adesso quando un fornitore ti dice "non preoccuparti del CLS, è normale
-            che sia rosso", sai cosa rispondere.
+            {m.closingTitle}
           </Heading>
           <div className="flex flex-wrap gap-6">
             <Button href="/contatti" variant="underline" size="md">
-              Parlane con uno che capisce
+              {m.ctaPrimary}
               <span aria-hidden="true">→</span>
             </Button>
-            <Button
-              href="/web-design-freelance"
-              variant="underline"
-              size="md"
-              className="opacity-70"
-            >
-              Guida completa al web design freelance
+            <Button href="/servizi/seo" variant="underline" size="md" className="opacity-70">
+              {m.ctaSecondary}
               <span aria-hidden="true">→</span>
             </Button>
           </div>

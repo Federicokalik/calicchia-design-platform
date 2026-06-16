@@ -10,6 +10,7 @@
     "perche": "Perché me",
     "percheScegliereMe": "Perché scegliere me",
     "blog": "Blog",
+    "risorse": "Risorse",
     "areaClienti": "Area Clienti",
     "faq": "FAQ",
     "freelance": "Web Designer Freelance"
@@ -46,6 +47,7 @@
     "quickPaths": "Percorsi rapidi",
     "studio": "Studio",
     "secondary": {
+      "resourcesDescription": "White paper e glossari curati.",
       "clientAreaDescription": "Documenti, file e avanzamento progetto.",
       "professionsDescription": "Landing verticali per categorie e attività.",
       "faqDescription": "Dubbi frequenti prima di iniziare."

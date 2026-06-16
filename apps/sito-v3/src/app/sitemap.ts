@@ -39,8 +39,11 @@ const STATIC_PATHS = [
   '/contatti',
   '/perche-scegliere-me',
   '/blog',
+  // Risorse — hub bilingue + white paper standalone (stesso slug nei due locale)
+  '/risorse',
+  '/risorse/dalla-seo-alla-geo',
   '/faq',
-  '/glossario-web-design',
+  '/risorse/glossario-web-design',
   '/web-design-freelance',
   '/web-design-vs-agenzia',
   '/sito-web-per-pmi',
@@ -67,8 +70,8 @@ const STATIC_PATHS = [
   // Pillar SEO MEDIA/BASSA priorità — bilingual IT+EN con slug tradotti (PATHNAMES in i18n/routing.ts)
   '/freelance-vs-agenzia-2026',
   '/wordpress-vs-headless',
-  '/glossario-seo',
-  '/glossario-e-commerce',
+  '/risorse/glossario-seo',
+  '/risorse/glossario-e-commerce',
   // Legal
   '/privacy-policy',
   '/cookie-policy',
@@ -111,7 +114,7 @@ const IT_ONLY_PATHS = new Set<string>([
   // NB: /servizi-per-professioni rimosso (2026-05-15) — ora bilingual.
   '/quanto-costa-sito-web',
   // Pillar bilingual con EN attiva: rimossi da IT_ONLY (web-designer-vs-developer, EAA, CWV)
-  '/glossario-web-design',
+  '/risorse/glossario-web-design',
   // Legal
   '/privacy-policy',
   '/cookie-policy',
@@ -142,7 +145,7 @@ const TOP_MONTHLY = new Set([
   '/perche-scegliere-me',
   '/zone',
   '/servizi-per-professioni',
-  '/glossario-web-design',
+  '/risorse/glossario-web-design',
   '/web-design-freelance',
   '/web-design-vs-agenzia',
   '/sito-web-per-pmi',

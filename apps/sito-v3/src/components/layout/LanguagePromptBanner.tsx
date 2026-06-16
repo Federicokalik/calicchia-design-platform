@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { isStandaloneResourcePath } from '@/lib/resource-docs';
 
 const COOKIE_NAME = 'LANG_BANNER_DISMISSED';
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 anno
@@ -23,6 +25,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 anno
  */
 export function LanguagePromptBanner() {
   const currentLocale = useLocale();
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -50,7 +53,7 @@ export function LanguagePromptBanner() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || isStandaloneResourcePath(pathname)) return null;
 
   return (
     <div

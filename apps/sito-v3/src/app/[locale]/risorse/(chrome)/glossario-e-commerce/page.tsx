@@ -18,7 +18,7 @@ import {
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import type { Locale } from '@/lib/i18n';
 
-const PATH = '/glossario-e-commerce';
+const PATH = '/risorse/glossario-e-commerce';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;

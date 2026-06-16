@@ -10,6 +10,7 @@
     "perche": "Why me",
     "percheScegliereMe": "Why work with me",
     "blog": "Blog",
+    "risorse": "Resources",
     "areaClienti": "Client Area",
     "faq": "FAQ",
     "freelance": "Freelance Web Designer"
@@ -46,6 +47,7 @@
     "quickPaths": "Quick paths",
     "studio": "Studio",
     "secondary": {
+      "resourcesDescription": "Curated white papers and glossaries.",
       "clientAreaDescription": "Documents, files and project progress.",
       "professionsDescription": "Vertical landing pages for categories and businesses.",
       "faqDescription": "Common questions before starting."

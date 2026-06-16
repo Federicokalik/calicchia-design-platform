@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
+import { isStandaloneResourcePath } from '@/lib/resource-docs';
 
 type CapacityStatus = 'available' | 'last_slot' | 'full';
 
@@ -45,7 +46,7 @@ export function AvailabilityTopbar() {
 
   // Path escluso: rimuove la lingua iniziale poi confronta.
   const pathNoLocale = stripLocale(pathname, locale);
-  const isExcluded = isExcludedPath(pathNoLocale);
+  const isExcluded = isExcludedPath(pathNoLocale) || isStandaloneResourcePath(pathname);
 
   // 1. Read dismiss flag from localStorage (once mounted, no SSR)
   useEffect(() => {
