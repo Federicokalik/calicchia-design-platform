@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Italy-based freelance web designer & developer for Canadian small businesses, professionals and Italian-Canadian community. Bilingual (English / Italian), EU-quality engineering, CAD-friendly rates, PIPEDA-aware, GDPR-native.",
   alternates: { canonical: '/en/freelance-web-designer-canada' },
   openGraph: {
+    type: 'website',
     title: 'Freelance Web Designer & Developer for Canadian Businesses',
     description:
       "Italy-based, bilingual EN/IT, EU-quality engineering, CAD-friendly rates. For Canadian small businesses and Italian-Canadian community.",
     url: '/en/freelance-web-designer-canada',
     locale: 'en_CA',
+    images: buildOgImage('Freelance Web Designer & Developer for Canadian Businesses', 'en'),
   },
 };
 

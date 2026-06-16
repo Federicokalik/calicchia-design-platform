@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Website design and development for Italian restaurants in North America: trattorie, pizzerie, panetterie, gelaterie. Bilingual menus EN/IT, online reservations, takeout integration, Google Business Profile optimization. Built by a native Italian.",
   alternates: { canonical: '/en/italian-restaurants-website-design' },
   openGraph: {
+    type: 'website',
     title: 'Website Design for Italian Restaurants',
     description:
       "Bilingual menus, reservations, takeout APIs, Google Maps optimization. Built by a native Italian, no fake-Italian theme-park aesthetic.",
     url: '/en/italian-restaurants-website-design',
     locale: 'en_CA',
+    images: buildOgImage('Website Design for Italian Restaurants', 'en'),
   },
 };
 

@@ -8,6 +8,7 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import { BookingWidget } from '@/components/booking/BookingWidget';
 import { fetchEventType, fetchEventTypes } from '@/lib/booking-api';
+import { buildOgImage } from '@/lib/og-image';
 
 interface Params {
   slug: string;
@@ -58,12 +59,22 @@ export async function generateMetadata({
       description: 'Prenota una call diretta con me, senza intermediari.',
     };
   }
+  const title = `${eventType.title} — Prenota`;
   return {
-    title: `${eventType.title} — Prenota`,
+    title,
     description:
       eventType.description ??
       'Prenota una call diretta con me, senza intermediari.',
     alternates: { canonical: `/prenota/${eventType.slug}` },
+    openGraph: {
+      type: 'website',
+      title,
+      description:
+        eventType.description ??
+        'Prenota una call diretta con me, senza intermediari.',
+      url: `/prenota/${eventType.slug}`,
+      images: buildOgImage(title, 'it'),
+    },
   };
 }
 

@@ -14,6 +14,7 @@ import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
+import { buildOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
   title: {
@@ -24,10 +25,12 @@ export const metadata: Metadata = {
     'Guida per PMI: 5 segnali che il sito sta perdendo clienti, cosa deve fare nel 2026, errori comuni, come scegliere il fornitore. Senza buzzword.',
   alternates: { canonical: '/sito-web-per-pmi' },
   openGraph: {
+    type: 'website',
     title: 'Sito Web per PMI · Quello che hai adesso ti sta facendo perdere clienti',
     description:
       '5 segnali, errori comuni, come scegliere chi te lo fa. Senza buzzword.',
     url: '/sito-web-per-pmi',
+    images: buildOgImage('Sito Web per PMI · Quello che hai adesso ti sta facendo perdere clienti', 'it'),
   },
 };
 

@@ -14,6 +14,7 @@ import { FinalCTA } from '@/components/home/FinalCTA';
 import { getSeoCities } from '@/lib/cms';
 import type { SeoCity } from '@/data/seo-cities';
 import { SITE } from '@/data/site';
+import { buildOgImage } from '@/lib/og-image';
 
 const PATH = '/zone';
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -37,10 +38,12 @@ export const metadata: Metadata = {
     'Web designer freelance attivo in tutta la Ciociaria (provincia di Frosinone) e nei capoluoghi italiani principali. Comuni serviti, pillar geo, mappa testuale.',
   alternates: { canonical: `${SITE_URL}${PATH}` },
   openGraph: {
+    type: 'website',
     title: 'Zone in cui lavoro · Web design freelance Ciociaria + Italia',
     description:
       'Comuni serviti in Ciociaria e capoluoghi italiani con landing dedicate.',
     url: PATH,
+    images: buildOgImage('Zone in cui lavoro · Web design freelance Ciociaria + Italia', 'it'),
   },
 };
 

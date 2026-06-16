@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 import { GEO_WP_CSS, GEO_WP_BODY } from '@/data/risorse/geo-whitepaper';
 import { GeoWhitepaperClient } from './GeoWhitepaperClient';
@@ -52,6 +53,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: m.title,
       description: m.description,
       url: buildCanonical(PATH, locale),
+      images: buildOgImage(m.title, locale),
       ...buildOgLocale(locale),
     },
   };

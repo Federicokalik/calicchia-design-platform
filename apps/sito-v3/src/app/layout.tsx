@@ -16,6 +16,7 @@ import { SITE } from '@/data/site';
 import { getSiteConfig } from '@/lib/site-config';
 import { getServiceCatalog } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
+import { buildOgImageUrl } from '@/lib/og-image';
 import './globals.css';
 
 // next/font/local — Funnel Display + Funnel Sans self-hosted con preload
@@ -48,9 +49,11 @@ const funnelSans = localFont({
 // template, brand and tagline are SEO-load-bearing and hardcoded to SITE so
 // they can never be corrupted by an editable admin setting.
 // SITE.url stays from the file because it's the deploy origin, not editable.
-const OG_DEFAULT = `${SITE.url}/img/federico-calicchia-ritratto-web-designer.webp`;
 const TITLE_DEFAULT = `${SITE.brand} — ${SITE.tagline}`;
 const TITLE_TEMPLATE = `%s — ${SITE.tagline}`;
+// Site-wide fallback share card — the generated branded OG (logo + IT/EN +
+// title). Any page that doesn't set its own openGraph.images inherits this.
+const OG_DEFAULT = buildOgImageUrl(TITLE_DEFAULT, 'it');
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSiteConfig();
@@ -80,12 +83,13 @@ export async function generateMetadata(): Promise<Metadata> {
         },
       ],
     },
+    // Only card + creator here. title/description/image are intentionally
+    // omitted so Twitter/X falls back to each page's own og:title / og:image /
+    // og:description (its documented fallback) — no need to duplicate a twitter
+    // block on every page. Pages set openGraph.images via buildOgImage().
     twitter: {
       card: 'summary_large_image',
       creator: '@calicchiadesign',
-      title: TITLE_DEFAULT,
-      description: site.description,
-      images: [OG_DEFAULT],
     },
     alternates: {
       types: {

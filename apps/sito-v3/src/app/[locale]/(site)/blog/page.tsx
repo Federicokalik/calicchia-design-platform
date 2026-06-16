@@ -7,6 +7,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('blog.list.metadata');
@@ -21,9 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
     // TODO: rimuovi quando >=3 articoli reali pubblicati (controllo via fetchBlogList)
     robots: { index: false, follow: true },
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/blog', locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

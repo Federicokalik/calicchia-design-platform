@@ -19,6 +19,7 @@ import { breadcrumbSchema, faqPageSchema } from '@/data/structured-data';
 import { getServiceCatalog, getPerchiFaqs, getApproach, getClients } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('perche.metadata');
@@ -31,9 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('description'),
     alternates: buildI18nAlternates('/perche-scegliere-me', locale),
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/perche-scegliere-me', locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

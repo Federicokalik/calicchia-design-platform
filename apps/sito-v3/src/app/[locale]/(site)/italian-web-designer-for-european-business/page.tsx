@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Italy-based freelance web designer & developer for European B2B mid-market companies. EU-quality engineering, GDPR-native, EUR / GBP invoicing, modern stack (Next.js / React / TypeScript). For SaaS, manufacturing, professional services, agencies needing reliable EU partner.",
   alternates: { canonical: '/en/italian-web-designer-for-european-business' },
   openGraph: {
+    type: 'website',
     title: 'Italian Web Designer for European B2B Businesses',
     description:
       'EU-quality, EU-rates, GDPR-native. For SaaS, manufacturing, professional services, agencies needing reliable EU partner.',
     url: '/en/italian-web-designer-for-european-business',
     locale: 'en_GB',
+    images: buildOgImage('Italian Web Designer for European B2B Businesses', 'en'),
   },
 };
 

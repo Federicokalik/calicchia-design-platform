@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Italy-based freelance web designer & developer working in English. Websites, e-commerce, custom development, SEO, WordPress. EU+UK+US clients. One contact, no agency middlemen, EU timezone.",
   alternates: { canonical: '/en/freelance-web-designer-italy' },
   openGraph: {
+    type: 'website',
     title: 'Freelance Web Designer & Developer based in Italy',
     description:
       "Italy-based, working in English. EU+UK+US clients. One contact, no agency middlemen, EU timezone.",
     url: '/en/freelance-web-designer-italy',
     locale: 'en_US',
+    images: buildOgImage('Freelance Web Designer & Developer based in Italy', 'en'),
   },
 };
 

@@ -293,7 +293,9 @@ export default async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // exclude _next, api, asset files, well-known crawler endpoints
-    '/((?!_next/|api/|favicon|robots\\.txt|sitemap\\.xml|rss\\.xml|.*\\..*).*)',
+    // exclude _next, api, the dynamic OG image route, asset files, well-known
+    // crawler endpoints. `/og` is a top-level route handler (outside [locale]) —
+    // without this exclusion next-intl would rewrite it to `/it/og` and 404.
+    '/((?!_next/|api/|og(?:/|$)|favicon|robots\\.txt|sitemap\\.xml|rss\\.xml|.*\\..*).*)',
   ],
 };

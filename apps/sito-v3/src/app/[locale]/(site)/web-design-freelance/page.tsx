@@ -20,6 +20,7 @@ import {
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -32,10 +33,12 @@ export async function generateMetadata(): Promise<Metadata> {
       "Cosa fa un web designer freelance, quanto costa, come riconoscerlo. Guida completa con esempi reali, errori da evitare e tempi misurati. Niente fumo, niente promesse vuote.",
     alternates: buildI18nAlternates('/web-design-freelance', locale),
     openGraph: {
+      type: 'website',
       title: 'Web Designer Freelance in Italia · La guida onesta',
       description:
         'Cosa fa, quanto costa, come riconoscerlo. Niente fumo, niente promesse vuote.',
       url: buildCanonical('/web-design-freelance', locale),
+      images: buildOgImage('Web Designer Freelance in Italia · La guida onesta', locale),
       ...buildOgLocale(locale),
     },
   };

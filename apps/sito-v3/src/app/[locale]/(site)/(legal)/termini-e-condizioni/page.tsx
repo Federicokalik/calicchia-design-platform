@@ -4,6 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/termini-e-condizioni con 404). No hreflang.
 export const metadata: Metadata = {
@@ -14,10 +15,12 @@ export const metadata: Metadata = {
     "Termini e condizioni d'uso del sito e dei rapporti contrattuali per i servizi professionali: preventivi, pagamenti, tempistiche, proprietà intellettuale, recesso, foro competente.",
   alternates: { canonical: buildCanonical('/termini-e-condizioni', 'it') },
   openGraph: {
+    type: 'website',
     title: 'Termini e Condizioni · Federico Calicchia',
     description:
       "Condizioni generali per uso sito e rapporti contrattuali con il prestatore.",
     url: buildCanonical('/termini-e-condizioni', 'it'),
+    images: buildOgImage('Termini e Condizioni · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
 };

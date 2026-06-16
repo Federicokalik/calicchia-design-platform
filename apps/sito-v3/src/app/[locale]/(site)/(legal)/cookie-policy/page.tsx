@@ -4,6 +4,7 @@ import { LEGAL_CONTENT } from '@/data/legal-content';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/cookie-policy con 404). No hreflang.
 export const metadata: Metadata = {
@@ -14,9 +15,11 @@ export const metadata: Metadata = {
     'Informativa sui cookie utilizzati dal sito: cookie tecnici, di sicurezza, analitici aggregati. Come gestire il consenso e quali strumenti sono attivi.',
   alternates: { canonical: buildCanonical('/cookie-policy', 'it') },
   openGraph: {
+    type: 'website',
     title: 'Cookie Policy · Federico Calicchia',
     description: 'Informativa cookie aggiornata, con elenco strumenti attivi.',
     url: buildCanonical('/cookie-policy', 'it'),
+    images: buildOgImage('Cookie Policy · Federico Calicchia', 'it'),
     ...buildOgLocale('it'),
   },
 };

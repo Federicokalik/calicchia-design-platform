@@ -20,7 +20,8 @@ import { RelatedZones } from '@/components/seo-landing/RelatedZones';
 import { ServiceShowcase } from '@/components/service-detail/ServiceShowcase';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
-import { buildCanonical } from '@/lib/canonical';
+import { buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
 interface Params {
@@ -58,11 +59,21 @@ export async function generateMetadata({
   const svc = getServiceByLandingSlug(service as ServiceSlug);
   if (!city || !svc) return { title: 'Combinazione non trovata' };
   const prep = getPreposizione(city.nome);
+  const title = `${svc.label} ${prep} ${city.nome}`;
+  const description = `${svc.label} a ${city.nome}. Progettazione, sviluppo, SEO locale per professionisti e attività della zona.`;
   return {
-    title: `${svc.label} ${prep} ${city.nome}`,
-    description: `${svc.label} a ${city.nome}. Progettazione, sviluppo, SEO locale per professionisti e attività della zona.`,
+    title,
+    description,
     alternates: { canonical: buildCanonical(`/zone/${comune}/${service}`, locale) },
     robots: city.tier === 1 ? { index: true, follow: true } : { index: false, follow: false },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: buildCanonical(`/zone/${comune}/${service}`, locale),
+      images: buildOgImage(title, locale),
+      ...buildOgLocale(locale),
+    },
   };
 }
 

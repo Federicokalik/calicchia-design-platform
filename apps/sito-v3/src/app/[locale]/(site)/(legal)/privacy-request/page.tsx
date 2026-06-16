@@ -7,6 +7,7 @@ import { PrivacyRequestForm } from '@/components/forms/PrivacyRequestForm';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 // Pagina IT-only (route guard blocca /en/privacy-request con 404). No hreflang.
 export const metadata: Metadata = {
@@ -18,10 +19,12 @@ export const metadata: Metadata = {
   alternates: { canonical: buildCanonical('/privacy-request', 'it') },
   robots: { index: false, follow: true },
   openGraph: {
+    type: 'website',
     title: 'Richiesta dati personali · GDPR',
     description:
       "Esercita i tuoi diritti GDPR (accesso, cancellazione, portabilità, rettifica, opposizione, limitazione).",
     url: buildCanonical('/privacy-request', 'it'),
+    images: buildOgImage('Richiesta dati personali · GDPR', 'it'),
     ...buildOgLocale('it'),
   },
 };

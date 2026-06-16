@@ -10,6 +10,7 @@ import { FinalCTA } from '@/components/home/FinalCTA';
 // for fresh installs / API outages.
 import { getFaqs } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
+import { buildOgImage } from '@/lib/og-image';
 
 export const metadata: Metadata = {
   title: 'FAQ Web Design Freelance',
@@ -17,10 +18,12 @@ export const metadata: Metadata = {
     'Risposte secche a 7 domande sul web design freelance: tempi, processo, manutenzione, SEO, prezzi. Niente fronzoli, niente promesse vuote.',
   alternates: { canonical: '/faq' },
   openGraph: {
+    type: 'website',
     title: 'FAQ Web Design Freelance — Federico Calicchia',
     description:
       "Risposte secche su tempi, processo, manutenzione, SEO. Niente fronzoli, niente promesse vuote.",
     url: '/faq',
+    images: buildOgImage('FAQ Web Design Freelance — Federico Calicchia', 'it'),
   },
 };
 

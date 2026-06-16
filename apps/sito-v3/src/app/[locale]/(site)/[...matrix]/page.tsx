@@ -33,6 +33,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
 import { buildCanonical, buildOgLocale } from '@/lib/canonical';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+import { buildOgImage } from '@/lib/og-image';
 import { SITE } from '@/data/site';
 
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -163,7 +164,6 @@ export async function generateMetadata({
 
   // Tier-based indexing.
   const indexable = profession.tier <= 2 && (!city || city.tier <= 2);
-  const ogImageUrl = `/api/og/matrix/${encodeURIComponent(matrix[0])}?locale=${locale}`;
 
   // Canonical + hreflang alternates. Matrix con città è IT-only quindi niente
   // EN alternate; matrix profession-only emette entrambi gli alternates.
@@ -191,14 +191,14 @@ export async function generateMetadata({
       description,
       url: canonical,
       type: 'article',
-      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+      images: buildOgImage(title, locale),
       ...buildOgLocale(locale),
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImageUrl],
+      images: buildOgImage(title, locale).map((i) => i.url),
     },
   };
 }

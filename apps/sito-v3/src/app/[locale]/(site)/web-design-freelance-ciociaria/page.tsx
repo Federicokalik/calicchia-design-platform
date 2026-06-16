@@ -10,6 +10,7 @@ import {
 // Audit C-013/C-014 (PR21): SEO cities DB-backed via getSeoCities();
 // metadata + page body read the same cached fetch.
 import { getSeoCities } from '@/lib/cms';
+import { buildOgImage } from '@/lib/og-image';
 import { Heading } from '@/components/ui/Heading';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Button } from '@/components/ui/Button';
@@ -38,10 +39,12 @@ export async function generateMetadata(): Promise<Metadata> {
     description: `Web designer freelance in Ciociaria, Frosinone. Sito fisico a Ceccano, lavoro su tutto il territorio ciociaro. ${total} comuni serviti, partite IVA locali, niente intermediari milanesi.`,
     alternates: { canonical: '/web-design-freelance-ciociaria' },
     openGraph: {
+      type: 'website',
       title: 'Web Designer Freelance in Ciociaria · 91 comuni serviti',
       description:
         'Sede a Ceccano, lavoro su tutta la provincia di Frosinone. Niente account manager che pronunciano sbagliato i comuni.',
       url: '/web-design-freelance-ciociaria',
+      images: buildOgImage('Web Designer Freelance in Ciociaria · 91 comuni serviti', 'it'),
     },
   };
 }

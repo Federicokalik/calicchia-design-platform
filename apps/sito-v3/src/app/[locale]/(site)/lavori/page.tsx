@@ -16,6 +16,7 @@ import { adaptApiListItem } from '@/lib/projects-adapter';
 import { SITE } from '@/data/site';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 const PATH = '/lavori';
 const SITE_URL = SITE.url.replace(/\/$/, '');
@@ -31,9 +32,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('description'),
     alternates: buildI18nAlternates(PATH, locale),
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical(PATH, locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

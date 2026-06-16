@@ -13,6 +13,7 @@ import {
 } from '@/components/layout/EditorialArticleLayout';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as Locale;
@@ -25,10 +26,12 @@ export async function generateMetadata(): Promise<Metadata> {
       "Confronto onesto tra web designer freelance e agenzia: costi reali, tempi, responsabilità, rischi. Quando scegliere uno, quando l'altra. Senza vendere niente.",
     alternates: buildI18nAlternates('/web-design-vs-agenzia', locale),
     openGraph: {
+      type: 'website',
       title: "Freelance vs Agenzia · Perché un'agenzia ti costa il triplo",
       description:
         'Confronto onesto: costi reali, tempi, responsabilità, rischi. Senza vendere niente.',
       url: buildCanonical('/web-design-vs-agenzia', locale),
+      images: buildOgImage("Freelance vs Agenzia · Perché un'agenzia ti costa il triplo", locale),
       ...buildOgLocale(locale),
     },
   };

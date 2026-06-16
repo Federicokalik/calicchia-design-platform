@@ -29,6 +29,7 @@ import {
   buildI18nAlternates,
   buildOgLocale,
 } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
 
 // IT-canonical path. EN is translated to /services-by-profession via PATHNAMES;
@@ -45,9 +46,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('description'),
     alternates: buildI18nAlternates(PATH, locale),
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical(PATH, locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

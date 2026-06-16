@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "English-speaking freelance web designer & developer based in Italy. For expats running businesses in Italy, foreign companies entering the Italian market, real estate agencies serving foreign buyers. Native Italian + fluent English, EU rates.",
   alternates: { canonical: '/en/english-speaking-web-designer-italy' },
   openGraph: {
+    type: 'website',
     title: 'English-Speaking Web Designer in Italy',
     description:
       "For expats, international businesses entering Italy, and Italian businesses serving foreign clients. Bilingual native Italian + fluent English.",
     url: '/en/english-speaking-web-designer-italy',
     locale: 'en_GB',
+    images: buildOgImage('English-Speaking Web Designer in Italy', 'en'),
   },
 };
 

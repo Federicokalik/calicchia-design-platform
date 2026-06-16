@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -15,10 +16,12 @@ export const metadata: Metadata = {
     'Quanto costa davvero un sito web nel 2026? I 5 fattori che muovono il preventivo, perché le agenzie costano di più, quando un DIY basta, come riconoscere un preventivo onesto. Senza cifre fittizie.',
   alternates: { canonical: '/quanto-costa-sito-web' },
   openGraph: {
+    type: 'website',
     title: 'Quanto costa un sito web · I 5 fattori che decidono il prezzo',
     description:
       'I 5 fattori reali che muovono il preventivo. Niente cifre da listino, niente bullshit.',
     url: '/quanto-costa-sito-web',
+    images: buildOgImage('Quanto costa un sito web · I 5 fattori che decidono il prezzo', 'it'),
   },
 };
 

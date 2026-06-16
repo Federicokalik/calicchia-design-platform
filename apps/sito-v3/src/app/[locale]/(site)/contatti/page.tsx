@@ -10,6 +10,7 @@ import { ContactSocials } from '@/components/contatti/ContactSocials';
 import { PageHero } from '@/components/layout/PageHero';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('contatti.metadata');
@@ -22,9 +23,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('description'),
     alternates: buildI18nAlternates('/contatti', locale),
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/contatti', locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

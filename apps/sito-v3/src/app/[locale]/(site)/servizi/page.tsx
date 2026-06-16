@@ -9,6 +9,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import type { Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('servizi.list.metadata');
@@ -21,9 +22,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t('description'),
     alternates: buildI18nAlternates('/servizi', locale),
     openGraph: {
+      type: 'website',
       title: t('ogTitle'),
       description: t('ogDescription'),
       url: buildCanonical('/servizi', locale),
+      images: buildOgImage(t('ogTitle'), locale),
       ...buildOgLocale(locale),
     },
   };

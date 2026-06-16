@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Italy-based freelance web designer & developer for Greater Toronto Area businesses: Toronto, Vaughan, Mississauga, Markham, Brampton, Hamilton. Bilingual English / Italian, EU-quality engineering, CAD-friendly rates.",
   alternates: { canonical: '/en/freelance-web-designer-toronto-gta' },
   openGraph: {
+    type: 'website',
     title: 'Freelance Web Designer & Developer for the GTA',
     description:
       "Toronto, Vaughan, Mississauga, Markham. Italian-Canadian community fit. Bilingual EN/IT, EU-quality, CAD-friendly rates.",
     url: '/en/freelance-web-designer-toronto-gta',
     locale: 'en_CA',
+    images: buildOgImage('Freelance Web Designer & Developer for the GTA', 'en'),
   },
 };
 

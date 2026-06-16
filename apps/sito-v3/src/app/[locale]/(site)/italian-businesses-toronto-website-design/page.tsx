@@ -3,6 +3,7 @@ import { getLocale } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
+import { buildOgImage } from '@/lib/og-image';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
@@ -17,11 +18,13 @@ export const metadata: Metadata = {
     "Website design and development for Italian-Canadian businesses in Toronto, Vaughan, Woodbridge, Mississauga, Hamilton. Native Italian speaker, EU engineering, CAD-friendly rates. Restaurants, contractors, retailers, professionals.",
   alternates: { canonical: '/en/italian-businesses-toronto-website-design' },
   openGraph: {
+    type: 'website',
     title: 'Website Design for Italian Businesses in Toronto + GTA',
     description:
       'Bilingual EN/IT, native Italian speaker, EU engineering quality, CAD rates. For Italian-Canadian businesses across the GTA.',
     url: '/en/italian-businesses-toronto-website-design',
     locale: 'en_CA',
+    images: buildOgImage('Website Design for Italian Businesses in Toronto + GTA', 'en'),
   },
 };
 

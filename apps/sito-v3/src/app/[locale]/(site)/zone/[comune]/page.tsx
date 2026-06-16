@@ -5,7 +5,8 @@ import { Link } from '@/i18n/navigation';
 import { getSeoCities } from '@/lib/cms';
 import { SEO_SERVICES } from '@/data/seo-service-matrix';
 import { COMUNE_ATTRIBUTES, getPreposizione } from '@/lib/comune-attributes';
-import { buildCanonical } from '@/lib/canonical';
+import { buildCanonical, buildOgLocale } from '@/lib/canonical';
+import { buildOgImage } from '@/lib/og-image';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, localBusinessSchema } from '@/data/structured-data';
@@ -33,11 +34,21 @@ export async function generateMetadata({
   const city = cityIndex.getCityBySlug(comune);
   if (!city) return { title: 'Zona non trovata' };
   const prep = getPreposizione(city.nome);
+  const title = `Web designer ${prep} ${city.nome}`;
+  const description = `Progettazione siti web, e-commerce, SEO ${prep} ${city.nome}. Lavoro con professionisti e attività della zona.`;
   return {
-    title: `Web designer ${prep} ${city.nome}`,
-    description: `Progettazione siti web, e-commerce, SEO ${prep} ${city.nome}. Lavoro con professionisti e attività della zona.`,
+    title,
+    description,
     alternates: { canonical: buildCanonical(`/zone/${comune}`, locale) },
     robots: city.tier <= 2 ? { index: true, follow: true } : { index: false, follow: false },
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: buildCanonical(`/zone/${comune}`, locale),
+      images: buildOgImage(title, locale),
+      ...buildOgLocale(locale),
+    },
   };
 }
 
