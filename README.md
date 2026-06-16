@@ -1,7 +1,7 @@
 # Calicchia Design Platform
 
-> 🟡 **Pre-launch** — infrastruttura deployata su Dockhand+CloudPanel da maggio 2026, ma [calicchia.design](https://calicchia.design) serve ancora un esperimento bolt.new in attesa dello switch del dominio. Single-tenant per design: piattaforma ottimizzata per un solo freelancer (il sottoscritto), non un SaaS multi-tenant. In rifinitura: breaking change interni possibili, copertura test parziale, documentazione in aggiornamento.
-> 🟡 **Pre-launch** — infrastructure deployed on Dockhand+CloudPanel since May 2026, but [calicchia.design](https://calicchia.design) still serves a bolt.new experiment pending the DNS cutover. Single-tenant by design: tuned for a single freelancer (myself), not a multi-tenant SaaS. Still being polished: internal breaking changes possible, partial test coverage, docs in flux.
+> 🟢 **Live** — [calicchia.design](https://calicchia.design) serve il sito reale in produzione (Dockhand+CloudPanel, switch DNS completato a giugno 2026). Single-tenant per design: piattaforma ottimizzata per un solo freelancer (il sottoscritto), non un SaaS multi-tenant. In rifinitura: breaking change interni possibili, copertura test parziale, documentazione in aggiornamento.
+> 🟢 **Live** — [calicchia.design](https://calicchia.design) now serves the real production site (Dockhand+CloudPanel, DNS cutover completed June 2026). Single-tenant by design: tuned for a single freelancer (myself), not a multi-tenant SaaS. Still being polished: internal breaking changes possible, partial test coverage, docs in flux.
 
 > Portfolio + gestionale di Federico Calicchia — sito pubblico, area clienti e backoffice in un unico monorepo.
 > Federico Calicchia's portfolio + business platform — public site, client area and back-office in a single monorepo.
@@ -16,7 +16,7 @@
 
 ### Cos'è
 
-**Calicchia Design Platform** è la piattaforma destinata a [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti. L'infrastruttura è già deployata in produzione (Dockhand+CloudPanel) da maggio 2026; il dominio pubblico serve ancora un esperimento [bolt.new](https://bolt.new/~/sb1-qxnunhjf) in attesa del cutover DNS.
+**Calicchia Design Platform** è la piattaforma di [calicchia.design](https://calicchia.design): un monorepo che mette insieme quattro applicazioni interdipendenti. È deployata in produzione (Dockhand+CloudPanel) da maggio 2026 e dal cutover DNS di giugno 2026 il dominio pubblico serve il sito reale.
 
 | Cosa | A cosa serve |
 |------|--------------|
@@ -65,7 +65,7 @@
 | ![Home](docs/screenshots/sito-home.png) | ![Portal login](docs/screenshots/portal-login.png) | ![Admin login](docs/screenshots/admin-login.png) |
 | ![Lavori](docs/screenshots/sito-lavori.png) | ![Servizi](docs/screenshots/sito-servizi.png) | ![Contatti](docs/screenshots/sito-contatti.png) |
 
-> Gli screenshot vengono rigenerati con `node scripts/readme-screenshots.mjs` mentre i tre dev server sono attivi.
+> Screenshot reali del sito live, rigenerabili con `SITE_BASE=https://calicchia.design ADMIN_BASE=https://admin.calicchia.design node scripts/readme-screenshots.mjs` (senza variabili punta ai dev server locali su `:3000`/`:5173`).
 
 ### Setup
 
@@ -175,7 +175,7 @@ AGPL-3.0-or-later — vedi [LICENSE](LICENSE).
 
 ### What it is
 
-**Calicchia Design Platform** is the platform meant for [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps. The infrastructure has been deployed in production (Dockhand+CloudPanel) since May 2026; the public domain still serves a [bolt.new](https://bolt.new/~/sb1-qxnunhjf) experiment pending the DNS cutover.
+**Calicchia Design Platform** is the platform behind [calicchia.design](https://calicchia.design): a monorepo bundling four interlocking apps. It has been deployed in production (Dockhand+CloudPanel) since May 2026, and since the June 2026 DNS cutover the public domain serves the real site.
 
 | What | What it does |
 |------|--------------|
@@ -224,7 +224,7 @@ AGPL-3.0-or-later — vedi [LICENSE](LICENSE).
 | ![Home](docs/screenshots/sito-home-en.png) | ![Portal login](docs/screenshots/portal-login.png) | ![Admin login](docs/screenshots/admin-login.png) |
 | ![Works](docs/screenshots/sito-lavori.png) | ![Services](docs/screenshots/sito-servizi.png) | ![Contact](docs/screenshots/sito-contatti.png) |
 
-> Regenerate with `node scripts/readme-screenshots.mjs` while all three dev servers are up.
+> Real screenshots of the live site. Regenerate with `SITE_BASE=https://calicchia.design ADMIN_BASE=https://admin.calicchia.design node scripts/readme-screenshots.mjs` (omit the vars to target the local dev servers on `:3000`/`:5173`).
 
 ### Setup
 
