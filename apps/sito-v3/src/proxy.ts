@@ -18,13 +18,13 @@ const EN_PATH_PREFIXES_ENABLED = [
   '/perche-scegliere-me',
   '/web-design-freelance',
   '/web-design-vs-agenzia',
-  '/glossario-web-design',
+  // NB: glossari migrati sotto /risorse (2026-06-16). seo/e-commerce sono ora
+  // bilingui same-slug (/risorse/glossario-* — default pass-through, EN ok);
+  // web-design resta IT-only via EN_PATH_DISALLOWED_PREFIXES sotto.
   // Pillar SEO MEDIA/BASSA priorità — bilingual EN content live (segment-translated slugs):
   '/freelance-vs-agenzia-2026',
   '/migrazione-google-analytics-4',
   '/wordpress-vs-headless',
-  '/glossario-seo',
-  '/glossario-e-commerce',
   // Pillar SEO ALTA priorità — bilingual EN content live (slug uguale IT/EN):
   '/web-designer-vs-developer',
   '/european-accessibility-act-2025',
@@ -46,6 +46,8 @@ const EN_PATH_DISALLOWED_PREFIXES = [
   '/web-design-freelance-ciociaria',
   '/sito-web-per-pmi',
   '/zone',
+  // Glossario Web Design: IT-only (resta tale dopo la migrazione sotto /risorse).
+  '/risorse/glossario-web-design',
   // NB: /servizi-per-professioni rimosso (2026-05-15) — l'hub è ora bilingual,
   // EN serve come /en/services-by-profession via PATHNAMES rewrite.
   '/quanto-costa-sito-web',

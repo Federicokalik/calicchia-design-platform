@@ -104,8 +104,10 @@ export function EditorialArticleLayout({
 
       <div className="px-6 md:px-10 lg:px-14 pb-24 md:pb-32">
         <div className="grid grid-cols-12 gap-6 md:gap-8">
-          {/* Rail sx — desktop sticky / mobile dropdown */}
-          <div className="col-span-12 md:col-span-2 md:col-start-1">
+          {/* Rail sx — desktop sticky / mobile dropdown. Sticky ripristinata
+              (2026-06-16): solo la rail SINISTRA (indice); la rail destra resta
+              statica. self-start evita lo stretch del grid item. */}
+          <div className="col-span-12 md:col-span-2 md:col-start-1 md:sticky md:top-32 md:self-start">
             <EditorialChapterIndex chapters={chapters} variant={indexVariant} />
           </div>
 

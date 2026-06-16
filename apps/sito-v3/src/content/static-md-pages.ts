@@ -108,6 +108,15 @@ export const STATIC_PAGES: Record<string, StaticPageMeta> = {
       'Accordo standard sul trattamento dei dati personali ai sensi dell\'art. 28 GDPR. Parte integrante dei Termini e Condizioni.',
     related: [{ name: 'Privacy Policy', path: '/privacy-policy' }],
   },
+  '/risorse/dalla-seo-alla-geo': {
+    title: 'Dalla SEO alla GEO — White Paper',
+    description:
+      'Come funzionano davvero i motori generativi (retrieval, embeddings, chunking, query fan-out), cosa rende un contenuto citabile e il quadro normativo UE/Italia. Variante estesa con fonti primarie.',
+    related: [
+      { name: 'Risorse', path: '/risorse' },
+      { name: 'Glossario SEO', path: '/risorse/glossario-seo' },
+    ],
+  },
   '/risorse/glossario-seo': {
     title: 'Glossario SEO',
     description:

@@ -101,6 +101,11 @@ export async function GET(): Promise<Response> {
     sections.push('');
   }
 
+  // ─── Risorse ──────────────────────────────────────────────────────
+  sections.push('## Resources');
+  sections.push(mdLink('Dalla SEO alla GEO — White Paper (esteso)', '/risorse/dalla-seo-alla-geo', '.md', 'Come funzionano i motori generativi (retrieval, embeddings, chunking, fan-out), citabilità e quadro UE/Italia'));
+  sections.push('');
+
   // ─── Glossari ─────────────────────────────────────────────────────
   sections.push('## Glossaries');
   sections.push(mdLink('Glossario SEO', '/risorse/glossario-seo', '.md', 'Termini chiave SEO spiegati senza fumo'));

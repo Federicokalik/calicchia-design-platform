@@ -127,8 +127,10 @@ export default async function BlogArticlePage({
 
       {showTOC ? (
         <div className="px-6 md:px-10 lg:px-14 py-16 md:py-24 max-w-[1400px] mx-auto grid grid-cols-1 md:grid-cols-12 gap-x-8 md:gap-x-12">
-          {/* Swiss compliance 2026-05-09: rimosso 'md:sticky md:top-32' (no sticky in pubblico) */}
-          <aside className="md:col-span-3 md:col-start-1">
+          {/* TOC sticky ripristinata (2026-06-16): su long-form l'indice sempre
+              visibile è un guadagno di leggibilità netto; self-start evita lo
+              stretch del grid item che annullerebbe lo sticky. */}
+          <aside className="md:col-span-3 md:col-start-1 md:sticky md:top-32 md:self-start">
             <BlogTOC />
           </aside>
           <div className="md:col-span-8 md:col-start-5">
