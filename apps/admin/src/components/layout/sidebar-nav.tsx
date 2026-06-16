@@ -40,6 +40,9 @@ import {
   Lightbulb,
   Compass,
   Briefcase,
+  Filter,
+  Send,
+  FileCode,
   type LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -153,6 +156,18 @@ const bottomNavigation: NavGroup[] = [
     items: [
       { labelKey: 'nav.campaigns', icon: Megaphone, path: '/marketing/campagne' },
       { labelKey: 'nav.newsletter', icon: MailPlus, path: '/marketing/newsletter' },
+    ],
+  },
+  {
+    labelKey: 'nav.emailMarketing',
+    items: [
+      { labelKey: 'nav.emailCampaigns', icon: Send, path: '/email-marketing/campagne' },
+      { labelKey: 'nav.audience', icon: Users, path: '/email-marketing/audience' },
+      { labelKey: 'nav.lists', icon: Layers, path: '/email-marketing/liste' },
+      { labelKey: 'nav.segments', icon: Filter, path: '/email-marketing/segmenti' },
+      { labelKey: 'nav.forms', icon: FileCode, path: '/email-marketing/form' },
+      { labelKey: 'nav.automations', icon: Workflow, path: '/email-marketing/automazioni' },
+      { labelKey: 'nav.analytics', icon: BarChart3, path: '/email-marketing/analytics' },
     ],
   },
   {

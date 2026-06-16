@@ -52,6 +52,14 @@ const ROUTES: LocalizedRoute[] = [
   { it: '/marketing/newsletter', en: '/marketing/newsletter' },
   { it: '/marketing/campagne/:id', en: '/marketing/campaigns/:id' },
   { it: '/marketing/campagne', en: '/marketing/campaigns' },
+  { it: '/email-marketing/audience', en: '/email-marketing/contacts' },
+  { it: '/email-marketing/liste', en: '/email-marketing/lists' },
+  { it: '/email-marketing/segmenti', en: '/email-marketing/segments' },
+  { it: '/email-marketing/campagne/:id', en: '/email-marketing/campaigns/:id' },
+  { it: '/email-marketing/campagne', en: '/email-marketing/campaigns' },
+  { it: '/email-marketing/form', en: '/email-marketing/forms' },
+  { it: '/email-marketing/automazioni', en: '/email-marketing/automations' },
+  { it: '/email-marketing/analytics', en: '/email-marketing/analytics' },
   { it: '/contatti', en: '/contacts' },
 ];
 

@@ -10,8 +10,12 @@ export {
   createChatCompletion,
   generateSEOSuggestions,
   generateTags,
+  generateMarketingEmailCopy,
   type OpenAIModel,
   type ChatCompletionOptions,
+  type MarketingEmailBlock,
+  type MarketingEmailCopy,
+  type MarketingEmailCopyOptions,
 } from './openai';
 
 // Perplexity exports

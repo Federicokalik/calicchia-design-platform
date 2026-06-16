@@ -267,6 +267,116 @@ export async function generateCategory(
 }
 
 // ─────────────────────────────────────────────────────────────
+// Marketing email copy generation (self-hosted Email Marketing)
+// ─────────────────────────────────────────────────────────────
+
+/** A block in the marketing email builder (mirrors lib/email-marketing Block). */
+export interface MarketingEmailBlock {
+  type: 'heading' | 'text' | 'button' | 'image' | 'divider' | 'spacer';
+  text?: string;
+  level?: 1 | 2 | 3;
+  url?: string;
+  size?: number;
+}
+
+export interface MarketingEmailCopy {
+  subject: string;
+  preheader: string;
+  blocks: MarketingEmailBlock[];
+}
+
+export interface MarketingEmailCopyOptions {
+  prompt: string;
+  tone?: 'professionale' | 'amichevole' | 'diretto' | 'ispirazionale';
+  goal?: string;
+  audience?: string;
+  language?: string;
+  model?: string;
+}
+
+const VALID_BLOCK_TYPES = new Set(['heading', 'text', 'button', 'image', 'divider', 'spacer']);
+
+/**
+ * Generate marketing email copy as a block tree the builder can render/edit.
+ * Returns subject + preheader + blocks. Personalization tokens like {{nome}}
+ * are allowed in heading/text and survive downstream rendering.
+ */
+export async function generateMarketingEmailCopy(opts: MarketingEmailCopyOptions): Promise<MarketingEmailCopy> {
+  if (!OPENAI_API_KEY) throw new Error('OPENAI_API_KEY non configurata');
+
+  const {
+    prompt, tone = 'professionale', goal, audience,
+    language = 'italiano', model = 'gpt-4o',
+  } = opts;
+
+  const systemPrompt = `Sei un copywriter esperto di email marketing per Calicchia Design (studio di web design e sviluppo).
+Scrivi email che convertono: oggetto breve e curiosity-driven, preheader complementare (non ripete l'oggetto), corpo conciso e scannerizzabile con UNA call-to-action chiara.
+
+Tono: ${tone}. Lingua: ${language}.${goal ? ` Obiettivo: ${goal}.` : ''}${audience ? ` Pubblico: ${audience}.` : ''}
+
+PERSONALIZZAZIONE: puoi usare i token {{nome}}, {{azienda}}, {{ruolo}} nel testo (es. "Ciao {{nome|ciao}},"). Usa la sintassi {{token|fallback}} per il valore di riserva. Non inventare altri token.
+
+Rispondi SOLO con JSON valido in questo formato:
+{
+  "subject": "oggetto (max 60 caratteri)",
+  "preheader": "anteprima inbox (max 100 caratteri)",
+  "blocks": [
+    { "type": "heading", "text": "...", "level": 2 },
+    { "type": "text", "text": "Paragrafo. Usa \\n per andare a capo." },
+    { "type": "button", "text": "Etichetta CTA", "url": "https://calicchia.design" },
+    { "type": "divider" },
+    { "type": "spacer", "size": 16 }
+  ]
+}
+
+REGOLE:
+- type ammessi SOLO: heading, text, button, image, divider, spacer.
+- Includi sempre almeno un heading, uno o più text, e UN solo button (la CTA principale).
+- Niente HTML nel testo: solo testo semplice (\\n per i ritorni a capo).
+- 4-8 blocchi totali. Email breve e d'impatto.`;
+
+  const result = await createChatCompletion({
+    model,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `Genera l'email per questo brief:\n\n${prompt}` },
+    ],
+    temperature: 0.7,
+    max_tokens: 1500,
+    response_format: { type: 'json_object' },
+  });
+
+  let parsed: { subject?: unknown; preheader?: unknown; blocks?: unknown };
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    throw new Error('AI email: JSON non valido restituito dal modello');
+  }
+
+  // Coerce + sanitize: drop unknown block types and stray fields.
+  const rawBlocks = Array.isArray(parsed.blocks) ? parsed.blocks : [];
+  const blocks: MarketingEmailBlock[] = [];
+  for (const b of rawBlocks) {
+    if (!b || typeof b !== 'object') continue;
+    const rb = b as Record<string, unknown>;
+    const type = String(rb.type ?? '');
+    if (!VALID_BLOCK_TYPES.has(type)) continue;
+    const block: MarketingEmailBlock = { type: type as MarketingEmailBlock['type'] };
+    if (typeof rb.text === 'string') block.text = rb.text;
+    if (rb.level === 1 || rb.level === 2 || rb.level === 3) block.level = rb.level;
+    if (typeof rb.url === 'string') block.url = rb.url;
+    if (typeof rb.size === 'number') block.size = rb.size;
+    blocks.push(block);
+  }
+
+  return {
+    subject: (typeof parsed.subject === 'string' ? parsed.subject : '').trim().slice(0, 120),
+    preheader: (typeof parsed.preheader === 'string' ? parsed.preheader : '').trim().slice(0, 160),
+    blocks,
+  };
+}
+
+// ─────────────────────────────────────────────────────────────
 // Article Writing from Research (Step 2 of the pipeline)
 // ─────────────────────────────────────────────────────────────
 

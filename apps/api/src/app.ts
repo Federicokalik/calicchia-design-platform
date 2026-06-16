@@ -70,6 +70,7 @@ import { services } from './routes/services';
 import { deliverables } from './routes/deliverables';
 import { websites } from './routes/websites';
 import { marketing } from './routes/marketing';
+import { emailMarketing } from './routes/email-marketing';
 import { leads } from './routes/leads';
 import { customerNotes } from './routes/customer-notes';
 import { paymentTracker } from './routes/payment-tracker';
@@ -105,6 +106,8 @@ import { mcpAuthMiddleware } from './middleware/mcp-auth';
 import { caldavServiceAuth } from './middleware/caldav-service-auth';
 import { whatsappPublic, whatsappAdmin } from './routes/whatsapp';
 import { preferencesPublic } from './routes/preferences-public';
+import { mktTrack } from './routes/mkt-track';
+import { mktFormsPublic } from './routes/mkt-forms-public';
 
 // Ensure uploads directory exists
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
@@ -169,12 +172,26 @@ app.use('/api/track', async (c, next) => {
   c.res.headers.delete('Access-Control-Allow-Credentials');
 });
 
-app.use('*', cors({
-  origin: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').filter(Boolean),
-  credentials: true,
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-Admin-Locale'],
+// Embeddable marketing forms are dropped on arbitrary external landing pages, so
+// their public endpoints need permissive (origin-reflecting, credential-less)
+// CORS — registered BEFORE the global cors, which is then skipped for this prefix
+// (the per-form origin allowlist is enforced inside the handler). Open redirect /
+// abuse is bounded by the slug + captcha + rate-limit, not by CORS.
+app.use('/api/mkt-forms/*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'OPTIONS'],
+  allowHeaders: ['Content-Type'],
 }));
+
+app.use('*', async (c, next) => {
+  if (c.req.path.startsWith('/api/mkt-forms/')) return next();
+  return cors({
+    origin: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').filter(Boolean),
+    credentials: true,
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-Admin-Locale'],
+  })(c, next);
+});
 
 // Security headers (GDPR + OWASP)
 app.use('*', async (c, next) => {
@@ -370,6 +387,17 @@ app.use('/api/track', trackRateLimit);
 app.use('/api/track/md', createRateLimit(240, 60 * 1000));
 app.route('/api/track', analyticsTrack);
 
+// Marketing tracking (open pixel / click redirect / unsubscribe) — PUBLIC,
+// cookieless, must stay OUT of protectedPaths. Pixels and email clients can be
+// chatty, so a generous per-IP cap (mirrors /api/track at 120/min).
+app.use('/api/mkt-track/*', createRateLimit(120, 60 * 1000));
+app.route('/api/mkt-track', mktTrack);
+
+// Embeddable marketing forms — PUBLIC. POST submit throttled (3/10min) like the
+// other public forms; embed.js / confirm GETs are not rate-limited by postOnly.
+app.use('/api/mkt-forms/*', postOnly(publicFormRateLimit));
+app.route('/api/mkt-forms', mktFormsPublic);
+
 // Protected routes (auth required — admin gestionale).
 // Audit D-013: a few public-form routes (/api/contacts, /api/newsletter,
 // /api/gdpr-requests, /api/cookie-consent) intentionally DO NOT appear in this
@@ -408,6 +436,7 @@ const protectedPaths = [
   '/api/deliverables',
   '/api/websites',
   '/api/marketing',
+  '/api/email-marketing',
   '/api/leads',
   '/api/customer-notes',
   '/api/payment-tracker',
@@ -473,6 +502,7 @@ app.route('/api/services', services);
 app.route('/api/deliverables', deliverables);
 app.route('/api/websites', websites);
 app.route('/api/marketing', marketing);
+app.route('/api/email-marketing', emailMarketing);
 app.route('/api/leads', leads);
 app.route('/api/customer-notes', customerNotes);
 app.route('/api/payment-tracker', paymentTracker);

@@ -4,6 +4,7 @@ import { authMiddleware } from '../middleware/auth';
 import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { sendNewsletterConfirmEmail } from '../lib/email';
+import { syncSubscriberConfirmed } from '../lib/marketing/audience-sync';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'newsletter' });
@@ -94,6 +95,12 @@ newsletter.get('/confirm', async (c) => {
     RETURNING id
   `;
   if (!updated) return c.json({ error: 'Token non valido o gia utilizzato' }, 404);
+
+  // Project the new consent into the marketing audience immediately (don't wait
+  // for the daily cron). Fire-and-forget — failures must not break confirmation.
+  syncSubscriberConfirmed(updated.id).catch((err) =>
+    log.warn({ err, subscriberId: updated.id }, 'inline audience sync threw'));
+
   return c.json({ success: true, message: 'Email confermata!' });
 });
 

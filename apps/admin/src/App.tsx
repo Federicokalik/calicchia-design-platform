@@ -72,6 +72,14 @@ import CookieConsentAuditPage from '@/pages/privacy/cookie-consent';
 import NewsletterPage from '@/pages/marketing/newsletter';
 import CampagnePage from '@/pages/marketing/campagne';
 import CampagnaDetailPage from '@/pages/marketing/campagne/detail';
+import AudiencePage from '@/pages/email-marketing/audience';
+import ListsPage from '@/pages/email-marketing/lists';
+import SegmentsPage from '@/pages/email-marketing/segments';
+import CampaignsPage from '@/pages/email-marketing/campaigns';
+import CampaignEditorPage from '@/pages/email-marketing/campaign-editor';
+import FormsPage from '@/pages/email-marketing/forms';
+import AutomationsPage from '@/pages/email-marketing/automations';
+import MarketingAnalyticsPage from '@/pages/email-marketing/analytics';
 import FaqCmsPage from '@/pages/cms/faq';
 import TeamCmsPage from '@/pages/cms/team';
 import GlossarioCmsPage from '@/pages/cms/glossario';
@@ -246,6 +254,23 @@ export default function App() {
         <Route path="marketing/campagne/:id" element={<CampagnaDetailPage />} />
         <Route path="marketing/campaigns" element={<CampagnePage />} />
         <Route path="marketing/campaigns/:id" element={<CampagnaDetailPage />} />
+
+        {/* Email Marketing (self-hosted platform — Phase 1: audience) */}
+        <Route path="email-marketing/audience" element={<AudiencePage />} />
+        <Route path="email-marketing/contacts" element={<AudiencePage />} />
+        <Route path="email-marketing/liste" element={<ListsPage />} />
+        <Route path="email-marketing/lists" element={<ListsPage />} />
+        <Route path="email-marketing/segmenti" element={<SegmentsPage />} />
+        <Route path="email-marketing/segments" element={<SegmentsPage />} />
+        <Route path="email-marketing/campagne" element={<CampaignsPage />} />
+        <Route path="email-marketing/campaigns" element={<CampaignsPage />} />
+        <Route path="email-marketing/campagne/:id" element={<CampaignEditorPage />} />
+        <Route path="email-marketing/campaigns/:id" element={<CampaignEditorPage />} />
+        <Route path="email-marketing/form" element={<FormsPage />} />
+        <Route path="email-marketing/forms" element={<FormsPage />} />
+        <Route path="email-marketing/automazioni" element={<AutomationsPage />} />
+        <Route path="email-marketing/automations" element={<AutomationsPage />} />
+        <Route path="email-marketing/analytics" element={<MarketingAnalyticsPage />} />
 
         {/* CMS pubblico (audit C-013/C-014) */}
         <Route path="cms/faq" element={<FaqCmsPage />} />

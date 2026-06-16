@@ -20,7 +20,7 @@ function esc(s: string | null | undefined): string {
  * Fallback: se il transport selezionato non è configurato, si tenta l'altro
  * con log warning. Se nessuno è configurato, `success: false` ma no throw.
  */
-export type EmailTransport = 'critical' | 'standard';
+export type EmailTransport = 'critical' | 'standard' | 'marketing';
 
 export interface EmailAttachment {
   filename: string;
@@ -34,10 +34,15 @@ interface EmailOptions {
   html: string;
   /** Plain-text fallback. Best practice deliverability (Gmail, anti-spam). */
   text?: string;
-  /** Default: `'standard'` (SMTP). Use `'critical'` for auth/payments. */
+  /** Default: `'standard'` (SMTP). `'critical'` for auth/payments,
+   *  `'marketing'` for bulk newsletter/campaigns (dedicated subdomain). */
   transport?: EmailTransport;
   /** Override Reply-To header. Default: EMAIL_REPLY_TO env or sender. */
   replyTo?: string;
+  /** Override the From address (marketing campaigns pass the sender identity). */
+  from?: string;
+  /** Extra headers (e.g. List-Unsubscribe / List-Unsubscribe-Post). */
+  headers?: Record<string, string>;
   attachments?: EmailAttachment[];
 }
 
@@ -57,6 +62,26 @@ function getResend(): Resend {
 }
 function hasResend(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
+}
+
+// ── Marketing Resend client (separate API key → isolated subdomain reputation).
+// Falls back to the main Resend key if a dedicated one isn't configured.
+let resendMarketingClient: Resend | null = null;
+function getResendMarketing(): Resend {
+  if (!resendMarketingClient) {
+    resendMarketingClient = new Resend(process.env.RESEND_MARKETING_API_KEY || process.env.RESEND_API_KEY);
+  }
+  return resendMarketingClient;
+}
+function hasResendMarketing(): boolean {
+  return Boolean(process.env.RESEND_MARKETING_API_KEY || process.env.RESEND_API_KEY);
+}
+function fromForMarketing(): string {
+  return (
+    process.env.EMAIL_FROM_MARKETING ||
+    process.env.EMAIL_FROM ||
+    'Calicchia Design <news@calicchia.design>'
+  );
 }
 
 // ── SMTP transporter (singleton) ──────────────────────────
@@ -98,12 +123,13 @@ async function sendViaResend(opts: EmailOptions): Promise<SendResult> {
   try {
     const resend = getResend();
     const result = await resend.emails.send({
-      from: fromForCritical(),
+      from: opts.from ?? fromForCritical(),
       to,
       subject: opts.subject,
       html: opts.html,
       text: opts.text,
       replyTo: opts.replyTo ?? defaultReplyTo(),
+      headers: opts.headers,
       attachments: opts.attachments?.map((attachment) => ({
         filename: attachment.filename,
         content: Buffer.isBuffer(attachment.content)
@@ -121,17 +147,49 @@ async function sendViaResend(opts: EmailOptions): Promise<SendResult> {
   }
 }
 
-async function sendViaSmtp(opts: EmailOptions): Promise<SendResult> {
-  const to = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to;
+// Marketing send: dedicated Resend key/subdomain. Same shape as critical but
+// isolates bulk reputation and always carries List-Unsubscribe headers.
+async function sendViaResendMarketing(opts: EmailOptions): Promise<SendResult> {
+  const to = Array.isArray(opts.to) ? opts.to : [opts.to];
   try {
-    const transporter = getSmtp();
-    const info = await transporter.sendMail({
-      from: fromForStandard(),
+    const resend = getResendMarketing();
+    const result = await resend.emails.send({
+      from: opts.from ?? fromForMarketing(),
       to,
       subject: opts.subject,
       html: opts.html,
       text: opts.text,
       replyTo: opts.replyTo ?? defaultReplyTo(),
+      headers: opts.headers,
+      attachments: opts.attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: Buffer.isBuffer(attachment.content)
+          ? attachment.content.toString('base64')
+          : attachment.content,
+        contentType: attachment.contentType,
+      })),
+    });
+    if (result.error) return { success: false, error: result.error.message, via: 'marketing' };
+    return { success: true, messageId: result.data?.id, via: 'marketing' };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    log.error({ err: error }, 'Resend marketing send error');
+    return { success: false, error: message, via: 'marketing' };
+  }
+}
+
+async function sendViaSmtp(opts: EmailOptions): Promise<SendResult> {
+  const to = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to;
+  try {
+    const transporter = getSmtp();
+    const info = await transporter.sendMail({
+      from: opts.from ?? fromForStandard(),
+      to,
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+      replyTo: opts.replyTo ?? defaultReplyTo(),
+      headers: opts.headers,
       attachments: opts.attachments?.map((attachment) => ({
         filename: attachment.filename,
         content: Buffer.isBuffer(attachment.content)
@@ -154,6 +212,7 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
   // Primary path
   if (requested === 'critical' && hasResend()) return sendViaResend(options);
   if (requested === 'standard' && hasSmtp()) return sendViaSmtp(options);
+  if (requested === 'marketing' && hasResendMarketing()) return sendViaResendMarketing(options);
 
   // Fallback path
   if (requested === 'critical' && hasSmtp()) {
@@ -163,6 +222,10 @@ export async function sendEmail(options: EmailOptions): Promise<SendResult> {
   if (requested === 'standard' && hasResend()) {
     log.warn('SMTP not configured — falling back to Resend for standard email');
     return sendViaResend(options);
+  }
+  if (requested === 'marketing' && hasSmtp()) {
+    log.warn('Marketing Resend not configured — falling back to SMTP for marketing email');
+    return sendViaSmtp(options);
   }
 
   log.warn('No transport configured (RESEND_API_KEY + SMTP_* both missing) — skipping');

@@ -23,6 +23,10 @@ import { runWhatsAppContactsSync } from './whatsapp-contacts-sync';
 import { runDataRetention } from './data-retention';
 import { runItalianHolidays } from './italian-holidays';
 import { runKbS4Sync } from './kb-sync';
+import { runMarketingAudienceSync } from './marketing-audience-sync';
+import { runMarketingSend } from './marketing-send';
+import { runMarketingSendWhatsApp } from './marketing-send-whatsapp';
+import { runMarketingAutomations } from './marketing-automations';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
@@ -171,6 +175,32 @@ const jobs: CronJob[] = [
     intervalMs: 24 * 60 * 60 * 1000,
     runAtHour: 7,
     run: runKbS4Sync,
+  },
+  {
+    // Marketing audience projection: CRM (subscribers/leads/customers) → mkt_contacts.
+    // Daily; the newsletter-confirm escalation happens inline. Idempotent.
+    name: 'marketing-audience-sync',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 4,
+    run: runMarketingAudienceSync,
+  },
+  {
+    // Marketing send queue drainer (email). Throttled batches per campaign.
+    name: 'marketing-send',
+    intervalMs: 60 * 1000,
+    run: runMarketingSend,
+  },
+  {
+    // WhatsApp broadcast drainer — conservative cadence (anti-ban).
+    name: 'marketing-send-whatsapp',
+    intervalMs: 2 * 60 * 1000,
+    run: runMarketingSendWhatsApp,
+  },
+  {
+    // Marketing automation drip engine — advances due enrollments.
+    name: 'marketing-automations',
+    intervalMs: 60 * 1000,
+    run: runMarketingAutomations,
   },
 ];
 

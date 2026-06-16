@@ -69,6 +69,11 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       RESEND_API_KEY: ${RESEND_API_KEY}
+      # Email marketing (piattaforma self-hosted) — Resend key + sottodominio
+      # dedicato (send.calicchia.design) per isolare la reputazione bulk-send.
+      RESEND_MARKETING_API_KEY: ${RESEND_MARKETING_API_KEY}
+      EMAIL_FROM_MARKETING: ${EMAIL_FROM_MARKETING}
+      WA_BROADCAST_DAILY_CAP: ${WA_BROADCAST_DAILY_CAP}
       # Email "standard" via SMTP Vhosting (preventivi, notifiche, contact form)
       EMAIL_FROM_CRITICAL: ${EMAIL_FROM_CRITICAL}
       EMAIL_REPLY_TO: ${EMAIL_REPLY_TO}
