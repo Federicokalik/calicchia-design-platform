@@ -4,10 +4,11 @@
  * chrome (availability topbar, language banner, MorphTicker CTA). The /risorse
  * hub and the migrated glossaries are NOT here — they keep the normal chrome.
  */
-// Vuoto dal 2026-06-16: il white paper GEO è ora integrato nel chrome del sito
-// (header/footer + TOC sticky sx), quindi nessuna risorsa nasconde più il chrome
-// globale. La lista resta come hook per eventuali documenti standalone futuri.
-export const STANDALONE_RESOURCE_SLUGS = [] as const;
+// Risorse "reading-focused": tengono header/footer del sito ma nascondono il
+// chrome flottante (MorphTicker "come posso aiutarti", AvailabilityTopbar,
+// LanguagePromptBanner) per non disturbare la lettura. Il white paper GEO è
+// integrato nel chrome ma rientra qui (richiesta utente 2026-06-16).
+export const STANDALONE_RESOURCE_SLUGS = ['dalla-seo-alla-geo'] as const;
 
 /**
  * True when `pathname` (with or without a leading /it|/en locale prefix) points

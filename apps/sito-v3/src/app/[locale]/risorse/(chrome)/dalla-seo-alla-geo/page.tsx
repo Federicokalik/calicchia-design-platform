@@ -72,9 +72,20 @@ export default async function GeoWhitepaperPage() {
   const main = mainOpen >= 0 ? body.slice(mainOpen + '<main>'.length, mainClose) : body;
   const foot = mainClose >= 0 ? body.slice(mainClose + '</main>'.length) : '';
 
+  // Fix di layout per l'integrazione nel chrome del sito:
+  // - padding-top per scendere sotto l'header fisso (pointer-events-none) e non
+  //   accavallarsi col logo (come fa PageHero con pt-32/pt-40);
+  // - footer del documento a filo con il SiteFooter (azzera il suo mt-16, solo
+  //   qui, via :has — lo <style> è iniettato solo su questa pagina).
+  const layoutFix = `
+.geo-wp{padding-top:7rem}
+@media(min-width:768px){.geo-wp{padding-top:8.5rem}}
+main:has(.geo-wp) + footer{margin-top:0}
+`;
   // EN override per l'etichetta CSS-baked della demo 04.
-  const css =
-    locale === 'en' ? `${GEO_WP_CSS}\n.geo-wp .se-true::after{content:"true value 50%"}` : GEO_WP_CSS;
+  const css = `${GEO_WP_CSS}${
+    locale === 'en' ? '\n.geo-wp .se-true::after{content:"true value 50%"}' : ''
+  }\n${layoutFix}`;
 
   return (
     <>
