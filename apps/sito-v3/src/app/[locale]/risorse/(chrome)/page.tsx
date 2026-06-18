@@ -74,6 +74,30 @@ export default async function RisorseHubPage() {
 
       <PageHero breadcrumbs={breadcrumbs} eyebrow={m.eyebrow} title={m.eyebrow} intro={m.lead} />
 
+      <section className="px-6 md:px-10 lg:px-14 max-w-[1400px] mx-auto">
+        <Link
+          href="/audit-geo"
+          className="group mb-px flex flex-col gap-3 p-8 md:p-10 transition-colors hover:bg-[var(--color-surface)]"
+          style={{ border: '1px solid var(--color-line)' }}
+        >
+          <span className="font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: 'var(--color-accent)' }}>
+            {locale === 'en' ? 'Free tool' : 'Strumento gratuito'}
+          </span>
+          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-4xl" style={{ fontWeight: 600, letterSpacing: '-0.02em' }}>
+            {locale === 'en' ? 'GEO Audit: is your site ready for AI engines?' : 'GEO Audit: il tuo sito è pronto per i motori AI?'}
+          </h2>
+          <p className="text-base leading-relaxed max-w-[52ch]" style={{ color: 'var(--color-ink-muted)' }}>
+            {locale === 'en'
+              ? 'Enter your URL and get an instant GEO score with the actions to improve it — based on the white paper.'
+              : 'Inserisci l’URL e ottieni subito uno score GEO con le azioni per migliorarlo — basato sul white paper.'}
+          </p>
+          <span className="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] group-hover:gap-3 transition-all" style={{ color: 'var(--color-ink)' }}>
+            {locale === 'en' ? 'Analyze my site' : 'Analizza il mio sito'}
+            <span aria-hidden>→</span>
+          </span>
+        </Link>
+      </section>
+
       <section className="px-6 md:px-10 lg:px-14 pb-32 max-w-[1400px] mx-auto">
         <ul role="list" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: 'var(--color-line)' }}>
           {resources.map((r) => (

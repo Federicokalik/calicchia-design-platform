@@ -5,6 +5,7 @@ import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import type { Locale } from '@/lib/i18n';
+import { Link } from '@/i18n/navigation';
 import { GEO_WP_CSS, GEO_WP_BODY } from '@/data/risorse/geo-whitepaper';
 import { GeoWhitepaperClient } from './GeoWhitepaperClient';
 
@@ -156,6 +157,25 @@ main:has(.geo-wp) + footer{margin-top:0}
             <div className="md:col-span-10 md:col-start-3">
               {/* eslint-disable-next-line react/no-danger */}
               <div dangerouslySetInnerHTML={{ __html: main }} />
+
+              {/* CTA al tool GEO Audit — mette in pratica il white paper sul proprio sito */}
+              <Link
+                href="/audit-geo"
+                className="group mt-12 flex flex-col gap-2 p-6 no-underline transition-colors hover:bg-[var(--color-surface)]"
+                style={{ border: '1px solid var(--color-line)' }}
+              >
+                <span className="text-[11px] font-bold uppercase" style={{ letterSpacing: '0.14em', color: 'var(--color-accent)', fontFamily: 'var(--font-sans)' }}>
+                  {locale === 'en' ? 'Free tool' : 'Strumento gratuito'}
+                </span>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: '1.125rem', color: 'var(--ink, #111)' }}>
+                  {locale === 'en' ? 'Test your own site → GEO Audit' : 'Metti alla prova il tuo sito → GEO Audit'}
+                </span>
+                <span style={{ fontFamily: 'var(--font-sans)', fontSize: '0.9rem', color: 'var(--ink-3, #6f6f6f)' }}>
+                  {locale === 'en'
+                    ? 'Get an instant GEO score and the actions to improve it.'
+                    : 'Ottieni subito uno score GEO e le azioni per migliorarlo.'}
+                </span>
+              </Link>
             </div>
           </div>
         </div>

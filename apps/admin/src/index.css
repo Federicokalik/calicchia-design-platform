@@ -498,3 +498,10 @@
 .excalidraw {
   --color-primary: hsl(var(--primary)) !important;
 }
+
+/* CAP captcha widget: angoli squadrati come i pulsanti (border-radius 0).
+ * Le custom properties di cap-widget attraversano lo Shadow DOM. */
+cap-widget {
+  --cap-border-radius: 0;
+  --cap-checkbox-border-radius: 0;
+}
