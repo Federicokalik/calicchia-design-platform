@@ -3,6 +3,7 @@ import { geoAuditScanSchema, geoAuditUnlockSchema, firstZodIssue } from '@calicc
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { getClientIp } from '../lib/client-ip';
+import { captcha } from '../lib/captcha';
 import { runDeterministicAudit, type GeoCheck } from '../lib/geo-audit';
 import { generateText } from '../lib/agent/llm-router';
 import { GEO_WHITEPAPER_PLAYBOOK } from '../lib/geo-whitepaper-context';
@@ -77,6 +78,18 @@ geoAudit.post('/scan', async (c) => {
 
 geoAudit.post('/unlock', async (c) => {
   const body = await c.req.json().catch(() => ({}));
+
+  // Anti-bot on lead creation: reuse the public contact-form site key (already
+  // configured in prod; skipped in dev when CAP_URL is unset).
+  const { turnstile_token } = body as { turnstile_token?: string };
+  const captchaResult = await captcha.verify(turnstile_token || '', {
+    remoteIp: getClientIp(c) ?? undefined,
+    siteKeyId: 'contact_form',
+  });
+  if (!captchaResult.ok) {
+    return c.json({ error: 'Verifica anti-bot fallita. Ricarica la pagina e riprova.' }, 403);
+  }
+
   const parsed = geoAuditUnlockSchema.safeParse(body);
   if (!parsed.success) {
     return c.json({ error: firstZodIssue(parsed.error) }, 400);

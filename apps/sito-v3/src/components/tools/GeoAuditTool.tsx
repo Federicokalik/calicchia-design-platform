@@ -5,6 +5,8 @@ import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/Button';
 import { Field, FieldLabel, FieldError, Input } from '@/components/ui/form';
 import { GdprCheckbox } from '@/components/forms/GdprCheckbox';
+import { useCaptcha } from '@/hooks/useCaptcha';
+import { reportEvent } from '@/instrumentation-client';
 import type { Locale } from '@/lib/i18n';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -140,6 +142,9 @@ export function GeoAuditTool({ locale }: { locale: Locale }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Anti-bot on lead creation (unlock). Reuses the public contact-form key.
+  const captcha = useCaptcha('contact_form');
+
   async function runScan(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -158,6 +163,7 @@ export function GeoAuditTool({ locale }: { locale: Locale }) {
       }
       setScan(data);
       setPhase('teaser');
+      reportEvent('geo_audit.scan', { url: data.url, score: data.score });
     } catch {
       setError(t.errGeneric);
     } finally {
@@ -184,17 +190,21 @@ export function GeoAuditTool({ locale }: { locale: Locale }) {
           name: name.trim() || undefined,
           gdpr_consent: true,
           wants_intervention: intent === 'help',
+          turnstile_token: captcha.token ?? '',
         }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data.error || t.errGeneric);
+        captcha.reset();
         return;
       }
       setReport(data);
       setPhase('report');
+      reportEvent('geo_audit.unlock', { score: data.score, wants_intervention: intent === 'help' });
     } catch {
       setError(t.errGeneric);
+      captcha.reset();
     } finally {
       setLoading(false);
     }
@@ -279,6 +289,7 @@ export function GeoAuditTool({ locale }: { locale: Locale }) {
           </fieldset>
 
           <GdprCheckbox checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+          <div ref={captcha.containerRef} style={{ minWidth: 300 }} />
           {error ? <FieldError>{error}</FieldError> : null}
           <div>
             <Button type="submit" variant="solid" disabled={loading}>

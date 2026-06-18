@@ -256,11 +256,13 @@ app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
 app.use('/api/calendar/bookings/*', postOnly(publicFormRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
-// GEO Audit tool (public). POST scan/unlock throttled (the scan triggers an
-// outbound fetch + sub-fetches, so it's heavier than the form endpoints);
-// GET /by-lead is admin-only via inline authMiddleware in the route and must
-// not be throttled, hence postOnly.
-app.use('/api/geo-audit/*', postOnly(createRateLimit(5, 10 * 60 * 1000)));
+// GEO Audit tool (public). Scan is analysis-only (no lead, no side effects) so
+// it's more permissive — legit users behind shared/corporate NAT test several
+// sites. Unlock creates a lead and is captcha-gated, so a tighter limit. GET
+// /by-lead is admin-only (inline authMiddleware) and must not be throttled,
+// hence postOnly on the POST endpoints only.
+app.use('/api/geo-audit/scan', postOnly(createRateLimit(15, 10 * 60 * 1000)));
+app.use('/api/geo-audit/unlock', postOnly(createRateLimit(5, 10 * 60 * 1000)));
 app.route('/api/geo-audit', geoAudit);
 app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);
