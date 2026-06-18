@@ -32,6 +32,7 @@ import { newsletter } from './routes/newsletter';
 import { blog } from './routes/blog';
 import { projects } from './routes/projects';
 import { contacts } from './routes/contacts';
+import { geoAudit } from './routes/geo-audit';
 import { publicLeads } from './routes/public-leads';
 import { analytics } from './routes/analytics';
 import { keys } from './routes/keys';
@@ -255,6 +256,12 @@ app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
 app.use('/api/calendar/bookings/*', postOnly(publicFormRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
+// GEO Audit tool (public). POST scan/unlock throttled (the scan triggers an
+// outbound fetch + sub-fetches, so it's heavier than the form endpoints);
+// GET /by-lead is admin-only via inline authMiddleware in the route and must
+// not be throttled, hence postOnly.
+app.use('/api/geo-audit/*', postOnly(createRateLimit(5, 10 * 60 * 1000)));
+app.route('/api/geo-audit', geoAudit);
 app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);
 // ICS feed pubblico per subscription esterne (iPhone/macOS Calendar/Outlook)

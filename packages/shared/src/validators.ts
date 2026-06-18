@@ -153,3 +153,29 @@ export const communicationPreferencesSchema = z.object({
 });
 
 export type CommunicationPreferences = z.infer<typeof communicationPreferencesSchema>;
+
+// =====================================================
+// GEO Audit tool — public contracts
+//
+// `/api/geo-audit/scan`   accepts a URL, runs the deterministic audit, returns a
+//                         teaser (score + top findings) and an auditId.
+// `/api/geo-audit/unlock` accepts the auditId + email (+ GDPR consent), generates
+//                         the AI action plan, creates the lead and returns the
+//                         full report. Mirrors publicContactSchema's email/consent
+//                         handling so the same lead pipeline rules apply.
+// =====================================================
+
+export const geoAuditScanSchema = z.object({
+  url: z.string().trim().min(4, 'URL richiesto').max(2048, 'URL troppo lungo'),
+  locale: z.enum(['it', 'en']).optional().default('it'),
+}).passthrough();
+export type GeoAuditScanBody = z.infer<typeof geoAuditScanSchema>;
+
+export const geoAuditUnlockSchema = z.object({
+  audit_id: z.string().uuid('audit_id non valido'),
+  email: z.string().trim().toLowerCase().email('Email non valida').max(255, 'Email troppo lunga'),
+  name: z.string().trim().max(100, 'Nome troppo lungo').optional().or(z.literal('')).transform((v) => v || undefined),
+  gdpr_consent: z.literal(true, { errorMap: () => ({ message: 'Consenso GDPR richiesto' }) }),
+  wants_intervention: z.boolean().optional(),
+}).passthrough();
+export type GeoAuditUnlockBody = z.infer<typeof geoAuditUnlockSchema>;

@@ -138,7 +138,7 @@ function isBlockedAddress(ip: string): boolean {
   return true; // not a valid IP literal
 }
 
-async function assertSafeHttpUrl(rawUrl: string): Promise<URL> {
+export async function assertSafeHttpUrl(rawUrl: string): Promise<URL> {
   let url: URL;
   try { url = new URL(rawUrl); } catch { throw new Error('URL non valido'); }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {

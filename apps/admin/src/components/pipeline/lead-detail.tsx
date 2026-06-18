@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
+import { GeoAuditPanel } from './geo-audit-panel';
 import type { Lead, LeadStatus, LeadSource } from '@/types/lead';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_CONFIG } from '@/types/lead';
 import { useI18n } from '@/hooks/use-i18n';
@@ -183,6 +184,9 @@ export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert, o
               placeholder={t('lead.notesPlaceholder')}
             />
           </div>
+
+          {/* GEO Audit (only renders if this lead came from the GEO Audit tool) */}
+          <GeoAuditPanel leadId={lead.id} />
 
           {/* Meta */}
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">
