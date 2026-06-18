@@ -379,3 +379,11 @@ body[data-menu-open='true'] [data-morph-ticker] {
   }
 }
 
+/* CAP captcha widget: angoli squadrati come i nostri pulsanti (border-radius 0).
+ * Le custom properties di cap-widget attraversano lo Shadow DOM, quindi questa
+ * regola globale copre tutti i form (contatti, GEO Audit, ecc.). */
+cap-widget {
+  --cap-border-radius: 0;
+  --cap-checkbox-border-radius: 0;
+}
+
