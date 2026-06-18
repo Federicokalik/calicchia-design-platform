@@ -139,6 +139,19 @@ export const VENDOR_DISCLOSURE: readonly VendorDisclosure[] = [
     policyUrl: 'https://policies.google.com/privacy',
   },
   {
+    id: 'meta-pixel',
+    name: 'Meta Pixel (Facebook)',
+    category: 'marketing',
+    cookies: ['_fbp', '_fbc'],
+    purpose: {
+      it: "Misurazione delle conversioni e remarketing per le campagne pubblicitarie su Facebook e Instagram. Caricato solo dopo consenso; Meta può ricevere il tuo IP e dati tecnici del browser.",
+      en: 'Conversion measurement and remarketing for Facebook and Instagram ad campaigns. Loaded only after consent; Meta may receive your IP and technical browser data.',
+    },
+    duration: { it: '3 mesi', en: '3 months' },
+    processor: 'Meta Platforms Ireland Ltd. (Dublin)',
+    policyUrl: 'https://www.facebook.com/privacy/policy/',
+  },
+  {
     id: 'trustindex',
     name: 'TrustIndex',
     category: 'marketing',

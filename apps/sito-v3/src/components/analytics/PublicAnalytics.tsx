@@ -3,7 +3,8 @@
 import { Suspense } from 'react';
 import { usePathname } from 'next/navigation';
 import { isLocale } from '@/lib/i18n';
-import { GoogleAnalytics } from './GoogleAnalytics';
+import { ZarazConsent } from './ZarazConsent';
+import { MetaPixel } from './MetaPixel';
 import { MouseflowAnalytics } from './MouseflowAnalytics';
 import { InternalAnalytics } from './InternalAnalytics';
 import { WebVitalsTracker } from './WebVitalsTracker';
@@ -24,7 +25,11 @@ export function PublicAnalytics() {
 
   return (
     <>
-      <GoogleAnalytics />
+      {/* GA4 runs through Cloudflare Zaraz; ZarazConsent bridges our banner to
+          the Zaraz Consent API so it respects the user's choice. The Meta Pixel
+          is loaded from app code (marketing-consent gated). */}
+      <ZarazConsent />
+      <MetaPixel />
       <MouseflowAnalytics />
       {/* Cookieless trackers — Suspense required by useSearchParams in Next 16 */}
       <Suspense fallback={null}>

@@ -62,15 +62,21 @@ type MouseflowApi = {
 };
 
 declare global {
+  interface FbqFn {
+    (...args: unknown[]): void;
+    callMethod?: (...args: unknown[]) => void;
+    queue?: unknown[];
+    push?: unknown;
+    loaded?: boolean;
+    version?: string;
+  }
+
   interface Window {
-    [key: `ga-disable-${string}`]: boolean | undefined;
     __cookieConsent?: {
       read: () => ConsentRecord | null;
       has: (category: keyof CookiePreferences) => boolean;
       save: (preferences: Partial<CookiePreferences>) => ConsentRecord;
     };
-    __googleAnalyticsConfigured?: boolean;
-    __lastGoogleAnalyticsPageView?: string;
     __openCookiePreferences?: () => void;
     __resolveGoogleMapsFooter?: () => void;
     dataLayer?: unknown[];
@@ -84,6 +90,18 @@ declare global {
     };
     mouseflow?: MouseflowApi;
     _mfq?: unknown[];
+    fbq?: FbqFn;
+    _fbq?: FbqFn;
+    zaraz?: {
+      consent?: {
+        APIReady?: boolean;
+        get: (purposeId: string) => boolean | undefined;
+        set: (consent: Record<string, boolean>) => void;
+        setAll: (value: boolean) => void;
+        getAll: () => Record<string, boolean>;
+        sendQueuedEvents?: () => void;
+      };
+    };
   }
 
   interface WindowEventMap {

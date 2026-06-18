@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 
 // Runtime public config — read on every request, never cached. This is what
-// lets us bake one immutable Docker image and inject GA / Mouseflow /
-// Turnstile / Maps keys via docker-compose env at deploy time. The repo is
-// public and the published GHCR images are public, so we deliberately avoid
-// NEXT_PUBLIC_* (which Next inlines at build time and would let a fork pull
-// our image and pollute our analytics).
+// lets us bake one immutable Docker image and inject Mouseflow / Turnstile /
+// Maps keys via docker-compose env at deploy time. The repo is public and the
+// published GHCR images are public, so we deliberately avoid NEXT_PUBLIC_*
+// (which Next inlines at build time and would let a fork pull our image and
+// pollute our analytics).
+//
+// Google Analytics is NOT served from here: it is injected first-party via the
+// Cloudflare Google tag gateway, so the app no longer reads GA_MEASUREMENT_ID.
 //
 // Returned values are all "browser-visible" by design (Turnstile site key,
-// GA measurement ID, etc.) — they are not secrets, just per-environment.
-// Hardened against accidental leak: only the keys listed below are echoed.
+// Maps key, etc.) — they are not secrets, just per-environment. Hardened
+// against accidental leak: only the keys listed below are echoed.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -42,7 +45,6 @@ export interface PublicCaptchaConfig {
 }
 
 export interface PublicRuntimeConfig {
-  gaMeasurementId: string;
   mouseflowId: string;
   /** @deprecated In transizione a `captcha.siteKeys`. Tenuto per back-compat (`useTurnstile`). */
   turnstileSiteKey: string;
@@ -106,7 +108,6 @@ export async function GET() {
   const provider: 'turnstile' | 'cap' = providerEnv === 'cap' ? 'cap' : 'turnstile';
 
   const config: PublicRuntimeConfig = {
-    gaMeasurementId: env('GA_MEASUREMENT_ID'),
     mouseflowId: env('MOUSEFLOW_ID'),
     turnstileSiteKey: env('TURNSTILE_SITE_KEY'),
     captcha: {

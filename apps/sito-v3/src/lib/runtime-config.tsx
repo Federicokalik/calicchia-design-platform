@@ -15,7 +15,6 @@ import type { PublicRuntimeConfig } from '@/app/api/config/route';
 // (typically <100 ms, often cached by the SW or browser) is invisible.
 
 const EMPTY_CONFIG: PublicRuntimeConfig = {
-  gaMeasurementId: '',
   mouseflowId: '',
   turnstileSiteKey: '',
   captcha: {
