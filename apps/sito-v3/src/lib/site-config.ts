@@ -26,6 +26,7 @@
 
 import { SITE } from '@/data/site';
 import type { SiteConfig } from '@/data/types';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 interface ApiSiteConfig {
   brand: string | null;
@@ -69,7 +70,7 @@ function formatAddressLine(a: ApiSiteConfig['contact']['address']): string | nul
 
 async function fetchApiConfig(): Promise<ApiSiteConfig | null> {
   try {
-    const res = await fetch(`${API_URL.replace(/\/$/, '')}/api/public/site-config`, {
+    const res = await fetchWithTimeout(`${API_URL.replace(/\/$/, '')}/api/public/site-config`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;

@@ -21,6 +21,7 @@ import { getCuriosita as getCuriositaFromFile, type Curiosita } from '@/data/cur
 import { getApproach as getApproachFromFile, type ApproachClaim } from '@/data/approach';
 import { CLIENTS, type Client } from '@/data/clients';
 import { getPerchiFaqs as getPerchiFaqsFromFile, type FaqItem } from '@/data/perchi-faqs';
+import { fetchWithTimeout } from '@/lib/fetch-with-timeout';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'http://localhost:3001';
 
@@ -46,7 +47,7 @@ interface TeamRow {
 
 async function fetchCms<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_URL.replace(/\/$/, '')}${path}`, {
+    const res = await fetchWithTimeout(`${API_URL.replace(/\/$/, '')}${path}`, {
       next: { revalidate: 300 },
     });
     if (!res.ok) return null;
