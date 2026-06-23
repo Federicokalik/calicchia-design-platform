@@ -13,7 +13,7 @@
  */
 export const GEO_WHITEPAPER_PLAYBOOK = `RIFERIMENTO GEO (dal white paper "Dalla SEO alla GEO", evidence-based):
 
-Principio: l'obiettivo è essere CITATI dai motori AI (ChatGPT/Bing, Perplexity, Google AI, Claude). Tutti usano RAG + embeddings + selezione a livello di "chunk": contano struttura, freschezza, autorevolezza e citabilità, non il ranking tradizionale.
+Principio: l'obiettivo è aumentare la probabilità di essere CITABILI dai motori AI (ChatGPT/Bing, Perplexity, Google AI, Claude), non garantire una citazione. Tutti usano RAG + embeddings + selezione a livello di "chunk": contano struttura, freschezza, autorevolezza e citabilità, non il ranking tradizionale.
 
 Leve con evidenza empirica (Aggarwal et al., KDD 2024) — usale nelle azioni:
 - Aggiungere STATISTICHE citate: fino a +31% di visibilità.
@@ -23,7 +23,9 @@ Leve con evidenza empirica (Aggarwal et al., KDD 2024) — usale nelle azioni:
 - FRESCHEZZA: contenuto aggiornato di recente citato fino a +38% (specie Perplexity); anche piccole modifiche resettano il segnale → aggiornare i contenuti chiave ogni trimestre.
 - Da EVITARE: keyword stuffing (unico metodo testato che PEGGIORA la visibilità).
 
-robots.txt: AMMETTERE i bot di retrieval/citazione (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User). Si possono bloccare i bot di training (GPTBot, ClaudeBot, Google-Extended) senza perdere le citazioni. Bloccare i bot di retrieval rimuove il sito dalle risposte AI. Pubblicare una sitemap.xml; valutare Bing Webmaster Tools + IndexNow.
+robots.txt: AMMETTERE i bot di retrieval/citazione (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User). Si possono bloccare i bot di training/opt-out (GPTBot, ClaudeBot, Google-Extended) senza penalizzare automaticamente la citabilità. Bloccare i bot di retrieval può rimuovere il sito dalle risposte AI. Pubblicare una sitemap.xml; valutare Bing Webmaster Tools + IndexNow.
+
+Snippet/citazione: evitare nosnippet, noarchive, max-snippet:0 e data-nosnippet sulle parti che si vogliono far leggere/citare. Queste direttive possono impedire snippet, cache o uso del testo nelle risposte.
 
 Rendering: molti bot AI non eseguono JavaScript → il contenuto chiave deve essere reso SERVER-SIDE nell'HTML grezzo.
 
@@ -31,6 +33,6 @@ Struttura: un solo <h1>, gerarchia <h2>/<h3>, un'idea per sezione (chunk auto-su
 
 Autorità (off-page, non auto-verificabile): menzioni del brand su G2, Trustpilot, Wikipedia, Reddit, YouTube; il volume di ricerca del brand è il predittore più forte di visibilità AI.
 
-Non priorità (smentite o non provate): llms.txt, schema markup speciale, file .md, chunking manuale. Non insistere su queste.
+Non priorità (smentite o non provate come leve di citazione): llms.txt, schema markup speciale, file .md, chunking manuale. llms.txt può essere trattato come "agentic readiness" opzionale (Lighthouse 13.3.0), ma non come fattore di citazione Search/ChatGPT. Non insistere su queste.
 
 Misurazione: la visibilità AI è una distribuzione, non un punteggio singolo; servono 7-10+ run per prompt per dati affidabili.`;

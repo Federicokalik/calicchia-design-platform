@@ -71,6 +71,8 @@ export interface ServiceLeadMagnetCopy {
   eyebrow: string;
   title: string;
   body: string;
+  href?: string;
+  buttonLabel?: string;
 }
 
 export interface ServiceDetail {
@@ -100,10 +102,12 @@ import { WEB_DESIGN_SERVICE } from './services-content/web-design';
 import { E_COMMERCE_SERVICE } from './services-content/e-commerce';
 import { SVILUPPO_WEB_SERVICE } from './services-content/sviluppo-web';
 import { SEO_SERVICE } from './services-content/seo';
+import { GEO_SERVICE } from './services-content/geo';
 import { WEB_DESIGN_EXTRAS } from './services-content/web-design-extras';
 import { E_COMMERCE_EXTRAS } from './services-content/e-commerce-extras';
 import { SVILUPPO_WEB_EXTRAS } from './services-content/sviluppo-web-extras';
 import { SEO_EXTRAS } from './services-content/seo-extras';
+import { GEO_EXTRAS } from './services-content/geo-extras';
 // Standalone services (6) — branding rimosso 2026-05-08 (fuori positioning).
 import { MANUTENZIONE_SITI_SERVICE } from './services-content/manutenzione-siti';
 import { ASSISTENZA_WORDPRESS_SERVICE } from './services-content/assistenza-wordpress';
@@ -124,7 +128,8 @@ export const SERVICES_DETAIL: ServiceDetail[] = [
   { ...E_COMMERCE_SERVICE, ...E_COMMERCE_EXTRAS },
   { ...SVILUPPO_WEB_SERVICE, ...SVILUPPO_WEB_EXTRAS },
   { ...SEO_SERVICE, ...SEO_EXTRAS },
-  // Standalone (6) — fuori matrice, raggiungibili solo da /servizi/<slug>
+  // Standalone (7) — fuori matrice, raggiungibili solo da /servizi/<slug>
+  { ...GEO_SERVICE, ...GEO_EXTRAS },
   { ...MANUTENZIONE_SITI_SERVICE, ...MANUTENZIONE_SITI_EXTRAS },
   { ...ASSISTENZA_WORDPRESS_SERVICE, ...ASSISTENZA_WORDPRESS_EXTRAS },
   { ...WORDPRESS_MIGRAZIONE_SERVICE, ...WORDPRESS_MIGRAZIONE_EXTRAS },
@@ -149,6 +154,8 @@ import { SVILUPPO_WEB_SERVICE_EN } from './services-content/en/sviluppo-web';
 import { SVILUPPO_WEB_EXTRAS_EN } from './services-content/en/sviluppo-web-extras';
 import { SEO_SERVICE_EN } from './services-content/en/seo';
 import { SEO_EXTRAS_EN } from './services-content/en/seo-extras';
+import { GEO_SERVICE_EN } from './services-content/en/geo';
+import { GEO_EXTRAS_EN } from './services-content/en/geo-extras';
 import { MANUTENZIONE_SITI_SERVICE_EN } from './services-content/en/manutenzione-siti';
 import { MANUTENZIONE_SITI_EXTRAS_EN } from './services-content/en/manutenzione-siti-extras';
 import { ASSISTENZA_WORDPRESS_SERVICE_EN } from './services-content/en/assistenza-wordpress';
@@ -168,7 +175,8 @@ export const SERVICES_DETAIL_EN: ServiceDetail[] = [
   { ...E_COMMERCE_SERVICE_EN, ...E_COMMERCE_EXTRAS_EN },
   { ...SVILUPPO_WEB_SERVICE_EN, ...SVILUPPO_WEB_EXTRAS_EN },
   { ...SEO_SERVICE_EN, ...SEO_EXTRAS_EN },
-  // Standalone (6) — tutti tradotti EN
+  // Standalone (7) — tutti tradotti EN
+  { ...GEO_SERVICE_EN, ...GEO_EXTRAS_EN },
   { ...MANUTENZIONE_SITI_SERVICE_EN, ...MANUTENZIONE_SITI_EXTRAS_EN },
   { ...ASSISTENZA_WORDPRESS_SERVICE_EN, ...ASSISTENZA_WORDPRESS_EXTRAS_EN },
   { ...WORDPRESS_MIGRAZIONE_SERVICE_EN, ...WORDPRESS_MIGRAZIONE_EXTRAS_EN },

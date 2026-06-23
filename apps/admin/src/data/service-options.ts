@@ -16,6 +16,7 @@ export const SERVICE_OPTIONS = [
   { slug: 'comunicazione', label: 'Comunicazione' },
   { slug: 'comunicazione-offline', label: 'Comunicazione Offline' },
   { slug: 'seo', label: 'SEO' },
+  { slug: 'geo', label: 'GEO & AI Visibility' },
   { slug: 'manutenzione', label: 'Manutenzione' },
   { slug: 'branding', label: 'Branding' },
   { slug: 'web-app', label: 'Web App' },

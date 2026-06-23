@@ -14,6 +14,7 @@ export const SEO_EXTRAS = {
     { title: 'Report mensile leggibile', format: 'PDF + dashboard', timeline: 'mensile' },
   ] satisfies readonly ServiceDeliverable[],
   related: [
+    { slug: 'geo', title: 'GEO & visibilità AI', shortPitch: 'Se le risposte AI stanno assorbendo click, serve rendere le pagine citabili senza abbandonare la SEO.' },
     { slug: 'web-design', title: 'Web Design', shortPitch: 'Se la struttura del sito è confusa, la SEO lavora con una zavorra addosso.' },
     { slug: 'sviluppo-web', title: 'Sviluppo Web', shortPitch: 'Performance, markup e routing sporco sono problemi SEO prima che estetici.' },
     { slug: 'analytics-setup', title: 'Analytics & Tag Manager', shortPitch: 'Senza GA4 + GTM correttamente configurati, ogni decisione SEO è alla cieca.' },

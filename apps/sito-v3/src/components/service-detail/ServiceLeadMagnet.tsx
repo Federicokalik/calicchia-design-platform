@@ -10,6 +10,8 @@ interface ServiceLeadMagnetProps {
   eyebrow: string;
   title: string;
   body: string;
+  href?: string;
+  buttonLabel?: string;
   index: string;
 }
 
@@ -18,6 +20,8 @@ export async function ServiceLeadMagnet({
   eyebrow,
   title,
   body,
+  href,
+  buttonLabel,
   index,
 }: ServiceLeadMagnetProps) {
   const t = await getTranslations('servizi.detail');
@@ -39,11 +43,11 @@ export async function ServiceLeadMagnet({
 
         <div className="md:col-span-5 md:self-end">
           <Button
-            href={`/contatti?lead=audit-${serviceSlug}`}
+            href={href ?? `/contatti?lead=audit-${serviceSlug}`}
             size="lg"
             className="swiss-hover-card hover:-translate-y-px motion-reduce:hover:translate-y-0"
           >
-            {t('leadMagnetButton')}
+            {buttonLabel ?? t('leadMagnetButton')}
             <span aria-hidden>→</span>
           </Button>
           <MonoLabel as="p" className="mt-5 uppercase">

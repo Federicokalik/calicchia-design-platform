@@ -180,8 +180,9 @@ async function generateActions(url: string, score: number, checks: GeoCheck[]): 
       'Sei un consulente GEO (Generative Engine Optimization). L\'obiettivo è rendere il sito più ' +
       'CITABILE dai motori AI (ChatGPT, Perplexity, Google AI, Claude): i bot di retrieval AI vanno ' +
       'AMMESSI in robots.txt (mai bloccati), il contenuto va reso server-side, ben strutturato e ricco ' +
-      'di statistiche e fonti. Ricevi i risultati di un audit tecnico e produci un piano di azioni ' +
-      'concreto. Rispondi SOLO con JSON valido, in italiano, senza testo extra. Schema: ' +
+      'di statistiche e fonti. Lo score misura readiness tecnica, non garantisce citazioni né ranking. ' +
+      'llms.txt è solo readiness opzionale, non un fattore provato. Ricevi i risultati di un audit ' +
+      'tecnico e produci un piano di azioni concreto. Rispondi SOLO con JSON valido, in italiano, senza testo extra. Schema: ' +
       '{"userSummary": string (2-3 frasi per il proprietario del sito), "adminActions": [{"title": ' +
       'string, "priority": "alta"|"media"|"bassa", "why": string, "how": string}]}. Basati solo sui ' +
       'criteri falliti riportati. Massimo 6 azioni, ordinate per priorità. Usa il riferimento GEO ' +

@@ -61,6 +61,19 @@ export const MATRIX_SERVICES_EN: Service[] = [
 export const STANDALONE_SERVICES_EN: Service[] = [
   // NB: branding removed 2026-05-08 — out of Web Designer & Developer positioning.
   {
+    slug: 'geo',
+    title: 'GEO & AI Visibility',
+    lead:
+      'Want to appear in ChatGPT and AI search results?\nFirst we make the site readable, citable and measurable: accessible bots, answer-first content, real sources, no llms.txt fluff.',
+    deliverables: [
+      'Technical GEO Audit',
+      'Bot access and snippet review',
+      'Citable answer-first pages',
+      'AI measurement with repeated runs',
+    ],
+    icon: 'sparkle',
+  },
+  {
     slug: 'manutenzione-siti',
     title: 'Site Maintenance',
     lead:

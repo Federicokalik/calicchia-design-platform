@@ -109,7 +109,7 @@ main:has(.geo-wp) + footer{margin-top:0}
             description: m.description,
             url: PATH,
             datePublished: '2026-06-16',
-            dateModified: '2026-06-16',
+            dateModified: '2026-06-22',
             section: locale === 'en' ? 'Resources' : 'Risorse',
             locale,
           }),

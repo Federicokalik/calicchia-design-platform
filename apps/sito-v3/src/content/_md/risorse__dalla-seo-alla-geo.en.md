@@ -1,6 +1,6 @@
 # From SEO to GEO: A White Paper on the Evolution of Search in the Age of Generative AI
 
-*White paper by [Federico Calicchia](https://github.com/federicokalik), written with the support of Claude Opus 4.8 (Anthropic) under his editorial direction · Last updated: 16 June 2026*
+*White paper by [Federico Calicchia](https://github.com/federicokalik), written with the support of Claude Opus 4.8 (Anthropic) under his editorial direction · Last updated: 22 June 2026*
 
 > **Methodological note.** This document was developed from research into primary and secondary sources (academic papers, official engine documentation, industry reports, independent reverse-engineering analyses). The sections explicitly distinguish documented facts from vendor claims and from analyses not officially confirmed. All sources are listed in the bibliography.
 
@@ -45,6 +45,7 @@ Generative engines do not primarily return a list of links but **synthesise an a
 - **5 March 2025:** AI Overviews move to Gemini 2.0; Google announces AI Mode as a Labs experiment.
 - **26 March 2025:** AI Overviews arrive in Italy and in other European countries.
 - **20 May 2025:** AI Mode extended to all US users.
+- **7 May 2026:** Google Chrome releases Lighthouse 13.3.0 with the experimental "Agentic Browsing" category (including an llms.txt check) in the default config.
 - **15 May 2026:** Google publishes the official GEO guide ("Optimizing your website for generative AI features").
 - **5 June 2026:** Google publishes guidance on third-party SEO services and updates "Do you need an SEO?", naming AEO/GEO as a service category.
 
@@ -440,9 +441,10 @@ There is an apparent contradiction between Section 2-bis (where I argue that str
 llms.txt deserves dissection because it is the most repeated and least supported GEO claim:
 
 - **What it really is:** a proposal by Jeremy Howard (September 2024), a Markdown file in the root to help LLMs use a site at inference time. It was born for *technical documentation aimed at developer tools*, not as an SEO lever.
-- **The evidence against (GEO visibility):** Google (Mueller, Illyes) states that it does not use it and has no intention of doing so; it compares it to the obsolete "keywords meta tag". Independent measurements (Otterly) detect 84 requests out of 62,100 to the file in 90 days (0.1%); Ahrefs (May 2026, ~38,000 valid files across 137,210 domains) finds that **97% of llms.txt files receive no requests**. SE Ranking (~300,000 domains) finds no correlation between adoption and citations. The Search Engine Land analysis ("GEO myths") is blunt: *"there is no data or evidence showing that llms.txt files boost AI inclusion. There is certainly no proof."*
+- **The evidence against (visibility in AI search):** Google *Search* states that it does not use it. The official 15 May 2026 guide says no new machine-readable files, AI text files, markup or Markdown are needed, because *"Google Search itself doesn't use them"* and adding them *"won't harm (nor help)"* visibility. Mueller compares it to the obsolete "keywords meta tag". Independent measurements (Otterly) detect 84 requests out of 62,100 to the file in 90 days (0.1%); Ahrefs (15 June 2026 study, ~38,000 valid files across 137,210 domains) finds that **97% of llms.txt files receive no requests** in May 2026 — and among the fetches that do happen, only 19.5% come from named AI tools (*"Slackbot alone fetched llms.txt files more often than PerplexityBot did"*). SE Ranking (~300,000 domains) finds no correlation between adoption and citations; removing the variable from the model *improves* its accuracy. The Search Engine Land analysis ("GEO myths") is blunt: *"there is no data or evidence showing that llms.txt files boost AI inclusion. There is certainly no proof."*
+- **The Search vs Chrome bifurcation (a recent fact, not to be misread):** about 8 days away from the Search guide, Google *Chrome* added llms.txt to developer tooling. **Lighthouse 13.3.0** (official GitHub changelog, 7 May 2026) introduced an experimental **"Agentic Browsing"** category in the default config, including an llms.txt check as an *optional* signal of "AI agent readiness" (agentic readiness), alongside WebMCP, the accessibility tree and CLS. **This is not a contradiction; it is a difference in purpose between two separate teams:** Lighthouse is a *best-practice diagnostic* tool, not a search engine; an audit that detects llms.txt does not mean Google Search uses it for citations. The audit marks a missing file (404) as *"Not Applicable"* because it is *"optional at the moment"*, and the category does not even assign a 0-100 score *"because the standards for the agentic web are still emerging"*. Mueller (19 May 2026) confirms it: llms.txt *"is not done for search ... more of a temporary crutch, perhaps to save some tokens"* for AI coding tools. **Lighthouse's motivation is prospective** (assumed future use by agents), not based on proven real-world usage — which remains negative. Seeing llms.txt appear in official Chrome checks may make some SEOs revisit their doubts, but it changes nothing on citations.
 - **The grain of truth (not to be inflated):** a Wix analysis (AI Search Lab, over 1,400 files examined, November 2025 updated to May 2026) estimates that the number of llms.txt files indexed by Google rose from ~30,000-60,000 (October 2025) to about 120,000 (May 2026), with a peak of ~200,000 in April 2026 — a sign that the format costs a fraction of the tokens of an HTML page and *may* make sense in view of the future **agentic web** and for RAG on tools that read it explicitly. It is, however, a **biased estimate not verified by independent sources** (the "125,000" figure often cited appears in the article's subtitle but does not match the "about 120,000" of the body text), and — in the same source's words — *"this will not make or break your GEO strategy."*
-- **Critical verdict:** llms.txt as an AI citation lever is **unproven and with predominantly contrary evidence**. It has a legitimate and narrow use case (documentation for agents/dev tools), which is different from "it gets you cited more by ChatGPT". Whoever sells it as a GEO factor is selling a bet on the future passed off as a present-day tactic. Realistic priority: very low, after anything concerning content quality and structure.
+- **Critical verdict:** llms.txt as an AI citation lever is **unproven and with predominantly contrary evidence**. It has a legitimate and narrow use case (documentation for agents/dev tools), which is different from "it gets you cited more by ChatGPT". Its inclusion in Lighthouse does not overturn the studies: it measures prospective *agentic readiness*, not real bot behaviour today. Whoever sells it as a GEO factor is selling a bet on the future passed off as a present-day tactic. Realistic priority: very low, after anything concerning content quality and structure. If the CMS generates it at low cost (Wix and Framer already do), keeping it as low-cost future-oriented infrastructure is acceptable — but it must be versioned and protected (prompt-injection risk flagged by Ahrefs).
 
 #### 6.4 — Serving pages in Markdown too: marginal, often hype
 
@@ -492,7 +494,7 @@ At the opposite extreme of GEO hype is the hype of "SEO is dead, only GEO matter
 | Brand mentions > backlinks for citations | Previsible (1.96M sessions) | Plausible, 1 study | Medium |
 | Schema/structured data for AISO | Debunked by Google 2026 | Overrated | Low (do it for other reasons) |
 | Manual content chunking | Debunked by Google 2026 | Myth (for Google) | Low |
-| llms.txt as a citation lever | No proof, contrary evidence | Unproven / hype | Very low |
+| llms.txt as a citation lever | No proof, contrary evidence (Search); included in Lighthouse as agentic readiness | Unproven for citations / hype | Very low |
 | Serving pages in Markdown | Profound/Otterly: null/non-signif. effect | Marginal (useful only for dev tools) | Low |
 | Decoy numbers "2.7x", "6.7 citations" | Without methodology/runs | Anecdote | Ignore |
 | "SEO is dead" | Contradicted by the data | False | — |
@@ -504,7 +506,7 @@ At the opposite extreme of GEO hype is the hype of "SEO is dead, only GEO matter
 - **Reverse-engineering:** the details on ChatGPT's `web.run`, fan-out and system prompt derive from independent analyses (RESONEO/Meteoria, AirOps, Dejan), not from complete official documentation, and change from one model to the next.
 - **Volatility:** the pipelines change rapidly (Gemini 3 Jan 2026, ChatGPT 5.3 switch Mar 2026); every figure has a validity date.
 - **Chunking tension:** Google (May 2026) declares manual chunking unnecessary for *its* AI features; this holds for Google, while for non-Google RAG engines content structure remains relevant (see 6.2).
-- **llms.txt and schema:** explicitly flagged as hype/overrated for GEO (Section 6), contrary to what many tools and agencies suggest.
+- **llms.txt and schema:** explicitly flagged as hype/overrated for GEO (Section 6), contrary to what many tools and agencies suggest. On Lighthouse specifically: the "Agentic Browsing" category is **experimental** and may change or be removed; the official Chrome documentation **does not** mention content negotiation (`Accept: text/markdown`), so that characteristic should not be attributed to Lighthouse. The official changelog date for 13.3.0 is 7 May 2026; press coverage is around 20 May 2026.
 
 ---
 
@@ -563,6 +565,9 @@ At the opposite extreme of GEO hype is the hype of "SEO is dead, only GEO matter
 - Wix Studio, *Debunking LLMs.txt Myths* (over 1,400 files; estimate ~120,000 indexed) — https://www.wix.com/studio/ai-search-lab/llms-txt-myths
 - Ahrefs, *97% of llms.txt Files Never Get Read* (May 2026) — https://ahrefs.com/blog/llmstxt-study/ ; SE Ranking, *LLMs.txt: Why It Doesn't Work* — https://seranking.com/blog/llms-txt/ ; Otterly, *The llms.txt Experiment* — https://otterly.ai/blog/the-llms-txt-experiment/
 - Search Engine Journal, *Mueller: llms.txt Can't Help LLMs Differentiate Sites* — https://www.searchenginejournal.com/googles-mueller-says-llms-txt-cant-help-llms-differentiate-sites/579304/
+- Google Chrome for Developers, *Lighthouse agentic browsing scoring* and *llms.txt audit* (experimental category, docs updated 5 May 2026) — https://developer.chrome.com/docs/lighthouse/agentic-browsing/scoring · https://developer.chrome.com/docs/lighthouse/agentic-browsing/llms-txt
+- GoogleChrome/lighthouse, *changelog 13.3.0* (Agentic Browsing in the default config, 7 May 2026) — https://github.com/GoogleChrome/lighthouse/blob/main/changelog.md
+- Search Engine Journal, *Google's llms.txt Guidance Depends On Which Product You Ask* (20 May 2026) — https://www.searchenginejournal.com/googles-llms-txt-guidance-depends-on-which-product-you-ask/575431/ ; Search Engine Land, *Google adds llms.txt check to Chrome Lighthouse* — https://searchengineland.com/google-llms-txt-chrome-lighthouse-478246
 
 **Markdown for pages (content negotiation / .md)**
 - Google Search Central, *AI optimization guide* (no Markdown required) — https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
@@ -588,4 +593,4 @@ At the opposite extreme of GEO hype is the hype of "SEO is dead, only GEO matter
 - Surmado, *Best AI Visibility Tools 2026* — https://www.surmado.com/blog/best-ai-visibility-tools-2026
 - Otterly.ai — https://otterly.ai/
 
-*Document updated as of 16 June 2026. Given the speed of the sector's evolution, the statistics and mechanisms described have limited temporal validity.*
+*Document updated as of 22 June 2026. Given the speed of the sector's evolution, the statistics and mechanisms described have limited temporal validity.*

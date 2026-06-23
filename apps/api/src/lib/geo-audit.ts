@@ -5,9 +5,11 @@
  * AI retrieval bot sees) plus /robots.txt and /sitemap.xml, then scores the page
  * against the evidence-based factors from the GEO white paper
  * (/risorse/dalla-seo-alla-geo). The scoring is deliberately HONEST: it does not
- * reward llms.txt / special schema / markdown (the paper rates them low/unproven)
- * and weights the factors with measured uplift (server-side rendering, retrieval
- * bot access, answer-first semantic structure, citability, freshness).
+ * reward llms.txt / special schema / markdown as citation factors (the paper
+ * rates them low/unproven) and weights the factors with measured uplift
+ * (server-side rendering, retrieval bot access, answer-first semantic
+ * structure, citability, freshness). llms.txt is reported only as optional
+ * agentic-readiness infrastructure.
  *
  * No LLM here — the qualitative action plan is generated separately at /unlock.
  */
@@ -112,6 +114,11 @@ const AI_RETRIEVAL_BOTS = [
   'Perplexity-User',
   'Claude-SearchBot',
   'Claude-User',
+];
+
+const AI_TRAINING_BOTS = [
+  'GPTBot',
+  'ClaudeBot',
   'Google-Extended',
 ];
 
@@ -176,13 +183,15 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
   const origin = new URL(page.finalUrl).origin;
 
   // Sub-fetches (best-effort; failures degrade gracefully).
-  const [robotsRes, sitemapRes] = await Promise.allSettled([
+  const [robotsRes, sitemapRes, llmsRes] = await Promise.allSettled([
     safeFetchText(`${origin}/robots.txt`),
     safeFetchText(`${origin}/sitemap.xml`),
+    safeFetchText(`${origin}/llms.txt`),
   ]);
   const robots = robotsRes.status === 'fulfilled' && robotsRes.value.ok ? robotsRes.value.text : '';
   const sitemapOk = sitemapRes.status === 'fulfilled' && sitemapRes.value.ok;
   const sitemapText = sitemapRes.status === 'fulfilled' ? sitemapRes.value.text : '';
+  const llmsOk = llmsRes.status === 'fulfilled' && llmsRes.value.ok;
 
   const text = stripToText(html);
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? '';
@@ -194,6 +203,7 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
   // 1 — Retrieval access (robots.txt + sitemap)
   {
     const blocked = AI_RETRIEVAL_BOTS.filter((b) => robots && isBotBlocked(robots, b));
+    const blockedTraining = AI_TRAINING_BOTS.filter((b) => robots && isBotBlocked(robots, b));
     const hasSitemap = sitemapOk || /sitemap:/i.test(robots);
     const passed = blocked.length === 0 && hasSitemap;
     const parts: string[] = [];
@@ -202,8 +212,25 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
         ? 'I bot di retrieval AI (ChatGPT, Perplexity, Claude) non sono bloccati da robots.txt.'
         : `robots.txt blocca questi bot di retrieval: ${blocked.join(', ')}.`,
     );
+    if (blockedTraining.length > 0) {
+      parts.push(`Bot di training/opt-out bloccati: ${blockedTraining.join(', ')} (informativo, non penalizza lo score).`);
+    }
     parts.push(hasSitemap ? 'Sitemap presente.' : 'Nessuna sitemap trovata (robots.txt né /sitemap.xml).');
     checks.push({ id: 'retrieval_access', label: 'Accesso ai motori AI', passed, weight: 25, detail: parts.join(' '), anchor: 's2' });
+  }
+
+  // 1b — Optional llms.txt / agentic readiness (informational only).
+  {
+    checks.push({
+      id: 'llms_txt',
+      label: 'llms.txt opzionale',
+      passed: null,
+      weight: 0,
+      detail: llmsOk
+        ? 'llms.txt presente: utile come infrastruttura opzionale per agenti/dev tool, ma non è conteggiato come fattore di citazione AI.'
+        : 'llms.txt non trovato: non penalizza lo score. Lighthouse lo tratta come readiness opzionale, non come leva provata di citazione.',
+      anchor: 's6',
+    });
   }
 
   // 2 — Server-side rendering (meaningful text in raw HTML)
@@ -273,6 +300,27 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
         ? `Segnali presenti: ${present.join(', ')}. ${passed ? '' : 'Aggiungere statistiche e fonti esterne aumenta le citazioni AI (uplift misurato +31/+28%).'}`.trim()
         : 'Nessuna statistica, fonte esterna o virgolettato: sono le leve con maggiore uplift di citabilità (+31/+41/+28%).',
       anchor: 's3',
+    });
+  }
+
+  // 5b — Snippet/citation eligibility directives.
+  {
+    const robotsDirectives = ['robots', 'googlebot', 'bingbot']
+      .map((name) => metaContent(html, name))
+      .filter(Boolean)
+      .join(', ');
+    const blocksSnippet = /\b(?:nosnippet|noarchive)\b/i.test(robotsDirectives)
+      || /\bmax-snippet\s*:\s*0\b/i.test(robotsDirectives)
+      || /\sdata-nosnippet(?:\s|=|>)/i.test(html);
+    checks.push({
+      id: 'snippet_eligibility',
+      label: 'Direttive snippet/citazione',
+      passed: !blocksSnippet,
+      weight: 10,
+      detail: blocksSnippet
+        ? 'La pagina contiene direttive come nosnippet, noarchive, max-snippet:0 o data-nosnippet: possono impedire o limitare snippet e citazioni nei motori AI.'
+        : 'Nessuna direttiva evidente limita snippet, cache o porzioni citabili del contenuto.',
+      anchor: 's5',
     });
   }
 

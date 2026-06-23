@@ -68,6 +68,19 @@ export const STANDALONE_SERVICES: Service[] = [
   // NB: branding rimosso 2026-05-08 — fuori positioning Web Designer & Developer.
   // Redirect /servizi/branding → /servizi configurato in next.config.ts.
   {
+    slug: 'geo',
+    title: 'GEO & visibilità AI',
+    lead:
+      'Vuoi apparire su ChatGPT e nelle ricerche AI?\nPrima rendiamo il sito leggibile, citabile e misurabile: bot accessibili, contenuti answer-first, fonti vere, niente fuffa su llms.txt.',
+    deliverables: [
+      'GEO Audit tecnico',
+      'Accesso bot e snippet review',
+      'Pagine answer-first citabili',
+      'Misurazione AI con run ripetute',
+    ],
+    icon: 'sparkle',
+  },
+  {
     slug: 'manutenzione-siti',
     title: 'Manutenzione siti',
     lead:

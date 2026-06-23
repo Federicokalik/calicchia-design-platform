@@ -53,6 +53,15 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
     ],
   },
   {
+    slug: 'geo',
+    label: 'GEO & visibilità AI',
+    subOptions: [
+      { value: 'GEO Audit tecnico', label: 'GEO Audit tecnico' },
+      { value: 'Ottimizzazione pagine citabili', label: 'Ottimizzazione pagine citabili' },
+      { value: 'Misurazione visibilità AI', label: 'Misurazione visibilità AI' },
+    ],
+  },
+  {
     slug: 'manutenzione-siti',
     label: 'Manutenzione siti',
     subOptions: [

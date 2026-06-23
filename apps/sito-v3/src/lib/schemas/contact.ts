@@ -6,6 +6,7 @@ export const SERVICE_OPTIONS = [
   'e-commerce',
   'sviluppo-web',
   'seo',
+  'geo',
   // Standalone services
   'branding',
   'manutenzione-siti',

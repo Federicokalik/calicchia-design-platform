@@ -19,6 +19,11 @@ export const SEO_EXTRAS_EN = {
   ] satisfies readonly ServiceDeliverable[],
   related: [
     {
+      slug: 'geo',
+      title: 'GEO & AI Visibility',
+      shortPitch: 'If AI answers are absorbing clicks, pages need to become citable without abandoning SEO.',
+    },
+    {
       slug: 'web-design',
       title: 'Web Design',
       shortPitch:

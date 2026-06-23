@@ -14,20 +14,20 @@ const COPY = {
   it: {
     metaTitle: 'GEO Audit — analizza la visibilità del tuo sito nei motori AI',
     metaDescription:
-      'Inserisci l’URL del tuo sito e scopri quanto è pronto per essere citato da ChatGPT, Perplexity, Google AI e Claude. Score gratuito basato sul white paper GEO.',
+      'Inserisci l’URL del tuo sito e scopri quanto è leggibile e citabile dai motori AI. Score tecnico gratuito basato sul white paper GEO.',
     eyebrow: 'Strumento gratuito',
     title: 'Il tuo sito è pronto per i motori AI?',
-    lead: 'Analizziamo la tua pagina secondo i fattori provati della GEO (Generative Engine Optimization) e ti diamo uno score immediato, con le azioni per migliorarlo.',
+    lead: 'Analizziamo la tua pagina secondo i fattori verificabili della GEO (Generative Engine Optimization) e ti diamo uno score tecnico immediato. Non misura una quota garantita di citazioni: misura cosa i motori AI riescono a leggere, estrarre e usare.',
     whitepaperLabel: 'Basato sul white paper',
     whitepaperCta: 'Dalla SEO alla GEO →',
   },
   en: {
     metaTitle: 'GEO Audit — check your site’s visibility in AI engines',
     metaDescription:
-      'Enter your site URL and find out how ready it is to be cited by ChatGPT, Perplexity, Google AI and Claude. Free score based on the GEO white paper.',
+      'Enter your site URL and find out how readable and citable it is for AI engines. Free technical score based on the GEO white paper.',
     eyebrow: 'Free tool',
     title: 'Is your site ready for AI engines?',
-    lead: 'We analyze your page against the proven factors of GEO (Generative Engine Optimization) and give you an instant score, with the actions to improve it.',
+    lead: 'We analyze your page against the verifiable factors of GEO (Generative Engine Optimization) and give you an instant technical score. It does not measure guaranteed citation share: it measures what AI engines can read, extract and use.',
     whitepaperLabel: 'Based on the white paper',
     whitepaperCta: 'From SEO to GEO →',
   },
