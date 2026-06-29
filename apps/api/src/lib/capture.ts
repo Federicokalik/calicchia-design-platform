@@ -180,9 +180,14 @@ async function shootViewport(
       height: vp.height,
       deviceScaleFactor: vp.deviceScaleFactor,
     });
-    await page.goto(targetUrl, { waitUntil: 'networkidle2', timeout: 45_000 });
+    // domcontentloaded, NON networkidle2: i siti con analytics/chat/polling non
+    // raggiungono mai l'idle → goto andava in timeout (45s) e ogni viewport
+    // falliva ("Nessuno screenshot catturato"). Poi aspettiamo l'idle in modo
+    // tollerante (non blocca se la rete non si quieta) + un settle per il render.
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
+    await page.waitForNetworkIdle({ idleTime: 500, timeout: 8_000 }).catch(() => {});
     await dismissCookies(page);
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 1200));
 
     let buffer: Buffer;
     if (viewport === 'fullpage') {
