@@ -4,6 +4,7 @@ import * as openai from '../lib/ai/openai';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
 import { logger } from '../lib/logger';
 import { revalidateSito } from '../lib/sito-revalidate';
+import { captureSite, type CaptureSource, type CaptureViewport } from '../lib/capture';
 
 const log = logger.child({ scope: 'project-ai-logs' });
 
@@ -502,4 +503,190 @@ projects.post('/:id/ai/seo', async (c) => {
     });
     throw err;
   }
+});
+
+// ========== SCREENSHOT CAPTURE ==========
+//
+// POST /api/projects/:id/capture
+//   Body: {
+//     url?:        string                       // override; default = project.live_url
+//     source?:     'live' | 'archive'           // default 'live'. 'archive' uses Wayback Machine
+//     archiveDate?: string                       // YYYYMMDD or YYYYMMDDhhmmss (Wayback pin, optional)
+//     viewports?:  ('desktop' | 'mobile' | 'fullpage')[]  // default all three
+//   }
+//   Returns: { captures: CaptureResult[] }
+//
+// Headless puppeteer. For `source: 'archive'` the endpoint first resolves
+// the closest Wayback snapshot via `archive.org/wayback/available`, then
+// navigates to the `id_` form of the snapshot (raw archived HTML, no
+// Wayback toolbar) so the screenshot is clean. Output webp files are
+// uploaded to /media/projects/<slug>/ and returned with their public URLs.
+//
+// Headful capture (login-protected sites) is intentionally NOT here — see
+// apps/api/src/lib/capture.ts header comment for the Fase 3 worker plan.
+projects.post('/:id/capture', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{
+    url?: string;
+    source?: CaptureSource;
+    archiveDate?: string;
+    viewports?: CaptureViewport[];
+  }>().catch(() => ({} as {
+    url?: string;
+    source?: CaptureSource;
+    archiveDate?: string;
+    viewports?: CaptureViewport[];
+  }));
+
+  const [project] = await sql`
+    SELECT slug, live_url FROM projects WHERE id = ${id}
+  `;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+
+  const url = (body.url || project.live_url || '').trim();
+  if (!url) {
+    return c.json({ error: 'URL obbligatorio: passalo nel body o salva live_url sul progetto' }, 400);
+  }
+
+  const source: CaptureSource = body.source === 'archive' ? 'archive' : 'live';
+  const viewports = Array.isArray(body.viewports) && body.viewports.length > 0
+    ? body.viewports
+    : ['desktop', 'mobile', 'fullpage'];
+
+  const validViewports: CaptureViewport[] = viewports.filter(
+    (v): v is CaptureViewport => v === 'desktop' || v === 'mobile' || v === 'fullpage',
+  );
+  if (validViewports.length === 0) {
+    return c.json({ error: 'Nessun viewport valido' }, 400);
+  }
+
+  const slug = (project.slug as string) || `project-${id}`;
+  const startedAt = Date.now();
+  try {
+    const captures = await captureSite({
+      url,
+      folder: `projects/${slug}`,
+      slug,
+      source,
+      archiveDate: body.archiveDate,
+      viewports: validViewports,
+    });
+    log.info({
+      project_id: id,
+      url,
+      source,
+      viewports: validViewports,
+      duration_ms: Date.now() - startedAt,
+    }, 'capture ok');
+    return c.json({ captures });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    log.error({ err, project_id: id, url, source }, 'capture failed');
+    return c.json({ error: `Capture fallito: ${message}` }, 500);
+  }
+});
+
+// ========== HEADFUL CAPTURE SESSIONS (Fase 3 — apps/worker) ==========
+//
+// The headful worker (apps/worker) polls the `capture_sessions` table
+// (migration 141) to drive a Chromium session exposed to the admin via
+// noVNC, for sites behind login that headless capture (Fase 2) can't reach.
+// These four endpoints enqueue/control sessions; the worker performs the
+// actual browser work and flips `status`. Gated by CAPTURE_HEADFUL_ENABLED —
+// when off, returns 503 so the admin (which also checks the same flag client
+// side via VITE_CAPTURE_HEADFUL_ENABLED) never exposes the remote-browser path.
+//
+//   POST /:id/capture/session/start        enqueue a pending session
+//   GET  /:id/capture/session/:sid         poll status (admin polling)
+//   POST /:id/capture/session/:sid/snap    request a screenshot at scroll/viewport
+//   POST /:id/capture/session/:sid/close   request teardown (profile persists)
+//
+// Auth: inherited — /api/projects and /api/projects/* are in `protectedPaths`
+// (app.ts), so authMiddleware already validated the admin JWT on every call.
+
+const HEADFUL_ENABLED = process.env.CAPTURE_HEADFUL_ENABLED === 'true';
+const HEADFUL_PROFILES_DIR = process.env.CAPTURE_PROFILES_DIR || '/data/profiles';
+
+function headfulDisabled(c: import('hono').Context) {
+  return c.json({ error: 'Headful capture disabilitato sul server (CAPTURE_HEADFUL_ENABLED≠true)' }, 503);
+}
+
+projects.post('/:id/capture/session/start', async (c) => {
+  if (!HEADFUL_ENABLED) return headfulDisabled(c);
+  const id = c.req.param('id');
+  const body = await c.req.json<{ url?: string }>().catch(() => ({ url: undefined } as { url?: string }));
+
+  const [project] = await sql`SELECT slug, live_url FROM projects WHERE id = ${id}`;
+  if (!project) return c.json({ error: 'Progetto non trovato' }, 404);
+
+  const url = (body.url || project.live_url || '').trim();
+  if (!url) return c.json({ error: 'URL obbligatorio' }, 400);
+
+  // One active session per project at a time: refuse to start a new one if a
+  // pending/open/snap session already exists. (Historical closed/error rows
+  // are fine to coexist.)
+  const [existing] = await sql`
+    SELECT id FROM capture_sessions
+    WHERE project_id = ${id}
+      AND status IN ('pending','open','snap_requested','snap_done')
+    ORDER BY created_at DESC LIMIT 1
+  `;
+  if (existing) return c.json({ error: 'Una sessione è già aperta per questo progetto', sessionId: existing.id }, 409);
+
+  const profileDir = `${HEADFUL_PROFILES_DIR}/${id}`;
+  const [row] = await sql`
+    INSERT INTO capture_sessions (project_id, target_url, profile_dir, status)
+    VALUES (${id}, ${url}, ${profileDir}, 'pending')
+    RETURNING *
+  `;
+  return c.json({ session: row });
+});
+
+projects.get('/:id/capture/session/:sid', async (c) => {
+  if (!HEADFUL_ENABLED) return headfulDisabled(c);
+  const sid = c.req.param('sid');
+  const [row] = await sql`SELECT * FROM capture_sessions WHERE id = ${sid}`;
+  if (!row) return c.json({ error: 'Sessione non trovata' }, 404);
+  return c.json({ session: row });
+});
+
+projects.post('/:id/capture/session/:sid/snap', async (c) => {
+  if (!HEADFUL_ENABLED) return headfulDisabled(c);
+  const sid = c.req.param('sid');
+  const body = await c.req.json<{
+    viewportWidth?: number;
+    viewportHeight?: number;
+    scrollY?: number;
+  }>().catch(() => ({} as { viewportWidth?: number; viewportHeight?: number; scrollY?: number }));
+
+  const [row] = await sql`SELECT status FROM capture_sessions WHERE id = ${sid}`;
+  if (!row) return c.json({ error: 'Sessione non trovata' }, 404);
+  if (row.status !== 'open' && row.status !== 'snap_done') {
+    return c.json({ error: `Sessione non è aperta (status=${row.status})` }, 400);
+  }
+
+  const vw = body.viewportWidth && body.viewportWidth > 0 ? body.viewportWidth : null;
+  const vh = body.viewportHeight && body.viewportHeight > 0 ? body.viewportHeight : null;
+  const sy = typeof body.scrollY === 'number' && body.scrollY >= 0 ? body.scrollY : null;
+
+  await sql`
+    UPDATE capture_sessions
+    SET viewport_width = ${vw},
+        viewport_height = ${vh},
+        scroll_y = ${sy},
+        status = 'snap_requested',
+        updated_at = NOW()
+    WHERE id = ${sid}
+  `;
+  return c.json({ ok: true });
+});
+
+projects.post('/:id/capture/session/:sid/close', async (c) => {
+  if (!HEADFUL_ENABLED) return headfulDisabled(c);
+  const sid = c.req.param('sid');
+  const [row] = await sql`SELECT status FROM capture_sessions WHERE id = ${sid}`;
+  if (!row) return c.json({ error: 'Sessione non trovata' }, 404);
+  if (row.status === 'closed') return c.json({ ok: true });
+  await sql`UPDATE capture_sessions SET status = 'close_requested', updated_at = NOW() WHERE id = ${sid}`;
+  return c.json({ ok: true });
 });

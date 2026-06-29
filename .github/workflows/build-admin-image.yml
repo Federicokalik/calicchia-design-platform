@@ -92,3 +92,6 @@ jobs:
             PUBLIC_BUGSINK_DSN=${{ vars.PUBLIC_BUGSINK_DSN }}
             VITE_CAP_PUBLIC_URL=${{ vars.VITE_CAP_PUBLIC_URL }}
             VITE_CAP_SITEKEY_ADMIN_LOGIN=${{ vars.VITE_CAP_SITEKEY_ADMIN_LOGIN }}
+            # Fase 3: mostra il pulsante «Apri browser remoto» nell'admin.
+            # 'true' SOLO quando anche CAPTURE_HEADFUL_ENABLED e attivo lato API.
+            VITE_CAPTURE_HEADFUL_ENABLED=${{ vars.VITE_CAPTURE_HEADFUL_ENABLED }}

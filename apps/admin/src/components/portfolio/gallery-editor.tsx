@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Upload, X, Loader2, ChevronUp, ChevronDown, SquareArrowOutUpRight, Link as LinkIcon, Trash2 } from 'lucide-react';
+import { Upload, X, Loader2, ChevronUp, ChevronDown, SquareArrowOutUpRight, Link as LinkIcon, Trash2, Film } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +12,33 @@ import { cn } from '@/lib/utils';
  * Gallery item shape persisted in projects.gallery (JSONB).
  *
  * `src` is the only required field. `alt` is optional but encouraged for
- * accessibility and image SEO. Reads from the DB tolerate the legacy
- * `string[]` shape — the editor normalizes on load (see {@link normalizeIncoming}).
+ * accessibility and image SEO. `type` discriminates image vs video; when
+ * absent it is inferred from the `src` extension so legacy data keeps
+ * working without a migration. Video items may carry `poster` (still frame
+ * shown before play), `width`, `height` for aspect-ratio hints.
+ * Reads from the DB tolerate the legacy `string[]` shape — the editor
+ * normalizes on load (see {@link normalizeGalleryIncoming}).
  */
+export type GalleryMediaType = 'image' | 'video';
+
 export interface GalleryItem {
   src: string;
   alt?: string;
+  type?: GalleryMediaType;
+  poster?: string;
+  width?: number;
+  height?: number;
+}
+
+const VIDEO_EXTS = /\.(mp4|webm|mov|m4v|ogg)$/i;
+
+/**
+ * Infer media type from a URL/extension. Used for backward compatibility with
+ * gallery rows persisted before the `type` field existed.
+ */
+export function inferMediaType(src: string | undefined | null): GalleryMediaType {
+  if (!src) return 'image';
+  return VIDEO_EXTS.test(src) ? 'video' : 'image';
 }
 
 interface GalleryEditorProps {
@@ -31,16 +52,29 @@ interface GalleryEditorProps {
 
 /**
  * Normalize incoming values: accept both the legacy `string[]` shape and the
- * current `{src, alt}[]` so existing data keeps working without a migration.
+ * current `{src, alt, type, ...}[]` so existing data keeps working without a
+ * migration. Type is inferred from the extension when missing.
  */
 export function normalizeGalleryIncoming(raw: unknown): GalleryItem[] {
   if (!Array.isArray(raw)) return [];
   return raw
     .map((item): GalleryItem | null => {
-      if (typeof item === 'string') return { src: item };
+      if (typeof item === 'string') {
+        return { src: item, type: inferMediaType(item) };
+      }
       if (item && typeof item === 'object' && 'src' in item && typeof (item as { src: unknown }).src === 'string') {
-        const obj = item as { src: string; alt?: unknown };
-        return { src: obj.src, alt: typeof obj.alt === 'string' ? obj.alt : undefined };
+        const obj = item as { src: string; alt?: unknown; type?: unknown; poster?: unknown; width?: unknown; height?: unknown };
+        const src = obj.src;
+        const type: GalleryMediaType =
+          obj.type === 'video' || obj.type === 'image' ? obj.type : inferMediaType(src);
+        return {
+          src,
+          alt: typeof obj.alt === 'string' ? obj.alt : undefined,
+          type,
+          poster: typeof obj.poster === 'string' ? obj.poster : undefined,
+          width: typeof obj.width === 'number' ? obj.width : undefined,
+          height: typeof obj.height === 'number' ? obj.height : undefined,
+        };
       }
       return null;
     })
@@ -57,12 +91,20 @@ export function GalleryEditor({
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 50MB hard cap server-side (apps/api/src/routes/media.ts MAX_FILE_SIZE).
+  // We warn the user before kicking off an upload that will be rejected.
+  const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
   const handleUpload = async (files: FileList) => {
     setIsUploading(true);
     const added: GalleryItem[] = [];
 
     for (const file of Array.from(files)) {
       if (value.length + added.length >= max) break;
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`${file.name} supera 50MB (massimo server)`);
+        continue;
+      }
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -71,7 +113,10 @@ export function GalleryEditor({
           method: 'POST',
           body: formData,
         });
-        if (data?.url) added.push({ src: data.url, alt: '' });
+        if (data?.url) {
+          const type: GalleryMediaType = file.type.startsWith('video/') ? 'video' : 'image';
+          added.push({ src: data.url, alt: '', type });
+        }
       } catch {
         // Skip failed uploads silently — toast handled upstream if needed.
       }
@@ -105,7 +150,7 @@ export function GalleryEditor({
     <div className={cn('space-y-3', className)}>
       {value.length === 0 ? (
         <p className="text-xs text-muted-foreground italic">
-          Nessuna immagine. Usa il pulsante in basso per caricare.
+          Nessun media. Usa il pulsante in basso per caricare immagini o video.
         </p>
       ) : (
         <ul className="space-y-3">
@@ -182,14 +227,34 @@ export function GalleryEditor({
 
               {/* Thumb */}
               {item.src ? (
-                <img
-                  src={item.src}
-                  alt={item.alt || ''}
-                  className="h-20 w-20 rounded border object-cover bg-muted shrink-0"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
-                  }}
-                />
+                <div className="relative h-20 w-20 shrink-0">
+                  {item.type === 'video' ? (
+                    <>
+                      <video
+                        src={item.src}
+                        poster={item.poster}
+                        muted
+                        className="h-20 w-20 rounded border bg-muted object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLVideoElement).style.visibility = 'hidden';
+                        }}
+                      />
+                      <span className="absolute left-1 top-1 rounded bg-black/70 px-1 py-0.5 text-[8px] font-semibold uppercase tracking-wider text-white flex items-center gap-0.5">
+                        <Film className="h-2 w-2" />
+                        Video
+                      </span>
+                    </>
+                  ) : (
+                    <img
+                      src={item.src}
+                      alt={item.alt || ''}
+                      className="h-20 w-20 rounded border object-cover bg-muted"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
+                      }}
+                    />
+                  )}
+                </div>
               ) : (
                 <div className="h-20 w-20 rounded border bg-muted shrink-0" />
               )}
@@ -232,7 +297,7 @@ export function GalleryEditor({
 
       <div className="flex items-center justify-between gap-3 pt-1">
         <p className="text-xs text-muted-foreground">
-          {value.length}/{max} immagini
+          {value.length}/{max} media
         </p>
         <Button
           type="button"
@@ -247,14 +312,14 @@ export function GalleryEditor({
           ) : (
             <Upload className="h-3.5 w-3.5 mr-1.5" />
           )}
-          {isUploading ? 'Caricamento…' : 'Carica immagini'}
+          {isUploading ? 'Caricamento…' : 'Carica immagini o video'}
         </Button>
       </div>
 
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/mp4,video/webm,video/quicktime,video/ogg"
         multiple
         className="hidden"
         onChange={(e) => e.target.files && e.target.files.length > 0 && handleUpload(e.target.files)}

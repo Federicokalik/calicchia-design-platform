@@ -20,6 +20,7 @@ import {
   serializeBeforeAfter,
   type BeforeAfterPair,
 } from '@/components/portfolio/before-after-editor';
+import { CaptureDialog } from '@/components/portfolio/capture-dialog';
 import { RichEditor } from '@/components/ui/rich-editor';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
@@ -608,7 +609,7 @@ export default function PortfolioEditorPage() {
               <div>
                 <h3 className="text-sm font-semibold">Galleria</h3>
                 <p className="text-[10px] text-muted-foreground mt-1">
-                  Carica le immagini, riordina con le frecce, scrivi un alt text per ciascuna (accessibilità + SEO).
+                  Carica immagini o video (mp4/webm, max 50MB), riordina con le frecce, scrivi un alt text per ciascuna (accessibilità + SEO). Per i video l'alt diventa la didascalia.
                 </p>
               </div>
               <GalleryEditor value={gallery} onChange={setGallery} folder="projects" max={20} />
@@ -622,14 +623,29 @@ export default function PortfolioEditorPage() {
           {form.watch('is_restyling') ? (
             <TabsContent value="restyle" className="space-y-4">
               <div className="rounded-xl border bg-card p-5 space-y-4">
-                <div>
-                  <h3 className="text-sm font-semibold">Prima / Dopo</h3>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    Carica le coppie di schermate per il confronto restyling.
-                    Alt text obbligatorio su entrambe (a11y + SEO).
-                    Se disattivi "Restyling sito" in Generale, la sezione
-                    sparisce dal sito ma le coppie restano salvate.
-                  </p>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold">Prima / Dopo</h3>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Carica le coppie di schermate per il confronto restyling.
+                      Alt text obbligatorio su entrambe (a11y + SEO).
+                      Se disattivi "Restyling sito" in Generale, la sezione
+                      sparisce dal sito ma le coppie restano salvate.
+                    </p>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      <strong>Tip restyling:</strong> usa «Cattura screenshot» con sorgente
+                      web.archive.org per il lato Prima, e sorgente «Sito live» per il lato Dopo.
+                    </p>
+                  </div>
+                  {!isNew && id ? (
+                    <CaptureDialog
+                      projectId={id}
+                      defaultUrl={form.watch('live_url') || ''}
+                      isRestyling
+                      onPushToGallery={(items) => setGallery([...gallery, ...items])}
+                      onPushToBeforeAfter={(pairs) => setBeforeAfter([...beforeAfter, ...pairs])}
+                    />
+                  ) : null}
                 </div>
                 <BeforeAfterEditor
                   value={beforeAfter}
