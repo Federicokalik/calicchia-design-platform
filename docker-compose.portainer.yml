@@ -62,6 +62,13 @@ services:
       WEBHOOK_ENCRYPTION_KEY: ${WEBHOOK_ENCRYPTION_KEY}
       UPLOAD_DIR: /data/uploads
       PRIVATE_UPLOAD_DIR: /data/private
+      # Headful capture (Fase 3): gating dei 4 endpoint /capture/session/*.
+      # Senza questa l'API risponde 503 anche col servizio `worker` attivo.
+      # CAPTURE_PROFILES_DIR è la base con cui l'API scrive profile_dir nelle
+      # righe capture_sessions (il worker monta lo stesso volume profiles_data
+      # su /data/profiles e ricalcola comunque il path da lì).
+      CAPTURE_HEADFUL_ENABLED: ${CAPTURE_HEADFUL_ENABLED:-false}
+      CAPTURE_PROFILES_DIR: /data/profiles
       API_URL: ${API_URL}
       SITE_URL: ${SITE_URL}
       ADMIN_URL: ${ADMIN_URL}
