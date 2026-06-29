@@ -19,6 +19,7 @@ import { Hono } from 'hono';
 import { sql } from '../../db';
 import { getCalendarByFeedToken } from '../../lib/calendar/calendars';
 import { buildIcsFeed } from '../../lib/calendar/ics-feed';
+import { publicApiUrl } from '../../lib/public-url';
 import type { CalendarEvent } from '../../lib/calendar/types';
 
 export const calendarFeed = new Hono();
@@ -70,7 +71,7 @@ calendarFeed.get('/:token{.+\\.ics}', async (c) => {
   const ics = buildIcsFeed({
     calendar,
     events,
-    uidDomain: process.env.PUBLIC_API_URL?.replace(/^https?:\/\//, '').replace(/[/:].*/, '') || 'caldes.it',
+    uidDomain: publicApiUrl().replace(/^https?:\/\//, '').replace(/[/:].*/, '') || 'caldes.it',
   });
 
   return c.body(ics, 200, {

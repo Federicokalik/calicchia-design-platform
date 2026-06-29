@@ -8,6 +8,7 @@
 
 import { customAlphabet } from 'nanoid';
 import { sql } from '../../db';
+import { publicApiUrl } from '../public-url';
 import type { Calendar, CreateCalendarInput } from './types';
 
 const generateFeedToken = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 32);
@@ -185,6 +186,6 @@ export async function rotateFeedToken(id: string): Promise<Calendar | null> {
  * Es. https://api.calicchia.design/api/calendar/feed/abc123def456...ics
  */
 export function buildFeedUrl(calendar: Calendar, baseUrl?: string): string {
-  const base = baseUrl || process.env.PUBLIC_API_URL || 'http://localhost:3001';
-  return `${base.replace(/\/$/, '')}/api/calendar/feed/${calendar.ics_feed_token}.ics`;
+  const base = baseUrl || publicApiUrl();
+  return `${base}/api/calendar/feed/${calendar.ics_feed_token}.ics`;
 }
