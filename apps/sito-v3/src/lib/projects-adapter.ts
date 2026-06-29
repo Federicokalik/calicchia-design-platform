@@ -126,13 +126,34 @@ function deriveGallerySection(api: ApiProjectDetail): ProjectSection | null {
       const resolved = resolveImageUrl(src ?? null);
       if (resolved && !seenSrc.has(resolved)) {
         seenSrc.add(resolved);
+        // Discriminate image vs video. The admin GalleryEditor writes `type`
+        // explicitly; for legacy rows we infer from the URL extension so a
+        // video persisted before this field existed still renders as <video>.
+        const explicitType =
+          typeof item === 'object' &&
+          (item as { type?: 'image' | 'video' }).type;
+        const inferredType: 'image' | 'video' = /\.(mp4|webm|mov|m4v|ogg)$/i.test(
+          resolved,
+        )
+          ? 'video'
+          : 'image';
+        const type = explicitType === 'video' || explicitType === 'image'
+          ? explicitType
+          : inferredType;
+        const posterSrc =
+          typeof item === 'object' && (item as { poster?: string }).poster
+            ? resolveImageUrl((item as { poster?: string }).poster ?? null) ?? undefined
+            : undefined;
         galleryAssets.push({
           src: resolved,
           alt:
             (typeof item === 'object' && item.alt) ||
-            `${api.title} — immagine ${galleryAssets.length + 1}`,
+            `${api.title} — ${type === 'video' ? 'video' : 'immagine'} ${galleryAssets.length + 1}`,
           width: (typeof item === 'object' && item.width) || 2200,
           height: (typeof item === 'object' && item.height) || 1650,
+          type,
+          poster: posterSrc,
+          video: type === 'video' ? resolved : undefined,
         });
       }
     }

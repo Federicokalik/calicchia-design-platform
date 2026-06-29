@@ -14,6 +14,9 @@ interface CaseGalleryProps {
  * niente cinematica scroll-tied. Le immagini stanno ferme — il visual si
  * costruisce dall'alternanza dei col-span (8/4/7) e dallo whitespace
  * intenzionale tra tile.
+ *
+ * Asset `type === 'video'` vengono renderizzati come `<video controls>` con
+ * `poster` opzionale. Le immagini continuano su next/image per l'ottimizzazione.
  */
 export async function CaseGallery({ section, index = '06' }: CaseGalleryProps) {
   const t = await getTranslations('lavori.detail');
@@ -36,6 +39,7 @@ export async function CaseGallery({ section, index = '06' }: CaseGalleryProps) {
             'col-span-12 md:col-span-4 md:mt-24',
             'col-span-12 md:col-span-7 md:col-start-3',
           ];
+          const isVideo = a.type === 'video' || !!a.video;
           return (
             <figure
               key={a.src + idx}
@@ -45,14 +49,25 @@ export async function CaseGallery({ section, index = '06' }: CaseGalleryProps) {
                 className="aspect-[16/10] overflow-hidden"
                 style={{ background: 'var(--color-line)' }}
               >
-                <Image
-                  src={a.src}
-                  alt={a.alt}
-                  width={a.width ?? 1600}
-                  height={a.height ?? 1200}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="w-full h-full object-cover"
-                />
+                {isVideo ? (
+                  <video
+                    src={a.video ?? a.src}
+                    poster={a.poster}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={a.src}
+                    alt={a.alt}
+                    width={a.width ?? 1600}
+                    height={a.height ?? 1200}
+                    sizes="(min-width: 1024px) 50vw, 100vw"
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               {a.alt && (
                 <figcaption

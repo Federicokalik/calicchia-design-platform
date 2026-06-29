@@ -10,6 +10,8 @@ export type SectionKind =
   | 'sequence'
   | 'gallery';
 
+export type AssetType = 'image' | 'video';
+
 export interface Asset {
   src: string;
   alt: string;
@@ -17,6 +19,12 @@ export interface Asset {
   height?: number;
   poster?: string;
   video?: string;
+  /**
+   * Discriminates image vs video assets. When absent, callers may infer from
+   * the `video` field presence or the `src` extension. The CaseGallery
+   * renderer branches on this to pick `<Image>` vs `<video>`.
+   */
+  type?: AssetType;
 }
 
 export interface Metric {
