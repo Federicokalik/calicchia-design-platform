@@ -18,6 +18,7 @@ import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { sql } from '../db';
 import { signFileUrl, savePrivateFile } from '../lib/private-files';
+import { publicApiUrl } from '../lib/public-url';
 import {
   sendWhatsAppText,
   sendWhatsAppMedia,
@@ -915,7 +916,7 @@ whatsappAdmin.post('/conversations/:id/messages', async (c) => {
     } else {
       const url = mediaUrl
         ? mediaUrl
-        : `${process.env.PUBLIC_API_URL || ''}/media/${mediaPath}`;
+        : `${publicApiUrl()}/media/${mediaPath}`;
       const res = await sendWhatsAppMedia(conv.phone, mediaCaption || text || '', url, fileName, mimetype, { replyToExternalId });
       externalId = res.externalId;
     }
