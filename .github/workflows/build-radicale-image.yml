@@ -1,0 +1,66 @@
+name: build-radicale-image
+
+# Builda l'immagine Docker custom di Radicale (plugin caldes_auth + caldes_storage)
+# e la pubblica su ghcr.io. Il container proxya CalDAV verso /api/caldav-backend/*
+# dell'API (Postgres unica fonte di verità). Vedi apps/radicale/README.md.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/radicale/**'
+      - '.github/workflows/build-radicale-image.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: build-radicale-image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: federicokalik/calicchia-radicale
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verifica sintassi plugin Python
+        run: |
+          python3 -m py_compile apps/radicale/plugins/caldes_auth.py
+          python3 -m py_compile apps/radicale/plugins/caldes_storage.py
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login a ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Estrai metadata immagine
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build e push immagine
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/radicale
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64

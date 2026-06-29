@@ -1,27 +1,32 @@
-# Radicale — config FASE 0 (spike trasporto).
-# Storage a FILE + auth htpasswd: serve SOLO a validare proxy/TLS/WebDAV/device.
-# In Fase 3 verrà sostituita da storage+auth plugin che parlano con l'API
-# (Postgres unica fonte di verità). NON è la config definitiva.
+# Radicale — config FASE 3 (backend Postgres via API).
+# Storage + auth plugin caldes_* parlano con /api/caldav-backend/* (Bearer
+# CALDAV_SERVICE_TOKEN). Postgres è l'unica fonte di verità: nessun file
+# storage lato Radicale, nessun htpasswd. Vedi apps/radicale/README.md.
 
 [server]
 # Loopback gestito da Docker; CloudPanel fa da TLS terminator davanti.
 hosts = 0.0.0.0:5232
 
 [auth]
-type = htpasswd
-# Il file utenti vive nel VOLUME persistente /data (radicale_data), NON nel
-# checkout git: così sopravvive ai redeploy di Dockhand (che possono ripulire i
-# file non tracciati nella working copy). Va creato a mano una volta (vedi README).
-htpasswd_filename = /data/users
-htpasswd_encryption = bcrypt
+# Plugin custom: valida Basic auth (username:app-password) chiamando
+# POST /api/caldav-backend/verify-credentials. Le app-password sono token
+# random hashati sha256 nella tabella caldav_app_passwords.
+type = caldes_auth
+# Backend URL interno (Docker app-net). Override via env CALDAV_BACKEND_URL.
+caldes_backend_url = http://api:3001/api/caldav-backend
+# Bearer secret letto da env CALDAV_SERVICE_TOKEN (NON committato qui).
 
 [storage]
-filesystem_folder = /data/collections
+# Plugin custom: thin client HTTP verso /api/caldav-backend/*. Nessun file.
+type = caldes_storage
+caldes_backend_url = http://api:3001/api/caldav-backend
+# Bearer secret letto da env CALDAV_SERVICE_TOKEN (NON committato qui).
 
 [rights]
-# owner_only: ogni utente vede solo le proprie collezioni (mono-utente OK).
+# owner_only: ogni utente vede solo le proprie collezioni. Mono-utente OK
+# (il principal viene dall'auth plugin = username dell'app-password).
 type = owner_only
 
 [logging]
-# Alza a debug se la discovery dei device non va.
+# Alza a debug per diagnosticare discovery/sync dei device.
 # level = debug

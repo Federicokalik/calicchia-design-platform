@@ -101,6 +101,7 @@ import { myWork } from './routes/my-work';
 import { mail } from './routes/mail';
 import { mcp } from './routes/mcp';
 import { mcpTokens } from './routes/mcp-tokens';
+import { caldavTokens } from './routes/caldav-tokens';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
@@ -465,6 +466,7 @@ const protectedPaths = [
   '/api/my-work',
   '/api/mail',
   '/api/mcp-tokens',
+  '/api/caldav-tokens',
   '/api/backup',
   '/api/whatsapp-admin',
   '/api/admin/kb',
@@ -532,6 +534,7 @@ app.route('/api/inbox', inbox);
 app.route('/api/my-work', myWork);
 app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
+app.route('/api/caldav-tokens', caldavTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
 app.route('/api/admin/kb', adminKb);
 app.route('/api/cms', cmsAdmin);

@@ -297,13 +297,19 @@ services:
     ports:
       - "127.0.0.1:3010:3000"
 
-  # CalDAV server — FASE 0 spike (storage a FILE + auth htpasswd). Vedi
-  # apps/radicale/README.md. In Fase 3 l'image diventerà l'immagine custom con i
-  # plugin che parlano con l'API (Postgres resta l'unica fonte di verità).
-  # Richiede sul server: apps/radicale/config/users (htpasswd, creato a mano) +
-  # vhost CloudPanel dav.calicchia.design → http://127.0.0.1:3011.
+  # CalDAV server — FASE 3 (backend Postgres via API). Vedi
+  # apps/radicale/README.md. L'immagine custom (build da apps/radicale/Dockerfile)
+  # include i plugin caldes_auth + caldes_storage che parlano con
+  # /api/caldav-backend/* (Bearer CALDAV_SERVICE_TOKEN). Postgres resta
+  # l'unica fonte di verità: nessun file storage, nessun htpasswd.
+  # Richiede sul server: env CALDAV_SERVICE_TOKEN + vhost CloudPanel
+  # dav.calicchia.design → http://127.0.0.1:3011.
+  # In produzione usare l'immagine pubblicata su ghcr (workflow CI); in dev
+  # locale `docker compose build radicale` builda dal Dockerfile.
   radicale:
-    image: tomsquest/docker-radicale:3.7.3.0
+    image: ghcr.io/federicokalik/calicchia-radicale:latest
+    build:
+      context: apps/radicale
     restart: always
     init: true
     security_opt:
@@ -316,14 +322,15 @@ services:
       - SETGID
       - KILL
     environment:
-      # Volume Docker (non bind-mount): il chown automatico di /data falliva
-      # ("chown: /data: Permission denied"). Lo saltiamo — il volume nasce già
-      # di proprietà dell'utente radicale (2999) ereditata dall'immagine.
-      # (NB: le env dell'immagine NON funzionano con read_only → niente read_only.)
+      # Niente più htpasswd / storage file: i plugin leggono tutto da env.
       TAKE_FILE_OWNERSHIP: "false"
+      # Bearer secret condiviso con l'API (caldavServiceAuth middleware).
+      # Generare con: openssl rand -hex 32. Deve matchare lato API.
+      CALDAV_SERVICE_TOKEN: ${CALDAV_SERVICE_TOKEN}
+      # URL interno dell'API su app-net (override della config default).
+      CALDAV_BACKEND_URL: http://api:3001/api/caldav-backend
     volumes:
       - ./apps/radicale/config:/config:ro
-      - radicale_data:/data
     networks:
       - app-net
     ports:
@@ -335,7 +342,6 @@ volumes:
   private_data:
   kb_data:
   valkey_data:
-  radicale_data:
 
 networks:
   app-net:

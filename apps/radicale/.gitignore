@@ -1,3 +1,4 @@
-# Il file utenti htpasswd contiene un hash di password: NON committarlo.
-# Va creato a mano sul server in apps/radicale/config/users (vedi README).
+# Fase 0 deprecata: l'htpasswd non è più usato (auth via app-password DB).
+# Lasciato per evitare di committare eventuali file users residui da vecchi
+# deploy. Puoi rimuoverlo dal server dopo la migrazione Fase 3.
 config/users

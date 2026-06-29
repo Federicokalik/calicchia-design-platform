@@ -1,0 +1,3 @@
+# Nessuna dipendenza extra — i plugin usano solo stdlib Python + vobject
+# (già installato nell'immagine base tomsquest/docker-radicale).
+# File mantenuto per future estensioni (es. icalendar se serve parsing lato plugin).

@@ -4,8 +4,7 @@
  * calendario esistenti. Mai esposti dal reverse proxy pubblico; protetti da
  * `caldavServiceAuth` (Bearer CALDAV_SERVICE_TOKEN) montato in app.ts.
  *
- * FASE 1: sola lettura + verifica credenziali. La scrittura (PUT/DELETE) arriva
- * in Fase 2.
+ * Copre lettura + scrittura (PUT/DELETE) + auth device (app-password).
  */
 
 import { Hono } from 'hono';
