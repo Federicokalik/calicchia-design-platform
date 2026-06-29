@@ -144,8 +144,12 @@ async function openSession(row: SessionRow): Promise<void> {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         `--display=${DISPLAY}`,
-        '--start-maximized',
-        '--window-size=1280,900',
+        // Catture 2x nitide: la finestra riempie il framebuffer Xvfb 4K e DSF 2
+        // dà un viewport CSS 1920×1080 renderizzato a 3840×2160 fisici → lo
+        // screenshot WYSIWYG esce ~3840px (retina). Xvfb è 3840x2160 nel
+        // Dockerfile; senza, riduci entrambi in proporzione.
+        '--force-device-scale-factor=2',
+        '--window-size=3840,2160',
       ],
     });
   } catch (e) {
@@ -227,6 +231,7 @@ async function snapSession(row: SessionRow): Promise<void> {
   try {
     const page = await frontPage(s.browser);
     if (!page) throw new Error('nessuna pagina aperta nel browser');
+    await page.bringToFront().catch(() => {}); // assicura che sia il tab renderizzato/attivo
 
     await new Promise((r) => setTimeout(r, 300)); // settle lazy content
 
@@ -314,6 +319,22 @@ async function tick(): Promise<void> {
         if (s) await teardown(s);
       }
     }
+  }
+
+  // 2b. Orphaned controls: snap/close requests for sessions this worker does
+  //     NOT hold in `active` (opened by a previous instance, or active lost on
+  //     restart). Senza questo resterebbero appese in *_requested per sempre.
+  //     close → 'closed'; snap → 'open' così l'admin può riaprire.
+  const heldIds = activeIds.length ? activeIds : ['00000000-0000-0000-0000-000000000000'];
+  const orphans = await sql`
+    SELECT id, status FROM capture_sessions
+    WHERE status IN ('snap_requested', 'close_requested')
+      AND id <> ALL(${heldIds}::uuid[])
+  ` as { id: string; status: string }[];
+  for (const r of orphans) {
+    const next = r.status === 'close_requested' ? 'closed' : 'open';
+    await sql`UPDATE capture_sessions SET status = ${next}, updated_at = NOW() WHERE id = ${r.id}`;
+    log.warn({ id: r.id, from: r.status, to: next }, 'orphaned control reconciled');
   }
 
   // 3. Open new pending sessions up to the concurrency cap.

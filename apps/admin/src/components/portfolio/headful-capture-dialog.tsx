@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MonitorSmartphone, Loader2, ExternalLink, Camera, Maximize2, X, Plus } from 'lucide-react';
+import { MonitorSmartphone, Loader2, ExternalLink, Camera, Maximize2, X, Plus, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -55,8 +55,9 @@ const HEADFUL_ENABLED = import.meta.env.VITE_CAPTURE_HEADFUL_ENABLED === 'true';
  *  - "Cattura questa vista" (WYSIWYG): the worker screenshots the current
  *    viewport at the current scroll — exactly what's on screen in the iframe.
  *  - "Pagina intera": the full scrollable page.
- * The framing decision lives server-side (snap_mode) because the admin sees
- * only noVNC pixels, not the remote DOM — it can't read the remote scroll.
+ *
+ * Feedback: a new screenshot pops a toast + preview; a failed snap surfaces
+ * last_error inline; closing shows an explicit "Sessione chiusa" state.
  *
  * Gated by VITE_CAPTURE_HEADFUL_ENABLED so the button never shows unless the
  * operator wired CAPTURE_HEADFUL_ENABLED on the API + worker at build/deploy.
@@ -70,6 +71,7 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
   const [error, setError] = useState<string | null>(null);
   const [captured, setCaptured] = useState<{ url: string } | null>(null);
   const pollRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastCapUrlRef = useRef<string | null>(null);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -86,7 +88,12 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
           const data = await apiFetch(`/api/projects/${projectId}/capture/session/${sid}`);
           const s: CaptureSession = data.session;
           setSession(s);
-          if (s.last_capture_url) setCaptured({ url: s.last_capture_url });
+          // New screenshot ready → preview + explicit confirmation (once).
+          if (s.last_capture_url && s.last_capture_url !== lastCapUrlRef.current) {
+            lastCapUrlRef.current = s.last_capture_url;
+            setCaptured({ url: s.last_capture_url });
+            toast.success('Screenshot catturato ✓');
+          }
           if (s.status === 'closed' || s.status === 'error') {
             stopPolling();
             return;
@@ -108,6 +115,16 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
     return stopPolling;
   }, [open, stopPolling]);
 
+  const resetForNew = () => {
+    stopPolling();
+    setSessionId(null);
+    setSession(null);
+    setCaptured(null);
+    setError(null);
+    lastCapUrlRef.current = null;
+    setUrl(defaultUrl);
+  };
+
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
     if (next) {
@@ -116,6 +133,7 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
       setSession(null);
       setError(null);
       setCaptured(null);
+      lastCapUrlRef.current = null;
     } else if (sessionId) {
       // If a session is still open server-side, request close so the worker
       // tears down Chromium + VNC and persists the profile.
@@ -204,6 +222,7 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
   const isOpen = session?.status === 'open' || session?.status === 'snap_requested' || session?.status === 'snap_done';
   const isSnapping = session?.status === 'snap_requested';
   const isClosing = session?.status === 'close_requested';
+  const isClosed = session?.status === 'closed';
   const isError = session?.status === 'error';
 
   return (
@@ -217,7 +236,7 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
         <MonitorSmartphone className="h-3.5 w-3.5 mr-1.5" />
         Apri browser remoto (login)
       </button>
-      <DialogContent className={sessionId ? 'sm:max-w-5xl' : 'sm:max-w-2xl'}>
+      <DialogContent className={sessionId && !isClosed ? 'sm:max-w-5xl' : 'sm:max-w-2xl'}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <MonitorSmartphone className="h-4 w-4" />
@@ -242,6 +261,21 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
                 Il worker apre un browser reale, naviga qui, e te lo mostra qui sotto via noVNC. Il profilo Chrome
                 sopravvive tra sessioni: il login fatto oggi resta valido anche a catture successive.
               </p>
+            </div>
+          ) : isClosed ? (
+            <div className="space-y-3 py-4 text-center">
+              <CheckCircle2 className="h-8 w-8 mx-auto text-emerald-500" />
+              <div>
+                <p className="text-sm font-semibold">Sessione chiusa</p>
+                <p className="text-xs text-muted-foreground">
+                  Il browser remoto è stato chiuso e il profilo Chrome salvato per la prossima volta.
+                </p>
+              </div>
+              {captured ? (
+                <div className="max-h-64 overflow-auto rounded border bg-muted text-left">
+                  <img src={captured.url} alt="Headful capture" className="w-full" />
+                </div>
+              ) : null}
             </div>
           ) : (
             <>
@@ -285,16 +319,21 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
                 {isClosing ? ' — chiusura in corso…' : null}
               </div>
 
-              {isError ? (
+              {/* Failure surfacing: a snap that fails reverts the session to
+                  'open' with last_error set — show it so it's not invisible. */}
+              {session?.last_error && !captured ? (
                 <p className="text-xs text-destructive">
-                  Errore: {session?.last_error ?? 'sconosciuto'}. Chiudi e riprova.
+                  Ultima cattura fallita: {session.last_error}. Riprova.
                 </p>
               ) : null}
 
               {/* Captured preview */}
               {captured ? (
                 <div className="space-y-2">
-                  <p className="text-xs font-semibold">Screenshot pronto:</p>
+                  <p className="text-xs font-semibold flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    Screenshot pronto:
+                  </p>
                   <div className="max-h-64 overflow-auto rounded border bg-muted">
                     <img src={captured.url} alt="Headful capture" className="w-full" />
                   </div>
@@ -304,6 +343,11 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
           )}
 
           {error ? <p className="text-xs text-destructive">{error}</p> : null}
+          {isError ? (
+            <p className="text-xs text-destructive">
+              Errore sessione: {session?.last_error ?? 'sconosciuto'}. Chiudi e riprova.
+            </p>
+          ) : null}
         </div>
 
         <DialogFooter className="gap-2 sm:gap-2">
@@ -312,10 +356,23 @@ export function HeadfulCaptureDialog({ projectId, defaultUrl, onPushToGallery }:
               {busy ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <MonitorSmartphone className="h-3.5 w-3.5 mr-1.5" />}
               Avvia sessione
             </Button>
+          ) : isClosed ? (
+            <div className="flex flex-wrap gap-2">
+              {captured ? (
+                <Button type="button" size="sm" variant="default" onClick={pushToGallery} className="h-8">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  Aggiungi alla galleria
+                </Button>
+              ) : null}
+              <Button type="button" size="sm" variant="outline" onClick={resetForNew} className="h-8">
+                <MonitorSmartphone className="h-3.5 w-3.5 mr-1.5" />
+                Nuova sessione
+              </Button>
+            </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Button type="button" size="sm" variant="outline" onClick={closeSession} disabled={busy} className="h-8">
-                <X className="h-3.5 w-3.5 mr-1.5" />
+              <Button type="button" size="sm" variant="outline" onClick={closeSession} disabled={busy || isClosing} className="h-8">
+                {isClosing ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <X className="h-3.5 w-3.5 mr-1.5" />}
                 Chiudi sessione
               </Button>
               {isOpen ? (

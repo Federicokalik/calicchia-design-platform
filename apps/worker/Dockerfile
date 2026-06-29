@@ -73,4 +73,4 @@ WORKDIR /app/apps/worker
 # No HEALTHCHECK: the worker exposes no port of its own while idle (websockify
 # only listens during an open session), so `restart: always` in compose is the
 # liveness signal.
-CMD ["sh", "-c", "rm -f /tmp/.X99-lock /tmp/.X11-unix/X99; Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & sleep 2 && pnpm exec tsx src/index.ts"]
+CMD ["sh", "-c", "rm -f /tmp/.X99-lock /tmp/.X11-unix/X99; Xvfb :99 -screen 0 3840x2160x24 -nolisten tcp & sleep 2 && pnpm exec tsx src/index.ts"]
