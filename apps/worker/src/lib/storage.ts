@@ -10,7 +10,7 @@
  */
 import { mkdirSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import { dirname, join, resolve } from 'path';
+import { dirname, isAbsolute, join, relative, resolve } from 'path';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || '/data/uploads';
 // Public base used to build the URL the admin loads. In compose the worker
@@ -28,8 +28,11 @@ mkdirSync(UPLOAD_DIR, { recursive: true });
 function safeJoin(key: string): string {
   const target = resolve(join(UPLOAD_DIR, key));
   // Reject path traversal — a key is operator-supplied via the project slug.
-  const rel = target.slice(RESOLVED_BASE.length);
-  if (rel.startsWith('..') || resolve(rel) === rel) {
+  // NB: lo slice precedente lasciava il "/" iniziale (rel = "/projects/…"),
+  // così resolve(rel)===rel era SEMPRE vero → throw anche per path validi (lo
+  // screenshot headful non si salvava mai). relative()+isAbsolute() è corretto.
+  const rel = relative(RESOLVED_BASE, target);
+  if (!rel || rel.startsWith('..') || isAbsolute(rel)) {
     throw new Error('Invalid storage path');
   }
   return target;
