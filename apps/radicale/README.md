@@ -157,8 +157,9 @@ possibile rimuoverli (erano già gitignored).
 - **401 Unauthorized:** app-password sbagliata o revocata. Creane una nuova
   via `/api/caldav-tokens`.
 - ** calendari vuoti:** il principal deve matchare l'username dell'app-password.
-  Di default `federico`. I calendari sono visibili se `ics_feed_enabled=true`
-  nella tabella `calendars` (flag riusato per il CalDAV).
+  Di default `federico`. Tutti i calendari della tabella `calendars` sono
+  visibili via CalDAV (il flag `ics_feed_enabled` controlla solo il feed ICS
+  pubblico read-only, non il CalDAV).
 - **sync ricorrenze rotte:** il backend supporta RRULE/EXDATE/RECURRENCE-ID
   (vedi `ics-feed.ts` e `caldav-backend.ts` PUT). Se un device manda
   estensioni non supportate, l'evento viene salvato come singolo.
