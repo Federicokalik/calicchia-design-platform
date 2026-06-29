@@ -156,11 +156,15 @@ async function dismissCookies(page: import('puppeteer').Page): Promise<void> {
  * shot. Mirrors capture-pooltech.mjs step logic.
  */
 async function triggerLazyLoad(page: import('puppeteer').Page): Promise<void> {
+  // Scroll granulare e lento: dà tempo a IntersectionObserver/lazy-load di far
+  // comparire le sezioni e caricare le immagini prima dello shot fullPage.
   const totalH = (await page.evaluate(() => document.body.scrollHeight)) ?? 0;
-  for (let y = 0; y < totalH; y += 800) {
+  for (let y = 0; y < totalH; y += 500) {
     await page.evaluate((yy) => window.scrollTo(0, yy), y);
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, 400));
   }
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await new Promise((r) => setTimeout(r, 500));
   await page.evaluate(() => window.scrollTo(0, 0));
   await new Promise((r) => setTimeout(r, 600));
 }
@@ -187,6 +191,16 @@ async function shootViewport(
     await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 45_000 });
     await page.waitForNetworkIdle({ idleTime: 500, timeout: 8_000 }).catch(() => {});
     await dismissCookies(page);
+    // Neutralizza animazioni/transizioni e forza visibili gli elementi con
+    // scroll-reveal (AOS/WOW/fade-in): senza, le sezioni che compaiono
+    // on-scroll finivano bianche/mancanti nello screenshot.
+    await page
+      .addStyleTag({
+        content:
+          '*,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important;transition-delay:0s!important;scroll-behavior:auto!important}' +
+          '[data-aos],.aos-init,.wow,.reveal,.fade-in,[class*="reveal"],[class*="fadeIn"],[class*="fade-in"]{opacity:1!important;transform:none!important}',
+      })
+      .catch(() => {});
     await new Promise((r) => setTimeout(r, 1200));
 
     let buffer: Buffer;
