@@ -14,9 +14,10 @@
  *                     websockify(novnc), navigates to target_url, sets
  *                     status='open' + vnc_url.
  *   open            → admin opens vnc_url, logs in, navigates. Idle.
- *   snap_requested  → admin asked for a screenshot at the current scroll /
- *                     viewport. Worker shoots webp, writes to the shared
- *                     uploads volume, sets status='snap_done' + last_capture_url.
+ *   snap_requested  → admin asked for a screenshot. snap_mode='viewport' shoots
+ *                     exactly the current view (WYSIWYG), 'fullpage' the whole
+ *                     page. Worker writes webp to the shared uploads volume,
+ *                     sets status='snap_done' + last_capture_url.
  *   snap_done       → admin previews the webp, pushes to gallery, then closes.
  *   close_requested → admin closed. Worker tears down Chromium + VNC, persists
  *                     the profile, sets status='closed'.
@@ -66,6 +67,7 @@ interface SessionRow {
   viewport_width: number | null;
   viewport_height: number | null;
   scroll_y: number | null;
+  snap_mode: string | null;
 }
 
 interface ActiveSession {
@@ -197,6 +199,23 @@ function hasVncRunning(): boolean {
   return false;
 }
 
+/**
+ * The page the operator is actually looking at. With a single tab this is
+ * pages[0], but login flows often spawn extra tabs — pick the foreground
+ * (visible) one so a WYSIWYG snap captures what they see in the noVNC window.
+ */
+async function frontPage(browser: Browser) {
+  const pages = await browser.pages();
+  for (const p of pages) {
+    try {
+      if (await p.evaluate(() => document.visibilityState === 'visible')) return p;
+    } catch {
+      /* page mid-navigation — skip */
+    }
+  }
+  return pages[pages.length - 1] ?? pages[0];
+}
+
 async function snapSession(row: SessionRow): Promise<void> {
   const s = active.get(row.id);
   if (!s) {
@@ -206,30 +225,26 @@ async function snapSession(row: SessionRow): Promise<void> {
     return;
   }
   try {
-    const pages = await s.browser.pages();
-    const page = pages[0];
+    const page = await frontPage(s.browser);
     if (!page) throw new Error('nessuna pagina aperta nel browser');
 
-    const vw = row.viewport_width ?? undefined;
-    const vh = row.viewport_height ?? undefined;
-    if (vw && vh) {
-      await page.setViewport({ width: vw, height: vh, deviceScaleFactor: 2 });
-    }
-    if (row.scroll_y && row.scroll_y > 0) {
-      await page.evaluate((y) => window.scrollTo(0, y), row.scroll_y);
-    }
-    await new Promise((r) => setTimeout(r, 600)); // settle lazy content
+    await new Promise((r) => setTimeout(r, 300)); // settle lazy content
 
-    const isClip = !!(vw && vh);
+    // 'fullpage' → entire scrollable page. Otherwise WYSIWYG: screenshot the
+    // current viewport at the current scroll — exactly what the operator sees
+    // in the noVNC window. No setViewport / no scrollTo: any re-framing would
+    // break the WYSIWYG promise (the admin can't read the remote DOM, so the
+    // framing must be whatever they left the live browser at).
+    const fullPage = row.snap_mode === 'fullpage';
     const buffer = (await page.screenshot({
       type: 'webp',
       quality: 90,
-      ...(isClip ? { clip: { x: 0, y: 0, width: vw!, height: vh! } } : { fullPage: true }),
+      fullPage,
     })) as Buffer;
 
     const [proj] = await sql`SELECT slug FROM projects WHERE id = ${row.project_id}`;
     const slug = (proj?.slug as string) || `project-${row.project_id}`;
-    const label = 'headful';
+    const label = fullPage ? 'headful-full' : 'headful';
     const { url, key } = await saveCapture(buffer, slug, label);
 
     await sql`
@@ -237,7 +252,7 @@ async function snapSession(row: SessionRow): Promise<void> {
       SET status = 'snap_done', last_capture_url = ${url}, updated_at = NOW()
       WHERE id = ${row.id}
     `;
-    log.info({ id: row.id, url, key }, 'snap done');
+    log.info({ id: row.id, url, key, mode: fullPage ? 'fullpage' : 'viewport' }, 'snap done');
   } catch (e) {
     log.error({ err: e, id: row.id }, 'snap failed');
     await sql`

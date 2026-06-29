@@ -653,11 +653,9 @@ projects.get('/:id/capture/session/:sid', async (c) => {
 projects.post('/:id/capture/session/:sid/snap', async (c) => {
   if (!HEADFUL_ENABLED) return headfulDisabled(c);
   const sid = c.req.param('sid');
-  const body = await c.req.json<{
-    viewportWidth?: number;
-    viewportHeight?: number;
-    scrollY?: number;
-  }>().catch(() => ({} as { viewportWidth?: number; viewportHeight?: number; scrollY?: number }));
+  const body = await c.req
+    .json<{ mode?: 'viewport' | 'fullpage' }>()
+    .catch(() => ({} as { mode?: 'viewport' | 'fullpage' }));
 
   const [row] = await sql`SELECT status FROM capture_sessions WHERE id = ${sid}`;
   if (!row) return c.json({ error: 'Sessione non trovata' }, 404);
@@ -665,15 +663,14 @@ projects.post('/:id/capture/session/:sid/snap', async (c) => {
     return c.json({ error: `Sessione non è aperta (status=${row.status})` }, 400);
   }
 
-  const vw = body.viewportWidth && body.viewportWidth > 0 ? body.viewportWidth : null;
-  const vh = body.viewportHeight && body.viewportHeight > 0 ? body.viewportHeight : null;
-  const sy = typeof body.scrollY === 'number' && body.scrollY >= 0 ? body.scrollY : null;
+  // 'viewport' = WYSIWYG (ciò che l'operatore vede ora nel noVNC),
+  // 'fullpage' = intera pagina scrollabile. Default WYSIWYG. Il worker
+  // legge snap_mode dalla riga e scatta di conseguenza (no re-framing).
+  const mode = body.mode === 'fullpage' ? 'fullpage' : 'viewport';
 
   await sql`
     UPDATE capture_sessions
-    SET viewport_width = ${vw},
-        viewport_height = ${vh},
-        scroll_y = ${sy},
+    SET snap_mode = ${mode},
         status = 'snap_requested',
         updated_at = NOW()
     WHERE id = ${sid}

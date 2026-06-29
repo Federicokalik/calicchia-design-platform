@@ -74,13 +74,17 @@ Un worker dedicato risolve tutto:
    .profiles/<projectId> })` dentro xvfb (`xvfb-run -a`).
 4. Worker espone il browser via **noVNC** sul host:port configurato
    (es. `6080`), ritorna URL al admin: `https://worker.local:6080/vnc.html`.
-5. Admin apre l'URL in un iframe/new tab, fa login, naviga.
-6. Admin clicca "Cattura qui" nel dialog →
+5. Admin pilota il browser remoto **dentro un iframe noVNC** nel dialog
+   (o "a schermo intero" in una nuova scheda), fa login, naviga.
+6. Admin clicca "Cattura questa vista" (WYSIWYG) o "Pagina intera" →
    `POST /api/projects/:id/capture/session/:sessionId/snap` →
-   API aggiorna la row con `{ status: 'snap_requested', scrollY, viewport }`.
-7. Worker picka, fa lo screenshot alla viewport + scroll corrente, salva
-   via `uploadFile` (stesso path della Fase 2), aggiorna la row con
-   `status: 'snap_done'` + l'URL del webp.
+   API aggiorna la row con `{ status: 'snap_requested', snap_mode }`
+   (`viewport` | `fullpage`, migration 142).
+7. Worker picka, screenshotta il tab in primo piano: in modalità `viewport`
+   cattura *esattamente* il viewport corrente allo scroll corrente (nessun
+   re-framing — l'admin vede solo i pixel noVNC, non il DOM remoto), in
+   `fullpage` l'intera pagina. Salva via `saveCapture` (stesso path della
+   Fase 2), aggiorna la row con `status: 'snap_done'` + l'URL del webp.
 8. Admin polling o SSE sull'endpoint di stato → ottiene l'URL → chiude.
 9. `POST /api/projects/:id/capture/session/:sessionId/close` →
    worker chiude browser, persiste `userDataDir`, status `closed`.
@@ -166,16 +170,18 @@ CREATE INDEX idx_capture_sessions_project ON capture_sessions(project_id, create
 
 ## UI admin da aggiungere (Fase 3)
 
-In `apps/admin/src/components/portfolio/capture-dialog.tsx`:
+In `apps/admin/src/components/portfolio/headful-capture-dialog.tsx` (montato in
+`capture-dialog.tsx`, gated da `VITE_CAPTURE_HEADFUL_ENABLED`):
 
-- Nuova `source: 'live'` → mostra pulsante secondario "Apri browser remoto (login)"
-  quando il feature flag `NEXT_PUBLIC_CAPTURE_HEADFUL_ENABLED` è on.
-- Dialog secondario "Browser remoto aperto" con:
-  - link noVNC (`vnc_url`) apribile in nuova scheda
-  - campo "viewport" e "scroll Y" opzionali per lo snap
-  - pulsante "Cattura qui" → POST `/session/:sid/snap`
-  - stato polling che mostra l'URL del webp quando pronto
-  - pulsante "Chiudi sessione"
+- pulsante "Apri browser remoto (login)" quando il flag è on.
+- Dialog con:
+  - **iframe noVNC inline** (`vnc_url`) — l'admin clicca dentro e pilota il
+    browser remoto direttamente nel dialog; link "Apri a schermo intero" come
+    fallback in nuova scheda
+  - pulsante "Cattura questa vista" → POST `/session/:sid/snap` `{mode:'viewport'}`
+  - pulsante "Pagina intera" → `{mode:'fullpage'}`
+  - stato polling che mostra l'anteprima del webp quando pronto
+  - "Aggiungi alla galleria" + "Chiudi sessione"
 
 ## Feature flag
 
