@@ -64,7 +64,13 @@ WORKDIR /app/apps/worker
 
 # Xvfb in background (single shared :99 display), then the polling worker.
 # The worker spawns x11vnc + websockify per-session as needed.
+#
+# `rm -f /tmp/.X99-lock` first: a container *restart* (restart: always) keeps
+# the writable layer, so a stale lock from the previous run makes Xvfb abort
+# with "Server is already active for display 99" → no X server → Chromium
+# headful fails ("Missing X server"). Removing it makes every start clean.
+#
 # No HEALTHCHECK: the worker exposes no port of its own while idle (websockify
 # only listens during an open session), so `restart: always` in compose is the
 # liveness signal.
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & sleep 1 && pnpm exec tsx src/index.ts"]
+CMD ["sh", "-c", "rm -f /tmp/.X99-lock /tmp/.X11-unix/X99; Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & sleep 2 && pnpm exec tsx src/index.ts"]
