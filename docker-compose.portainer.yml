@@ -336,12 +336,65 @@ services:
     ports:
       - "127.0.0.1:3011:5232"
 
+  # Headful capture worker — FASE 3 (apps/worker). Polla capture_sessions
+  # per driveare Chromium headful + xvfb + noVNC, così l'admin può loggarsi
+  # manualmente su siti dietro login e catturare. Il profilo Chrome per
+  # progetto sopravvive (volume profiles_data), riusabile da capture
+  # headless successive. Gating: CAPTURE_HEADFUL_ENABLED; se off il worker
+  # gira ma le API rifiutano le session endpoints (503) e l'admin non
+  # mostra il pulsante (VITE_CAPTURE_HEADFUL_ENABLED build-time).
+  # Richiede sul server: vhost CloudPanel capture.calicchia.design →
+  # http://127.0.0.1:3012 (per esporre noVNC all'admin via TLS).
+  # In produzione usare l'immagine pubblicata su ghcr (workflow CI); in
+  # dev locale `docker compose build worker` builda dal Dockerfile.
+  worker:
+    image: ghcr.io/federicokalik/calicchia-worker:latest
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    restart: always
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      # URL pubblico dell'API — serve al worker per costruire l'URL pubblico
+      # dei webp che scrive nel volume uploads condiviso (l'admin li mostra
+      # dal browser sull'origine pubblica, non dalla rete interna).
+      API_URL: ${API_URL}
+      PUBLIC_API_URL: ${PUBLIC_API_URL:-${API_URL}}
+      CAPTURE_HEADFUL_ENABLED: ${CAPTURE_HEADFUL_ENABLED:-false}
+      CAPTURE_PROFILES_DIR: /data/profiles
+      UPLOAD_DIR: /data/uploads
+      CAPTURE_VNC_BASE_URL: ${CAPTURE_VNC_BASE_URL:-https://capture.calicchia.design}
+      CAPTURE_WORKER_VNC_PORT: "6080"
+      # Tuning opzionale (defaults: poll 2s, concurrency 1, ttl 30min).
+      CAPTURE_WORKER_POLL_MS: ${CAPTURE_WORKER_POLL_MS:-2000}
+      CAPTURE_WORKER_CONCURRENCY: ${CAPTURE_WORKER_CONCURRENCY:-1}
+      CAPTURE_SESSION_TTL_MS: ${CAPTURE_SESSION_TTL_MS:-1800000}
+    volumes:
+      - uploads_data:/data/uploads
+      - profiles_data:/data/profiles
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - app-net
+    # noVNC web client sul loopback → CloudPanel proxa il subdomain
+    # capture.calicchia.design verso http://127.0.0.1:3012.
+    ports:
+      - "127.0.0.1:3012:6080"
+
 volumes:
   postgres_data:
   uploads_data:
   private_data:
   kb_data:
   valkey_data:
+  profiles_data:
 
 networks:
   app-net:
