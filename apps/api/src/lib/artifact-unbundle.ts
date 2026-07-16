@@ -20,6 +20,34 @@ interface ManifestEntry {
   compressed?: boolean;
 }
 
+export interface CleanReport {
+  scripts: number;
+  noscript: number;
+  uiButtons: number;
+  inlineHandlers: number;
+}
+
+/**
+ * Normalize an uploaded quote document for print: the PDF is a static
+ * artifact, so active content only adds nondeterminism (and script execution
+ * inside server-side Chrome). Removes:
+ *  - <script> blocks (animations, loaders — never needed in print)
+ *  - <noscript> fallbacks
+ *  - screen-only UI buttons (e.g. the artifact "print / save PDF" bar)
+ *  - inline event handlers (onclick, onload, …)
+ * Layout/CSS is left untouched.
+ */
+export function cleanCustomQuoteHtml(html: string): { html: string; report: CleanReport } {
+  const report: CleanReport = { scripts: 0, noscript: 0, uiButtons: 0, inlineHandlers: 0 };
+
+  let out = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, () => { report.scripts++; return ''; });
+  out = out.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, () => { report.noscript++; return ''; });
+  out = out.replace(/<button\b[^>]*class="[^"]*(?:no-print|print-bar)[^"]*"[^>]*>[\s\S]*?<\/button>/gi, () => { report.uiButtons++; return ''; });
+  out = out.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, () => { report.inlineHandlers++; return ''; });
+
+  return { html: out, report };
+}
+
 export function unbundleArtifactHtml(html: string): string | null {
   const manifestMatch = /<script type="__bundler\/manifest">([\s\S]*?)<\/script>/.exec(html);
   const templateMatch = /<script type="__bundler\/template">([\s\S]*?)<\/script>/.exec(html);

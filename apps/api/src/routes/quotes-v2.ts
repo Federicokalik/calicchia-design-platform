@@ -22,7 +22,7 @@ import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../li
 import { renderQuoteHtml, injectSignatureIntoCustomHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
 import { savePrivateFile, readPrivateFile } from '../lib/private-files';
-import { unbundleArtifactHtml } from '../lib/artifact-unbundle';
+import { unbundleArtifactHtml, cleanCustomQuoteHtml } from '../lib/artifact-unbundle';
 import {
   generateQuoteDraft,
   generateQuoteFromMarkdown,
@@ -205,6 +205,11 @@ quotesV2.post('/import-html', async (c) => {
   const unbundled = unbundleArtifactHtml(html);
   if (unbundled) html = unbundled;
 
+  // Cleaner: strip active content and screen-only UI — the stored document is
+  // a static print artifact (also keeps scripts out of server-side Chrome).
+  const cleaned = cleanCustomQuoteHtml(html);
+  html = cleaned.html;
+
   const totale = Number(body.totale);
   if (!Number.isFinite(totale) || totale < 0) {
     return c.json({ error: 'Totale mancante o non valido' }, 400);
@@ -253,7 +258,7 @@ quotesV2.post('/import-html', async (c) => {
     RETURNING id, title
   `;
 
-  return c.json({ quote_id: rows[0].id, title: rows[0].title }, 201);
+  return c.json({ quote_id: rows[0].id, title: rows[0].title, cleaned: cleaned.report }, 201);
 });
 
 // POST /api/quotes-v2 — create quote
