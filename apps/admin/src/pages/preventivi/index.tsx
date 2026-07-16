@@ -81,8 +81,13 @@ export default function PreventiviPage() {
       queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
       setImportOpen(false);
       toast.success('Bozza generata — rivedila prima di inviare');
-      navigate(`/preventivi/${res.quote_id}`, {
-        state: { suggestedCustomers: res.suggested_customers || [] },
+      // → editor (not detail): the draft needs review, and the customer
+      //   suggestion banner lives there.
+      navigate(`/preventivi/${res.quote_id}/edit`, {
+        state: {
+          suggestedCustomers: res.suggested_customers || [],
+          clientHint: res.client_hint || null,
+        },
       });
     },
     onError: (err: any) => toast.error(err?.message || 'Generazione fallita'),

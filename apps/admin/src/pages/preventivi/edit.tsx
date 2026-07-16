@@ -83,6 +83,41 @@ export default function PreventivoEditorPage() {
   const [suggestedCustomers, setSuggestedCustomers] = useState<any[]>(
     () => (location.state as any)?.suggestedCustomers || [],
   );
+  // Client identity extracted from the brief's frontmatter — offered as
+  // "create & link" when no existing customer matches.
+  const [clientHint, setClientHint] = useState<{ nome: string; piva: string; referente: string } | null>(
+    () => (location.state as any)?.clientHint || null,
+  );
+  const [creatingCustomer, setCreatingCustomer] = useState(false);
+
+  const createAndLinkCustomer = async () => {
+    if (!clientHint) return;
+    setCreatingCustomer(true);
+    try {
+      const res = await apiFetch('/api/customers', {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: clientHint.nome || null,
+          contact_name: clientHint.referente || clientHint.nome,
+          billing_address: clientHint.piva ? { vat_number: clientHint.piva } : {},
+          createOnStripe: false,
+        }),
+      });
+      if (res?.customer?.id) {
+        setCustomerId(res.customer.id);
+        setClientHint(null);
+        setSuggestedCustomers([]);
+        queryClient.invalidateQueries({ queryKey: ['customers-select'] });
+        toast.success(`Cliente "${clientHint.nome || clientHint.referente}" creato e collegato — ricorda di salvare`);
+      } else {
+        toast.error('Creazione cliente fallita');
+      }
+    } catch (e: any) {
+      toast.error(e?.message || 'Creazione cliente fallita');
+    } finally {
+      setCreatingCustomer(false);
+    }
+  };
 
   // Header fields
   const [title, setTitle] = useState('');
@@ -539,10 +574,12 @@ export default function PreventivoEditorPage() {
       </div>
 
       {/* Customer suggestion banner (Markdown import) */}
-      {suggestedCustomers.length > 0 && !customerId && (
+      {(suggestedCustomers.length > 0 || clientHint) && !customerId && (
         <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-2">
-          <p className="text-xs font-semibold">Possibile cliente esistente trovato nel brief</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-xs font-semibold">
+            {suggestedCustomers.length > 0 ? 'Possibile cliente esistente trovato nel brief' : 'Cliente indicato nel brief'}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
             {suggestedCustomers.map((s: any) => (
               <div key={s.id} className="flex items-center gap-2 rounded border bg-card px-2.5 py-1.5 text-xs">
                 <span>
@@ -553,13 +590,31 @@ export default function PreventivoEditorPage() {
                 <Button
                   size="sm"
                   className="h-6 text-[11px]"
-                  onClick={() => { setCustomerId(s.id); setSuggestedCustomers([]); }}
+                  onClick={() => { setCustomerId(s.id); setSuggestedCustomers([]); setClientHint(null); toast.success('Cliente collegato — ricorda di salvare'); }}
                 >
                   Collega
                 </Button>
               </div>
             ))}
-            <Button variant="ghost" size="sm" className="h-6 text-[11px]" onClick={() => setSuggestedCustomers([])}>
+            {clientHint && (
+              <div className="flex items-center gap-2 rounded border border-dashed bg-card px-2.5 py-1.5 text-xs">
+                <span>
+                  <b>{clientHint.nome || clientHint.referente}</b>
+                  {clientHint.piva ? ` · P.IVA ${clientHint.piva}` : ''}
+                  {clientHint.referente && clientHint.nome ? ` · Rif. ${clientHint.referente}` : ''}
+                </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-6 text-[11px]"
+                  disabled={creatingCustomer}
+                  onClick={createAndLinkCustomer}
+                >
+                  {creatingCustomer ? 'Creazione…' : 'Crea e collega'}
+                </Button>
+              </div>
+            )}
+            <Button variant="ghost" size="sm" className="h-6 text-[11px]" onClick={() => { setSuggestedCustomers([]); setClientHint(null); }}>
               Ignora
             </Button>
           </div>

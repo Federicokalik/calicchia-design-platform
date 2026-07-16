@@ -140,7 +140,7 @@ quotesV2.post('/generate-from-markdown', async (c) => {
     const { draft, frontmatter } = await generateQuoteFromMarkdown(parseResult.data, { idempotencyKey });
 
     // Best-effort customer suggestions from the frontmatter — never binding.
-    const nameHint = String(frontmatter.cliente || frontmatter.referente || '').trim();
+    const nameHint = String(frontmatter.cliente || '').trim() || String(frontmatter.referente || '').trim();
     const pivaHint = String(frontmatter.cliente_piva || frontmatter.piva_cliente || '').replace(/\s+/g, '');
     let suggested: readonly object[] = [];
     if (nameHint || pivaHint) {
@@ -158,7 +158,17 @@ quotesV2.post('/generate-from-markdown', async (c) => {
       }
     }
 
-    return c.json({ ...draft, suggested_customers: suggested }, 201);
+    // Client identity from the frontmatter — used by the editor banner to
+    // offer "create & link" when no existing customer matches. Never binding.
+    const clientHint = (nameHint || pivaHint)
+      ? {
+          nome: nameHint,
+          piva: pivaHint,
+          referente: String(frontmatter.referente || '').trim(),
+        }
+      : null;
+
+    return c.json({ ...draft, suggested_customers: suggested, client_hint: clientHint }, 201);
   } catch (err) {
     log.error({ err }, 'quotes-v2 generate-from-markdown error');
     return c.json(
