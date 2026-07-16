@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
 import { sql } from '../../db';
 import { generateText } from '../agent/llm-router';
+import { parseStructuredQuoteMarkdown } from './markdown-parser';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // KB_DIR (set in production) points at the files delivered by kb-bootstrap.ts;
@@ -130,6 +131,7 @@ const QuoteLLMOutputSchema = z.object({
   sections: z.array(LLMSectionSchema).optional(),
   notes: z.string().optional(),
   premessa: z.string().optional(),
+  valid_until: z.string().optional(),
 }).refine((v) => (v.items && v.items.length) || (v.sections && v.sections.length), {
   message: 'Either items or sections must be present',
 });
@@ -198,6 +200,82 @@ function setCached(key: string | undefined, quote: QuoteDraft): void {
   idempotencyCache.set(key, { quote, expiresAt: Date.now() + IDEMPOTENCY_TTL_MS });
 }
 
+/**
+ * Coerce known model deviations BEFORE zod validation — observed in the wild
+ * (Qwen3.5): `rate` emitted as an array of amounts instead of
+ * `[{percentuale, momento}]`, numeric fields as strings, unknown section
+ * types. The editor/template degrade gracefully, so salvaging beats rejecting.
+ */
+const KNOWN_SECTION_TYPES = new Set(['premessa', 'offerte', 'comparativa', 'problemi', 'clausole', 'materiali', 'tempistiche', 'pagamento', 'contratto']);
+
+function sanitizeLLMQuoteJson(parsed: unknown): unknown {
+  if (!parsed || typeof parsed !== 'object') return parsed;
+  const out = parsed as Record<string, unknown>;
+  if (!Array.isArray(out.sections)) return out;
+
+  out.sections = out.sections
+    .filter((s: unknown) => s && typeof s === 'object' && KNOWN_SECTION_TYPES.has(String((s as Record<string, unknown>).type)))
+    .map((s: Record<string, unknown>) => {
+      const data = (s.data && typeof s.data === 'object' ? s.data : {}) as Record<string, unknown>;
+
+      if (s.type === 'offerte' && Array.isArray(data.offerte)) {
+        data.offerte = data.offerte
+          .filter((o: unknown) => o && typeof o === 'object')
+          .map((o: Record<string, unknown>) => ({
+            ...o,
+            nome: String(o.nome ?? ''),
+            prezzo: Number(o.prezzo) || 0,
+            include: Array.isArray(o.include) ? o.include.map(String) : [],
+            esclude: Array.isArray(o.esclude) ? o.esclude.map(String) : [],
+          }))
+          .filter((o: Record<string, unknown>) => o.nome);
+      }
+
+      if (s.type === 'pagamento' && Array.isArray(data.modalita)) {
+        data.modalita = data.modalita
+          .filter((m: unknown) => m && typeof m === 'object')
+          .map((m: Record<string, unknown>) => {
+            const rate = Array.isArray(m.rate)
+              ? m.rate
+                  .map((r: unknown) => {
+                    if (r && typeof r === 'object') {
+                      const ro = r as Record<string, unknown>;
+                      return { percentuale: Number(ro.percentuale) || 0, momento: String(ro.momento ?? '') };
+                    }
+                    // Model emitted a bare amount → keep it as descriptive text.
+                    if (typeof r === 'number' || typeof r === 'string') {
+                      return { percentuale: 0, momento: `€ ${r}` };
+                    }
+                    return null;
+                  })
+                  .filter(Boolean)
+              : [];
+            return { ...m, nome: String(m.nome ?? ''), sconto_percentuale: Number(m.sconto_percentuale) || 0, rate };
+          });
+      }
+
+      if (s.type === 'premessa' && Array.isArray(data.statistiche)) {
+        data.statistiche = data.statistiche
+          .map((st: unknown) => {
+            if (st && typeof st === 'object') {
+              const so = st as Record<string, unknown>;
+              return { valore: String(so.valore ?? ''), label: String(so.label ?? '') };
+            }
+            return null;
+          })
+          .filter(Boolean);
+      }
+
+      if (s.type === 'materiali' && Array.isArray(data.lista)) {
+        data.lista = data.lista.map(String);
+      }
+
+      return { ...s, data };
+    });
+
+  return out;
+}
+
 async function callLLMForQuote(prompt: string): Promise<QuoteLLMOutput> {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < MAX_LLM_RETRIES; attempt++) {
@@ -212,12 +290,12 @@ async function callLLMForQuote(prompt: string): Promise<QuoteLLMOutput> {
       const jsonMatch = result.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('LLM response contains no JSON object');
       const parsed = JSON.parse(jsonMatch[0]);
-      return QuoteLLMOutputSchema.parse(parsed);
+      return QuoteLLMOutputSchema.parse(sanitizeLLMQuoteJson(parsed));
     } catch (e) {
       lastError = e;
     }
   }
-  throw new Error(`LLM did not return valid JSON after ${MAX_LLM_RETRIES} attempts: ${String(lastError)}`);
+  throw new Error(`LLM did not return valid JSON after ${MAX_LLM_RETRIES} attempts: ${String(lastError).slice(0, 500)}`);
 }
 
 // Compact spec of the section JSON shapes, shared by both prompts.
@@ -282,17 +360,15 @@ export function parseMarkdownBrief(markdown: string): MarkdownBrief {
   }
 }
 
-function buildMarkdownPrompt(pricing: string, profile: string, brief: MarkdownBrief): string {
+// Pure extraction mode: the brief IS the source of truth, so the pricing and
+// profile KBs stay OUT of this prompt — grounding them in added ~5k input
+// tokens, ballooned the output past 7k tokens and pushed the request over the
+// reverse-proxy timeout, for zero extraction value.
+function buildMarkdownPrompt(brief: MarkdownBrief): string {
   const fmLines = Object.entries(brief.frontmatter)
     .map(([k, v]) => `${k}: ${typeof v === 'object' ? JSON.stringify(v) : String(v)}`)
     .join('\n');
-  return `Sei l'agente di preventivazione del fornitore descritto sotto. Ti viene fornito un BRIEF IN MARKDOWN che spesso è già un preventivo redatto: il tuo compito è ESTRARRE e strutturare, non inventare.
-
-═══ PROFILO FORNITORE ═══
-${profile || '(non disponibile)'}
-
-═══ LISTINO PREZZI (solo come fallback) ═══
-${pricing || '(non disponibile — usa esclusivamente le cifre presenti nel brief)'}
+  return `Sei l'agente di preventivazione. Ti viene fornito un BRIEF IN MARKDOWN che spesso è già un preventivo redatto: il tuo compito è ESTRARRE e strutturare, non inventare.
 
 ═══ BRIEF — METADATI (frontmatter) ═══
 ${fmLines || '(nessun frontmatter)'}
@@ -301,10 +377,12 @@ ${fmLines || '(nessun frontmatter)'}
 ${brief.body}
 
 ═══ REGOLE ═══
-- ESTRAZIONE, NON INVENZIONE: se il brief contiene già voci, prezzi, sconti, opzioni di pagamento, tempistiche o clausole, riportali FEDELMENTE (stesse cifre, stessi importi). Usa il listino SOLO per voci richieste ma senza prezzo nel brief.
+- ESTRAZIONE, NON INVENZIONE: se il brief contiene già voci, prezzi, sconti, opzioni di pagamento, tempistiche o clausole, riportali FEDELMENTE (stesse cifre, stessi importi). Non aggiungere voci non presenti nel brief.
+- Sii CONCISO: testi brevi, niente ripetizioni; il documento finale viene impaginato dal sistema.
 - NON calcolare totali complessivi: il sistema li ricalcola dalle voci.
-- Sconti: rappresenta uno sconto come voce dell'array "offerte" con prezzo NEGATIVO è VIETATO — usa invece il prezzo finale scontato nella voce, oppure la modalità di pagamento con "sconto_percentuale".
-- Note/commenti interni del brief (es. avvisi "da confermare", commenti HTML <!-- -->) NON vanno nel preventivo per il cliente: riassumili nel campo "internal_notes".
+- Sconti: una voce "offerte" con prezzo NEGATIVO è VIETATA — usa il prezzo finale scontato nella voce, oppure la modalità di pagamento con "sconto_percentuale".
+- "rate" è SEMPRE un array di oggetti {"percentuale": numero, "momento": "testo"} — MAI numeri o importi nudi.
+- Note/commenti interni del brief (es. avvisi "da confermare", commenti HTML <!-- -->) NON vanno nel preventivo per il cliente: riassumili nel campo "premessa" (appunti interni).
 - Decisioni aperte segnalate nel brief (es. dominio nuovo vs esistente) → sezione "clausole" con tipo "warning".
 - Mantieni l'ordine del brief nelle sezioni.
 
@@ -396,7 +474,7 @@ async function insertQuoteDraft(
     INSERT INTO quotes_v2 (
       customer_id, title, description, items,
       subtotal, tax_rate, tax_amount, total,
-      notes, internal_notes,
+      valid_until, notes, internal_notes,
       materials_checklist, auto_create_project, project_template
     ) VALUES (
       ${opts.clientId || null},
@@ -404,6 +482,7 @@ async function insertQuoteDraft(
       ${llmOutput.description || 'Preventivo e Contratto di Incarico'},
       ${JSON.stringify(items)},
       ${subtotal}, ${0}, ${0}, ${total},
+      ${llmOutput.valid_until || null},
       ${llmOutput.notes || null},
       ${opts.internalNotes},
       ${JSON.stringify(materialsChecklist)},
@@ -454,6 +533,32 @@ export async function generateQuoteDraft(
 }
 
 /**
+ * Markdown brief → structured extraction (no DB side effects).
+ *
+ * Structured briefs (house convention: frontmatter + standard headings +
+ * price tables) are parsed DETERMINISTICALLY — instant, free, faithful to
+ * the cent, no LLM flakiness. Free-form briefs fall back to LLM extraction.
+ * Exposed separately so the pipeline can be exercised without an INSERT.
+ */
+export async function extractQuoteFromMarkdown(
+  markdown: string,
+): Promise<{ llmOutput: QuoteLLMOutput; frontmatter: Record<string, unknown>; engine: 'parser' | 'llm' }> {
+  const brief = parseMarkdownBrief(markdown);
+
+  const parsed = parseStructuredQuoteMarkdown(brief.frontmatter, brief.body);
+  if (parsed) {
+    // Deterministic output is trusted by construction (TS-typed) — the zod
+    // LLM schema is deliberately NOT applied: e.g. discount rows are
+    // legitimate negative-price voices here.
+    return { llmOutput: parsed as unknown as QuoteLLMOutput, frontmatter: brief.frontmatter, engine: 'parser' };
+  }
+
+  const prompt = buildMarkdownPrompt(brief);
+  const llmOutput = await callLLMForQuote(prompt);
+  return { llmOutput, frontmatter: brief.frontmatter, engine: 'llm' };
+}
+
+/**
  * Markdown brief → structured quote draft.
  *
  * Unlike the form-based path, the markdown body/frontmatter DOES reach the
@@ -471,26 +576,16 @@ export async function generateQuoteFromMarkdown(
   const cached = getCached(opts?.idempotencyKey);
   if (cached) return { draft: cached, frontmatter: parseMarkdownBrief(validInput.markdown).frontmatter };
 
-  const brief = parseMarkdownBrief(validInput.markdown);
-  // Extraction mode: the brief itself is the price source — the KBs are only
-  // fallback grounding, so a missing KB file (e.g. /data/kb not yet populated
-  // in prod) must not fail the import.
-  let pricing = '';
-  let profile = '';
-  try { pricing = loadPricingKB(); } catch { /* optional in markdown mode */ }
-  try { profile = loadProfileKB(); } catch { /* optional in markdown mode */ }
-
-  const prompt = buildMarkdownPrompt(pricing, profile, brief);
-  const llmOutput = await callLLMForQuote(prompt);
+  const { llmOutput, frontmatter, engine } = await extractQuoteFromMarkdown(validInput.markdown);
 
   const internalNotes =
-    'Generato da AI (import Markdown).' +
+    (engine === 'parser' ? 'Importato da Markdown (parser strutturato).' : 'Generato da AI (import Markdown).') +
     (llmOutput.premessa ? ' Note estratte: ' + llmOutput.premessa : '');
 
   const draft = await insertQuoteDraft(llmOutput, { clientId: validInput.client_id, internalNotes });
 
   setCached(opts?.idempotencyKey, draft);
-  return { draft, frontmatter: brief.frontmatter };
+  return { draft, frontmatter };
 }
 
 export function assertKBsValid(): void {
