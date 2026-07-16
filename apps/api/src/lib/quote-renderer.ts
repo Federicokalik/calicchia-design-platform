@@ -108,11 +108,25 @@ export function injectSignatureIntoCustomHtml(
     : '';
   const sigBlock = `${img}<div style="font-size:9pt;">${escHtml(quote.signer_name || '')}</div><div style="font-size:8pt;letter-spacing:0.1em;text-transform:uppercase;color:#F57F44;">✓ Firmato digitalmente (FEA) il ${formatDateIt(quote.signed_at)}</div>`;
 
-  let out = html.replace(/(<[^>]+data-sign="cliente"[^>]*>)/i, `$1${sigBlock}`);
+  let out: string;
+  if (/data-sign="cliente"/i.test(html)) {
+    out = html.replace(/(<[^>]+data-sign="cliente"[^>]*>)/i, `$1${sigBlock}`);
+  } else {
+    // Fallback for house-design documents without explicit markers: hook the
+    // client acceptance block of the Swiss-editorial signature grid.
+    out = html.replace(
+      /(<span class="role">Per il cliente[^<]*<\/span>)/i,
+      `$1${sigBlock}`,
+    );
+  }
 
   if (quote.vessatorie_approved_at) {
     const vexLine = `<div style="font-size:8pt;letter-spacing:0.12em;text-transform:uppercase;color:#F57F44;">✓ Approvate specificamente con firma digitale il ${formatDateIt(quote.vessatorie_approved_at)}</div>`;
-    out = out.replace(/(<[^>]+data-sign="vessatorie"[^>]*>)/i, `$1${vexLine}`);
+    if (/data-sign="vessatorie"/i.test(out)) {
+      out = out.replace(/(<[^>]+data-sign="vessatorie"[^>]*>)/i, `$1${vexLine}`);
+    } else {
+      out = out.replace(/(<div class="vex-sign">[\s\S]*?<\/div>)/i, `$1${vexLine}`);
+    }
   }
   return out;
 }
