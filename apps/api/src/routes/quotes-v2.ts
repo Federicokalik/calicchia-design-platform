@@ -495,9 +495,11 @@ quotesV2.post('/:id/send', async (c) => {
     }
   }
 
-  // Nothing went out → do NOT mark the quote as sent.
+  // Nothing went out → do NOT mark the quote as sent. The reason goes in
+  // `error` too because apiFetch surfaces only that field in the toast.
   if (!sentVia.length) {
-    return c.json({ error: 'Invio fallito su tutti i canali richiesti', failed }, 502);
+    const reasons = Object.values(failed).join(' · ') || 'motivo sconosciuto';
+    return c.json({ error: `Invio fallito: ${reasons}`, failed }, 502);
   }
 
   // Update quote status
