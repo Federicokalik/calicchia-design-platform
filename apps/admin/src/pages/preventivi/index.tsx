@@ -206,6 +206,35 @@ export default function PreventiviPage() {
     },
   });
 
+  const [scheduleDate, setScheduleDate] = useState('');
+  const [scheduleChannels, setScheduleChannels] = useState('email');
+
+  const scheduleMutation = useMutation({
+    mutationFn: ({ id }: { id: string }) =>
+      apiFetch(`/api/quotes-v2/${id}/schedule-send`, {
+        method: 'POST',
+        body: JSON.stringify({
+          send_at: new Date(scheduleDate).toISOString(),
+          channels: scheduleChannels === 'both' ? ['email', 'whatsapp'] : [scheduleChannels],
+        }),
+      }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
+      setSendDialog(null);
+      setScheduleDate('');
+      toast.success(`Invio programmato per il ${new Date(res.scheduled_send_at).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`);
+    },
+    onError: (err: any) => toast.error(err?.message || 'Programmazione fallita'),
+  });
+
+  const cancelScheduleMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/quotes-v2/${id}/schedule-send`, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
+      toast.success('Invio programmato annullato');
+    },
+  });
+
   const quotes = data?.quotes || [];
   const stats = data?.stats || { total: 0, draft: 0, sent: 0, signed: 0, totalValue: 0 };
 
@@ -223,6 +252,13 @@ export default function PreventiviPage() {
           hasEmail: !!q.customer_email, hasPhone: !!q.customer_phone,
         }),
       });
+      if (q.scheduled_send_at) {
+        items.push({
+          label: 'Annulla invio programmato',
+          icon: Clock,
+          onClick: () => cancelScheduleMutation.mutate(q.id),
+        });
+      }
       items.push({ divider: true });
       items.push({
         label: 'Elimina',
@@ -316,6 +352,14 @@ export default function PreventiviPage() {
                     )}
                   </div>
 
+                  {/* Scheduled send badge */}
+                  {q.scheduled_send_at && (
+                    <Badge variant="outline" className="shrink-0 text-[10px] px-1.5 border-amber-400/50 text-amber-600 dark:text-amber-400">
+                      <Clock className="h-2.5 w-2.5 mr-1" />
+                      Invio {new Date(q.scheduled_send_at).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })} {new Date(q.scheduled_send_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                    </Badge>
+                  )}
+
                   {/* Status badge */}
                   <Badge variant="outline" className={cn('shrink-0 text-[10px] px-1.5', statusCfg.color)}>
                     {statusCfg.label}
@@ -385,6 +429,39 @@ export default function PreventiviPage() {
                 onClick={() => sendMutation.mutate({ id: sendDialog.id, channels: ['email', 'whatsapp'] })}
               >
                 <Send className="h-4 w-4 mr-2" /> Invia Entrambi
+              </Button>
+            </div>
+
+            {/* Scheduled send */}
+            <div className="mt-4 border-t pt-4 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> …oppure programma l'invio
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="datetime-local"
+                  className="flex-1 h-9 rounded-md border bg-background px-2 text-sm"
+                  value={scheduleDate}
+                  min={new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16)}
+                  onChange={(e) => setScheduleDate(e.target.value)}
+                />
+                <Select value={scheduleChannels} onValueChange={setScheduleChannels}>
+                  <SelectTrigger className="w-[130px] h-9 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email" disabled={!sendDialog.hasEmail}>Email</SelectItem>
+                    <SelectItem value="whatsapp" disabled={!sendDialog.hasPhone}>WhatsApp</SelectItem>
+                    <SelectItem value="both" disabled={!sendDialog.hasEmail || !sendDialog.hasPhone}>Entrambi</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                disabled={!scheduleDate || new Date(scheduleDate).getTime() <= Date.now() || scheduleMutation.isPending}
+                onClick={() => scheduleMutation.mutate({ id: sendDialog.id })}
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                {scheduleMutation.isPending ? 'Programmazione…' : 'Programma invio'}
               </Button>
             </div>
           </DialogContent>

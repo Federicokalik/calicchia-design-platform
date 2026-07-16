@@ -19,6 +19,7 @@ import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
+import { runQuoteScheduledSend } from './quote-scheduled-send';
 import { runWhatsAppScheduled } from './whatsapp-scheduled';
 import { runWhatsAppContactsSync } from './whatsapp-contacts-sync';
 import { runDataRetention } from './data-retention';
@@ -148,6 +149,12 @@ const jobs: CronJob[] = [
     name: 'whatsapp-watchdog',
     intervalMs: 2 * 60 * 1000,
     run: runWhatsAppWatchdog,
+  },
+  {
+    // Invii programmati dei preventivi (email/WhatsApp).
+    name: 'quote-scheduled-send',
+    intervalMs: 60 * 1000,
+    run: runQuoteScheduledSend,
   },
   {
     name: 'whatsapp-scheduled',

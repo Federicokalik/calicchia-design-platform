@@ -29,6 +29,7 @@ import {
   GenerateQuoteInputSchema,
   GenerateFromMarkdownInputSchema,
 } from '../lib/quotes/generate';
+import { sendQuote } from '../lib/quotes/send';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'quotes-v2' });
@@ -427,92 +428,67 @@ quotesV2.delete('/:id', async (c) => {
   return c.json({ success: true });
 });
 
-// POST /api/quotes-v2/:id/send — send via email/whatsapp
+// POST /api/quotes-v2/:id/send — send via email/whatsapp (immediate)
 quotesV2.post('/:id/send', async (c) => {
   const { id } = c.req.param();
   const { channels } = await c.req.json(); // ['email', 'whatsapp']
 
+  const result = await sendQuote(id, Array.isArray(channels) ? channels : []);
+  if (!result.ok) {
+    const status = result.error === 'Preventivo non trovato' ? 404 : 502;
+    return c.json({ error: result.error, failed: result.failed }, status);
+  }
+  return c.json({
+    success: true,
+    sent_via: result.sentVia,
+    failed: Object.keys(result.failed).length ? result.failed : undefined,
+    sign_url: result.signUrl,
+  });
+});
+
+// POST /api/quotes-v2/:id/schedule-send — schedule the send for later.
+// Body: { send_at: ISO string (future), channels: ['email'|'whatsapp'] }
+quotesV2.post('/:id/schedule-send', async (c) => {
+  const { id } = c.req.param();
+  const body = await c.req.json();
+
+  const sendAt = new Date(String(body.send_at || ''));
+  if (Number.isNaN(sendAt.getTime()) || sendAt.getTime() <= Date.now()) {
+    return c.json({ error: 'Data di invio non valida (deve essere nel futuro)' }, 400);
+  }
+  const channels = Array.isArray(body.channels)
+    ? body.channels.filter((ch: unknown) => ch === 'email' || ch === 'whatsapp')
+    : [];
+  if (!channels.length) return c.json({ error: 'Seleziona almeno un canale' }, 400);
+
   const rows = await sql`
-    SELECT q.*, c.contact_name, c.email AS customer_email, c.phone AS customer_phone, c.company_name
-    FROM quotes_v2 q
-    LEFT JOIN customers c ON c.id = q.customer_id
-    WHERE q.id = ${id}
-  `;
-  if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
-
-  const quote = rows[0];
-  const signUrl = `${QUOTE_PUBLIC_URL}/${quote.signature_token}`;
-  const sentVia: string[] = [];
-  // Per-channel failure reasons — the UI must report honestly instead of
-  // pretending "sent via email" when nothing went out.
-  const failed: Record<string, string> = {};
-
-  if (channels?.includes('email') && !quote.customer_email) {
-    failed.email = 'Email cliente mancante in anagrafica';
-  }
-  if (channels?.includes('whatsapp') && !quote.customer_phone) {
-    failed.whatsapp = 'Telefono cliente mancante in anagrafica';
-  } else if (channels?.includes('whatsapp') && !isWhatsAppConfigured()) {
-    failed.whatsapp = 'WhatsApp (GOWA) non configurato';
-  }
-
-  // Send email
-  if (channels?.includes('email') && quote.customer_email) {
-    try {
-      await sendEmail({
-        to: quote.customer_email,
-        subject: `Preventivo: ${quote.title}`,
-        html: `
-          <p>Ciao ${quote.contact_name || ''},</p>
-          <p>Ti invio il preventivo <strong>${quote.title}</strong> per un totale di <strong>€${parseFloat(quote.total).toLocaleString('it-IT')}</strong>.</p>
-          <p>Puoi visionarlo e firmarlo digitalmente al seguente link:</p>
-          <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#f97316;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">Visualizza e Firma</a></p>
-          <p>Il preventivo è valido fino al ${quote.valid_until ? new Date(quote.valid_until).toLocaleDateString('it-IT') : 'revoca'}.</p>
-          <br>
-          <p>Federico Calicchia<br>Web Designer</p>
-        `,
-      });
-      sentVia.push('email');
-    } catch (err) {
-      log.error({ err }, 'Error sending quote email');
-      failed.email = 'Invio email fallito';
-    }
-  }
-
-  // Send WhatsApp
-  if (channels?.includes('whatsapp') && quote.customer_phone && isWhatsAppConfigured()) {
-    try {
-      const message = `Ciao ${quote.contact_name || ''}! 👋\n\nTi invio il preventivo *${quote.title}* per un totale di *€${parseFloat(quote.total).toLocaleString('it-IT')}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!`;
-      await sendWhatsAppText(quote.customer_phone, message);
-      sentVia.push('whatsapp');
-    } catch (err) {
-      log.error({ err }, 'Error sending quote WhatsApp');
-      // GOWA wraps WhatsApp's own rejection (e.g. number not on WhatsApp) in
-      // a 500 with "server returned error 400" — surface something actionable.
-      failed.whatsapp = /400/.test(String((err as Error).message))
-        ? 'WhatsApp ha rifiutato il numero (verifica che sia un numero WhatsApp valido)'
-        : 'Invio WhatsApp fallito';
-    }
-  }
-
-  // Nothing went out → do NOT mark the quote as sent. The reason goes in
-  // `error` too because apiFetch surfaces only that field in the toast.
-  if (!sentVia.length) {
-    const reasons = Object.values(failed).join(' · ') || 'motivo sconosciuto';
-    return c.json({ error: `Invio fallito: ${reasons}`, failed }, 502);
-  }
-
-  // Update quote status
-  await sql`
     UPDATE quotes_v2 SET
-      status = CASE WHEN status = 'draft' THEN 'sent' ELSE status END,
-      sent_via = ${sentVia},
-      sent_at = now(),
+      scheduled_send_at = ${sendAt.toISOString()},
+      scheduled_send_channels = ${channels},
+      scheduled_send_attempts = 0,
+      updated_at = now()
+    WHERE id = ${id} AND status <> 'signed'
+    RETURNING id, scheduled_send_at
+  `;
+  if (!rows.length) return c.json({ error: 'Preventivo non trovato o già firmato' }, 404);
+
+  return c.json({ success: true, scheduled_send_at: rows[0].scheduled_send_at, channels });
+});
+
+// DELETE /api/quotes-v2/:id/schedule-send — cancel a scheduled send
+quotesV2.delete('/:id/schedule-send', async (c) => {
+  const { id } = c.req.param();
+  const rows = await sql`
+    UPDATE quotes_v2 SET
+      scheduled_send_at = NULL,
+      scheduled_send_channels = NULL,
+      scheduled_send_attempts = 0,
       updated_at = now()
     WHERE id = ${id}
+    RETURNING id
   `;
-
-  return c.json({ success: true, sent_via: sentVia, failed: Object.keys(failed).length ? failed : undefined, sign_url: signUrl });
+  if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
+  return c.json({ success: true });
 });
 
 // POST /api/quotes-v2/:id/materials — update materials checklist
