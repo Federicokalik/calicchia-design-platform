@@ -233,7 +233,7 @@ export default function PreventiviPage() {
     <div className="flex items-center gap-2">
       <Button size="sm" variant="outline" onClick={openImportDialog}>
         <FileUp className="h-4 w-4 mr-1.5" />
-        Importa da Markdown
+        Importa documento
       </Button>
       <Button size="sm" onClick={() => navigate('/preventivi/new')}>
         <Plus className="h-4 w-4 mr-1.5" />
@@ -391,7 +391,7 @@ export default function PreventiviPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> Importa preventivo da Markdown
+              <Sparkles className="h-4 w-4 text-primary" /> Importa preventivo (Markdown o HTML)
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
