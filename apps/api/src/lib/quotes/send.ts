@@ -61,6 +61,7 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
           <p>Il preventivo è valido fino al ${quote.valid_until ? new Date(quote.valid_until).toLocaleDateString('it-IT') : 'revoca'}.</p>
           <br>
           <p>Federico Calicchia<br>Web Designer</p>
+          <p style="margin-top:16px;font-size:12px;color:#999;">Questo è un messaggio automatico inviato dal gestionale di Calicchia Design. Puoi rispondere direttamente a questa email per qualsiasi domanda.</p>
         `,
       });
       sentVia.push('email');
@@ -72,7 +73,7 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
 
   if (channels?.includes('whatsapp') && quote.customer_phone && isWhatsAppConfigured()) {
     try {
-      const message = `Ciao ${quote.contact_name || ''}! 👋\n\nTi invio il preventivo *${quote.title}* per un totale di *€${parseFloat(quote.total).toLocaleString('it-IT')}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!`;
+      const message = `Ciao ${quote.contact_name || ''}! 👋\n\nTi invio il preventivo *${quote.title}* per un totale di *€${parseFloat(quote.total).toLocaleString('it-IT')}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!\n\n_Messaggio automatico inviato dal gestionale di Calicchia Design — puoi rispondere direttamente qui._`;
       await sendWhatsAppText(quote.customer_phone, message);
       sentVia.push('whatsapp');
     } catch (err) {
