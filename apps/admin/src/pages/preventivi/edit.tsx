@@ -179,10 +179,16 @@ export default function PreventivoEditorPage() {
       setCustomerId(q.customer_id || '');
       setValidUntil(q.valid_until || '');
       setInternalNotes(q.internal_notes || '');
-      // Restore sections from items/metadata if stored
-      if (q.project_template?.sections) {
-        setSections(q.project_template.sections);
-      }
+      // Restore sections. project_template can come back as a JSON *string*
+      // (double-encoded jsonb) — the PDF renderer and sign page already parse
+      // defensively; without this the editor silently fell back to the empty
+      // defaults and a save would overwrite the imported/stored sections.
+      try {
+        const pt = typeof q.project_template === 'string' ? JSON.parse(q.project_template) : q.project_template;
+        if (Array.isArray(pt?.sections) && pt.sections.length) {
+          setSections(pt.sections);
+        }
+      } catch { /* malformed template → keep defaults */ }
     }
   }, [data]);
 

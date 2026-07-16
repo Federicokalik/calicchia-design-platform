@@ -130,29 +130,33 @@ export function parseContractArticle(raw: string, index: number, vessatorie: num
 }
 
 /**
- * Default 15-article boilerplate. Single source shared by the api settings
+ * Default 15-article contract. Single source shared by the api settings
  * schema defaults and the admin Impostazioni editor (previously duplicated
- * in three places).
+ * in three places). Extended texts modeled on the approved Swiss-editorial
+ * mockup, generalized from project specifics; per-quote customization goes
+ * in the contratto section's `articoli_override`.
+ * `{{foro_competente}}` is substituted from quote.settings at render time.
  */
 export const DEFAULT_CONTRACT_ARTICLES: string[] = [
-  'Art. 1 — OGGETTO: Il Fornitore si impegna a realizzare per il Cliente i servizi descritti nel presente preventivo.',
-  "Art. 2 — COMPENSO: Il compenso per i servizi è quello indicato nell'offerta economica accettata.",
-  'Art. 3 — DURATA: Il presente contratto ha durata di 12 mesi dalla data di sottoscrizione.',
-  'Art. 4 — MODALITÀ DI PAGAMENTO: Il pagamento dovrà avvenire secondo le modalità indicate nel preventivo.',
-  'Art. 5 — RITARDO NEI PAGAMENTI: In caso di ritardo, il Fornitore si riserva di sospendere i servizi.',
-  'Art. 6 — PROPRIETÀ INTELLETTUALE: I diritti di proprietà intellettuale restano del Fornitore fino al saldo completo.',
-  'Art. 7 — RISERVATEZZA: Le parti si impegnano a mantenere riservate le informazioni scambiate.',
-  'Art. 8 — RECESSO: Ciascuna parte può recedere con preavviso scritto di 30 giorni.',
-  'Art. 9 — FORZA MAGGIORE: Nessuna parte sarà responsabile per inadempimenti dovuti a causa di forza maggiore.',
-  'Art. 10 — LIMITAZIONE DI RESPONSABILITÀ: La responsabilità del Fornitore è limitata al compenso ricevuto.',
-  'Art. 11 — GARANZIA: Il Fornitore garantisce la conformità dei servizi alle specifiche concordate.',
-  'Art. 12 — MODIFICHE AL CONTRATTO: Eventuali modifiche devono essere concordate per iscritto.',
-  'Art. 13 — CESSIONE: Il contratto non può essere ceduto a terzi senza consenso scritto.',
-  'Art. 14 — COMUNICAZIONI: Le comunicazioni ufficiali devono avvenire via PEC o raccomandata.',
-  'Art. 15 — FORO COMPETENTE: Per ogni controversia sarà competente il Tribunale indicato nelle impostazioni.',
+  "Art. 1 — Oggetto: Il Cliente conferisce al Fornitore l'incarico per la realizzazione dei servizi descritti nel presente preventivo, secondo il perimetro definito nelle sezioni precedenti del documento. Le funzionalità e le attività non espressamente menzionate si intendono escluse.",
+  "Art. 2 — Compenso e modalità di pagamento: Il compenso è definito dall'offerta economica accettata, con le modalità di pagamento indicate nel presente documento. Su ciascuna fattura di importo superiore a € 77,47 è dovuta dal Cliente la marca da bollo di € 2,00, operando il Fornitore in regime forfettario (IVA esente ex art. 1 L. 190/2014).",
+  "Art. 3 — Durata del contratto: L'incarico decorre dalla sottoscrizione e si conclude con la consegna di quanto previsto. Per i servizi ricorrenti eventualmente inclusi valgono l'impegno minimo e le modalità di rinnovo indicati nell'offerta economica.",
+  "Art. 4 — Specifiche sul pagamento: In caso di ritardo nel pagamento, il Fornitore ha facoltà di sospendere l'erogazione dei servizi fino al saldo. Fino al saldo integrale, il Fornitore può non pubblicare né consegnare i contenuti e i materiali previsti. In caso di esecuzione parziale, il Fornitore ha diritto di trattenere le somme ricevute e al compenso per l'opera già svolta.",
+  "Art. 5 — Specifiche sui servizi: Il Fornitore può avvalersi di collaboratori o assistenti sotto la propria responsabilità. La proprietà del sito e dei materiali prodotti è trasferita al Cliente al saldo integrale della relativa quota; fino a tale momento restano del Fornitore. Tutti i diritti non espressamente concessi sono riservati.",
+  'Art. 6 — Obblighi del Fornitore: Il Fornitore si impegna a prestare la propria opera con diligenza, a mantenere riservati i fatti e le informazioni relativi all\'incarico e a vigilare affinché eventuali collaboratori osservino il medesimo obbligo di riservatezza.',
+  'Art. 7 — Obblighi del Cliente: Il Cliente si impegna a fornire tempestivamente materiali, contenuti e accessi necessari, a collaborare per l\'esecuzione dell\'incarico e a comunicare tempestivamente ogni variazione rilevante. La mancata collaborazione esonera il Fornitore da responsabilità e può comportare lo slittamento delle tempistiche concordate.',
+  'Art. 8 — Modifiche e integrazioni: Il presente contratto annulla ogni precedente accordo tra le Parti. Funzionalità o attività non previste nel perimetro sono oggetto di nuova contrattualizzazione con costo ulteriore. Eventuali modifiche devono essere concordate per iscritto.',
+  "Art. 9 — Recesso: Le Parti possono recedere per giusta causa; il mancato adempimento degli obblighi ne costituisce giusta causa. L'acconto versato alla firma è a copertura dell'opera di avvio e non è rimborsabile in caso di recesso del Cliente prima della consegna; resta inoltre dovuto il compenso per l'opera eventualmente già svolta e il rimborso delle spese sostenute.",
+  "Art. 10 — Clausola risolutiva espressa: Il Fornitore può risolvere il contratto ex art. 1456 c.c. con effetto immediato qualora il Cliente non adempia all'obbligo di pagamento entro il termine di messa in mora, violi gli obblighi contrattuali o sia sottoposto a procedura concorsuale. Resta salvo l'obbligo del Cliente di pagare quanto dovuto fino a quel momento.",
+  'Art. 11 — Riservatezza e promozione: Le Parti si impegnano alla riservatezza delle informazioni comunicate. Il Cliente autorizza il Fornitore a utilizzare il materiale realizzato, il nome del Cliente e il relativo marchio per la promozione della propria attività.',
+  'Art. 12 — Comunicazioni: Le comunicazioni tra le Parti avvengono per iscritto via posta elettronica. Il Fornitore è contattabile nei giorni lavorativi (lunedì–venerdì, 9:00–18:00). Il Cliente si impegna a rispondere in tempo utile.',
+  "Art. 13 — Limitazione di responsabilità: Il Cliente esonera il Fornitore da responsabilità per mancata esecuzione dovuta a forza maggiore o problemi tecnici, per danni indiretti derivanti dall'uso di piattaforme o software di terzi e per il mancato raggiungimento di risultati specifici, trattandosi di obbligazione di mezzi e non di risultato. La richiesta di risarcimento non può eccedere il valore del contratto.",
+  "Art. 14 — Trattamento dei dati: I dati personali sono trattati nel rispetto del Regolamento UE 679/2016 (GDPR). Le Parti consentono l'inserimento dei propri dati nelle rispettive banche dati; i dati possono essere comunicati a terzi solo per l'esecuzione del contratto.",
+  'Art. 15 — Foro competente: Il presente contratto è disciplinato dalla legge italiana. Per ogni controversia è competente in via esclusiva il {{foro_competente}}.',
 ];
 
-export const DEFAULT_CLAUSOLE_VESSATORIE: number[] = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
+// Mirrors the mockup's "— vessatoria" markers: artt. 4, 5, 9, 10, 11, 13, 15.
+export const DEFAULT_CLAUSOLE_VESSATORIE: number[] = [4, 5, 9, 10, 11, 13, 15];
 
 // ---------------------------------------------------------------------------
 // Defensive normalization — sections[].data is admin-authored schemaless
@@ -512,8 +516,10 @@ export function resolveContractArticles(
     ? arr<number>(settings.clausole_vessatorie)
     : DEFAULT_CLAUSOLE_VESSATORIE;
   const override = arr<string | null>(rec(contrattoData).articoli_override);
+  const foro = str(settings.foro_competente) || 'Foro competente per legge';
   return base.map((raw, i) => {
-    const effective = typeof override[i] === 'string' && (override[i] as string).trim() ? (override[i] as string) : raw;
+    let effective = typeof override[i] === 'string' && (override[i] as string).trim() ? (override[i] as string) : raw;
+    effective = effective.replace(/\{\{foro_competente\}\}/g, foro);
     return parseContractArticle(effective, i, vessatorie);
   });
 }
