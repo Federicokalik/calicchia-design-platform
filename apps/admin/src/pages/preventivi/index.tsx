@@ -188,9 +188,14 @@ export default function PreventiviPage() {
     onSuccess: (res: any) => {
       queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
       setSendDialog(null);
-      toast.success(`Preventivo inviato via ${res.sent_via?.join(' + ') || 'email'}`);
+      const failures = res.failed ? Object.values(res.failed).join(' · ') : '';
+      if (failures) {
+        toast.warning(`Inviato via ${res.sent_via.join(' + ')} — ma: ${failures}`, { duration: 8000 });
+      } else {
+        toast.success(`Preventivo inviato via ${res.sent_via.join(' + ')}`);
+      }
     },
-    onError: () => toast.error('Errore invio'),
+    onError: (err: any) => toast.error(err?.message || 'Invio fallito su tutti i canali', { duration: 8000 }),
   });
 
   const deleteMutation = useMutation({

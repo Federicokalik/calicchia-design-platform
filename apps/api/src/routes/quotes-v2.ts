@@ -443,6 +443,18 @@ quotesV2.post('/:id/send', async (c) => {
   const quote = rows[0];
   const signUrl = `${QUOTE_PUBLIC_URL}/${quote.signature_token}`;
   const sentVia: string[] = [];
+  // Per-channel failure reasons — the UI must report honestly instead of
+  // pretending "sent via email" when nothing went out.
+  const failed: Record<string, string> = {};
+
+  if (channels?.includes('email') && !quote.customer_email) {
+    failed.email = 'Email cliente mancante in anagrafica';
+  }
+  if (channels?.includes('whatsapp') && !quote.customer_phone) {
+    failed.whatsapp = 'Telefono cliente mancante in anagrafica';
+  } else if (channels?.includes('whatsapp') && !isWhatsAppConfigured()) {
+    failed.whatsapp = 'WhatsApp (GOWA) non configurato';
+  }
 
   // Send email
   if (channels?.includes('email') && quote.customer_email) {
@@ -463,6 +475,7 @@ quotesV2.post('/:id/send', async (c) => {
       sentVia.push('email');
     } catch (err) {
       log.error({ err }, 'Error sending quote email');
+      failed.email = 'Invio email fallito';
     }
   }
 
@@ -474,7 +487,17 @@ quotesV2.post('/:id/send', async (c) => {
       sentVia.push('whatsapp');
     } catch (err) {
       log.error({ err }, 'Error sending quote WhatsApp');
+      // GOWA wraps WhatsApp's own rejection (e.g. number not on WhatsApp) in
+      // a 500 with "server returned error 400" — surface something actionable.
+      failed.whatsapp = /400/.test(String((err as Error).message))
+        ? 'WhatsApp ha rifiutato il numero (verifica che sia un numero WhatsApp valido)'
+        : 'Invio WhatsApp fallito';
     }
+  }
+
+  // Nothing went out → do NOT mark the quote as sent.
+  if (!sentVia.length) {
+    return c.json({ error: 'Invio fallito su tutti i canali richiesti', failed }, 502);
   }
 
   // Update quote status
@@ -487,7 +510,7 @@ quotesV2.post('/:id/send', async (c) => {
     WHERE id = ${id}
   `;
 
-  return c.json({ success: true, sent_via: sentVia, sign_url: signUrl });
+  return c.json({ success: true, sent_via: sentVia, failed: Object.keys(failed).length ? failed : undefined, sign_url: signUrl });
 });
 
 // POST /api/quotes-v2/:id/materials — update materials checklist
