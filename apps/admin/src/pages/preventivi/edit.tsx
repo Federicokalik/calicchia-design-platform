@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -130,6 +130,13 @@ export default function PreventivoEditorPage() {
   // Sections
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
 
+  // Custom-HTML quotes: the document is the uploaded file, items/totals were
+  // set at import. The editor must NOT overwrite them on save — we keep the
+  // loaded template extras + items and send them back verbatim.
+  const [isCustomDoc, setIsCustomDoc] = useState(false);
+  const customTemplateExtrasRef = useRef<Record<string, any>>({});
+  const originalItemsRef = useRef<any[] | null>(null);
+
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   // Fetch existing
@@ -188,6 +195,15 @@ export default function PreventivoEditorPage() {
         if (Array.isArray(pt?.sections) && pt.sections.length) {
           setSections(pt.sections);
         }
+        if (pt && typeof pt === 'object') {
+          const { sections: _s, ...extras } = pt;
+          customTemplateExtrasRef.current = extras;
+          if (extras.custom_html) {
+            setIsCustomDoc(true);
+            const rawItems = typeof q.items === 'string' ? JSON.parse(q.items) : q.items;
+            originalItemsRef.current = Array.isArray(rawItems) ? rawItems : [];
+          }
+        }
       } catch { /* malformed template → keep defaults */ }
     }
   }, [data]);
@@ -240,9 +256,13 @@ export default function PreventivoEditorPage() {
   // Save
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const items = allOfferte.map((o: Offerta) => ({
-        description: o.nome, quantity: 1, unit_price: o.prezzo, total: o.prezzo,
-      }));
+      // Custom-HTML docs: items/totals come from the import, not the section
+      // builder — send them back unchanged so a save can't zero the quote.
+      const items = isCustomDoc
+        ? (originalItemsRef.current || [])
+        : allOfferte.map((o: Offerta) => ({
+            description: o.nome, quantity: 1, unit_price: o.prezzo, total: o.prezzo,
+          }));
       const body = {
         customer_id: customerId || null,
         title,
@@ -253,7 +273,7 @@ export default function PreventivoEditorPage() {
         internal_notes: internalNotes,
         materials_checklist: sections.find((s) => s.type === 'materiali')?.data.lista?.map((l: string) => ({ label: l, received: false })) || [],
         auto_create_project: sections.find((s) => s.type === 'contratto')?.data.auto ?? true,
-        project_template: { sections },
+        project_template: { ...customTemplateExtrasRef.current, sections },
       };
       if (isNew) return apiFetch('/api/quotes-v2', { method: 'POST', body: JSON.stringify(body) });
       return apiFetch(`/api/quotes-v2/${id}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -578,6 +598,15 @@ export default function PreventivoEditorPage() {
           {saveMutation.isPending ? 'Salvataggio...' : 'Salva'}
         </Button>
       </div>
+
+      {/* Custom-HTML doc notice */}
+      {isCustomDoc && (
+        <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-xs">
+          <b>Documento HTML su misura</b> — il PDF usa il file caricato all'import, non le sezioni
+          qui sotto. Da questa pagina gestisci intestazione, cliente e note; totale e pagamento
+          sono quelli indicati all'import.
+        </div>
+      )}
 
       {/* Customer suggestion banner (Markdown import) */}
       {(suggestedCustomers.length > 0 || clientHint) && !customerId && (

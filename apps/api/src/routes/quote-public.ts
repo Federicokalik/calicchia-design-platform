@@ -24,14 +24,24 @@ export const quotePublic = new Hono();
  * boilerplate + per-quote article overrides — same logic as the PDF template.
  */
 async function getVessatorieForQuote(projectTemplate: unknown): Promise<ContractArticle[]> {
-  let sections: Array<{ type?: string; data?: unknown }> = [];
+  let pt: Record<string, unknown> | null = null;
   try {
-    const pt = typeof projectTemplate === 'string' ? JSON.parse(projectTemplate) : projectTemplate;
-    if (pt && Array.isArray((pt as { sections?: unknown }).sections)) {
-      sections = (pt as { sections: Array<{ type?: string; data?: unknown }> }).sections;
-    }
+    const parsed = typeof projectTemplate === 'string' ? JSON.parse(projectTemplate) : projectTemplate;
+    if (parsed && typeof parsed === 'object') pt = parsed as Record<string, unknown>;
   } catch { /* malformed template → no contract → no vessatorie gate */ }
+  if (!pt) return [];
 
+  // Custom HTML quotes declare their clauses explicitly at import time.
+  if (Array.isArray(pt.vessatorie_custom) && pt.vessatorie_custom.length) {
+    return (pt.vessatorie_custom as Array<Record<string, unknown>>).map((v, i) => ({
+      numero: Number(v.numero) || i + 1,
+      titolo: String(v.titolo ?? ''),
+      testo: String(v.testo ?? ''),
+      vessatoria: true,
+    }));
+  }
+
+  const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
   const contratto = sections.find((s) => s?.type === 'contratto');
   if (!contratto) return [];
 

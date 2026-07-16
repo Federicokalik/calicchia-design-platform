@@ -43,29 +43,65 @@ export default function PreventiviPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [sendDialog, setSendDialog] = useState<{ id: string; title: string; hasEmail: boolean; hasPhone: boolean } | null>(null);
 
-  // Import-from-Markdown dialog state
+  // Import dialog state — two modes: Markdown brief (parser/AI) or hand-made HTML document
   const [importOpen, setImportOpen] = useState(false);
+  const [importMode, setImportMode] = useState<'md' | 'html'>('md');
   const [importMarkdown, setImportMarkdown] = useState('');
   const [importFileName, setImportFileName] = useState('');
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [importKey, setImportKey] = useState('');
+  // Custom HTML fields (the document itself isn't parsable → explicit data)
+  const [htmlContent, setHtmlContent] = useState('');
+  const [htmlTitle, setHtmlTitle] = useState('');
+  const [htmlTotale, setHtmlTotale] = useState('');
+  const [htmlAnticipato, setHtmlAnticipato] = useState('');
+  const [htmlRate, setHtmlRate] = useState('');
+  const [htmlVessatorie, setHtmlVessatorie] = useState('');
+  const [htmlCustomerId, setHtmlCustomerId] = useState('');
+
+  const { data: customersData } = useQuery({
+    queryKey: ['customers-select'],
+    queryFn: () => apiFetch('/api/customers?limit=100'),
+    enabled: importOpen,
+  });
+  const customers = customersData?.customers || [];
 
   const openImportDialog = () => {
+    setImportMode('md');
     setImportMarkdown('');
     setImportFileName('');
+    setHtmlContent('');
+    setHtmlTitle('');
+    setHtmlTotale('');
+    setHtmlAnticipato('');
+    setHtmlRate('');
+    setHtmlVessatorie('');
+    setHtmlCustomerId('');
     setImportKey(crypto.randomUUID());
     setImportOpen(true);
   };
 
-  const readMarkdownFile = (file: File) => {
-    if (!file.name.toLowerCase().endsWith('.md') && file.type !== 'text/markdown' && file.type !== 'text/plain') {
-      toast.error('Carica un file .md');
+  const readImportFile = (file: File) => {
+    const name = file.name.toLowerCase();
+    const isHtml = name.endsWith('.html') || name.endsWith('.htm') || file.type === 'text/html';
+    const isMd = name.endsWith('.md') || file.type === 'text/markdown' || file.type === 'text/plain';
+    if (!isHtml && !isMd) {
+      toast.error('Carica un file .md oppure .html');
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
-      setImportMarkdown(String(reader.result || ''));
+      const content = String(reader.result || '');
       setImportFileName(file.name);
+      if (isHtml) {
+        setImportMode('html');
+        setHtmlContent(content);
+        const t = /<title>([^<]{1,200})<\/title>/i.exec(content)?.[1]?.trim();
+        if (t) setHtmlTitle(t);
+      } else {
+        setImportMode('md');
+        setImportMarkdown(content);
+      }
     };
     reader.readAsText(file);
   };
@@ -91,6 +127,50 @@ export default function PreventiviPage() {
       });
     },
     onError: (err: any) => toast.error(err?.message || 'Generazione fallita'),
+  });
+
+  const importHtmlMutation = useMutation({
+    mutationFn: () => {
+      const totale = parseFloat(htmlTotale.replace(',', '.'));
+      const pagamento: Array<{ nome: string; importo: number }> = [];
+      const anticipato = parseFloat(htmlAnticipato.replace(',', '.'));
+      if (Number.isFinite(anticipato) && anticipato > 0) {
+        pagamento.push({ nome: 'Saldo anticipato unico', importo: anticipato });
+      }
+      const rateMatch = /^(\d+)\s*[x×@]?\s*([\d.,]+)?/.exec(htmlRate.trim());
+      if (rateMatch) {
+        const n = parseInt(rateMatch[1], 10);
+        const rTot = rateMatch[2] ? parseFloat(rateMatch[2].replace(/\./g, '').replace(',', '.')) : totale;
+        if (n > 1) pagamento.push({ nome: `${n} rate`, importo: rTot });
+      }
+      // One clause per line: "4 — Titolo" (number optional)
+      const vessatorie = htmlVessatorie
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .map((l, i) => {
+          const m = /^(\d+)?\s*[—–-]?\s*(.+)$/.exec(l);
+          return { numero: m?.[1] ? parseInt(m[1], 10) : i + 1, titolo: m?.[2]?.trim() || l };
+        });
+      return apiFetch('/api/quotes-v2/import-html', {
+        method: 'POST',
+        body: JSON.stringify({
+          html: htmlContent,
+          title: htmlTitle.trim() || undefined,
+          totale,
+          pagamento,
+          vessatorie,
+          customer_id: htmlCustomerId || undefined,
+        }),
+      });
+    },
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
+      setImportOpen(false);
+      toast.success('Preventivo su misura creato');
+      navigate(`/preventivi/${res.quote_id}`);
+    },
+    onError: (err: any) => toast.error(err?.message || 'Import fallito'),
   });
 
   const { data, isLoading } = useQuery({
@@ -315,8 +395,9 @@ export default function PreventiviPage() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Carica o incolla un brief in Markdown (frontmatter + testo): l'AI lo trasforma
-            in una bozza strutturata da rivedere nell'editor. Nulla viene inviato al cliente.
+            <b>.md</b>: brief Markdown → bozza strutturata da rivedere nell'editor.{' '}
+            <b>.html</b>: documento su misura già impaginato — indichi solo totale,
+            pagamento e clausole. Nulla viene inviato al cliente.
           </p>
           <div
             className={cn(
@@ -329,45 +410,128 @@ export default function PreventiviPage() {
               e.preventDefault();
               setIsDraggingFile(false);
               const file = e.dataTransfer.files?.[0];
-              if (file) readMarkdownFile(file);
+              if (file) readImportFile(file);
             }}
             onClick={() => document.getElementById('md-import-input')?.click()}
           >
             <FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
             <p className="text-sm font-medium">
-              {importFileName || 'Trascina un file .md oppure clicca per selezionarlo'}
+              {importFileName || 'Trascina un file .md o .html, oppure clicca per selezionarlo'}
             </p>
             <input
               id="md-import-input"
               type="file"
-              accept=".md,text/markdown,text/plain"
+              accept=".md,.html,.htm,text/markdown,text/plain,text/html"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) readMarkdownFile(file);
+                if (file) readImportFile(file);
                 e.target.value = '';
               }}
             />
           </div>
-          <div className="space-y-1.5">
-            <p className="text-xs text-muted-foreground">…oppure incolla il contenuto:</p>
-            <Textarea
-              value={importMarkdown}
-              onChange={(e) => { setImportMarkdown(e.target.value); setImportFileName(''); }}
-              rows={8}
-              className="font-mono text-xs"
-              placeholder={'---\ncliente: Nome Cliente\noggetto: Sito web\n---\n\n## Cosa include\n…'}
-            />
-          </div>
-          <Button
-            onClick={() => importMutation.mutate()}
-            disabled={importMarkdown.trim().length < 30 || importMutation.isPending}
-            className="w-full"
-          >
-            {importMutation.isPending
-              ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generazione bozza in corso…</>)
-              : (<><Sparkles className="h-4 w-4 mr-2" /> Genera bozza con AI</>)}
-          </Button>
+
+          {importMode === 'md' && (
+            <>
+              <div className="space-y-1.5">
+                <p className="text-xs text-muted-foreground">…oppure incolla il contenuto Markdown:</p>
+                <Textarea
+                  value={importMarkdown}
+                  onChange={(e) => { setImportMarkdown(e.target.value); setImportFileName(''); }}
+                  rows={8}
+                  className="font-mono text-xs"
+                  placeholder={'---\ncliente: Nome Cliente\noggetto: Sito web\n---\n\n## Cosa include\n…'}
+                />
+              </div>
+              <Button
+                onClick={() => importMutation.mutate()}
+                disabled={importMarkdown.trim().length < 30 || importMutation.isPending}
+                className="w-full"
+              >
+                {importMutation.isPending
+                  ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generazione bozza in corso…</>)
+                  : (<><Sparkles className="h-4 w-4 mr-2" /> Genera bozza con AI</>)}
+              </Button>
+            </>
+          )}
+
+          {importMode === 'html' && (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2 space-y-1">
+                  <p className="text-xs font-medium">Titolo</p>
+                  <input
+                    className="w-full h-8 rounded-md border bg-background px-2 text-sm"
+                    value={htmlTitle}
+                    onChange={(e) => setHtmlTitle(e.target.value)}
+                    placeholder="Oggetto del preventivo"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">Totale (€) *</p>
+                  <input
+                    className="w-full h-8 rounded-md border bg-background px-2 text-sm"
+                    value={htmlTotale}
+                    onChange={(e) => setHtmlTotale(e.target.value)}
+                    placeholder="2748"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">Saldo anticipato (€, opz.)</p>
+                  <input
+                    className="w-full h-8 rounded-md border bg-background px-2 text-sm"
+                    value={htmlAnticipato}
+                    onChange={(e) => setHtmlAnticipato(e.target.value)}
+                    placeholder="2500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">Rate (opz.)</p>
+                  <input
+                    className="w-full h-8 rounded-md border bg-background px-2 text-sm"
+                    value={htmlRate}
+                    onChange={(e) => setHtmlRate(e.target.value)}
+                    placeholder="3 x 916"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium">Cliente (opz.)</p>
+                  <Select value={htmlCustomerId} onValueChange={setHtmlCustomerId}>
+                    <SelectTrigger className="h-8 text-sm"><SelectValue placeholder="Seleziona…" /></SelectTrigger>
+                    <SelectContent>
+                      {customers.map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>{c.contact_name}{c.company_name ? ` (${c.company_name})` : ''}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs font-medium">Clausole vessatorie (una per riga: "4 — Titolo"; vuoto = nessuna)</p>
+                <Textarea
+                  value={htmlVessatorie}
+                  onChange={(e) => setHtmlVessatorie(e.target.value)}
+                  rows={3}
+                  className="font-mono text-xs"
+                  placeholder={'4 — Specifiche sul pagamento\n9 — Recesso\n15 — Foro competente'}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Firma nel documento: aggiungi <code>{'<div data-sign="cliente"></div>'}</code> dove
+                va la firma e <code>{'<div data-sign="vessatorie"></div>'}</code> sul box clausole —
+                alla firma digitale il PDF viene rigenerato con nome, data e immagine firma in quei punti.
+              </p>
+              <Button
+                onClick={() => importHtmlMutation.mutate()}
+                disabled={!htmlContent || !Number.isFinite(parseFloat(htmlTotale.replace(',', '.'))) || importHtmlMutation.isPending}
+                className="w-full"
+              >
+                {importHtmlMutation.isPending
+                  ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Creazione in corso…</>)
+                  : (<><FileUp className="h-4 w-4 mr-2" /> Crea preventivo su misura</>)}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

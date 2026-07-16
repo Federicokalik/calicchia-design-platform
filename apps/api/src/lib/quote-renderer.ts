@@ -69,3 +69,50 @@ export function renderQuoteHtml(quote: QuoteData, settings: QuoteSettings = {}):
     numero: deriveNumero(quote),
   });
 }
+
+const MESI_IT = ['', 'gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+
+function formatDateIt(d?: string | null): string {
+  if (!d) return '';
+  const dt = new Date(d);
+  if (Number.isNaN(dt.getTime())) return '';
+  return `${dt.getDate()} ${MESI_IT[dt.getMonth() + 1]} ${dt.getFullYear()}`;
+}
+
+function escHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/**
+ * Inject the FEA signature into a hand-crafted quote document via its
+ * placeholder elements:
+ *   <div data-sign="cliente"></div>     → signature image + name + date
+ *   <div data-sign="vessatorie"></div>  → specific-approval line
+ * Placeholders are optional — without them the document prints unchanged and
+ * the signature lives in the audit trail / sign page only.
+ */
+export function injectSignatureIntoCustomHtml(
+  html: string,
+  quote: {
+    signer_name?: string | null;
+    signed_at?: string | null;
+    signature_image?: string | null;
+    vessatorie_approved_at?: string | null;
+  },
+): string {
+  if (!quote.signed_at) return html;
+
+  const img = typeof quote.signature_image === 'string'
+    && /^data:image\/(png|jpe?g);base64,[A-Za-z0-9+/=]+$/.test(quote.signature_image)
+    ? `<img src="${quote.signature_image}" alt="Firma" style="height:18mm;display:block;margin-bottom:2mm;">`
+    : '';
+  const sigBlock = `${img}<div style="font-size:9pt;">${escHtml(quote.signer_name || '')}</div><div style="font-size:8pt;letter-spacing:0.1em;text-transform:uppercase;color:#F57F44;">✓ Firmato digitalmente (FEA) il ${formatDateIt(quote.signed_at)}</div>`;
+
+  let out = html.replace(/(<[^>]+data-sign="cliente"[^>]*>)/i, `$1${sigBlock}`);
+
+  if (quote.vessatorie_approved_at) {
+    const vexLine = `<div style="font-size:8pt;letter-spacing:0.12em;text-transform:uppercase;color:#F57F44;">✓ Approvate specificamente con firma digitale il ${formatDateIt(quote.vessatorie_approved_at)}</div>`;
+    out = out.replace(/(<[^>]+data-sign="vessatorie"[^>]*>)/i, `$1${vexLine}`);
+  }
+  return out;
+}

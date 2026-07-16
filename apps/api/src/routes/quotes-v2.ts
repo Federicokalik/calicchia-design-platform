@@ -19,8 +19,10 @@ function sanitizeItems(items: unknown): unknown[] {
 }
 import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
-import { renderQuoteHtml } from '../lib/quote-renderer';
+import { renderQuoteHtml, injectSignatureIntoCustomHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
+import { savePrivateFile, readPrivateFile } from '../lib/private-files';
+import { unbundleArtifactHtml } from '../lib/artifact-unbundle';
 import {
   generateQuoteDraft,
   generateQuoteFromMarkdown,
@@ -176,6 +178,82 @@ quotesV2.post('/generate-from-markdown', async (c) => {
       502,
     );
   }
+});
+
+// POST /api/quotes-v2/import-html — hand-crafted quote document (custom HTML).
+// The admin uploads a finished HTML design; the system wraps it with the
+// machinery only (totals, PDF, send, OTP sign, vessatorie gate). The HTML is
+// stored in the private file store and rendered to PDF as-is — the shared
+// template is bypassed. Financial data can't be parsed from arbitrary HTML,
+// so totale/pagamento/vessatorie arrive as explicit fields.
+quotesV2.post('/import-html', async (c) => {
+  let body: Record<string, unknown>;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Body JSON non valido' }, 400);
+  }
+
+  let html = typeof body.html === 'string' ? body.html : '';
+  if (html.length < 200 || html.length > 8 * 1024 * 1024 || !html.includes('<')) {
+    return c.json({ error: 'File HTML mancante o non valido (min 200 byte, max 8MB)' }, 400);
+  }
+
+  // claude.ai artifact exports arrive "bundled" (assets in __bundler scripts,
+  // unpacked by JS at runtime) — unpack server-side so Puppeteer prints the
+  // real document deterministically. Plain HTML passes through untouched.
+  const unbundled = unbundleArtifactHtml(html);
+  if (unbundled) html = unbundled;
+
+  const totale = Number(body.totale);
+  if (!Number.isFinite(totale) || totale < 0) {
+    return c.json({ error: 'Totale mancante o non valido' }, 400);
+  }
+
+  const title = (typeof body.title === 'string' && body.title.trim())
+    || /<title>([^<]{1,200})<\/title>/i.exec(html)?.[1]?.trim()
+    || 'Preventivo su misura';
+
+  const pagamento = Array.isArray(body.pagamento)
+    ? body.pagamento
+        .filter((p: unknown) => p && typeof p === 'object')
+        .map((p: Record<string, unknown>) => ({ nome: String(p.nome ?? '').slice(0, 200), importo: Number(p.importo) || 0 }))
+        .filter((p: { nome: string }) => p.nome)
+    : [];
+
+  const vessatorie = Array.isArray(body.vessatorie)
+    ? body.vessatorie
+        .filter((v: unknown) => v && typeof v === 'object')
+        .map((v: Record<string, unknown>) => ({ numero: Number(v.numero) || 0, titolo: String(v.titolo ?? '').slice(0, 200) }))
+        .filter((v: { titolo: string }) => v.titolo)
+    : [];
+
+  const htmlName = `custom_${Date.now()}_${crypto.randomBytes(4).toString('hex')}.html`;
+  await savePrivateFile('quotes', htmlName, Buffer.from(html, 'utf-8'));
+
+  const items = [{ description: title, quantity: 1, unit_price: totale, total: totale }];
+
+  const rows = await sql`
+    INSERT INTO quotes_v2 (
+      customer_id, title, description, items,
+      subtotal, tax_rate, tax_amount, total,
+      valid_until, internal_notes,
+      custom_html_path, project_template
+    ) VALUES (
+      ${typeof body.customer_id === 'string' && body.customer_id ? body.customer_id : null},
+      ${title},
+      ${'Documento su misura'},
+      ${JSON.stringify(items)},
+      ${totale}, ${0}, ${0}, ${totale},
+      ${typeof body.valid_until === 'string' && body.valid_until ? body.valid_until : null},
+      ${'Importato da HTML su misura.'},
+      ${`quotes/${htmlName}`},
+      ${JSON.stringify({ custom_html: true, pagamento_custom: pagamento, vessatorie_custom: vessatorie })}
+    )
+    RETURNING id, title
+  `;
+
+  return c.json({ quote_id: rows[0].id, title: rows[0].title }, 201);
 });
 
 // POST /api/quotes-v2 — create quote
@@ -459,12 +537,25 @@ quotesV2.post('/:id/generate-pdf', async (c) => {
 
   const quote = rows[0];
 
-  // Get settings for PDF styling
-  const settingsRows = await sql`SELECT value FROM site_settings WHERE key = 'quote.settings'`;
-  const settings = settingsRows[0]?.value || {};
-
-  // Render HTML (quote row has all required QuoteData fields from the JOIN)
-  const html = renderQuoteHtml(quote as Parameters<typeof renderQuoteHtml>[0], settings);
+  // Custom HTML quotes render the hand-crafted document as-is (signature
+  // injected into its data-sign placeholders once signed); everything else
+  // goes through the shared Swiss-editorial template.
+  let html: string;
+  if (quote.custom_html_path) {
+    const name = String(quote.custom_html_path).split('/').pop() || '';
+    try {
+      html = (await readPrivateFile('quotes', name)).toString('utf-8');
+    } catch {
+      return c.json({ error: 'Documento HTML non trovato nello storage' }, 404);
+    }
+    html = injectSignatureIntoCustomHtml(html, quote);
+  } else {
+    // Get settings for PDF styling
+    const settingsRows = await sql`SELECT value FROM site_settings WHERE key = 'quote.settings'`;
+    const settings = settingsRows[0]?.value || {};
+    // Render HTML (quote row has all required QuoteData fields from the JOIN)
+    html = renderQuoteHtml(quote as Parameters<typeof renderQuoteHtml>[0], settings);
+  }
 
   // Generate PDF
   const result = await generateQuotePdf(html, `Preventivo_${quote.title}`);
