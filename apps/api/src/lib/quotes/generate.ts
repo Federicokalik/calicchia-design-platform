@@ -201,10 +201,13 @@ function setCached(key: string | undefined, quote: QuoteDraft): void {
 async function callLLMForQuote(prompt: string): Promise<QuoteLLMOutput> {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < MAX_LLM_RETRIES; attempt++) {
+    // max_tokens: the router default (2000) truncates a sections-rich quote
+    // JSON mid-output → parse fails on every retry (seen in prod ai_usage_logs:
+    // output_tokens exactly 2000 on each attempt). A full draft needs 3-5k.
     const result = await generateText('task_breakdown', [
       { role: 'system', content: 'Rispondi SOLO con JSON valido conforme allo schema indicato. Nessun testo prima o dopo il JSON.' },
       { role: 'user', content: prompt },
-    ], { temperature: 0.3 });
+    ], { temperature: 0.3, max_tokens: 8000 });
     try {
       const jsonMatch = result.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('LLM response contains no JSON object');
