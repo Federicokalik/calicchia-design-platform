@@ -110,6 +110,9 @@ const LLMSectionSchema = z.discriminatedUnion('type', [
       modalita: z.array(z.object({
         nome: z.string(),
         sconto_percentuale: z.number().default(0),
+        importo: z.number().nonnegative().optional(),
+        metodo: z.string().optional(),
+        nota: z.string().optional(),
         rate: z.array(z.object({ percentuale: z.number(), momento: z.string() })).default([]),
       })).default([]),
     }).passthrough(),
@@ -250,7 +253,13 @@ function sanitizeLLMQuoteJson(parsed: unknown): unknown {
                   })
                   .filter(Boolean)
               : [];
-            return { ...m, nome: String(m.nome ?? ''), sconto_percentuale: Number(m.sconto_percentuale) || 0, rate };
+            return {
+              ...m,
+              nome: String(m.nome ?? ''),
+              sconto_percentuale: Number(m.sconto_percentuale) || 0,
+              ...(m.importo !== undefined && m.importo !== null ? { importo: Math.max(0, Number(m.importo) || 0) } : {}),
+              rate,
+            };
           });
       }
 
@@ -307,7 +316,7 @@ const SECTIONS_SPEC = `Tipi di sezione disponibili (usa solo quelli pertinenti, 
 - {"type":"clausole","data":{"tipo":"warning|info|success","titolo":"...","testo":"...","lista":["..."]}}
 - {"type":"materiali","data":{"lista":["Logo (vettoriale)","..."]}}
 - {"type":"tempistiche","data":{"prima_bozza":"~1 settimana","nota":"dal brief","settimane":8,"fasi":[{"label":"Sviluppo","start_pct":12.5,"width_pct":50}]}}
-- {"type":"pagamento","data":{"modalita":[{"nome":"Saldo unico","sconto_percentuale":10,"rate":[]},{"nome":"3 rate","sconto_percentuale":0,"rate":[{"percentuale":33,"momento":"alla firma"},{"percentuale":33,"momento":"a metà lavoro"},{"percentuale":34,"momento":"alla consegna"}]}]}}
+- {"type":"pagamento","data":{"modalita":[{"nome":"Saldo anticipato unico","metodo":"bonifico · carta · PayPal","importo":549,"rate":[]},{"nome":"3 rate","metodo":"PayPal · Klarna","importo":679,"rate":[{"percentuale":33,"momento":"alla firma"},{"percentuale":33,"momento":"a metà lavoro"},{"percentuale":34,"momento":"alla consegna"}]}]}} — "importo" è il totale SPECIFICO dell'opzione (può differire dal totale preventivo: sconto anticipato, sovrapprezzo rateizzazione)
 - {"type":"contratto","data":{"auto":true,"servizi":["..."],"clausole":[]}}`;
 
 function buildPrompt(pricing: string, profile: string, input: GenerateQuoteInput): string {

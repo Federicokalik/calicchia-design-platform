@@ -671,20 +671,29 @@ function renderPagamento(d: Record<string, unknown>, n: number, q: NormalizedQuo
   const rows = modalita.flatMap((m) => {
     const sconto = num(m.sconto_percentuale);
     const rate = arr<Record<string, unknown>>(m.rate);
+    // Each option can carry its own absolute total (`importo`) — real-world
+    // options differ by channel cost (e.g. anticipated wire cheaper, BNPL
+    // installments with a surcharge). Falls back to sconto% / quote total.
+    const explicit = num(m.importo);
+    const base = explicit > 0 ? explicit : (sconto ? q.total * (1 - sconto / 100) + q.bollo : totale);
+    const metodo = str(m.metodo);
+    const nota = str(m.nota);
+    const detail = [metodo ? `Via ${metodo}.` : '', nota]
+      .filter(Boolean).join(' ');
     if (!rate.length) {
-      const amount = sconto ? q.total * (1 - sconto / 100) + q.bollo : totale;
+      const fallbackLbl = sconto ? `Sconto ${sconto}% sul totale.` : 'Saldo in un’unica soluzione.';
       return [`<div class="ms">
   <span class="k">${esc(m.nome)}</span>
-  <div class="amt"><span class="cur">€</span>${formatCurrency(amount).replace('€ ', '')}</div>
-  <span class="lbl">${sconto ? `Sconto ${sconto}% sul totale.` : 'Saldo in un’unica soluzione.'}</span>
+  <div class="amt"><span class="cur">€</span>${formatCurrency(base).replace('€ ', '')}</div>
+  <span class="lbl">${esc(detail || fallbackLbl)}</span>
 </div>`];
     }
     return rate.map((r) => {
       const pct = num(r.percentuale);
       return `<div class="ms">
   <span class="k">${esc(m.nome)} · ${pct}%</span>
-  <div class="amt"><span class="cur">€</span>${formatCurrency(totale * pct / 100).replace('€ ', '')}</div>
-  <span class="lbl">${esc(r.momento)}</span>
+  <div class="amt"><span class="cur">€</span>${formatCurrency(base * pct / 100).replace('€ ', '')}</div>
+  <span class="lbl">${esc([str(r.momento), detail].filter(Boolean).join(' — '))}</span>
 </div>`;
     });
   }).join('');

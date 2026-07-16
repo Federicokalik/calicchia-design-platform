@@ -36,7 +36,7 @@ interface RigaComparativa { caratteristica: string; colonna_a: string; colonna_b
 interface Offerta { id: string; nome: string; descrizione: string; prezzo: number; consigliata: boolean; include: string[]; esclude: string[]; }
 interface ProblemaRisolto { problema: string; soluzione: string; }
 interface Rata { percentuale: number; momento: string; }
-interface ModalitaPagamento { id: string; nome: string; sconto_percentuale: number; rate: Rata[]; }
+interface ModalitaPagamento { id: string; nome: string; sconto_percentuale: number; rate: Rata[]; importo?: number; metodo?: string; }
 interface FaseGantt { label: string; start_pct: number; width_pct: number; }
 
 interface Section {
@@ -425,8 +425,12 @@ export default function PreventivoEditorPage() {
             {(d.modalita || []).map((m: ModalitaPagamento, mi: number) => (
               <div key={m.id} className="rounded border p-3 space-y-2 bg-muted/20">
                 <div className="flex gap-2">
-                  <Input className="flex-1 h-7 text-xs" value={m.nome} placeholder="Nome opzione" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, nome: e.target.value }; updateSection(section.id, { ...d, modalita: next }); }} />
-                  <Input className="w-20 h-7 text-xs" type="number" value={m.sconto_percentuale} placeholder="Sconto %" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, sconto_percentuale: parseFloat(e.target.value) || 0 }; updateSection(section.id, { ...d, modalita: next }); }} />
+                  <Input className="flex-1 h-7 text-xs" value={m.nome} placeholder="Nome opzione (es. Saldo anticipato)" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, nome: e.target.value }; updateSection(section.id, { ...d, modalita: next }); }} />
+                  <Input className="w-20 h-7 text-xs" type="number" value={m.sconto_percentuale} placeholder="Sconto %" title="Sconto % (alternativo all'importo)" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, sconto_percentuale: parseFloat(e.target.value) || 0 }; updateSection(section.id, { ...d, modalita: next }); }} />
+                </div>
+                <div className="flex gap-2">
+                  <Input className="w-28 h-7 text-xs" type="number" value={m.importo ?? ''} placeholder="Importo € (opz.)" title="Totale specifico di questa opzione — ha priorità sullo sconto % (es. rate BNPL a costo maggiorato)" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, importo: e.target.value === '' ? undefined : parseFloat(e.target.value) || 0 }; updateSection(section.id, { ...d, modalita: next }); }} />
+                  <Input className="flex-1 h-7 text-xs" value={m.metodo ?? ''} placeholder="Metodo (es. bonifico · carta · PayPal · Klarna)" onChange={(e) => { const next = [...d.modalita]; next[mi] = { ...m, metodo: e.target.value }; updateSection(section.id, { ...d, modalita: next }); }} />
                 </div>
                 <Label className="text-[10px]">Rate</Label>
                 {m.rate.map((r: Rata, ri: number) => (

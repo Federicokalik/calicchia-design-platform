@@ -200,6 +200,9 @@ export function parseStructuredQuoteMarkdown(
       modalita.push({
         nome: nomeRaw,
         sconto_percentuale: sconto,
+        // Keep the option's own absolute total — options legitimately differ
+        // from the quote total (anticipated discount, BNPL surcharge…).
+        ...(amount !== null && amount > 0 ? { importo: amount } : {}),
         rate: !isSingle && rateMatches.length ? rateMatches : [],
       });
     }
