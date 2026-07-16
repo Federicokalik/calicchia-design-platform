@@ -5,8 +5,10 @@ import { toast } from 'sonner';
 import {
   Plus, Filter, Send, Eye, CheckCircle2, Clock, XCircle,
   FileSignature, MoreHorizontal, Trash2, Mail, MessageSquare,
+  FileUp, Loader2, Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -40,6 +42,51 @@ export default function PreventiviPage() {
   const confirm = useConfirm();
   const [statusFilter, setStatusFilter] = useState('all');
   const [sendDialog, setSendDialog] = useState<{ id: string; title: string; hasEmail: boolean; hasPhone: boolean } | null>(null);
+
+  // Import-from-Markdown dialog state
+  const [importOpen, setImportOpen] = useState(false);
+  const [importMarkdown, setImportMarkdown] = useState('');
+  const [importFileName, setImportFileName] = useState('');
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [importKey, setImportKey] = useState('');
+
+  const openImportDialog = () => {
+    setImportMarkdown('');
+    setImportFileName('');
+    setImportKey(crypto.randomUUID());
+    setImportOpen(true);
+  };
+
+  const readMarkdownFile = (file: File) => {
+    if (!file.name.toLowerCase().endsWith('.md') && file.type !== 'text/markdown' && file.type !== 'text/plain') {
+      toast.error('Carica un file .md');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImportMarkdown(String(reader.result || ''));
+      setImportFileName(file.name);
+    };
+    reader.readAsText(file);
+  };
+
+  const importMutation = useMutation({
+    mutationFn: () =>
+      apiFetch('/api/quotes-v2/generate-from-markdown', {
+        method: 'POST',
+        headers: { 'Idempotency-Key': importKey },
+        body: JSON.stringify({ markdown: importMarkdown }),
+      }),
+    onSuccess: (res: any) => {
+      queryClient.invalidateQueries({ queryKey: ['quotes-v2'] });
+      setImportOpen(false);
+      toast.success('Bozza generata — rivedila prima di inviare');
+      navigate(`/preventivi/${res.quote_id}`, {
+        state: { suggestedCustomers: res.suggested_customers || [] },
+      });
+    },
+    onError: (err: any) => toast.error(err?.message || 'Generazione fallita'),
+  });
 
   const { data, isLoading } = useQuery({
     queryKey: ['quotes-v2', statusFilter],
@@ -98,10 +145,16 @@ export default function PreventiviPage() {
   };
 
   const topbarActions = useMemo(() => (
-    <Button size="sm" onClick={() => navigate('/preventivi/new')}>
-      <Plus className="h-4 w-4 mr-1.5" />
-      Nuovo Preventivo
-    </Button>
+    <div className="flex items-center gap-2">
+      <Button size="sm" variant="outline" onClick={openImportDialog}>
+        <FileUp className="h-4 w-4 mr-1.5" />
+        Importa da Markdown
+      </Button>
+      <Button size="sm" onClick={() => navigate('/preventivi/new')}>
+        <Plus className="h-4 w-4 mr-1.5" />
+        Nuovo Preventivo
+      </Button>
+    </div>
   ), [navigate]);
 
   useTopbar({
@@ -247,6 +300,71 @@ export default function PreventiviPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Import from Markdown dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Importa preventivo da Markdown
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Carica o incolla un brief in Markdown (frontmatter + testo): l'AI lo trasforma
+            in una bozza strutturata da rivedere nell'editor. Nulla viene inviato al cliente.
+          </p>
+          <div
+            className={cn(
+              'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+              isDraggingFile ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+            )}
+            onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+            onDragLeave={() => setIsDraggingFile(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDraggingFile(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) readMarkdownFile(file);
+            }}
+            onClick={() => document.getElementById('md-import-input')?.click()}
+          >
+            <FileUp className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm font-medium">
+              {importFileName || 'Trascina un file .md oppure clicca per selezionarlo'}
+            </p>
+            <input
+              id="md-import-input"
+              type="file"
+              accept=".md,text/markdown,text/plain"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) readMarkdownFile(file);
+                e.target.value = '';
+              }}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <p className="text-xs text-muted-foreground">…oppure incolla il contenuto:</p>
+            <Textarea
+              value={importMarkdown}
+              onChange={(e) => { setImportMarkdown(e.target.value); setImportFileName(''); }}
+              rows={8}
+              className="font-mono text-xs"
+              placeholder={'---\ncliente: Nome Cliente\noggetto: Sito web\n---\n\n## Cosa include\n…'}
+            />
+          </div>
+          <Button
+            onClick={() => importMutation.mutate()}
+            disabled={importMarkdown.trim().length < 30 || importMutation.isPending}
+            className="w-full"
+          >
+            {importMutation.isPending
+              ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generazione bozza in corso…</>)
+              : (<><Sparkles className="h-4 w-4 mr-2" /> Genera bozza con AI</>)}
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

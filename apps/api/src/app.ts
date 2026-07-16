@@ -219,6 +219,11 @@ app.use('*', async (c, next) => {
 // Serve uploaded files as static assets
 app.use('/media/*', serveStatic({ root: UPLOAD_DIR, rewriteRequestPath: (path) => path.replace('/media', '') }));
 
+// Bundled static assets (quote PDF/preview fonts). Public by design — the
+// admin preview iframe loads them cross-process via the Vite/reverse proxy.
+// NOT in protectedPaths: fonts are not sensitive.
+app.use('/api/assets/*', serveStatic({ root: './assets', rewriteRequestPath: (path) => path.replace('/api/assets', '') }));
+
 // Health check (no auth required)
 app.route('/api/health', health);
 

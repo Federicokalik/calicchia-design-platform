@@ -21,7 +21,12 @@ import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
 import { renderQuoteHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
-import { generateQuoteDraft, GenerateQuoteInputSchema } from '../lib/quotes/generate';
+import {
+  generateQuoteDraft,
+  generateQuoteFromMarkdown,
+  GenerateQuoteInputSchema,
+  GenerateFromMarkdownInputSchema,
+} from '../lib/quotes/generate';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'quotes-v2' });
@@ -108,6 +113,56 @@ quotesV2.post('/generate', async (c) => {
     log.error({ err }, 'quotes-v2 generate error');
     return c.json(
       { error: 'Generazione preventivo fallita', detail: (err as Error).message },
+      502,
+    );
+  }
+});
+
+// POST /api/quotes-v2/generate-from-markdown — AI quote draft from a Markdown
+// brief (YAML frontmatter + prose). Auth: admin only (middleware in app.ts).
+// The draft is inserted as `draft` and never auto-sent. The customer is never
+// auto-linked: the response carries non-binding `suggested_customers` matches
+// (by name / VAT from the frontmatter) for the admin to confirm in the editor.
+quotesV2.post('/generate-from-markdown', async (c) => {
+  const idempotencyKey = c.req.header('Idempotency-Key') || undefined;
+  let rawBody: unknown;
+  try {
+    rawBody = await c.req.json();
+  } catch {
+    return c.json({ error: 'Body JSON non valido' }, 400);
+  }
+  const parseResult = GenerateFromMarkdownInputSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    return c.json({ error: 'Input non valido', details: parseResult.error.flatten() }, 400);
+  }
+
+  try {
+    const { draft, frontmatter } = await generateQuoteFromMarkdown(parseResult.data, { idempotencyKey });
+
+    // Best-effort customer suggestions from the frontmatter — never binding.
+    const nameHint = String(frontmatter.cliente || frontmatter.referente || '').trim();
+    const pivaHint = String(frontmatter.cliente_piva || frontmatter.piva_cliente || '').replace(/\s+/g, '');
+    let suggested: readonly object[] = [];
+    if (nameHint || pivaHint) {
+      try {
+        suggested = await sql`
+          SELECT id, contact_name, company_name, email,
+                 billing_address->>'vat_number' AS vat_number
+          FROM customers
+          WHERE (${nameHint} <> '' AND (contact_name ILIKE ${'%' + nameHint + '%'} OR company_name ILIKE ${'%' + nameHint + '%'}))
+             OR (${pivaHint} <> '' AND billing_address->>'vat_number' ILIKE ${'%' + pivaHint + '%'})
+          LIMIT 5
+        `;
+      } catch (err) {
+        log.warn({ err }, 'customer suggestion lookup failed');
+      }
+    }
+
+    return c.json({ ...draft, suggested_customers: suggested }, 201);
+  } catch (err) {
+    log.error({ err }, 'quotes-v2 generate-from-markdown error');
+    return c.json(
+      { error: 'Generazione preventivo da Markdown fallita', detail: (err as Error).message },
       502,
     );
   }

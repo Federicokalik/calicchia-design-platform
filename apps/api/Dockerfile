@@ -41,6 +41,9 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY apps/api/package.json apps/api/tsconfig.json ./apps/api/
 COPY apps/api/src ./apps/api/src
+# Bundled static assets: Funnel woff2 for the quote PDF/preview template
+# (inlined as data URIs by quote-renderer.ts and served at /api/assets/fonts).
+COPY apps/api/assets ./apps/api/assets
 # Workspace package: pnpm symlinks node_modules/@calicchia/shared → here. Two
 # parts to ship correctly:
 #   1. The TypeScript source (`package.json` + `src/`) from the build context

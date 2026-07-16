@@ -28,13 +28,15 @@ export async function generateQuotePdf(
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
 
+    // The shared Swiss-editorial template renders fixed 210×297mm pages with
+    // their own in-page header/footer chrome (incl. computed "Pag. X di Y"),
+    // so Chrome must print edge-to-edge with no native header/footer.
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      margin: { top: '18mm', right: '18mm', bottom: '24mm', left: '18mm' },
+      margin: { top: '0', right: '0', bottom: '0', left: '0' },
       printBackground: true,
-      displayHeaderFooter: true,
-      headerTemplate: '<div style="font-size:7.5pt;color:#999;width:100%;text-align:center;padding:0 18mm;">Calicchia Design di Federico Calicchia · P.IVA 03160480608</div>',
-      footerTemplate: '<div style="font-size:7.5pt;color:#999;width:100%;display:flex;justify-content:space-between;padding:0 18mm;"><span></span><span>Pag. <span class="pageNumber"></span> di <span class="totalPages"></span></span></div>',
+      displayHeaderFooter: false,
+      preferCSSPageSize: true,
     });
 
     // Save to the private store (SEC-10) — never the public /media/* path.

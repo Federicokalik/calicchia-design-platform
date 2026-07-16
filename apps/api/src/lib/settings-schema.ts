@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEFAULT_CONTRACT_ARTICLES, DEFAULT_CLAUSOLE_VESSATORIE } from '@calicchia/shared';
 
 const serviceTypeSchema = z.enum([
   'graphic_design',
@@ -190,6 +191,7 @@ const settingsSchemas = {
     banca: z.string().default(''),
     iban: z.string().default(''),
     bic: z.string().default(''),
+    sito_web: z.string().default(''),
 
     // Regime fiscale
     regime_tipo: z.string().default('forfettario'),
@@ -201,29 +203,13 @@ const settingsSchemas = {
     // Contratto
     foro_competente: z.string().default('Tribunale di Frosinone'),
     durata_standard_mesi: z.number().default(12),
-    clausole_vessatorie: z.array(z.number()).default([4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]),
+    clausole_vessatorie: z.array(z.number()).default(DEFAULT_CLAUSOLE_VESSATORIE),
 
     // Template default
     materiali_default: z.array(z.string()).default(['Logo (vettoriale)', 'Testi / Copy', 'Foto / Immagini', 'Accessi (hosting, dominio)']),
     note_default: z.string().default(''),
     termini_condizioni: z.string().default(''),
-    contratto_articoli: z.array(z.string()).default([
-      'Art. 1 — OGGETTO: Il Fornitore si impegna a realizzare per il Cliente i servizi descritti nel presente preventivo.',
-      'Art. 2 — COMPENSO: Il compenso per i servizi è quello indicato nell\'offerta economica accettata.',
-      'Art. 3 — DURATA: Il presente contratto ha durata di 12 mesi dalla data di sottoscrizione.',
-      'Art. 4 — MODALITÀ DI PAGAMENTO: Il pagamento dovrà avvenire secondo le modalità indicate nel preventivo.',
-      'Art. 5 — RITARDO NEI PAGAMENTI: In caso di ritardo, il Fornitore si riserva di sospendere i servizi.',
-      'Art. 6 — PROPRIETÀ INTELLETTUALE: I diritti di proprietà intellettuale restano del Fornitore fino al saldo completo.',
-      'Art. 7 — RISERVATEZZA: Le parti si impegnano a mantenere riservate le informazioni scambiate.',
-      'Art. 8 — RECESSO: Ciascuna parte può recedere con preavviso scritto di 30 giorni.',
-      'Art. 9 — FORZA MAGGIORE: Nessuna parte sarà responsabile per inadempimenti dovuti a causa di forza maggiore.',
-      'Art. 10 — LIMITAZIONE DI RESPONSABILITÀ: La responsabilità del Fornitore è limitata al compenso ricevuto.',
-      'Art. 11 — GARANZIA: Il Fornitore garantisce la conformità dei servizi alle specifiche concordate.',
-      'Art. 12 — MODIFICHE AL CONTRATTO: Eventuali modifiche devono essere concordate per iscritto.',
-      'Art. 13 — CESSIONE: Il contratto non può essere ceduto a terzi senza consenso scritto.',
-      'Art. 14 — COMUNICAZIONI: Le comunicazioni ufficiali devono avvenire via PEC o raccomandata.',
-      'Art. 15 — FORO COMPETENTE: Per ogni controversia sarà competente il Tribunale indicato nelle impostazioni.',
-    ]),
+    contratto_articoli: z.array(z.string()).default(DEFAULT_CONTRACT_ARTICLES),
   }).passthrough(),
 
   'automation.rules': z.object({

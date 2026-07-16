@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import crypto from 'crypto';
+import { resolveContractArticles, type ContractArticle } from '@calicchia/shared';
 import { sql } from '../db';
 import { sendEmail } from '../lib/email';
 import { renderOtpCodeEmail } from '../templates/otp-code';
@@ -17,12 +18,35 @@ const log = logger.child({ scope: 'quote-sign' });
 
 export const quotePublic = new Hono();
 
+/**
+ * Vessatorie clauses (artt. 1341-1342 c.c.) applicable to a quote: only when
+ * the quote carries a contract section, resolved from the global settings
+ * boilerplate + per-quote article overrides — same logic as the PDF template.
+ */
+async function getVessatorieForQuote(projectTemplate: unknown): Promise<ContractArticle[]> {
+  let sections: Array<{ type?: string; data?: unknown }> = [];
+  try {
+    const pt = typeof projectTemplate === 'string' ? JSON.parse(projectTemplate) : projectTemplate;
+    if (pt && Array.isArray((pt as { sections?: unknown }).sections)) {
+      sections = (pt as { sections: Array<{ type?: string; data?: unknown }> }).sections;
+    }
+  } catch { /* malformed template → no contract → no vessatorie gate */ }
+
+  const contratto = sections.find((s) => s?.type === 'contratto');
+  if (!contratto) return [];
+
+  const settingsRows = await sql`SELECT value FROM site_settings WHERE key = 'quote.settings'`;
+  const settings = settingsRows[0]?.value || {};
+  return resolveContractArticles(settings, contratto.data).filter((a) => a.vessatoria);
+}
+
 // GET /api/quote-sign/:token — view quote
 quotePublic.get('/:token', async (c) => {
   const { token } = c.req.param();
   const rows = await sql`
     SELECT q.id, q.title, q.description, q.items, q.subtotal, q.tax_rate, q.tax_amount, q.total,
            q.currency, q.valid_until, q.notes, q.status, q.signed_at, q.signer_name,
+           q.project_template, q.vessatorie_approved_at,
            c.contact_name AS customer_name, c.company_name
     FROM quotes_v2 q
     LEFT JOIN customers c ON c.id = q.customer_id
@@ -36,7 +60,15 @@ quotePublic.get('/:token', async (c) => {
     await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent) VALUES (${quote.id}, 'viewed', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null})`;
   }
 
-  return c.json({ quote });
+  // Clauses requiring specific approval (artt. 1341-1342 c.c.) — the client
+  // must tick a dedicated consent before the signature is accepted.
+  const vessatorie = await getVessatorieForQuote(quote.project_template);
+  const { project_template: _pt, ...publicQuote } = quote;
+
+  return c.json({
+    quote: publicQuote,
+    vessatorie: vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo, testo: a.testo })),
+  });
 });
 
 // POST /api/quote-sign/:token/otp — request OTP
@@ -83,7 +115,7 @@ quotePublic.post('/:token/otp', async (c) => {
 // POST /api/quote-sign/:token/sign — verify OTP + submit signature
 quotePublic.post('/:token/sign', async (c) => {
   const { token } = c.req.param();
-  const { otp, signature_image, signer_name } = await c.req.json();
+  const { otp, signature_image, signer_name, vessatorie_approved } = await c.req.json();
 
   if (!otp || !signature_image) return c.json({ error: 'OTP e firma richiesti' }, 400);
 
@@ -96,6 +128,13 @@ quotePublic.post('/:token/sign', async (c) => {
 
   const quote = rows[0];
   if (quote.status === 'signed') return c.json({ error: 'Già firmato' }, 400);
+
+  // Artt. 1341-1342 c.c.: when the quote carries vessatorie clauses, the
+  // general signature is not enough — a distinct explicit approval is required.
+  const vessatorie = await getVessatorieForQuote(quote.project_template);
+  if (vessatorie.length && vessatorie_approved !== true) {
+    return c.json({ error: 'È richiesta l\'approvazione specifica delle clausole vessatorie (artt. 1341-1342 c.c.)' }, 400);
+  }
 
   const { ip: clientIp, ua: clientUa } = extractIpUa({ header: (name) => c.req.header(name) });
 
@@ -120,17 +159,28 @@ quotePublic.post('/:token/sign', async (c) => {
   const ua = clientUa || 'unknown';
   const pdfHash = crypto.createHash('sha256').update(`${quote.id}-${Date.now()}`).digest('hex');
 
+  // Freeze the approved clauses as presented at signature time — later edits
+  // to quote.settings must not change what was approved (evidentiary value).
+  const vessatorieSnapshot = vessatorie.length
+    ? JSON.stringify(vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo })))
+    : null;
+
   await sql`
     UPDATE quotes_v2 SET
       status = 'signed', signed_at = now(),
       signer_name = ${signer_name || null}, signer_email = ${quote.customer_email},
       signature_image = ${signature_image}, signature_ip = ${ip},
       signature_user_agent = ${ua}, pdf_hash_sha256 = ${pdfHash},
+      vessatorie_approved_at = ${vessatorie.length ? sql`now()` : null},
+      vessatorie_snapshot = ${vessatorieSnapshot},
       otp_code = NULL, otp_hash = NULL, otp_expires_at = NULL, otp_attempts = 0,
       updated_at = now()
     WHERE id = ${quote.id}
   `;
 
+  if (vessatorie.length) {
+    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'vessatorie_approved', ${ip}, ${ua}, ${vessatorieSnapshot})`;
+  }
   await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${JSON.stringify({ signer_name, pdf_hash: pdfHash })})`;
 
   // Admin notification of signature (standard transport; the OTP/customer

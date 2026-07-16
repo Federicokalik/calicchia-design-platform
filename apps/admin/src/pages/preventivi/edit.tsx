@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -24,6 +24,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { DEFAULT_CONTRACT_ARTICLES, parseContractArticle } from '@calicchia/shared';
 import { SectionWrapper } from '@/components/preventivi/section-wrapper';
 import { PdfPreview } from '@/components/preventivi/pdf-preview';
 import { useTopbar } from '@/hooks/use-topbar';
@@ -36,6 +37,7 @@ interface Offerta { id: string; nome: string; descrizione: string; prezzo: numbe
 interface ProblemaRisolto { problema: string; soluzione: string; }
 interface Rata { percentuale: number; momento: string; }
 interface ModalitaPagamento { id: string; nome: string; sconto_percentuale: number; rate: Rata[]; }
+interface FaseGantt { label: string; start_pct: number; width_pct: number; }
 
 interface Section {
   id: string;
@@ -57,10 +59,13 @@ const SECTION_TYPES = [
   { type: 'contratto', label: 'Contratto', icon: FileSignature },
 ] as const;
 
+// Fallback when quote.settings.materiali_default hasn't loaded yet.
+const DEFAULT_MATERIALI = ['Logo (vettoriale)', 'Testi / Copy', 'Foto / Immagini', 'Accessi (hosting, dominio)'];
+
 // Default sections for new quote
 const DEFAULT_SECTIONS: Section[] = [
   { id: uid(), type: 'offerte', data: { offerte: [{ id: uid(), nome: '', descrizione: '', prezzo: 0, consigliata: true, include: [''], esclude: [''] }] } },
-  { id: uid(), type: 'materiali', data: { lista: ['Logo (vettoriale)', 'Testi / Copy', 'Foto / Immagini', 'Accessi (hosting, dominio)'] } },
+  { id: uid(), type: 'materiali', data: { lista: DEFAULT_MATERIALI } },
   { id: uid(), type: 'tempistiche', data: { prima_bozza: '10-15 giorni lavorativi', nota: 'dalla ricezione dei materiali' } },
   { id: uid(), type: 'pagamento', data: { modalita: [{ id: uid(), nome: 'Saldo Unico (10% sconto)', sconto_percentuale: 10, rate: [] }, { id: uid(), nome: '2 Rate', sconto_percentuale: 0, rate: [{ percentuale: 50, momento: 'alla firma' }, { percentuale: 50, momento: 'al completamento' }] }] } },
   { id: uid(), type: 'contratto', data: { auto: true, servizi: [''], clausole: [''] } },
@@ -69,8 +74,15 @@ const DEFAULT_SECTIONS: Section[] = [
 export default function PreventivoEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const isNew = !id || id === 'new';
+
+  // Non-binding customer matches from the Markdown import (router state) —
+  // the admin confirms or dismisses; the quote is never auto-linked.
+  const [suggestedCustomers, setSuggestedCustomers] = useState<any[]>(
+    () => (location.state as any)?.suggestedCustomers || [],
+  );
 
   // Header fields
   const [title, setTitle] = useState('');
@@ -96,6 +108,32 @@ export default function PreventivoEditorPage() {
     queryKey: ['customers-select'],
     queryFn: () => apiFetch('/api/customers?limit=100'),
   });
+
+  // quote.settings drives the default materials list and the global contract
+  // articles the per-quote override editor falls back to.
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => apiFetch('/api/settings'),
+    staleTime: 60_000,
+  });
+  const quoteSettings = (((settingsData as any)?.settings ?? settingsData) || {})['quote.settings'] || {};
+  const globalArticles: string[] = Array.isArray(quoteSettings.contratto_articoli) && quoteSettings.contratto_articoli.length
+    ? quoteSettings.contratto_articoli
+    : DEFAULT_CONTRACT_ARTICLES;
+  const [openOverrideIdx, setOpenOverrideIdx] = useState<number | null>(null);
+
+  // New quote: swap the hardcoded materials fallback for the configured
+  // default once settings load — only while the list is still untouched.
+  useEffect(() => {
+    const md = quoteSettings.materiali_default;
+    if (!isNew || !Array.isArray(md) || !md.length) return;
+    setSections((prev) => prev.map((s) =>
+      s.type === 'materiali' && JSON.stringify(s.data?.lista) === JSON.stringify(DEFAULT_MATERIALI)
+        ? { ...s, data: { ...s.data, lista: md } }
+        : s,
+    ));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isNew, settingsData]);
 
   // Populate from existing
   useEffect(() => {
@@ -278,16 +316,46 @@ export default function PreventivoEditorPage() {
 
       case 'tempistiche':
         return (
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs">Prima bozza</Label>
-              <Input className="h-8 text-xs" value={d.prima_bozza} onChange={(e) => updateSection(section.id, { ...d, prima_bozza: e.target.value })} placeholder="10-15 giorni lavorativi" />
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Prima bozza</Label>
+                <Input className="h-8 text-xs" value={d.prima_bozza} onChange={(e) => updateSection(section.id, { ...d, prima_bozza: e.target.value })} placeholder="10-15 giorni lavorativi" />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Nota</Label>
+                <Input className="h-8 text-xs" value={d.nota} onChange={(e) => updateSection(section.id, { ...d, nota: e.target.value })} placeholder="dalla ricezione dei materiali" />
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Nota</Label>
-              <Input className="h-8 text-xs" value={d.nota} onChange={(e) => updateSection(section.id, { ...d, nota: e.target.value })} placeholder="dalla ricezione dei materiali" />
+            <div className="pt-2">
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-xs">Fasi Gantt (opzionale — se presenti, il PDF mostra la timeline)</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground">Settimane</span>
+                  <Input
+                    className="w-14 h-6 text-[11px]"
+                    type="number"
+                    min={2}
+                    max={16}
+                    value={d.settimane || 8}
+                    onChange={(e) => updateSection(section.id, { ...d, settimane: parseInt(e.target.value) || 8 })}
+                  />
+                </div>
+              </div>
+              {(d.fasi || []).map((f: FaseGantt, fi: number) => (
+                <div key={fi} className="flex gap-1.5 mb-1 items-center">
+                  <Input className="flex-1 h-6 text-[11px]" value={f.label} placeholder="Nome fase" onChange={(e) => { const next = [...d.fasi]; next[fi] = { ...f, label: e.target.value }; updateSection(section.id, { ...d, fasi: next }); }} />
+                  <Input className="w-16 h-6 text-[11px]" type="number" min={0} max={100} value={f.start_pct} title="Inizio %" onChange={(e) => { const next = [...d.fasi]; next[fi] = { ...f, start_pct: parseFloat(e.target.value) || 0 }; updateSection(section.id, { ...d, fasi: next }); }} />
+                  <Input className="w-16 h-6 text-[11px]" type="number" min={1} max={100} value={f.width_pct} title="Durata %" onChange={(e) => { const next = [...d.fasi]; next[fi] = { ...f, width_pct: parseFloat(e.target.value) || 0 }; updateSection(section.id, { ...d, fasi: next }); }} />
+                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={() => updateSection(section.id, { ...d, fasi: d.fasi.filter((_: any, j: number) => j !== fi) })}><Trash2 className="h-2.5 w-2.5" /></Button>
+                </div>
+              ))}
+              {(d.fasi || []).length > 0 && (
+                <p className="text-[10px] text-muted-foreground mb-1">Colonne: nome fase · inizio % · durata % (sulla timeline)</p>
+              )}
+              <Button variant="ghost" size="sm" className="h-5 text-[10px]" onClick={() => updateSection(section.id, { ...d, fasi: [...(d.fasi || []), { label: '', start_pct: 0, width_pct: 12.5 }] })}>+ fase</Button>
             </div>
-          </div>
+          </>
         );
 
       case 'pagamento':
@@ -371,7 +439,8 @@ export default function PreventivoEditorPage() {
           </>
         );
 
-      case 'contratto':
+      case 'contratto': {
+        const overrides: (string | null)[] = Array.isArray(d.articoli_override) ? d.articoli_override : [];
         return (
           <>
             <div className="flex items-center gap-2">
@@ -388,8 +457,63 @@ export default function PreventivoEditorPage() {
               ))}
               <Button variant="ghost" size="sm" className="h-5 text-[10px]" onClick={() => updateSection(section.id, { ...d, servizi: [...(d.servizi || []), ''] })}>+ servizio</Button>
             </div>
+            <div className="pt-2">
+              <Label className="text-[10px]">Articoli del contratto — override per questo preventivo</Label>
+              <p className="text-[10px] text-muted-foreground mb-1.5">Di default valgono gli articoli globali (Impostazioni → Preventivi). Personalizza qui solo gli articoli specifici di questo progetto.</p>
+              <div className="space-y-1">
+                {globalArticles.map((globalText, i) => {
+                  const hasOverride = typeof overrides[i] === 'string' && (overrides[i] as string).trim() !== '';
+                  const effective = hasOverride ? (overrides[i] as string) : globalText;
+                  const parsed = parseContractArticle(effective, i);
+                  const isOpen = openOverrideIdx === i;
+                  return (
+                    <div key={i} className={`rounded border ${hasOverride ? 'border-primary/40 bg-primary/5' : 'bg-muted/20'}`}>
+                      <button
+                        type="button"
+                        className="flex items-center justify-between w-full px-2 py-1.5 text-left text-[11px] font-medium"
+                        onClick={() => setOpenOverrideIdx(isOpen ? null : i)}
+                      >
+                        <span>Art. {parsed.numero} — {parsed.titolo}{hasOverride ? ' · personalizzato' : ''}</span>
+                        <span className="text-muted-foreground">{isOpen ? '▲' : '▼'}</span>
+                      </button>
+                      {isOpen && (
+                        <div className="px-2 pb-2 space-y-1">
+                          <Textarea
+                            className="text-[11px]"
+                            rows={3}
+                            value={effective}
+                            onChange={(e) => {
+                              const next = [...overrides];
+                              while (next.length < globalArticles.length) next.push(null);
+                              next[i] = e.target.value;
+                              updateSection(section.id, { ...d, articoli_override: next });
+                            }}
+                          />
+                          {hasOverride && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 text-[10px]"
+                              onClick={() => {
+                                const next = [...overrides];
+                                while (next.length < globalArticles.length) next.push(null);
+                                next[i] = null;
+                                updateSection(section.id, { ...d, articoli_override: next });
+                              }}
+                            >
+                              Ripristina testo globale
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </>
         );
+      }
 
       default:
         return <p className="text-xs text-muted-foreground">Sezione non implementata</p>;
@@ -413,6 +537,34 @@ export default function PreventivoEditorPage() {
           {saveMutation.isPending ? 'Salvataggio...' : 'Salva'}
         </Button>
       </div>
+
+      {/* Customer suggestion banner (Markdown import) */}
+      {suggestedCustomers.length > 0 && !customerId && (
+        <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 space-y-2">
+          <p className="text-xs font-semibold">Possibile cliente esistente trovato nel brief</p>
+          <div className="flex flex-wrap gap-2">
+            {suggestedCustomers.map((s: any) => (
+              <div key={s.id} className="flex items-center gap-2 rounded border bg-card px-2.5 py-1.5 text-xs">
+                <span>
+                  <b>{s.contact_name}</b>
+                  {s.company_name ? ` · ${s.company_name}` : ''}
+                  {s.vat_number ? ` · P.IVA ${s.vat_number}` : ''}
+                </span>
+                <Button
+                  size="sm"
+                  className="h-6 text-[11px]"
+                  onClick={() => { setCustomerId(s.id); setSuggestedCustomers([]); }}
+                >
+                  Collega
+                </Button>
+              </div>
+            ))}
+            <Button variant="ghost" size="sm" className="h-6 text-[11px]" onClick={() => setSuggestedCustomers([])}>
+              Ignora
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
         {/* LEFT: Editor */}

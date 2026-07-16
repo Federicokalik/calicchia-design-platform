@@ -6,9 +6,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { API_BASE } from '@/lib/api';
 
+interface VessatoriaClause {
+  numero: number;
+  titolo: string;
+  testo: string;
+}
+
 export default function QuoteSignPage() {
   const { token } = useParams();
   const [quote, setQuote] = useState<any>(null);
+  const [vessatorie, setVessatorie] = useState<VessatoriaClause[]>([]);
+  const [vessatorieApproved, setVessatorieApproved] = useState(false);
+  const [expandedClause, setExpandedClause] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'view' | 'otp_sent' | 'sign' | 'done'>('view');
@@ -28,7 +37,10 @@ export default function QuoteSignPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.error) setError(data.error);
-        else setQuote(data.quote);
+        else {
+          setQuote(data.quote);
+          setVessatorie(Array.isArray(data.vessatorie) ? data.vessatorie : []);
+        }
       })
       .catch(() => setError('Errore nel caricamento'))
       .finally(() => setLoading(false));
@@ -110,6 +122,7 @@ export default function QuoteSignPage() {
   // Submit signature
   const submitSignature = async () => {
     if (!hasSignature || !otpInput) return;
+    if (vessatorie.length && !vessatorieApproved) return;
     setIsSubmitting(true);
     const signatureImage = canvasRef.current?.toDataURL('image/png') || '';
 
@@ -118,7 +131,12 @@ export default function QuoteSignPage() {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ otp: otpInput, signature_image: signatureImage, signer_name: signerName }),
+        body: JSON.stringify({
+          otp: otpInput,
+          signature_image: signatureImage,
+          signer_name: signerName,
+          vessatorie_approved: vessatorie.length ? vessatorieApproved : undefined,
+        }),
       });
       const data = await res.json();
       if (data.error) { setError(data.error); setIsSubmitting(false); return; }
@@ -291,7 +309,52 @@ export default function QuoteSignPage() {
                   </div>
                   <button onClick={clearCanvas} className="text-xs text-gray-400 hover:text-gray-600 mt-1">Cancella firma</button>
                 </div>
-                <Button onClick={submitSignature} disabled={!hasSignature || isSubmitting} className="w-full bg-orange-500 hover:bg-orange-600">
+
+                {/* Artt. 1341-1342 c.c. — specific approval of vessatorie clauses */}
+                {vessatorie.length > 0 && (
+                  <div className="border border-orange-200 bg-orange-50/50 rounded-lg p-4 space-y-3">
+                    <p className="text-sm font-semibold text-gray-900">Clausole che richiedono approvazione specifica</p>
+                    <p className="text-xs text-gray-500">
+                      Ai sensi degli artt. 1341 e 1342 del Codice Civile, le seguenti clausole richiedono
+                      la tua approvazione esplicita e distinta dalla firma del preventivo.
+                    </p>
+                    <ul className="space-y-1">
+                      {vessatorie.map((clause) => (
+                        <li key={clause.numero} className="text-sm">
+                          <button
+                            type="button"
+                            className="text-left w-full hover:bg-orange-100/60 rounded px-2 py-1 transition-colors"
+                            onClick={() => setExpandedClause(expandedClause === clause.numero ? null : clause.numero)}
+                          >
+                            <span className="font-medium text-gray-800">Art. {clause.numero} — {clause.titolo}</span>
+                            <span className="text-gray-400 text-xs ml-1">{expandedClause === clause.numero ? '▲' : '▼'}</span>
+                          </button>
+                          {expandedClause === clause.numero && (
+                            <p className="text-xs text-gray-600 px-2 pb-1 pt-0.5">{clause.testo}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <label className="flex items-start gap-2 cursor-pointer pt-1">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 accent-orange-500"
+                        checked={vessatorieApproved}
+                        onChange={(e) => setVessatorieApproved(e.target.checked)}
+                      />
+                      <span className="text-sm text-gray-700">
+                        Dichiaro di aver letto e compreso le clausole sopra elencate e le
+                        <strong> approvo specificamente</strong> ai sensi degli artt. 1341-1342 c.c.
+                      </span>
+                    </label>
+                  </div>
+                )}
+
+                <Button
+                  onClick={submitSignature}
+                  disabled={!hasSignature || isSubmitting || (vessatorie.length > 0 && !vessatorieApproved)}
+                  className="w-full bg-orange-500 hover:bg-orange-600"
+                >
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <PenTool className="h-4 w-4 mr-2" />}
                   Conferma e firma
                 </Button>

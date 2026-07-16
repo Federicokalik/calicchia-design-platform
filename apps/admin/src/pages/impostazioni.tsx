@@ -8,6 +8,7 @@ import {
   Shield, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
   Briefcase, Users, Calculator, Coins, Copy, MessageCircle,
 } from 'lucide-react';
+import { DEFAULT_CONTRACT_ARTICLES, DEFAULT_CLAUSOLE_VESSATORIE, parseContractArticle } from '@calicchia/shared';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
 import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { MfaSection } from './impostazioni/mfa-section';
@@ -600,7 +601,7 @@ export default function ImpostazioniPage() {
               <div className="flex items-center gap-2 text-sm font-medium"><Palette className="h-4 w-4 text-muted-foreground" /> Brand</div>
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Colore primario" value={getQs('colore_primario', '#f57f44')} onChange={(v) => setQsField('colore_primario', v)} type="color" />
-                <Field label="Font" value={getQs('font', 'Inter, Arial, sans-serif')} onChange={(v) => setQsField('font', v)} />
+                <Field label="Logo URL" value={getQs('logo_url', '')} onChange={(v) => setQsField('logo_url', v)} placeholder="/media/logo.svg" description="Wordmark su copertina e intestazioni; vuoto = ragione sociale in Funnel Display" />
               </div>
             </div>
 
@@ -615,6 +616,8 @@ export default function ImpostazioniPage() {
                 <Field label="Email" value={getQs('email_fornitore', '')} onChange={(v) => setQsField('email_fornitore', v)} />
                 <Field label="Banca" value={getQs('banca', '')} onChange={(v) => setQsField('banca', v)} />
                 <Field label="IBAN" value={getQs('iban', '')} onChange={(v) => setQsField('iban', v)} />
+                <Field label="BIC / SWIFT" value={getQs('bic', '')} onChange={(v) => setQsField('bic', v)} />
+                <Field label="Sito web" value={getQs('sito_web', '')} onChange={(v) => setQsField('sito_web', v)} placeholder="calicchia.design" />
               </div>
             </div>
 
@@ -653,38 +656,43 @@ export default function ImpostazioniPage() {
 
                 <div className="space-y-1">
                   {Array.from({ length: 15 }, (_, i) => {
-                    const defaults = [
-                      'Art. 1 — OGGETTO: Il Fornitore si impegna a realizzare per il Cliente i servizi descritti nel presente preventivo.',
-                      "Art. 2 — COMPENSO: Il compenso per i servizi è quello indicato nell'offerta economica accettata.",
-                      'Art. 3 — DURATA: Il presente contratto ha durata di 12 mesi dalla data di sottoscrizione.',
-                      'Art. 4 — MODALITÀ DI PAGAMENTO: Il pagamento dovrà avvenire secondo le modalità indicate nel preventivo.',
-                      'Art. 5 — RITARDO NEI PAGAMENTI: In caso di ritardo, il Fornitore si riserva di sospendere i servizi.',
-                      'Art. 6 — PROPRIETÀ INTELLETTUALE: I diritti di proprietà intellettuale restano del Fornitore fino al saldo completo.',
-                      'Art. 7 — RISERVATEZZA: Le parti si impegnano a mantenere riservate le informazioni scambiate.',
-                      'Art. 8 — RECESSO: Ciascuna parte può recedere con preavviso scritto di 30 giorni.',
-                      'Art. 9 — FORZA MAGGIORE: Nessuna parte sarà responsabile per inadempimenti dovuti a causa di forza maggiore.',
-                      'Art. 10 — LIMITAZIONE DI RESPONSABILITÀ: La responsabilità del Fornitore è limitata al compenso ricevuto.',
-                      'Art. 11 — GARANZIA: Il Fornitore garantisce la conformità dei servizi alle specifiche concordate.',
-                      'Art. 12 — MODIFICHE AL CONTRATTO: Eventuali modifiche devono essere concordate per iscritto.',
-                      'Art. 13 — CESSIONE: Il contratto non può essere ceduto a terzi senza consenso scritto.',
-                      'Art. 14 — COMUNICAZIONI: Le comunicazioni ufficiali devono avvenire via PEC o raccomandata.',
-                      'Art. 15 — FORO COMPETENTE: Per ogni controversia sarà competente il Tribunale indicato nelle impostazioni.',
-                    ];
-                    const articles: string[] = qs.contratto_articoli || quoteSettings.contratto_articoli || defaults;
-                    const value = articles[i] || defaults[i];
+                    const articles: string[] = qs.contratto_articoli || quoteSettings.contratto_articoli || DEFAULT_CONTRACT_ARTICLES;
+                    const vessatorie: number[] = qs.clausole_vessatorie || quoteSettings.clausole_vessatorie || DEFAULT_CLAUSOLE_VESSATORIE;
+                    const value = articles[i] || DEFAULT_CONTRACT_ARTICLES[i];
                     const isOpen = openArticles.has(i);
-                    const artTitle = value.match(/^(Art\.\s*\d+\s*—\s*[^:]+)/)?.[1] || `Art. ${i + 1}`;
+                    const parsed = parseContractArticle(value, i);
+                    const artTitle = `Art. ${parsed.numero} — ${parsed.titolo}`;
+                    const isVessatoria = vessatorie.includes(parsed.numero);
 
                     return (
                       <div key={i} className="rounded-lg border bg-muted/20">
-                        <button
-                          type="button"
-                          className="flex items-center justify-between w-full px-3 py-2 text-left text-xs font-medium hover:bg-muted/40 transition-colors rounded-lg"
-                          onClick={() => toggleArticle(i)}
-                        >
-                          <span>{artTitle}</span>
-                          <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
-                        </button>
+                        <div className="flex items-center gap-2 px-3 py-2">
+                          <button
+                            type="button"
+                            className="flex items-center justify-between flex-1 text-left text-xs font-medium hover:bg-muted/40 transition-colors rounded"
+                            onClick={() => toggleArticle(i)}
+                          >
+                            <span>{artTitle}</span>
+                            <ChevronDown className={cn('h-3.5 w-3.5 text-muted-foreground transition-transform', isOpen && 'rotate-180')} />
+                          </button>
+                          <label
+                            className="flex items-center gap-1.5 shrink-0 cursor-pointer text-[10px] text-muted-foreground"
+                            title="Clausola vessatoria — richiede specifica approvazione ai sensi degli artt. 1341-1342 c.c."
+                          >
+                            <input
+                              type="checkbox"
+                              className="h-3 w-3 accent-primary"
+                              checked={isVessatoria}
+                              onChange={(e) => {
+                                const next = e.target.checked
+                                  ? [...vessatorie, parsed.numero].sort((a, b) => a - b)
+                                  : vessatorie.filter((n) => n !== parsed.numero);
+                                setQsField('clausole_vessatorie', next);
+                              }}
+                            />
+                            Vessatoria
+                          </label>
+                        </div>
                         {isOpen && (
                           <div className="px-3 pb-3">
                             <Textarea
