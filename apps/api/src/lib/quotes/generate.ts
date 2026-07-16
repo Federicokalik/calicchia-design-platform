@@ -286,10 +286,10 @@ function buildMarkdownPrompt(pricing: string, profile: string, brief: MarkdownBr
   return `Sei l'agente di preventivazione del fornitore descritto sotto. Ti viene fornito un BRIEF IN MARKDOWN che spesso è già un preventivo redatto: il tuo compito è ESTRARRE e strutturare, non inventare.
 
 ═══ PROFILO FORNITORE ═══
-${profile}
+${profile || '(non disponibile)'}
 
 ═══ LISTINO PREZZI (solo come fallback) ═══
-${pricing}
+${pricing || '(non disponibile — usa esclusivamente le cifre presenti nel brief)'}
 
 ═══ BRIEF — METADATI (frontmatter) ═══
 ${fmLines || '(nessun frontmatter)'}
@@ -469,8 +469,13 @@ export async function generateQuoteFromMarkdown(
   if (cached) return { draft: cached, frontmatter: parseMarkdownBrief(validInput.markdown).frontmatter };
 
   const brief = parseMarkdownBrief(validInput.markdown);
-  const pricing = loadPricingKB();
-  const profile = loadProfileKB();
+  // Extraction mode: the brief itself is the price source — the KBs are only
+  // fallback grounding, so a missing KB file (e.g. /data/kb not yet populated
+  // in prod) must not fail the import.
+  let pricing = '';
+  let profile = '';
+  try { pricing = loadPricingKB(); } catch { /* optional in markdown mode */ }
+  try { profile = loadProfileKB(); } catch { /* optional in markdown mode */ }
 
   const prompt = buildMarkdownPrompt(pricing, profile, brief);
   const llmOutput = await callLLMForQuote(prompt);
