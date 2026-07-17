@@ -31,6 +31,7 @@ export default function QuoteSignPage() {
   const [step, setStep] = useState<'view' | 'otp_sent' | 'sign' | 'done'>('view');
   const [otpInput, setOtpInput] = useState('');
   const [emailHint, setEmailHint] = useState('');
+  const [otpChannel, setOtpChannel] = useState<'email' | 'whatsapp'>('email');
   const [signerName, setSignerName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -109,18 +110,27 @@ export default function QuoteSignPage() {
     setHasSignature(false);
   };
 
-  // Request OTP
-  const requestOTP = async () => {
+  // Request OTP (email or WhatsApp)
+  const requestOTP = async (channel: 'email' | 'whatsapp') => {
     setIsSubmitting(true);
+    setError('');
     try {
-      const res = await fetch(`${API_BASE}/api/quote-sign/${token}/otp`, { method: 'POST', credentials: 'include' });
+      const res = await fetch(`${API_BASE}/api/quote-sign/${token}/otp`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel }),
+      });
       const data = await res.json();
       if (data.error) { setError(data.error); return; }
-      setEmailHint(data.email_hint);
+      setEmailHint(data.hint || data.email_hint);
+      setOtpChannel(channel);
       setStep('otp_sent');
     } catch { setError('Errore invio OTP'); }
     finally { setIsSubmitting(false); }
   };
+
+  const otpChannels: string[] = Array.isArray(quote?.otp_channels) ? quote.otp_channels : ['email'];
 
   // Verify OTP and show sign canvas
   const verifyAndSign = () => {
@@ -318,11 +328,23 @@ export default function QuoteSignPage() {
               <div className="bg-white rounded-xl border p-6 text-center">
                 <PenTool className="h-8 w-8 text-orange-500 mx-auto mb-3" />
                 <h2 className="text-lg font-semibold mb-1">Firma questo preventivo</h2>
-                <p className="text-sm text-gray-500 mb-4">Ti invieremo un codice di verifica via email per confermare la tua identità.</p>
-                <Button onClick={requestOTP} disabled={isSubmitting} className="bg-orange-500 hover:bg-orange-600">
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-                  Invia codice di verifica
-                </Button>
+                <p className="text-sm text-gray-500 mb-4">
+                  Ti invieremo un codice di verifica per confermare la tua identità.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  {otpChannels.includes('email') && (
+                    <Button onClick={() => requestOTP('email')} disabled={isSubmitting} className="bg-orange-500 hover:bg-orange-600">
+                      {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                      Codice via Email
+                    </Button>
+                  )}
+                  {otpChannels.includes('whatsapp') && (
+                    <Button onClick={() => requestOTP('whatsapp')} disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
+                      {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                      Codice via WhatsApp
+                    </Button>
+                  )}
+                </div>
                 {error && <p className="text-sm text-red-500 mt-3">{error}</p>}
               </div>
             )}
@@ -331,7 +353,9 @@ export default function QuoteSignPage() {
             {step === 'otp_sent' && (
               <div className="bg-white rounded-xl border p-6">
                 <h2 className="text-lg font-semibold mb-1">Inserisci il codice</h2>
-                <p className="text-sm text-gray-500 mb-4">Abbiamo inviato un codice a 6 cifre a <strong>{emailHint}</strong></p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Abbiamo inviato un codice a 6 cifre {otpChannel === 'whatsapp' ? 'su WhatsApp al numero' : 'a'} <strong>{emailHint}</strong>
+                </p>
                 <div className="max-w-xs mx-auto space-y-3">
                   <Input
                     value={otpInput}

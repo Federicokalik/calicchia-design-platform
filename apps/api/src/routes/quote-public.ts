@@ -16,6 +16,7 @@ import {
 import { decodeEntities, escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
 import { ensureProjectForQuote } from '../lib/quotes/project';
 import { readPrivateFile } from '../lib/private-files';
+import { sendWhatsAppText, isWhatsAppConfigured } from '../lib/whatsapp';
 
 const log = logger.child({ scope: 'quote-sign' });
 
@@ -101,7 +102,8 @@ quotePublic.get('/:token', async (c) => {
     SELECT q.id, q.title, q.description, q.items, q.subtotal, q.tax_rate, q.tax_amount, q.total,
            q.currency, q.valid_until, q.notes, q.status, q.signed_at, q.signer_name,
            q.project_template, q.vessatorie_approved_at, q.custom_html_path,
-           c.contact_name AS customer_name, c.company_name
+           c.contact_name AS customer_name, c.company_name,
+           c.email AS customer_email, c.phone AS customer_phone
     FROM quotes_v2 q
     LEFT JOIN customers c ON c.id = q.customer_id
     WHERE q.signature_token = ${token}
@@ -118,7 +120,13 @@ quotePublic.get('/:token', async (c) => {
   // must tick a dedicated consent before the signature is accepted.
   const vessatorie = await getVessatorieForQuote(quote.project_template);
   const pagamento = getPagamentoForQuote(quote.project_template);
-  const { project_template: _pt, custom_html_path, ...publicQuote } = quote;
+  // Raw contacts stay server-side — the page only learns WHICH OTP channels
+  // are available; masked hints are returned by the /otp endpoint after use.
+  const { project_template: _pt, custom_html_path, customer_email, customer_phone, ...publicQuote } = quote;
+  const otpChannels = [
+    ...(customer_email ? ['email'] : []),
+    ...(customer_phone && isWhatsAppConfigured() ? ['whatsapp'] : []),
+  ];
 
   // items can be double-encoded depending on the write path (jsonb holding a
   // JSON *string* — e.g. the import-html route): normalize to a real array or
@@ -141,6 +149,7 @@ quotePublic.get('/:token', async (c) => {
       items,
       // Boolean only — the storage path stays server-side.
       has_document: !!custom_html_path,
+      otp_channels: otpChannels,
     },
     pagamento,
     vessatorie: vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo, testo: a.testo })),
@@ -185,17 +194,27 @@ quotePublic.get('/:token/document', async (c) => {
   return c.html(html);
 });
 
-// POST /api/quote-sign/:token/otp — request OTP
+// POST /api/quote-sign/:token/otp — request OTP via email (default) or
+// WhatsApp ({"channel":"whatsapp"}), when the customer has a phone and GOWA
+// is up. Same code strength/expiry either way; the channel is audit-logged.
 quotePublic.post('/:token/otp', async (c) => {
   const { token } = c.req.param();
+  const body = await c.req.json().catch(() => ({} as Record<string, unknown>));
+  const channel = body.channel === 'whatsapp' ? 'whatsapp' : 'email';
+
   const rows = await sql`
-    SELECT q.id, q.status, c.email AS customer_email, c.contact_name
+    SELECT q.id, q.status, c.email AS customer_email, c.phone AS customer_phone, c.contact_name
     FROM quotes_v2 q LEFT JOIN customers c ON c.id = q.customer_id
     WHERE q.signature_token = ${token}
   `;
   if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
   if (rows[0].status === 'signed') return c.json({ error: 'Già firmato' }, 400);
-  if (!rows[0].customer_email) return c.json({ error: 'Email cliente non configurata' }, 400);
+  if (channel === 'email' && !rows[0].customer_email) {
+    return c.json({ error: 'Email cliente non configurata' }, 400);
+  }
+  if (channel === 'whatsapp' && (!rows[0].customer_phone || !isWhatsAppConfigured())) {
+    return c.json({ error: 'Verifica via WhatsApp non disponibile — usa la verifica via email' }, 400);
+  }
 
   const otp = generateOtpCode();
   const expiresAt = otpExpiresAt(10);
@@ -212,18 +231,34 @@ quotePublic.post('/:token/otp', async (c) => {
     WHERE id = ${rows[0].id}
   `;
 
-  const otpEmail = await renderOtpCodeEmail({ code: otp, expiresMinutes: 10 });
-  await sendEmail({
-    to: rows[0].customer_email,
-    subject: 'Codice di verifica per firma preventivo',
-    html: otpEmail.html,
-    text: otpEmail.text,
-    transport: 'critical',
-  });
+  let hint: string;
+  if (channel === 'whatsapp') {
+    try {
+      await sendWhatsAppText(
+        rows[0].customer_phone,
+        `🔐 *${otp}* è il tuo codice di verifica per la firma del preventivo.\n\nValido 10 minuti. Se non l'hai richiesto tu, ignora questo messaggio.`,
+      );
+    } catch (err) {
+      log.error({ err }, 'OTP WhatsApp send failed');
+      return c.json({ error: 'Invio WhatsApp fallito — riprova o usa la verifica via email' }, 502);
+    }
+    hint = String(rows[0].customer_phone).replace(/.(?=.{4})/g, '•');
+  } else {
+    const otpEmail = await renderOtpCodeEmail({ code: otp, expiresMinutes: 10 });
+    await sendEmail({
+      to: rows[0].customer_email,
+      subject: 'Codice di verifica per firma preventivo',
+      html: otpEmail.html,
+      text: otpEmail.text,
+      transport: 'critical',
+    });
+    hint = rows[0].customer_email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
+  }
 
-  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${JSON.stringify({ email: rows[0].customer_email })})`;
+  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${JSON.stringify({ channel, ...(channel === 'whatsapp' ? { phone: rows[0].customer_phone } : { email: rows[0].customer_email }) })})`;
 
-  return c.json({ success: true, email_hint: rows[0].customer_email.replace(/(.{2})(.*)(@.*)/, '$1***$3') });
+  // email_hint kept for backward compatibility with already-built clients.
+  return c.json({ success: true, channel, hint, email_hint: hint });
 });
 
 // POST /api/quote-sign/:token/sign — verify OTP + submit signature
