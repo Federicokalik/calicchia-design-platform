@@ -8,6 +8,7 @@ import {
   Megaphone,
   FileText,
   File,
+  FileSignature,
   Upload,
   Wallet,
   Receipt,
@@ -55,6 +56,7 @@ const GROUPS: NavGroup[] = [
   {
     key: 'documents',
     items: [
+      { href: '/clienti/preventivi', key: 'quotes', icon: FileSignature, roles: ['client'] },
       { href: '/clienti/file', key: 'files', icon: File, roles: ['client'] },
       { href: '/clienti/upload', key: 'upload', icon: Upload, roles: ['client'] },
     ],
@@ -95,6 +97,7 @@ export function PortalNav({ role = 'client' }: { role?: PortalRole }) {
     const enHref = itHref
       .replace('/clienti', '/clients')
       .replace('/progetti', '/projects')
+      .replace('/preventivi', '/quotes')
       .replace('/campagne', '/campaigns')
       .replace('/file', '/files')
       .replace('/investimento', '/billing')

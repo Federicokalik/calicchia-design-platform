@@ -235,6 +235,23 @@ export interface PortalInvoice {
   stripe_invoice_pdf: string | null;
 }
 
+export interface PortalQuote {
+  id: string;
+  quote_number: string | null;
+  title: string;
+  status: 'sent' | 'viewed' | 'signed' | string;
+  total: number;
+  currency: string;
+  valid_until: string | null;
+  sent_at: string | null;
+  viewed_at: string | null;
+  signed_at: string | null;
+  signer_name: string | null;
+  created_at: string;
+  /** Tokenized OTP sign/view page (admin-hosted) — same link sent via email/WhatsApp. */
+  sign_url: string;
+}
+
 export interface PortalInvoiceLineItem {
   description: string;
   quantity?: number;
@@ -513,6 +530,11 @@ export async function uploadFile(formData: FormData): Promise<{ id: string; key:
     }).catch(() => undefined);
     throw error;
   }
+}
+
+export async function getQuotes(): Promise<PortalQuote[]> {
+  const data = await authedFetch<{ quotes: PortalQuote[] }>('/quotes');
+  return data.quotes ?? [];
 }
 
 export async function getInvoices(): Promise<PortalInvoice[]> {

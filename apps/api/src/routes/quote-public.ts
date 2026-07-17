@@ -13,6 +13,8 @@ import {
   otpExpiresAt,
   verifyOtpHash,
 } from '../lib/signing';
+import { escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
+import { ensureProjectForQuote } from '../lib/quotes/project';
 
 const log = logger.child({ scope: 'quote-sign' });
 
@@ -193,17 +195,25 @@ quotePublic.post('/:token/sign', async (c) => {
   }
   await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${JSON.stringify({ signer_name, pdf_hash: pdfHash })})`;
 
+  // Signed → the quote becomes a "lavoro": auto-create the linked project
+  // (budget = quote total) so it shows up in admin outside the leads pipeline.
+  // Never blocks the signature: failures are logged inside and return null.
+  const project = await ensureProjectForQuote(quote);
+
+  const displayTitle = quoteDisplayTitle(quote.title);
+  const totalFmt = parseFloat(quote.total || '0').toLocaleString('it-IT');
+
   // Admin notification of signature (standard transport; the OTP/customer
   // confirmation goes through critical above)
   sendEmail({
     to: process.env.ADMIN_EMAIL || 'admin@calicchia.design',
-    subject: `Preventivo firmato: ${quote.title}`,
-    html: `<p><strong>${quote.title}</strong> firmato da ${signer_name || quote.customer_email}.</p><p>IP: ${ip} — ${new Date().toLocaleString('it-IT')}</p>`,
+    subject: `Preventivo firmato: ${displayTitle}`,
+    html: `<p><strong>${escapeHtml(displayTitle)}</strong> (€${totalFmt}) firmato da ${escapeHtml(signer_name || quote.customer_email || '')}.</p>${project ? `<p>Progetto creato automaticamente: <strong>${escapeHtml(project.name)}</strong></p>` : ''}<p>IP: ${ip} — ${new Date().toLocaleString('it-IT')}</p>`,
   }).catch((err) => log.error({ err }, 'admin signature notification failed'));
 
   // Notify Telegram
   import('../lib/telegram').then(({ notifyTelegram }) => {
-    notifyTelegram('✅ Preventivo firmato!', `${quote.title}\nFirmato da: ${signer_name || quote.customer_email}\n€${parseFloat(quote.total || '0').toLocaleString('it-IT')}`);
+    notifyTelegram('✅ Preventivo firmato!', `${displayTitle}\nFirmato da: ${signer_name || quote.customer_email}\n€${totalFmt}${project ? `\n📁 Progetto creato: ${project.name}` : ''}`);
   }).catch((err) => log.error({ err }, 'Telegram notify failed'));
   // Fire workflow event
   import('../lib/workflow/triggers').then(({ fireEvent }) => {

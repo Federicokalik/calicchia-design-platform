@@ -20,6 +20,7 @@
       "projects": "Progetti",
       "campaigns": "Campagne",
       "reports": "Report",
+      "quotes": "Preventivi",
       "files": "File",
       "upload": "Carica file",
       "billing": "Investimento",
@@ -250,6 +251,36 @@
       "description": "Domini, hosting e servizi ricorrenti appariranno qui."
     }
   },
+  "quotes": {
+    "eyebrow": "Preventivi",
+    "title": "Preventivi.",
+    "intro": "Leggo il preventivo, lo firmo online, ritrovo qui lo storico.",
+    "signNow": "Da firmare",
+    "history": "Storico preventivi",
+    "validUntil": "Valido fino al {date}",
+    "stats": {
+      "label": "Snapshot",
+      "toSign": "Da firmare",
+      "signed": "Firmati",
+      "signedValue": "Valore firmato"
+    },
+    "columns": {
+      "number": "Numero",
+      "title": "Oggetto",
+      "sentDate": "Inviato il",
+      "status": "Stato",
+      "total": "Importo"
+    },
+    "table": {
+      "sign": "Leggi e firma",
+      "view": "Visualizza"
+    },
+    "empty": {
+      "eyebrow": "Nessun preventivo",
+      "title": "Non ci sono preventivi.",
+      "description": "Quando riceverai un preventivo lo troverai qui, pronto da leggere e firmare."
+    }
+  },
   "invoices": {
     "eyebrow": "Saldo e ricevute",
     "title": "Fatture.",
@@ -386,6 +417,9 @@
   },
   "status": {
     "draft": "Bozza",
+    "sent": "Da firmare",
+    "viewed": "Da firmare",
+    "signed": "Firmato",
     "in_progress": "In corso",
     "review": "In revisione",
     "completed": "Completato",

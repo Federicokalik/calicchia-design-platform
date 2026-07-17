@@ -9,6 +9,7 @@ import { messagesRoutes } from './messages';
 import { uploadRoutes } from './upload';
 import { filesRoutes } from './files';
 import { invoicesRoutes } from './invoices';
+import { quotesRoutes } from './quotes';
 import { renewalsRoutes } from './renewals';
 import { reportsRoutes } from './reports';
 import { preferencesRoutes } from './preferences';
@@ -45,6 +46,9 @@ portal.route('/files', filesRoutes);
 
 // Invoices & Payments
 portal.route('/invoices', invoicesRoutes);
+
+// Quotes (preventivi da visionare/firmare — sign_url punta al flusso OTP)
+portal.route('/quotes', quotesRoutes);
 
 // Renewals
 portal.route('/renewals', renewalsRoutes);

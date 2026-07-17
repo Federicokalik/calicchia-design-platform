@@ -20,6 +20,7 @@
       "projects": "Projects",
       "campaigns": "Campaigns",
       "reports": "Reports",
+      "quotes": "Quotes",
       "files": "Files",
       "upload": "Upload",
       "billing": "Billing",
@@ -250,6 +251,36 @@
       "description": "Domains, hosting and recurring services will appear here."
     }
   },
+  "quotes": {
+    "eyebrow": "Quotes",
+    "title": "Quotes.",
+    "intro": "Read the quote, sign it online, find the history here.",
+    "signNow": "To sign",
+    "history": "Quote history",
+    "validUntil": "Valid until {date}",
+    "stats": {
+      "label": "Snapshot",
+      "toSign": "To sign",
+      "signed": "Signed",
+      "signedValue": "Signed value"
+    },
+    "columns": {
+      "number": "Number",
+      "title": "Subject",
+      "sentDate": "Sent on",
+      "status": "Status",
+      "total": "Amount"
+    },
+    "table": {
+      "sign": "Read and sign",
+      "view": "View"
+    },
+    "empty": {
+      "eyebrow": "No quotes",
+      "title": "There are no quotes yet.",
+      "description": "When you receive a quote you will find it here, ready to read and sign."
+    }
+  },
   "invoices": {
     "eyebrow": "Balance and receipts",
     "title": "Invoices.",
@@ -386,6 +417,9 @@
   },
   "status": {
     "draft": "Draft",
+    "sent": "To sign",
+    "viewed": "To sign",
+    "signed": "Signed",
     "in_progress": "In progress",
     "review": "In review",
     "completed": "Completed",
