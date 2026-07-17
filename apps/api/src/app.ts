@@ -199,14 +199,20 @@ app.use('*', async (c, next) => {
 app.use('*', async (c, next) => {
   await next();
   c.header('X-Content-Type-Options', 'nosniff');
-  c.header('X-Frame-Options', 'DENY');
+  // Frame/CSP defaults are set ONLY if the route didn't set its own: running
+  // after next(), an unconditional set would clobber per-route relaxations
+  // (quote-sign /document iframe, trust-index embed in public.ts) — which is
+  // exactly the bug that blocked the sign-page document embed (2026-07-17).
+  if (!c.res.headers.has('X-Frame-Options')) c.header('X-Frame-Options', 'DENY');
   c.header('X-XSS-Protection', '0'); // Deprecated but harmless
   c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
   c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   // CSP (SEC-08): the API only returns JSON and static files — none of which
   // load sub-resources — so a deny-all policy is safe and blocks any HTML the
   // API might ever serve (e.g. error pages) from executing scripts.
-  c.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  if (!c.res.headers.has('Content-Security-Policy')) {
+    c.header('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  }
   // SEC-13: COOP isolates the browsing context; CORP must stay 'cross-origin'
   // because /media/* images are embedded by sito-v3 on another origin.
   c.header('Cross-Origin-Opener-Policy', 'same-origin');
