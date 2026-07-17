@@ -61,6 +61,31 @@ if (process.env.NODE_ENV !== 'development') {
   }
 }
 
+// Apply pending DB migrations in-process BEFORE app/cron modules load
+// (incident 2026-07-16/17: the one-off compose `migrate` service is only
+// re-run when its container gets recreated — a deploy that skips it leaves
+// the running code ahead of its schema, "column does not exist" at runtime).
+// Ledger-based → normally a fast no-op. Fail-fast on error: serving traffic
+// against a stale schema is worse than a visible failed boot. Opt out with
+// AUTO_MIGRATE=false (e.g. when only the one-off service should migrate).
+if (process.env.AUTO_MIGRATE !== 'false') {
+  try {
+    const { runPendingMigrations } = await import('./lib/db-migrate');
+    const { applied } = await runPendingMigrations();
+    console.log(applied > 0 ? `✅ Applied ${applied} pending DB migration(s)` : '✅ DB schema up to date');
+  } catch (err) {
+    // Connection AggregateErrors carry an empty message — never log blank.
+    const e = err as { message?: string; code?: string };
+    const msg = e.message || e.code || String(err);
+    console.error(`FATAL: DB migration failed at boot: ${msg}`);
+    try {
+      const { notifyTelegram } = await import('./lib/telegram');
+      await notifyTelegram('🛑 API non partita: migrazione DB fallita', msg.slice(0, 500));
+    } catch { /* telegram not configured — the healthcheck will surface it */ }
+    process.exit(1);
+  }
+}
+
 // Fetch the gitignored AI knowledge bases from object storage (MEGA S4) BEFORE
 // any module that reads them is loaded. The dynamic imports below guarantee
 // that lib/agent (which reads the pricing KB at module load) is evaluated only
