@@ -5,6 +5,16 @@ import { quoteDisplayTitle, quoteSignUrl } from '../../lib/quotes/format';
 
 export const quotesRoutes = new Hono<PortalEnv>();
 
+// quotes_v2 has NO quote_number column (that lives on the legacy `quotes`
+// table): per convention the number sits at the end of the title —
+// "Preventivo <cliente> — 2026-TFN-001". Split it out for display.
+function splitTitleNumber(rawTitle: unknown): { title: string; quote_number: string | null } {
+  const full = quoteDisplayTitle(rawTitle);
+  const m = full.match(/^(.*?)\s+[—–-]\s+([A-Z0-9]+(?:-[A-Z0-9]+)+)$/i);
+  if (m) return { title: m[1], quote_number: m[2] };
+  return { title: full, quote_number: null };
+}
+
 // ── List quotes for this customer ─────────────────────────
 // Drafts are admin-internal and never exposed; everything from 'sent' onwards
 // is visible so the client can find and sign the preventivo from the portal.
@@ -14,7 +24,7 @@ quotesRoutes.get('/', portalClientAuth, async (c) => {
   const customerId = c.get('customer_id') as string;
 
   const rows = await sql`
-    SELECT id, quote_number, title, status, total, currency, valid_until,
+    SELECT id, title, status, total, currency, valid_until,
            sent_at, viewed_at, signed_at, signer_name, created_at, signature_token
     FROM quotes_v2
     WHERE customer_id = ${customerId} AND status <> 'draft'
@@ -24,8 +34,7 @@ quotesRoutes.get('/', portalClientAuth, async (c) => {
   return c.json({
     quotes: rows.map((q) => ({
       id: q.id,
-      quote_number: q.quote_number,
-      title: quoteDisplayTitle(q.title),
+      ...splitTitleNumber(q.title),
       status: q.status,
       total: Number(q.total || 0),
       currency: (q.currency as string) || 'EUR',
