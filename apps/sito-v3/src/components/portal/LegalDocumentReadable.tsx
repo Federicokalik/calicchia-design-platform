@@ -28,8 +28,11 @@ export function LegalDocumentReadable({
   defaultOpen = false,
 }: LegalDocumentReadableProps) {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  const reached = useScrollToBottom(sentinelRef);
   const [open, setOpen] = useState(defaultOpen);
+  // `open` riattacca l'observer quando la card viene espansa: con la card
+  // chiusa il sentinel non è montato e l'observer non si aggancerebbe mai
+  // (bug storico: il checkbox del DPA — chiuso di default — restava disabilitato).
+  const reached = useScrollToBottom(sentinelRef, open);
 
   // Se il documento e` molto corto, il sentinel e` gia` in viewport al primo
   // render → useScrollToBottom restituisce true. Bene, ma vogliamo evitare
@@ -94,6 +97,10 @@ export function LegalDocumentReadable({
           style={{ borderColor: 'rgba(17,17,17,0.08)' }}
         >
           <div
+            // Senza data-lenis-prevent lo smooth-scroll globale (Lenis, montato
+            // nel root layout) cattura la rotella e il container interno non
+            // scorre mai → impossibile raggiungere il fondo e accettare.
+            data-lenis-prevent
             className="max-h-[55vh] overflow-y-auto px-6 py-5 text-sm leading-relaxed"
             style={{ color: 'var(--color-text-secondary)' }}
           >

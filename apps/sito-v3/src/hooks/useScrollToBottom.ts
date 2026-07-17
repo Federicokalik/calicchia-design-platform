@@ -13,11 +13,18 @@ import { useEffect, useRef, useState, type RefObject } from 'react';
  * al viewport (root: null). Lo state diventa true UNA volta e non torna piu`
  * indietro — utile per evitare oscillazioni se l'utente ri-scrolla in alto.
  */
-export function useScrollToBottom(sentinelRef: RefObject<HTMLElement | null>): boolean {
+export function useScrollToBottom(
+  sentinelRef: RefObject<HTMLElement | null>,
+  active: boolean = true,
+): boolean {
   const [reached, setReached] = useState(false);
   const reachedRef = useRef(false);
 
   useEffect(() => {
+    // `active` is in the deps because the sentinel may not exist yet on first
+    // render (collapsed accordion): the observer must attach when the caller
+    // mounts the content, not only on hook mount.
+    if (!active) return;
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
@@ -46,7 +53,7 @@ export function useScrollToBottom(sentinelRef: RefObject<HTMLElement | null>): b
     );
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [sentinelRef]);
+  }, [sentinelRef, active]);
 
   return reached;
 }
