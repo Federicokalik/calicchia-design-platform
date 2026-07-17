@@ -4,6 +4,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { runAgent } from '../lib/agent';
 import { sendTelegramMessage, isAuthorizedChat, isTelegramConfigured } from '../lib/telegram';
 import { logger } from '../lib/logger';
+import { authMiddleware } from '../middleware/auth';
 
 const log = logger.child({ scope: 'telegram' });
 
@@ -203,8 +204,9 @@ telegram.post('/webhook', async (c) => {
   return c.json({ ok: true });
 });
 
-// GET /api/telegram/status
-telegram.get('/status', async (c) => {
+// GET /api/telegram/status — admin only (leaks configured state + chat_id tail
+// to anonymous callers otherwise; /webhook stays public via its secret token).
+telegram.get('/status', authMiddleware, async (c) => {
   return c.json({
     configured: isTelegramConfigured(),
     chat_id: process.env.TELEGRAM_CHAT_ID ? '***' + process.env.TELEGRAM_CHAT_ID.slice(-4) : null,

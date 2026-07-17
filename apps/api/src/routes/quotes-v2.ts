@@ -263,7 +263,7 @@ quotesV2.post('/import-html', async (c) => {
 // POST /api/quotes-v2 — create quote
 quotesV2.post('/', async (c) => {
   const body = await c.req.json();
-  const { customer_id, lead_id, title, description, items, tax_rate, valid_until, notes, internal_notes, materials_checklist, project_template } = body;
+  const { customer_id, lead_id, title, description, items, tax_rate, valid_until, notes, internal_notes, materials_checklist, project_template, auto_create_project } = body;
 
   if (!title) return c.json({ error: 'Titolo richiesto' }, 400);
 
@@ -279,13 +279,13 @@ quotesV2.post('/', async (c) => {
       customer_id, lead_id, title, description, items,
       subtotal, tax_rate, tax_amount, total,
       valid_until, notes, internal_notes,
-      materials_checklist, project_template
+      materials_checklist, project_template, auto_create_project
     )
     VALUES (
       ${customer_id || null}, ${lead_id || null}, ${title}, ${description || null}, ${JSON.stringify(parsedItems)},
       ${subtotal}, ${rate}, ${taxAmount}, ${total},
       ${valid_until || null}, ${notes || null}, ${internal_notes || null},
-      ${JSON.stringify(materials_checklist || [])}, ${JSON.stringify(project_template || null)}
+      ${JSON.stringify(materials_checklist || [])}, ${JSON.stringify(project_template || null)}, ${auto_create_project ?? true}
     )
     RETURNING *
   `;
@@ -377,6 +377,15 @@ quotesV2.put('/:id', async (c) => {
   const { id } = c.req.param();
   const body = await c.req.json();
 
+  // A signed quote is a binding contract — its content must not change after
+  // signature (would desync the "✓ Firmato digitalmente" PDF from what was
+  // approved). The editor is reachable by URL even for signed quotes.
+  const [existing] = await sql`SELECT status FROM quotes_v2 WHERE id = ${id}`;
+  if (!existing) return c.json({ error: 'Preventivo non trovato' }, 404);
+  if (existing.status === 'signed') {
+    return c.json({ error: 'Preventivo già firmato: non modificabile' }, 409);
+  }
+
   // Recalculate totals if items changed
   let subtotal = body.subtotal;
   let taxAmount = body.tax_amount;
@@ -401,10 +410,11 @@ quotesV2.put('/:id', async (c) => {
       tax_amount = COALESCE(${taxAmount}, tax_amount),
       total = COALESCE(${total}, total),
       valid_until = ${body.valid_until !== undefined ? body.valid_until : null},
-      notes = ${body.notes !== undefined ? body.notes : null},
+      notes = ${body.notes !== undefined ? body.notes : sql`notes`},
       internal_notes = ${body.internal_notes !== undefined ? body.internal_notes : null},
       materials_checklist = COALESCE(${body.materials_checklist ? JSON.stringify(body.materials_checklist) : null}, materials_checklist),
       project_template = ${body.project_template !== undefined ? JSON.stringify(body.project_template) : null},
+      auto_create_project = ${body.auto_create_project !== undefined ? body.auto_create_project : sql`auto_create_project`},
       updated_at = now()
     WHERE id = ${id}
     RETURNING *
@@ -564,11 +574,13 @@ quotesV2.post('/:id/generate-pdf', async (c) => {
   // Generate PDF
   const result = await generateQuotePdf(html, `Preventivo_${quote.title}`);
 
-  // Update quote with PDF path + hash
+  // Update quote with PDF path + hash. NEVER overwrite the hash once signed —
+  // for a signed quote pdf_hash_sha256 is the evidentiary signature hash, and
+  // regenerating the PDF would otherwise destroy the link to the approved content.
   await sql`
     UPDATE quotes_v2 SET
       pdf_path = ${result.pdfPath},
-      pdf_hash_sha256 = ${result.pdfHash},
+      pdf_hash_sha256 = CASE WHEN status = 'signed' THEN pdf_hash_sha256 ELSE ${result.pdfHash} END,
       updated_at = now()
     WHERE id = ${id}
   `;

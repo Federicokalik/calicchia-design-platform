@@ -188,7 +188,7 @@ app.use('/api/mkt-forms/*', cors({
 app.use('*', async (c, next) => {
   if (c.req.path.startsWith('/api/mkt-forms/')) return next();
   return cors({
-    origin: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').filter(Boolean),
+    origin: (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').map((s) => s.trim()).filter(Boolean),
     credentials: true,
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization', 'Accept-Language', 'X-Admin-Locale'],

@@ -248,11 +248,12 @@ subscriptions.post(
     }
 
     const provider = String(subscription.provider ?? 'stripe');
+    const atPeriodEnd = body.at_period_end ?? false;
     if (provider === 'stripe') {
       const stripeId = String(subscription.stripe_subscription_id ?? '');
       if (!stripeId) throw new HTTPException(400, { message: 'Stripe subscription id mancante' });
       await cancelStripeSubscription(stripeId, {
-        atPeriodEnd: body.at_period_end ?? false,
+        atPeriodEnd,
         reason: body.reason,
       });
     } else if (provider === 'paypal') {
@@ -263,9 +264,17 @@ subscriptions.post(
       throw new HTTPException(400, { message: `Provider non supportato: ${provider}` });
     }
 
+    // With at_period_end the subscription stays live at the provider until the
+    // period ends, so keep it 'active' (auto_renew=false marks "won't renew");
+    // the provider's subscription.deleted webhook flips it to 'canceled' then.
+    // Setting 'canceled' now would oscillate — the immediate updated webhook
+    // reverts it to 'active'. Immediate cancels go straight to 'canceled'.
     const [updated] = await sql`
       UPDATE subscriptions
-      SET status = 'canceled', canceled_at = NOW(), auto_renew = false, updated_at = NOW()
+      SET status = ${atPeriodEnd ? 'active' : 'canceled'},
+          canceled_at = NOW(),
+          auto_renew = false,
+          updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
     ` as Array<Record<string, unknown>>;

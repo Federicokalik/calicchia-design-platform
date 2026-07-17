@@ -160,16 +160,29 @@ export async function recordPaymentSuccess(
     };
   }
 
-  // ── 1. Mark payment_link as paid ───────────────────────────
-  await sql`
+  // ── 1. Atomically claim the payment_link ───────────────────
+  // The SELECT-based guard above is not atomic with this write, so a webhook and
+  // a return-URL capture can both pass it and each run the cascade, double-counting
+  // paid_amount. Only the request that actually flips the row proceeds.
+  const claimed = await sql`
     UPDATE payment_links
     SET
       status = 'paid',
       paid_at = ${paidAt},
       payer_email = COALESCE(${input.payerEmail ?? null}, payer_email),
       updated_at = NOW()
-    WHERE id = ${link.id} AND status != 'paid'
+    WHERE id = ${link.id} AND status NOT IN ('paid', 'refunded', 'partially_refunded')
+    RETURNING id
   `;
+  if (claimed.length === 0) {
+    return {
+      alreadyProcessed: true,
+      paymentLinkId: link.id,
+      paymentScheduleId: link.payment_schedule_id,
+      invoiceId: link.invoice_id,
+      customerId: await resolveCustomerId(link),
+    };
+  }
 
   // ── 2. Cascade onto payment_schedules ──────────────────────
   let scheduleId: string | null = null;
@@ -328,6 +341,24 @@ export async function recordRefund(input: RecordRefundInput): Promise<{
 
   if (!link) throw new Error(`payment_link ${input.paymentLinkId} not found`);
 
+  const history = Array.isArray(link.refund_history) ? link.refund_history : [];
+
+  // Idempotency: the same refund is recorded twice — the admin /refund route
+  // calls recordRefund synchronously, then the charge.refunded / CAPTURE.REFUNDED
+  // webhook calls it again for the same provider refund. Without this, a 50%
+  // refund would be counted as 100% and the link wrongly marked 'refunded'.
+  const alreadyRecorded = history.some(
+    (h) => h && typeof h === 'object' && (h as { provider_refund_id?: string }).provider_refund_id === input.providerRefundId,
+  );
+  if (alreadyRecorded) {
+    const curRefunded = Number(link.refunded_amount ?? 0);
+    return {
+      newRefundedAmount: curRefunded,
+      fullyRefunded: curRefunded >= Number(link.amount),
+      paymentLinkStatus: (link.status as 'paid' | 'refunded' | 'partially_refunded'),
+    };
+  }
+
   const currentRefunded = Number(link.refunded_amount ?? 0);
   const newRefunded = currentRefunded + Number(input.amount);
   const linkAmount = Number(link.amount);
@@ -338,7 +369,6 @@ export async function recordRefund(input: RecordRefundInput): Promise<{
       ? 'partially_refunded'
       : 'paid';
 
-  const history = Array.isArray(link.refund_history) ? link.refund_history : [];
   history.push({
     at: new Date().toISOString(),
     amount: input.amount,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 declare global {
   interface Window {
@@ -28,8 +28,15 @@ interface TurnstileRenderOptions {
 }
 
 export interface UseTurnstileResult {
-  /** Mount the Turnstile widget on the given container ref. */
-  containerRef: RefObject<HTMLDivElement | null>;
+  /**
+   * Callback ref for the widget container. A callback ref (not a stored
+   * RefObject) so the widget re-renders whenever the container re-attaches —
+   * e.g. the contact form re-appearing after "send another", which unmounts
+   * the container while the hook stays mounted. A plain effect keyed on
+   * [siteKey, action] would not re-run there, leaving a stale/consumed widget
+   * and a permanent 403 on the second submit.
+   */
+  containerRef: (node: HTMLDivElement | null) => void;
   /** Latest token (cleared on submit / reset). */
   token: string | null;
   /** Manually trigger reset (e.g. after submit failure to get a fresh token). */
@@ -93,11 +100,18 @@ export function useTurnstile(
   siteKey: string | undefined,
   action?: string,
 ): UseTurnstileResult {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const removeWidget = useCallback(() => {
+    if (typeof window !== 'undefined' && widgetIdRef.current && window.turnstile) {
+      window.turnstile.remove(widgetIdRef.current);
+    }
+    widgetIdRef.current = null;
+  }, []);
 
   const reset = useCallback(() => {
     setToken(null);
@@ -109,76 +123,66 @@ export function useTurnstile(
     window.turnstile.reset(widgetIdRef.current);
   }, []);
 
-  useEffect(() => {
-    if (typeof window === 'undefined' || !siteKey) {
+  const containerRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      // Detach: tear down so a later re-attach renders a fresh, unconsumed widget.
+      if (node === null) {
+        removeWidget();
+        nodeRef.current = null;
+        setToken(null);
+        setReady(false);
+        return;
+      }
+
+      nodeRef.current = node;
+
+      if (typeof window === 'undefined' || !siteKey) {
+        setReady(false);
+        return;
+      }
+
       setReady(false);
       setToken(null);
       setError(null);
-      return;
-    }
 
-    let cancelled = false;
+      loadTurnstileScript()
+        .then(() => {
+          // Bail if the node was detached/replaced while the script loaded.
+          if (nodeRef.current !== node || !window.turnstile) return;
 
-    setReady(false);
-    setToken(null);
-    setError(null);
+          removeWidget();
+          widgetIdRef.current = window.turnstile.render(node, {
+            sitekey: siteKey,
+            theme: 'light',
+            size: 'flexible',
+            appearance: 'interaction-only',
+            ...(action ? { action } : {}),
+            callback: (nextToken) => {
+              setToken(nextToken);
+              setError(null);
+            },
+            'error-callback': () => {
+              setToken(null);
+              setError('Verifica anti-bot non riuscita. Riprova.');
+            },
+            'expired-callback': () => {
+              setToken(null);
+              setError('Verifica anti-bot scaduta. Riprova.');
+            },
+            'timeout-callback': () => {
+              setToken(null);
+              setError('Verifica anti-bot scaduta. Riprova.');
+            },
+          });
 
-    loadTurnstileScript()
-      .then(() => {
-        if (cancelled) return;
-
-        const container = containerRef.current;
-        if (!container || !window.turnstile) {
-          setError('Verifica anti-bot non disponibile.');
-          return;
-        }
-
-        if (widgetIdRef.current) {
-          window.turnstile.remove(widgetIdRef.current);
-          widgetIdRef.current = null;
-        }
-
-        widgetIdRef.current = window.turnstile.render(container, {
-          sitekey: siteKey,
-          theme: 'light',
-          size: 'flexible',
-          appearance: 'interaction-only',
-          ...(action ? { action } : {}),
-          callback: (nextToken) => {
-            setToken(nextToken);
-            setError(null);
-          },
-          'error-callback': () => {
-            setToken(null);
-            setError('Verifica anti-bot non riuscita. Riprova.');
-          },
-          'expired-callback': () => {
-            setToken(null);
-            setError('Verifica anti-bot scaduta. Riprova.');
-          },
-          'timeout-callback': () => {
-            setToken(null);
-            setError('Verifica anti-bot scaduta. Riprova.');
-          },
+          setReady(true);
+        })
+        .catch((err) => {
+          setError(err instanceof Error ? err.message : 'Verifica anti-bot non disponibile.');
         });
-
-        setReady(true);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setError(err instanceof Error ? err.message : 'Verifica anti-bot non disponibile.');
-      });
-
-    return () => {
-      cancelled = true;
-
-      if (typeof window === 'undefined') return;
-      if (!widgetIdRef.current || !window.turnstile) return;
-
-      window.turnstile.remove(widgetIdRef.current);
-      widgetIdRef.current = null;
-    };
-  }, [siteKey, action]);
+    },
+    [siteKey, action, removeWidget],
+  );
 
   return {
     containerRef,

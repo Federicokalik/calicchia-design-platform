@@ -44,7 +44,7 @@ export const publicContactSchema = z.object({
   source_service: z.string().max(64).optional(),
   source_profession: z.string().max(64).optional(),
   lead_source: z.string().trim().max(64, 'Origine lead troppo lunga').optional().or(z.literal('')).transform((v) => v || undefined),
-  meet_slot: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'Formato slot non valido').optional(),
+  meet_slot: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'Formato slot non valido').optional().or(z.literal('')).transform((v) => v || undefined),
 }).passthrough();
 export type PublicContactBody = z.infer<typeof publicContactSchema>;
 

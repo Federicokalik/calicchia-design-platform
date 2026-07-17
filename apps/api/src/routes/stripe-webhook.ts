@@ -60,7 +60,19 @@ stripeWebhook.post('/', async (c) => {
   ` as Array<{ id: string }>;
 
   if (inserted.length === 0) {
-    return c.json({ received: true, duplicate: true });
+    // Row already exists. A DO NOTHING alone would swallow Stripe's retry of a
+    // *failed* event (processed=false) as a 200 duplicate → lost forever. Only
+    // treat as a real duplicate when the prior attempt actually succeeded;
+    // otherwise reclaim the row and reprocess. (New-event concurrency is still
+    // guarded by the DO NOTHING above — only the inserter proceeds.)
+    const reclaimed = await sql`
+      UPDATE stripe_webhook_logs SET error_message = NULL
+      WHERE event_id = ${event.id} AND processed = false
+      RETURNING id
+    ` as Array<{ id: string }>;
+    if (reclaimed.length === 0) {
+      return c.json({ received: true, duplicate: true });
+    }
   }
 
   try {
@@ -109,31 +121,69 @@ stripeWebhook.post('/', async (c) => {
         const [customer] = await sql`SELECT id FROM customers WHERE stripe_customer_id = ${stripeCustomerId}`;
         if (customer) {
           const item = subscription.items.data[0];
-          await sql`
-            INSERT INTO subscriptions ${sql({
-              stripe_subscription_id: subscription.id,
-              customer_id: customer.id,
-              stripe_price_id: item?.price?.id,
-              name: (item?.price?.product as Stripe.Product)?.name || 'Abbonamento',
-              amount: (item?.price?.unit_amount || 0) / 100,
-              currency: item?.price?.currency?.toUpperCase() || 'EUR',
-              billing_interval: item?.price?.recurring?.interval || 'year',
-              status: subscription.status,
-              start_date: new Date(subscription.start_date * 1000).toISOString().split('T')[0],
-              current_period_start: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
-              current_period_end: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
-              next_billing_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
-              canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
-              auto_renew: !subscription.cancel_at_period_end,
-            })}
-            ON CONFLICT (stripe_subscription_id) DO UPDATE SET
-              status = EXCLUDED.status,
-              current_period_start = EXCLUDED.current_period_start,
-              current_period_end = EXCLUDED.current_period_end,
-              next_billing_date = EXCLUDED.next_billing_date,
-              canceled_at = EXCLUDED.canceled_at,
-              auto_renew = EXCLUDED.auto_renew
-          `;
+          const startDate = new Date(subscription.start_date * 1000).toISOString().split('T')[0];
+          const periodStart = new Date(subscription.current_period_start * 1000).toISOString().split('T')[0];
+          const periodEnd = new Date(subscription.current_period_end * 1000).toISOString().split('T')[0];
+          const canceledAt = subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null;
+
+          // POST /api/subscriptions pre-creates a local 'incomplete' row and puts
+          // its id in the checkout metadata. Attach the Stripe id to THAT row
+          // instead of inserting a fresh one — otherwise the pre-created row is
+          // orphaned and the customer sees a duplicate subscription. Preserve the
+          // local name/provider/metadata (service name + approval state).
+          const localId = subscription.metadata?.subscription_id;
+          let linked = false;
+          if (localId) {
+            const rows = await sql`
+              UPDATE subscriptions SET
+                stripe_subscription_id = ${subscription.id},
+                customer_id = ${customer.id},
+                stripe_price_id = ${item?.price?.id ?? null},
+                amount = ${(item?.price?.unit_amount || 0) / 100},
+                currency = ${item?.price?.currency?.toUpperCase() || 'EUR'},
+                billing_interval = ${item?.price?.recurring?.interval || 'year'},
+                status = ${subscription.status},
+                start_date = ${startDate},
+                current_period_start = ${periodStart},
+                current_period_end = ${periodEnd},
+                next_billing_date = ${periodEnd},
+                canceled_at = ${canceledAt},
+                auto_renew = ${!subscription.cancel_at_period_end},
+                updated_at = NOW()
+              WHERE id = ${localId}
+                AND (stripe_subscription_id IS NULL OR stripe_subscription_id = ${subscription.id})
+              RETURNING id
+            ` as Array<{ id: string }>;
+            linked = rows.length > 0;
+          }
+
+          if (!linked) {
+            await sql`
+              INSERT INTO subscriptions ${sql({
+                stripe_subscription_id: subscription.id,
+                customer_id: customer.id,
+                stripe_price_id: item?.price?.id,
+                name: (item?.price?.product as Stripe.Product)?.name || 'Abbonamento',
+                amount: (item?.price?.unit_amount || 0) / 100,
+                currency: item?.price?.currency?.toUpperCase() || 'EUR',
+                billing_interval: item?.price?.recurring?.interval || 'year',
+                status: subscription.status,
+                start_date: startDate,
+                current_period_start: periodStart,
+                current_period_end: periodEnd,
+                next_billing_date: periodEnd,
+                canceled_at: canceledAt,
+                auto_renew: !subscription.cancel_at_period_end,
+              })}
+              ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+                status = EXCLUDED.status,
+                current_period_start = EXCLUDED.current_period_start,
+                current_period_end = EXCLUDED.current_period_end,
+                next_billing_date = EXCLUDED.next_billing_date,
+                canceled_at = EXCLUDED.canceled_at,
+                auto_renew = EXCLUDED.auto_renew
+            `;
+          }
         }
         break;
       }
@@ -170,6 +220,7 @@ stripeWebhook.post('/', async (c) => {
               subscription_id: subscriptionId,
               invoice_number: invoice.number || `INV-${Date.now()}`,
               status,
+              subtotal: (invoice.subtotal || 0) / 100,
               total: (invoice.total || 0) / 100,
               amount_paid: (invoice.amount_paid || 0) / 100,
               amount_due: (invoice.amount_due || 0) / 100,
@@ -178,7 +229,7 @@ stripeWebhook.post('/', async (c) => {
               due_date: invoice.due_date ? new Date(invoice.due_date * 1000).toISOString().split('T')[0] : null,
               paid_at: invoice.status === 'paid' && invoice.status_transitions?.paid_at ? new Date(invoice.status_transitions.paid_at * 1000).toISOString() : null,
               stripe_hosted_invoice_url: invoice.hosted_invoice_url,
-              stripe_pdf_url: invoice.invoice_pdf,
+              stripe_invoice_pdf: invoice.invoice_pdf,
             })}
             ON CONFLICT (stripe_invoice_id) DO UPDATE SET
               status = EXCLUDED.status,

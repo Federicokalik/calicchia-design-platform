@@ -17,6 +17,7 @@ import {
   getQuotes,
   LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  PortalForbiddenError,
   requirePortalAccess,
   type PortalQuote,
 } from '@/lib/portal-api';
@@ -210,6 +211,9 @@ export default async function PreventiviPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       return <PortalRedirect to="/clienti/login" />;
+    }
+    if (error instanceof PortalForbiddenError) {
+      return <PortalRedirect to="/clienti/progetti" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
       return <PortalRedirect to="/clienti/accettazione-legale" />;

@@ -14,7 +14,12 @@ export const newsletter = new Hono();
 const isValidEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s) && s.length <= 255;
 
 newsletter.post('/subscribe', async (c) => {
-  const { email, name, turnstile_token } = await c.req.json();
+  const body = await c.req.json().catch(() => null);
+  if (!body) return c.json({ error: 'Dati non validi' }, 400);
+  const { email: rawEmail, name, turnstile_token } = body;
+  // Normalize case so a later GDPR erase/export (which matches lowercased) can
+  // find the row, and so 'User@x.com' / 'user@x.com' don't create two records.
+  const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
 
   const clientIp = getClientIp(c);
   // Truncate user-agent to a reasonable length to avoid unbounded text storage
@@ -50,9 +55,13 @@ newsletter.post('/subscribe', async (c) => {
     VALUES (${email}, ${name || null}, 'pending', ${clientIp}, ${userAgent})
     ON CONFLICT (email) DO UPDATE SET
       name               = EXCLUDED.name,
-      status             = 'pending',
-      consent_ip         = EXCLUDED.consent_ip,
-      consent_user_agent = EXCLUDED.consent_user_agent,
+      -- A re-subscribe must NOT downgrade an already-confirmed subscriber back
+      -- to 'pending' (which would silently drop them from sends until they
+      -- re-click), nor overwrite their original consent proof with the
+      -- re-submitter's IP/UA. Preserve both when already confirmed.
+      status             = CASE WHEN newsletter_subscribers.status = 'confirmed' THEN 'confirmed' ELSE 'pending' END,
+      consent_ip         = CASE WHEN newsletter_subscribers.status = 'confirmed' THEN newsletter_subscribers.consent_ip ELSE EXCLUDED.consent_ip END,
+      consent_user_agent = CASE WHEN newsletter_subscribers.status = 'confirmed' THEN newsletter_subscribers.consent_user_agent ELSE EXCLUDED.consent_user_agent END,
       updated_at         = NOW()
     RETURNING confirmation_token, status
   ` as Array<{ confirmation_token: string; status: string }>;
@@ -61,7 +70,7 @@ newsletter.post('/subscribe', async (c) => {
   // surface the transport result to the caller. Mail failures (Resend rate-
   // limit, SMTP outage) must not leak to the public form — UX-wise the user
   // already saw "controlla la tua email" and a retry is one /subscribe away.
-  if (subscriber?.confirmation_token) {
+  if (subscriber?.confirmation_token && subscriber.status !== 'confirmed') {
     sendNewsletterConfirmEmail({
       to: email,
       confirmationToken: subscriber.confirmation_token,
@@ -86,12 +95,17 @@ newsletter.get('/confirm', async (c) => {
 
   const confirmIp = getClientIp(c);
 
+  // Only a still-pending row may be confirmed, and the token is burned (rotated)
+  // on success. Without `AND status='pending'` an already-unsubscribed user (or
+  // a link-scanner re-visiting an old email) would be silently re-confirmed —
+  // processing after opt-out. Token rotation makes the link single-use.
   const [updated] = await sql`
     UPDATE newsletter_subscribers
-    SET status       = 'confirmed',
-        confirmed_at = NOW(),
-        confirmed_ip = ${confirmIp}
-    WHERE confirmation_token = ${token}::uuid
+    SET status             = 'confirmed',
+        confirmed_at       = NOW(),
+        confirmed_ip       = ${confirmIp},
+        confirmation_token = gen_random_uuid()
+    WHERE confirmation_token = ${token}::uuid AND status = 'pending'
     RETURNING id
   `;
   if (!updated) return c.json({ error: 'Token non valido o gia utilizzato' }, 404);
@@ -110,7 +124,7 @@ newsletter.get('/unsubscribe', async (c) => {
 
   const [updated] = await sql`
     UPDATE newsletter_subscribers
-    SET status = 'unsubscribed'
+    SET status = 'unsubscribed', unsubscribed_at = NOW()
     WHERE unsubscribe_token = ${token}::uuid
     RETURNING id
   `;

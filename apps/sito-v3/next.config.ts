@@ -37,6 +37,38 @@ const bugsinkDsn =
   readRootEnvValue('BUGSINK_DSN') ??
   '';
 
+// Media served by apps/api lives at `${API_URL}/media/**`; in production API_URL
+// is the public API domain, so next/image needs that host in remotePatterns or
+// it throws "hostname not configured" and 500s any page rendering an uploaded
+// image (cover/gallery/before-after). Derived from env at build time.
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.PORTAL_API_URL ??
+  readRootEnvValue('NEXT_PUBLIC_API_URL') ??
+  readRootEnvValue('PORTAL_API_URL') ??
+  '';
+
+function apiMediaRemotePattern():
+  | { protocol: 'http' | 'https'; hostname: string; port?: string; pathname: string }
+  | null {
+  if (!apiUrl) return null;
+  try {
+    const u = new URL(apiUrl);
+    // localhost:3001 is already covered explicitly below (dev).
+    if (u.hostname === 'localhost') return null;
+    return {
+      protocol: u.protocol.replace(':', '') === 'http' ? 'http' : 'https',
+      hostname: u.hostname,
+      ...(u.port ? { port: u.port } : {}),
+      pathname: '/media/**',
+    };
+  } catch {
+    return null;
+  }
+}
+
+const apiMediaPattern = apiMediaRemotePattern();
+
 // CSP (SEC-08). sito-v3 has no nonce middleware (middleware.ts is deliberately
 // absent — see src/i18n/routing.ts), so script/style fall back to
 // 'unsafe-inline' for Next's hydration scripts and GSAP's inline style
@@ -93,6 +125,7 @@ const config: NextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost', port: '3001', pathname: '/media/**' },
+      ...(apiMediaPattern ? [apiMediaPattern] : []),
       { protocol: 'https', hostname: 'picsum.photos', pathname: '/seed/**' },
       { protocol: 'https', hostname: 'fastly.picsum.photos', pathname: '/**' },
     ],

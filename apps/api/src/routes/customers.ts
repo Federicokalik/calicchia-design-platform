@@ -250,8 +250,10 @@ customers.post('/:id/stripe-sync', async (c) => {
   const candidateIds = new Set<string>();
   if (customer.stripe_customer_id) candidateIds.add(String(customer.stripe_customer_id));
   if (email) {
-    const list = await stripe.customers.list({ email, limit: 20 });
-    for (const sc of list.data) candidateIds.add(sc.id);
+    // Auto-paginate: don't cap at the first 20 Stripe customers for this email.
+    for await (const sc of stripe.customers.list({ email, limit: 20 })) {
+      candidateIds.add(sc.id);
+    }
   }
   if (!candidateIds.size) {
     return c.json({ error: 'Nessun cliente Stripe trovato (email mancante o non registrata su Stripe)' }, 404);
@@ -264,13 +266,13 @@ customers.post('/:id/stripe-sync', async (c) => {
   const productNames = new Map<string, string>();
 
   for (const stripeCustomerId of candidateIds) {
-    const subs = await stripe.subscriptions.list({
+    // Auto-paginate over ALL subscriptions for this customer (not just 100).
+    let hasLiveSub = false;
+    for await (const subscription of stripe.subscriptions.list({
       customer: stripeCustomerId,
       status: 'all',
       limit: 100,
-    });
-
-    for (const subscription of subs.data) {
+    })) {
       const item = subscription.items.data[0];
       const rawProduct = item?.price?.product;
       const productId = typeof rawProduct === 'string'
@@ -311,11 +313,14 @@ customers.post('/:id/stripe-sync', async (c) => {
           canceled_at = EXCLUDED.canceled_at,
           auto_renew = EXCLUDED.auto_renew
       `;
+      if (['active', 'trialing', 'past_due'].includes(subscription.status)) {
+        hasLiveSub = true;
+      }
       synced += 1;
     }
 
     // The Stripe customer owning live subscriptions is the authoritative link.
-    if (subs.data.some((s) => ['active', 'trialing', 'past_due'].includes(s.status))) {
+    if (hasLiveSub) {
       linkedStripeId = stripeCustomerId;
     }
   }
@@ -466,22 +471,21 @@ customers.post('/sync-stripe', async (c) => {
 
   const results = { customers: { synced: 0, errors: 0 }, subscriptions: { synced: 0, errors: 0 }, invoices: { synced: 0, errors: 0 } };
 
-  const stripeCustomers = await stripe.customers.list({ limit: 100 });
-  const syncResults = await Promise.allSettled(
-    stripeCustomers.data
-      .filter((sc) => !sc.deleted)
-      .map((sc) =>
-        sql`
-          INSERT INTO customers (stripe_customer_id, contact_name, email, phone, company_name, status)
-          VALUES (${sc.id}, ${sc.name || sc.email || 'Unknown'}, ${sc.email || ''}, ${sc.phone || null}, ${sc.metadata?.company_name || sc.name || null}, 'active')
-          ON CONFLICT (stripe_customer_id) DO UPDATE SET
-            contact_name = EXCLUDED.contact_name, email = EXCLUDED.email, phone = EXCLUDED.phone
-        `
-      )
-  );
-  for (const r of syncResults) {
-    if (r.status === 'fulfilled') results.customers.synced++;
-    else results.customers.errors++;
+  // Auto-paginate over ALL Stripe customers — a single list({limit:100}) call
+  // silently dropped everyone past the first 100 while still reporting success.
+  for await (const sc of stripe.customers.list({ limit: 100 })) {
+    if (sc.deleted) continue;
+    try {
+      await sql`
+        INSERT INTO customers (stripe_customer_id, contact_name, email, phone, company_name, status)
+        VALUES (${sc.id}, ${sc.name || sc.email || 'Unknown'}, ${sc.email || ''}, ${sc.phone || null}, ${sc.metadata?.company_name || sc.name || null}, 'active')
+        ON CONFLICT (stripe_customer_id) DO UPDATE SET
+          contact_name = EXCLUDED.contact_name, email = EXCLUDED.email, phone = EXCLUDED.phone
+      `;
+      results.customers.synced++;
+    } catch {
+      results.customers.errors++;
+    }
   }
 
   return c.json({ success: true, results });

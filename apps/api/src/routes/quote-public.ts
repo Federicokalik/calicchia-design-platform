@@ -20,6 +20,10 @@ import { sendWhatsAppText, isWhatsAppConfigured } from '../lib/whatsapp';
 
 const log = logger.child({ scope: 'quote-sign' });
 
+// signature_token is a uuid column — a non-uuid path segment would blow up the
+// Postgres cast (22P02) into a 500 + Bugsink noise. Reject early with a 404.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const quotePublic = new Hono();
 
 /**
@@ -98,6 +102,7 @@ function getPagamentoForQuote(projectTemplate: unknown): Array<Record<string, un
 // GET /api/quote-sign/:token — view quote
 quotePublic.get('/:token', async (c) => {
   const { token } = c.req.param();
+  if (!UUID_RE.test(token)) return c.json({ error: 'Preventivo non trovato' }, 404);
   const rows = await sql`
     SELECT q.id, q.title, q.description, q.items, q.subtotal, q.tax_rate, q.tax_amount, q.total,
            q.currency, q.valid_until, q.notes, q.status, q.signed_at, q.signer_name,
@@ -163,6 +168,7 @@ quotePublic.get('/:token', async (c) => {
 // scripts/active content). Standard template quotes have no stored document.
 quotePublic.get('/:token/document', async (c) => {
   const { token } = c.req.param();
+  if (!UUID_RE.test(token)) return c.json({ error: 'Documento non disponibile' }, 404);
   const rows = await sql`
     SELECT id, custom_html_path FROM quotes_v2 WHERE signature_token = ${token}
   `;
@@ -199,16 +205,22 @@ quotePublic.get('/:token/document', async (c) => {
 // is up. Same code strength/expiry either way; the channel is audit-logged.
 quotePublic.post('/:token/otp', async (c) => {
   const { token } = c.req.param();
+  if (!UUID_RE.test(token)) return c.json({ error: 'Non trovato' }, 404);
   const body = await c.req.json().catch(() => ({} as Record<string, unknown>));
   const channel = body.channel === 'whatsapp' ? 'whatsapp' : 'email';
 
   const rows = await sql`
-    SELECT q.id, q.status, c.email AS customer_email, c.phone AS customer_phone, c.contact_name
+    SELECT q.id, q.status,
+           (q.valid_until IS NOT NULL AND q.valid_until < CURRENT_DATE) AS is_expired,
+           c.email AS customer_email, c.phone AS customer_phone, c.contact_name
     FROM quotes_v2 q LEFT JOIN customers c ON c.id = q.customer_id
     WHERE q.signature_token = ${token}
   `;
   if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
   if (rows[0].status === 'signed') return c.json({ error: 'Già firmato' }, 400);
+  if (['expired', 'cancelled'].includes(rows[0].status) || rows[0].is_expired) {
+    return c.json({ error: 'Preventivo non più valido o scaduto' }, 410);
+  }
   if (channel === 'email' && !rows[0].customer_email) {
     return c.json({ error: 'Email cliente non configurata' }, 400);
   }
@@ -264,12 +276,15 @@ quotePublic.post('/:token/otp', async (c) => {
 // POST /api/quote-sign/:token/sign — verify OTP + submit signature
 quotePublic.post('/:token/sign', async (c) => {
   const { token } = c.req.param();
+  if (!UUID_RE.test(token)) return c.json({ error: 'Non trovato' }, 404);
   const { otp, signature_image, signer_name, vessatorie_approved } = await c.req.json();
 
   if (!otp || !signature_image) return c.json({ error: 'OTP e firma richiesti' }, 400);
 
   const rows = await sql`
-    SELECT q.*, c.email AS customer_email
+    SELECT q.*,
+           (q.valid_until IS NOT NULL AND q.valid_until < CURRENT_DATE) AS is_expired,
+           c.email AS customer_email
     FROM quotes_v2 q LEFT JOIN customers c ON c.id = q.customer_id
     WHERE q.signature_token = ${token}
   `;
@@ -277,6 +292,9 @@ quotePublic.post('/:token/sign', async (c) => {
 
   const quote = rows[0];
   if (quote.status === 'signed') return c.json({ error: 'Già firmato' }, 400);
+  if (['expired', 'cancelled'].includes(quote.status) || quote.is_expired) {
+    return c.json({ error: 'Preventivo non più valido o scaduto' }, 410);
+  }
 
   // Artt. 1341-1342 c.c.: when the quote carries vessatorie clauses, the
   // general signature is not enough — a distinct explicit approval is required.
@@ -288,25 +306,31 @@ quotePublic.post('/:token/sign', async (c) => {
   const { ip: clientIp, ua: clientUa } = extractIpUa({ header: (name) => c.req.header(name) });
 
   if (!verifyOtpHash(quote.otp_hash, quote.otp_expires_at, otp)) {
-    const attempts = (quote.otp_attempts ?? 0) + 1;
+    // Atomic increment so parallel brute-force attempts each burn a real slot
+    // (read-modify-write would let a batch share one increment).
+    const [bumped] = await sql`
+      UPDATE quotes_v2 SET otp_attempts = otp_attempts + 1
+      WHERE id = ${quote.id}
+      RETURNING otp_attempts
+    `;
+    const attempts = Number(bumped?.otp_attempts ?? (quote.otp_attempts ?? 0) + 1);
     if (attempts >= OTP_MAX_ATTEMPTS) {
       // Burn the code so the remaining TTL can't be used; client must request a new one.
       await sql`
         UPDATE quotes_v2
-        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL, otp_attempts = ${attempts}
+        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL
         WHERE id = ${quote.id}
       `;
       await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
       return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
     }
-    await sql`UPDATE quotes_v2 SET otp_attempts = ${attempts} WHERE id = ${quote.id}`;
     await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
     return c.json({ error: 'Codice OTP non valido o scaduto' }, 400);
   }
 
   const ip = clientIp || 'unknown';
   const ua = clientUa || 'unknown';
-  const pdfHash = crypto.createHash('sha256').update(`${quote.id}-${Date.now()}`).digest('hex');
+  const signedAtIso = new Date().toISOString();
 
   // Freeze the approved clauses as presented at signature time — later edits
   // to quote.settings must not change what was approved (evidentiary value).
@@ -314,9 +338,34 @@ quotePublic.post('/:token/sign', async (c) => {
     ? JSON.stringify(vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo })))
     : null;
 
-  await sql`
+  // Evidentiary hash bound to the ACTUAL approved content + signer + signature,
+  // not the meaningless `id-Date.now()`. Recomputable from the stored quote to
+  // prove in a dispute that the signed content is exactly what was approved.
+  const pdfHash = crypto.createHash('sha256').update(JSON.stringify({
+    id: quote.id,
+    title: quote.title,
+    items: quote.items,
+    subtotal: quote.subtotal,
+    tax_rate: quote.tax_rate,
+    tax_amount: quote.tax_amount,
+    total: quote.total,
+    currency: quote.currency,
+    notes: quote.notes,
+    project_template: quote.project_template,
+    vessatorie_snapshot: vessatorieSnapshot,
+    signer_name: signer_name || null,
+    signer_email: quote.customer_email,
+    signature_image_sha: crypto.createHash('sha256').update(String(signature_image)).digest('hex'),
+    signed_at: signedAtIso,
+  })).digest('hex');
+
+  // Atomic transition: only one concurrent /sign can flip draft→signed. Without
+  // `AND status <> 'signed'` two parallel requests with the same valid OTP both
+  // pass the earlier guard and each runs ensureProjectForQuote on a stale row
+  // (project_id still null) → duplicate client_projects + double notifications.
+  const [claimed] = await sql`
     UPDATE quotes_v2 SET
-      status = 'signed', signed_at = now(),
+      status = 'signed', signed_at = ${signedAtIso},
       signer_name = ${signer_name || null}, signer_email = ${quote.customer_email},
       signature_image = ${signature_image}, signature_ip = ${ip},
       signature_user_agent = ${ua}, pdf_hash_sha256 = ${pdfHash},
@@ -324,8 +373,13 @@ quotePublic.post('/:token/sign', async (c) => {
       vessatorie_snapshot = ${vessatorieSnapshot},
       otp_code = NULL, otp_hash = NULL, otp_expires_at = NULL, otp_attempts = 0,
       updated_at = now()
-    WHERE id = ${quote.id}
+    WHERE id = ${quote.id} AND status <> 'signed'
+    RETURNING id
   `;
+  if (!claimed) {
+    // Lost the race — another request already signed. Do not double-create.
+    return c.json({ error: 'Già firmato' }, 400);
+  }
 
   if (vessatorie.length) {
     await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'vessatorie_approved', ${ip}, ${ua}, ${vessatorieSnapshot})`;

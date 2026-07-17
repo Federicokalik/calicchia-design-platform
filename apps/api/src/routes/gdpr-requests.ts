@@ -27,7 +27,8 @@ const TYPE_LABELS: Record<string, string> = {
 // ─── Public: Submit GDPR request ───────────────────────────────
 
 gdprRequests.post('/', async (c) => {
-  const body = await c.req.json();
+  const body = await c.req.json().catch(() => null);
+  if (!body) return c.json({ error: 'Dati non validi' }, 400);
   const { email, name, request_type, message, turnstile_token } = body;
 
   // Captcha verification (siteKeyId binds token to the GDPR request form)
@@ -52,9 +53,12 @@ gdprRequests.post('/', async (c) => {
     return c.json({ error: 'Messaggio troppo lungo' }, 400);
   }
 
+  // Normalize case so the erase/export matching (below) reliably finds the row.
+  const normEmail = String(email).trim().toLowerCase();
+
   const [inserted] = await sql`
     INSERT INTO gdpr_requests (email, name, request_type, message)
-    VALUES (${email}, ${name || null}, ${request_type}, ${message || null})
+    VALUES (${normEmail}, ${name || null}, ${request_type}, ${message || null})
     RETURNING id
   `;
 
@@ -125,13 +129,13 @@ gdprRequests.put('/:id', authMiddleware, async (c) => {
 // ─── Admin: Export user data (for access/portability requests) ──
 
 gdprRequests.get('/export/:email', authMiddleware, async (c) => {
-  const email = decodeURIComponent(c.req.param('email'));
+  const email = decodeURIComponent(c.req.param('email')).trim().toLowerCase();
 
   // Lookup customer/lead for cross-channel data (WhatsApp conversations linkate).
   const linked = await sql`
-    SELECT id, 'customer' AS kind FROM customers WHERE email = ${email}
+    SELECT id, 'customer' AS kind FROM customers WHERE LOWER(email) = ${email}
     UNION ALL
-    SELECT id, 'lead' AS kind FROM leads WHERE email = ${email}
+    SELECT id, 'lead' AS kind FROM leads WHERE LOWER(email) = ${email}
   ` as Array<{ id: string; kind: 'customer' | 'lead' }>;
   const customerIds = linked.filter(r => r.kind === 'customer').map(r => r.id);
   const leadIds = linked.filter(r => r.kind === 'lead').map(r => r.id);
@@ -143,8 +147,8 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     waMessages,
     commPrefs,
   ] = await Promise.all([
-    sql`SELECT name, email, phone, company, message, services, sectors, wants_call, wants_meet, source_page, created_at FROM contacts WHERE email = ${email}`,
-    sql`SELECT email, name, status, confirmed_at, created_at FROM newsletter_subscribers WHERE email = ${email}`,
+    sql`SELECT name, email, phone, company, message, services, sectors, wants_call, wants_meet, source_page, created_at FROM contacts WHERE LOWER(email) = ${email}`,
+    sql`SELECT email, name, status, confirmed_at, created_at FROM newsletter_subscribers WHERE LOWER(email) = ${email}`,
     customerIds.length || leadIds.length
       ? sql`SELECT id, chat_id, phone, contact_name, customer_id, lead_id, ai_mode, last_message_at, created_at
             FROM whatsapp_conversations
@@ -162,7 +166,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
                email_operational, email_marketing, sms_transactional,
                updated_via, updated_at
         FROM communication_preferences
-        WHERE email = ${email}
+        WHERE LOWER(email) = ${email}
            OR customer_id = ANY(${customerIds as any})
            OR lead_id = ANY(${leadIds as any})`,
   ]);
@@ -200,24 +204,24 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
 //      client_uploads files on storage, and the Stripe customer (separate
 //      processor). cookie_consents/analytics hold no person-linkable PII.
 gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
-  const email = decodeURIComponent(c.req.param('email'));
+  const email = decodeURIComponent(c.req.param('email')).trim().toLowerCase();
 
   // Resolve linked records BEFORE anonymizing (anonymization changes the email).
   const linked = await sql`
-    SELECT id, 'customer' AS kind FROM customers WHERE email = ${email}
+    SELECT id, 'customer' AS kind FROM customers WHERE LOWER(email) = ${email}
     UNION ALL
-    SELECT id, 'lead' AS kind FROM leads WHERE email = ${email}
+    SELECT id, 'lead' AS kind FROM leads WHERE LOWER(email) = ${email}
   ` as Array<{ id: string; kind: 'customer' | 'lead' }>;
   const customerIds = linked.filter(r => r.kind === 'customer').map(r => r.id);
   const leadIds = linked.filter(r => r.kind === 'lead').map(r => r.id);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const result = await sql.begin(async (tx: any) => {
-    const deletedContacts = await tx`DELETE FROM contacts WHERE email = ${email} RETURNING id`;
-    const deletedNewsletter = await tx`DELETE FROM newsletter_subscribers WHERE email = ${email} RETURNING id`;
+    const deletedContacts = await tx`DELETE FROM contacts WHERE LOWER(email) = ${email} RETURNING id`;
+    const deletedNewsletter = await tx`DELETE FROM newsletter_subscribers WHERE LOWER(email) = ${email} RETURNING id`;
     const deletedPrefs = await tx`
       DELETE FROM communication_preferences
-      WHERE email = ${email}
+      WHERE LOWER(email) = ${email}
          OR customer_id = ANY(${customerIds as any})
          OR lead_id = ANY(${leadIds as any}) RETURNING id`;
     const deletedWaConvs = customerIds.length || leadIds.length
@@ -228,7 +232,7 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
       : [];
     const deletedLoginEvents = await tx`
       DELETE FROM portal_login_events
-      WHERE email = ${email} OR customer_id = ANY(${customerIds as any}) RETURNING id`;
+      WHERE LOWER(email) = ${email} OR customer_id = ANY(${customerIds as any}) RETURNING id`;
 
     // Anonymize customers — keep the row (fiscal children) but strip PII.
     const anonCustomers = customerIds.length

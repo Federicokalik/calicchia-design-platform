@@ -378,6 +378,10 @@ publicRoutes.get('/projects/:slug', async (c) => {
       tags: project.tags || [],
       metrics: Array.isArray(project.metrics) ? project.metrics : [],
       outcome: project.outcome,
+      // Migration 095 — before/after (restyling) section. FE derives visibility
+      // from is_restyling and resolves image URLs client-side (projects-adapter).
+      is_restyling: !!project.is_restyling,
+      before_after: project.before_after ?? null,
       seo_title: project.seo_title,
       seo_description: project.seo_description,
       live_url: project.live_url,

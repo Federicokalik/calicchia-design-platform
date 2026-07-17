@@ -14,6 +14,7 @@ import {
   getRenewals,
   LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  PortalForbiddenError,
   requirePortalAccess,
 } from '@/lib/portal-api';
 import {
@@ -95,6 +96,9 @@ export default async function RenewalsPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       return <PortalRedirect to="/clienti/login" />;
+    }
+    if (error instanceof PortalForbiddenError) {
+      return <PortalRedirect to="/clienti/progetti" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
       return <PortalRedirect to="/clienti/accettazione-legale" />;

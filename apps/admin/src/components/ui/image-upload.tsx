@@ -45,16 +45,11 @@ export function ImageUpload({
         formData.append('file', file);
         formData.append('folder', folder);
 
-        const response = await apiFetch('/api/media/upload', {
+        // apiFetch returns parsed JSON and throws on non-ok — no Response here.
+        const data = await apiFetch('/api/media/upload', {
           method: 'POST',
           body: formData,
         });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Errore durante l\'upload');
-        }
 
         onChange(data.url);
       } catch (err) {
@@ -236,13 +231,12 @@ export function MultiImageUpload({
         formData.append('file', file);
         formData.append('folder', folder);
 
-        const response = await apiFetch('/api/media/upload', {
+        // apiFetch returns parsed JSON and throws on non-ok (caught below).
+        const data = await apiFetch('/api/media/upload', {
           method: 'POST',
           body: formData,
         });
-
-        const data = await response.json();
-        if (response.ok) {
+        if (data?.url) {
           newUrls.push(data.url);
         }
       } catch {

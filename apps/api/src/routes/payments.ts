@@ -6,7 +6,7 @@ import { stripe, isStripeConfigured, createStripeRefund } from '../lib/stripe';
 import { createPaypalOrder, capturePaypalOrder, getPaypalOrder, isPaypalConfigured, isPaypalReady, refundPaypalCapture } from '../lib/paypal';
 import { createRevolutOrder, getRevolutOrder, cancelRevolutOrder, isRevolutConfigured, isRevolutReady } from '../lib/revolut';
 import { zValidator } from '../lib/z-validator';
-import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
+import { recordPaymentSuccess, recordRefund, type PaymentProvider } from '../lib/payment-events';
 import { generateReceiptForPaymentLink } from '../lib/receipt-pdf';
 import { logger } from '../lib/logger';
 
@@ -377,10 +377,13 @@ payments.get('/providers', async (c) => {
   const revolutObj = isRecord(providers.revolut) ? providers.revolut : {};
   const stripeObj = isRecord(providers.stripe) ? providers.stripe : {};
 
-  // Check if APIs are configured (env or DB keys)
+  // Check if APIs are configured (env or DB keys). NOTE: unlike paypal/revolut
+  // (whose libs read the DB key), the Stripe client (lib/stripe.ts getStripe)
+  // reads ONLY the env var — advertising "configured" off a DB-only key would
+  // make every checkout 500. Keep Stripe gated on the env var it actually uses.
   const paypalReady = isPaypalConfigured() || !!(paypalObj.client_id && paypalObj.client_secret);
   const revolutReady = isRevolutConfigured() || !!revolutObj.api_key;
-  const stripeReady = isStripeConfigured() || !!stripeObj.secret_key;
+  const stripeReady = isStripeConfigured();
 
   return c.json({
     providers: {
@@ -764,21 +767,30 @@ payments.post('/links/:id/refresh', async (c) => {
     payload = { ...payload, revolut_state: order.state };
   }
 
+  // If the provider now reports paid, run the FULL payment pipeline via
+  // recordPaymentSuccess (atomic claim + schedule/invoice cascade + receipt +
+  // confirmation email). A bare UPDATE status='paid' here would skip all of that,
+  // force paid_amount to the full amount even for partial coverage, AND make the
+  // later webhook a no-op (alreadyProcessed) — losing the cascade forever.
+  if (newStatus === 'paid' && String(link.status) !== 'paid') {
+    await recordPaymentSuccess({
+      provider: provider as PaymentProvider,
+      providerOrderId,
+      amount: Number(link.amount),
+      currency: String(link.currency ?? 'EUR'),
+      scheduleIdFallback: link.payment_schedule_id ? String(link.payment_schedule_id) : null,
+    });
+  }
+
+  // Persist the provider status snapshot. For the paid case recordPaymentSuccess
+  // already set status/paid_at + cascade; this only refreshes payload_json (and
+  // status for non-paid transitions like expired/cancelled).
   const [updated] = await sql`
     UPDATE payment_links
     SET status = ${newStatus}, payload_json = ${sqlv(payload)}, updated_at = NOW()
     WHERE id = ${id}
     RETURNING *
   ` as Array<Record<string, unknown>>;
-
-  // If paid, also update the schedule
-  if (newStatus === 'paid' && link.payment_schedule_id) {
-    await sql`
-      UPDATE payment_schedules
-      SET status = 'paid', paid_at = NOW(), paid_amount = amount, updated_at = NOW()
-      WHERE id = ${String(link.payment_schedule_id)} AND status != 'paid'
-    `;
-  }
 
   return c.json({ link: updated, status_changed: newStatus !== String(link.status) });
 });

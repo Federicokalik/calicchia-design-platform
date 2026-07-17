@@ -66,7 +66,8 @@ contacts.get('/cal-slots', async (c) => {
 // ─── Public: Submit contact form ───────────────────────────────
 
 contacts.post('/', async (c) => {
-  const body = await c.req.json();
+  const body = await c.req.json().catch(() => null);
+  if (!body) return c.json({ error: 'Dati non validi' }, 400);
   const { turnstile_token } = body as { turnstile_token?: string };
 
   // Captcha verification (siteKeyId binds the token to the public contact form)

@@ -36,10 +36,22 @@ function renderInline(line: string): string {
   // Inline code `...`
   out = out.replace(/`([^`]+)`/g, (_, code) => `<code>${escapeHtml(code)}</code>`);
 
-  // Links [text](url)
+  // Links [text](url). The brief is rendered via dangerouslySetInnerHTML and a
+  // markdown link survives write-time HTML sanitization (to sanitize-html it's
+  // plain text), so an unvalidated href here is a live XSS sink. Allow only
+  // http(s), mailto, and relative/anchor paths — drop the anchor for anything
+  // else (javascript:, data:, vbscript:, protocol-relative //host).
   out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, text, url) => {
-    const safeUrl = url.replace(/"/g, '%22');
-    const isExternal = /^https?:\/\//.test(url);
+    const trimmed = String(url).trim();
+    const isSafe =
+      /^https?:\/\//i.test(trimmed) ||
+      /^mailto:/i.test(trimmed) ||
+      /^\/(?!\/)/.test(trimmed) ||
+      /^#/.test(trimmed) ||
+      /^\.\.?\//.test(trimmed);
+    if (!isSafe) return text;
+    const safeUrl = trimmed.replace(/"/g, '%22');
+    const isExternal = /^https?:\/\//i.test(trimmed);
     const rel = isExternal ? ' rel="noopener noreferrer"' : '';
     const target = isExternal ? ' target="_blank"' : '';
     return `<a href="${safeUrl}"${target}${rel}>${text}</a>`;

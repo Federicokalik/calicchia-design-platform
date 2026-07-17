@@ -10,7 +10,9 @@ const log = logger.child({ scope: 'auth-middleware' });
 export function extractToken(c: Context): string | null {
   // Cookie (priority — browser requests)
   const cookieHeader = c.req.header('cookie') || '';
-  const match = cookieHeader.match(/auth_token=([^;]+)/);
+  // Anchor to a cookie boundary so a decoy like `xauth_token=…` before the real
+  // cookie can't be captured instead (cookie-tossing session DoS from a subdomain).
+  const match = cookieHeader.match(/(?:^|;\s*)auth_token=([^;]+)/);
   if (match) return match[1];
 
   // Bearer header (API clients / e2e tests)

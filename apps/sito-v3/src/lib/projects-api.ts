@@ -143,22 +143,28 @@ function warn(context: string, detail: unknown): void {
   console.warn(`[projects-api] ${context}`, detail);
 }
 
-async function fetchJson<T>(url: string): Promise<T | null> {
+async function fetchJson<T>(url: string, opts?: { strict?: boolean }): Promise<T | null> {
   if (shouldSkipApiFetchDuringBuild()) return null;
 
   try {
     // Bound the wait — an unreachable/hanging API must never stall a render.
     const res = await fetch(url, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: { revalidate: REVALIDATE_SECONDS, tags: ['projects'] },
       signal: AbortSignal.timeout(5000),
     });
+    if (res.status === 404) return null;
     if (!res.ok) {
       warn(`${url} returned`, res.status);
+      // strict: a transient 5xx must NOT be cached as a missing resource, or a
+      // live case study 404s for the whole ISR window. Throw so Next keeps the
+      // last good (stale) render instead of caching notFound().
+      if (opts?.strict) throw new Error(`Upstream ${res.status} for ${url}`);
       return null;
     }
     return (await res.json()) as T;
   } catch (error) {
     warn(`${url} fetch failed`, error);
+    if (opts?.strict) throw error instanceof Error ? error : new Error(String(error));
     return null;
   }
 }
@@ -191,6 +197,7 @@ export async function fetchProjectBySlug(
 ): Promise<ApiProjectDetailResponse | null> {
   return fetchJson<ApiProjectDetailResponse>(
     withLocale(`${apiBase()}/api/public/projects/${encodeURIComponent(slug)}`, locale),
+    { strict: true },
   );
 }
 

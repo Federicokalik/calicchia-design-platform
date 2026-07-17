@@ -1,7 +1,9 @@
 import crypto from 'node:crypto';
 
 export function generateOtpCode(): string {
-  return String(Math.floor(Math.random() * 1_000_000)).padStart(6, '0');
+  // CSPRNG — the 6-digit OTP is the only barrier of the signature (FEA).
+  // Math.random() (V8 xorshift128+) is predictable from observed outputs.
+  return String(crypto.randomInt(0, 1_000_000)).padStart(6, '0');
 }
 
 export function otpExpiresAt(minutesFromNow = 10): Date {

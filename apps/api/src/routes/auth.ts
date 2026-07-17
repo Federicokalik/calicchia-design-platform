@@ -31,7 +31,7 @@ function mfaConfigError(c: Context, err: unknown) {
 
 function extractAdminRefreshToken(c: Context): string | null {
   const cookieHeader = c.req.header('cookie') || '';
-  const match = cookieHeader.match(new RegExp(`${ADMIN_REFRESH_COOKIE_NAME}=([^;]+)`));
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${ADMIN_REFRESH_COOKIE_NAME}=([^;]+)`));
   return match?.[1] ?? null;
 }
 

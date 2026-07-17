@@ -121,7 +121,20 @@ signablesPublic.get('/:token', async (c) => {
     doc.status = 'viewed';
   }
 
-  return c.json({ document: doc });
+  // Mask signer contacts — anyone holding the link must not read them in clear
+  // (parity with quote-public). The FE only needs a "sent to …" hint; the OTP
+  // still routes to the real stored value server-side.
+  const maskedDoc = {
+    ...doc,
+    signer_email: doc.signer_email
+      ? String(doc.signer_email).replace(/(.{2})(.*)(@.*)/, '$1***$3')
+      : null,
+    signer_phone: doc.signer_phone
+      ? String(doc.signer_phone).replace(/.(?=.{4})/g, '•')
+      : null,
+  };
+
+  return c.json({ document: maskedDoc });
 });
 
 signablesPublic.post('/:token/request-otp', async (c) => {
@@ -210,11 +223,17 @@ signablesPublic.post('/:token/sign', async (c) => {
   const { ip, ua } = extractIpUa({ header: (name) => c.req.header(name) });
 
   if (!verifyOtpHash(doc.otp_hash, doc.otp_expires_at, otp)) {
-    const attempts = (doc.otp_attempts ?? 0) + 1;
+    // Atomic increment so parallel brute-force attempts each burn a real slot.
+    const [bumped] = await sql`
+      UPDATE signable_documents SET otp_attempts = otp_attempts + 1
+      WHERE id = ${doc.id}
+      RETURNING otp_attempts
+    `;
+    const attempts = Number(bumped?.otp_attempts ?? (doc.otp_attempts ?? 0) + 1);
     if (attempts >= OTP_MAX_ATTEMPTS) {
       await sql`
         UPDATE signable_documents
-        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL, otp_attempts = ${attempts}
+        SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL
         WHERE id = ${doc.id}
       `;
       await writeAuditLog({
@@ -226,7 +245,6 @@ signablesPublic.post('/:token/sign', async (c) => {
       });
       return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
     }
-    await sql`UPDATE signable_documents SET otp_attempts = ${attempts} WHERE id = ${doc.id}`;
     await writeAuditLog({
       signableId: doc.id,
       action: 'otp_failed',
@@ -247,7 +265,9 @@ signablesPublic.post('/:token/sign', async (c) => {
     signed_at: signedAt,
   });
 
-  await sql`
+  // Atomic transition — only one concurrent /sign flips to 'signed', avoiding a
+  // duplicate signature_submitted audit entry from a parallel request.
+  const [claimed] = await sql`
     UPDATE signable_documents
     SET
       status = 'signed',
@@ -261,8 +281,12 @@ signablesPublic.post('/:token/sign', async (c) => {
       otp_hash = NULL,
       otp_expires_at = NULL,
       otp_attempts = 0
-    WHERE id = ${doc.id}
+    WHERE id = ${doc.id} AND status <> 'signed'
+    RETURNING id
   `;
+  if (!claimed) {
+    return c.json({ error: "Gia' firmato" }, 400);
+  }
 
   await writeAuditLog({
     signableId: doc.id,

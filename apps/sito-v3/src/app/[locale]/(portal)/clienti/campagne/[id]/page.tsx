@@ -14,6 +14,7 @@ import {
   getPortalCampaign,
   LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  PortalForbiddenError,
   requirePortalAccess,
 } from '@/lib/portal-api';
 import { getPortalCustomerLabel } from '@/lib/portal-format';
@@ -82,6 +83,9 @@ export default async function CampagnaDetailPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       return <PortalRedirect to="/clienti/login" />;
+    }
+    if (error instanceof PortalForbiddenError) {
+      return <PortalRedirect to="/clienti/progetti" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
       return <PortalRedirect to="/clienti/accettazione-legale" />;

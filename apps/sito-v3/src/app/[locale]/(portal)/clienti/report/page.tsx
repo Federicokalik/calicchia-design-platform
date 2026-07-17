@@ -14,6 +14,7 @@ import {
   getReports,
   LegalAcceptanceRequiredError,
   PortalUnauthorizedError,
+  PortalForbiddenError,
   requirePortalAccess,
   type PortalReport,
 } from '@/lib/portal-api';
@@ -117,6 +118,9 @@ export default async function ReportListPage({ params }: PageProps) {
   } catch (error) {
     if (error instanceof PortalUnauthorizedError) {
       return <PortalRedirect to="/clienti/login" />;
+    }
+    if (error instanceof PortalForbiddenError) {
+      return <PortalRedirect to="/clienti/progetti" />;
     }
     if (error instanceof LegalAcceptanceRequiredError) {
       return <PortalRedirect to="/clienti/accettazione-legale" />;

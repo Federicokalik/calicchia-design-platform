@@ -101,7 +101,16 @@ paypalWebhook.post('/', async (c) => {
   ` as Array<{ id: string }>;
 
   if (inserted.length === 0) {
-    return c.json({ received: true, duplicate: true });
+    // Only a genuinely-processed event is a real duplicate. A retry of a failed
+    // event (processed=false) must be reprocessed, not swallowed as 200.
+    const reclaimed = await sql`
+      UPDATE paypal_webhook_logs SET error_message = NULL
+      WHERE event_id = ${eventId} AND processed = false
+      RETURNING id
+    ` as Array<{ id: string }>;
+    if (reclaimed.length === 0) {
+      return c.json({ received: true, duplicate: true });
+    }
   }
 
   try {

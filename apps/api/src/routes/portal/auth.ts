@@ -146,7 +146,7 @@ async function findActorByCode(accessCode: string, normalizedEmail?: string): Pr
 
 export async function portalAuth(c: Context, next: Next) {
   const cookieHeader = c.req.header('cookie') || '';
-  const match = cookieHeader.match(/portal_token=([^;]+)/);
+  const match = cookieHeader.match(/(?:^|;\s*)portal_token=([^;]+)/);
   const token = match?.[1] ?? null;
 
   if (!token) {
@@ -463,7 +463,7 @@ authRoutes.post('/logout', async (c) => {
   let actorRole: 'client' | 'collaborator' | null = null;
   try {
     const cookieHeader = c.req.header('cookie') || '';
-    const match = cookieHeader.match(/portal_token=([^;]+)/);
+    const match = cookieHeader.match(/(?:^|;\s*)portal_token=([^;]+)/);
     if (match) {
       const { payload } = await jwtVerify(match[1], getJwtSecret());
       const sub = payload.sub ? String(payload.sub) : null;

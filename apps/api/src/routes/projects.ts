@@ -17,7 +17,9 @@ export const projects = new Hono<Env>();
 projects.use('*', async (c, next) => {
   await next();
   if (c.req.method !== 'GET' && c.res.status < 400) {
-    void revalidateSito();
+    // 'projects' invalidates the /lavori list + detail fetches (tagged in
+    // sito-v3 projects-api); 'sitemap' refreshes sitemap.xml + llms.txt.
+    void revalidateSito({ tags: ['sitemap', 'projects'] });
   }
 });
 
@@ -90,6 +92,11 @@ projects.post('/', async (c) => {
 
   if (!title || !slug) {
     return c.json({ error: 'title e slug sono obbligatori' }, 400);
+  }
+  // Slug must match the public route's validation (^[a-z0-9-]+$) or the project
+  // is listed but its detail page 404s forever. Enforce at write-time.
+  if (!/^[a-z0-9-]+$/.test(slug)) {
+    return c.json({ error: 'slug non valido: usa solo lettere minuscole, numeri e trattini' }, 400);
   }
 
   // Get next display_order
@@ -173,6 +180,10 @@ projects.put('/:id', async (c) => {
     is_restyling,
     before_after,
   } = body;
+
+  if (slug !== undefined && !/^[a-z0-9-]+$/.test(slug)) {
+    return c.json({ error: 'slug non valido: usa solo lettere minuscole, numeri e trattini' }, 400);
+  }
 
   const updateData: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (title !== undefined) updateData.title = title;
