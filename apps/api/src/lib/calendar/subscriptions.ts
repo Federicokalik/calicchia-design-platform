@@ -16,7 +16,7 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv, sqlInsert } from '../../db';
+import { sql, sqlInsert } from '../../db';
 import { fetchIcs, parseIcs, IcsImportError, type ParsedEvent } from './ics-import';
 import { logger } from '../logger';
 

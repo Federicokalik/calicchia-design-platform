@@ -11,9 +11,13 @@
  *  - RECURRENCE-ID → override
  *  - VTIMEZONE: skippato (per TZID usiamo Intl quando possibile; fallback UTC con warning)
  *
- * Difese: solo http(s), max body 5MB, timeout 15s, no redirect a host privati,
+ * Difese: solo http(s), max body 5MB, timeout 15s, blocco SSRF su host privati
+ * (assertPublicUrl: DNS lookup + rivalidazione a ogni redirect),
  * UID obbligatorio (eventi senza UID skippati con warning).
  */
+
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
 
 const FETCH_TIMEOUT_MS = 15_000;
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -51,6 +55,65 @@ export class IcsImportError extends Error {
 }
 
 // ============================================
+// SSRF guard
+// ============================================
+
+function isPrivateIp(addr: string, family: number): boolean {
+  if (family === 4) {
+    const [a, b] = addr.split('.').map(Number);
+    if (a === 0 || a === 10 || a === 127) return true;          // this-net, RFC1918, loopback
+    if (a === 100 && b >= 64 && b <= 127) return true;          // CGNAT 100.64/10
+    if (a === 169 && b === 254) return true;                    // link-local + cloud metadata
+    if (a === 172 && b >= 16 && b <= 31) return true;           // RFC1918
+    if (a === 192 && b === 168) return true;                    // RFC1918
+    return false;
+  }
+  const lower = addr.toLowerCase();
+  if (lower === '::' || lower === '::1') return true;           // unspecified / loopback
+  if (/^fe[89ab]/.test(lower)) return true;                     // link-local fe80::/10
+  if (lower.startsWith('fc') || lower.startsWith('fd')) return true; // ULA fc00::/7
+  if (lower.startsWith('::ffff:')) {
+    const v4 = lower.slice(lower.lastIndexOf(':') + 1);
+    if (v4.includes('.')) return isPrivateIp(v4, 4);            // IPv4-mapped
+  }
+  return false;
+}
+
+/**
+ * Rifiuta URL che puntano (direttamente o via DNS) a host privati/interni.
+ * Residuo noto: TOCTOU DNS-rebinding (il lookup qui e la resolve della fetch
+ * sono separati) — accettabile perché le subscription URL sono configurate
+ * solo da admin; hardening ulteriore richiederebbe un Agent undici con
+ * lookup pinnato.
+ */
+export async function assertPublicUrl(url: string): Promise<void> {
+  let parsed: URL;
+  try { parsed = new URL(url); } catch { throw new IcsImportError('URL non valido'); }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new IcsImportError('URL deve usare http/https');
+  }
+  if (parsed.username || parsed.password) throw new IcsImportError('URL con credenziali non ammesso');
+  const host = parsed.hostname.replace(/^\[|\]$/g, '');
+  if (host === 'localhost' || host.endsWith('.local') || host.endsWith('.internal')) {
+    throw new IcsImportError('Host privato non ammesso');
+  }
+  const literalFamily = isIP(host);
+  if (literalFamily) {
+    if (isPrivateIp(host, literalFamily)) throw new IcsImportError('IP privato non ammesso');
+    return;
+  }
+  let addrs: Array<{ address: string; family: number }>;
+  try {
+    addrs = await lookup(host, { all: true, verbatim: true });
+  } catch {
+    throw new IcsImportError(`DNS non risolvibile: ${host}`);
+  }
+  if (!addrs.length || addrs.some((a) => isPrivateIp(a.address, a.family))) {
+    throw new IcsImportError('Host risolve a IP privato — non ammesso');
+  }
+}
+
+// ============================================
 // HTTP fetcher con If-None-Match / If-Modified-Since
 // ============================================
 
@@ -58,8 +121,6 @@ export async function fetchIcs(
   url: string,
   cache: { etag?: string | null; lastModified?: string | null } = {},
 ): Promise<FetchResult> {
-  if (!/^https?:\/\//i.test(url)) throw new IcsImportError('URL deve usare http/https');
-
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
@@ -72,12 +133,28 @@ export async function fetchIcs(
     if (cache.etag) headers['If-None-Match'] = cache.etag;
     if (cache.lastModified) headers['If-Modified-Since'] = cache.lastModified;
 
-    const res = await fetch(url, {
-      method: 'GET',
-      headers,
-      signal: controller.signal,
-      redirect: 'follow', // fetch nativo gestisce i redirect; cap MAX_REDIRECTS è browser-default
-    });
+    // Redirect manuali: ogni hop viene rivalidato contro host privati (SSRF).
+    let currentUrl = url;
+    await assertPublicUrl(currentUrl);
+    let res: Response;
+    let redirects = 0;
+    for (;;) {
+      res = await fetch(currentUrl, {
+        method: 'GET',
+        headers,
+        signal: controller.signal,
+        redirect: 'manual',
+      });
+      if (res.status >= 300 && res.status < 400) {
+        const location = res.headers.get('location');
+        if (!location) throw new IcsImportError(`Redirect ${res.status} senza Location`);
+        if (++redirects > MAX_REDIRECTS) throw new IcsImportError('Troppi redirect');
+        currentUrl = new URL(location, currentUrl).toString();
+        await assertPublicUrl(currentUrl);
+        continue;
+      }
+      break;
+    }
 
     if (res.status === 304) {
       return { notModified: true, body: null, etag: cache.etag ?? null, lastModified: cache.lastModified ?? null };

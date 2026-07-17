@@ -43,6 +43,7 @@ const STABLE_FALLBACK_EVENT_TYPES: BookingEventType[] = [
 ];
 
 export type BookingStatus =
+  | 'pending'
   | 'confirmed'
   | 'cancelled'
   | 'rescheduled'
@@ -112,6 +113,7 @@ interface CreateBookingResponse {
   success: boolean;
   booking?: {
     uid: string;
+    status?: string;
     start_time: string;
     end_time: string;
     location_type: BookingLocationType;
@@ -217,7 +219,14 @@ export async function fetchEventType(
   }
 }
 
-/** Slot disponibili nel range [from, to]. */
+/**
+ * Slot disponibili nel range [from, to].
+ *
+ * Gli errori (HTTP o rete) vengono PROPAGATI al chiamante: SlotPicker ha uno
+ * stato errore dedicato. Ritornare {} su failure mascherava i 500 API come
+ * "sono pieno" (calendario vuoto). Un 200 con zero slot resta il legittimo
+ * "nessuna disponibilità".
+ */
 export async function fetchAvailableSlots(
   eventTypeSlug: string,
   from: string,
@@ -225,33 +234,25 @@ export async function fetchAvailableSlots(
 ): Promise<SlotsByDate> {
   const params = new URLSearchParams({ from, to });
 
-  try {
-    const res = await fetch(
-      `${PUBLIC_PREFIX}/event-types/${encodeURIComponent(eventTypeSlug)}/slots?${params.toString()}`,
-      { next: { revalidate: 60 } },
-    );
-    if (!res.ok) {
-      warn('fetchAvailableSlots failed', {
-        eventTypeSlug,
-        from,
-        to,
-        status: res.status,
-      });
-      return {};
-    }
-
-    const data = (await res.json()) as SlotsResponse;
-    return data.slots_by_date ?? {};
-  } catch (error) {
-    warn('fetchAvailableSlots threw', { eventTypeSlug, from, to, error });
-    return {};
+  const res = await fetch(
+    `${PUBLIC_PREFIX}/event-types/${encodeURIComponent(eventTypeSlug)}/slots?${params.toString()}`,
+  );
+  if (!res.ok) {
+    warn('fetchAvailableSlots failed', { eventTypeSlug, from, to, status: res.status });
+    throw new Error('Il calendario non risponde. Riprova tra qualche minuto.');
   }
+
+  const data = (await res.json()) as SlotsResponse;
+  return data.slots_by_date ?? {};
 }
 
-/** Crea booking, ritorna { uid }. Throws on validation/conflict/server errors. */
+/**
+ * Crea booking, ritorna { uid, status }. Status 'pending' quando l'event type
+ * richiede approvazione manuale. Throws on validation/conflict/server errors.
+ */
 export async function createBooking(
   input: CreateBookingInput,
-): Promise<{ uid: string }> {
+): Promise<{ uid: string; status: string }> {
   try {
     const res = await fetch(`${PUBLIC_PREFIX}/bookings`, {
       method: 'POST',
@@ -301,7 +302,7 @@ export async function createBooking(
       throw new Error('Prenotazione creata, ma conferma non leggibile.');
     }
 
-    return { uid };
+    return { uid, status: data.booking?.status ?? 'confirmed' };
   } catch (error) {
     if (error instanceof Error) throw error;
     warn('createBooking threw non-error', error);

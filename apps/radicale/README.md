@@ -73,7 +73,8 @@ server {
 ### 4. App-password CalDAV (NO htpasswd)
 A differenza della Fase 0, **non si usa htpasswd**. Le credenziali device sono
 "app-password" dedicate, hashate sha256 nella tabella `caldav_app_passwords`,
-revocabili per-dispositivo. Creale dall'admin via API (o futura UI admin):
+revocabili per-dispositivo. Creale dall'**admin UI: Impostazioni → CalDAV**
+(sezione `caldav-tokens`), oppure via API:
 ```bash
 # Dall'admin autenticato (sostituisci <JWT>):
 curl -X POST https://api.calicchia.design/api/caldav-tokens \

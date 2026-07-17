@@ -4,13 +4,15 @@
  */
 
 import { Hono } from 'hono';
-import { sql, sqlv, sqlInsert } from '../../db';
+import { sql, sqlInsert } from '../../db';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
 import {
   createBooking,
   cancelBooking,
   rescheduleBooking,
+  approveBooking,
+  rejectBooking,
   getBookingByUid,
   BookingConflictError,
   BookingValidationError,
@@ -20,6 +22,8 @@ import {
   sendBookingAdminNotification,
   sendBookingCancelled,
   sendBookingRescheduled,
+  sendBookingApproved,
+  sendBookingRejected,
 } from '../../lib/calendar/email';
 import {
   listCalendars,
@@ -113,6 +117,12 @@ calendarAdmin.post('/event-types', async (c) => {
   if (!body.duration_minutes || body.duration_minutes < 5) return c.json({ error: 'Durata minima 5 minuti' }, 400);
   if (!body.location_type || !['google_meet','custom_url','in_person','phone'].includes(body.location_type)) {
     return c.json({ error: 'location_type non valido' }, 400);
+  }
+  // Audit D-011 (parità server-side): Google Workspace dismesso — i NUOVI event
+  // type non possono nascere google_meet (nessuna auto-generazione del link).
+  // Gli esistenti continuano a funzionare col link incollato manualmente.
+  if (body.location_type === 'google_meet') {
+    return c.json({ error: 'google_meet non disponibile per nuovi event type: usa custom_url con un link Meet/Jitsi/Whereby' }, 400);
   }
 
   try {
@@ -395,7 +405,7 @@ calendarAdmin.get('/bookings', async (c) => {
   const total = bookings[0]?._total_count ? parseInt(bookings[0]._total_count as string) : 0;
   const cleaned = bookings.map((b) => ({ ...b, _total_count: undefined }));
 
-  const stats: Record<string, number> = { confirmed: 0, cancelled: 0, completed: 0, no_show: 0, rescheduled: 0 };
+  const stats: Record<string, number> = { pending: 0, confirmed: 0, cancelled: 0, completed: 0, no_show: 0 };
   for (const r of allCounts) {
     stats[r.status as string] = parseInt(r.n as string);
   }
@@ -432,6 +442,7 @@ calendarAdmin.post('/bookings', async (c) => {
       },
       source: 'admin_manual',
       source_metadata: { created_by: 'admin' },
+      allow_buffer_override: body.allow_buffer_override === true,
     });
 
     if (body.send_emails !== false) {
@@ -476,6 +487,7 @@ calendarAdmin.post('/bookings/:uid/reschedule', async (c) => {
     const result = await rescheduleBooking(c.req.param('uid'), body.start, {
       by: 'admin',
       reason: body.reason || 'Riprogrammata dall\'admin',
+      allow_buffer_override: body.allow_buffer_override === true,
     });
     if (body.notify !== false) {
       Promise.allSettled([
@@ -500,11 +512,47 @@ calendarAdmin.post('/bookings/:uid/mark', async (c) => {
 
   const rows = await sql`
     UPDATE calendar_bookings SET status = ${newStatus}
-    WHERE uid = ${c.req.param('uid')} AND status IN ('confirmed','rescheduled')
+    WHERE uid = ${c.req.param('uid')} AND status = 'confirmed'
     RETURNING id
   `;
   if (!rows[0]) return c.json({ error: 'Prenotazione non trovata o già finalizzata' }, 404);
   return c.json({ success: true });
+});
+
+// ─── Approvazione (requires_approval, migr. 146) ───────────────────────────────
+
+calendarAdmin.post('/bookings/:uid/approve', async (c) => {
+  try {
+    const result = await approveBooking(c.req.param('uid'));
+    if (!result) return c.json({ error: 'Prenotazione non trovata' }, 404);
+    Promise.allSettled([
+      sendBookingApproved({ booking: result.booking, eventType: result.eventType }),
+    ]).catch((err) => log.error({ err }, 'approve email error'));
+    return c.json({ booking: result.booking });
+  } catch (err) {
+    if (err instanceof BookingValidationError) return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
+    throw err;
+  }
+});
+
+calendarAdmin.post('/bookings/:uid/reject', async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  try {
+    const result = await rejectBooking(
+      c.req.param('uid'),
+      typeof body.reason === 'string' ? body.reason.slice(0, 500) : undefined,
+    );
+    if (!result) return c.json({ error: 'Prenotazione non trovata' }, 404);
+    if (body.notify !== false) {
+      Promise.allSettled([
+        sendBookingRejected({ booking: result.booking, eventType: result.eventType }),
+      ]).catch((err) => log.error({ err }, 'reject email error'));
+    }
+    return c.json({ success: true });
+  } catch (err) {
+    if (err instanceof BookingValidationError) return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
+    throw err;
+  }
 });
 
 calendarAdmin.post('/bookings/:uid/resend-confirmation', async (c) => {

@@ -34,6 +34,7 @@ interface BookingRow {
 }
 
 const STATUS_VARIANT: Record<string, 'default' | 'outline' | 'secondary' | 'destructive'> = {
+  pending: 'outline',
   confirmed: 'default',
   cancelled: 'destructive',
   rescheduled: 'outline',
@@ -45,7 +46,7 @@ export default function PrenotazioniPage() {
   const { t, formatDateTime } = useI18n();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
-  const [filter, setFilter] = useState<'all' | 'confirmed' | 'cancelled' | 'completed'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<BookingRow | null>(null);
 
@@ -67,6 +68,9 @@ export default function PrenotazioniPage() {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      // Il cancel lato server cancella anche il calendar_event proiettato:
+      // senza questa invalidation il calendario mostrava ancora l'evento.
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       toast.success(t('calendar.bookings.cancelled'));
       setSelected(null);
     },
@@ -79,6 +83,7 @@ export default function PrenotazioniPage() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       toast.success(t('common.updated'));
     },
   });
@@ -86,6 +91,30 @@ export default function PrenotazioniPage() {
   const resend = useMutation({
     mutationFn: (uid: string) => apiFetch(`/api/admin/calendar/bookings/${uid}/resend-confirmation`, { method: 'POST' }),
     onSuccess: () => toast.success(t('calendar.bookings.emailResent')),
+  });
+
+  const approve = useMutation({
+    mutationFn: (uid: string) => apiFetch(`/api/admin/calendar/bookings/${uid}/approve`, { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success(t('calendar.bookings.approved'));
+      setSelected(null);
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
+  });
+
+  const reject = useMutation({
+    mutationFn: (uid: string) => apiFetch(`/api/admin/calendar/bookings/${uid}/reject`, {
+      method: 'POST', body: JSON.stringify({ notify: true }),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success(t('calendar.bookings.rejected'));
+      setSelected(null);
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
   });
 
   useTopbar({
@@ -102,7 +131,7 @@ export default function PrenotazioniPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-        {(['confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled'] as const).map((k) => (
+        {(['pending', 'confirmed', 'cancelled', 'completed', 'no_show'] as const).map((k) => (
           <div key={k} className="rounded-lg border bg-card p-3">
             <p className="text-xs text-muted-foreground">{t(`booking.status.${k}`)}</p>
             <p className="text-2xl font-semibold mt-0.5">{stats[k] || 0}</p>
@@ -112,7 +141,7 @@ export default function PrenotazioniPage() {
 
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
-        {(['all', 'confirmed', 'cancelled', 'completed'] as const).map((k) => (
+        {(['all', 'pending', 'confirmed', 'cancelled', 'completed'] as const).map((k) => (
           <Button
             key={k}
             size="sm"
@@ -232,6 +261,22 @@ export default function PrenotazioniPage() {
                   </div>
                 )}
               </div>
+
+              {/* Actions — pending: approva/rifiuta */}
+              {selected.status === 'pending' && (
+                <div className="border-t pt-3 flex flex-wrap gap-1.5">
+                  <Button size="sm" onClick={() => approve.mutate(selected.uid)} disabled={approve.isPending}>
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> {t('calendar.bookings.approve')}
+                  </Button>
+                  <Button size="sm" variant="destructive" className="ml-auto" onClick={async () => {
+                    if (await confirm({ title: t('calendar.bookings.confirmReject'), variant: 'destructive' })) {
+                      reject.mutate(selected.uid);
+                    }
+                  }} disabled={reject.isPending}>
+                    <X className="h-3.5 w-3.5 mr-1.5" /> {t('calendar.bookings.reject')}
+                  </Button>
+                </div>
+              )}
 
               {/* Actions */}
               {selected.status === 'confirmed' && (

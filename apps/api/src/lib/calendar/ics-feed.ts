@@ -49,11 +49,12 @@ function fold(line: string): string {
   return out.join(CRLF);
 }
 
-function formatUtcDateTime(iso: string): string {
-  return iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+function formatUtcDateTime(iso: string | Date): string {
+  // NB: il driver postgres restituisce Date per timestamptz — accetta entrambi.
+  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
-function formatDateOnly(iso: string): string {
+function formatDateOnly(iso: string | Date): string {
   return new Date(iso).toISOString().slice(0, 10).replace(/-/g, '');
 }
 
@@ -61,25 +62,8 @@ function nowUtcCompact(): string {
   return formatUtcDateTime(new Date().toISOString());
 }
 
-const VTIMEZONE_EUROPE_ROME = [
-  'BEGIN:VTIMEZONE',
-  'TZID:Europe/Rome',
-  'BEGIN:DAYLIGHT',
-  'TZOFFSETFROM:+0100',
-  'TZOFFSETTO:+0200',
-  'TZNAME:CEST',
-  'DTSTART:19700329T020000',
-  'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
-  'END:DAYLIGHT',
-  'BEGIN:STANDARD',
-  'TZOFFSETFROM:+0200',
-  'TZOFFSETTO:+0100',
-  'TZNAME:CET',
-  'DTSTART:19701025T030000',
-  'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
-  'END:STANDARD',
-  'END:VTIMEZONE',
-].join(CRLF);
+// NB: nessun VTIMEZONE — i tempi sono emessi in UTC (Z) o come DATE all-day;
+// RFC 5545 richiede VTIMEZONE solo per tempi referenziati con TZID.
 
 interface BuildOpts {
   calendar: Calendar;
@@ -102,7 +86,6 @@ export function buildIcsFeed(opts: BuildOpts): string {
     `X-WR-CALDESC:${calDesc}`,
     `X-WR-TIMEZONE:${opts.calendar.timezone}`,
     `X-APPLE-CALENDAR-COLOR:${opts.calendar.color}`,
-    VTIMEZONE_EUROPE_ROME,
   ];
 
   for (const ev of opts.events) {
@@ -135,7 +118,6 @@ export function buildIcsResource(opts: {
     'VERSION:2.0',
     'PRODID:-//Caldes//Calendar//IT',
     'CALSCALE:GREGORIAN',
-    VTIMEZONE_EUROPE_ROME,
   ];
   lines.push(...buildVEvent(opts.master, uidDomain));
   for (const ov of opts.overrides || []) {

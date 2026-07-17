@@ -161,6 +161,28 @@ async function sendWithIcs(opts: {
   }
 }
 
+/** Invio senza allegato .ics (pending request / rejected: nessun invito da allegare). */
+async function sendPlain(opts: { to: string; subject: string; html: string }): Promise<SendResult> {
+  if (!process.env.RESEND_API_KEY) {
+    log.warn('RESEND_API_KEY non configurato — skip');
+    return { success: false, error: 'RESEND_API_KEY missing' };
+  }
+  try {
+    const res = await getResend().emails.send({
+      from: FROM,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+    });
+    if (res.error) return { success: false, error: res.error.message };
+    return { success: true, messageId: res.data?.id };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    log.error({ message }, 'Send error');
+    return { success: false, error: message };
+  }
+}
+
 /**
  * Pre-alloca audit row PRIMA del send (anti race-condition).
  * Ritorna true se questa esecuzione ha vinto la race ed è autorizzata a inviare.
@@ -428,6 +450,144 @@ export async function sendBookingRescheduled({
   });
   if (!result.success && result.error) {
     await markReminderError(booking.id, 'rescheduled', to, result.error);
+  }
+  return result;
+}
+
+// ============================================
+// 6. Flusso approvazione (requires_approval, migr. 146)
+// ============================================
+
+/**
+ * Richiesta ricevuta (booking pending): il partecipante viene avvisato che la
+ * richiesta è in attesa di conferma. Con recipient 'admin' la mail chiede di
+ * approvare/rifiutare dal gestionale.
+ */
+export async function sendBookingPendingRequest({
+  booking, eventType, recipient,
+}: SendOpts & { recipient: 'attendee' | 'admin' }): Promise<SendResult> {
+  const tz = recipient === 'admin' ? 'Europe/Rome' : (booking.attendee_timezone || 'Europe/Rome');
+  const to = recipient === 'admin' ? ADMIN_EMAIL : booking.attendee_email;
+  const manage = manageUrl(booking.uid);
+
+  if (!await claimReminder(booking.id, 'pending_request', to)) {
+    return { success: false, error: 'already_processed' };
+  }
+
+  const html = frame({
+    title: recipient === 'admin'
+      ? `Richiesta da approvare: ${eventType.title}`
+      : `Richiesta ricevuta: ${eventType.title}`,
+    preheader: formatDateLong(booking.start_time, tz),
+    body: recipient === 'admin'
+      ? `
+      <h1 style="color:#111;font-size:20px;font-weight:600;margin:0 0 16px">Richiesta di prenotazione da approvare</h1>
+      <p style="color:#374151;font-size:14px;margin:0 0 8px"><strong>${esc(booking.attendee_name)}</strong> &lt;${esc(booking.attendee_email)}&gt;</p>
+      ${buildBookingDetailsBlock(booking, eventType, tz)}
+      <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
+        Lo slot è bloccato in attesa della tua decisione: approva o rifiuta dal gestionale (Calendario → Prenotazioni).
+      </p>
+      <p style="color:#9ca3af;font-size:12px;margin:24px 0 0">UID: <code>${booking.uid}</code> · Origine: ${esc(booking.source)}</p>`
+      : `
+      <h1 style="color:#111;font-size:22px;font-weight:600;margin:0 0 16px">Richiesta ricevuta</h1>
+      <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
+        Ciao ${esc(booking.attendee_name)}, ho ricevuto la tua richiesta di prenotazione.
+        Lo slot è riservato per te: riceverai la conferma definitiva (con l'invito
+        da aggiungere al calendario) appena la richiesta viene approvata.
+      </p>
+      ${buildBookingDetailsBlock(booking, eventType, tz)}
+      ${manage ? ctaButton(manage, 'Gestisci la richiesta') : ''}
+      <p style="color:#6b7280;font-size:13px;line-height:1.6;margin:24px 0 0">
+        Se cambi idea puoi annullare la richiesta dal link qui sopra.
+      </p>`,
+  });
+
+  // Niente .ics METHOD:REQUEST per il pending (l'invito arriva con l'approvazione):
+  // Resend richiede comunque un attachment nel nostro helper → invio senza ICS.
+  const result = await sendPlain({
+    to,
+    subject: recipient === 'admin'
+      ? `⏳ Da approvare: ${booking.attendee_name} — ${eventType.title}`
+      : `Richiesta ricevuta: ${eventType.title}`,
+    html,
+  });
+  if (!result.success && result.error) {
+    await markReminderError(booking.id, 'pending_request', to, result.error);
+  }
+  return result;
+}
+
+/** Richiesta approvata → conferma definitiva con invito .ics. */
+export async function sendBookingApproved({ booking, eventType }: SendOpts): Promise<SendResult> {
+  const tz = booking.attendee_timezone || 'Europe/Rome';
+  const manage = manageUrl(booking.uid);
+
+  if (!await claimReminder(booking.id, 'approved', booking.attendee_email)) {
+    return { success: false, error: 'already_processed' };
+  }
+
+  const ics = buildIcs({
+    booking, eventType,
+    organizerName: ORGANIZER_NAME,
+    organizerEmail: ADMIN_EMAIL,
+    manageUrl: manage || undefined,
+    meetingUrl: eventType.location_type === 'google_meet' || eventType.location_type === 'custom_url'
+      ? booking.location_value || null : null,
+    method: 'REQUEST',
+  });
+
+  const html = frame({
+    title: `Prenotazione confermata: ${eventType.title}`,
+    preheader: formatDateLong(booking.start_time, tz),
+    body: `
+      <h1 style="color:#111;font-size:22px;font-weight:600;margin:0 0 16px">Richiesta approvata ✓</h1>
+      <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
+        Ciao ${esc(booking.attendee_name)}, la tua richiesta è stata approvata: la prenotazione è confermata.
+        In allegato trovi l'invito (.ics) da aggiungere al tuo calendario.
+      </p>
+      ${buildBookingDetailsBlock(booking, eventType, tz)}
+      ${manage ? ctaButton(manage, 'Gestisci la prenotazione') : ''}`,
+  });
+
+  const result = await sendWithIcs({
+    to: booking.attendee_email,
+    subject: `Prenotazione confermata: ${eventType.title}`,
+    html, ics,
+  });
+  if (!result.success && result.error) {
+    await markReminderError(booking.id, 'approved', booking.attendee_email, result.error);
+  }
+  return result;
+}
+
+/** Richiesta rifiutata → avviso al partecipante (nessun .ics). */
+export async function sendBookingRejected({ booking, eventType }: SendOpts): Promise<SendResult> {
+  const tz = booking.attendee_timezone || 'Europe/Rome';
+
+  if (!await claimReminder(booking.id, 'rejected', booking.attendee_email)) {
+    return { success: false, error: 'already_processed' };
+  }
+
+  const reason = booking.cancellation_reason?.replace(/^Rifiutata:?\s*/, '');
+  const html = frame({
+    title: `Richiesta non confermata: ${eventType.title}`,
+    body: `
+      <h1 style="color:#111;font-size:22px;font-weight:600;margin:0 0 16px">Richiesta non confermata</h1>
+      <p style="color:#374151;font-size:14px;line-height:1.6;margin:0 0 16px">
+        Ciao ${esc(booking.attendee_name)}, purtroppo non posso confermare la tua richiesta
+        per <strong>${esc(eventType.title)}</strong> del ${esc(formatDateLong(booking.start_time, tz))}.
+      </p>
+      ${reason ? `<p style="color:#6b7280;font-size:13px;line-height:1.6;margin:0 0 16px">Motivo: ${esc(reason)}</p>` : ''}
+      ${ctaButton(`${SITE_URL}/prenota/${eventType.slug}`, 'Scegli un altro orario')}`,
+  });
+
+  const result = await sendPlain({
+    to: booking.attendee_email,
+    subject: `Richiesta non confermata: ${eventType.title}`,
+    html,
+  });
+  if (!result.success && result.error) {
+    await markReminderError(booking.id, 'rejected', booking.attendee_email, result.error);
   }
   return result;
 }

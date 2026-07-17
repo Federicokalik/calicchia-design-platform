@@ -49,4 +49,7 @@ export const WORKFLOW_EVENTS = {
   DOMINIO_SCADENZA: 'dominio_scadenza',
   CONTATTO_RICEVUTO: 'contatto_ricevuto',
   BOOKING_CREATO: 'booking_creato',
+  BOOKING_CANCELLATO: 'booking_cancellato',
+  BOOKING_RIPROGRAMMATO: 'booking_riprogrammato',
+  BOOKING_APPROVATO: 'booking_approvato',
 } as const;

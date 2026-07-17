@@ -75,7 +75,7 @@ export async function getCapacityWeeks(fromIso: string, toIsoValue: string): Pro
           )) / 60), 0)::int AS minutes,
           COUNT(*)::int AS count
         FROM calendar_bookings
-        WHERE status = 'confirmed'
+        WHERE status IN ('confirmed', 'pending')
           AND start_time < ${week.end}::timestamptz
           AND end_time > ${week.start}::timestamptz
       `,

@@ -15,6 +15,12 @@ const SECRET = process.env.BOOKING_TOKEN_SECRET || process.env.JWT_SECRET || '';
 
 if (!SECRET) {
   log.warn('BOOKING_TOKEN_SECRET non configurato — token non verranno generati');
+} else if (!process.env.BOOKING_TOKEN_SECRET) {
+  // Fallback su JWT_SECRET: accoppia due domini di fiducia distinti (sessioni
+  // admin e link self-service via email) — ruotare uno invalida anche l'altro.
+  log.warn(
+    'BOOKING_TOKEN_SECRET non impostato: fallback su JWT_SECRET (sconsigliato in produzione — genera un secret dedicato)'
+  );
 }
 
 const DEFAULT_TTL_SECONDS = 90 * 24 * 60 * 60;

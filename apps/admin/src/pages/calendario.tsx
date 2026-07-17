@@ -18,6 +18,7 @@ import type { RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
+import { CALENDAR_TZ } from '@/lib/timezone';
 import { useConfirm } from '@/hooks/use-confirm';
 import EventoEditModal from '@/pages/calendario/evento-edit';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
@@ -55,6 +56,7 @@ const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: stri
   project: { backgroundColor: '#f97316', borderColor: '#ea580c', textColor: '#fff' },
   domain:  { backgroundColor: '#ef4444', borderColor: '#dc2626', textColor: '#fff' },
   calcom:  { backgroundColor: '#94a3b8', borderColor: '#64748b', textColor: '#fff' },
+  system:  { backgroundColor: '#ef4444', borderColor: '#dc2626', textColor: '#fff' },
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -66,6 +68,7 @@ const SOURCE_LABELS: Record<string, string> = {
   project: 'Progetto',
   domain: 'Dominio',
   calcom: 'Cal.com (storico)',
+  system: 'Sistema (festività)',
 };
 
 interface CalendarApi {
@@ -281,6 +284,7 @@ export default function CalendarioPage() {
       });
       toast.success('Evento aggiornato');
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
     } catch (err) {
       info.revert();
       toast.error(err instanceof Error ? err.message : 'Spostamento non riuscito');
@@ -304,6 +308,7 @@ export default function CalendarioPage() {
       });
       toast.success(a.kind === 'delete' ? 'Occorrenza eliminata' : 'Modificata solo questa occorrenza');
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       setSelectedEvent(null);
     } catch (err) {
       a.revert?.();
@@ -347,6 +352,7 @@ export default function CalendarioPage() {
         }
       }
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       setSelectedEvent(null);
     } catch (err) {
       a.revert?.();
@@ -398,6 +404,7 @@ export default function CalendarioPage() {
         toast.success('Eliminate questa e le successive');
       }
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       setSelectedEvent(null);
     } catch (err) {
       a.revert?.();
@@ -429,6 +436,7 @@ export default function CalendarioPage() {
       }),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       toast.success('Evento duplicato');
       // Apri il modal sulla copia per consentire ritocchi immediati
       const copy = data?.event;
@@ -447,6 +455,7 @@ export default function CalendarioPage() {
       apiFetch(`/api/admin/calendar/events/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       toast.success('Evento eliminato');
       setSelectedEvent(null);
     },
@@ -586,6 +595,7 @@ export default function CalendarioPage() {
           onClose={() => { setShowEditor(false); setEditingEvent(null); setCreatingFromSlot(null); }}
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+            queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
           }}
         />
       )}
@@ -692,13 +702,13 @@ export default function CalendarioPage() {
               <div className="flex items-center gap-2 text-xs">
                 <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                 <div>
-                  <div>{new Date(selectedEvent.start_time).toLocaleDateString(intlLocale, { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+                  <div>{new Date(selectedEvent.start_time).toLocaleDateString(intlLocale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: CALENDAR_TZ })}</div>
                   <div className="text-muted-foreground">
                     {selectedEvent.all_day ? 'Tutto il giorno' : (
                       <>
-                        {new Date(selectedEvent.start_time).toLocaleTimeString(intlLocale, { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(selectedEvent.start_time).toLocaleTimeString(intlLocale, { hour: '2-digit', minute: '2-digit', timeZone: CALENDAR_TZ })}
                         {' — '}
-                        {new Date(selectedEvent.end_time).toLocaleTimeString(intlLocale, { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(selectedEvent.end_time).toLocaleTimeString(intlLocale, { hour: '2-digit', minute: '2-digit', timeZone: CALENDAR_TZ })}
                       </>
                     )}
                   </div>

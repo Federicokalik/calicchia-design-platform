@@ -24,6 +24,7 @@ interface EventTypeForm {
   color: string;
   is_active: boolean;
   is_public: boolean;
+  requires_approval: boolean;
   workflow_event_key: string;
   sort_order: number;
 }
@@ -60,6 +61,7 @@ export default function EventTypeEditPage() {
         color: et.color,
         is_active: et.is_active,
         is_public: et.is_public,
+        requires_approval: !!et.requires_approval,
         workflow_event_key: et.workflow_event_key || '',
         sort_order: et.sort_order,
       });
@@ -104,7 +106,7 @@ export default function EventTypeEditPage() {
         </Button>
         {form && (
           <Button asChild size="sm" variant="outline">
-            <a href={`${SITE_URL}/it/prenota/${form.slug}`} target="_blank" rel="noreferrer">
+            <a href={`${SITE_URL}/prenota/${form.slug}`} target="_blank" rel="noreferrer">
               <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Apri
             </a>
           </Button>
@@ -168,6 +170,17 @@ export default function EventTypeEditPage() {
             </div>
           </Field>
         </div>
+        <Field label="Approvazione">
+          <label className="inline-flex items-center gap-1.5 text-sm pt-1">
+            <input type="checkbox" checked={form.requires_approval} onChange={(e) => set('requires_approval', e.target.checked)} />
+            Richiede approvazione manuale
+          </label>
+          <p className="text-xs text-muted-foreground mt-1">
+            Le prenotazioni dal sito nascono &quot;in attesa&quot;: lo slot resta bloccato e il
+            partecipante riceve la conferma (con invito .ics) solo quando approvi da
+            Calendario → Prenotazioni. Le prenotazioni create da admin restano confermate subito.
+          </p>
+        </Field>
       </Section>
 
       <Section title="Durata e disponibilità">

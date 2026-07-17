@@ -197,17 +197,6 @@ dashboard.get('/collaborators-summary', async (c) => {
   });
 });
 
-dashboard.get('/upcoming-bookings', async (c) => {
-  const bookings = await sql`
-    SELECT id, booking_uid, title, start_time, end_time, attendee_name, attendee_email, meeting_url, duration_minutes
-    FROM cal_bookings
-    WHERE status = 'upcoming' AND start_time >= ${new Date().toISOString()}
-    ORDER BY start_time ASC
-    LIMIT 5
-  `;
-  return c.json({ bookings });
-});
-
 dashboard.get('/capacity-week', async (c) => {
   const nowIso = new Date().toISOString();
   const capacity = (await getCapacityWeeks(nowIso, nowIso))[0];

@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { X, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
+import { isoToZonedInput, zonedInputToIso } from '@/lib/timezone';
 import { useConfirm } from '@/hooks/use-confirm';
 
 interface Calendar {
@@ -38,16 +39,6 @@ interface Props {
 }
 
 type RecurrenceType = 'none' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
-
-function isoToLocalInput(iso: string): string {
-  const d = new Date(iso);
-  const tzOffset = d.getTimezoneOffset() * 60_000;
-  return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
-}
-
-function localInputToIso(input: string): string {
-  return new Date(input).toISOString();
-}
 
 function parseUntil(value?: string): string | undefined {
   if (!value) return undefined;
@@ -167,14 +158,14 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
   const [location, setLocation] = useState(initial?.location || '');
   const [url, setUrl] = useState(initial?.url || '');
   const [startInput, setStartInput] = useState(
-    initial?.start_time ? isoToLocalInput(initial.start_time) :
-    initialStart ? isoToLocalInput(initialStart) :
-    isoToLocalInput(new Date(Date.now() + 60 * 60_000).toISOString())
+    initial?.start_time ? isoToZonedInput(initial.start_time) :
+    initialStart ? isoToZonedInput(initialStart) :
+    isoToZonedInput(new Date(Date.now() + 60 * 60_000).toISOString())
   );
   const [endInput, setEndInput] = useState(
-    initial?.end_time ? isoToLocalInput(initial.end_time) :
-    initialEnd ? isoToLocalInput(initialEnd) :
-    isoToLocalInput(new Date(Date.now() + 2 * 60 * 60_000).toISOString())
+    initial?.end_time ? isoToZonedInput(initial.end_time) :
+    initialEnd ? isoToZonedInput(initialEnd) :
+    isoToZonedInput(new Date(Date.now() + 2 * 60 * 60_000).toISOString())
   );
   const [allDay, setAllDay] = useState(initial?.all_day || false);
   const [recurrence, setRecurrence] = useState(parseRRule(initial?.rrule || null));
@@ -193,8 +184,8 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
         description: description.trim() || null,
         location: location.trim() || null,
         url: url.trim() || null,
-        start_time: localInputToIso(startInput),
-        end_time: localInputToIso(endInput),
+        start_time: zonedInputToIso(startInput),
+        end_time: zonedInputToIso(endInput),
         all_day: allDay,
         rrule: buildRRule(recurrence),
       });

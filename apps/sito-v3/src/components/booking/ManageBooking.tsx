@@ -32,6 +32,7 @@ const SLOT_FORMAT = new Intl.DateTimeFormat('it-IT', {
 });
 
 const STATUS_LABELS: Record<BookingDetail['status'], string> = {
+  pending: 'In attesa di conferma',
   confirmed: 'Confermata',
   cancelled: 'Cancellata',
   rescheduled: 'Riprogrammata',
@@ -56,7 +57,8 @@ export function ManageBooking({ booking, token }: ManageBookingProps) {
   const [updatedBooking, setUpdatedBooking] = useState(booking);
   const [newSlot, setNewSlot] = useState<BookingSlot | null>(null);
 
-  const isActive = updatedBooking.status === 'confirmed';
+  // Anche i pending sono gestibili self-service (annulla richiesta / sposta slot)
+  const isActive = updatedBooking.status === 'confirmed' || updatedBooking.status === 'pending';
   const startDate = new Date(updatedBooking.start_time);
 
   const onCancel = async () => {

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Calendar, Video, CheckSquare, FolderKanban } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import { CALENDAR_TZ, zonedDayWindow } from '@/lib/timezone';
 import { useI18n } from '@/hooks/use-i18n';
 
 interface AgendaItem {
@@ -21,8 +22,8 @@ const typeConfig = {
 export function WidgetAgenda() {
   const { t, formatDate, formatDateTime } = useI18n();
   const today = new Date();
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString();
-  const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).toISOString();
+  // Finestra "oggi" nel fuso del calendario (Europe/Rome), non in quello del browser
+  const { dateLocal, startIso: todayStart, endIso: todayEnd } = zonedDayWindow(today);
 
   // Caldes Calendar — eventi multi-calendario di oggi (sostituisce Google Calendar + Cal.com)
   const { data: eventsData } = useQuery({
@@ -39,8 +40,7 @@ export function WidgetAgenda() {
     queryKey: ['agenda-tasks', todayStart],
     queryFn: async () => {
       try {
-        const todayDate = today.toISOString().split('T')[0];
-        return await apiFetch(`/api/project-tasks?due_date=${todayDate}&limit=20`);
+        return await apiFetch(`/api/project-tasks?due_date=${dateLocal}&limit=20`);
       } catch { return { tasks: [] }; }
     },
   });
@@ -53,7 +53,7 @@ export function WidgetAgenda() {
     if (ev.status === 'cancelled') continue;
     items.push({
       id: `event-${ev.id}-${ev.start_time}`,
-      time: ev.all_day ? t('common.allDay') : formatDateTime(ev.start_time, { hour: '2-digit', minute: '2-digit' }),
+      time: ev.all_day ? t('common.allDay') : formatDateTime(ev.start_time, { hour: '2-digit', minute: '2-digit', timeZone: CALENDAR_TZ }),
       title: ev.summary,
       type: 'booking',
       meta: ev.location || (ev.url ? t('common.online') : undefined),
@@ -65,7 +65,7 @@ export function WidgetAgenda() {
     if (t.status === 'done') continue;
     items.push({
       id: `task-${t.id}`,
-      time: t.due_date ? formatDateTime(t.due_date, { hour: '2-digit', minute: '2-digit' }) : '-',
+      time: t.due_date ? formatDateTime(t.due_date, { hour: '2-digit', minute: '2-digit', timeZone: CALENDAR_TZ }) : '-',
       title: t.title,
       type: 'task',
       meta: t.project_name || undefined,

@@ -14,6 +14,7 @@ import { computeAvailableSlots } from '../lib/calendar/slots';
 import {
   sendBookingConfirmation,
   sendBookingAdminNotification,
+  sendBookingPendingRequest,
 } from '../lib/calendar/email';
 import {
   isAuditLeadSource,
@@ -134,11 +135,19 @@ contacts.post('/', async (c) => {
       calBookingUid = booking.uid;
       meetingUrl = booking.location_value || null;
 
-      // Email asincrone (non blocca il form)
-      Promise.allSettled([
-        sendBookingConfirmation({ booking, eventType }),
-        sendBookingAdminNotification({ booking, eventType }),
-      ]).catch((err) => log.error({ err }, 'booking email error'));
+      // Email asincrone (non blocca il form). Con requires_approval il booking
+      // nasce pending → email "richiesta ricevuta" invece della conferma.
+      Promise.allSettled(
+        booking.status === 'pending'
+          ? [
+              sendBookingPendingRequest({ booking, eventType, recipient: 'attendee' }),
+              sendBookingPendingRequest({ booking, eventType, recipient: 'admin' }),
+            ]
+          : [
+              sendBookingConfirmation({ booking, eventType }),
+              sendBookingAdminNotification({ booking, eventType }),
+            ]
+      ).catch((err) => log.error({ err }, 'booking email error'));
     } catch (err) {
       if (err instanceof BookingConflictError) {
         bookingConflict = true;

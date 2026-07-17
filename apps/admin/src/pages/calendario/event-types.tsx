@@ -114,7 +114,7 @@ export default function EventTypesPage() {
                   variant="ghost"
                   className="h-7 px-2 text-xs"
                   onClick={() => {
-                    navigator.clipboard.writeText(`${SITE_URL}/it/prenota/${et.slug}`);
+                    navigator.clipboard.writeText(`${SITE_URL}/prenota/${et.slug}`);
                     toast.success('Link copiato');
                   }}
                 >
@@ -129,7 +129,7 @@ export default function EventTypesPage() {
                   {et.is_active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                 </Button>
                 <a
-                  href={`${SITE_URL}/it/prenota/${et.slug}`}
+                  href={`${SITE_URL}/prenota/${et.slug}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center justify-center h-7 px-2 rounded-md hover:bg-accent text-xs"

@@ -12,6 +12,7 @@
  * - Rate limited: max 20 tool calls per minute per channel
  */
 
+import { fromZonedTime } from 'date-fns-tz';
 import { sql } from '../../db';
 import { logger } from '../logger';
 
@@ -66,6 +67,149 @@ export async function checkBudgetCap(): Promise<boolean> {
     return parseFloat(result?.total || '0') < budgetCapEur;
   } catch { return true; }
 }
+
+// === CALENDAR HELPERS + SHARED EXECUTORS ===
+// Gli executor sono condivisi tra i tool canonici (create_booking, …) e gli
+// alias legacy (create_cal_booking, …) che un tempo scrivevano sulla tabella
+// morta cal_bookings: entrambi ora operano SOLO sul motore live.
+
+const ROME_TZ = 'Europe/Rome';
+
+/** Finestra [fromIso, toIso) del giorno corrente in Europe/Rome (DST-safe). */
+function romeDayWindow(): { date: string; fromIso: string; toIso: string } {
+  const date = new Intl.DateTimeFormat('en-CA', { timeZone: ROME_TZ }).format(new Date());
+  const [y, m, d] = date.split('-').map(Number);
+  const nextDate = new Date(Date.UTC(y, m - 1, d + 1)).toISOString().slice(0, 10);
+  return {
+    date,
+    fromIso: fromZonedTime(`${date}T00:00:00`, ROME_TZ).toISOString(),
+    toIso: fromZonedTime(`${nextDate}T00:00:00`, ROME_TZ).toISOString(),
+  };
+}
+
+const CREATE_BOOKING_PARAMS = {
+  type: 'object',
+  properties: {
+    event_type_slug: { type: 'string', description: 'Slug dell\'event type (es. consulenza-gratuita-30min); vedi list_event_types' },
+    start: { type: 'string', description: 'ISO UTC datetime (es. 2026-04-26T09:00:00Z)' },
+    attendee_name: { type: 'string' },
+    attendee_email: { type: 'string' },
+    attendee_phone: { type: 'string' },
+    attendee_company: { type: 'string' },
+    attendee_message: { type: 'string' },
+    allow_buffer_override: { type: 'boolean', description: 'Consenti lo slot anche se viola i buffer dell\'event type (default false)' },
+  },
+  required: ['event_type_slug', 'start', 'attendee_name', 'attendee_email'],
+};
+
+const executeCreateBooking = async (args: Record<string, unknown>): Promise<string> => {
+  const { createBooking, BookingConflictError, BookingValidationError } = await import('../calendar/booking');
+  const { sendBookingConfirmation, sendBookingAdminNotification } = await import('../calendar/email');
+  try {
+    const { booking, eventType } = await createBooking({
+      event_type_slug: args.event_type_slug as string,
+      start: args.start as string,
+      attendee: {
+        name: args.attendee_name as string,
+        email: args.attendee_email as string,
+        phone: args.attendee_phone as string | undefined,
+        company: args.attendee_company as string | undefined,
+        timezone: ROME_TZ,
+        message: args.attendee_message as string | undefined,
+      },
+      source: 'mcp',
+      source_metadata: { created_via: 'mcp_tool' },
+      allow_buffer_override: args.allow_buffer_override === true,
+    });
+    Promise.allSettled([
+      sendBookingConfirmation({ booking, eventType }),
+      sendBookingAdminNotification({ booking, eventType }),
+    ]).catch(() => {});
+    return JSON.stringify({
+      success: true,
+      uid: booking.uid,
+      status: booking.status,
+      start_time: booking.start_time,
+      end_time: booking.end_time,
+    });
+  } catch (err) {
+    if (err instanceof BookingConflictError) return JSON.stringify({ error: err.message, code: 'CONFLICT' });
+    if (err instanceof BookingValidationError) return JSON.stringify({ error: err.message, code: 'VALIDATION' });
+    return JSON.stringify({ error: err instanceof Error ? err.message : 'Errore sconosciuto' });
+  }
+};
+
+const executeCancelBooking = async (args: Record<string, unknown>): Promise<string> => {
+  const { cancelBooking } = await import('../calendar/booking');
+  const { sendBookingCancelled } = await import('../calendar/email');
+  // Gli alias legacy passavano booking_id: accettalo come sinonimo di uid.
+  const uid = (args.uid ?? args.booking_id) as string;
+  if (!uid) return JSON.stringify({ error: 'uid richiesto' });
+  const result = await cancelBooking(uid, {
+    cancelled_by: 'admin',
+    reason: args.reason as string | undefined,
+  });
+  if (!result) return JSON.stringify({ error: 'Booking non trovato' });
+  Promise.allSettled([
+    sendBookingCancelled({ ...result, recipient: 'attendee' }),
+  ]).catch(() => {});
+  return JSON.stringify({ success: true, uid });
+};
+
+const executeRescheduleBooking = async (args: Record<string, unknown>): Promise<string> => {
+  const { rescheduleBooking, BookingConflictError, BookingValidationError } = await import('../calendar/booking');
+  const { sendBookingRescheduled } = await import('../calendar/email');
+  const uid = (args.uid ?? args.booking_id) as string;
+  const start = args.start as string;
+  if (!uid || !start) return JSON.stringify({ error: 'uid e start richiesti' });
+  const previous = await sql<{ start_time: string }[]>`
+    SELECT start_time FROM calendar_bookings WHERE uid = ${uid} LIMIT 1
+  `;
+  if (!previous[0]) return JSON.stringify({ error: 'Booking non trovato' });
+  try {
+    const result = await rescheduleBooking(uid, start, {
+      by: 'admin',
+      reason: args.reason as string | undefined,
+      allow_buffer_override: args.allow_buffer_override === true,
+    });
+    Promise.allSettled([
+      sendBookingRescheduled({
+        booking: result.booking, eventType: result.eventType,
+        previousStart: previous[0].start_time, recipient: 'attendee',
+      }),
+    ]).catch(() => {});
+    return JSON.stringify({
+      success: true,
+      uid: result.booking.uid,
+      previous_uid: result.previousUid,
+      start_time: result.booking.start_time,
+      end_time: result.booking.end_time,
+    });
+  } catch (err) {
+    if (err instanceof BookingConflictError) return JSON.stringify({ error: err.message, code: 'CONFLICT' });
+    if (err instanceof BookingValidationError) return JSON.stringify({ error: err.message, code: 'VALIDATION' });
+    return JSON.stringify({ error: err instanceof Error ? err.message : 'Errore sconosciuto' });
+  }
+};
+
+const executeListBookings = async (args: Record<string, unknown>): Promise<string> => {
+  const status = (args.status as string) || 'confirmed';
+  const limit = Math.max(1, Math.min((args.limit as number) || 50, 200));
+  const statusFilter = status === 'all' ? sql`` : sql`AND b.status = ${status}`;
+  const fromFilter = args.from_date ? sql`AND b.start_time >= ${(args.from_date as string) + 'T00:00:00Z'}` : sql``;
+  const toFilter = args.to_date ? sql`AND b.start_time < ${(args.to_date as string) + 'T23:59:59Z'}` : sql``;
+  const rows = await sql`
+    SELECT b.uid, b.status, b.attendee_name, b.attendee_email,
+           b.start_time, b.end_time, b.location_value,
+           et.title AS event_type_title, et.slug AS event_type_slug
+    FROM calendar_bookings b
+    JOIN calendar_event_types et ON et.id = b.event_type_id
+    WHERE 1=1 ${statusFilter} ${fromFilter} ${toFilter}
+    ORDER BY b.start_time DESC
+    LIMIT ${limit}
+  `;
+  return JSON.stringify({ count: rows.length, bookings: rows });
+};
 
 export const tools: ToolDefinition[] = [
   // === READ TOOLS ===
@@ -125,12 +269,39 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'get_calendar_today',
-    description: 'Ottieni gli appuntamenti e eventi di oggi',
+    description: 'Ottieni prenotazioni ed eventi di oggi dal calendario live (timezone Europe/Rome)',
     parameters: { type: 'object', properties: {} },
+    riskLevel: 'low',
     execute: async () => {
-      const today = new Date().toISOString().split('T')[0];
-      const bookings = await sql`SELECT title, start_time, end_time, attendee_name, status FROM cal_bookings WHERE DATE(start_time) = ${today} AND status != 'cancelled' ORDER BY start_time`;
-      return JSON.stringify({ events: bookings, date: today });
+      const { date, fromIso, toIso } = romeDayWindow();
+      const bookings = await sql<{
+        title: string; start_time: string; end_time: string;
+        attendee_name: string | null; status: string;
+      }[]>`
+        SELECT et.title AS title, b.start_time, b.end_time, b.attendee_name, b.status
+        FROM calendar_bookings b
+        JOIN calendar_event_types et ON et.id = b.event_type_id
+        WHERE b.status IN ('confirmed', 'pending')
+          AND b.start_time >= ${fromIso} AND b.start_time < ${toIso}
+        ORDER BY b.start_time
+      `;
+      const { listOccurrences } = await import('../calendar/events');
+      const occurrences = await listOccurrences({ fromIso, toIso });
+      const events = [
+        ...bookings.map((b) => ({ ...b, kind: 'booking' })),
+        // Escludi le proiezioni dei booking (source='booking') per non duplicare
+        ...occurrences
+          .filter((e) => e.source !== 'booking' && e.status !== 'cancelled')
+          .map((e) => ({
+            title: e.summary,
+            start_time: e.start_time,
+            end_time: e.end_time,
+            attendee_name: null,
+            status: e.status,
+            kind: 'event',
+          })),
+      ].sort((a, b) => new Date(a.start_time as string).getTime() - new Date(b.start_time as string).getTime());
+      return JSON.stringify({ events, date, count: events.length });
     },
   },
   {
@@ -1182,143 +1353,65 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     },
   },
 
-  // === APPUNTAMENTI (cal_bookings) ===
+  // === APPUNTAMENTI — alias legacy sul motore live ===
+  // Storicamente questi tool scrivevano sulla tabella morta cal_bookings
+  // (Cal.com, read-only da migr. 069): i booking creati lì non generavano
+  // eventi, email né promemoria. Ora sono alias 1:1 dei tool canonici
+  // create_booking / reschedule_booking / cancel_booking / list_bookings.
   {
     name: 'create_cal_booking',
-    description: 'Crea un appuntamento/meeting interno (tabella cal_bookings). Usa quando l\'utente dice "prendi appuntamento", "crea meeting", "fissa call". RICHIEDE CONFERMA.',
+    description: 'Alias di create_booking: crea una prenotazione sul calendario live. Usa quando l\'utente dice "prendi appuntamento", "crea meeting", "fissa call". Invia email di conferma. RICHIEDE CONFERMA.',
+    parameters: CREATE_BOOKING_PARAMS,
+    riskLevel: 'medium',
     requiresConfirmation: true,
-    parameters: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', description: 'Titolo meeting/appuntamento' },
-        start_time: { type: 'string', description: 'ISO 8601 (es. 2026-04-25T15:00:00+02:00)' },
-        end_time: { type: 'string', description: 'ISO 8601. Se omesso viene calcolato con duration_minutes (default 60).' },
-        duration_minutes: { type: 'number', description: 'Alternativa a end_time (default 60)' },
-        attendee_name: { type: 'string' },
-        attendee_email: { type: 'string' },
-        description: { type: 'string' },
-        location: { type: 'string', description: 'Indirizzo o link meeting' },
-      },
-      required: ['title', 'start_time'],
-    },
-    execute: async (args) => {
-      const startStr = args.start_time as string;
-      const start = new Date(startStr);
-      if (isNaN(start.getTime())) return JSON.stringify({ error: 'start_time non valido (usa ISO 8601)' });
-      let end: Date;
-      if (args.end_time) {
-        end = new Date(args.end_time as string);
-        if (isNaN(end.getTime())) return JSON.stringify({ error: 'end_time non valido' });
-      } else {
-        const dur = (args.duration_minutes as number) || 60;
-        end = new Date(start.getTime() + dur * 60_000);
-      }
-      const durationMin = Math.round((end.getTime() - start.getTime()) / 60_000);
-      const bookingUid = `mcp-${crypto.randomUUID()}`;
-
-      const [row] = await sql`
-        INSERT INTO cal_bookings (
-          booking_uid, title, description, start_time, end_time, duration_minutes,
-          attendee_name, attendee_email, location, status
-        ) VALUES (
-          ${bookingUid},
-          ${args.title as string},
-          ${(args.description as string) || null},
-          ${start.toISOString()},
-          ${end.toISOString()},
-          ${durationMin},
-          ${(args.attendee_name as string) || null},
-          ${(args.attendee_email as string) || null},
-          ${(args.location as string) || null},
-          'upcoming'
-        )
-        RETURNING id, title, start_time, end_time, attendee_name, status
-      `;
-      return JSON.stringify({ created: row });
-    },
+    execute: executeCreateBooking,
   },
   {
     name: 'update_cal_booking',
-    description: 'Modifica un appuntamento esistente (orario, titolo, note, partecipanti). RICHIEDE CONFERMA.',
-    requiresConfirmation: true,
+    description: 'Alias di reschedule_booking: sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante. RICHIEDE CONFERMA.',
     parameters: {
       type: 'object',
       properties: {
-        booking_id: { type: 'string', description: 'UUID booking' },
-        title: { type: 'string' },
-        start_time: { type: 'string', description: 'ISO 8601' },
-        end_time: { type: 'string', description: 'ISO 8601' },
-        attendee_name: { type: 'string' },
-        attendee_email: { type: 'string' },
-        description: { type: 'string' },
-        location: { type: 'string' },
+        uid: { type: 'string', description: 'UID pubblico del booking (accettato anche come booking_id)' },
+        booking_id: { type: 'string', description: 'Sinonimo legacy di uid' },
+        start: { type: 'string', description: 'Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)' },
+        reason: { type: 'string', description: 'Motivo (opzionale)' },
       },
-      required: ['booking_id'],
+      required: ['start'],
     },
-    execute: async (args) => {
-      const updates: Record<string, unknown> = {};
-      if (args.title !== undefined) updates.title = args.title;
-      if (args.description !== undefined) updates.description = args.description;
-      if (args.start_time !== undefined) updates.start_time = args.start_time;
-      if (args.end_time !== undefined) updates.end_time = args.end_time;
-      if (args.attendee_name !== undefined) updates.attendee_name = args.attendee_name;
-      if (args.attendee_email !== undefined) updates.attendee_email = args.attendee_email;
-      if (args.location !== undefined) updates.location = args.location;
-      if (!Object.keys(updates).length) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
-
-      const [row] = await sql`UPDATE cal_bookings SET ${sql(updates)} WHERE id = ${args.booking_id as string} RETURNING id, title, start_time, end_time, status`;
-      if (!row) return JSON.stringify({ error: 'Booking non trovato' });
-      return JSON.stringify({ updated: row });
-    },
+    riskLevel: 'medium',
+    requiresConfirmation: true,
+    execute: executeRescheduleBooking,
   },
   {
     name: 'cancel_cal_booking',
-    description: 'Cancella un appuntamento (soft-cancel: status = cancelled). RICHIEDE CONFERMA.',
-    requiresConfirmation: true,
+    description: 'Alias di cancel_booking: cancella una prenotazione per UID. Notifica il partecipante via email. RICHIEDE CONFERMA.',
     parameters: {
       type: 'object',
       properties: {
-        booking_id: { type: 'string' },
+        uid: { type: 'string', description: 'UID pubblico del booking (accettato anche come booking_id)' },
+        booking_id: { type: 'string', description: 'Sinonimo legacy di uid' },
         reason: { type: 'string', description: 'Motivo cancellazione (opzionale)' },
       },
-      required: ['booking_id'],
     },
-    execute: async (args) => {
-      const [row] = await sql`
-        UPDATE cal_bookings
-        SET status = 'cancelled', cancelled_at = now(), cancellation_reason = ${(args.reason as string) || null}
-        WHERE id = ${args.booking_id as string}
-        RETURNING id, title, status
-      `;
-      if (!row) return JSON.stringify({ error: 'Booking non trovato' });
-      return JSON.stringify({ cancelled: row });
-    },
+    riskLevel: 'high',
+    requiresConfirmation: true,
+    execute: executeCancelBooking,
   },
   {
     name: 'list_cal_bookings',
-    description: 'Elenca appuntamenti in un intervallo di date (default: prossimi 14 giorni). Esclude cancellati.',
+    description: 'Alias di list_bookings: elenca le prenotazioni del calendario live con filtri per stato e date.',
     parameters: {
       type: 'object',
       properties: {
-        from: { type: 'string', description: 'Data inizio ISO/YYYY-MM-DD (default oggi)' },
-        to: { type: 'string', description: 'Data fine ISO/YYYY-MM-DD (default +14gg)' },
+        status: { type: 'string', enum: ['confirmed', 'pending', 'cancelled', 'completed', 'no_show', 'all'], description: 'Filtra per stato (default: confirmed)' },
+        from_date: { type: 'string', description: 'YYYY-MM-DD: solo bookings con start >= questa data' },
+        to_date: { type: 'string', description: 'YYYY-MM-DD: solo bookings con start <= questa data' },
         limit: { type: 'number' },
       },
     },
-    execute: async (args) => {
-      const from = args.from ? new Date(args.from as string) : new Date();
-      const to = args.to ? new Date(args.to as string) : new Date(Date.now() + 14 * 24 * 3600 * 1000);
-      const limit = Math.max(1, Math.min((args.limit as number) || 50, 100));
-      const rows = await sql`
-        SELECT id, title, start_time, end_time, attendee_name, attendee_email, location, status
-        FROM cal_bookings
-        WHERE start_time >= ${from.toISOString()} AND start_time <= ${to.toISOString()}
-          AND status != 'cancelled'
-        ORDER BY start_time ASC
-        LIMIT ${limit}
-      `;
-      return JSON.stringify({ count: rows.length, bookings: rows });
-    },
+    riskLevel: 'low',
+    execute: executeListBookings,
   },
 
   // === IDEE (wrapper su notes con tag='idea') ===
@@ -1432,84 +1525,38 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     parameters: {
       type: 'object',
       properties: {
-        status: { type: 'string', enum: ['confirmed', 'cancelled', 'completed', 'no_show', 'rescheduled', 'all'], description: 'Filtra per stato (default: confirmed)' },
+        status: { type: 'string', enum: ['confirmed', 'pending', 'cancelled', 'completed', 'no_show', 'all'], description: 'Filtra per stato (default: confirmed)' },
         from_date: { type: 'string', description: 'YYYY-MM-DD: solo bookings con start >= questa data' },
         to_date: { type: 'string', description: 'YYYY-MM-DD: solo bookings con start <= questa data' },
         limit: { type: 'number' },
       },
     },
     riskLevel: 'low',
-    execute: async (args) => {
-      const status = (args.status as string) || 'confirmed';
-      const limit = Math.max(1, Math.min((args.limit as number) || 50, 200));
-      const statusFilter = status === 'all' ? sql`` : sql`AND b.status = ${status}`;
-      const fromFilter = args.from_date ? sql`AND b.start_time >= ${(args.from_date as string) + 'T00:00:00Z'}` : sql``;
-      const toFilter = args.to_date ? sql`AND b.start_time < ${(args.to_date as string) + 'T23:59:59Z'}` : sql``;
-      const rows = await sql`
-        SELECT b.uid, b.status, b.attendee_name, b.attendee_email,
-               b.start_time, b.end_time, b.location_value,
-               et.title AS event_type_title, et.slug AS event_type_slug
-        FROM calendar_bookings b
-        JOIN calendar_event_types et ON et.id = b.event_type_id
-        WHERE 1=1 ${statusFilter} ${fromFilter} ${toFilter}
-        ORDER BY b.start_time DESC
-        LIMIT ${limit}
-      `;
-      return JSON.stringify({ count: rows.length, bookings: rows });
-    },
+    execute: executeListBookings,
   },
   {
     name: 'create_booking',
     description: 'Crea una nuova prenotazione manuale per conto di un partecipante. Invia email di conferma.',
+    parameters: CREATE_BOOKING_PARAMS,
+    riskLevel: 'medium',
+    requiresConfirmation: true,
+    execute: executeCreateBooking,
+  },
+  {
+    name: 'reschedule_booking',
+    description: 'Sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante via email.',
     parameters: {
       type: 'object',
       properties: {
-        event_type_slug: { type: 'string' },
-        start: { type: 'string', description: 'ISO UTC datetime (es. 2026-04-26T09:00:00Z)' },
-        attendee_name: { type: 'string' },
-        attendee_email: { type: 'string' },
-        attendee_phone: { type: 'string' },
-        attendee_company: { type: 'string' },
-        attendee_message: { type: 'string' },
+        uid: { type: 'string', description: 'UID pubblico del booking' },
+        start: { type: 'string', description: 'Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)' },
+        reason: { type: 'string', description: 'Motivo (opzionale, mostrato al partecipante)' },
       },
-      required: ['event_type_slug', 'start', 'attendee_name', 'attendee_email'],
+      required: ['uid', 'start'],
     },
     riskLevel: 'medium',
     requiresConfirmation: true,
-    execute: async (args) => {
-      const { createBooking, BookingConflictError, BookingValidationError } = await import('../calendar/booking');
-      const { sendBookingConfirmation, sendBookingAdminNotification } = await import('../calendar/email');
-      try {
-        const { booking, eventType } = await createBooking({
-          event_type_slug: args.event_type_slug as string,
-          start: args.start as string,
-          attendee: {
-            name: args.attendee_name as string,
-            email: args.attendee_email as string,
-            phone: args.attendee_phone as string | undefined,
-            company: args.attendee_company as string | undefined,
-            timezone: 'Europe/Rome',
-            message: args.attendee_message as string | undefined,
-          },
-          source: 'mcp',
-          source_metadata: { created_via: 'mcp_tool' },
-        });
-        Promise.allSettled([
-          sendBookingConfirmation({ booking, eventType }),
-          sendBookingAdminNotification({ booking, eventType }),
-        ]).catch(() => {});
-        return JSON.stringify({
-          success: true,
-          uid: booking.uid,
-          start_time: booking.start_time,
-          end_time: booking.end_time,
-        });
-      } catch (err) {
-        if (err instanceof BookingConflictError) return JSON.stringify({ error: err.message, code: 'CONFLICT' });
-        if (err instanceof BookingValidationError) return JSON.stringify({ error: err.message, code: 'VALIDATION' });
-        return JSON.stringify({ error: err instanceof Error ? err.message : 'Errore sconosciuto' });
-      }
-    },
+    execute: executeRescheduleBooking,
   },
   {
     name: 'cancel_booking',
@@ -1524,19 +1571,7 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     },
     riskLevel: 'high',
     requiresConfirmation: true,
-    execute: async (args) => {
-      const { cancelBooking } = await import('../calendar/booking');
-      const { sendBookingCancelled } = await import('../calendar/email');
-      const result = await cancelBooking(args.uid as string, {
-        cancelled_by: 'admin',
-        reason: args.reason as string | undefined,
-      });
-      if (!result) return JSON.stringify({ error: 'Booking non trovato' });
-      Promise.allSettled([
-        sendBookingCancelled({ ...result, recipient: 'attendee' }),
-      ]).catch(() => {});
-      return JSON.stringify({ success: true, uid: args.uid });
-    },
+    execute: executeCancelBooking,
   },
 
   // ============================================
@@ -1614,17 +1649,15 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     execute: async (args) => {
       const { listOccurrences } = await import('../calendar/events');
       const { getCalendar } = await import('../calendar/calendars');
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+      const { date, fromIso, toIso } = romeDayWindow();
       let calendarId: string | undefined;
       if (args.calendar) {
         const cal = await getCalendar(args.calendar as string);
         if (cal) calendarId = cal.id;
       }
-      const occ = await listOccurrences({ calendarId, fromIso: start, toIso: end });
+      const occ = await listOccurrences({ calendarId, fromIso, toIso });
       return JSON.stringify({
-        date: start.slice(0, 10),
+        date,
         count: occ.length,
         events: occ.map((e) => ({
           summary: e.summary,

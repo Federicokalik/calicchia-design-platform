@@ -3,7 +3,7 @@
  *
  * Caratteristiche:
  * - METHOD: REQUEST (creazione/conferma) o CANCEL
- * - VTIMEZONE Europe/Rome esplicito (DST CEST/CET)
+ * - Tempi in UTC (Z), nessun VTIMEZONE necessario
  * - Line folding a 75 ottetti
  * - Escaping di virgole, semicolons, backslashes, newlines
  * - VALARM 24h e 30m prima
@@ -61,35 +61,19 @@ function fold(line: string): string {
   return out.join(CRLF);
 }
 
-function formatUtcDateTime(iso: string): string {
+function formatUtcDateTime(iso: string | Date): string {
   // 2026-04-26T09:00:00.000Z → 20260426T090000Z
-  return iso.replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  // NB: il driver postgres restituisce Date per le colonne timestamptz, i
+  // route serializzati JSON passano stringhe — accetta entrambi.
+  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
 function nowUtcCompact(): string {
   return formatUtcDateTime(new Date().toISOString());
 }
 
-/** VTIMEZONE Europe/Rome con regole DST 2007-onwards (sufficiente per booking entro qualche anno). */
-const VTIMEZONE_EUROPE_ROME = [
-  'BEGIN:VTIMEZONE',
-  'TZID:Europe/Rome',
-  'BEGIN:DAYLIGHT',
-  'TZOFFSETFROM:+0100',
-  'TZOFFSETTO:+0200',
-  'TZNAME:CEST',
-  'DTSTART:19700329T020000',
-  'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
-  'END:DAYLIGHT',
-  'BEGIN:STANDARD',
-  'TZOFFSETFROM:+0200',
-  'TZOFFSETTO:+0100',
-  'TZNAME:CET',
-  'DTSTART:19701025T030000',
-  'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
-  'END:STANDARD',
-  'END:VTIMEZONE',
-].join(CRLF);
+// NB: nessun VTIMEZONE — tutti i DTSTART/DTEND sono emessi in UTC (suffisso Z)
+// e RFC 5545 richiede VTIMEZONE solo per tempi referenziati con TZID.
 
 export interface IcsBuildOptions {
   booking: Pick<Booking,
@@ -131,7 +115,6 @@ export function buildIcs(opts: IcsBuildOptions): string {
     `PRODID:-//Caldes//Booking//IT`,
     'CALSCALE:GREGORIAN',
     `METHOD:${method}`,
-    VTIMEZONE_EUROPE_ROME,
     'BEGIN:VEVENT',
     `UID:${uid}`,
     `SEQUENCE:${sequence}`,

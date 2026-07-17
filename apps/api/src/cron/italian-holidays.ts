@@ -26,9 +26,9 @@ import { logger } from '../lib/logger';
 const log = logger.child({ scope: 'cron-italian-holidays' });
 
 const YEARS_AHEAD = 6;
-// La tabella calendar_events vincola source a un set fisso; 'admin' è quello
-// semanticamente più vicino per eventi gestiti dal sistema senza migrazione.
-const HOLIDAY_SOURCE = 'admin' as const;
+// Migr. 147: source dedicato per eventi auto-gestiti (prima ripiegava su
+// 'admin'; le righe storiche sono state ri-classificate dalla migrazione).
+const HOLIDAY_SOURCE = 'system' as const;
 
 /**
  * Trova il calendario "Festività" esistente (per nome o slug, così riusa quello

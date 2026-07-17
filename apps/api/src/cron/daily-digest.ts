@@ -6,11 +6,13 @@ export async function runDailyDigest() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const [bookings, dueTasks, newLeads, pendingQuotes, revenue, staleLeads] = await Promise.all([
+  const [bookings, pendingBookings, dueTasks, newLeads, pendingQuotes, revenue, staleLeads] = await Promise.all([
     // Audit J-K-15: digest used to read cal_bookings (legacy read-only since
     // mig 069); the active booking flow inserts into calendar_bookings, so the
     // count was always 0 for new bookings. Switched to the live table.
     sql`SELECT COUNT(*)::int AS c FROM calendar_bookings WHERE DATE(start_time) = ${today} AND status != 'cancelled'`,
+    // Richieste in attesa di approvazione (requires_approval, migr. 146)
+    sql`SELECT COUNT(*)::int AS c FROM calendar_bookings WHERE status = 'pending' AND start_time >= NOW()`,
     sql`SELECT COUNT(*)::int AS c FROM project_tasks WHERE DATE(due_date) = ${today} AND status != 'done'`,
     sql`SELECT COUNT(*)::int AS c FROM leads WHERE DATE(created_at) = ${today}`,
     sql`SELECT COUNT(*)::int AS c FROM quotes_v2 WHERE status IN ('sent', 'viewed')`,
@@ -19,6 +21,7 @@ export async function runDailyDigest() {
   ]);
 
   const b = bookings[0]?.c || 0;
+  const p = pendingBookings[0]?.c || 0;
   const t = dueTasks[0]?.c || 0;
   const l = newLeads[0]?.c || 0;
   const q = pendingQuotes[0]?.c || 0;
@@ -29,6 +32,7 @@ export async function runDailyDigest() {
 
 ${b} appuntamenti | ${t} task scadenza | ${l} nuovi lead
 ${q} preventivi in attesa | €${r.toLocaleString('it-IT')} da incassare
+${p > 0 ? `⏳ ${p} prenotazioni da approvare` : ''}
 ${s > 0 ? `⚠️ ${s} lead senza follow-up` : '✅ Lead ok'}`;
 
   await sendTelegramMessage(text, undefined, { parse_mode: 'HTML' });

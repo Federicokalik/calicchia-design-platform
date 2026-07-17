@@ -6,10 +6,11 @@ import {
   User, Link2, Key, KeyRound, History, Palette, FileSignature, Sparkles,
   Trash2, CheckCircle2, XCircle, RefreshCw, Building2, CreditCard, MapPin,
   Shield, Activity, ChevronDown, Scale, Database, Download, Upload, AlertTriangle,
-  Briefcase, Users, Calculator, Coins, Copy, MessageCircle,
+  Briefcase, Users, Calculator, Coins, Copy, MessageCircle, CalendarClock,
 } from 'lucide-react';
 import { DEFAULT_CONTRACT_ARTICLES, DEFAULT_CLAUSOLE_VESSATORIE, parseContractArticle } from '@calicchia/shared';
 import { McpTokensSection } from './impostazioni/mcp-tokens-section';
+import { CaldavTokensSection } from './impostazioni/caldav-tokens-section';
 import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { MfaSection } from './impostazioni/mfa-section';
 import { KnowledgeBaseSection } from './impostazioni/knowledge-base-section';
@@ -69,6 +70,7 @@ const NAV_GROUPS = [
       { id: 'sicurezza', label: '2FA', icon: Shield },
       { id: 'api-keys', label: 'API Keys', icon: Key },
       { id: 'mcp-tokens', label: 'Token MCP', icon: KeyRound },
+      { id: 'caldav-tokens', label: 'CalDAV', icon: CalendarClock },
       { id: 'captcha', label: 'Captcha (Cap)', icon: Shield },
     ],
   },
@@ -918,6 +920,9 @@ export default function ImpostazioniPage() {
         {activeTab === 'sicurezza' && <MfaSection />}
 
         {activeTab === 'mcp-tokens' && <McpTokensSection />}
+
+        {/* === APP-PASSWORD CALDAV (Radicale) === */}
+        {activeTab === 'caldav-tokens' && <CaldavTokensSection />}
 
         {/* === CAPTCHA (Cap) === */}
         {activeTab === 'captcha' && <CaptchaSection />}

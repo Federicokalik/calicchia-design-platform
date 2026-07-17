@@ -13,6 +13,8 @@ interface Params {
 
 interface Search {
   token?: string;
+  /** 'in-attesa' quando il booking è pending (event type con approvazione manuale). */
+  stato?: string;
 }
 
 export const metadata: Metadata = {
@@ -69,14 +71,17 @@ export default async function PrenotazioneUidPage({
     // Token presente ma non valido o booking inesistente → cade in conferma generica
   }
 
-  // Pagina di conferma generica post-redirect
+  // Pagina di conferma generica post-redirect (variante pending quando
+  // l'event type richiede approvazione manuale)
+  const isPending = sp.stato === 'in-attesa';
+
   return (
     <article>
       <header className="px-6 md:px-10 lg:px-14 pt-36 md:pt-44 pb-10 md:pb-14">
         <div className="grid grid-cols-12 gap-6 md:gap-8">
           <div className="col-span-12 md:col-span-9 md:col-start-1">
             <Eyebrow as="p" mono tone="accent" className="mb-6">
-              Confermato
+              {isPending ? 'Richiesta ricevuta' : 'Confermato'}
             </Eyebrow>
 
             <Heading
@@ -85,16 +90,16 @@ export default async function PrenotazioneUidPage({
               className="mb-8"
               style={{ maxWidth: '16ch' }}
             >
-              Ci vediamo presto.
+              {isPending ? 'Quasi fatto.' : 'Ci vediamo presto.'}
             </Heading>
 
             <p
               className="text-[length:var(--text-body-lg)] leading-relaxed"
               style={{ maxWidth: '60ch', color: 'var(--color-text-secondary)' }}
             >
-              La tua prenotazione è andata a buon fine. Ti ho mandato un&apos;email
-              con il link per il meeting + il file `.ics` da aggiungere al
-              calendario. Controlla anche la cartella spam, non si sa mai.
+              {isPending
+                ? 'La tua richiesta è in attesa di conferma: lo slot è riservato per te. Riceverai una email con la conferma definitiva (e l’invito da aggiungere al calendario) appena la approvo. Controlla anche la cartella spam, non si sa mai.'
+                : 'La tua prenotazione è andata a buon fine. Ti ho mandato un’email con il link per il meeting + il file `.ics` da aggiungere al calendario. Controlla anche la cartella spam, non si sa mai.'}
             </p>
           </div>
         </div>

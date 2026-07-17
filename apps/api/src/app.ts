@@ -266,6 +266,15 @@ app.use('/api/newsletter/unsubscribe', createRateLimit(20, 60 * 1000));
 // surface looking guarded (audit E-005, same pattern fix as /api/backup).
 app.use('/api/calendar/bookings', postOnly(publicFormRateLimit));
 app.use('/api/calendar/bookings/*', postOnly(publicFormRateLimit));
+// GET pubbliche del calendario: /event-types/:slug/slots esegue il calcolo
+// completo slot+capacity+busy (query pesanti) senza auth — 30/min per IP è
+// ampio per l'uso reale (SlotPicker = 1 chiamata per pagina; le fetch SSR di
+// sito-v3 sono cached con revalidate 60-300s) ma chiude il DoS gratuito.
+const calendarReadRateLimit = createRateLimit(30, 60 * 1000);
+const getOnly = (mw: MiddlewareHandler): MiddlewareHandler =>
+  (c, next) => (c.req.method === 'GET' ? mw(c, next) : next());
+app.use('/api/calendar/event-types', getOnly(calendarReadRateLimit));
+app.use('/api/calendar/event-types/*', getOnly(calendarReadRateLimit));
 app.route('/api/newsletter', newsletter);
 app.route('/api/contacts', contacts);
 // GEO Audit tool (public). Scan is analysis-only (no lead, no side effects) so

@@ -7,9 +7,10 @@
 export type LocationType = 'google_meet' | 'custom_url' | 'in_person' | 'phone';
 
 export type BookingStatus =
+  | 'pending'      // richiesta in attesa di approvazione (requires_approval)
   | 'confirmed'
   | 'cancelled'
-  | 'rescheduled'
+  | 'rescheduled'  // legacy: non più scritto da migr. 070, solo storico
   | 'no_show'
   | 'completed';
 
@@ -105,6 +106,8 @@ export interface Booking {
   source_metadata: Record<string, unknown>;
   contact_id: string | null;
   lead_id: string | null;
+  /** Valorizzato quando una richiesta pending viene approvata (migr. 146). */
+  approved_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -132,6 +135,12 @@ export interface CreateBookingInput {
   lead_id?: string;
   /** Se true salta invio email confermail (usato dal route contacts che ha già un proprio invio). */
   skip_emails?: boolean;
+  /**
+   * Solo per source non-public (admin/MCP): consente di creare il booking
+   * anche se viola i buffer dell'event type (il no-overlap resta comunque
+   * garantito dalla EXCLUDE constraint).
+   */
+  allow_buffer_override?: boolean;
   /** Audit trail GDPR art. 7 — IP raccolto al POST. Null se chiamante non lo passa (es. admin manual). */
   consent_ip?: string | null;
   /** Audit trail GDPR art. 7 — user-agent raccolto al POST. */
@@ -166,7 +175,7 @@ export interface Calendar {
 }
 
 export type CalendarEventStatus = 'confirmed' | 'tentative' | 'cancelled';
-export type CalendarEventSource = 'manual' | 'booking' | 'admin' | 'mcp' | 'agent' | 'ics_pull';
+export type CalendarEventSource = 'manual' | 'booking' | 'admin' | 'mcp' | 'agent' | 'ics_pull' | 'system';
 
 export interface CalendarEvent {
   id: string;

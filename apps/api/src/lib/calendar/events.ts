@@ -13,7 +13,7 @@
 
 import { createHash } from 'node:crypto';
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv, sqlInsert } from '../../db';
+import { sql, sqlInsert } from '../../db';
 import { expandRRule, validateRRule } from './rrule';
 import type {
   CalendarEvent,

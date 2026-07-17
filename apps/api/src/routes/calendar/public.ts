@@ -15,6 +15,7 @@ import {
   cancelBooking,
   rescheduleBooking,
   getBookingByUid,
+  validateCustomResponses,
   BookingConflictError,
   BookingValidationError,
 } from '../../lib/calendar/booking';
@@ -24,6 +25,7 @@ import {
   sendBookingAdminNotification,
   sendBookingCancelled,
   sendBookingRescheduled,
+  sendBookingPendingRequest,
 } from '../../lib/calendar/email';
 import { buildIcs } from '../../lib/calendar/ics';
 import type { EventType } from '../../lib/calendar/types';
@@ -152,6 +154,10 @@ calendarPublic.post('/bookings', async (c) => {
   if (!et) return c.json({ error: 'Tipologia di prenotazione non disponibile' }, 404);
 
   try {
+    // Enforce required custom_questions server-side (audit F7): sanifica e
+    // valida le risposte; BookingValidationError → 400 dal catch sottostante.
+    const customResponses = validateCustomResponses(et.custom_questions || [], body.custom_responses);
+
     const { booking, eventType } = await createBooking({
       event_type_slug: et.slug,
       start,
@@ -163,8 +169,7 @@ calendarPublic.post('/bookings', async (c) => {
         timezone: tz,
         message: attendeeMessage || undefined,
       },
-      custom_responses: body.custom_responses && typeof body.custom_responses === 'object'
-        ? body.custom_responses : {},
+      custom_responses: customResponses,
       source: 'public_page',
       source_metadata: {
         source_page: typeof body.source_page === 'string' ? body.source_page.slice(0, 255) : null,
@@ -208,37 +213,39 @@ calendarPublic.post('/bookings', async (c) => {
       }).catch(() => {});
     }
 
-    // Send emails (non-blocking, claim+mark idempotenza in lib/calendar/email.ts)
-    Promise.allSettled([
-      sendBookingConfirmation({ booking, eventType }),
-      sendBookingAdminNotification({ booking, eventType }),
-    ]).catch((err) => log.error({ err }, 'email send error'));
+    // Send emails (non-blocking, claim+mark idempotenza in lib/calendar/email.ts).
+    // Pending (requires_approval): richiesta ricevuta + avviso admin da approvare;
+    // la conferma con .ics parte solo all'approve.
+    const isPending = booking.status === 'pending';
+    Promise.allSettled(
+      isPending
+        ? [
+            sendBookingPendingRequest({ booking, eventType, recipient: 'attendee' }),
+            sendBookingPendingRequest({ booking, eventType, recipient: 'admin' }),
+          ]
+        : [
+            sendBookingConfirmation({ booking, eventType }),
+            sendBookingAdminNotification({ booking, eventType }),
+          ]
+    ).catch((err) => log.error({ err }, 'email send error'));
 
     // Telegram notification (best-effort, log errori)
     import('../../lib/telegram').then(({ notifyTelegram }) => {
       const where = booking.location_value || eventType.location_type;
       return notifyTelegram(
-        '📅 Nuova prenotazione',
+        isPending ? '⏳ Richiesta prenotazione da approvare' : '📅 Nuova prenotazione',
         `${eventType.title}\n${booking.attendee_name} <${booking.attendee_email}>\n${new Date(booking.start_time).toLocaleString('it-IT', { timeZone: 'Europe/Rome' })}\n${where}`
       );
     }).catch((err) => log.error({ err }, 'Telegram notify failed'));
 
-    // Workflow event fire (best-effort, log errori in modo che fallimenti automation siano visibili)
-    import('../../lib/workflow/triggers').then(({ fireEvent }) => {
-      const eventKey = eventType.workflow_event_key || 'booking_creato';
-      return fireEvent(eventKey, {
-        booking_uid: booking.uid,
-        event_type_slug: eventType.slug,
-        attendee_name: booking.attendee_name,
-        attendee_email: booking.attendee_email,
-        start_time: booking.start_time,
-      });
-    }).catch((err) => log.error({ err }, `Workflow fireEvent failed for booking ${booking.uid}`));
+    // Workflow event (booking_creato / workflow_event_key) — centralizzato in
+    // lib/calendar/booking.ts createBooking: parte per OGNI percorso.
 
     return c.json({
       success: true,
       booking: {
         uid: booking.uid,
+        status: booking.status,
         start_time: booking.start_time,
         end_time: booking.end_time,
         location_type: booking.location_type,
@@ -303,14 +310,7 @@ calendarPublic.post('/bookings/:uid/cancel', async (c) => {
     sendBookingCancelled({ ...result, recipient: 'admin' }),
   ]).catch((err) => log.error({ err }, 'cancel email error'));
 
-  import('../../lib/workflow/triggers').then(({ fireEvent }) => {
-    return fireEvent('booking_cancellato', {
-      booking_uid: uid,
-      event_type_slug: result.eventType.slug,
-      attendee_email: result.booking.attendee_email,
-      cancelled_by: 'attendee',
-    });
-  }).catch((err) => log.error({ err }, `Workflow fireEvent (cancellato) failed for ${uid}`));
+  // Workflow event booking_cancellato — centralizzato in cancelBooking.
 
   return c.json({ success: true });
 });
@@ -357,14 +357,7 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
       }),
     ]).catch((err) => log.error({ err }, 'reschedule email error'));
 
-    import('../../lib/workflow/triggers').then(({ fireEvent }) => {
-      return fireEvent('booking_riprogrammato', {
-        previous_uid: uid,
-        new_uid: result.booking.uid,
-        event_type_slug: result.eventType.slug,
-        attendee_email: result.booking.attendee_email,
-      });
-    }).catch((err) => log.error({ err }, `Workflow fireEvent (riprogrammato) failed for ${uid}`));
+    // Workflow event booking_riprogrammato — centralizzato in rescheduleBooking.
 
     return c.json({
       success: true,

@@ -69,6 +69,11 @@ const SLOT_FORMAT = new Intl.DateTimeFormat('it-IT', {
 export function BookingWidget({ eventType }: BookingWidgetProps) {
   const router = useRouter();
   const [selectedSlot, setSelectedSlot] = useState<BookingSlot | null>(null);
+  // Risposte alle custom questions dell'event type (definite in admin).
+  // Fuori da RHF: lo schema Zod è statico, le domande sono dinamiche.
+  const customQuestions = eventType.custom_questions ?? [];
+  const [customResponses, setCustomResponses] = useState<Record<string, string>>({});
+  const [customErrors, setCustomErrors] = useState<Record<string, string>>({});
   const { config } = useRuntimeConfig();
   const turnstile = useCaptcha('booking_create');
   const captchaCfg = config.captcha;
@@ -115,6 +120,16 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
       return;
     }
 
+    // Required custom questions (il backend le rifiuta comunque: qui solo UX)
+    const missing: Record<string, string> = {};
+    for (const q of customQuestions) {
+      if (q.required && !(customResponses[q.key] ?? '').trim()) {
+        missing[q.key] = 'Campo obbligatorio.';
+      }
+    }
+    setCustomErrors(missing);
+    if (Object.keys(missing).length > 0) return;
+
     try {
       const result = await createBooking({
         eventTypeSlug: eventType.slug,
@@ -125,8 +140,14 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
         notes: data.notes || undefined,
         turnstileToken: turnstile.token ?? '',
         gdprConsent: true,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        customResponses,
       });
-      router.push(`/prenotazione/${result.uid}`);
+      router.push(
+        result.status === 'pending'
+          ? `/prenotazione/${result.uid}?stato=in-attesa`
+          : `/prenotazione/${result.uid}`
+      );
     } catch (error) {
       setError('root', {
         type: 'server',
@@ -248,6 +269,60 @@ export function BookingWidget({ eventType }: BookingWidgetProps) {
                   {...register('notes')}
                 />
               </Field>
+
+              {customQuestions.map((q) => {
+                const fieldId = `booking-cq-${q.key}`;
+                const value = customResponses[q.key] ?? '';
+                const err = customErrors[q.key];
+                const setValue = (v: string) => {
+                  setCustomResponses((prev) => ({ ...prev, [q.key]: v }));
+                  if (err) setCustomErrors((prev) => ({ ...prev, [q.key]: '' }));
+                };
+                return (
+                  <Field key={q.key} className="mt-6">
+                    <FieldLabel htmlFor={fieldId} required={q.required}>
+                      {q.label}
+                    </FieldLabel>
+                    {q.type === 'textarea' ? (
+                      <Textarea
+                        id={fieldId}
+                        rows={3}
+                        invalid={Boolean(err)}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                      />
+                    ) : q.type === 'select' ? (
+                      <select
+                        id={fieldId}
+                        aria-invalid={err ? 'true' : undefined}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        className="mt-3 bg-transparent border-b py-3 text-lg outline-none focus:border-[var(--color-text-primary)] transition-hover-color"
+                        style={{
+                          borderColor: err ? 'var(--color-text-error)' : 'var(--color-border-strong)',
+                          color: 'var(--color-text-primary)',
+                        }}
+                      >
+                        <option value="">Seleziona…</option>
+                        {(q.options ?? []).map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <Input
+                        id={fieldId}
+                        type="text"
+                        invalid={Boolean(err)}
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                      />
+                    )}
+                    {err ? <FieldError>{err}</FieldError> : null}
+                  </Field>
+                );
+              })}
 
               <Field className="mt-6">
                 <Controller

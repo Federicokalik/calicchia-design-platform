@@ -133,10 +133,11 @@ export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<C
   const overallStart = Math.min(...windows.map((w) => toMs(w.startUtc)));
   const overallEnd = Math.max(...windows.map((w) => toMs(w.endUtc)));
 
-  // 2. Bookings esistenti
+  // 2. Bookings esistenti — i pending (in attesa di approvazione) bloccano
+  //    lo slot come i confirmed, coerentemente con la EXCLUDE constraint.
   const bookings = await sql<{ start_time: string; end_time: string }[]>`
     SELECT start_time, end_time FROM calendar_bookings
-    WHERE status = 'confirmed'
+    WHERE status IN ('confirmed', 'pending')
       AND end_time   > ${new Date(overallStart).toISOString()}
       AND start_time < ${new Date(overallEnd).toISOString()}
   `;

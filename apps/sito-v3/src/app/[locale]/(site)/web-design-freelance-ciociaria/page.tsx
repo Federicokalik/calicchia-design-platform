@@ -451,7 +451,7 @@ export default async function WebDesignFreelanceCiociariaPage() {
                 <Button href="/contatti" variant="solid" size="md">
                   Scrivimi <ArrowRight size={16} weight="regular" aria-hidden />
                 </Button>
-                <Button href="/prenota/chiamata-conoscitiva" variant="ghost" size="md">
+                <Button href="/prenota/consulenza-gratuita-30min" variant="ghost" size="md">
                   Prenota una chiamata
                 </Button>
               </div>
