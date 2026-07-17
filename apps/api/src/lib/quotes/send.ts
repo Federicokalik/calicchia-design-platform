@@ -8,10 +8,9 @@ import { sql } from '../../db';
 import { sendEmail } from '../email';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
 import { logger } from '../logger';
+import { escapeHtml, quoteDisplayTitle, quoteSignUrl } from './format';
 
 const log = logger.child({ scope: 'quote-send' });
-
-const QUOTE_PUBLIC_URL = process.env.QUOTE_PUBLIC_URL || 'http://localhost:5173/preventivo';
 
 export interface QuoteSendResult {
   ok: boolean;
@@ -35,9 +34,13 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
     return { ok: false, sentVia: [], failed: {}, error: 'Preventivo già firmato' };
   }
 
-  const signUrl = `${QUOTE_PUBLIC_URL}/${quote.signature_token}`;
+  const signUrl = quoteSignUrl(quote.signature_token);
   const sentVia: string[] = [];
   const failed: Record<string, string> = {};
+
+  const displayTitle = quoteDisplayTitle(quote.title);
+  const contactName = String(quote.contact_name || '').trim();
+  const totalFmt = parseFloat(quote.total).toLocaleString('it-IT');
 
   if (channels?.includes('email') && !quote.customer_email) {
     failed.email = 'Email cliente mancante in anagrafica';
@@ -52,10 +55,10 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
     try {
       await sendEmail({
         to: quote.customer_email,
-        subject: `Preventivo: ${quote.title}`,
+        subject: `Preventivo: ${displayTitle}`,
         html: `
-          <p>Ciao ${quote.contact_name || ''},</p>
-          <p>Ti invio il preventivo <strong>${quote.title}</strong> per un totale di <strong>€${parseFloat(quote.total).toLocaleString('it-IT')}</strong>.</p>
+          <p>Ciao${contactName ? ' ' + escapeHtml(contactName) : ''},</p>
+          <p>Ti invio il preventivo <strong>${escapeHtml(displayTitle)}</strong> per un totale di <strong>€${totalFmt}</strong>.</p>
           <p>Puoi visionarlo e firmarlo digitalmente al seguente link:</p>
           <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#f97316;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">Visualizza e Firma</a></p>
           <p>Il preventivo è valido fino al ${quote.valid_until ? new Date(quote.valid_until).toLocaleDateString('it-IT') : 'revoca'}.</p>
@@ -73,7 +76,7 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
 
   if (channels?.includes('whatsapp') && quote.customer_phone && isWhatsAppConfigured()) {
     try {
-      const message = `Ciao ${quote.contact_name || ''}! 👋\n\nTi invio il preventivo *${quote.title}* per un totale di *€${parseFloat(quote.total).toLocaleString('it-IT')}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!\n\n_Messaggio automatico inviato dal gestionale di Calicchia Design — puoi rispondere direttamente qui._`;
+      const message = `Ciao${contactName ? ' ' + contactName : ''}! 👋\n\nTi invio il preventivo *${displayTitle}* per un totale di *€${totalFmt}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!\n\n_Messaggio automatico inviato dal gestionale di Calicchia Design — puoi rispondere direttamente qui._`;
       await sendWhatsAppText(quote.customer_phone, message);
       sentVia.push('whatsapp');
     } catch (err) {

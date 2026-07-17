@@ -36,8 +36,6 @@ const log = logger.child({ scope: 'quotes-v2' });
 
 export const quotesV2 = new Hono();
 
-const QUOTE_PUBLIC_URL = process.env.QUOTE_PUBLIC_URL || 'http://localhost:5173/preventivo';
-
 // GET /api/quotes-v2 — list all quotes
 quotesV2.get('/', async (c) => {
   const status = c.req.query('status');

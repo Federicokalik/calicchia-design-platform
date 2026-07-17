@@ -71,7 +71,9 @@ function isUuid(value: string): boolean {
 }
 
 function publicBaseUrl(): string {
-  return (process.env.PUBLIC_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
+  // The signables sign page lives on the public site (sito-v3 /firma/[token]).
+  // PORTAL_URL is already wired in the prod compose and points there.
+  return (process.env.PUBLIC_BASE_URL || process.env.PORTAL_URL || 'http://localhost:3000').replace(/\/$/, '');
 }
 
 function htmlEscape(value: string): string {
