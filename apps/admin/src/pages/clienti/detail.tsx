@@ -262,6 +262,22 @@ export default function ClienteDetailPage() {
     },
   });
 
+  // Link existing Stripe subscriptions (created directly on Stripe, e.g.
+  // historical yearly plans): matches by email, backfills `subscriptions`,
+  // repoints stripe_customer_id — the webhook keeps them updated afterwards.
+  const stripeSyncMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/customers/${id}/stripe-sync`, { method: 'POST' }),
+    onSuccess: (res: { subscriptions_synced?: number; stripe_customers_checked?: number }) => {
+      toast.success(
+        `Stripe collegato: ${res.subscriptions_synced ?? 0} abbonamenti sincronizzati` +
+        (res.stripe_customers_checked ? ` (${res.stripe_customers_checked} account Stripe controllati)` : ''),
+      );
+      queryClient.invalidateQueries({ queryKey: ['customer', id] });
+      queryClient.invalidateQueries({ queryKey: ['customer-payments', id] });
+    },
+    onError: (err: Error) => toast.error(err.message || 'Sincronizzazione Stripe fallita'),
+  });
+
   if (isLoading) {
     return <LoadingState />;
   }
@@ -303,13 +319,24 @@ export default function ClienteDetailPage() {
               Revenue: €{(customer.total_revenue || 0).toLocaleString('it-IT')}
             </span>
           </div>
-          {customer.phone && (
-            <div className="mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
+            {customer.phone && (
               <Button size="sm" variant="outline" onClick={() => setWaOpen(true)}>
                 <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Manda WhatsApp
               </Button>
-            </div>
-          )}
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => stripeSyncMutation.mutate()}
+              disabled={stripeSyncMutation.isPending}
+            >
+              {stripeSyncMutation.isPending
+                ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                : <RefreshCw className="h-3.5 w-3.5 mr-1.5" />}
+              Sincronizza Stripe
+            </Button>
+          </div>
         </div>
       </div>
 

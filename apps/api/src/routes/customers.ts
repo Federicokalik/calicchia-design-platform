@@ -232,6 +232,93 @@ customers.post('/:id/portal', async (c) => {
   return c.json({ url: session.url });
 });
 
+// POST /api/customers/:id/stripe-sync — link the customer to their existing
+// Stripe customer and backfill subscriptions created directly on Stripe
+// (e.g. historical "gestione annua" plans that predate the gestionale).
+// Candidates: the stored stripe_customer_id + every Stripe customer with the
+// same email. Subscriptions are upserted with the same mapping as the
+// customer.subscription.* webhook, which then keeps them updated; the local
+// record is repointed to the Stripe customer that owns live subscriptions so
+// future webhook events resolve to this customer.
+customers.post('/:id/stripe-sync', async (c) => {
+  if (!isStripeConfigured()) return c.json({ error: 'Stripe non configurato' }, 503);
+  const id = c.req.param('id');
+  const [customer] = await sql`SELECT id, email, stripe_customer_id FROM customers WHERE id = ${id}`;
+  if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
+
+  const email = String(customer.email || '').trim().toLowerCase();
+  const candidateIds = new Set<string>();
+  if (customer.stripe_customer_id) candidateIds.add(String(customer.stripe_customer_id));
+  if (email) {
+    const list = await stripe.customers.list({ email, limit: 20 });
+    for (const sc of list.data) candidateIds.add(sc.id);
+  }
+  if (!candidateIds.size) {
+    return c.json({ error: 'Nessun cliente Stripe trovato (email mancante o non registrata su Stripe)' }, 404);
+  }
+
+  let synced = 0;
+  let linkedStripeId = customer.stripe_customer_id ? String(customer.stripe_customer_id) : null;
+
+  for (const stripeCustomerId of candidateIds) {
+    const subs = await stripe.subscriptions.list({
+      customer: stripeCustomerId,
+      status: 'all',
+      limit: 100,
+      expand: ['data.items.data.price.product'],
+    });
+
+    for (const subscription of subs.data) {
+      const item = subscription.items.data[0];
+      const product = item?.price?.product;
+      await sql`
+        INSERT INTO subscriptions ${sql({
+          stripe_subscription_id: subscription.id,
+          customer_id: customer.id,
+          provider: 'stripe',
+          stripe_price_id: item?.price?.id,
+          name: (typeof product === 'object' && product && 'name' in product ? product.name : null) || 'Abbonamento',
+          amount: (item?.price?.unit_amount || 0) / 100,
+          currency: item?.price?.currency?.toUpperCase() || 'EUR',
+          billing_interval: item?.price?.recurring?.interval || 'year',
+          status: subscription.status,
+          start_date: new Date(subscription.start_date * 1000).toISOString().split('T')[0],
+          current_period_start: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
+          current_period_end: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
+          next_billing_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
+          canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+          auto_renew: !subscription.cancel_at_period_end,
+        })}
+        ON CONFLICT (stripe_subscription_id) DO UPDATE SET
+          customer_id = EXCLUDED.customer_id,
+          status = EXCLUDED.status,
+          current_period_start = EXCLUDED.current_period_start,
+          current_period_end = EXCLUDED.current_period_end,
+          next_billing_date = EXCLUDED.next_billing_date,
+          canceled_at = EXCLUDED.canceled_at,
+          auto_renew = EXCLUDED.auto_renew
+      `;
+      synced += 1;
+    }
+
+    // The Stripe customer owning live subscriptions is the authoritative link.
+    if (subs.data.some((s) => ['active', 'trialing', 'past_due'].includes(s.status))) {
+      linkedStripeId = stripeCustomerId;
+    }
+  }
+
+  if (linkedStripeId && linkedStripeId !== customer.stripe_customer_id) {
+    await sql`UPDATE customers SET stripe_customer_id = ${linkedStripeId}, updated_at = now() WHERE id = ${id}`;
+  }
+
+  return c.json({
+    success: true,
+    stripe_customer_id: linkedStripeId,
+    stripe_customers_checked: candidateIds.size,
+    subscriptions_synced: synced,
+  });
+});
+
 customers.post('/:id/payment-link', async (c) => {
   const id = c.req.param('id');
   const { type, priceId, amount, description } = await c.req.json();
