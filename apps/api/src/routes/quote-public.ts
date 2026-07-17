@@ -13,7 +13,7 @@ import {
   otpExpiresAt,
   verifyOtpHash,
 } from '../lib/signing';
-import { escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
+import { decodeEntities, escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
 import { ensureProjectForQuote } from '../lib/quotes/project';
 
 const log = logger.child({ scope: 'quote-sign' });
@@ -77,8 +77,22 @@ quotePublic.get('/:token', async (c) => {
   const vessatorie = await getVessatorieForQuote(quote.project_template);
   const { project_template: _pt, ...publicQuote } = quote;
 
+  // items can be double-encoded depending on the write path (jsonb holding a
+  // JSON *string* — e.g. the import-html route): normalize to a real array or
+  // the sign page crashes on items.map. Entities in title/descriptions arrive
+  // HTML-escaped from imports; React re-escapes on render, so decoding is safe.
+  let rawItems: unknown = publicQuote.items;
+  if (typeof rawItems === 'string') {
+    try { rawItems = JSON.parse(rawItems); } catch { rawItems = []; }
+  }
+  const items = (Array.isArray(rawItems) ? rawItems : []).map((it) =>
+    it && typeof it === 'object' && typeof (it as Record<string, unknown>).description === 'string'
+      ? { ...(it as Record<string, unknown>), description: decodeEntities((it as Record<string, unknown>).description as string) }
+      : it,
+  );
+
   return c.json({
-    quote: publicQuote,
+    quote: { ...publicQuote, title: decodeEntities(String(publicQuote.title || '')), items },
     vessatorie: vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo, testo: a.testo })),
   });
 });

@@ -176,7 +176,12 @@ export default function QuoteSignPage() {
     );
   }
 
-  const items = quote?.items || [];
+  // items can arrive double-encoded from legacy rows (jsonb holding a JSON
+  // string) — never call .map on a non-array or the whole page error-boundaries.
+  const rawItems = typeof quote?.items === 'string'
+    ? (() => { try { return JSON.parse(quote.items); } catch { return []; } })()
+    : quote?.items;
+  const items = Array.isArray(rawItems) ? rawItems : [];
 
   return (
     <div className="min-h-screen bg-gray-50">
