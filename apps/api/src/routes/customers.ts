@@ -259,25 +259,38 @@ customers.post('/:id/stripe-sync', async (c) => {
 
   let synced = 0;
   let linkedStripeId = customer.stripe_customer_id ? String(customer.stripe_customer_id) : null;
+  // Product names resolved separately: expanding data.items.data.price.product
+  // on subscriptions.list exceeds Stripe's 4-level expand limit.
+  const productNames = new Map<string, string>();
 
   for (const stripeCustomerId of candidateIds) {
     const subs = await stripe.subscriptions.list({
       customer: stripeCustomerId,
       status: 'all',
       limit: 100,
-      expand: ['data.items.data.price.product'],
     });
 
     for (const subscription of subs.data) {
       const item = subscription.items.data[0];
-      const product = item?.price?.product;
+      const rawProduct = item?.price?.product;
+      const productId = typeof rawProduct === 'string'
+        ? rawProduct
+        : rawProduct && 'id' in rawProduct ? String(rawProduct.id) : null;
+      if (productId && !productNames.has(productId)) {
+        try {
+          const product = await stripe.products.retrieve(productId);
+          productNames.set(productId, ('name' in product && product.name) || 'Abbonamento');
+        } catch {
+          productNames.set(productId, 'Abbonamento');
+        }
+      }
       await sql`
         INSERT INTO subscriptions ${sql({
           stripe_subscription_id: subscription.id,
           customer_id: customer.id,
           provider: 'stripe',
           stripe_price_id: item?.price?.id,
-          name: (typeof product === 'object' && product && 'name' in product ? product.name : null) || 'Abbonamento',
+          name: (productId && productNames.get(productId)) || 'Abbonamento',
           amount: (item?.price?.unit_amount || 0) / 100,
           currency: item?.price?.currency?.toUpperCase() || 'EUR',
           billing_interval: item?.price?.recurring?.interval || 'year',
