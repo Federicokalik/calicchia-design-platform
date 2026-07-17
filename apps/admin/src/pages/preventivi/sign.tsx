@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckCircle2, Loader2, Send, PenTool } from 'lucide-react';
+import { CheckCircle2, FileText, Loader2, Send, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,9 +12,17 @@ interface VessatoriaClause {
   testo: string;
 }
 
+interface PagamentoOption {
+  nome: string;
+  importo: number | null;
+  sconto_percentuale: number | null;
+  rate: Array<{ percentuale: number; momento: string }>;
+}
+
 export default function QuoteSignPage() {
   const { token } = useParams();
   const [quote, setQuote] = useState<any>(null);
+  const [pagamento, setPagamento] = useState<PagamentoOption[]>([]);
   const [vessatorie, setVessatorie] = useState<VessatoriaClause[]>([]);
   const [vessatorieApproved, setVessatorieApproved] = useState(false);
   const [expandedClause, setExpandedClause] = useState<number | null>(null);
@@ -39,6 +47,7 @@ export default function QuoteSignPage() {
         if (data.error) setError(data.error);
         else {
           setQuote(data.quote);
+          setPagamento(Array.isArray(data.pagamento) ? data.pagamento : []);
           setVessatorie(Array.isArray(data.vessatorie) ? data.vessatorie : []);
         }
       })
@@ -227,6 +236,62 @@ export default function QuoteSignPage() {
                   </tr>
                 </tfoot>
               </table>
+            </div>
+          )}
+
+          {/* Custom-HTML quotes: the items table above is just a stub — the
+              real contract lives in the imported document. Embed it so the
+              customer reads what they sign; new-tab link as fallback. */}
+          {quote.has_document && (
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs text-gray-500 uppercase font-medium">Documento completo</p>
+                <a
+                  href={`${API_BASE}/api/quote-sign/${token}/document`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-700"
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Apri a schermo intero
+                </a>
+              </div>
+              <iframe
+                src={`${API_BASE}/api/quote-sign/${token}/document`}
+                title="Documento preventivo completo"
+                className="w-full rounded-lg border bg-white"
+                style={{ height: '75vh' }}
+              />
+            </div>
+          )}
+
+          {/* Payment options — the customer must see "anticipato €549" etc.
+              BEFORE signing, not only inside the document/PDF. */}
+          {pagamento.length > 0 && (
+            <div className="mt-4 border rounded-lg p-4">
+              <p className="text-xs text-gray-500 uppercase font-medium mb-2">Modalità di pagamento</p>
+              <ul className="space-y-2">
+                {pagamento.map((p, i) => (
+                  <li key={i} className="flex items-baseline justify-between gap-3 text-sm">
+                    <span className="text-gray-700">
+                      {p.nome}
+                      {p.rate.length > 0 && (
+                        <span className="text-gray-400 text-xs block">
+                          {p.rate.map((r) => `${r.percentuale}% ${r.momento}`).join(' · ')}
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 text-right">
+                      {p.importo != null && (
+                        <span className="font-semibold text-gray-900">€{p.importo.toLocaleString('it-IT')}</span>
+                      )}
+                      {p.sconto_percentuale != null && (
+                        <span className="ml-2 text-xs text-green-600 font-medium">-{p.sconto_percentuale}%</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 

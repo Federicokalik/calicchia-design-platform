@@ -15,6 +15,7 @@ import {
 } from '../lib/signing';
 import { decodeEntities, escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
 import { ensureProjectForQuote } from '../lib/quotes/project';
+import { readPrivateFile } from '../lib/private-files';
 
 const log = logger.child({ scope: 'quote-sign' });
 
@@ -52,13 +53,54 @@ async function getVessatorieForQuote(projectTemplate: unknown): Promise<Contract
   return resolveContractArticles(settings, contratto.data).filter((a) => a.vessatoria);
 }
 
+/**
+ * Payment options for the sign page, normalized from the two template shapes:
+ *   - custom HTML quotes: project_template.pagamento_custom = [{nome, importo}]
+ *   - template quotes: sections[type=pagamento].data.modalita =
+ *       [{nome, importo?, sconto_percentuale?, rate: [{percentuale, momento}]}]
+ * The customer must see the payment terms (e.g. "anticipato €549") BEFORE
+ * signing, not only inside the PDF.
+ */
+function getPagamentoForQuote(projectTemplate: unknown): Array<Record<string, unknown>> {
+  let pt: Record<string, unknown> | null = null;
+  try {
+    const parsed = typeof projectTemplate === 'string' ? JSON.parse(projectTemplate) : projectTemplate;
+    if (parsed && typeof parsed === 'object') pt = parsed as Record<string, unknown>;
+  } catch { /* malformed → no payment box */ }
+  if (!pt) return [];
+
+  const normalize = (list: unknown[]): Array<Record<string, unknown>> =>
+    list
+      .filter((p): p is Record<string, unknown> => !!p && typeof p === 'object')
+      .map((p) => ({
+        nome: decodeEntities(String(p.nome ?? '')),
+        importo: Number(p.importo) > 0 ? Number(p.importo) : null,
+        sconto_percentuale: Number(p.sconto_percentuale) > 0 ? Number(p.sconto_percentuale) : null,
+        rate: Array.isArray(p.rate)
+          ? (p.rate as Array<Record<string, unknown>>).map((r) => ({
+              percentuale: Number(r.percentuale) || 0,
+              momento: decodeEntities(String(r.momento ?? '')),
+            }))
+          : [],
+      }))
+      .filter((p) => p.nome);
+
+  if (Array.isArray(pt.pagamento_custom) && pt.pagamento_custom.length) {
+    return normalize(pt.pagamento_custom as unknown[]);
+  }
+  const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
+  const pagamento = sections.find((s) => s?.type === 'pagamento');
+  const modalita = (pagamento?.data as { modalita?: unknown[] } | undefined)?.modalita;
+  return Array.isArray(modalita) ? normalize(modalita) : [];
+}
+
 // GET /api/quote-sign/:token — view quote
 quotePublic.get('/:token', async (c) => {
   const { token } = c.req.param();
   const rows = await sql`
     SELECT q.id, q.title, q.description, q.items, q.subtotal, q.tax_rate, q.tax_amount, q.total,
            q.currency, q.valid_until, q.notes, q.status, q.signed_at, q.signer_name,
-           q.project_template, q.vessatorie_approved_at,
+           q.project_template, q.vessatorie_approved_at, q.custom_html_path,
            c.contact_name AS customer_name, c.company_name
     FROM quotes_v2 q
     LEFT JOIN customers c ON c.id = q.customer_id
@@ -75,7 +117,8 @@ quotePublic.get('/:token', async (c) => {
   // Clauses requiring specific approval (artt. 1341-1342 c.c.) — the client
   // must tick a dedicated consent before the signature is accepted.
   const vessatorie = await getVessatorieForQuote(quote.project_template);
-  const { project_template: _pt, ...publicQuote } = quote;
+  const pagamento = getPagamentoForQuote(quote.project_template);
+  const { project_template: _pt, custom_html_path, ...publicQuote } = quote;
 
   // items can be double-encoded depending on the write path (jsonb holding a
   // JSON *string* — e.g. the import-html route): normalize to a real array or
@@ -92,9 +135,54 @@ quotePublic.get('/:token', async (c) => {
   );
 
   return c.json({
-    quote: { ...publicQuote, title: decodeEntities(String(publicQuote.title || '')), items },
+    quote: {
+      ...publicQuote,
+      title: decodeEntities(String(publicQuote.title || '')),
+      items,
+      // Boolean only — the storage path stays server-side.
+      has_document: !!custom_html_path,
+    },
+    pagamento,
     vessatorie: vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo, testo: a.testo })),
   });
+});
+
+// GET /api/quote-sign/:token/document — full custom-HTML document, so the
+// customer can READ what they sign (the stub items table is not the contract).
+// Same trust level as the quote itself: possessing the signature token grants
+// view access. The HTML was sanitized at import (cleanCustomQuoteHtml strips
+// scripts/active content). Standard template quotes have no stored document.
+quotePublic.get('/:token/document', async (c) => {
+  const { token } = c.req.param();
+  const rows = await sql`
+    SELECT id, custom_html_path FROM quotes_v2 WHERE signature_token = ${token}
+  `;
+  if (!rows.length || !rows[0].custom_html_path) return c.json({ error: 'Documento non disponibile' }, 404);
+
+  const name = String(rows[0].custom_html_path).split('/').pop() || '';
+  let html: string;
+  try {
+    html = (await readPrivateFile('quotes', name)).toString('utf-8');
+  } catch {
+    return c.json({ error: 'Documento non trovato nello storage' }, 404);
+  }
+
+  c.header('X-Robots-Tag', 'noindex, nofollow');
+  c.header('Cache-Control', 'private, no-store');
+  // The sign page embeds this document in an iframe. The global security
+  // headers (X-Frame-Options DENY + frame-ancestors 'none', app.ts) must be
+  // relaxed HERE ONLY — same pattern as the trust-index embed in public.ts.
+  // Via the admin nginx /api proxy the iframe is same-origin ('self'); the
+  // direct api origin is allowed for the admin host too. The document was
+  // sanitized at import (scripts/active content stripped), CSP still blocks
+  // any script as defense in depth.
+  const adminOrigin = (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, '');
+  c.header('X-Frame-Options', 'SAMEORIGIN');
+  c.header(
+    'Content-Security-Policy',
+    `default-src 'none'; style-src 'unsafe-inline' https:; img-src data: https:; font-src data: https:; frame-ancestors 'self' ${adminOrigin}; base-uri 'none'`,
+  );
+  return c.html(html);
 });
 
 // POST /api/quote-sign/:token/otp — request OTP
