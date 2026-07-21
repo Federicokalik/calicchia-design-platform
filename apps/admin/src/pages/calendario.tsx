@@ -75,6 +75,7 @@ const SOURCE_LABELS: Record<string, string> = {
 
 interface CalendarApi {
   id: string;
+  slug: string;
   name: string;
   color: string;
 }
