@@ -61,11 +61,19 @@ interface RecurrenceState {
   setposDay?: string; // MO..SU
 }
 
+// Chiavi RRULE che il form sa rappresentare e ricostruire senza perdite.
+// Qualsiasi altra chiave (INTERVAL, BYMONTHDAY, BYMONTH, WKST, …) forza la
+// modalità raw: si parte dalla stringa completa, mai da una versione lossy.
+const FORM_RRULE_KEYS = new Set(['FREQ', 'COUNT', 'UNTIL', 'BYDAY', 'BYSETPOS']);
+
 function parseRRule(rrule: string | null): RecurrenceState {
   if (!rrule) return { type: 'none', raw: '' };
   const parts = Object.fromEntries(rrule.split(';').map((p) => p.split('=')));
   const freq = parts.FREQ as RecurrenceType;
   if (!['DAILY', 'WEEKLY', 'MONTHLY'].includes(freq)) return { type: 'none', raw: rrule, useRaw: true };
+  if (Object.keys(parts).some((k) => !FORM_RRULE_KEYS.has(k.toUpperCase()))) {
+    return { type: freq, raw: rrule, useRaw: true };
+  }
   const state: RecurrenceState = {
     type: freq,
     count: parts.COUNT ? parseInt(parts.COUNT) : undefined,
@@ -169,6 +177,13 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
   );
   const [allDay, setAllDay] = useState(initial?.all_day || false);
   const [recurrence, setRecurrence] = useState(parseRRule(initial?.rrule || null));
+  // In edit la rrule viene reinviata SOLO se l'utente tocca la sezione ricorrenza:
+  // il round-trip parse→build è lossy e riscriverebbe la serie a ogni rinomina.
+  const [recurrenceTouched, setRecurrenceTouched] = useState(false);
+  const updateRecurrence = (next: RecurrenceState) => {
+    setRecurrence(next);
+    setRecurrenceTouched(true);
+  };
 
   useEffect(() => {
     if (!initial && defaultCalId && !calendarId) setCalendarId(defaultCalId);
@@ -178,7 +193,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
 
   const save = useMutation({
     mutationFn: () => {
-      const body = JSON.stringify({
+      const payload: Record<string, unknown> = {
         calendar_id: calendarId,
         summary: summary.trim(),
         description: description.trim() || null,
@@ -187,8 +202,11 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
         start_time: zonedInputToIso(startInput),
         end_time: zonedInputToIso(endInput),
         all_day: allDay,
-        rrule: buildRRule(recurrence),
-      });
+      };
+      // rrule omessa in edit se non toccata: il backend non la modifica e la
+      // stringa originale (INTERVAL & co. inclusi) resta intatta in DB.
+      if (!isEdit || recurrenceTouched) payload.rrule = buildRRule(recurrence);
+      const body = JSON.stringify(payload);
       return isEdit
         ? apiFetch(`/api/admin/calendar/events/${initial!.id}`, { method: 'PUT', body })
         : apiFetch('/api/admin/calendar/events', { method: 'POST', body });
@@ -338,7 +356,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                   size="sm"
                   variant={recurrence.type === t ? 'default' : 'outline'}
                   className="text-xs"
-                  onClick={() => setRecurrence({ ...recurrence, type: t, useRaw: false })}
+                  onClick={() => updateRecurrence({ ...recurrence, type: t, useRaw: false })}
                 >
                   {t === 'none' ? 'Mai' : t === 'DAILY' ? 'Giornaliero' : t === 'WEEKLY' ? 'Settimanale' : 'Mensile'}
                 </Button>
@@ -364,7 +382,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                       onClick={() => {
                         const cur = recurrence.byDay || [];
                         const next = cur.includes(d.value) ? cur.filter((v) => v !== d.value) : [...cur, d.value];
-                        setRecurrence({ ...recurrence, byDay: next });
+                        updateRecurrence({ ...recurrence, byDay: next });
                       }}
                     >
                       {d.label}
@@ -381,7 +399,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                     size="sm"
                     variant={recurrence.monthlyMode !== 'weekday' ? 'default' : 'outline'}
                     className="text-xs"
-                    onClick={() => setRecurrence({ ...recurrence, monthlyMode: 'monthday' })}
+                    onClick={() => updateRecurrence({ ...recurrence, monthlyMode: 'monthday' })}
                   >
                     Stesso giorno del mese
                   </Button>
@@ -394,7 +412,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                       const d = new Date(startInput);
                       const pos = isNaN(d.getTime()) ? 1 : Math.ceil(d.getDate() / 7);
                       const day = isNaN(d.getTime()) ? 'MO' : ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'][d.getDay()];
-                      setRecurrence({
+                      updateRecurrence({
                         ...recurrence,
                         monthlyMode: 'weekday',
                         setpos: recurrence.setpos ?? pos,
@@ -410,7 +428,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                   <div className="grid grid-cols-2 gap-2">
                     <select
                       value={recurrence.setpos ?? 1}
-                      onChange={(e) => setRecurrence({ ...recurrence, setpos: parseInt(e.target.value) })}
+                      onChange={(e) => updateRecurrence({ ...recurrence, setpos: parseInt(e.target.value) })}
                       className="w-full px-2 py-1 text-sm rounded-md border bg-background"
                     >
                       <option value={1}>1°</option>
@@ -421,7 +439,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                     </select>
                     <select
                       value={recurrence.setposDay ?? 'MO'}
-                      onChange={(e) => setRecurrence({ ...recurrence, setposDay: e.target.value })}
+                      onChange={(e) => updateRecurrence({ ...recurrence, setposDay: e.target.value })}
                       className="w-full px-2 py-1 text-sm rounded-md border bg-background"
                     >
                       {DAYS_OF_WEEK.map((d) => (
@@ -441,7 +459,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                     type="number"
                     min={1}
                     value={recurrence.count || ''}
-                    onChange={(e) => setRecurrence({ ...recurrence, count: e.target.value ? parseInt(e.target.value) : undefined })}
+                    onChange={(e) => updateRecurrence({ ...recurrence, count: e.target.value ? parseInt(e.target.value) : undefined })}
                     className="w-full px-2 py-1 text-sm rounded-md border bg-background"
                     placeholder="Lascia vuoto per illimitato"
                   />
@@ -451,7 +469,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
                   <input
                     type="date"
                     value={recurrence.until ? recurrence.until.slice(0, 10) : ''}
-                    onChange={(e) => setRecurrence({ ...recurrence, until: e.target.value || undefined })}
+                    onChange={(e) => updateRecurrence({ ...recurrence, until: e.target.value || undefined })}
                     className="w-full px-2 py-1 text-sm rounded-md border bg-background"
                   />
                 </div>
@@ -462,7 +480,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
               <input
                 type="checkbox"
                 checked={!!recurrence.useRaw}
-                onChange={(e) => setRecurrence({
+                onChange={(e) => updateRecurrence({
                   ...recurrence,
                   useRaw: e.target.checked,
                   raw: recurrence.raw || buildRRule({ ...recurrence, useRaw: false }) || '',
@@ -475,7 +493,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
               <div>
                 <textarea
                   value={recurrence.raw || ''}
-                  onChange={(e) => setRecurrence({ ...recurrence, raw: e.target.value })}
+                  onChange={(e) => updateRecurrence({ ...recurrence, raw: e.target.value })}
                   rows={2}
                   className="w-full px-3 py-2 text-sm rounded-md border bg-background font-mono"
                   placeholder="FREQ=WEEKLY;BYDAY=MO,TU,TH,FR"

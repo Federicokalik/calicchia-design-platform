@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -57,6 +57,7 @@ const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: stri
   domain:  { backgroundColor: '#ef4444', borderColor: '#dc2626', textColor: '#fff' },
   calcom:  { backgroundColor: '#94a3b8', borderColor: '#64748b', textColor: '#fff' },
   system:  { backgroundColor: '#ef4444', borderColor: '#dc2626', textColor: '#fff' },
+  ics_pull: { backgroundColor: '#0d9488', borderColor: '#0f766e', textColor: '#fff' },
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -69,6 +70,7 @@ const SOURCE_LABELS: Record<string, string> = {
   domain: 'Dominio',
   calcom: 'Cal.com (storico)',
   system: 'Sistema (festività)',
+  ics_pull: 'Importato (ICS)',
 };
 
 interface CalendarApi {
@@ -123,17 +125,20 @@ export default function CalendarioPage() {
     return next;
   });
 
-  // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
-  const { data: eventsData } = useQuery({
+  // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar).
+  // Niente catch-che-svuota: un errore API deve mostrare il banner, non un
+  // calendario vuoto identico a "nessun evento". keepPreviousData mantiene
+  // visibili gli eventi dell'ultimo fetch riuscito durante errori transitori.
+  const { data: eventsData, error: eventsError, refetch: refetchEvents } = useQuery({
     queryKey: ['admin-calendar-events', dateRange?.start, dateRange?.end],
     queryFn: async () => {
       if (!dateRange) return { events: [] };
       const params = new URLSearchParams({ from: dateRange.start, to: dateRange.end });
-      try {
-        return await apiFetch(`/api/admin/calendar/events?${params}`);
-      } catch { return { events: [] }; }
+      return await apiFetch(`/api/admin/calendar/events?${params}`);
     },
     enabled: !!dateRange,
+    retry: 1,
+    placeholderData: keepPreviousData,
   });
 
   // Calendari per colore + lookup
@@ -634,6 +639,18 @@ export default function CalendarioPage() {
         })}
       </div>
 
+      {/* Errore caricamento eventi: banner persistente (mai calendario muto-vuoto) */}
+      {!!eventsError && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          <span>
+            Errore nel caricamento eventi: {eventsError instanceof Error ? eventsError.message : 'errore sconosciuto'}
+          </span>
+          <Button size="sm" variant="outline" className="text-xs shrink-0" onClick={() => refetchEvents()}>
+            Riprova
+          </Button>
+        </div>
+      )}
+
       {/* Calendar + Detail */}
       <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
         <div className="rounded-lg border bg-card p-4">
@@ -733,32 +750,45 @@ export default function CalendarioPage() {
                 <p className="text-xs text-muted-foreground whitespace-pre-wrap">{selectedEvent.description}</p>
               )}
 
-              {/* Action buttons — solo per eventi del nuovo sistema, no per legacy calcom/project/domain */}
+              {/* Action buttons — solo per eventi del nuovo sistema, no per legacy calcom/project/domain.
+                  Modifica solo su sorgenti editabili: gli ics_pull vengono sovrascritti
+                  a ogni sync e i system (festività) sono auto-gestiti dal cron. */}
               {selectedEvent.id && selectedEvent.uid && (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    onClick={() => {
-                      setEditingEvent(selectedEvent);
-                      setCreatingFromSlot(null);
-                      setShowEditor(true);
-                      setSelectedEvent(null);
-                    }}
-                  >
-                    <Pencil className="h-3 w-3 mr-1.5" /> Modifica
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs"
-                    disabled={duplicateMutation.isPending}
-                    onClick={() => duplicateMutation.mutate(selectedEvent.id)}
-                  >
-                    <Copy className="h-3 w-3 mr-1.5" />
-                    {duplicateMutation.isPending ? 'Duplico…' : 'Duplica'}
-                  </Button>
+                <div className="space-y-2">
+                  {!EDITABLE_SOURCES.has(selectedEvent.source) && (
+                    <p className="text-[11px] text-muted-foreground">
+                      {selectedEvent.source === 'ics_pull'
+                        ? 'Evento importato da sottoscrizione ICS — sola lettura. Modificalo nel calendario di origine.'
+                        : 'Evento di sistema — sola lettura.'}
+                    </p>
+                  )}
+                  <div className="grid grid-cols-2 gap-2">
+                    {EDITABLE_SOURCES.has(selectedEvent.source) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs"
+                        onClick={() => {
+                          setEditingEvent(selectedEvent);
+                          setCreatingFromSlot(null);
+                          setShowEditor(true);
+                          setSelectedEvent(null);
+                        }}
+                      >
+                        <Pencil className="h-3 w-3 mr-1.5" /> Modifica
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className={`text-xs ${EDITABLE_SOURCES.has(selectedEvent.source) ? '' : 'col-span-2'}`}
+                      disabled={duplicateMutation.isPending}
+                      onClick={() => duplicateMutation.mutate(selectedEvent.id)}
+                    >
+                      <Copy className="h-3 w-3 mr-1.5" />
+                      {duplicateMutation.isPending ? 'Duplico…' : 'Duplica'}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

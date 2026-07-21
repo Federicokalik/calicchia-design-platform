@@ -5,8 +5,9 @@
  *
  * Covers: event types, slot computation, booking lifecycle (create / conflict
  * / reschedule / cancel), approval flow (pending → approve / reject),
- * custom-responses validation, SSRF guard, ICS build, HMAC tokens, CalDAV
- * app-passwords, data hygiene.
+ * custom-responses validation, SSRF guard, ICS build, ICS-pull anti-wipe
+ * (empty/garbage feed must not delete local events; ics_pull events are
+ * read-only), HMAC tokens, CalDAV app-passwords, data hygiene.
  *
  * Run: pnpm --filter @calicchia/api run verify:calendar:smoke
  * (wraps: tsx --env-file=../../.env scripts/verify-calendar.ts)
@@ -31,18 +32,21 @@ import {
   BookingConflictError,
   BookingValidationError,
 } from '../src/lib/calendar/booking';
-import { getEventBySource } from '../src/lib/calendar/events';
+import { getEventBySource, updateEvent, deleteEvent, EventReadOnlyError } from '../src/lib/calendar/events';
 import { buildIcs } from '../src/lib/calendar/ics';
 import { buildIcsFeed } from '../src/lib/calendar/ics-feed';
 import { getDefaultCalendar } from '../src/lib/calendar/calendars';
 import { signBookingToken, verifyBookingToken, isTokenSecretConfigured } from '../src/lib/calendar/token';
-import { assertPublicUrl } from '../src/lib/calendar/ics-import';
+import { assertPublicUrl, parseIcs, IcsImportError, type ParsedEvent } from '../src/lib/calendar/ics-import';
+import { replaceSubscriptionEvents } from '../src/lib/calendar/subscriptions';
 import { createAppPassword, verifyCredentials, revokeAppPassword } from '../src/lib/calendar/caldav-passwords';
 import type { Slot } from '../src/lib/calendar/types';
 
 const TEST_EMAIL = 'verify-calendar@test.invalid';
 const TEST_SLUG = 'verify-smoke-test';
 const TEST_SLUG_APPROVAL = 'verify-smoke-approval';
+const TEST_CAL_SLUG = 'verify-smoke-ics-cal';
+const TEST_SUB_NAME = 'verify-smoke-sub';
 
 let failures = 0;
 
@@ -116,6 +120,10 @@ async function cleanup() {
   await sql`DELETE FROM calendar_bookings WHERE attendee_email = ${TEST_EMAIL}`;
   await sql`DELETE FROM calendar_event_types WHERE slug IN (${TEST_SLUG}, ${TEST_SLUG_APPROVAL})`;
   await sql`DELETE FROM caldav_app_passwords WHERE device_name = 'verify-calendar-smoke'`;
+  // Anti-wipe fixtures: la subscription cascata sugli eventi importati; il
+  // calendario di test cascata su eventuali residui.
+  await sql`DELETE FROM calendar_subscriptions WHERE name = ${TEST_SUB_NAME}`;
+  await sql`DELETE FROM calendars WHERE slug = ${TEST_CAL_SLUG}`;
 }
 
 async function main() {
@@ -391,6 +399,123 @@ async function main() {
     if (!revoked) throw new Error('revoca fallita');
     const afterRevoke = await verifyCredentials('verify-smoke', password);
     if (afterRevoke.ok) throw new Error('password revocata ancora valida');
+    return null;
+  });
+
+  console.log('\nICS pull anti-wipe:');
+  await check('parseIcs rifiuta una pagina HTML (non VCALENDAR)', async () => {
+    try {
+      parseIcs('<html><body>errore</body></html>');
+    } catch (err) {
+      if (err instanceof IcsImportError) return null;
+      throw err;
+    }
+    throw new Error('HTML accettato come calendario');
+  });
+  await check('parseIcs rifiuta un body vuoto', async () => {
+    try {
+      parseIcs('');
+    } catch (err) {
+      if (err instanceof IcsImportError) return null;
+      throw err;
+    }
+    throw new Error('body vuoto accettato come calendario');
+  });
+  await check('feed vuoto NON cancella gli eventi locali (rollback)', async () => {
+    const [cal] = await sql<{ id: string }[]>`
+      INSERT INTO calendars (slug, name, color, timezone, ics_feed_token, ics_feed_enabled)
+      VALUES (${TEST_CAL_SLUG}, 'Verify smoke ICS', '#334155', 'Europe/Rome',
+              'verifysmokeicscaltoken0000000000', false)
+      ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+      RETURNING id
+    `;
+    const [sub] = await sql<{ id: string }[]>`
+      INSERT INTO calendar_subscriptions (calendar_id, name, ics_url, sync_enabled)
+      VALUES (${cal.id}::uuid, ${TEST_SUB_NAME}, 'https://example.invalid/verify-smoke.ics', false)
+      RETURNING id
+    `;
+    const mkParsed = (uid: string): ParsedEvent => ({
+      remote_uid: uid,
+      summary: `Smoke ${uid}`,
+      description: null,
+      location: null,
+      url: null,
+      start_time: new Date(Date.now() + 3_600_000).toISOString(),
+      end_time: new Date(Date.now() + 7_200_000).toISOString(),
+      all_day: false,
+      rrule: null,
+      exdates: [],
+      recurrence_id: null,
+      status: 'confirmed',
+    });
+
+    const seeded = await replaceSubscriptionEvents(sub.id, cal.id, [mkParsed('smoke-a'), mkParsed('smoke-b')]);
+    if (seeded.inserted !== 2) throw new Error(`attesi 2 inserted, trovati ${seeded.inserted}`);
+
+    let threw = false;
+    try {
+      await replaceSubscriptionEvents(sub.id, cal.id, []);
+    } catch (err) {
+      if (!(err instanceof IcsImportError)) throw err;
+      threw = true;
+    }
+    if (!threw) throw new Error('replace con feed vuoto non ha lanciato');
+
+    const [after] = await sql<{ n: number }[]>`
+      SELECT COUNT(*)::int AS n FROM calendar_events WHERE subscription_id = ${sub.id}::uuid
+    `;
+    if (after.n !== 2) throw new Error(`rollback mancato: attesi 2 eventi, trovati ${after.n}`);
+    return null;
+  });
+  await check('allowEmpty (force) svuota davvero', async () => {
+    const [sub] = await sql<{ id: string; calendar_id: string }[]>`
+      SELECT id, calendar_id FROM calendar_subscriptions WHERE name = ${TEST_SUB_NAME}
+    `;
+    if (!sub) throw new Error('subscription di test mancante');
+    const res = await replaceSubscriptionEvents(sub.id, sub.calendar_id, [], { allowEmpty: true });
+    if (res.removed !== 2) throw new Error(`attesi 2 removed, trovati ${res.removed}`);
+    const [after] = await sql<{ n: number }[]>`
+      SELECT COUNT(*)::int AS n FROM calendar_events WHERE subscription_id = ${sub.id}::uuid
+    `;
+    if (after.n !== 0) throw new Error(`attesi 0 eventi, trovati ${after.n}`);
+    return null;
+  });
+  await check('eventi ics_pull sono read-only (update/delete → EventReadOnlyError)', async () => {
+    const [sub] = await sql<{ id: string; calendar_id: string }[]>`
+      SELECT id, calendar_id FROM calendar_subscriptions WHERE name = ${TEST_SUB_NAME}
+    `;
+    if (!sub) throw new Error('subscription di test mancante');
+    await replaceSubscriptionEvents(sub.id, sub.calendar_id, [{
+      remote_uid: 'smoke-ro',
+      summary: 'Smoke read-only',
+      description: null,
+      location: null,
+      url: null,
+      start_time: new Date(Date.now() + 3_600_000).toISOString(),
+      end_time: new Date(Date.now() + 7_200_000).toISOString(),
+      all_day: false,
+      rrule: null,
+      exdates: [],
+      recurrence_id: null,
+      status: 'confirmed',
+    }]);
+    const [ev] = await sql<{ id: string }[]>`
+      SELECT id FROM calendar_events WHERE subscription_id = ${sub.id}::uuid LIMIT 1
+    `;
+    if (!ev) throw new Error('evento importato mancante');
+
+    try {
+      await updateEvent(ev.id, { summary: 'rinominato' });
+      throw new Error('updateEvent su ics_pull non ha lanciato');
+    } catch (err) {
+      if (!(err instanceof EventReadOnlyError)) throw err;
+    }
+    try {
+      await deleteEvent(ev.id);
+      throw new Error('deleteEvent su ics_pull non ha lanciato');
+    } catch (err) {
+      if (!(err instanceof EventReadOnlyError)) throw err;
+    }
     return null;
   });
 

@@ -28,6 +28,26 @@ export class EventValidationError extends Error {
   constructor(message: string) { super(message); }
 }
 
+export class EventReadOnlyError extends Error {
+  code = 'EVENT_READ_ONLY' as const;
+  constructor(message: string) { super(message); }
+}
+
+/**
+ * Gli eventi importati da sottoscrizione ICS sono sola lettura: il sync
+ * full-reconcile (subscriptions.ts) li cancella e reinserisce dal remoto a ogni
+ * giro, quindi qualsiasi modifica locale verrebbe silenziosamente persa.
+ * Il guard sta a livello lib così copre admin API, CalDAV backend e tool agent.
+ */
+function assertWritable(ev: CalendarEvent): void {
+  if (ev.source === 'ics_pull') {
+    throw new EventReadOnlyError(
+      'Evento importato da sottoscrizione ICS (sola lettura): modificalo nel calendario di origine. ' +
+      'Le modifiche locali verrebbero sovrascritte al prossimo sync.',
+    );
+  }
+}
+
 const COLUMNS = sql`
   id, calendar_id, uid, summary, description, location, url,
   start_time, end_time, all_day,
@@ -114,6 +134,7 @@ export interface UpdateEventInput {
 export async function updateEvent(id: string, input: UpdateEventInput): Promise<CalendarEvent | null> {
   const existing = await getEvent(id);
   if (!existing) return null;
+  assertWritable(existing);
 
   const updates: Record<string, unknown> = {};
   if (input.summary !== undefined) updates.summary = String(input.summary).trim().slice(0, 500);
@@ -163,7 +184,10 @@ export async function updateEvent(id: string, input: UpdateEventInput): Promise<
 }
 
 export async function deleteEvent(id: string): Promise<boolean> {
-  const rows = await sql`DELETE FROM calendar_events WHERE id = ${id}::uuid RETURNING id`;
+  const existing = await getEvent(id);
+  if (!existing) return false;
+  assertWritable(existing);
+  const rows = await sql`DELETE FROM calendar_events WHERE id = ${existing.id}::uuid RETURNING id`;
   return rows.length > 0;
 }
 
@@ -182,6 +206,7 @@ export async function createOccurrenceOverride(opts: {
 }): Promise<CalendarEvent> {
   const master = await getEvent(opts.masterEventId);
   if (!master) throw new EventValidationError('Master event non trovato');
+  assertWritable(master);
   if (!master.rrule) throw new EventValidationError('L\'evento non è ricorrente');
 
   const originalStart = new Date(opts.originalStartIso);

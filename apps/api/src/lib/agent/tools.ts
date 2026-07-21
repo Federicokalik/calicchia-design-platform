@@ -1887,11 +1887,16 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     riskLevel: 'high',
     requiresConfirmation: true,
     execute: async (args) => {
-      const { deleteEvent, getEvent } = await import('../calendar/events');
+      const { deleteEvent, getEvent, EventReadOnlyError } = await import('../calendar/events');
       const existing = await getEvent(args.id_or_uid as string);
       if (!existing) return JSON.stringify({ error: 'Evento non trovato' });
-      const ok = await deleteEvent(existing.id);
-      return JSON.stringify({ success: ok });
+      try {
+        const ok = await deleteEvent(existing.id);
+        return JSON.stringify({ success: ok });
+      } catch (err) {
+        if (err instanceof EventReadOnlyError) return JSON.stringify({ error: err.message });
+        throw err;
+      }
     },
   },
 

@@ -45,6 +45,7 @@ import {
   deleteEvent,
   createOccurrenceOverride,
   EventValidationError,
+  EventReadOnlyError,
 } from '../../lib/calendar/events';
 import {
   listSubscriptions,
@@ -767,15 +768,21 @@ calendarAdmin.put('/events/:id', async (c) => {
     if (!ev) return c.json({ error: 'Evento non trovato' }, 404);
     return c.json({ event: ev });
   } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
     throw err;
   }
 });
 
 calendarAdmin.delete('/events/:id', async (c) => {
-  const ok = await deleteEvent(c.req.param('id'));
-  if (!ok) return c.json({ error: 'Evento non trovato' }, 404);
-  return c.json({ success: true });
+  try {
+    const ok = await deleteEvent(c.req.param('id'));
+    if (!ok) return c.json({ error: 'Evento non trovato' }, 404);
+    return c.json({ success: true });
+  } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
+    throw err;
+  }
 });
 
 /**
@@ -846,6 +853,7 @@ calendarAdmin.post('/events/:id/exception', async (c) => {
     });
     return c.json({ event: override });
   } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
     throw err;
   }
@@ -897,8 +905,11 @@ calendarAdmin.delete('/subscriptions/:id', async (c) => {
 });
 
 calendarAdmin.post('/subscriptions/:id/sync', async (c) => {
+  // `force: true` bypassa la cache ETag e la protezione anti-wipe (feed vuoto):
+  // serve per il recovery dopo un errore e per svuotare intenzionalmente.
+  const body = await c.req.json().catch(() => ({} as Record<string, unknown>));
   try {
-    const result = await syncSubscription(c.req.param('id'));
+    const result = await syncSubscription(c.req.param('id'), { force: body.force === true });
     const refreshed = await getSubscription(c.req.param('id'));
     return c.json({ subscription: refreshed, sync: result });
   } catch (err) {

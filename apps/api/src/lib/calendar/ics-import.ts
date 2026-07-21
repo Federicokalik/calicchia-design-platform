@@ -330,9 +330,17 @@ function tzOffsetAt(epochMs: number, tzid: string): number {
 
 /**
  * Parse principale: estrae tutti i VEVENT dal VCALENDAR.
+ *
+ * Un body senza BEGIN:VCALENDAR (pagina HTML di errore/login, body vuoto,
+ * redirect interstitial) è un errore, NON un calendario vuoto: distinguere i
+ * due casi impedisce al sync full-reconcile di interpretare una risposta
+ * rotta come "zero eventi" e svuotare il calendario locale.
  */
 export function parseIcs(raw: string): ParsedEvent[] {
   const lines = unfold(raw);
+  if (!lines.some((l) => l.trim().toUpperCase() === 'BEGIN:VCALENDAR')) {
+    throw new IcsImportError('Il contenuto non è un VCALENDAR (BEGIN:VCALENDAR mancante)');
+  }
   const events: ParsedEvent[] = [];
 
   let inEvent = false;

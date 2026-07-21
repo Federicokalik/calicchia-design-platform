@@ -13,6 +13,9 @@
  *   3. dentro una transazione: cancella tutti gli eventi della subscription e reinserisce
  *      il set fresco. È semplice, atomico e si lascia dietro un calendar_events pulito.
  *      Trade-off: gli ID UUID degli eventi cambiano ad ogni sync (non li usiamo come riferimento esterno).
+ *
+ * Anti-wipe: un feed che parse-a a 0 eventi con eventi locali presenti fa rollback
+ * (vedi replaceSubscriptionEvents) — solo il sync manuale con `force` può svuotare.
  */
 
 import { customAlphabet } from 'nanoid';
@@ -145,13 +148,17 @@ export interface SyncResult {
 /**
  * Esegue il sync di una singola subscription. Idempotente: re-eseguito senza modifiche
  * sull'origine, riconosce 304 Not Modified via ETag e termina senza scrivere.
+ *
+ * `force`: ignora la cache ETag/Last-Modified (ri-scarica sempre) e accetta anche
+ * un feed legittimamente vuoto (bypassa la protezione anti-wipe). Mai usato dal cron;
+ * riservato al sync manuale esplicito dell'admin.
  */
-export async function syncSubscription(id: string): Promise<SyncResult> {
+export async function syncSubscription(id: string, opts: { force?: boolean } = {}): Promise<SyncResult> {
   const sub = await getSubscription(id);
   if (!sub) throw new SubscriptionValidationError('Subscription non trovata');
 
   try {
-    const fetched = await fetchIcs(sub.ics_url, {
+    const fetched = await fetchIcs(sub.ics_url, opts.force ? {} : {
       etag: sub.etag,
       lastModified: sub.last_modified,
     });
@@ -166,8 +173,12 @@ export async function syncSubscription(id: string): Promise<SyncResult> {
       return { notModified: true, inserted: 0, removed: 0, error: null };
     }
 
-    const parsed = fetched.body ? parseIcs(fetched.body) : [];
-    const { inserted, removed } = await replaceSubscriptionEvents(sub.id, sub.calendar_id, parsed);
+    // Body vuoto/null passa comunque da parseIcs: senza BEGIN:VCALENDAR lancia
+    // IcsImportError → last_error, invece di essere trattato come feed a 0 eventi.
+    const parsed = parseIcs(fetched.body ?? '');
+    const { inserted, removed } = await replaceSubscriptionEvents(sub.id, sub.calendar_id, parsed, {
+      allowEmpty: opts.force,
+    });
 
     await sql`
       UPDATE calendar_subscriptions SET
@@ -203,11 +214,18 @@ export async function syncSubscription(id: string): Promise<SyncResult> {
  *
  * Strategia "master + override": nella seconda passata, gli eventi con RECURRENCE-ID
  * vengono linkati al master via UID remoto → cerchiamo l'ID locale appena inserito.
+ *
+ * Anti-wipe: un feed parsato a 0 eventi mentre localmente ce ne sono N è quasi
+ * sempre un feed remoto rotto, non uno svuotamento intenzionale — il throw fa
+ * rollback della transazione e gli eventi locali restano intatti. `allowEmpty`
+ * (sync manuale con force) è l'unico modo di svuotare davvero.
+ * Esportata (non usata fuori dal modulo a runtime) per il test in verify-calendar.ts.
  */
-async function replaceSubscriptionEvents(
+export async function replaceSubscriptionEvents(
   subscriptionId: string,
   calendarId: string,
   parsed: ParsedEvent[],
+  opts: { allowEmpty?: boolean } = {},
 ): Promise<{ inserted: number; removed: number }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- postgres driver tx type narrows away the tagged-template call signature
   return await sql.begin(async (tx: any) => {
@@ -217,7 +235,15 @@ async function replaceSubscriptionEvents(
     `;
     const removed = removedRows.length;
 
-    if (parsed.length === 0) return { inserted: 0, removed };
+    if (parsed.length === 0) {
+      if (removed > 0 && !opts.allowEmpty) {
+        throw new IcsImportError(
+          `Feed vuoto ma ${removed} eventi presenti localmente: sync annullato (protezione anti-wipe). ` +
+          'Se il calendario remoto è stato davvero svuotato, usa il sync manuale con force.',
+        );
+      }
+      return { inserted: 0, removed };
+    }
 
     // Step 2: separa master/single da override (RECURRENCE-ID)
     // Google emette spesso master+override con stesso UID; manteniamo la stessa

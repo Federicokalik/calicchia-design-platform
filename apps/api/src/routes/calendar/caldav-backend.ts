@@ -19,7 +19,9 @@ import {
   getEventOverrides,
   caldavEtag,
   EventValidationError,
+  EventReadOnlyError,
 } from '../../lib/calendar/events';
+import type { CalendarEvent } from '../../lib/calendar/types';
 import { buildIcsResource } from '../../lib/calendar/ics-feed';
 import { parseIcs } from '../../lib/calendar/ics-import';
 import { verifyCredentials } from '../../lib/calendar/caldav-passwords';
@@ -32,6 +34,23 @@ export const caldavBackend = new Hono();
 // Anti-bruteforce sul controllo credenziali (il device ripassa l'auth a ogni
 // richiesta, quindi il limite è generoso ma presente).
 const verifyLimit = createRateLimit(30, 60_000);
+
+/**
+ * Risolve lo uid di un href risorsa (`{uid}.ics`). Il nostro href usa lo uid
+ * locale nudo, ma il VEVENT servito espone `UID:{uid}@caldes.it` — alcuni client
+ * CalDAV derivano il filename dallo UID iCal e chiamano `{uid}@caldes.it.ics`.
+ * Fallback: se lo uid pieno non esiste e contiene `@`, riprova senza suffisso.
+ * Mai strippare a priori: uid client-generated con `@` legittimi (es. Apple)
+ * vanno cercati per primi così come sono.
+ */
+async function resolveHrefUid(rawParam: string): Promise<{ uid: string; event: CalendarEvent | null }> {
+  const uid = rawParam.replace(/\.ics$/i, '');
+  let event = await getEvent(uid);
+  if (!event && uid.includes('@')) {
+    event = await getEvent(uid.replace(/@[^@]*$/, ''));
+  }
+  return { uid, event };
+}
 
 function collectionDTO(cal: Calendar) {
   return {
@@ -82,8 +101,7 @@ caldavBackend.get('/collections/:slug/items/:uid', async (c) => {
   const cal = await getCalendar(c.req.param('slug'));
   if (!cal) return c.json({ error: 'Collezione non trovata' }, 404);
 
-  const uid = c.req.param('uid').replace(/\.ics$/i, '');
-  const master = await getEvent(uid);
+  const { event: master } = await resolveHrefUid(c.req.param('uid'));
   if (!master || master.calendar_id !== cal.id || master.recurrence_master_id) {
     return c.json({ error: 'Evento non trovato' }, 404);
   }
@@ -99,7 +117,6 @@ caldavBackend.get('/collections/:slug/items/:uid', async (c) => {
 caldavBackend.put('/collections/:slug/items/:uid', async (c) => {
   const cal = await getCalendar(c.req.param('slug'));
   if (!cal) return c.json({ error: 'Collezione non trovata' }, 404);
-  const uid = c.req.param('uid').replace(/\.ics$/i, '');
 
   const raw = await c.req.text();
   let parsed;
@@ -116,7 +133,9 @@ caldavBackend.put('/collections/:slug/items/:uid', async (c) => {
   const overrideInputs = parsed.filter((p) => p.recurrence_id);
 
   try {
-    let master = await getEvent(uid);
+    const resolved = await resolveHrefUid(c.req.param('uid'));
+    const uid = resolved.uid;
+    let master = resolved.event;
     if (master && master.calendar_id !== cal.id) {
       return c.json({ error: 'UID appartiene a un altro calendario' }, 409);
     }
@@ -171,6 +190,7 @@ caldavBackend.put('/collections/:slug/items/:uid', async (c) => {
     if (!master) return c.json({ error: 'Risorsa senza master' }, 400);
     return c.body(null, 201, { ETag: caldavEtag(master) });
   } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
     if ((err as { code?: string }).code === '23505') return c.json({ error: 'UID già esistente' }, 409);
     throw err;
@@ -181,12 +201,16 @@ caldavBackend.put('/collections/:slug/items/:uid', async (c) => {
 caldavBackend.delete('/collections/:slug/items/:uid', async (c) => {
   const cal = await getCalendar(c.req.param('slug'));
   if (!cal) return c.json({ error: 'Collezione non trovata' }, 404);
-  const uid = c.req.param('uid').replace(/\.ics$/i, '');
 
-  const master = await getEvent(uid);
+  const { event: master } = await resolveHrefUid(c.req.param('uid'));
   if (!master || master.calendar_id !== cal.id || master.recurrence_master_id) {
     return c.json({ error: 'Evento non trovato' }, 404);
   }
-  await deleteEvent(master.id);
+  try {
+    await deleteEvent(master.id);
+  } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
+    throw err;
+  }
   return c.body(null, 204);
 });
