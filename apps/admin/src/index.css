@@ -334,6 +334,14 @@
   font-weight: 600;
 }
 
+/* Task completati nel calendario: barrati e attenuati */
+.fc .fc-event.task-done {
+  opacity: 0.55;
+}
+.fc .fc-event.task-done .fc-event-title {
+  text-decoration: line-through;
+}
+
 /* Events */
 .fc .fc-event {
   border-radius: calc(var(--radius) - 4px) !important;

@@ -296,21 +296,24 @@ export default function CalendarioPage() {
       });
     }
 
-    // Task di progetto: due date come chip all-day (i done non compaiono).
+    // Task di progetto: due date come chip all-day; i completati restano
+    // visibili ma barrati/attenuati (classe task-done in index.css).
     // Come le Scadenze, restano visibili anche dentro ferie/festività.
     for (const t of (hidden.has('task') ? [] : tasksData?.tasks || [])) {
-      if (!t.due_date || t.status === 'done') continue;
+      if (!t.due_date) continue;
+      const done = t.status === 'done';
       events.push({
         id: `task-${t.id}`,
-        title: `📋 ${t.title}`,
+        title: `${done ? '✅' : '📋'} ${t.title}`,
         start: t.due_date,
         allDay: true,
         editable: false,
+        classNames: done ? ['task-done'] : [],
         ...SOURCE_COLORS.task,
         extendedProps: {
           source: 'task',
           data: {
-            summary: `📋 ${t.title}`,
+            summary: `${done ? '✅' : '📋'} ${t.title}`,
             description: [t.project_name, t.milestone_name].filter(Boolean).join(' — ') || null,
             start_time: t.due_date,
             end_time: t.due_date,
