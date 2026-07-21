@@ -32,7 +32,15 @@ import {
   BookingConflictError,
   BookingValidationError,
 } from '../src/lib/calendar/booking';
-import { getEventBySource, updateEvent, deleteEvent, EventReadOnlyError } from '../src/lib/calendar/events';
+import {
+  getEventBySource,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+  createOccurrenceOverride,
+  listOccurrences,
+  EventReadOnlyError,
+} from '../src/lib/calendar/events';
 import { buildIcs } from '../src/lib/calendar/ics';
 import { buildIcsFeed } from '../src/lib/calendar/ics-feed';
 import { getDefaultCalendar } from '../src/lib/calendar/calendars';
@@ -517,6 +525,61 @@ async function main() {
       if (!(err instanceof EventReadOnlyError)) throw err;
     }
     return null;
+  });
+
+  console.log('\nOccorrenze cancellate (override):');
+  await check('override cancellato sopprime l\'occorrenza; niente duplicati; delete cascata', async () => {
+    const [cal] = await sql<{ id: string }[]>`
+      SELECT id FROM calendars WHERE slug = ${TEST_CAL_SLUG} LIMIT 1
+    `;
+    if (!cal) throw new Error('calendario di test mancante (sezione anti-wipe)');
+
+    const base = Date.now() + 86_400_000; // domani, stessa ora per 5 giorni
+    const master = await createEvent({
+      calendar_id: cal.id,
+      summary: 'Smoke serie',
+      start_time: new Date(base).toISOString(),
+      end_time: new Date(base + 3_600_000).toISOString(),
+      rrule: 'FREQ=DAILY',
+      source: 'admin',
+    });
+    try {
+      const day3 = new Date(base + 2 * 86_400_000).toISOString();
+      await createOccurrenceOverride({ masterEventId: master.id, originalStartIso: day3, status: 'cancelled' });
+      // Click ripetuto: non deve creare una seconda riga
+      await createOccurrenceOverride({ masterEventId: master.id, originalStartIso: day3, status: 'cancelled' });
+      const [ovCount] = await sql<{ n: number }[]>`
+        SELECT COUNT(*)::int AS n FROM calendar_events WHERE recurrence_master_id = ${master.id}::uuid
+      `;
+      if (ovCount.n !== 1) throw new Error(`attesa 1 riga override, trovate ${ovCount.n}`);
+
+      const occs = await listOccurrences({
+        calendarId: cal.id,
+        fromIso: new Date(base - 3_600_000).toISOString(),
+        toIso: new Date(base + 5 * 86_400_000).toISOString(),
+      });
+      const serie = occs.filter((o) => o.summary === 'Smoke serie');
+      // Confronto a precisione di secondo: l'espansione RRULE tronca i ms.
+      const day3Sec = Math.floor(new Date(day3).getTime() / 1000);
+      if (serie.some((o) => Math.floor(new Date(o.start_time).getTime() / 1000) === day3Sec)) {
+        throw new Error('occorrenza cancellata ancora presente nell\'espansione');
+      }
+      // Range [base-1h, base+5g] inclusivo → 6 espansioni giornaliere, meno la cancellata.
+      if (serie.length !== 5) throw new Error(`attese 5 occorrenze visibili su 6, trovate ${serie.length}`);
+
+      const withCancelled = await listOccurrences({
+        calendarId: cal.id,
+        fromIso: new Date(base - 3_600_000).toISOString(),
+        toIso: new Date(base + 5 * 86_400_000).toISOString(),
+        includeCancelled: true,
+      });
+      if (!withCancelled.some((o) => o.is_override && o.status === 'cancelled')) {
+        throw new Error('includeCancelled non restituisce l\'override cancellato');
+      }
+      return null;
+    } finally {
+      await deleteEvent(master.id); // cascata sugli override figli
+    }
   });
 
   console.log('\nIgiene dati:');

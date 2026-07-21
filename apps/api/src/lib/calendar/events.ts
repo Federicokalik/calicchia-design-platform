@@ -217,6 +217,29 @@ export async function createOccurrenceOverride(opts: {
   const newStart = opts.newStartIso ? new Date(opts.newStartIso) : originalStart;
   const newEnd = opts.newEndIso ? new Date(opts.newEndIso) : new Date(newStart.getTime() + duration);
 
+  // Upsert: un'occorrenza ha al massimo UN override. Senza questo check, click
+  // ripetuti su "cancella questa occorrenza" accumulavano righe duplicate.
+  const [existing] = await sql<CalendarEvent[]>`
+    SELECT ${COLUMNS} FROM calendar_events
+    WHERE recurrence_master_id = ${master.id}::uuid
+      AND recurrence_id = ${originalStart.toISOString()}::timestamptz
+    LIMIT 1
+  `;
+  if (existing) {
+    const rows = await sql<CalendarEvent[]>`
+      UPDATE calendar_events SET ${sql({
+        summary: opts.newSummary || master.summary,
+        description: opts.newDescription !== undefined ? opts.newDescription : master.description,
+        start_time: newStart.toISOString(),
+        end_time: newEnd.toISOString(),
+        status: opts.status || 'confirmed',
+      })}
+      WHERE id = ${existing.id}::uuid
+      RETURNING ${COLUMNS}
+    `;
+    return rows[0];
+  }
+
   const rows = await sql<CalendarEvent[]>`
     INSERT INTO calendar_events ${sqlInsert({
       calendar_id: master.calendar_id,
@@ -272,9 +295,15 @@ export interface ListEventsOptions {
  */
 export async function listOccurrences(opts: ListEventsOptions): Promise<CalendarEventOccurrence[]> {
   const calendarFilter = opts.calendarId ? sql`AND calendar_id = ${opts.calendarId}::uuid` : sql``;
+  // NB: gli override CANCELLATI vanno sempre caricati anche quando
+  // includeCancelled=false — servono a sopprimere l'occorrenza del master
+  // (escluderli qui faceva "risorgere" le occorrenze eliminate: la riga
+  // cancellata non entrava nella overrideMap e il master la re-espandeva
+  // come confermata, in UI, feed ICS e busy ranges). Vengono poi filtrati
+  // in emissione, allo step 3.
   const statusFilter = opts.includeCancelled
     ? sql``
-    : sql`AND status != 'cancelled'`;
+    : sql`AND (status != 'cancelled' OR recurrence_master_id IS NOT NULL)`;
   const blockingFilter = opts.blockingOnly
     ? sql`AND EXISTS (
         SELECT 1 FROM calendars c
@@ -348,8 +377,11 @@ export async function listOccurrences(opts: ListEventsOptions): Promise<Calendar
     }
   }
 
-  // 3. Aggiungi override (sono già "occorrenze concrete" nel range)
+  // 3. Aggiungi override (sono già "occorrenze concrete" nel range).
+  //    I cancellati hanno già soppresso l'occorrenza del master allo step 2:
+  //    qui vengono emessi solo se il chiamante vuole anche i cancellati.
   for (const ov of overrides) {
+    if (!opts.includeCancelled && ov.status === 'cancelled') continue;
     if (new Date(ov.start_time) < new Date(opts.toIso) && new Date(ov.end_time) > new Date(opts.fromIso)) {
       occurrences.push(toOccurrence(ov, ov.recurrence_id, true));
     }
@@ -373,13 +405,15 @@ function toIsoString(value: string | Date): string {
 
 /**
  * Chiave canonica per abbinare un override alla sua occorrenza nel master.
- * Normalizza il timestamp (Date dal driver o stringa ISO da expandRRule) a una
- * forma ISO canonica, così i due lati del confronto combaciano sempre.
+ * Normalizza il timestamp (Date dal driver o stringa ISO da expandRRule) a
+ * precisione di SECONDO: l'espansione RRULE tronca i millisecondi mentre
+ * recurrence_id li conserva — confrontare gli ISO grezzi mancava il match per
+ * master con start non allineato al secondo e l'override non sopprimeva nulla.
  */
 function occurrenceKey(masterId: string, start: string | Date): string {
   const d = start instanceof Date ? start : new Date(start);
-  const iso = isNaN(d.getTime()) ? String(start) : d.toISOString();
-  return `${masterId}|${iso}`;
+  if (isNaN(d.getTime())) return `${masterId}|${String(start)}`;
+  return `${masterId}|${Math.floor(d.getTime() / 1000)}`;
 }
 
 function toOccurrence(
