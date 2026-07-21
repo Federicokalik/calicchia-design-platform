@@ -58,8 +58,13 @@ export async function getCapacityWeeks(fromIso: string, toIsoValue: string): Pro
   // sono già sottratti dagli slot come busy. Contarli anche qui azzererebbe la
   // capacity dell'intera settimana (es. chiusura 3gg = 72h > 40h) bloccando
   // pure i giorni aperti.
+  // Stesso criterio di getOrCreateFestivitaCalendar: in prod il calendario
+  // esiste con slug abbreviato ('f'), il match affidabile è sul nome.
   const [festivita] = await sql<Array<{ id: string }>>`
-    SELECT id FROM calendars WHERE slug = 'festivita' LIMIT 1
+    SELECT id FROM calendars
+    WHERE slug = 'festivita' OR lower(name) IN ('festività', 'festività e chiusure')
+    ORDER BY created_at ASC
+    LIMIT 1
   `;
 
   const results: CapacityWeekUsage[] = [];

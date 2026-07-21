@@ -147,7 +147,35 @@ function describeRecurrence(r: ReturnType<typeof parseRRule>): string {
   return `${base}, senza fine`;
 }
 
-export default function EventoEditModal({ initial, initialStart, initialEnd, onClose, onSaved }: Props) {
+/**
+ * Wrapper: in edit carica SEMPRE la riga master raw dall'API prima di montare il
+ * form. Il calendario passa l'OCCORRENZA espansa (senza campo rrule e con le
+ * date dell'occorrenza cliccata): inizializzare il form da lì mostrava "Mai"
+ * per le serie ricorrenti e al salvataggio collassava l'intera serie in un
+ * evento singolo nel giorno cliccato (incidente Creattivamente 2026-07-21).
+ */
+export default function EventoEditModal(props: Props) {
+  const isEditing = !!props.initial?.id;
+  const { data, isError } = useQuery({
+    queryKey: ['admin-calendar-event-raw', props.initial?.id],
+    queryFn: () => apiFetch(`/api/admin/calendar/events/${props.initial!.id}`),
+    enabled: isEditing,
+  });
+  if (isEditing && !data?.event && !isError) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={props.onClose}>
+        <div className="bg-card border rounded-lg shadow-lg px-6 py-4 text-sm text-muted-foreground">
+          Caricamento evento…
+        </div>
+      </div>
+    );
+  }
+  // Se il fetch fallisce si ripiega sull'occorrenza: i guard "touched" del form
+  // evitano comunque di riscrivere date e rrule non modificate dall'utente.
+  return <EventoEditForm {...props} initial={isEditing && data?.event ? data.event : props.initial} />;
+}
+
+function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved }: Props) {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const isEdit = !!initial?.id;
@@ -184,6 +212,9 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
     setRecurrence(next);
     setRecurrenceTouched(true);
   };
+  // Stessa logica per date/all-day: una pura rinomina non deve toccare
+  // start/end del master (che in fallback potrebbero essere quelli dell'occorrenza).
+  const [timesTouched, setTimesTouched] = useState(false);
 
   useEffect(() => {
     if (!initial && defaultCalId && !calendarId) setCalendarId(defaultCalId);
@@ -199,12 +230,15 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
         description: description.trim() || null,
         location: location.trim() || null,
         url: url.trim() || null,
-        start_time: zonedInputToIso(startInput),
-        end_time: zonedInputToIso(endInput),
-        all_day: allDay,
       };
-      // rrule omessa in edit se non toccata: il backend non la modifica e la
-      // stringa originale (INTERVAL & co. inclusi) resta intatta in DB.
+      // Campi omessi in edit se non toccati: il backend non li modifica e i
+      // valori originali del master (date, rrule con INTERVAL & co.) restano
+      // intatti in DB — una rinomina è solo una rinomina.
+      if (!isEdit || timesTouched) {
+        payload.start_time = zonedInputToIso(startInput);
+        payload.end_time = zonedInputToIso(endInput);
+        payload.all_day = allDay;
+      }
       if (!isEdit || recurrenceTouched) payload.rrule = buildRRule(recurrence);
       const body = JSON.stringify(payload);
       return isEdit
@@ -295,7 +329,7 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
               <input
                 type="datetime-local"
                 value={startInput}
-                onChange={(e) => setStartInput(e.target.value)}
+                onChange={(e) => { setStartInput(e.target.value); setTimesTouched(true); }}
                 className="w-full px-3 py-2 text-sm rounded-md border bg-background"
               />
             </div>
@@ -304,14 +338,14 @@ export default function EventoEditModal({ initial, initialStart, initialEnd, onC
               <input
                 type="datetime-local"
                 value={endInput}
-                onChange={(e) => setEndInput(e.target.value)}
+                onChange={(e) => { setEndInput(e.target.value); setTimesTouched(true); }}
                 className="w-full px-3 py-2 text-sm rounded-md border bg-background"
               />
             </div>
           </div>
 
           <label className="inline-flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={allDay} onChange={(e) => setAllDay(e.target.checked)} />
+            <input type="checkbox" checked={allDay} onChange={(e) => { setAllDay(e.target.checked); setTimesTouched(true); }} />
             Tutto il giorno
           </label>
 
