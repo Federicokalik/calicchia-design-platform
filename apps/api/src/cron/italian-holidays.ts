@@ -10,7 +10,8 @@
  *
  * Gli eventi sono timed 24h (NON all_day, così bloccano gli slot di
  * prenotazione — gli all_day per design non bloccano) sul calendario
- * "Festività" (blocks_availability=true).
+ * "Festività e chiusure" (blocks_availability=true), che ospita anche le
+ * chiusure manuali dal–al inserite dall'admin (route /closures, source='admin').
  *
  * Idempotenza: source_id stabile `it-holiday-YYYY-MM-DD`. Ri-esecuzioni non
  * creano duplicati; ogni anno la finestra avanza e vengono aggiunte solo le
@@ -18,9 +19,8 @@
  */
 
 import Holidays from 'date-holidays';
-import { createCalendar } from '../lib/calendar/calendars';
+import { getOrCreateFestivitaCalendar } from '../lib/calendar/calendars';
 import { createEvent, getEventBySource } from '../lib/calendar/events';
-import { sql } from '../db';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron-italian-holidays' });
@@ -30,33 +30,10 @@ const YEARS_AHEAD = 6;
 // 'admin'; le righe storiche sono state ri-classificate dalla migrazione).
 const HOLIDAY_SOURCE = 'system' as const;
 
-/**
- * Trova il calendario "Festività" esistente (per nome o slug, così riusa quello
- * eventualmente già creato a mano dall'utente) o ne crea uno dedicato.
- */
-async function getOrCreateFestivitaCalendarId(): Promise<string> {
-  const existing = await sql<{ id: string }[]>`
-    SELECT id FROM calendars
-    WHERE lower(name) = 'festività' OR slug = 'festivita'
-    ORDER BY created_at ASC
-    LIMIT 1
-  `;
-  if (existing[0]) return existing[0].id;
-
-  const cal = await createCalendar({
-    slug: 'festivita',
-    name: 'Festività',
-    description: 'Festività nazionali italiane (auto-gestite)',
-    color: '#ef4444',
-    timezone: 'Europe/Rome',
-    blocks_availability: true,
-  });
-  log.info(`Calendario "Festività" creato (${cal.id})`);
-  return cal.id;
-}
-
 export async function runItalianHolidays(): Promise<void> {
-  const calendarId = await getOrCreateFestivitaCalendarId();
+  // Calendario condiviso "Festività e chiusure" (migr. 148) — lookup/creazione
+  // centralizzati in calendars.ts, riusati anche dalle route /closures.
+  const { id: calendarId } = await getOrCreateFestivitaCalendar();
 
   const hd = new Holidays('IT');
   const currentYear = new Date().getUTCFullYear();

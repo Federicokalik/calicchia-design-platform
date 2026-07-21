@@ -80,6 +80,31 @@ export async function getBookingsCalendar(): Promise<Calendar | null> {
   return rows[0] || null;
 }
 
+/**
+ * Calendario "Festività e chiusure" (slug 'festivita'): festività IT auto-gestite
+ * dal cron + chiusure manuali dal–al (ferie/ponti) inserite dall'admin.
+ * Trova quello esistente — anche col vecchio nome "Festività" — o lo crea.
+ * Condiviso da cron/italian-holidays.ts e dalle route /closures.
+ */
+export async function getOrCreateFestivitaCalendar(): Promise<Calendar> {
+  const rows = await sql<Calendar[]>`
+    SELECT ${COLUMNS} FROM calendars
+    WHERE slug = 'festivita' OR lower(name) IN ('festività', 'festività e chiusure')
+    ORDER BY created_at ASC
+    LIMIT 1
+  `;
+  if (rows[0]) return rows[0];
+
+  return await createCalendar({
+    slug: 'festivita',
+    name: 'Festività e chiusure',
+    description: 'Festività nazionali italiane (auto) e chiusure manuali (ferie, ponti)',
+    color: '#ef4444',
+    timezone: 'Europe/Rome',
+    blocks_availability: true,
+  });
+}
+
 export async function createCalendar(input: CreateCalendarInput): Promise<Calendar> {
   if (!SLUG_REGEX.test(input.slug)) {
     throw new CalendarValidationError('Slug non valido (a-z, 0-9, -)');

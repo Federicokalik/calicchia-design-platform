@@ -4,6 +4,7 @@
  */
 
 import { Hono } from 'hono';
+import { fromZonedTime } from 'date-fns-tz';
 import { sql, sqlInsert } from '../../db';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
@@ -33,6 +34,7 @@ import {
   deleteCalendar,
   rotateFeedToken,
   buildFeedUrl,
+  getOrCreateFestivitaCalendar,
   CalendarValidationError,
   CalendarConflictError,
   CalendarSystemError,
@@ -361,6 +363,77 @@ calendarAdmin.delete('/schedule/overrides/:id', async (c) => {
     DELETE FROM calendar_availability_overrides WHERE id = ${c.req.param('id')}::uuid RETURNING id
   `;
   if (!rows[0]) return c.json({ error: 'Override non trovato' }, 404);
+  return c.json({ success: true });
+});
+
+// ============================================
+// CLOSURES — chiusure dal–al (ferie, ponti) come eventi bloccanti sul
+// calendario di sistema "Festività e chiusure" (migr. 148).
+// Un solo evento timed 00:00→24:00 (tz del calendario) sull'intero range:
+// timed perché gli all-day per design NON bloccano gli slot di prenotazione.
+// Visibili nel calendario admin e nel feed ICS come qualsiasi calendar_event.
+// ============================================
+
+calendarAdmin.get('/closures', async (c) => {
+  const cal = await getOrCreateFestivitaCalendar();
+  // source != 'system' separa le chiusure manuali dalle festività auto (cron).
+  const closures = await sql`
+    SELECT id, summary, start_time, end_time, source, status
+    FROM calendar_events
+    WHERE calendar_id = ${cal.id}::uuid
+      AND source != 'system'
+      AND end_time > NOW() - interval '30 days'
+    ORDER BY start_time ASC
+  `;
+  return c.json({ closures, calendar: { id: cal.id, name: cal.name, timezone: cal.timezone } });
+});
+
+calendarAdmin.post('/closures', async (c) => {
+  const body = await c.req.json();
+  const fromDate = String(body.from_date || '');
+  const toDate = String(body.to_date || fromDate);
+  if (!isValidDate(fromDate) || !isValidDate(toDate)) {
+    return c.json({ error: 'from_date e to_date richiesti (YYYY-MM-DD)' }, 400);
+  }
+  if (toDate < fromDate) return c.json({ error: 'to_date deve essere >= from_date' }, 400);
+  const rangeDays = (Date.parse(`${toDate}T00:00:00Z`) - Date.parse(`${fromDate}T00:00:00Z`)) / 86_400_000 + 1;
+  if (rangeDays > 366) return c.json({ error: 'Range massimo 366 giorni' }, 400);
+
+  const cal = await getOrCreateFestivitaCalendar();
+  const tz = cal.timezone || 'Europe/Rome';
+  // Fine = mezzanotte del giorno DOPO l'ultimo giorno incluso (range inclusivo).
+  const endDay = new Date(Date.parse(`${toDate}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+  const start = fromZonedTime(`${fromDate}T00:00:00`, tz);
+  const end = fromZonedTime(`${endDay}T00:00:00`, tz);
+
+  try {
+    const ev = await createEvent({
+      calendar_id: cal.id,
+      summary: typeof body.summary === 'string' && body.summary.trim()
+        ? body.summary.trim()
+        : 'Chiusura',
+      start_time: start.toISOString(),
+      end_time: end.toISOString(),
+      all_day: false,
+      source: 'admin',
+      status: 'confirmed',
+    });
+    return c.json({ closure: ev });
+  } catch (err) {
+    if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+calendarAdmin.delete('/closures/:id', async (c) => {
+  const cal = await getOrCreateFestivitaCalendar();
+  const ev = await getEvent(c.req.param('id'));
+  // Mai cancellare da qui le festività auto (source='system'): le ricreerebbe
+  // comunque il cron al giro successivo.
+  if (!ev || ev.calendar_id !== cal.id || ev.source === 'system') {
+    return c.json({ error: 'Chiusura non trovata' }, 404);
+  }
+  await deleteEvent(ev.id);
   return c.json({ success: true });
 });
 

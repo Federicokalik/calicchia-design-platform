@@ -53,6 +53,14 @@ async function getWeekBounds(fromIso: string, toIsoValue: string): Promise<Array
 export async function getCapacityWeeks(fromIso: string, toIsoValue: string): Promise<CapacityWeekUsage[]> {
   const hoursAvailable = await getWeeklyCapacityHours();
   const weeks = await getWeekBounds(fromIso, toIsoValue);
+  // Il calendario "Festività e chiusure" rappresenta INDISPONIBILITÀ (festività
+  // auto, ferie/ponti), non carico di lavoro: i suoi eventi timed 24h/multi-day
+  // sono già sottratti dagli slot come busy. Contarli anche qui azzererebbe la
+  // capacity dell'intera settimana (es. chiusura 3gg = 72h > 40h) bloccando
+  // pure i giorni aperti.
+  const [festivita] = await sql<Array<{ id: string }>>`
+    SELECT id FROM calendars WHERE slug = 'festivita' LIMIT 1
+  `;
 
   const results: CapacityWeekUsage[] = [];
   for (const week of weeks) {
@@ -86,6 +94,7 @@ export async function getCapacityWeeks(fromIso: string, toIsoValue: string): Pro
     let calendarMinutes = 0;
     for (const occurrence of occurrences) {
       if (occurrence.status !== 'confirmed' || occurrence.all_day || occurrence.source === 'booking') continue;
+      if (occurrence.source === 'system' || (festivita && occurrence.calendar_id === festivita.id)) continue;
       const minutes = overlapMinutes(occurrence.start_time, occurrence.end_time, week.start, week.end);
       if (minutes <= 0) continue;
       calendarMinutes += minutes;

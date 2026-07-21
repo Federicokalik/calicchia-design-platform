@@ -5,10 +5,12 @@ import { Plus, Save, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
+import { CALENDAR_TZ } from '@/lib/timezone';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
 
 interface SlotRow { id?: string; day_of_week: number; start_time: string; end_time: string }
 interface Override { id: string; override_date: string; is_unavailable: boolean; start_time: string | null; end_time: string | null; note: string | null }
+interface Closure { id: string; summary: string; start_time: string; end_time: string; source: string; status: string }
 
 const DAYS = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 
@@ -122,7 +124,104 @@ export default function DisponibilitaPage() {
         ))}
       </div>
 
+      <ClosuresSection />
+
       <OverridesSection overrides={data?.overrides || []} />
+    </div>
+  );
+}
+
+/**
+ * Chiusure dal–al (ferie, ponti): eventi bloccanti sul calendario di sistema
+ * "Festività e chiusure" — a differenza degli override, sono visibili nel
+ * calendario e inclusi nel feed ICS abbonabile.
+ */
+function ClosuresSection() {
+  const queryClient = useQueryClient();
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [title, setTitle] = useState('');
+
+  const { data } = useQuery({
+    queryKey: ['admin-closures'],
+    queryFn: () => apiFetch('/api/admin/calendar/closures'),
+  });
+  const closures: Closure[] = data?.closures || [];
+
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-closures'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+  };
+
+  const create = useMutation({
+    mutationFn: () => apiFetch('/api/admin/calendar/closures', {
+      method: 'POST',
+      body: JSON.stringify({ from_date: from, to_date: to || from, summary: title.trim() || undefined }),
+    }),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Chiusura creata');
+      setFrom(''); setTo(''); setTitle('');
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/admin/calendar/closures/${id}`, { method: 'DELETE' }),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Chiusura rimossa');
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
+  });
+
+  const fmtDay = (iso: string) =>
+    new Date(iso).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric', timeZone: CALENDAR_TZ });
+  // end_time è la mezzanotte del giorno DOPO l'ultimo incluso: -1ms → ultimo giorno.
+  const lastDay = (endIso: string) => fmtDay(new Date(new Date(endIso).getTime() - 1).toISOString());
+
+  return (
+    <div className="rounded-lg border bg-card p-4 space-y-3">
+      <h3 className="font-semibold text-sm">Chiusure dal–al (ferie, ponti)</h3>
+      <p className="text-xs text-muted-foreground">
+        Creano un evento bloccante sul calendario «Festività e chiusure»: niente slot prenotabili nel
+        periodo, visibile nel calendario e nel feed ICS abbonabile dal telefono.
+      </p>
+
+      <div className="grid gap-2 md:grid-cols-[140px_140px_1fr_auto] items-end">
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Dal</label>
+          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="w-full px-3 py-2 text-sm rounded-md border bg-background" />
+        </div>
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Al (incluso)</label>
+          <input type="date" value={to} min={from || undefined} onChange={(e) => setTo(e.target.value)} className="w-full px-3 py-2 text-sm rounded-md border bg-background" />
+        </div>
+        <div>
+          <label className="block text-xs text-muted-foreground mb-1">Titolo</label>
+          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Chiusura" className="w-full px-3 py-2 text-sm rounded-md border bg-background" />
+        </div>
+        <Button size="sm" onClick={() => create.mutate()} disabled={!from || create.isPending}>
+          <Plus className="h-3.5 w-3.5 mr-1.5" /> Aggiungi
+        </Button>
+      </div>
+
+      <div className="space-y-1.5 pt-2 border-t">
+        {closures.length === 0 && (
+          <p className="text-xs text-muted-foreground italic">Nessuna chiusura programmata.</p>
+        )}
+        {closures.map((cl) => (
+          <div key={cl.id} className="flex items-center justify-between text-sm py-1">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs">{fmtDay(cl.start_time)} → {lastDay(cl.end_time)}</span>
+              <span className="text-xs text-muted-foreground">{cl.summary}</span>
+            </div>
+            <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive" onClick={() => remove.mutate(cl.id)}>
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -164,7 +263,11 @@ function OverridesSection({ overrides }: { overrides: Override[] }) {
 
   return (
     <div className="rounded-lg border bg-card p-4 space-y-3">
-      <h3 className="font-semibold text-sm">Override per data (ferie, festivi, orari speciali)</h3>
+      <h3 className="font-semibold text-sm">Orari speciali per singolo giorno</h3>
+      <p className="text-xs text-muted-foreground">
+        Agiscono solo sul motore di prenotazione (non compaiono nel calendario né nel feed ICS).
+        Per ferie e ponti usa le «Chiusure dal–al» qui sopra.
+      </p>
 
       <div className="grid gap-2 md:grid-cols-[140px_120px_1fr_auto] items-end">
         <div>
