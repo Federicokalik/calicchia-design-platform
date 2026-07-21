@@ -58,6 +58,7 @@ const SOURCE_COLORS: Record<string, { backgroundColor: string; borderColor: stri
   calcom:  { backgroundColor: '#94a3b8', borderColor: '#64748b', textColor: '#fff' },
   system:  { backgroundColor: '#ef4444', borderColor: '#dc2626', textColor: '#fff' },
   ics_pull: { backgroundColor: '#0d9488', borderColor: '#0f766e', textColor: '#fff' },
+  task:    { backgroundColor: '#06b6d4', borderColor: '#0891b2', textColor: '#fff' },
 };
 
 const SOURCE_LABELS: Record<string, string> = {
@@ -71,6 +72,7 @@ const SOURCE_LABELS: Record<string, string> = {
   calcom: 'Cal.com (storico)',
   system: 'Sistema (festività)',
   ics_pull: 'Importato (ICS)',
+  task: 'Task',
 };
 
 interface CalendarApi {
@@ -183,6 +185,16 @@ export default function CalendarioPage() {
     },
   });
 
+  // Task di progetto con due date — aggregati read-only come progetti/domini
+  const { data: tasksData } = useQuery({
+    queryKey: ['tasks-calendar'],
+    queryFn: async () => {
+      try {
+        return await apiFetch('/api/project-tasks?limit=200');
+      } catch { return { tasks: [] }; }
+    },
+  });
+
   // Build events array
   const calendarEvents = (() => {
     const events: any[] = [];
@@ -281,6 +293,34 @@ export default function CalendarioPage() {
         editable: false,
         ...SOURCE_COLORS.domain,
         extendedProps: { source: 'domain', data: d },
+      });
+    }
+
+    // Task di progetto: due date come chip all-day (i done non compaiono).
+    // Come le Scadenze, restano visibili anche dentro ferie/festività.
+    for (const t of (hidden.has('task') ? [] : tasksData?.tasks || [])) {
+      if (!t.due_date || t.status === 'done') continue;
+      events.push({
+        id: `task-${t.id}`,
+        title: `📋 ${t.title}`,
+        start: t.due_date,
+        allDay: true,
+        editable: false,
+        ...SOURCE_COLORS.task,
+        extendedProps: {
+          source: 'task',
+          data: {
+            summary: `📋 ${t.title}`,
+            description: [t.project_name, t.milestone_name].filter(Boolean).join(' — ') || null,
+            start_time: t.due_date,
+            end_time: t.due_date,
+            all_day: true,
+            source: 'task',
+            status: t.status,
+            location: null,
+            url: null,
+          },
+        },
       });
     }
 
@@ -657,7 +697,7 @@ export default function CalendarioPage() {
             </button>
           );
         })}
-        {(['project', 'domain', 'calcom'] as const).map((key) => {
+        {(['task', 'project', 'domain', 'calcom'] as const).map((key) => {
           const off = hidden.has(key);
           return (
             <button
