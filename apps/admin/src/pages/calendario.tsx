@@ -185,10 +185,33 @@ export default function CalendarioPage() {
   // Build events array
   const calendarEvents = (() => {
     const events: any[] = [];
+    const occs = (eventsData?.events || []) as CalendarEventOcc[];
+
+    // Festività e chiusure come "coperta": gli eventi interamente coperti da una
+    // festività/chiusura vengono nascosti — in ferie il calendario mostra solo
+    // la chiusura. Eccezioni: bookings (appuntamenti reali, mai nascosti in
+    // silenzio) e il calendario Scadenze. Nascondere "Festività e chiusure"
+    // dalla legenda disattiva anche il filtro (escape hatch per vedere tutto).
+    const festCal = calendars.find((c) => /^festivit/i.test(c.name));
+    const scadenzeCal = calendars.find((c) => c.slug === 'scadenze');
+    const festActive = !!festCal && !hidden.has(festCal.id);
+    const blockRanges = festActive
+      ? occs.filter((e) => e.calendar_id === festCal.id)
+          .map((e) => ({ s: new Date(e.start_time).getTime(), e: new Date(e.end_time).getTime() }))
+      : [];
+    const coveredByBlock = (ev: CalendarEventOcc) => {
+      if (!blockRanges.length) return false;
+      if (ev.calendar_id === festCal!.id || ev.source === 'booking') return false;
+      if (scadenzeCal && ev.calendar_id === scadenzeCal.id) return false;
+      const s = new Date(ev.start_time).getTime();
+      const e = new Date(ev.end_time).getTime();
+      return blockRanges.some((b) => s >= b.s && e <= b.e);
+    };
 
     // Caldes Calendar — eventi multi-calendario (sostituisce Google Calendar)
-    for (const ev of (eventsData?.events || []) as CalendarEventOcc[]) {
+    for (const ev of occs) {
       if (hidden.has(ev.calendar_id)) continue;
+      if (coveredByBlock(ev)) continue;
       const cal = calendarById.get(ev.calendar_id);
       const sourceColor = SOURCE_COLORS[ev.source] || SOURCE_COLORS.manual;
       events.push({
@@ -203,6 +226,17 @@ export default function CalendarioPage() {
         editable: DRAGGABLE_SOURCES.has(ev.source),
         extendedProps: { source: ev.source, data: ev, calendar: cal },
       });
+      // Sfondo "bloccato" sull'intera fascia di festività/chiusure: rende
+      // visivamente chiuso il periodo oltre al chip evento cliccabile.
+      if (festActive && ev.calendar_id === festCal.id) {
+        events.push({
+          id: `bg-${ev.id}-${ev.start_time}`,
+          start: ev.start_time,
+          end: ev.end_time,
+          display: 'background',
+          backgroundColor: cal?.color || sourceColor.backgroundColor,
+        });
+      }
     }
 
     // Cal.com storico (se ancora presente nel DB legacy)
