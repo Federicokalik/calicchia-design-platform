@@ -90,16 +90,34 @@ function extractFeedback(
   fallbackName: string | null,
 ): { quote: string; attribution: string } | null {
   if (!field) return null;
-  if (typeof field === 'string') {
-    return field.trim()
-      ? { quote: field, attribution: fallbackName ?? '' }
-      : null;
+
+  // The admin always persists feedback as JSON.stringify({quote, author, role})
+  // and the API returns that column verbatim, so a string field is almost always
+  // a serialized object, not prose. Parse it and fall through to the object
+  // branch; only a string that isn't JSON is treated as a raw quote (legacy rows
+  // / manual DB edits). Without this, an empty `{"quote":"",...}` renders the raw
+  // JSON as the testimonial.
+  let value: ApiProjectFeedback | string = field;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    try {
+      const parsed: unknown = JSON.parse(trimmed);
+      if (parsed && typeof parsed === 'object') {
+        value = parsed as ApiProjectFeedback;
+      } else {
+        return { quote: trimmed, attribution: fallbackName ?? '' };
+      }
+    } catch {
+      return { quote: trimmed, attribution: fallbackName ?? '' };
+    }
   }
-  const quote = field.quote ?? '';
-  if (!quote.trim()) return null;
-  const name = field.name ?? field.author ?? fallbackName ?? '';
-  const role = field.role ?? '';
-  const company = field.company ?? '';
+
+  const quote = (value.quote ?? '').trim();
+  if (!quote) return null;
+  const name = value.name ?? value.author ?? fallbackName ?? '';
+  const role = value.role ?? '';
+  const company = value.company ?? '';
   const attribution = [name, role, company].filter(Boolean).join(' · ');
   return { quote, attribution };
 }
