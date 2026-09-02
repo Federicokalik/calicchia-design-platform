@@ -59,7 +59,12 @@ export async function CaseNote({ text }: CaseNoteProps) {
   if (paragraphs.length === 0) return null;
 
   return (
-    <Section spacing="compact" bordered="top">
+    <Section
+      id="case-note"
+      spacing="compact"
+      bordered="top"
+      style={{ scrollMarginTop: 'calc(var(--availability-banner-height, 0px) + 6rem)' }}
+    >
       <div className="grid grid-cols-12 gap-6 md:gap-10">
         <div className="col-span-12 md:col-span-3">
           <p

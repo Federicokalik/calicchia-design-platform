@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { CaseHeroOverlay } from '@/components/case-study/CaseHeroOverlay';
 import { CaseStaleNotice } from '@/components/case-study/CaseStaleNotice';
 import { CaseNote } from '@/components/case-study/CaseNote';
+import { CaseNoteSticky } from '@/components/case-study/CaseNoteSticky';
 import { CaseBrief } from '@/components/case-study/CaseBrief';
 import { CaseGallery } from '@/components/case-study/CaseGallery';
 import { CaseBeforeAfter } from '@/components/case-study/CaseBeforeAfter';
@@ -223,23 +224,42 @@ export default async function CaseStudyPage({
           serie "01 / 02 / 03" che il visitatore legge sui rail. */}
       <CaseBrief markdown={ext.brief} index="01" />
 
-      {ext.beforeAfterPairs.length > 0 ? (
-        <CaseBeforeAfter pairs={ext.beforeAfterPairs} index="02" />
-      ) : null}
+      {/* Nota editoriale completa PRIMA delle sezioni visive: se comunica una
+          limitazione ("niente altri screenshot"), il visitatore la legge
+          prima di vedere il set ridotto di immagini. */}
+      {ext.caseNote ? <CaseNote text={ext.caseNote} /> : null}
 
       {(() => {
         const hasRestyle = ext.beforeAfterPairs.length > 0;
         const galleryIdx = hasRestyle ? '03' : '02';
         const outcomeIdx = hasRestyle ? '04' : '03';
+
+        const visual = (
+          <>
+            {hasRestyle ? (
+              <CaseBeforeAfter pairs={ext.beforeAfterPairs} index="02" />
+            ) : null}
+            {gallery ? <CaseGallery section={gallery} index={galleryIdx} /> : null}
+          </>
+        );
+
         return (
           <>
-            {gallery ? <CaseGallery section={gallery} index={galleryIdx} /> : null}
+            {ext.caseNote && (hasRestyle || gallery) ? (
+              /* Wrapper = containing block della barra sticky: resta
+                 agganciata sotto l'header finché Prima/Dopo + Galleria sono
+                 in viewport, poi scorre via con il blocco (prima dei Risultati). */
+              <div className="relative">
+                <CaseNoteSticky text={ext.caseNote} />
+                {visual}
+              </div>
+            ) : (
+              visual
+            )}
             <CaseOutcome outcome={ext.outcome} metrics={ext.metrics} index={outcomeIdx} />
           </>
         );
       })()}
-
-      {ext.caseNote ? <CaseNote text={ext.caseNote} /> : null}
 
       {feedback ? (
         <CaseQuote
