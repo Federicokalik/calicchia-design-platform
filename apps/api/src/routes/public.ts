@@ -41,6 +41,25 @@ function resolveImageUrl(key: string | null): string | null {
   return `${API_URL}/media/${key}`;
 }
 
+/**
+ * JSONB columns fed a pre-stringified string by the admin (historical bug in
+ * portfolio/edit.tsx) are stored as a JSON *string* scalar, so `Array.isArray`
+ * fails on read and gallery/metrics come back empty. Parse the string form so
+ * rows saved before the admin fix still render; new rows arrive as real arrays.
+ */
+function coerceJsonArray(value: unknown): unknown[] {
+  if (Array.isArray(value)) return value;
+  if (typeof value === 'string' && value.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 // ─────────────────────────────────────────────────────────────
 // Validation helpers
 // ─────────────────────────────────────────────────────────────
@@ -370,13 +389,13 @@ publicRoutes.get('/projects/:slug', async (c) => {
       industries: project.industries,
       cover_image: resolveImageUrl(project.cover_image as string | null),
       cover_alt: (project.cover_alt as string | null) ?? null,
-      gallery: Array.isArray(project.gallery) ? project.gallery : [],
+      gallery: coerceJsonArray(project.gallery),
       technologies: project.technologies || [],
       feedback: project.feedback,
       // Migration 075 — case study extension
       year: project.year,
       tags: project.tags || [],
-      metrics: Array.isArray(project.metrics) ? project.metrics : [],
+      metrics: coerceJsonArray(project.metrics),
       outcome: project.outcome,
       // Migration 095 — before/after (restyling) section. FE derives visibility
       // from is_restyling and resolves image URLs client-side (projects-adapter).

@@ -222,14 +222,19 @@ export default function PortfolioEditorPage() {
         ...values,
         technologies: values.technologies?.split(',').map((t) => t.trim()).filter(Boolean) || [],
         services: serializeServices(serviceSlugs),
-        feedback: JSON.stringify(feedback),
-        gallery: JSON.stringify(gallery),
+        // JSONB columns: send parsed objects/arrays, NOT JSON.stringify'd
+        // strings. A pre-stringified string is stored as a JSON *string* scalar
+        // in the jsonb column, so `Array.isArray()` on the read side fails and
+        // gallery/metrics come back empty (`before_after` already does this
+        // right via serializeBeforeAfter).
+        feedback,
+        gallery,
         // Migration 090 — brief unico body
         brief: values.brief || null,
         // Migration 075 — case study extension
         year: values.year || null,
         tags: values.tags?.split(',').map((t) => t.trim()).filter(Boolean) || [],
-        metrics: JSON.stringify(metricsClean),
+        metrics: metricsClean,
         outcome: values.outcome || null,
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
