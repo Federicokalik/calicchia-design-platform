@@ -33,6 +33,11 @@
     "brief": "Brief",
     "briefHeading": "What we built, in short.",
     "clientVoice": "Client voice",
+    "links": {
+      "live": "Live site",
+      "repo": "Repository",
+      "ariaLabel": "Project links"
+    },
     "seeMore": "Want to see more?",
     "allProjects": "All work",
     "goToArchive": "Go to archive",

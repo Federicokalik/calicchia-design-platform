@@ -33,6 +33,11 @@
     "brief": "Brief",
     "briefHeading": "Cosa abbiamo fatto, in breve.",
     "clientVoice": "Voce del cliente",
+    "links": {
+      "live": "Sito live",
+      "repo": "Repository",
+      "ariaLabel": "Link del progetto"
+    },
     "seeMore": "Vuoi vederne altri?",
     "allProjects": "Tutti i lavori",
     "goToArchive": "Vai all'archivio",

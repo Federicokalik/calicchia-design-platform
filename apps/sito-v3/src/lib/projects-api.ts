@@ -96,6 +96,7 @@ export interface ApiProjectDetail {
   seo_title: string | null;
   seo_description: string | null;
   live_url: string | null;
+  repo_url: string | null;
   published_at: string | null;
   created_at: string;
   // Migration 095 — restyle before/after

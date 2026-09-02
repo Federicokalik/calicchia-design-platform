@@ -260,6 +260,7 @@ export interface CaseStudyExtensionData {
   /** Migration 090 — body unico markdown del case study. */
   brief: string | null;
   liveUrl: string | null;
+  repoUrl: string | null;
   seoTitleOverride: string | null;
   seoDescriptionOverride: string | null;
   client: string | null;
@@ -286,6 +287,7 @@ export function deriveCaseStudyExtension(
     brief:
       typeof api.brief === 'string' && api.brief.trim() ? api.brief : null,
     liveUrl: api.live_url,
+    repoUrl: api.repo_url,
     seoTitleOverride: api.seo_title,
     seoDescriptionOverride: api.seo_description,
     client: api.client,

@@ -385,6 +385,7 @@ publicRoutes.get('/projects/:slug', async (c) => {
       seo_title: project.seo_title,
       seo_description: project.seo_description,
       live_url: project.live_url,
+      repo_url: project.repo_url,
       published_at: project.published_at,
       created_at: project.created_at,
     },
