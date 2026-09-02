@@ -38,6 +38,13 @@
       "repo": "Repository",
       "ariaLabel": "Link del progetto"
     },
+    "lightbox": {
+      "open": "Ingrandisci",
+      "close": "Chiudi",
+      "prev": "Precedente",
+      "next": "Successiva",
+      "ariaLabel": "Galleria a schermo intero"
+    },
     "seeMore": "Vuoi vederne altri?",
     "allProjects": "Tutti i lavori",
     "goToArchive": "Vai all'archivio",

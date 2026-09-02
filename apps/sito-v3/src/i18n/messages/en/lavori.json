@@ -38,6 +38,13 @@
       "repo": "Repository",
       "ariaLabel": "Project links"
     },
+    "lightbox": {
+      "open": "Enlarge",
+      "close": "Close",
+      "prev": "Previous",
+      "next": "Next",
+      "ariaLabel": "Full-screen gallery"
+    },
     "seeMore": "Want to see more?",
     "allProjects": "All work",
     "goToArchive": "Go to archive",
