@@ -1,10 +1,15 @@
 import { useRef, useState } from 'react';
 import { Upload, X, Loader2, ChevronUp, ChevronDown, Plus, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiFetch } from '@/lib/api';
 import { cn } from '@/lib/utils';
+
+// Keep in sync with MAX_FILE_SIZE in apps/api/src/routes/media.ts and the
+// client_max_body_size in apps/admin/nginx.conf.
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 /**
  * Migration 095 — Before/After pair shape persisted in projects.before_after.
@@ -111,6 +116,12 @@ export function BeforeAfterEditor({
     file: File,
   ) => {
     const key = `${pairIndex}-${side}`;
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error(`${file.name} supera 50MB (massimo server)`);
+      const inputEl = inputRefs.current[key];
+      if (inputEl) inputEl.value = '';
+      return;
+    }
     setSlot(key, true);
     try {
       const formData = new FormData();
@@ -131,8 +142,10 @@ export function BeforeAfterEditor({
         };
         onChange(next);
       }
-    } catch {
-      // Silent fail — toast is handled at form level if needed.
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? `Upload fallito: ${err.message}` : 'Upload fallito',
+      );
     } finally {
       setSlot(key, false);
       const inputEl = inputRefs.current[key];

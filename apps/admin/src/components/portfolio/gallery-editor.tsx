@@ -117,8 +117,12 @@ export function GalleryEditor({
           const type: GalleryMediaType = file.type.startsWith('video/') ? 'video' : 'image';
           added.push({ src: data.url, alt: '', type });
         }
-      } catch {
-        // Skip failed uploads silently — toast handled upstream if needed.
+      } catch (err) {
+        toast.error(
+          err instanceof Error
+            ? `${file.name}: ${err.message}`
+            : `${file.name}: upload fallito`,
+        );
       }
     }
 
