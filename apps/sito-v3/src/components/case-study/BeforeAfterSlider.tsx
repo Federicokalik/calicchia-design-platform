@@ -186,6 +186,16 @@ export function BeforeAfterSlider({
   const counter = `${String(position + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
   const ariaValueNow = Math.round(sliderPosition * 100);
 
+  // Restyle shots are website screenshots — often PNG with a soft alpha
+  // shadow. Show them at their NATURAL aspect ratio (no forced 16:10 crop)
+  // and let the page background show through the transparent shadow instead
+  // of a grey fill.
+  const ratioW = pair.before.w ?? pair.after.w ?? 16;
+  const ratioH = pair.before.h ?? pair.after.h ?? 10;
+  const frameStyle = { aspectRatio: `${ratioW} / ${ratioH}`, background: 'transparent' };
+  const imgW = pair.before.w ?? pair.after.w ?? 2400;
+  const imgH = pair.before.h ?? pair.after.h ?? 1500;
+
   // ── Reduced-motion: vertical stack, no JS interaction ────────────
   if (reducedMotion) {
     return (
@@ -208,16 +218,16 @@ export function BeforeAfterSlider({
             {beforeWord}
           </p>
           <div
-            className="relative aspect-[16/10] w-full overflow-hidden"
-            style={{ background: 'var(--color-line)' }}
+            className="relative w-full overflow-hidden"
+            style={frameStyle}
           >
             <Image
               src={pair.before.src}
               alt={pair.before.alt}
-              width={pair.before.w ?? 2400}
-              height={pair.before.h ?? 1500}
+              width={imgW}
+              height={imgH}
               sizes="(min-width: 1024px) 70vw, 100vw"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
@@ -230,16 +240,16 @@ export function BeforeAfterSlider({
             {afterWord}
           </p>
           <div
-            className="relative aspect-[16/10] w-full overflow-hidden"
-            style={{ background: 'var(--color-line)' }}
+            className="relative w-full overflow-hidden"
+            style={frameStyle}
           >
             <Image
               src={pair.after.src}
               alt={pair.after.alt}
-              width={pair.after.w ?? 2400}
-              height={pair.after.h ?? 1500}
+              width={imgW}
+              height={imgH}
               sizes="(min-width: 1024px) 70vw, 100vw"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-contain"
             />
           </div>
         </div>
@@ -278,9 +288,9 @@ export function BeforeAfterSlider({
 
       <div
         ref={figureRef}
-        className="relative aspect-[16/10] w-full overflow-hidden select-none touch-none"
+        className="relative w-full overflow-hidden select-none touch-none"
         style={{
-          background: 'var(--color-line)',
+          ...frameStyle,
           cursor: isDragging ? 'grabbing' : 'grab',
         }}
         onPointerDown={handlePointerDown}
@@ -294,7 +304,7 @@ export function BeforeAfterSlider({
           alt={pair.after.alt}
           fill
           sizes="(min-width: 1024px) 70vw, 100vw"
-          className="object-cover pointer-events-none"
+          className="object-contain pointer-events-none"
           draggable={false}
         />
 
@@ -310,7 +320,7 @@ export function BeforeAfterSlider({
             alt={pair.before.alt}
             fill
             sizes="(min-width: 1024px) 70vw, 100vw"
-            className="object-cover"
+            className="object-contain"
             draggable={false}
           />
         </div>

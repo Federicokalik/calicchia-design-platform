@@ -397,7 +397,7 @@ function ImageSlot({
         <img
           src={image.src}
           alt={image.alt}
-          className="aspect-[16/10] w-full rounded border object-cover bg-muted"
+          className="aspect-[16/10] w-full rounded border border-dashed object-contain"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.visibility = 'hidden';
           }}

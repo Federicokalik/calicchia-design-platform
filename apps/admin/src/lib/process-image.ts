@@ -1,29 +1,28 @@
 /**
- * Client-side image normalization for portfolio media (cover, gallery,
- * before/after). Runs in the browser before the upload leaves the admin:
+ * Client-side guard for portfolio media (cover, gallery, before/after).
  *
- *   - decodes the file, caps the LONGEST edge at MAX_LONG_EDGE (never upscales)
- *   - re-encodes to WebP at WEBP_QUALITY (near-lossless; next/image re-optimizes
- *     again for delivery, so the stored file only needs to be a clean master)
- *   - returns the final pixel dimensions so callers can persist width/height
- *     (kills layout shift on the public case-study page)
- *   - flags images whose shortest edge is below MIN_SHORT_EDGE — a portfolio
- *     quality floor, surfaced as a toast, not a hard block
+ * Philosophy: the stored file is the MASTER. next/image re-encodes it to
+ * AVIF/WebP at display size for delivery anyway, so the admin must not
+ * degrade it. A pristine PNG screenshot — crisp text, a soft alpha shadow —
+ * is uploaded byte-for-byte untouched.
  *
- * Doing this client-side keeps the API image free of a native dependency
- * (sharp/libvips) and moves the CPU cost off the server. Non-raster inputs
- * (GIF, video, PDF) and any failure path return the original file untouched.
+ * The only transform is a safety downscale when the longest edge exceeds
+ * MAX_LONG_EDGE, and even then the source format is preserved (PNG stays
+ * lossless PNG with its transparency; JPEG re-encodes at 0.95). Everything
+ * else — dimensions for width/height hints, the sub-1200px quality warning —
+ * is read-only.
+ *
+ * Non-decodable inputs (GIF, video, PDF) and any failure path return the
+ * original file.
  */
 
 const MAX_LONG_EDGE = 2560;
 const MIN_SHORT_EDGE = 1200;
-const WEBP_QUALITY = 0.92;
 
-// GIF is excluded on purpose: canvas re-encoding would drop the animation.
-const PROCESSABLE = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const DECODABLE = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/avif']);
 
 export interface ProcessedImage {
-  /** WebP File when processed, otherwise the original File. */
+  /** Original File unless a downscale was required. */
   file: File;
   width?: number;
   height?: number;
@@ -31,26 +30,42 @@ export interface ProcessedImage {
   warning?: string;
 }
 
-function canvasToWebp(canvas: HTMLCanvasElement): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/webp', WEBP_QUALITY);
-  });
+function warnIfSmall(name: string, w: number, h: number): string | undefined {
+  const shortEdge = Math.min(w, h);
+  if (!shortEdge || shortEdge >= MIN_SHORT_EDGE) return undefined;
+  return `${name}: ${w}×${h}px — il lato corto (${shortEdge}px) è sotto i ${MIN_SHORT_EDGE}px consigliati per il portfolio.`;
 }
 
 export async function processPortfolioImage(input: File): Promise<ProcessedImage> {
-  if (!PROCESSABLE.has(input.type)) return { file: input };
+  if (!DECODABLE.has(input.type)) return { file: input };
 
+  let bitmap: ImageBitmap;
   try {
-    const bitmap = await createImageBitmap(input);
-    const srcW = bitmap.width;
-    const srcH = bitmap.height;
-    if (!srcW || !srcH) {
-      bitmap.close();
-      return { file: input };
-    }
+    bitmap = await createImageBitmap(input);
+  } catch {
+    return { file: input };
+  }
 
-    const longEdge = Math.max(srcW, srcH);
-    const scale = longEdge > MAX_LONG_EDGE ? MAX_LONG_EDGE / longEdge : 1;
+  const srcW = bitmap.width;
+  const srcH = bitmap.height;
+  const longEdge = Math.max(srcW, srcH);
+
+  // Within the cap → upload the original bytes, untouched. No canvas, no
+  // re-encode: the master stays exactly as exported.
+  if (!longEdge || longEdge <= MAX_LONG_EDGE) {
+    bitmap.close();
+    return {
+      file: input,
+      width: srcW || undefined,
+      height: srcH || undefined,
+      warning: srcW && srcH ? warnIfSmall(input.name, srcW, srcH) : undefined,
+    };
+  }
+
+  // Oversized → downscale, keeping the source format (PNG lossless + alpha,
+  // JPEG at 0.95). WebP/AVIF sources fall back to PNG to stay lossless.
+  try {
+    const scale = MAX_LONG_EDGE / longEdge;
     const outW = Math.round(srcW * scale);
     const outH = Math.round(srcH * scale);
 
@@ -60,28 +75,27 @@ export async function processPortfolioImage(input: File): Promise<ProcessedImage
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       bitmap.close();
-      return { file: input };
+      return { file: input, width: srcW, height: srcH, warning: warnIfSmall(input.name, srcW, srcH) };
     }
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(bitmap, 0, 0, outW, outH);
     bitmap.close();
 
-    const blob = await canvasToWebp(canvas);
-    if (!blob || blob.type !== 'image/webp') return { file: input };
+    const outType = input.type === 'image/jpeg' ? 'image/jpeg' : 'image/png';
+    const quality = outType === 'image/jpeg' ? 0.95 : undefined;
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), outType, quality);
+    });
+    if (!blob) {
+      return { file: input, width: srcW, height: srcH, warning: warnIfSmall(input.name, srcW, srcH) };
+    }
 
-    const name = input.name.replace(/\.[^./]+$/, '') + '.webp';
-    const file = new File([blob], name, { type: 'image/webp', lastModified: Date.now() });
-
-    const shortEdge = Math.min(outW, outH);
-    const warning =
-      shortEdge < MIN_SHORT_EDGE
-        ? `${input.name}: ${outW}×${outH}px — il lato corto (${shortEdge}px) è sotto i ${MIN_SHORT_EDGE}px consigliati per il portfolio.`
-        : undefined;
-
-    return { file, width: outW, height: outH, warning };
+    const ext = outType === 'image/jpeg' ? '.jpg' : '.png';
+    const name = input.name.replace(/\.[^./]+$/, '') + ext;
+    const file = new File([blob], name, { type: outType, lastModified: Date.now() });
+    return { file, width: outW, height: outH, warning: warnIfSmall(input.name, outW, outH) };
   } catch {
-    // Corrupt file, unsupported decode, OOM on a huge canvas — upload as-is.
-    return { file: input };
+    return { file: input, width: srcW, height: srcH, warning: warnIfSmall(input.name, srcW, srcH) };
   }
 }
