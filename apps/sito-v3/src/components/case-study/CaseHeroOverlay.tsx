@@ -8,6 +8,8 @@ interface CaseHeroOverlayProps {
   project: Project;
   client: string | null;
   services: string | null;
+  liveUrl?: string | null;
+  repoUrl?: string | null;
 }
 
 /**
@@ -23,8 +25,16 @@ export async function CaseHeroOverlay({
   project,
   client,
   services,
+  liveUrl,
+  repoUrl,
 }: CaseHeroOverlayProps) {
   const t = await getTranslations('lavori.detail');
+
+  // External links (live site / repo), overlaid bottom-right on the cover.
+  const links = [
+    liveUrl ? { href: liveUrl, label: t('links.live') } : null,
+    repoUrl ? { href: repoUrl, label: t('links.repo') } : null,
+  ].filter((x): x is { href: string; label: string } => x !== null);
 
   // Meta segments: client (se differente dal title), anno, servizi (primi 2-3).
   const servicesShort = services
@@ -90,43 +100,68 @@ export async function CaseHeroOverlay({
           }}
         />
 
-        {/* Overlay content: meta strip + titolo display. Allineato bottom-left,
-            inset responsive. */}
-        <div className="absolute inset-x-5 sm:inset-x-8 md:inset-x-12 bottom-5 sm:bottom-8 md:bottom-12 flex flex-col gap-3 md:gap-5">
-          <div
-            className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] sm:text-xs uppercase tracking-[0.22em]"
-            style={{ color: 'rgba(255,255,255,0.92)' }}
-          >
-            <span
-              className="inline-block px-2.5 py-1 rounded-full"
+        {/* Overlay content: meta strip + titolo display bottom-left; link
+            esterni (sito live / repo) bottom-right. Flex row con
+            justify-between così i due blocchi non si sovrappongono mai anche
+            con titoli lunghi o schermi stretti. */}
+        <div className="absolute inset-x-5 sm:inset-x-8 md:inset-x-12 bottom-5 sm:bottom-8 md:bottom-12 flex items-end justify-between gap-5 md:gap-8">
+          <div className="flex min-w-0 flex-col gap-3 md:gap-5">
+            <div
+              className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[10px] sm:text-xs uppercase tracking-[0.22em]"
+              style={{ color: 'rgba(255,255,255,0.92)' }}
+            >
+              <span
+                className="inline-block px-2.5 py-1 rounded-full"
+                style={{
+                  background: 'var(--color-ink)',
+                  border: '1px solid var(--color-border-inverse)',
+                }}
+              >
+                {t('caseStudy')}
+              </span>
+              {metaSegments.map((seg, i) => (
+                <span key={`${seg}-${i}`} className="flex items-center gap-3">
+                  <span aria-hidden style={{ opacity: 0.5 }}>·</span>
+                  <span>{seg}</span>
+                </span>
+              ))}
+            </div>
+
+            <h1
+              className="font-[family-name:var(--font-display)] text-white"
               style={{
-                background: 'var(--color-ink)',
-                border: '1px solid var(--color-border-inverse)',
+                fontSize: 'clamp(2rem, 6vw, 5.5rem)',
+                fontWeight: 500,
+                letterSpacing: '-0.035em',
+                lineHeight: 0.92,
+                maxWidth: '20ch',
+                textShadow: '0 2px 24px rgba(0,0,0,0.35)',
               }}
             >
-              {t('caseStudy')}
-            </span>
-            {metaSegments.map((seg, i) => (
-              <span key={`${seg}-${i}`} className="flex items-center gap-3">
-                <span aria-hidden style={{ opacity: 0.5 }}>·</span>
-                <span>{seg}</span>
-              </span>
-            ))}
+              {project.title}
+            </h1>
           </div>
 
-          <h1
-            className="font-[family-name:var(--font-display)] text-white"
-            style={{
-              fontSize: 'clamp(2rem, 6vw, 5.5rem)',
-              fontWeight: 500,
-              letterSpacing: '-0.035em',
-              lineHeight: 0.92,
-              maxWidth: '20ch',
-              textShadow: '0 2px 24px rgba(0,0,0,0.35)',
-            }}
-          >
-            {project.title}
-          </h1>
+          {links.length > 0 ? (
+            <nav
+              className="flex shrink-0 flex-col items-end gap-1.5 sm:gap-2"
+              aria-label={t('links.ariaLabel')}
+            >
+              {links.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 font-mono text-[10px] sm:text-xs uppercase tracking-[0.18em] text-white/90 underline-offset-4 transition-colors hover:text-white hover:underline"
+                  style={{ textShadow: '0 1px 12px rgba(0,0,0,0.55)' }}
+                >
+                  {item.label}
+                  <span aria-hidden>↗</span>
+                </a>
+              ))}
+            </nav>
+          ) : null}
         </div>
       </div>
     </section>

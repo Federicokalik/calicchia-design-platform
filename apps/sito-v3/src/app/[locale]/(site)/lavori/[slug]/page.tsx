@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { CaseHeroOverlay } from '@/components/case-study/CaseHeroOverlay';
 import { CaseStaleNotice } from '@/components/case-study/CaseStaleNotice';
-import { CaseLinks } from '@/components/case-study/CaseLinks';
 import { CaseBrief } from '@/components/case-study/CaseBrief';
 import { CaseGallery } from '@/components/case-study/CaseGallery';
 import { CaseBeforeAfter } from '@/components/case-study/CaseBeforeAfter';
@@ -200,6 +199,8 @@ export default async function CaseStudyPage({
         project={project}
         client={ext.client}
         services={ext.servicesLine}
+        liveUrl={ext.liveUrl}
+        repoUrl={ext.repoUrl}
       />
 
       {ext.isStale ? (
@@ -209,8 +210,6 @@ export default async function CaseStudyPage({
           liveUrl={ext.liveUrl}
         />
       ) : null}
-
-      <CaseLinks liveUrl={ext.liveUrl} repoUrl={ext.repoUrl} />
 
 
       {/* Detail sequence (migration 095 — restyle prima/dopo opzionale):
