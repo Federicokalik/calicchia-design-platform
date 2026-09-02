@@ -8,10 +8,7 @@ import { CaseBeforeAfter } from '@/components/case-study/CaseBeforeAfter';
 import { CaseOutcome } from '@/components/case-study/CaseOutcome';
 import { CaseQuote } from '@/components/case-study/CaseQuote';
 import { CaseNext } from '@/components/case-study/CaseNext';
-import {
-  fetchAllPublishedProjects,
-  fetchProjectBySlug,
-} from '@/lib/projects-api';
+import { fetchProjectBySlug } from '@/lib/projects-api';
 import {
   adaptApiProjectToLegacy,
   deriveCaseStudyExtension,
@@ -31,19 +28,15 @@ interface Params {
   slug: string;
 }
 
-// Locale layout sets dynamicParams=false to restrict locales. We override here
-// because fetchAllPublishedProjects() returns [] during Docker image build
-// (no API reachable), so generateStaticParams below produces no params.
-// Without this override, every request 500s with NoFallbackError.
-export const dynamicParams = true;
-
-export async function generateStaticParams(): Promise<Params[]> {
-  // generateStaticParams is shared across locales — fetch the IT canonical list
-  // (slugs are the same across locales today; if EN-only slugs are added later
-  // this needs to fan-out per-locale).
-  const list = await fetchAllPublishedProjects('it');
-  return list.map((p) => ({ slug: p.slug }));
-}
+// Case study pages render fully on-demand. The Docker image is built without API
+// access, so a build-time generateStaticParams would always be empty — and under
+// Next 16 `output: 'standalone'` an empty generateStaticParams combined with a
+// `dynamicParams` override of the parent layout throws NoFallbackError at runtime:
+// the request falls through to the [...matrix] catch-all → 404 for every case
+// study. `force-dynamic` skips the prerender/fallback machinery entirely — each
+// case study is SSR'd live against the API, so a freshly published project is
+// reachable immediately (no ISR window, no redeploy).
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,

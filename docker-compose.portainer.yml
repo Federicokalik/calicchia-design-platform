@@ -73,6 +73,13 @@ services:
       SITE_URL: ${SITE_URL}
       ADMIN_URL: ${ADMIN_URL}
       PORTAL_URL: ${SITE_URL}
+      # On-demand ISR: dopo ogni publish/update CMS l'API ping-a sito-v3 così le
+      # modifiche compaiono in ~1s invece di attendere la finestra ISR passiva
+      # (10 min /lavori, 5 min contenuti CMS). Senza queste due, revalidateSito()
+      # è un no-op. URL interno su app-net (niente hairpin NAT); il token deve
+      # essere identico a REVALIDATE_SECRET lato sito-v3.
+      SITO_REVALIDATE_URL: ${SITO_REVALIDATE_URL:-http://sito-v3:3000/api/revalidate}
+      SITO_REVALIDATE_TOKEN: ${SITO_REVALIDATE_TOKEN}
       EMAIL_FROM: ${EMAIL_FROM}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       RESEND_API_KEY: ${RESEND_API_KEY}
@@ -222,6 +229,11 @@ services:
       # cade sul fallback http://localhost:3000 e il browser segue lì (incident
       # 2026-05-29). Riusa SITE_URL gia` presente nel .env.
       PUBLIC_SITE_URL: ${SITE_URL}
+      # REVALIDATE_SECRET: shared secret con l'API per POST /api/revalidate.
+      # Deve essere IDENTICO a SITO_REVALIDATE_TOKEN lato api. Senza, la route
+      # risponde 404 di proposito e l'ISR on-demand resta morto (le modifiche
+      # admin compaiono solo alla scadenza ISR passiva).
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
       # Runtime public config (consumato da /api/config -> RuntimeConfigProvider).
       # Cambiare valore = restart container, nessun rebuild dell'immagine.
       TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY}
