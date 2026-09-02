@@ -45,6 +45,9 @@
       "next": "Successiva",
       "ariaLabel": "Galleria a schermo intero"
     },
+    "note": {
+      "label": "Nota"
+    },
     "seeMore": "Vuoi vederne altri?",
     "allProjects": "Tutti i lavori",
     "goToArchive": "Vai all'archivio",

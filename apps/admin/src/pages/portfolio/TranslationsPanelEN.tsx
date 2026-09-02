@@ -17,6 +17,8 @@ const TRANSLATABLE_FIELDS = [
   { key: 'outcome', label: 'Outcome (risultati)', type: 'textarea', maxChars: 1500 },
   { key: 'seo_title', label: 'SEO Title', type: 'input', maxChars: 70 },
   { key: 'seo_description', label: 'SEO Description', type: 'textarea', maxChars: 160 },
+  // Migration 150 — nota editoriale
+  { key: 'case_note', label: 'Nota / disclaimer', type: 'textarea', maxChars: 1200 },
 ] as const;
 
 type FieldKey = (typeof TRANSLATABLE_FIELDS)[number]['key'];

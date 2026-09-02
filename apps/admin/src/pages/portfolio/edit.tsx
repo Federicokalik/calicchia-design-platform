@@ -54,6 +54,8 @@ const schema = z.object({
   outcome: z.string().optional(),
   seo_title: z.string().max(70).optional(),
   seo_description: z.string().max(160).optional(),
+  // Migration 150 — nota editoriale opzionale (riquadro dopo i Risultati).
+  case_note: z.string().max(1200).optional(),
   is_published: z.boolean().default(false),
   is_featured: z.boolean().default(false),
   // Migration 095 — toggle dedicato per la sezione restyling (prima/dopo).
@@ -129,6 +131,7 @@ export default function PortfolioEditorPage() {
       outcome: '',
       seo_title: '',
       seo_description: '',
+      case_note: '',
       is_published: false,
       is_featured: false,
       is_restyling: false,
@@ -157,6 +160,7 @@ export default function PortfolioEditorPage() {
         outcome: p.outcome || '',
         seo_title: p.seo_title || '',
         seo_description: p.seo_description || '',
+        case_note: p.case_note || '',
         is_published: p.is_published || false,
         is_featured: p.is_featured || false,
         is_restyling: p.is_restyling || false,
@@ -238,6 +242,7 @@ export default function PortfolioEditorPage() {
         outcome: values.outcome || null,
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
+        case_note: values.case_note?.trim() || null,
         // Migration 095 — restyle before/after
         is_restyling: values.is_restyling,
         before_after: serializeBeforeAfter(beforeAfter),
@@ -438,6 +443,19 @@ export default function PortfolioEditorPage() {
                   value={form.watch('brief') || ''}
                   onChange={(val) => form.setValue('brief', val)}
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Nota / disclaimer (opzionale)</Label>
+                <Textarea
+                  {...form.register('case_note')}
+                  rows={4}
+                  maxLength={1200}
+                  placeholder="Es. limitazioni privacy, cosa resta comunque visitabile pubblicamente. Gli URL vengono resi cliccabili."
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Riquadro editoriale mostrato dopo la sezione Risultati. Righe
+                  vuote = paragrafi separati. Traducibile nel pannello EN.
+                </p>
               </div>
             </div>
           </TabsContent>
@@ -815,6 +833,7 @@ export default function PortfolioEditorPage() {
               outcome: form.watch('outcome'),
               seo_title: form.watch('seo_title'),
               seo_description: form.watch('seo_description'),
+              case_note: form.watch('case_note'),
             }}
           />
         </div>

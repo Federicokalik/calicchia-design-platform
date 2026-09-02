@@ -317,8 +317,8 @@ publicRoutes.get('/projects/:slug', async (c) => {
   if (!validateSlug(slug)) return c.json({ error: 'Not Found' }, 404);
   const locale = parseLocale(c.req.query('locale'));
 
-  // i18n: JOIN su translations per i 6 campi traducibili
-  // (title, description, brief, outcome, seo_title, seo_description).
+  // i18n: JOIN su translations per i campi traducibili (title, description,
+  // brief, outcome, seo_title, seo_description, case_note).
   // Migration 090: `content`/`challenge`/`solution` consolidati in `brief`.
   const rows = await sql`
     SELECT
@@ -328,7 +328,8 @@ publicRoutes.get('/projects/:slug', async (c) => {
       COALESCE(t_brief.field_value, p.brief) AS i18n_brief,
       COALESCE(t_outcome.field_value, p.outcome) AS i18n_outcome,
       COALESCE(t_seo_title.field_value, p.seo_title) AS i18n_seo_title,
-      COALESCE(t_seo_desc.field_value, p.seo_description) AS i18n_seo_description
+      COALESCE(t_seo_desc.field_value, p.seo_description) AS i18n_seo_description,
+      COALESCE(t_case_note.field_value, p.case_note) AS i18n_case_note
     FROM projects p
     LEFT JOIN projects_translations t_title
       ON t_title.project_id = p.id AND t_title.locale = ${locale} AND t_title.field_name = 'title'
@@ -342,6 +343,8 @@ publicRoutes.get('/projects/:slug', async (c) => {
       ON t_seo_title.project_id = p.id AND t_seo_title.locale = ${locale} AND t_seo_title.field_name = 'seo_title'
     LEFT JOIN projects_translations t_seo_desc
       ON t_seo_desc.project_id = p.id AND t_seo_desc.locale = ${locale} AND t_seo_desc.field_name = 'seo_description'
+    LEFT JOIN projects_translations t_case_note
+      ON t_case_note.project_id = p.id AND t_case_note.locale = ${locale} AND t_case_note.field_name = 'case_note'
     WHERE p.slug = ${slug} AND p.is_published = true
   `;
 
@@ -354,6 +357,7 @@ publicRoutes.get('/projects/:slug', async (c) => {
   project.outcome = project.i18n_outcome;
   project.seo_title = project.i18n_seo_title;
   project.seo_description = project.i18n_seo_description;
+  project.case_note = project.i18n_case_note;
 
   // Get all published projects for prev/next (circular)
   const allProjects = await sql`
@@ -405,6 +409,7 @@ publicRoutes.get('/projects/:slug', async (c) => {
       seo_description: project.seo_description,
       live_url: project.live_url,
       repo_url: project.repo_url,
+      case_note: project.case_note,
       published_at: project.published_at,
       created_at: project.created_at,
     },

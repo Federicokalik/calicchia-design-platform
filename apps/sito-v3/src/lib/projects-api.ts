@@ -97,6 +97,8 @@ export interface ApiProjectDetail {
   seo_description: string | null;
   live_url: string | null;
   repo_url: string | null;
+  /** Migration 150 — nota editoriale opzionale (i18n). */
+  case_note: string | null;
   published_at: string | null;
   created_at: string;
   // Migration 095 — restyle before/after

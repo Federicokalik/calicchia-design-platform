@@ -88,6 +88,8 @@ projects.post('/', async (c) => {
     // Migration 095 — before/after restyle section
     is_restyling,
     before_after,
+    // Migration 150 — nota editoriale opzionale
+    case_note,
   } = body;
 
   if (!title || !slug) {
@@ -134,6 +136,8 @@ projects.post('/', async (c) => {
       // Migration 095
       is_restyling: is_restyling ?? false,
       before_after: before_after ?? null,
+      // Migration 150
+      case_note: case_note || null,
       display_order: (max_order as number) + 1,
     })}
     RETURNING *
@@ -179,6 +183,8 @@ projects.put('/:id', async (c) => {
     // Migration 095 — before/after restyle section
     is_restyling,
     before_after,
+    // Migration 150 — nota editoriale opzionale
+    case_note,
   } = body;
 
   if (slug !== undefined && !/^[a-z0-9-]+$/.test(slug)) {
@@ -213,6 +219,8 @@ projects.put('/:id', async (c) => {
   // Migration 095
   if (is_restyling !== undefined) updateData.is_restyling = !!is_restyling;
   if (before_after !== undefined) updateData.before_after = before_after ?? null;
+  // Migration 150
+  if (case_note !== undefined) updateData.case_note = case_note || null;
 
   const [project] = await sql`
     UPDATE projects SET ${sql(updateData)} WHERE id = ${id} RETURNING *
@@ -272,6 +280,7 @@ const TRANSLATABLE_PROJECT_FIELDS = [
   'outcome',
   'seo_title',
   'seo_description',
+  'case_note', // Migration 150 — nota editoriale
 ] as const;
 type TranslatableProjectField = (typeof TRANSLATABLE_PROJECT_FIELDS)[number];
 

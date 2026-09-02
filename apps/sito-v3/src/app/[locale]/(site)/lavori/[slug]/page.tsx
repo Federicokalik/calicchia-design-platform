@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { CaseHeroOverlay } from '@/components/case-study/CaseHeroOverlay';
 import { CaseStaleNotice } from '@/components/case-study/CaseStaleNotice';
+import { CaseNote } from '@/components/case-study/CaseNote';
 import { CaseBrief } from '@/components/case-study/CaseBrief';
 import { CaseGallery } from '@/components/case-study/CaseGallery';
 import { CaseBeforeAfter } from '@/components/case-study/CaseBeforeAfter';
@@ -237,6 +238,8 @@ export default async function CaseStudyPage({
           </>
         );
       })()}
+
+      {ext.caseNote ? <CaseNote text={ext.caseNote} /> : null}
 
       {feedback ? (
         <CaseQuote

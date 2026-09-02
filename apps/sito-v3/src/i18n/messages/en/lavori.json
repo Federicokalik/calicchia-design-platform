@@ -45,6 +45,9 @@
       "next": "Next",
       "ariaLabel": "Full-screen gallery"
     },
+    "note": {
+      "label": "Note"
+    },
     "seeMore": "Want to see more?",
     "allProjects": "All work",
     "goToArchive": "Go to archive",

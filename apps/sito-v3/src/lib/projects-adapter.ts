@@ -261,6 +261,8 @@ export interface CaseStudyExtensionData {
   brief: string | null;
   liveUrl: string | null;
   repoUrl: string | null;
+  /** Migration 150 — nota editoriale opzionale (già risolta i18n dall'API). */
+  caseNote: string | null;
   seoTitleOverride: string | null;
   seoDescriptionOverride: string | null;
   client: string | null;
@@ -288,6 +290,8 @@ export function deriveCaseStudyExtension(
       typeof api.brief === 'string' && api.brief.trim() ? api.brief : null,
     liveUrl: api.live_url,
     repoUrl: api.repo_url,
+    caseNote:
+      typeof api.case_note === 'string' && api.case_note.trim() ? api.case_note : null,
     seoTitleOverride: api.seo_title,
     seoDescriptionOverride: api.seo_description,
     client: api.client,
