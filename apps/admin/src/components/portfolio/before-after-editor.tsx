@@ -5,10 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { apiFetch } from '@/lib/api';
+import { processPortfolioImage } from '@/lib/process-image';
 import { cn } from '@/lib/utils';
 
-// Keep in sync with MAX_FILE_SIZE in apps/api/src/routes/media.ts and the
-// client_max_body_size in apps/admin/nginx.conf.
+// Guard against a huge source file before it hits the canvas decoder. The
+// processed WebP that actually gets uploaded is far smaller. Keep in sync with
+// MAX_FILE_SIZE in apps/api/src/routes/media.ts + client_max_body_size in
+// apps/admin/nginx.conf.
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 /**
@@ -124,8 +127,11 @@ export function BeforeAfterEditor({
     }
     setSlot(key, true);
     try {
+      const processed = await processPortfolioImage(file);
+      if (processed.warning) toast.warning(processed.warning);
+
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', processed.file);
       formData.append('folder', folder);
       const data = await apiFetch('/api/media/upload', {
         method: 'POST',
@@ -138,6 +144,8 @@ export function BeforeAfterEditor({
           [side]: {
             ...next[pairIndex][side],
             src: data.url,
+            w: processed.width,
+            h: processed.height,
           },
         };
         onChange(next);

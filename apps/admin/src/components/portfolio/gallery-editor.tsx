@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RowContextMenu, type RowAction } from '@/components/ui/row-context-menu';
 import { apiFetch } from '@/lib/api';
+import { processPortfolioImage } from '@/lib/process-image';
 import { cn } from '@/lib/utils';
 
 /**
@@ -106,16 +107,30 @@ export function GalleryEditor({
         continue;
       }
       try {
+        const isVideo = file.type.startsWith('video/');
+        // Images → normalized to WebP + capped at 2560px client-side. Video
+        // passes through (the server has a 50MB cap, no transcode).
+        const processed = isVideo
+          ? { file, width: undefined, height: undefined, warning: undefined }
+          : await processPortfolioImage(file);
+        if (processed.warning) toast.warning(processed.warning);
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', processed.file);
         formData.append('folder', folder);
         const data = await apiFetch('/api/media/upload', {
           method: 'POST',
           body: formData,
         });
         if (data?.url) {
-          const type: GalleryMediaType = file.type.startsWith('video/') ? 'video' : 'image';
-          added.push({ src: data.url, alt: '', type });
+          const type: GalleryMediaType = isVideo ? 'video' : 'image';
+          added.push({
+            src: data.url,
+            alt: '',
+            type,
+            width: processed.width,
+            height: processed.height,
+          });
         }
       } catch (err) {
         toast.error(

@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import { processPortfolioImage } from '@/lib/process-image';
 import { siteAsset } from '@/lib/public-urls';
 
 interface ImageUploadProps {
@@ -41,8 +43,11 @@ export function ImageUpload({
       setIsUploading(true);
 
       try {
+        const processed = await processPortfolioImage(file);
+        if (processed.warning) toast.warning(processed.warning);
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', processed.file);
         formData.append('folder', folder);
 
         // apiFetch returns parsed JSON and throws on non-ok — no Response here.
@@ -227,8 +232,11 @@ export function MultiImageUpload({
       if (value.length + newUrls.length >= max) break;
 
       try {
+        const processed = await processPortfolioImage(file);
+        if (processed.warning) toast.warning(processed.warning);
+
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', processed.file);
         formData.append('folder', folder);
 
         // apiFetch returns parsed JSON and throws on non-ok (caught below).
@@ -239,8 +247,10 @@ export function MultiImageUpload({
         if (data?.url) {
           newUrls.push(data.url);
         }
-      } catch {
-        // Skip failed uploads
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? `${file.name}: ${err.message}` : `${file.name}: upload fallito`,
+        );
       }
     }
 
