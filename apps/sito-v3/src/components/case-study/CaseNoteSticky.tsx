@@ -1,4 +1,7 @@
-import { getTranslations } from 'next-intl/server';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CaseNoteStickyProps {
   /** Testo completo della nota (già risolto i18n). */
@@ -25,27 +28,60 @@ function firstUrl(text: string): string | null {
  *
  * `position: sticky` dentro il wrapper che contiene ANCHE le sezioni visive:
  * resta agganciata finché quel blocco è in viewport, poi scorre via con lui.
- * Sfondo opaco `--color-bg` + hairline. Il testo rimanda alla nota completa
- * (`#case-note`); l'eventuale URL è un link diretto.
+ *
+ * Visibilità: nascosta finché la nota completa (`#case-note`) è ancora a
+ * schermo — così non si vedono le due versioni insieme. Compare (fade) solo
+ * quando la nota completa è scrollata sopra l'header.
  */
-export async function CaseNoteSticky({ text }: CaseNoteStickyProps) {
-  const t = await getTranslations('lavori.detail');
+export function CaseNoteSticky({ text }: CaseNoteStickyProps) {
+  const t = useTranslations('lavori.detail');
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const full = document.getElementById('case-note');
+    if (!full) {
+      setVisible(true);
+      return;
+    }
+    let raf = 0;
+    const check = () => {
+      raf = 0;
+      // La barra compare quando il bordo inferiore della nota completa passa
+      // sotto la linea dell'header (~96px dal top).
+      setVisible(full.getBoundingClientRect().bottom < 96);
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
   const summary = firstSentence(text);
   if (!summary) return null;
 
   const url = firstUrl(text);
   const href = url ? (url.startsWith('http') ? url : `https://${url}`) : null;
-  // Evita di ripetere l'URL se è già dentro la frase mostrata.
-  const showUrl = href && !summary.includes(url as string);
+  const showUrl = Boolean(href && url && !summary.includes(url));
 
   return (
     <div
+      aria-hidden={!visible}
       className="sticky border-y"
       style={{
         top: 'calc(var(--availability-banner-height, 0px) + 4rem)',
         zIndex: 40,
         background: 'var(--color-bg)',
         borderColor: 'var(--color-line)',
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: 'opacity 220ms ease',
       }}
     >
       <div className="mx-auto flex max-w-[1600px] items-center gap-3 px-6 py-2.5 md:px-10 lg:px-14">
@@ -60,6 +96,7 @@ export async function CaseNoteSticky({ text }: CaseNoteStickyProps) {
         </span>
         <a
           href="#case-note"
+          tabIndex={visible ? undefined : -1}
           className="min-w-0 flex-1 truncate text-xs transition-opacity hover:opacity-70"
           style={{ color: 'var(--color-text-secondary)' }}
         >
@@ -70,6 +107,7 @@ export async function CaseNoteSticky({ text }: CaseNoteStickyProps) {
             href={href as string}
             target="_blank"
             rel="noopener noreferrer"
+            tabIndex={visible ? undefined : -1}
             className="hidden shrink-0 items-center gap-1 font-mono text-[length:var(--text-eyebrow)] uppercase tracking-[0.14em] transition-opacity hover:opacity-70 sm:inline-flex"
             style={{ color: 'var(--color-ink)' }}
           >
