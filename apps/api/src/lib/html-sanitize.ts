@@ -37,25 +37,32 @@ export function sanitizeBlogHtml(html: string | null | undefined): string {
   });
 }
 
-// Block-level HTML the rich editor could produce. If the content contains any
-// of these, it is already HTML (legacy rows / hand-written) and must NOT be
-// re-parsed through the markdown renderer.
-const ALREADY_HTML_RE = /<(h[1-6]|p|pre|table|blockquote|figure|ul|ol|div|img|iframe)[\s>]/i;
+// Entity decode — restore characters that a legacy write-time HTML sanitize
+// escaped inside the stored markdown (`>` → `&gt;`, `&` → `&amp;`, …). Those
+// entities are markdown syntax, not HTML, so they broke the renderer. Decoded
+// BEFORE marked.parse; sanitize runs after, so XSS stays blocked.
+function decodeMarkdownEntities(md: string): string {
+  return md
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+}
 
 /**
  * Render blog content for display.
  *
  * The admin editor stores Markdown (`@tiptap/markdown` → `editor.getMarkdown()`),
  * but the public site renders the body with `dangerouslySetInnerHTML` and
- * expects HTML. This converts markdown → HTML with `marked` (GFM: tables, code
- * fences) and then sanitizes. Content that is already HTML (legacy rows) is only
- * sanitized — never double-parsed. DB stays markdown; conversion happens at the
- * public serving chokepoint only.
+ * expects HTML. Content is always converted markdown → HTML with `marked`
+ * (GFM: tables, code fences; raw HTML blocks like demo-embeds pass through)
+ * and then sanitized. The DB stays markdown; conversion happens at the public
+ * serving chokepoint only. Entities corrupted by the legacy write-time
+ * sanitize are decoded first (existing rows), new rows pass through unchanged.
  */
 export function renderBlogContent(content: string | null | undefined): string {
   if (!content) return '';
-  const html = ALREADY_HTML_RE.test(content)
-    ? content
-    : (marked.parse(content, { async: false }) as string);
+  const html = marked.parse(decodeMarkdownEntities(content), { async: false }) as string;
   return sanitizeBlogHtml(html);
 }

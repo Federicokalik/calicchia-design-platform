@@ -230,16 +230,18 @@ body[data-menu-open='true'] [data-morph-ticker] {
   padding: 0.15em 0.35em;
   background: var(--color-bg-elev);
   border: 1px solid var(--color-line);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 .prose-blog pre {
   font-family: var(--font-mono);
   font-size: 0.9rem;
-  background: var(--color-ink);
-  color: var(--color-bg);
+  line-height: 1.6;
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
   padding: 1.5rem;
   overflow-x: auto;
-  border-radius: 4px;
+  border-radius: 2px;
 }
 .prose-blog pre code {
   background: transparent;
@@ -285,6 +287,60 @@ body[data-menu-open='true'] [data-morph-ticker] {
 }
 .prose-blog tbody tr:last-child td {
   border-bottom: none;
+}
+/* Call-to-action dentro l'articolo: una blockquote che chiude con un link a
+   /contatti/ è un CTA, non una citazione → diventa una card con pulsante
+   (convenzione del blog editor). Degrada a blockquote normale senza :has(). */
+.prose-blog blockquote:has(a[href*='/contatti/']) {
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-accent);
+  border-radius: 2px;
+  padding: 2rem;
+  max-width: 65ch;
+  margin-left: 0;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-ink);
+}
+.prose-blog blockquote:has(a[href*='/contatti/']) strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--color-ink);
+  margin-bottom: 0.5rem;
+}
+.prose-blog blockquote:has(a[href*='/contatti/']) p {
+  color: var(--color-ink-muted);
+  margin: 0 0 0.75rem;
+}
+.prose-blog blockquote:has(a[href*='/contatti/']) p:last-of-type {
+  margin-bottom: 1.5rem;
+}
+.prose-blog blockquote:has(a[href*='/contatti/']) a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  background: var(--color-cta-bg);
+  color: var(--color-cta-fg);
+  border: 1px solid var(--color-cta-bg);
+  border-radius: 2px;
+  padding: 0.8rem 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  text-decoration: none;
+  transition: filter 0.3s ease;
+}
+.prose-blog blockquote:has(a[href*='/contatti/']) a:hover {
+  filter: brightness(0.92);
 }
 
 /* ── Case study longform — Pentagram editorial ────────────────────── */
