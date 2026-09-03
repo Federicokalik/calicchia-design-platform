@@ -2,7 +2,9 @@ import Script from 'next/script';
 import { getLocale, getTranslations } from 'next-intl/server';
 
 // Commento++ self-hosted su VPS esterno — URL pubblici e stabili, niente env.
-const COMMENTO_URL = 'https://commenti.calicchia.design/js/commento.js';
+// Versionare l'asset evita che la CDN continui a servire una build precedente
+// quando cambia il bundle self-hosted di Commento++.
+const COMMENTO_URL = 'https://commenti.calicchia.design/js/commento.js?v=1.8.7-i18n-it-en-1';
 // Tema del widget, allineato al design system (vedi public/css/commento.css).
 // Commento carica questo stylesheet DOPO quello stock (cssOverride), quindi le
 // regole vincono su pari specificità.
