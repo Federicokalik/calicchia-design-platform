@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { buildBlogUrl, formatBlogDate, type BlogPostMeta } from '@/lib/blog-api';
@@ -18,14 +19,22 @@ export function BlogCard({ post, featured = false }: BlogCardProps) {
   return (
     <Link href={href} className="swiss-hover-card group flex flex-col">
       <div
-        className={`swiss-hover-card-image ${featured ? 'aspect-[16/9]' : 'aspect-[4/3]'} mb-6 overflow-hidden flex items-center justify-center`}
+        className={`swiss-hover-card-image relative ${featured ? 'aspect-[16/9]' : 'aspect-[4/3]'} mb-6 overflow-hidden flex items-center justify-center`}
         style={{
           background: post.cover_image
-            ? `url(${post.cover_image}) center/cover no-repeat`
+            ? undefined
             : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
         }}
       >
-        {!post.cover_image && (
+        {post.cover_image ? (
+          <Image
+            src={post.cover_image}
+            alt={post.title}
+            fill
+            sizes={featured ? '(min-width: 1024px) 80vw, 100vw' : '(min-width: 1024px) 45vw, 100vw'}
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
           <span
             className="font-[family-name:var(--font-display)] text-9xl"
             style={{

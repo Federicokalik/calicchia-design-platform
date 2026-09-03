@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { formatBlogDate } from '@/lib/blog-api';
 
@@ -68,14 +69,23 @@ export async function BlogHero({
       )}
 
       <div
-        className="aspect-[16/9] overflow-hidden"
+        className="relative aspect-[16/9] overflow-hidden"
         style={{
           background: coverImage
-            ? `url(${coverImage}) center/cover no-repeat`
+            ? undefined
             : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
         }}
       >
-        {!coverImage && (
+        {coverImage ? (
+          <Image
+            src={coverImage}
+            alt={title}
+            fill
+            priority
+            sizes="(min-width: 1024px) 80vw, 100vw"
+            style={{ objectFit: 'cover' }}
+          />
+        ) : (
           <div className="w-full h-full flex items-center justify-center">
             <span
               className="font-[family-name:var(--font-display)] text-[12rem]"
