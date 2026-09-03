@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Link } from '@/i18n/navigation';
-import { fetchBlogArticle, buildBlogUrl, fetchBlogList } from '@/lib/blog-api';
+import { fetchBlogArticle, buildBlogUrl } from '@/lib/blog-api';
 import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogBody } from '@/components/blog/BlogBody';
 import { BlogDemoIslands } from '@/components/blog/BlogDemoIslands';
@@ -11,7 +11,7 @@ import { BlogComments } from '@/components/blog/BlogComments';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { articleSchema, breadcrumbSchema } from '@/data/structured-data';
 import { SITE } from '@/data/site';
-import { LOCALES, type Locale } from '@/lib/i18n';
+import { type Locale } from '@/lib/i18n';
 import { buildI18nAlternates, buildCanonical, buildOgLocale } from '@/lib/canonical';
 import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 
@@ -22,32 +22,16 @@ interface Params {
   slug: string;
 }
 
-/**
- * Pre-generate static params per tutti i blog post pubblicati × tutti i locale.
- * `dynamicParams: true` permette nuovi post senza rebuild.
- * Revalidate 1h: post nuovi appaiono nel giro di un'ora senza intervento.
- */
-export const dynamicParams = true;
-export const revalidate = 3600;
-
-export async function generateStaticParams(): Promise<Params[]> {
-  // IT canonical list; blog posts share slugs across locales (admin
-  // TranslationsPanelEN attaches EN content to the same row, no separate slug).
-  const posts = await fetchBlogList(200, 'it');
-  const params: Params[] = [];
-  for (const post of posts) {
-    const dateStr = post.published_at ?? post.created_at;
-    if (!dateStr) continue;
-    const date = new Date(dateStr);
-    if (Number.isNaN(date.getTime())) continue;
-    const anno = String(date.getFullYear());
-    const mese = String(date.getMonth() + 1).padStart(2, '0');
-    for (const locale of LOCALES) {
-      params.push({ locale, anno, mese, slug: post.slug });
-    }
-  }
-  return params;
-}
+// Blog article pages render fully on-demand. The Docker image is built without
+// API access, so a build-time generateStaticParams would always be empty — and
+// under Next 16 `output: 'standalone'` an empty generateStaticParams combined
+// with a `dynamicParams` override of the parent [locale] layout
+// (dynamicParams = false) throws NoFallbackError at runtime: the request falls
+// through to the [...matrix] catch-all → 404 for every article (same failure as
+// lavori/[slug]). `force-dynamic` skips the prerender/fallback machinery
+// entirely — each article is SSR'd live against the API, so a freshly published
+// post is reachable immediately (no ISR window, no redeploy).
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({
   params,
