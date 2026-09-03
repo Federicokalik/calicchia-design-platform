@@ -1,0 +1,294 @@
+/*
+ * Commento++ — tema allineato al design system Calicchia (Swiss/Pentagram).
+ *
+ * Caricato via `cssOverride` in BlogComments (dopo il CSS stock, quindi vince
+ * su pari specificita'). Usa i token globali della pagina (--color-*, --font-*)
+ * cosi' il widget segue automaticamente l'identita' del sito.
+ */
+
+/* ── Root & tipografia base ─────────────────────────────── */
+.commento-root {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+}
+.commento-root * {
+  font-family: inherit !important;
+  color: var(--color-ink);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+}
+.commento-root a { color: var(--color-accent-deep); text-decoration: underline; text-underline-offset: 0.15em; }
+.commento-root a:hover { color: var(--color-accent); }
+.commento-root blockquote {
+  margin: 0 0 0 0.5rem;
+  padding: 0 0 0 0.75rem;
+  border-left: 2px solid var(--color-line);
+  color: var(--color-ink-muted);
+}
+.commento-root code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  padding: 0.1em 0.3em;
+}
+
+/* ── Area di scrittura ──────────────────────────────────── */
+.commento-root textarea {
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  color: var(--color-ink);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.95rem;
+  min-height: 110px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+.commento-root textarea:focus {
+  border-color: var(--color-accent);
+}
+.commento-root textarea::placeholder {
+  color: var(--color-ink-subtle);
+  font-size: 0.95rem;
+  line-height: normal;
+  display: block;
+  text-align: left;
+}
+.commento-root .commento-red-border {
+  border-color: var(--color-accent-deep);
+}
+
+/* Campi guest (nome/email) */
+.commento-root input[type="text"],
+.commento-root input[type="email"],
+.commento-root input[type="password"] {
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  color: var(--color-ink);
+  padding: 0.55rem 0.75rem;
+  outline: none;
+}
+.commento-root input[type="text"]:focus,
+.commento-root input[type="email"]:focus,
+.commento-root input[type="password"]:focus {
+  border-color: var(--color-accent);
+}
+.commento-root input::placeholder {
+  color: var(--color-ink-subtle);
+}
+
+/* ── Pulsanti ───────────────────────────────────────────── */
+.commento-root .commento-submit-button {
+  background: var(--color-cta-bg) !important;
+  color: var(--color-cta-fg) !important;
+  border: 1px solid var(--color-cta-bg) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.15em !important;
+  text-transform: uppercase !important;
+  padding: 0.65rem 1.4rem !important;
+  margin-top: 0.9rem !important;
+  transition: filter 0.3s ease;
+}
+.commento-root .commento-submit-button:hover {
+  filter: brightness(0.92);
+}
+.commento-root .commento-submit-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pulsanti generici (cancel / oauth) — outline coerente */
+.commento-root .commento-button {
+  background: transparent !important;
+  border: 1px solid var(--color-line-strong) !important;
+  border-radius: 2px !important;
+  box-shadow: none !important;
+  color: var(--color-ink) !important;
+  font-size: 0.72rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+.commento-root .commento-button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent-deep) !important;
+}
+
+/* Markdown help + anonimo */
+.commento-root .commento-markdown-button {
+  color: var(--color-ink-subtle);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.commento-root .commento-markdown-help {
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  background: var(--color-bg-elev);
+}
+.commento-root .commento-anonymous-checkbox-container label {
+  color: var(--color-ink-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+}
+
+/* ── Ordinamento ────────────────────────────────────────── */
+.commento-root .commento-sort-policy-buttons-container {
+  padding: 0.75rem 0 1.25rem;
+}
+.commento-root .commento-sort-policy-buttons .commento-sort-policy-button {
+  color: var(--color-ink-subtle);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+}
+.commento-root .commento-sort-policy-buttons .commento-sort-policy-button-selected {
+  color: var(--color-accent-deep);
+  font-weight: 600;
+}
+
+/* ── Card commento ──────────────────────────────────────── */
+.commento-root .commento-card {
+  border-top: 1px solid var(--color-line);
+  padding: 1.25rem 0 0.25rem;
+  margin-top: 1.25rem;
+}
+.commento-root .commento-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+  background: var(--color-cta-bg);
+  color: var(--color-cta-fg);
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+.commento-root .commento-avatar-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 2px;
+}
+.commento-root .commento-card .commento-name {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.05rem;
+  color: var(--color-ink);
+  margin-left: 52px;
+}
+.commento-root .commento-card .commento-subtitle {
+  margin-left: 52px;
+  color: var(--color-ink-subtle);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+.commento-root .commento-card .commento-timeago {
+  color: var(--color-ink-subtle);
+  font-size: 0.75rem;
+}
+.commento-root .commento-card .commento-timeago::before { content: ""; }
+.commento-root .commento-card .commento-score {
+  color: var(--color-ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.commento-root .commento-card .commento-body p {
+  font-size: 0.95rem;
+  color: var(--color-ink);
+}
+.commento-root .commento-card .commento-body a {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+}
+
+/* Badge moderazione */
+.commento-root .commento-card .commento-flagged::after,
+.commento-root .commento-card .commento-moderator::after,
+.commento-root .commento-card .commento-anonymous::after,
+.commento-root .commento-card .commento-pending::after {
+  border-radius: 2px;
+  font-weight: 500;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+/* Azioni (icone mask): tint sistema */
+.commento-root .commento-card .commento-option-button { background: var(--color-ink-subtle); }
+.commento-root .commento-card .commento-upvoted { background: var(--color-accent); }
+.commento-root .commento-card .commento-downvoted { background: var(--color-ink); }
+.commento-root .commento-card .commento-option-remove { background: var(--color-accent-deep); }
+.commento-root .commento-card .commento-option-sticky,
+.commento-root .commento-card .commento-option-unsticky { background: var(--color-accent); }
+.commento-root .commento-card .commento-option-approve { background: #2F9E44; }
+
+/* Card evidenziate / dark */
+.commento-root .commento-highlighted-card { background: var(--color-bg-elev); }
+.commento-root .commento-dark-card { background: var(--color-bg-elev); }
+
+/* Risposte annidate — indentazione con hairline */
+.commento-root [class^="commento-comment-children"] {
+  margin-left: 1rem;
+  padding-left: 1.25rem;
+  border-left: 1px solid var(--color-line);
+}
+
+/* ── Login box ──────────────────────────────────────────── */
+.commento-root .commento-login-box {
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  box-shadow: none;
+  padding: 1.5rem;
+}
+.commento-root .commento-login-box hr { background: var(--color-line); }
+.commento-root .commento-login-box .commento-login-box-subtitle {
+  color: var(--color-ink-muted);
+}
+.commento-root .commento-login-box .commento-email {
+  box-shadow: none;
+  border-radius: 2px;
+  border: 1px solid var(--color-line);
+}
+.commento-root .commento-login-box .commento-email-button {
+  background: var(--color-cta-bg);
+  color: var(--color-cta-fg);
+  border: none;
+  border-radius: 0 2px 2px 0;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+.commento-root .commento-login-box .commento-forgot-link,
+.commento-root .commento-login-box .commento-login-link {
+  color: var(--color-ink-muted);
+  border-bottom: 1px solid var(--color-line);
+}
+.commento-root .commento-login-box .commento-login-box-close:after,
+.commento-root .commento-login-box .commento-login-box-close:before {
+  background-color: var(--color-ink-muted);
+}
+
+/* ── Footer ─────────────────────────────────────────────── */
+.commento-root .commento-footer { margin-top: 2rem; }
+.commento-root .commento-footer .commento-logo-text {
+  color: var(--color-ink-subtle);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+}
+.commento-root .commento-footer .commento-logo { border-radius: 2px; }
+
+/* ── Errori / notifiche ─────────────────────────────────── */
+.commento-root .commento-error-box {
+  color: var(--color-accent-deep);
+  font-weight: 500;
+}
+.commento-root .commento-moderation-notice {
+  color: var(--color-accent-deep);
+  font-weight: 500;
+}

@@ -1,8 +1,12 @@
 import Script from 'next/script';
 import { getTranslations } from 'next-intl/server';
 
-// Commento++ self-hosted su VPS esterno — URL pubblico e stabile, niente env.
+// Commento++ self-hosted su VPS esterno — URL pubblici e stabili, niente env.
 const COMMENTO_URL = 'https://commenti.calicchia.design/js/commento.js';
+// Tema del widget, allineato al design system (vedi public/css/commento.css).
+// Commento carica questo stylesheet DOPO quello stock (cssOverride), quindi le
+// regole vincono su pari specificità.
+const COMMENTO_CSS = 'https://calicchia.design/css/commento.css';
 
 interface BlogCommentsProps {
   src?: string;
@@ -14,6 +18,8 @@ interface BlogCommentsProps {
  * Commento++ self-hosted comments widget.
  * Script source is the public Commento++ endpoint; the embed is the canonical
  * `<script defer src=...>` + `<div id="commento">` mount point Commento targets.
+ * `window.commento.cssOverride` è settato prima del load perché Commento legge
+ * la config quando lo script si esegue (afterInteractive → dopo hydration).
  */
 export async function BlogComments({ src, allowComments = true }: BlogCommentsProps) {
   if (!allowComments) return null;
@@ -33,6 +39,11 @@ export async function BlogComments({ src, allowComments = true }: BlogCommentsPr
         {t('comments')}
       </p>
       <div id="commento" />
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.commento = window.commento || {}; window.commento.cssOverride = ${JSON.stringify(COMMENTO_CSS)};`,
+        }}
+      />
       <Script src={src ?? COMMENTO_URL} strategy="afterInteractive" defer />
     </section>
   );
