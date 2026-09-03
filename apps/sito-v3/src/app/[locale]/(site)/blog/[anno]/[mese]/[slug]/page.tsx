@@ -133,7 +133,7 @@ export default async function BlogArticlePage({
 
       <BlogShare title={post.title} url={fullUrl} />
 
-      <BlogComments />
+      <BlogComments allowComments={post.allow_comments !== false} />
 
       {(post.prevSlug || post.nextSlug) && (
         <nav
