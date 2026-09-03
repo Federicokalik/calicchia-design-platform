@@ -1,5 +1,5 @@
 import Script from 'next/script';
-import { getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 
 // Commento++ self-hosted su VPS esterno — URL pubblici e stabili, niente env.
 const COMMENTO_URL = 'https://commenti.calicchia.design/js/commento.js';
@@ -25,6 +25,10 @@ export async function BlogComments({ src, allowComments = true }: BlogCommentsPr
   if (!allowComments) return null;
 
   const t = await getTranslations('blog.detail');
+  // Locale della pagina: Commento sceglie la lingua dal locale (data-locale o
+  // navigator.language) e carica /i18n/<locale>.json dal server Commento.
+  // EN è il default del widget; it richiede un file it.json sul container.
+  const locale = await getLocale();
 
   return (
     <section
@@ -44,7 +48,12 @@ export async function BlogComments({ src, allowComments = true }: BlogCommentsPr
           __html: `window.commento = window.commento || {}; window.commento.cssOverride = ${JSON.stringify(COMMENTO_CSS)};`,
         }}
       />
-      <Script src={src ?? COMMENTO_URL} strategy="afterInteractive" defer />
+      <Script
+        src={src ?? COMMENTO_URL}
+        strategy="afterInteractive"
+        defer
+        data-locale={locale}
+      />
     </section>
   );
 }
