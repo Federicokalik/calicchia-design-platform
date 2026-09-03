@@ -257,6 +257,35 @@ body[data-menu-open='true'] [data-morph-ticker] {
   height: auto;
   margin: 2rem 0;
 }
+/* Tabelle Markdown (marked GFM): hairline verticali, header mono eyebrow,
+   celle ariose — coerente con il resto della tipografia editoriale. */
+.prose-blog table {
+  width: 100%;
+  max-width: 65ch;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+}
+.prose-blog thead th {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  text-align: left;
+  color: var(--color-accent-deep);
+  padding: 0.5rem 0.9rem 0.5rem 0;
+  border-bottom: 1px solid var(--color-ink);
+}
+.prose-blog tbody td {
+  padding: 0.75rem 0.9rem 0.75rem 0;
+  border-bottom: 1px solid var(--color-line);
+  vertical-align: top;
+}
+.prose-blog tbody tr:last-child td {
+  border-bottom: none;
+}
 
 /* ── Case study longform — Pentagram editorial ────────────────────── */
 /* Stili per il markdown renderizzato da CaseLongform.tsx. Niente
