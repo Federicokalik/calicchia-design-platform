@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { formatBlogDate } from '@/lib/blog-api';
+import { getImageSize } from '@/lib/image-meta';
 
 interface BlogHeroProps {
   title: string;
@@ -23,6 +24,10 @@ export async function BlogHero({
 }: BlogHeroProps) {
   const t = await getTranslations('blog.detail');
   const formattedDate = formatBlogDate(publishedAt);
+  // Dimensioni intrinseche della cover: permettono di renderizzare al rapporto
+  // naturale (niente crop forzato 16/9) e di chiedere all'optimizer la
+  // larghezza nativa — sotto 2500px i pixel restano quelli del master.
+  const coverSize = coverImage ? await getImageSize(coverImage) : null;
 
   return (
     <section
@@ -68,38 +73,52 @@ export async function BlogHero({
         </p>
       )}
 
-      <div
-        className="relative aspect-[16/9] overflow-hidden"
-        style={{
-          background: coverImage
-            ? undefined
-            : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
-        }}
-      >
-        {coverImage ? (
-          <Image
-            src={coverImage}
-            alt={title}
-            fill
-            priority
-            sizes="(min-width: 1024px) 80vw, 100vw"
-            style={{ objectFit: 'cover' }}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span
-              className="font-[family-name:var(--font-display)] text-[12rem]"
-              style={{
-                color: 'var(--color-ink-subtle)',
-                letterSpacing: '-0.04em',
-                fontWeight: 500,
-              }}
-            >
-              {title.charAt(0)}
-            </span>
-          </div>
-        )}
-      </div>
+      {coverImage && coverSize ? (
+        <Image
+          src={coverImage}
+          alt={title}
+          width={coverSize.width}
+          height={coverSize.height}
+          priority
+          quality={90}
+          sizes={`${coverSize.width}px`}
+          className="w-full h-auto"
+        />
+      ) : (
+        <div
+          className="relative aspect-video overflow-hidden"
+          style={{
+            background: coverImage
+              ? 'var(--color-line)'
+              : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
+          }}
+        >
+          {coverImage ? (
+            <Image
+              src={coverImage}
+              alt={title}
+              fill
+              priority
+              quality={90}
+              sizes="(min-width: 1024px) 80vw, 100vw"
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <span
+                className="font-[family-name:var(--font-display)] text-[12rem]"
+                style={{
+                  color: 'var(--color-ink-subtle)',
+                  letterSpacing: '-0.04em',
+                  fontWeight: 500,
+                }}
+              >
+                {title.charAt(0)}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }

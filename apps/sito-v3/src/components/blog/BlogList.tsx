@@ -2,6 +2,7 @@ import { ArrowRight } from '@phosphor-icons/react/dist/ssr';
 import { getTranslations } from 'next-intl/server';
 import { BlogCard } from './BlogCard';
 import type { BlogPostMeta } from '@/lib/blog-api';
+import { getImageSize } from '@/lib/image-meta';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/Button';
@@ -44,6 +45,16 @@ export async function BlogList({ posts }: BlogListProps) {
     );
   }
 
+  // Dimensioni intrinseche delle cover: le card le rendono al rapporto naturale
+  // (nessun crop) e chiedono la larghezza nativa. Fetch header-only, cache in-process.
+  const sizes = await Promise.all(
+    posts.map(async (p): Promise<[string, { width: number; height: number } | null]> => [
+      p.slug,
+      p.cover_image ? await getImageSize(p.cover_image) : null,
+    ]),
+  );
+  const sizeBySlug = new Map(sizes);
+
   // Featured = il più recente.
   const [first, ...rest] = posts;
 
@@ -51,14 +62,23 @@ export async function BlogList({ posts }: BlogListProps) {
     <>
       {first && (
         <div className="mb-20 md:mb-32">
-          <BlogCard post={first} featured />
+          <BlogCard
+            post={first}
+            featured
+            coverWidth={sizeBySlug.get(first.slug)?.width}
+            coverHeight={sizeBySlug.get(first.slug)?.height}
+          />
         </div>
       )}
       {rest.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-16">
           {rest.map((p, i) => (
             <div key={p.slug} className={i % 2 === 1 ? 'md:mt-32' : ''}>
-              <BlogCard post={p} />
+              <BlogCard
+                post={p}
+                coverWidth={sizeBySlug.get(p.slug)?.width}
+                coverHeight={sizeBySlug.get(p.slug)?.height}
+              />
             </div>
           ))}
         </div>

@@ -10,43 +10,59 @@ interface BlogCardProps {
   post: BlogPostMeta;
   /** True for the first card (larger format). */
   featured?: boolean;
+  /** Dimensioni intrinseche della cover (da getImageSize nel server component). */
+  coverWidth?: number;
+  coverHeight?: number;
 }
 
-export function BlogCard({ post, featured = false }: BlogCardProps) {
+export function BlogCard({ post, featured = false, coverWidth, coverHeight }: BlogCardProps) {
   const href = buildBlogUrl(post);
   const locale = useLocale() as Locale;
 
   return (
     <Link href={href} className="swiss-hover-card group flex flex-col">
-      <div
-        className={`swiss-hover-card-image relative ${featured ? 'aspect-[16/9]' : 'aspect-[4/3]'} mb-6 overflow-hidden flex items-center justify-center`}
-        style={{
-          background: post.cover_image
-            ? undefined
-            : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
-        }}
-      >
-        {post.cover_image ? (
-          <Image
-            src={post.cover_image}
-            alt={post.title}
-            fill
-            sizes={featured ? '(min-width: 1024px) 80vw, 100vw' : '(min-width: 1024px) 45vw, 100vw'}
-            style={{ objectFit: 'cover' }}
-          />
-        ) : (
-          <span
-            className="font-[family-name:var(--font-display)] text-9xl"
-            style={{
-              color: 'var(--color-ink-subtle)',
-              letterSpacing: '-0.04em',
-              fontWeight: 500,
-            }}
-          >
-            {post.title.charAt(0)}
-          </span>
-        )}
-      </div>
+      {post.cover_image && coverWidth && coverHeight ? (
+        <Image
+          src={post.cover_image}
+          alt={post.title}
+          width={coverWidth}
+          height={coverHeight}
+          quality={90}
+          sizes={`${coverWidth}px`}
+          className="swiss-hover-card-image w-full h-auto mb-6"
+        />
+      ) : (
+        <div
+          className={`swiss-hover-card-image relative ${featured ? 'aspect-[16/9]' : 'aspect-[4/3]'} mb-6 overflow-hidden flex items-center justify-center`}
+          style={{
+            background: post.cover_image
+              ? 'var(--color-line)'
+              : 'linear-gradient(135deg, var(--color-bg-elev), var(--color-line))',
+          }}
+        >
+          {post.cover_image ? (
+            <Image
+              src={post.cover_image}
+              alt={post.title}
+              fill
+              quality={90}
+              sizes={featured ? '(min-width: 1024px) 80vw, 100vw' : '(min-width: 1024px) 45vw, 100vw'}
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <span
+              className="font-[family-name:var(--font-display)] text-9xl"
+              style={{
+                color: 'var(--color-ink-subtle)',
+                letterSpacing: '-0.04em',
+                fontWeight: 500,
+              }}
+            >
+              {post.title.charAt(0)}
+            </span>
+          )}
+        </div>
+      )}
       <div className="flex items-baseline justify-between gap-3 mb-2">
         {post.category && (
           <span
