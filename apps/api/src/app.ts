@@ -102,6 +102,7 @@ import { mail } from './routes/mail';
 import { mcp } from './routes/mcp';
 import { mcpTokens } from './routes/mcp-tokens';
 import { caldavTokens } from './routes/caldav-tokens';
+import { device } from './routes/device';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
@@ -554,6 +555,7 @@ app.route('/api/inbox', inbox);
 app.route('/api/my-work', myWork);
 app.route('/api/mail', mail);
 app.route('/api/mcp-tokens', mcpTokens);
+app.route('/api/device', device);  // auth device propria (Bearer dvt_*), NON in protectedPaths
 app.route('/api/caldav-tokens', caldavTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
 app.route('/api/admin/kb', adminKb);
