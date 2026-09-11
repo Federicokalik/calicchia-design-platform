@@ -1,8 +1,8 @@
 # Dalla SEO alla GEO: White Paper sull'evoluzione della ricerca nell'era dell'AI generativa
 
-*White paper a cura di [Federico Calicchia](https://github.com/federicokalik), redatto con il supporto di Claude Opus 4.8 (Anthropic) su sue indicazioni editoriali · Ultimo aggiornamento: 22 giugno 2026*
+*White paper a cura di [Federico Calicchia](https://github.com/federicokalik), redatto con il supporto di GLM 5.3 Flash (Z.ai) su sue indicazioni editoriali, a partire da una ricerca condotta con Claude Opus 5 (Anthropic) · Ultimo aggiornamento: 11 settembre 2026*
 
-> **Nota metodologica.** Documento elaborato a partire da una ricerca su fonti primarie e secondarie (paper accademici, documentazione ufficiale dei motori, report di settore, analisi di reverse-engineering indipendenti). Le sezioni distinguono esplicitamente i fatti documentati dai claim dei vendor e dalle analisi non confermate ufficialmente. Tutte le fonti sono elencate in bibliografia.
+> **Nota metodologica.** Documento elaborato a partire da una ricerca su fonti primarie e secondarie (paper accademici, documentazione ufficiale dei motori, report di settore, analisi di reverse-engineering indipendenti). La ricerca è stata condotta con Claude Opus 5 (Anthropic) e aggiornata al 7 settembre 2026; la stesura del documento è stata redatta con GLM 5.3 Flash, sotto direzione editoriale. Le sezioni distinguono esplicitamente i fatti documentati dai claim dei vendor e dalle analisi non confermate ufficialmente. Tutte le fonti sono elencate in bibliografia.
 
 ## Introduzione
 
@@ -13,16 +13,26 @@ I motori generativi — Google con AI Overviews e AI Mode, ChatGPT, Perplexity, 
 Questo white paper ricostruisce il passaggio dalla SEO alla GEO con tre obiettivi: spiegare **come funzionano davvero** i motori generativi a livello di retrieval (embedding, chunking, re-ranking, query fan-out) e di selezione delle fonti, motore per motore; **distinguere ciò che è documentato** da ciò che è inferito tramite reverse-engineering o semplicemente affermato dai vendor; e **collocare il fenomeno nel contesto italiano ed europeo**, dove il quadro normativo (AI Act, opt-out TDM, DSA, GDPR) è il più stringente al mondo e condiziona concretamente cosa la GEO può e non può fare. Il taglio è formativo e analitico, non operativo-aziendale: l'obiettivo è capire il meccanismo, non vendere una ricetta.
 
 ## TL;DR
-- **La ricerca sta migrando da un modello a "link blu" (crawling → indexing → ranking → click) a un modello di "motori generativi" che sintetizzano risposte e citano poche fonti:** nel 2024 il 58,5% delle ricerche Google USA finiva senza click (SparkToro/Datos), salito al 68,01% all'inizio del 2026 (SparkToro/Similarweb); quando appare un AI Overview, il CTR organico della pagina top cala di circa il 47-61% a seconda dello studio (Authoritas, Pew, Seer Interactive, Ahrefs).
+- **La ricerca sta migrando da un modello a "link blu" (crawling → indexing → ranking → click) a un modello di "motori generativi" che sintetizzano risposte e citano poche fonti:** nel 2024 il 58,5% delle ricerche Google USA finiva senza click (SparkToro/Datos), salito al 68,01% nei primi quattro mesi del 2026 (SparkToro/Similarweb); quando appare un AI Overview, il CTR organico della pagina top cala di circa il 47-61% a seconda dello studio (Authoritas, Pew, Seer Interactive, Ahrefs) — ma il declino si è fermato: il CTR con AIO è risalito da ~1,3% (dic 2025) a ~2,4% (feb 2026), con un divario strutturale residuo del ~37% rispetto alle query senza AIO (Seer, 53 brand, 5,47M query).
 - **La GEO (Generative Engine Optimization) nasce dal paper accademico di Aggarwal et al. (IIT Delhi/Princeton, KDD 2024)**, che dimostra che aggiungere statistiche, citazioni e quotazioni può aumentare la visibilità nelle risposte generative "fino al 40%", mentre il keyword stuffing tradizionale è l'unico metodo testato che *peggiora* la visibilità.
 - **Ogni motore AI ha una pipeline di retrieval diversa** (ChatGPT su indice Bing/scraping terzi, Perplexity con crawler proprio, Claude su Brave Search, Copilot su Bing con Prometheus, Gemini sull'indice Google con query fan-out): tutti usano RAG, embeddings e selezione a livello di "chunk", per cui struttura del contenuto, freschezza, autorevolezza e citabilità contano più del posizionamento tradizionale.
 - **La visibilità AI è una distribuzione, non un punteggio:** una misura singola ha un errore standard di 0,370 (statisticamente inutile); servono 7-10+ run ripetute per prompt (paper "Don't Measure Once", arXiv 2604.07585).
 - **Google stessa (maggio 2026) ha dichiarato che "GEO è ancora SEO"** e ha smontato 5 miti, tra cui llms.txt e il chunking manuale.
 
+> **Aggiornamento settembre 2026 (giu → set).** Le novità sostanziali arrivate dopo la chiusura della prima versione (22 giugno 2026):
+> 1. **Search Console — report "Generative AI":** lanciati il 3 giugno 2026 per un sottoinsieme di siti UK (sulla spinta di CMA/DMA), poi **globali dal 31 agosto 2026** (dati dal 18 maggio 2026). Solo impression, pagine, paesi, dispositivi e date — **niente click né prompt**; introdotto un opt-out dalle feature AI senza penalità di ranking.
+> 2. **Cloudflare — blocco di default dei crawler AI "mixed-use"** (search + training + agent mescolati) su pagine con pubblicità, dal **15 settembre 2026** per nuovi clienti e clienti free; i crawler di sola ricerca restano ammessi. Il precedente "Pay Per Crawl" è evoluto in **Pay Per Use** (compenso quando il contenuto compare in una risposta AI).
+> 3. **AI Act UE — obblighi di trasparenza (art. 50) in vigore dal 2 agosto 2026:** marking machine-readable degli output generativi, etichettatura di deepfake e testi AI su temi di interesse pubblico, informazione agli utenti dei chatbot. Linee guida della Commissione 20 luglio 2026; periodo transitorio fino al 2 dicembre 2026; sanzioni fino a €15M o 3% del fatturato mondiale.
+> 4. **AI Mode in Francia dal 22 luglio 2026** (ultimo grande mercato UE, escluso inizialmente per i diritti connessi), con impegni su opt-out editori e compensazione.
+> 5. **ChatGPT Atlas dismesso come browser il 9 agosto 2026** (funzioni agentiche spostate nell'app e in un'estensione Chrome); **Perplexity Comet gratuito e su Android dal 19 agosto 2026**.
+> 6. **Dati di svolta su CTR e conversioni:** il CTR organico in presenza di AI Overview è risalito (Seer Interactive: da ~1,3% a dicembre 2025 a ~2,4% a febbraio 2026); il traffico da AI converte molto meglio dell'organico (Semrush 4,4x; Ahrefs 23x; Adobe +42% nel retail a marzo 2026).
+> 7. **Mercato in riassetto:** ChatGPT è sceso sotto il 50% della quota app a marzo 2026 (Gemini ~28%, Claude ~10%); run rate Anthropic a $47B (Series H, 29 maggio 2026).
+> 8. **Standard di licensing in corsa:** RSL Media / "Human Consent Standard" (maggio-giugno 2026), a fianco di RSL e IETF AI Preferences; i crawler AI erano il 52% di tutto il traffico bot a giugno 2026.
+
 ## Key Findings
 
-1. **Il comportamento di ricerca è cambiato strutturalmente, non marginalmente.** Lo zero-click è passato da ~50% (SparkToro 2019) a 68,01% (Q1 2026 USA). Gartner ha previsto (feb 2024) un calo del 25% del volume di ricerca tradizionale entro il 2026 — una previsione, non un consuntivo.
-2. **Il posizionamento organico tradizionale resta importante ma non è più sufficiente.** Lo studio Ahrefs di gennaio 2026 mostra che solo il 38% delle pagine citate negli AI Overviews è anche nella top 10 organica (era 76% a luglio 2025).
+1. **Il comportamento di ricerca è cambiato strutturalmente, non marginalmente.** Lo zero-click è passato da ~50% (SparkToro 2019) a 68,01% (gen–apr 2026 USA). Gartner ha previsto (feb 2024) un calo del 25% del volume di ricerca tradizionale entro il 2026 — una previsione, non un consuntivo: a metà 2026 non si è verificata nella misura prevista (il CTR con AIO è risalito e il traffico da AI converte meglio, quindi molti brand perdono click ma non fatturato).
+2. **Il posizionamento organico tradizionale resta importante ma non è più sufficiente.** Lo studio Ahrefs di gennaio 2026 mostra che solo il 38% delle pagine citate negli AI Overviews è anche nella top 10 organica (era 76% a luglio 2025); l'overlap è poi sceso a un range 12–54% a inizio 2026 secondo i diversi studi (solo il 12% degli URL citati dagli LLM è in top 10 secondo Ahrefs).
 3. **Le tattiche GEO con evidenza empirica sono poche e specifiche:** statistiche, citazioni di fonti, quotazioni, freschezza, struttura "answer-first". Molti consigli popolari (llms.txt, schema-as-hack, chunking manuale) non hanno evidenza di funzionare e alcuni sono smentiti da Google.
 4. **Il mercato italiano/UE è in ritardo ma in rapida accelerazione:** AI Overviews in Italia dal 26 marzo 2025; uso GenAI in Italia al 20% (sotto media UE 33%, Eurostat 2025); dopo il reclamo FIEG (15 ottobre 2025), l'AGCOM ha trasmesso il caso Google AI Overviews/AI Mode alla Commissione UE ex art. 65 DSA (29 aprile 2026). La frammentazione dei motori è globale: in Cina Doubao, ERNIE, DeepSeek e Qwen superano insieme i 900 milioni di utenti.
 5. **Il contesto normativo UE è il più stringente al mondo:** AI Act, GDPR, opt-out TDM ex art. 4 CDSM, caso Garante-OpenAI e dispute publisher modellano come la GEO può operare in Europa.
@@ -48,6 +58,11 @@ I "motori generativi" (generative engines) non restituiscono primariamente una l
 - **7 maggio 2026:** Google Chrome rilascia Lighthouse 13.3.0 con la categoria sperimentale "Agentic Browsing" (include un check su llms.txt) nel config di default.
 - **15 maggio 2026:** Google pubblica la guida ufficiale GEO ("Optimizing your website for generative AI features").
 - **5 giugno 2026:** Google pubblica la guida sui servizi SEO di terze parti e aggiorna "Do you need an SEO?", nominando AEO/GEO come categoria di servizio.
+- **3 giugno 2026:** Search Console lancia i report "Search Generative AI" (impression in AI Overviews, AI Mode e Discover) per un sottoinsieme di siti UK, su mandato CMA/DMA.
+- **20 luglio 2026:** la Commissione UE pubblica le linee guida volontarie per il Code of Practice sull'etichettatura AI (art. 50 AI Act), applicabile dal 2 agosto 2026.
+- **22 luglio 2026:** AI Mode e AI Overviews arrivano in Francia, ultimo grande mercato UE, con impegni su opt-out editori e diritti connessi.
+- **31 agosto 2026:** i report "Generative AI" di Search Console diventano globali (dati dal 18 maggio 2026, nessun backfill storico; solo impression — niente click né prompt; opt-out dalle feature AI senza penalità).
+- **15 settembre 2026 (annunciato il 1° luglio):** Cloudflare attiva il blocco di default dei crawler AI "mixed-use" su pagine con pubblicità (nuovi clienti, nuovi siti, clienti free); Pay Per Crawl → Pay Per Use.
 
 Perplexity (fondata nel 2022) ha reso popolare il concetto di "answer engine" con citazioni trasparenti. Claude (Anthropic) ha aggiunto la ricerca web nel 2025.
 
@@ -72,16 +87,18 @@ Il termine GEO è stato formalizzato nel paper di **Pranjal Aggarwal, Vishvak Mu
 - **Ahrefs (dic 2025):** la presenza di un AI Overview correla con un CTR medio inferiore del **58%** per la pagina top.
 - **Pew Research (lug 2025):** su 68.879 ricerche reali, click su link tradizionale all'8% con AI Overview vs 15% senza (≈ −47%); solo l'1% clicca una fonte citata; 26% delle sessioni con AIO termina del tutto (vs 16%). Google ha contestato la metodologia.
 - **Seer Interactive (set 2025, >25M impression):** CTR organico per query con AIO crollato del **61%** (1,76% → 0,61%).
-- **Gartner (feb 2024):** previsione −25% del volume di ricerca tradizionale entro il 2026.
+- **Seer Interactive (studio longitudinale, dati a feb 2026; 53 brand, 5,47M query, 2,43 mld impression):** dato di svolta — il CTR organico in presenza di AIO è sceso a un minimo di ~1,3% a dicembre 2025 per poi **risalire a ~2,4% a febbraio 2026** (recupero ~85%, inversione di un declino di 18 mesi). Resta un divario strutturale di ~37% rispetto alle query senza AIO (2,4% vs 3,8%).
+- **Qualità del traffico da AI (mar 2026):** secondo Semrush il visitatore medio da AI search vale **4,4x** quello dell'organico tradizionale (tassi di conversione); Ahrefs: AI search = 0,5% del traffico ma 12,1% degli signup (**23x**); Adobe Digital Insights: traffico da AI convertiva **+42%** rispetto al non-AI a marzo 2026 (inversione dal −43% di luglio 2024). *(Attenzione: la definizione di "conversione" varia tra studi e i campioni sono spesso auto-selezionati.)*
+- **Gartner (feb 2024):** previsione −25% del volume di ricerca tradizionale entro il 2026. A settembre 2026 non si è verificata nella misura prevista.
 - **Impatto publisher:** Digital Content Next (ago 2025) cala mediano del traffico referral Google del **10%**; Press Gazette/Chartbeat: −33% globale nel 2025 (−38% USA, −17% Europa). Il danno scala con la dimensione del sito.
 
 ### 2. Come funziona tecnicamente ogni motore AI (panoramica)
 
 Tutti i motori generativi usano una forma di **RAG (Retrieval-Augmented Generation)**: invece di affidarsi solo alla conoscenza "parametrica" (appresa in training), recuperano contenuti freschi dal web e li usano per costruire la risposta. Le sottosezioni 2-bis e 2-ter scendono in profondità sulla meccanica e sul reverse-engineering; qui la sintesi per-motore.
 
-- **ChatGPT (OpenAI):** retrieval via API di scraping di terze parti (storicamente legato a Bing; Seer Interactive ha trovato 87% di overlap con i top result di Bing); query fan-out; selezione fonti che pesa autorevolezza, struttura e freschezza.
-- **Google Gemini / AI Overviews / AI Mode:** indice web proprio + Knowledge Graph + Shopping; query fan-out documentato via API; selezione che attinge anche fuori dalla top-10 organica (Ahrefs gen 2026: solo 38% delle citazioni dalla top-10).
-- **Perplexity:** RAG con crawler proprio (PerplexityBot); forte sensibilità alla freschezza; tipicamente 3-5 fonti per risposta; reranking ML a più livelli.
+- **ChatGPT (OpenAI):** retrieval via API di scraping di terze parti (storicamente legato a Bing; Seer Interactive ha trovato 87% di overlap con i top result di Bing); query fan-out; selezione fonti che pesa autorevolezza, struttura e freschezza. Il browser **ChatGPT Atlas è stato dismesso il 9 agosto 2026**: le funzioni agentiche vivono nell'app ChatGPT e in un'estensione Chrome.
+- **Google Gemini / AI Overviews / AI Mode:** indice web proprio + Knowledge Graph + Shopping; query fan-out documentato via API; selezione che attinge anche fuori dalla top-10 organica (Ahrefs gen 2026: solo 38% delle citazioni dalla top-10). Scala ufficiale: **2,5 miliardi di utenti mensili** per gli AI Overviews e **1 miliardo per AI Mode** (Google I/O, maggio 2026; query che raddoppiano ogni trimestre da launch, Liz Reid). AI Mode gira su Gemini 2.5/3.5 Flash.
+- **Perplexity:** RAG con crawler proprio (PerplexityBot); forte sensibilità alla freschezza; tipicamente 3-5 fonti per risposta; reranking ML a più livelli. Il browser agentic **Comet** è ora gratuito e cross-platform (Mac, Windows, iOS, Android — su Android dal 19 agosto 2026).
 - **Microsoft Copilot:** modello Prometheus su indice Bing; "Bing Orchestrator" che genera query interne iterative (fan-out); citazioni numerate [1][2]; primo motore a codificare la GEO nelle proprie Webmaster Guidelines (febbraio 2026).
 - **Claude (Anthropic):** retrieval via provider esterno (overlap con Brave); citazione a livello di frase; tre bot (ClaudeBot training, Claude-User fetch, Claude-SearchBot indicizzazione).
 
@@ -201,7 +218,7 @@ Copilot merita una trattazione a sé perché è l'unico motore importante che ha
 - **Bing Webmaster Guidelines (riscrittura del 27 febbraio 2026) — FATTO UFFICIALE.** Microsoft ha riscritto le linee guida trattando *"grounding results and citations"* come **esito di eleggibilità separato** dal ranking tradizionale, e introducendo **GEO come categoria di ottimizzazione ufficiale** (primo motore a farlo in policy). Direttive verificate: **NOARCHIVE** impedisce l'uso del contenuto nelle risposte Copilot; **NOCACHE** limita Copilot a usare solo URL, titolo e snippet (Microsoft lo **sconsiglia** sulle pagine che si vogliono far citare); l'attributo **data-snippet** permette di specificare quale testo Bing può mostrare o citare (controllo a livello di paragrafo).
 - **Relazione con ChatGPT (ATTRIBUZIONE CAUTA).** Lo studio Seer Interactive (6 febbraio 2025) ha trovato che **l'87% delle citazioni di SearchGPT coincide con i top 20 organic result di Bing** (contro il 56% per Google). È una **misurazione indipendente di coincidenza**, non una quota di retrieval dichiarata; il dato spesso citato "~92% via Bing API" è un **claim vendor non confermato**. Inoltre OpenAI sta costruendo un indice proprio: la correlazione con Bing potrebbe de-correlare nel tempo.
 - **IndexNow (FATTO UFFICIALE).** Protocollo che notifica a Bing (e ai motori partecipanti) ogni aggiunta/modifica/rimozione di contenuto; **Google non lo supporta** (febbraio 2026).
-- **Trasparenza.** L'**AI Performance Report** di Bing Webmaster Tools (public preview da febbraio 2026) mostra conteggio citazioni, URL citati e un campione delle grounding queries (che *"sono un campione"* e *"non necessariamente le query esatte digitate"*).
+- **Trasparenza.** L'**AI Performance Report** di Bing Webmaster Tools (public preview da febbraio 2026) mostra conteggio citazioni, URL citati e un campione delle grounding queries (che *"sono un campione"* e *"non necessariamente le query esatte digitate"*). **Novità settembre 2026:** Google ha pareggiato il match con i report **"Search Generative AI"** in Search Console (UK dal 3 giugno 2026, globali dal 31 agosto 2026) — ma **solo impression** (AI Overviews, AI Mode, Discover), senza click né prompt; esiste anche un toggle di opt-out dalle feature AI senza penalità di ranking. Per ChatGPT e Perplexity non esiste nulla di simile: la misurazione resta delegata a tool terzi.
 - **Copilot Search vs Microsoft 365 Copilot.** Il consumer è grounded sull'indice web pubblico di Bing; l'enterprise (M365 Copilot) è grounded sul tenant via Microsoft Graph + Semantic Index, con scoping ai permessi dell'utente.
 
 **Conseguenza GEO:** per Copilot, l'indicizzazione su Bing e la gestione corretta delle direttive (evitare NOARCHIVE/NOCACHE sulle pagine da far citare) sono prerequisiti tecnici espliciti — l'unico caso in cui il "cosa fare" è scritto nero su bianco dal produttore.
@@ -215,7 +232,7 @@ Copilot merita una trattazione a sé perché è l'unico motore importante che ha
 | Query fan-out | Sì (`web.run`, 2-10+ round) | Sì (documentato via API) | Sì (query decomposition) | Sì (Bing Orchestrator) | Sì (ricerche multiple) |
 | Citazione esposta | Inline, variabile per modello | `groundingSupports` frase→chunk | Inline sempre, paragrafo | Numerata [1][2] + pannello fonti | Inline sempre, frase (`cited_text`) |
 | Fattore distintivo | Concentrazione su pochi domini autorevoli (Bigfoot) | Copertura albero sotto-domande | Freshness estrema, earned media Tier-1 | GEO in policy ufficiale (Webmaster Guidelines) | Granularità di frase |
-| Trasparenza meccanica | Bassa (reverse-engineering) | Media (API ufficiale) | Bassa-media (analisi indipendenti) | Alta (doc + AI Performance Report) | Media (doc ufficiale) |
+| Trasparenza meccanica | Bassa (reverse-engineering) | Media-alta (API ufficiale + report Search Console "Generative AI", solo impression) | Bassa-media (analisi indipendenti) | Alta (doc + AI Performance Report) | Media (doc ufficiale) |
 | Riproducibilità citazione | Bassa (cambia per modello) | Media | Media-bassa (volatile su freshness) | Media-alta | Media |
 
 ### 3. Cosa rende un contenuto citabile (tattiche GEO evidence-based)
@@ -239,12 +256,15 @@ Copilot merita una trattazione a sé perché è l'unico motore importante che ha
 ### 4. Il mercato italiano ed europeo (quadro generale)
 
 #### Adozione
-- **Eurostat 2025:** uso di strumenti GenAI in Italia al **20%**, sotto la media UE del 33% e lontano da Norvegia (56%) e Danimarca (48%). Riflette il divario nord-sud europeo.
+- **Eurostat 2025:** uso di strumenti GenAI in Italia al **20%** (19,9% per la rilevazione ufficiale), sotto la media UE del 32,7% e lontano da Norvegia (56%) e Danimarca (48%). Riflette il divario nord-sud europeo.
+- **Adozione misurata come audience (da non fondere con Eurostat):** ~15 milioni di italiani (35% della popolazione online 18-74) usavano app AI a dicembre 2025, più del doppio del 2024 (Audicom-Audiweb); ChatGPT 10,1 milioni di utenti unici (23,6% della popolazione 18-74); ChatGPT genera oltre l'84% del traffico di referral AI in Italia (We Are Social/Meltwater, *Digital 2026: Italy*). La divergenza Eurostat (~20%) vs Audiweb (~35%) riflette definizioni diverse (survey ufficiale vs misurazione audience app): vanno presentate entrambe con fonte, non fuse.
 - **ChatGPT in Europa:** utenti attivi mensili medi da 11,2 a 41,3 milioni entro marzo 2025 (~270%).
 - L'Italia è stata il **primo paese al mondo** a bloccare temporaneamente ChatGPT (marzo 2023).
 
 #### Tempistica AI Overviews in Europa
 Arrivati in Italia il **26 marzo 2025** (con Austria, Belgio, Germania, Irlanda, Polonia, Portogallo, Spagna, Svizzera), ~10 mesi dopo gli USA, in italiano e su Gemini 2.0. Si attivano per query informative a coda lunga. L'AI Mode in italiano non risultava pienamente lanciato a metà 2026.
+
+**Il precedente francese (luglio 2026):** la Francia è stata inizialmente **esclusa** dal rollout di AI Mode e AI Overviews per ragioni regolatorie sui diritti connessi; dal **22 luglio 2026** entrambe le feature sono attive anche lì, con impegni di Google su opt-out editori e compensazione. È il caso di riferimento per il dibattito FIEG-AGCOM/UE: dimostra che la "fattibilità regolatoria" degli opt-out senza penalizzazione, oggi chiesta dagli editori italiani, è già stata negoziata altrove in UE.
 
 *(Per il quadro normativo dettagliato — TDM/opt-out, AI Act, caso FIEG-AGCOM, Garante — vedi la Sezione 4-ter.)*
 
@@ -256,6 +276,9 @@ La frammentazione dei motori generativi non è un fenomeno solo occidentale. Per
 - **Gli altri.** Secondo i dati QuestMobile (via Caixin), a **marzo 2026 Doubao (ByteDance) è in testa con ~345 milioni di MAU**, davanti a Qwen (Alibaba, ~166M) e DeepSeek (~127M), con Tencent Yuanbao tra i primi quattro; Doubao ha superato Baidu ERNIE Bot. I MAU combinati dei principali player superano i 900 milioni.
 
 **Implicazione per un freelance italiano:** questi motori sono **contesto**, non azione operativa quotidiana. Il punto rilevante è strutturale — la logica GEO (retrieval, grounding, citazioni, query fan-out) è sostanzialmente la stessa ovunque, e la frammentazione (più motori, nessun dominatore unico) è una tendenza globale, non un'anomalia occidentale. *(Nota: i conteggi MAU dei motori cinesi divergono molto tra fonti e metriche; vanno trattati come stime, sempre con fonte e data.)*
+
+#### Quote di mercato occidentali aggiornate (settembre 2026)
+Dato recente più rilevante: **ChatGPT è sceso sotto il 50% della quota app a marzo 2026** (prima volta; Sensor Tower, dati fine maggio: 46,4%, davanti a Gemini 27,7% e Claude 10,3%). Sul web mondiale ChatGPT è sceso dal 76,5% (feb 2025) al 53,9% (mag 2026, Similarweb/Momentic) a vantaggio di Gemini (5,6% → 27,9%) e Claude (1,4% → 9,2%). Completano il quadro: run rate di Anthropic a **$47B** (annuncio Series H, 29 maggio 2026; OpenAI ~$25B ARR). *(Attenzione: StatCounter e i tool di misurazione web danno numeri molto diversi — metodologie diverse, referral vs visite vs app; non vanno fusi.)* Implicazione GEO: **non si ottimizza per un solo motore** — ChatGPT, Gemini e Claude sono ormai il set base che copre ~84% dell'audience app, e ogni engine va monitorato separatamente (vedi 4-bis).
 
 ### 4-bis. Metodologia di misurazione: come testare la GEO senza ingannarsi
 
@@ -374,9 +397,10 @@ Rilevanza GEO: il GDPR vincola come i dati personali presenti nei contenuti poss
 
 - **1 agosto 2024:** entrata in vigore (Reg. UE 2024/1689).
 - **2 agosto 2025:** applicabili gli obblighi per i modelli GPAI (inclusi policy copyright e "riassunto sufficientemente dettagliato" dei dati di training). Pubblicato il GPAI Code of Practice (capitoli Trasparenza, Copyright, Safety).
-- **2 agosto 2026:** piena applicabilità, inclusi gli obblighi di trasparenza (etichettatura dei contenuti generati da AI e dei deepfake).
+- **20 luglio 2026:** la Commissione pubblica le linee guida volontarie per il Code of Practice sull'etichettatura AI.
+- **2 agosto 2026 (ora attivo):** piena applicabilità, inclusi gli **obblighi di trasparenza dell'art. 50**: i sistemi di AI generativa devono marcare gli output come artificiali in formato machine-readable; deepfake e testi AI su temi di interesse pubblico vanno etichettati; gli utenti vanno informati quando interagiscono con un chatbot. Sanzioni fino a **€15M o 3% del fatturato mondiale**. Contenuti pubblicati prima del 2 agosto 2026 non vanno etichettati retroattivamente; periodo transitorio per marking/detection dei sistemi già sul mercato **fino al 2 dicembre 2026**. Eccezione rilevante: la marcatura non è richiesta per contenuti AI sottoposti a **revisione editoriale umana con responsabilità di persona identificabile**.
 
-Per un freelance: gli obblighi diretti ricadono sui *fornitori* di modelli, non su chi pubblica siti. Ma l'etichettatura dei contenuti AI-generati (dei tuoi clienti) e la gestione corretta di opt-out/licensing diventano parte della due diligence professionale.
+Per un freelance: gli obblighi diretti ricadono sui *fornitori* di modelli, non su chi pubblica siti. Ma dal 2 agosto 2026 **chi pubblica contenuti AI (testo, immagini, video) per conto di clienti su temi di interesse pubblico deve etichettarli**, salvo revisione editoriale umana documentata (clausole nei contratti con clienti e freelance, responsabilità editoriale registrata nel CMS): la conformità all'art. 50 entra nella due diligence professionale, insieme alla gestione di opt-out/licensing.
 
 ### 5. Implicazioni pratiche per la GEO
 
@@ -390,8 +414,11 @@ Ottimizzazione a livello di chunk/passaggio (non di pagina); ampiezza topica per
 
 **Fase 1 — Fondamenta tecniche (immediato):**
 1. Verificare l'indicizzazione su **Bing Webmaster Tools** (prerequisito per ChatGPT). Usare **IndexNow**.
-2. Auditare il **robots.txt**: consentire i bot di retrieval (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User) anche bloccando il training. Non bloccare per errore i bot di citazione.
+2. Auditare il **robots.txt**: consentire i bot di retrieval (OAI-SearchBot, ChatGPT-User, Claude-SearchBot, Claude-User, PerplexityBot, Perplexity-User) anche bloccando il training. Non bloccare per errore i bot di citazione. *(Novità: per i siti dietro Cloudflare decidere consapevolmente, **entro il 15 settembre 2026**, se accettare/bloccare/monetizzare i crawler AI "mixed-use" ora bloccati di default.)*
 3. Rendering server-side del contenuto chiave e HTML semantico pulito.
+4. **Attivare e monitorare i nuovi report "Generative AI" di Search Console** (globali dal 31 agosto 2026) per una baseline di impression su AI Overviews/AI Mode/Discover — ricordando che misurano solo impression, non click.
+5. **Rimuovere le dipendenze dai rich results deprecati** (FAQ dal 7 maggio 2026; il markup FAQPage resta valido ma non produce più rich result, e l'API Search Console per i dati FAQ è stata rimossa ad agosto 2026).
+6. Per i clienti UE che pubblicano contenuti AI: **mettere in conformità con l'art. 50 AI Act** (etichettatura, responsabilità editoriale documentata, clausole nei contratti).
 
 **Fase 2 — Contenuto (1-3 mesi):**
 4. Riscrivere le pagine top in formato **answer-first**: heading a domanda, risposta diretta nei primi 40-60 token.
@@ -400,12 +427,16 @@ Ottimizzazione a livello di chunk/passaggio (non di pagina); ampiezza topica per
 7. Strutturare in **chunk autosufficienti** che coprano le sotto-domande (per il fan-out), architettura pillar + cluster. (NB: scrivere bene, non spezzare artificialmente — vedi 6.2.)
 
 **Fase 3 — Autorità e misurazione (3-6 mesi):**
-8. Costruire **menzioni di brand** e citazioni di terze parti (G2/Trustpilot, PR digitale, YouTube, Reddit); Wikipedia per il grounding delle entità dove rilevante.
-9. Implementare un tool di tracking AI (Otterly entry, Peec AI per il multilingua europeo, Profound enterprise) e monitorare **trend con run ripetute** (vedi 4-bis), non snapshot.
+8. Costruire **menzioni di brand** e citazioni di terze parti (G2/Trustpilot, PR digitale, YouTube, Reddit); Wikipedia per il grounding delle entità dove rilevante. *(La correlazione più forte con le citazioni AI resta il volume di ricerca del brand — 0,334 secondo Previsible/5WPR, più dei backlink — e la presenza su Wikidata/Wikipedia + piattaforme autorevoli può moltiplicare la probabilità di citazione ~2,8x.)*
+9. Implementare un tool di tracking AI (Otterly entry ~$29/mese, Peec AI per il multilingua europeo, Semrush AI Visibility Toolkit da $99, Profound enterprise) e monitorare **trend con run ripetute** (vedi 4-bis), non snapshot.
+10. **Tracciare il traffico da AI come canale separato in GA4** e introdurre KPI di AI visibility (share of voice, citation rate). Pratica ancora rara: solo il 16% delle Fortune 500 e il 22% dei marketer tracciano la AI visibility (AirOps; Averi, mar 2026). Il traffico AI resta ~1% del totale ma converte molto meglio (4,4x–23x, vedi Sezione 1).
 
 **Soglie che cambiano le raccomandazioni:**
 - Se il traffico da AI search supera l'1-2% (oggi tipicamente <1% ma converte meglio dell'organico), aumentare l'investimento GEO.
 - Se l'overlap tra citazioni AI e ranking organico è basso, dare priorità a chunking-friendliness e autorevolezza.
+- Se Search Console aggiungerà i **click** (oggi solo impression) ai report "Generative AI", la misurazione GEO cambia in profondità.
+- Se **AI Mode diventerà default in Italia** o il blocco Cloudflare/RSL genererà referral significativi da pay-per-use, rivedere policy crawler e priorità.
+- Se un tool AI supererà stabilmente ChatGPT come motore di citazione, riprioritare i test per-engine.
 - Per l'Italia, monitorare il lancio dell'**AI Mode in italiano** e l'evoluzione del caso FIEG-AGCOM e del quadro copyright UE.
 
 ### 6. Sezione critica / anti-hype: cosa smontare nel discorso GEO corrente
@@ -460,8 +491,9 @@ Domanda ricorrente: conviene pubblicare una versione Markdown delle pagine (via 
 #### 6.5 — Schema/structured data: utile, ma non per il motivo che ti dicono
 
 - **Il claim hype:** "senza schema.org non vieni citato dall'AI."
-- **L'evidenza:** Google (maggio 2026) dice esplicitamente che lo structured data **non è richiesto** per generare risposte AI. Pedro Dias e altri hanno mostrato che lo schema non influenza le citazioni ChatGPT. Gli studi di correlazione (siti con schema = più visibilità AI) esistono ma sono **confusi da variabili terze**: i siti che implementano schema tendono a essere anche più curati, più autorevoli, meglio strutturati. La correlazione non isola lo schema come causa.
-- **Verdetto bilanciato:** lo schema resta utile per i suoi scopi classici (rich result, parsing, disambiguazione di entità) e non fa male. Ma non è il fattore di citazione AI che il marketing GEO suggerisce. Implementalo per igiene tecnica e per la Search tradizionale, non come "trucco AI".
+- **L'evidenza:** Google (maggio 2026) dice esplicitamente che lo structured data **non è richiesto** per generare risposte AI ("nessuno schema speciale per AI Overviews o AI Mode") e che lo structured data va usato quando corrisponde al contenuto visibile, per la comprensione delle entità — non come leva diretta di ranking. Pedro Dias e altri hanno mostrato che lo schema non influenza le citazioni ChatGPT. Gli studi di correlazione (siti con schema = più visibilità AI) esistono ma sono **confusi da variabili terze**: i siti che implementano schema tendono a essere anche più curati, più autorevoli, meglio strutturati. La correlazione non isola lo schema come causa.
+- **Contesto in rapida erosione dei rich result:** Google ha deprecato i **FAQ rich results dal 7 maggio 2026** (dopo HowTo nel 2023 e sette tipi a giugno 2025; Practice Problem e Sitelinks Search Box a gennaio 2026). Il markup FAQPage resta valido ma non produce più rich result (l'API Search Console per i dati FAQ è stata rimossa ad agosto 2026).
+- **Verdetto bilanciato:** lo schema resta utile per i suoi scopi classici (rich result, parsing, disambiguazione di entità) e non fa male. Ma non è il fattore di citazione AI che il marketing GEO suggerisce. Implementalo per igiene tecnica e per la Search tradizionale, non come "trucco AI" — e non fondare decisioni o audit sui rich result FAQ.
 
 #### 6.6 — I numeri-civetta dei vendor
 
@@ -478,7 +510,8 @@ Una classe di claim da trattare con sospetto sistematico: percentuali precise se
 All'estremo opposto dell'hype GEO c'è l'hype del "SEO è morto, conta solo la GEO". È altrettanto sbagliato:
 
 - I dati Ahrefs/Semrush mostrano che il ranking organico tradizionale **resta correlato** (anche se non più condizione necessaria) con la citazione AI; gli AI Overviews girano *sopra* il sistema di ranking Search.
-- La "visibilità parametrica" (Sezione 2-ter.1) si costruisce con gli stessi segnali del SEO classico: autorità, copertura stampa, Wikipedia, backlink, menzioni.
+- I catastrofismi si sono ridimensionati nel 2026: il CTR organico in presenza di AIO è **risalito** (Seer: da ~1,3% a ~2,4% tra dic 2025 e feb 2026) e il traffico da AI **converte molto meglio** (4,4x–23x, Adobe +42%): molti brand perdono click ma non fatturato. Il gioco si sposta dai click alle citazioni, non si chiude.
+- La "visibilità parametrica" (Sezione 2-ter.1) si costruisce con gli stessi segnali del SEO classico: autorità, copertura stampa, Wikipedia, backlink, menzioni. Dato che rafforza il punto: secondo Seer Interactive le citazioni potrebbero essere **"post-hoc"** — l'LLM deciderebbe prima quali brand raccomandare (dalla conoscenza parametrica) e poi cercherebbe fonti a supporto; se confermata, l'ottimizzazione delle citazioni da sola non compensa una brand authority debole. *(Ipotesi, non fatto acclarato.)*
 - Google stessa intitola la sua posizione "AEO e GEO sono ancora SEO".
 
 **Verdetto:** la GEO è un'estensione del SEO, non un suo sostituto. Le fondamenta (crawlabilità, autorevolezza, contenuto di qualità) sono *più* importanti, non meno. Ciò che cambia è il livello di competizione (chunk vs pagina), le superfici (YouTube, Reddit) e le metriche (citazione vs click).
@@ -491,18 +524,21 @@ All'estremo opposto dell'hype GEO c'è l'hype del "SEO è morto, conta solo la G
 | Freschezza del contenuto conta | Ahrefs, Seer, Perplexity test, GEO paper | Provato | Alta |
 | Contenuto non-commodity / esperienza diretta | Google guide ufficiale 2026 | Confermato dal platform | Alta |
 | Struttura/chiarezza answer-first | Ricerca RAG + cross-encoder | Solido (meccanismo) | Alta |
-| Menzioni di brand > backlink per citazioni | Previsible (1,96M sessioni) | Plausibile, 1 studio | Media |
+| Menzioni di brand > backlink per citazioni | Previsible/5WPR (0,334; menzioni non linkate 0,664) | Plausibile, convergente | Media |
 | Schema/structured data per AISO | Smentito da Google 2026 | Sopravvalutato | Bassa (fallo per altro) |
 | Chunking manuale del contenuto | Smentito da Google 2026 | Mito (per Google) | Bassa |
 | llms.txt come leva di citazione | Nessuna prova, evidenza contraria (Search); incluso in Lighthouse come agentic readiness | Non provato per citazioni / hype | Bassissima |
 | Servire pagine in Markdown | Profound/Otterly: effetto nullo/non signif. | Marginale (utile solo per dev tool) | Bassa |
+| Report "Generative AI" di Search Console come misurazione completa | Solo impression, niente click/prompt | Incompleto (baseline utile) | Media (con caveat) |
 | Numeri-civetta "2,7x", "6,7 citazioni" | Senza metodologia/run | Aneddoto | Ignora |
 | "Il SEO è morto" | Contraddetto dai dati | Falso | — |
 
 ## Caveats
 - **Distinguere fatti documentati da claim dei vendor:** indici e numeri Pew/SparkToro/Ahrefs/Seer sono ben documentati; molti "fattori di citazione" precisi provengono da blog di vendor e non sono verificabili con fonti primarie nominate.
-- **Dati contrastanti sul ranking:** l'overlap tra citazioni AIO e top-10 varia tra studi (38% vs 76%) anche per differenze metodologiche di rilevamento.
-- **Le previsioni sono previsioni:** il 25% di Gartner è una stima del 2024, non un consuntivo.
+- **Dati contrastanti sul ranking:** l'overlap tra citazioni AIO e top-10 varia tra studi (38% vs 76%, poi sceso a un range 12–54% a inizio 2026) anche per differenze metodologiche di rilevamento.
+- **Le previsioni sono previsioni:** il 25% di Gartner è una stima del 2024, non un consuntivo; a settembre 2026 non si è verificata nella misura prevista.
+- **Non fondere metodologie:** quote di mercato e conversion variano fortemente tra web-visit (Similarweb), app (Sensor Tower), referral (StatCounter) e clickstream; le "conversion 4,4x–23x" arrivano spesso da aziende che misurano il proprio traffico (bias di auto-selezione) con eventi di conversione non uniformi. I dati italiani di calo organico per settore sono stime di agenzie SEO, non statistiche ufficiali; l'unica fonte italiana robusta resta Audiweb-Audicom.
+- **Ipotesi da trattare come tali:** la tesi Seer sulle citazioni "post-hoc" (il brand decide prima della ricerca delle fonti) è un'ipotesi, non un fatto acclarato.
 - **Reverse-engineering:** i dettagli su `web.run`, fan-out e system prompt di ChatGPT derivano da analisi indipendenti (RESONEO/Meteoria, AirOps, Dejan), non da documentazione ufficiale completa, e cambiano da un modello all'altro.
 - **Volatilità:** le pipeline cambiano rapidamente (Gemini 3 gen 2026, switch ChatGPT 5.3 mar 2026); ogni dato ha una data di validità.
 - **Tensione chunking:** Google (mag 2026) dichiara non necessario il chunking manuale per le *sue* feature AI; questo vale per Google, mentre per i motori RAG non-Google la struttura del contenuto resta rilevante (vedi 6.2).
@@ -557,6 +593,24 @@ All'estremo opposto dell'hype GEO c'è l'hype del "SEO è morto, conta solo la G
 - Lafferty N., *AI Visibility Metrics: Formulas, Benchmarks & Sample Sizes (2026)* — https://nicklafferty.com/blog/ai-visibility-metrics-reference/
 - Machine Relations, *Citation Drift* (BrightEdge 70x, Semrush Reddit 60→10%) — https://medium.com/machine-relations/citation-drift-ai-visibility-data-d7c2eea8e223
 
+**Zero-click, CTR e qualità del traffico (aggiornati 2026)**
+- SparkToro, *Zero-Click 2026* (clickstream Similarweb, gen–apr 2026: 68,01%) — https://sparktoro.com/blog/
+- Seer Interactive, *longitudinal AI Overviews CTR study* (53 brand, 5,47M query; rebound ~1,3% → ~2,4% dic 2025–feb 2026) — https://www.seerinteractive.com/insights/
+- Pew Research, *Google users are less likely to click on links when an AI summary appears* (lug 2025) — https://www.pewresearch.org/short-reads/2025/07/22/google-users-are-less-likely-to-click-on-links-when-an-ai-summary-appears-in-the-results/
+- Semrush, *AI visitors convert 4,4x better* (9 giu 2025, Kyle Byers) — https://www.semrush.com/blog/ai-search-visitor-value/
+- Ahrefs, *AI Search Traffic Converts 23x Better* (giu 2025) — https://ahrefs.com/blog/ai-search-traffic-converts-23x-better/
+- Adobe Digital Insights, *AI referral conversion +42% vs non-AI* (mar 2026) — via Search Engine Land
+- Ahrefs, *AI Overviews top-10 overlap* (gen 2026: 38%; aggiornamento 2026: solo 12% degli URL citati in top 10)
+
+**Search Console, crawler AI e licensing (giu–set 2026)**
+- Google Search Central, *Search Generative AI performance reports in Search Console* (3 giu 2026 UK; globali dal 31 ago 2026) — https://developers.google.com/search/blog
+- Google Search Central, *AI features report* (solo impression, opt-out senza penalità) — https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+- Cloudflare, *Content Independence / default blocking of AI crawlers* (annuncio 1 lug 2026; attivo dal 15 set 2026) e *Pay Per Use* — https://blog.cloudflare.com/
+- RSL — Really Simple Licensing (lancio 10 set 2025; RSL Media / Human Consent Standard, mag-giu 2026) — https://reallysimplelicensing.com/
+- IETF, *AI Preferences* (draft: vocabolario di usi permessi/proibiti nei robots.txt) — https://datatracker.ietf.org/doc/draft-ietf-aipref/
+- Sensor Tower, *State of AI 2026* (quote app: ChatGPT 46,4%, Gemini 27,7%, Claude 10,3%)
+- Anthropic, *Series H announcement* (run rate $47B, 29 mag 2026) — https://www.anthropic.com/news ; CNBC (28 mag 2026)
+
 **Guida ufficiale Google e anti-hype**
 - Google Search Central, *A new resource for optimizing for generative AI in Search* (15 mag 2026) — https://developers.google.com/search/blog/2026/05/a-new-resource-for-optimizing
 - Google Search Central, *Guidance on using third-party SEO tools, services, and advice* e aggiornamento *Do you need an SEO?* (5 giu 2026, nomina AEO/GEO come categoria) — cfr. Digital Applied, *Google Now Tells You to Optimize for Generative AI* — https://www.digitalapplied.com/blog/google-official-seo-docs-generative-ai-optimization-june-2026
@@ -577,7 +631,8 @@ All'estremo opposto dell'hype GEO c'è l'hype del "SEO è morto, conta solo la G
 - Cloudflare, *Introducing Markdown for Agents* — https://blog.cloudflare.com/markdown-for-agents/ ; Search Engine Land, *Google & Bing don't recommend separate markdown pages* — https://searchengineland.com/google-bing-dont-recommend-seperate-markdown-pages-for-llms-468365
 
 **Quadro giuridico UE/Italia**
-- Direttiva (UE) 2019/790 (CDSM), artt. 3-4; AI Act (Reg. UE 2024/1689), art. 53(1)(c), Considerando 106
+- Direttiva (UE) 2019/790 (CDSM), artt. 3-4; AI Act (Reg. UE 2024/1689), art. 50 (trasparenza), art. 53(1)(c), Considerando 106
+- Commissione Europea, *linee guida Code of Practice sull'etichettatura AI, art. 50 AI Act* (20 lug 2026) — https://digital-strategy.ec.europa.eu/ ; obblighi art. 50 in vigore dal 2 agosto 2026, transitorio fino al 2 dicembre 2026
 - EPRS, *AI and copyright: training of general-purpose AI* — https://www.europarl.europa.eu/RegData/etudes/ATAG/2025/769585/EPRS_ATA(2025)769585_EN.pdf
 - Parlamento UE, procedura 2025/2058(INI) *"Copyright and generative AI"* (relatore Voss): studio JURI PE 774095 (Lucchi, 9 lug 2025) e draft report PE775.433 (27 giu 2025); risoluzione T10-0066/2026 (10 mar 2026) — https://oeil.secure.europarl.europa.eu/oeil/en/procedure-file?reference=2025/2058(INI) ; Jones Day, *EP study on GenAI and copyright* — https://www.jonesday.com/en/insights/2025/08/european-parliaments-new-study-on-generative-ai-and-copyright-calls-for-overhaul-of-optout-regime
 - Kluwer Copyright Blog, *The TDM Opt-Out in the EU* e *LAION Round 2* — https://legalblogs.wolterskluwer.com/copyright-blog/the-tdm-opt-out-in-the-eu-five-problems-one-solution/
@@ -593,4 +648,4 @@ All'estremo opposto dell'hype GEO c'è l'hype del "SEO è morto, conta solo la G
 - Surmado, *Best AI Visibility Tools 2026* — https://www.surmado.com/blog/best-ai-visibility-tools-2026
 - Otterly.ai — https://otterly.ai/
 
-*Documento aggiornato al 22 giugno 2026. Data la rapidità dell'evoluzione del settore, statistiche e meccanismi descritti hanno validità temporale limitata.*
+*Documento aggiornato al 11 settembre 2026 (ricerca aggiornata al 7 settembre 2026). Data la rapidità dell'evoluzione del settore, statistiche e meccanismi descritti hanno validità temporale limitata.*

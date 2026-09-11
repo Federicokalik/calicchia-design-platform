@@ -14,20 +14,20 @@ const COPY = {
   it: {
     metaTitle: 'GEO Audit — analizza la visibilità del tuo sito nei motori AI',
     metaDescription:
-      'Inserisci l’URL del tuo sito e scopri quanto è leggibile e citabile dai motori AI. Score tecnico gratuito basato sul white paper GEO.',
+      'Inserisci l’URL del tuo sito e scopri quanto è leggibile e citabile dai motori AI. Score tecnico gratuito basato sul white paper GEO, aggiornato a settembre 2026.',
     eyebrow: 'Strumento gratuito',
     title: 'Il tuo sito è pronto per i motori AI?',
-    lead: 'Analizziamo la tua pagina secondo i fattori verificabili della GEO (Generative Engine Optimization) e ti diamo uno score tecnico immediato. Non misura una quota garantita di citazioni: misura cosa i motori AI riescono a leggere, estrarre e usare.',
+    lead: 'Analizziamo la tua pagina secondo i fattori verificabili della GEO (Generative Engine Optimization) e ti diamo uno score tecnico immediato. Non misura una quota garantita di citazioni: misura cosa i motori AI riescono a leggere, estrarre e usare — e ti segnala cosa non è verificabile a distanza (report Search Console, crawler Cloudflare, AI Act).',
     whitepaperLabel: 'Basato sul white paper',
     whitepaperCta: 'Dalla SEO alla GEO →',
   },
   en: {
     metaTitle: 'GEO Audit — check your site’s visibility in AI engines',
     metaDescription:
-      'Enter your site URL and find out how readable and citable it is for AI engines. Free technical score based on the GEO white paper.',
+      'Enter your site URL and find out how readable and citable it is for AI engines. Free technical score based on the GEO white paper, updated September 2026.',
     eyebrow: 'Free tool',
     title: 'Is your site ready for AI engines?',
-    lead: 'We analyze your page against the verifiable factors of GEO (Generative Engine Optimization) and give you an instant technical score. It does not measure guaranteed citation share: it measures what AI engines can read, extract and use.',
+    lead: 'We analyze your page against the verifiable factors of GEO (Generative Engine Optimization) and give you an instant technical score. It does not measure guaranteed citation share: it measures what AI engines can read, extract and use — and flags what cannot be verified remotely (Search Console reports, Cloudflare crawlers, the AI Act).',
     whitepaperLabel: 'Based on the white paper',
     whitepaperCta: 'From SEO to GEO →',
   },

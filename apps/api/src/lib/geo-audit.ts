@@ -11,6 +11,13 @@
  * structure, citability, freshness). llms.txt is reported only as optional
  * agentic-readiness infrastructure.
  *
+ * Aligned with the September 2026 update of the paper: Search Console
+ * "Generative AI" reports (global since 31 Aug 2026, impressions-only),
+ * Cloudflare default blocking of mixed-use AI crawlers (15 Sep 2026), FAQ rich
+ * results deprecation (7 May 2026) and AI Act art. 50 (in force since 2 Aug
+ * 2026) surface as INFORMATIONAL checks — none of them can be fully verified
+ * off-page, so they never move the score.
+ *
  * No LLM here — the qualitative action plan is generated separately at /unlock.
  */
 
@@ -55,7 +62,7 @@ export interface GeoAuditResult {
 async function safeFetchText(
   url: string,
   init?: RequestInit,
-): Promise<{ ok: boolean; status: number; text: string; finalUrl: string }> {
+): Promise<{ ok: boolean; status: number; text: string; finalUrl: string; viaCloudflare: boolean }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -68,7 +75,9 @@ async function safeFetchText(
     const buf = await res.arrayBuffer();
     const sliced = buf.byteLength > MAX_HTML_BYTES ? buf.slice(0, MAX_HTML_BYTES) : buf;
     const text = new TextDecoder('utf-8', { fatal: false }).decode(sliced);
-    return { ok: res.ok, status: res.status, text, finalUrl: res.url || url };
+    const server = (res.headers.get('server') || '').toLowerCase();
+    const viaCloudflare = server.includes('cloudflare') || !!res.headers.get('cf-ray');
+    return { ok: res.ok, status: res.status, text, finalUrl: res.url || url, viaCloudflare };
   } finally {
     clearTimeout(timer);
   }
@@ -233,6 +242,20 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
     });
   }
 
+  // 1c — Cloudflare mixed-use AI crawler default block (informational only).
+  {
+    checks.push({
+      id: 'cloudflare_ai_crawlers',
+      label: 'Crawler AI su Cloudflare',
+      passed: null,
+      weight: 0,
+      detail: page.viaCloudflare
+        ? 'Il sito è servito da Cloudflare: dal 15 settembre 2026 i crawler AI "mixed-use" sono bloccati di default su pagine con pubblicità (nuovi clienti, nuovi siti, clienti free); i crawler di sola ricerca restano ammessi. Verifica le impostazioni per non bloccare per errore i bot che generano citazioni.'
+        : 'Il sito non risulta servito da Cloudflare: nessuna azione richiesta sul blocco di default dei crawler AI "mixed-use" (in vigore dal 15 settembre 2026).',
+      anchor: 's5',
+    });
+  }
+
   // 2 — Server-side rendering (meaningful text in raw HTML)
   {
     const len = text.length;
@@ -324,6 +347,21 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
     });
   }
 
+  // 5c — FAQ rich results deprecation (informational only).
+  {
+    const hasFaqSchema = /"FAQPage"/i.test(html) || /"@type"\s*:\s*"FAQPage"/i.test(html);
+    checks.push({
+      id: 'faq_rich_results',
+      label: 'Schema FAQ (rich results deprecati)',
+      passed: null,
+      weight: 0,
+      detail: hasFaqSchema
+        ? 'Schema FAQPage presente: dal 7 maggio 2026 non produce più rich results (markup ancora valido per la comprensione delle entità, ma senza bonus visibile). Non rimuoverlo, però: non fa male — e nessuno schema speciale è richiesto per AI Overviews/AI Mode.'
+        : 'Nessuno schema FAQPage: nessun impatto. I FAQ rich results sono deprecati dal 7 maggio 2026 e Google conferma che nessuno schema speciale è richiesto per le feature AI.',
+      anchor: 's6',
+    });
+  }
+
   // 6 — Freshness (modified date within ~18 months)
   {
     const modified = metaContent(html, 'article:modified_time') || metaContent(html, 'article:published_time');
@@ -373,8 +411,28 @@ export async function runDeterministicAudit(rawUrl: string): Promise<GeoAuditRes
     label: 'Brand mention & autorità',
     passed: null,
     weight: 0,
-    detail: 'Le menzioni del brand (G2, Trustpilot, Wikipedia, Reddit, YouTube) sono off-page e non verificabili automaticamente, ma sono il predittore più forte di visibilità AI.',
+    detail: 'Le menzioni del brand (G2, Trustpilot, Wikipedia, Reddit, YouTube) sono off-page e non verificabili automaticamente, ma sono il predittore più forte di visibilità AI (correlazione 0,334 con il volume di ricerca del brand; secondo Seer le citazioni possono essere "post-hoc": prima la scelta del brand, poi la ricerca delle fonti).',
     anchor: 's3',
+  });
+
+  // Informational (not scored): Search Console AI reports are site-owner-side.
+  checks.push({
+    id: 'search_console_ai_reports',
+    label: 'Report "Generative AI" in Search Console',
+    passed: null,
+    weight: 0,
+    detail: 'Non verificabile dal lato tool: attiva e monitora i report "Generative AI" di Search Console (globali dal 31 agosto 2026) per una baseline di impression su AI Overviews, AI Mode e Discover. Misurano solo impression — niente click né prompt — ma sono la prima misura proprietaria di esposizione AI.',
+    anchor: 's5',
+  });
+
+  // Informational (not scored): AI Act art. 50 compliance is editorial/contractual.
+  checks.push({
+    id: 'ai_act_labelling',
+    label: 'Etichettatura contenuti AI (AI Act art. 50)',
+    passed: null,
+    weight: 0,
+    detail: 'Non verificabile dal lato tool: dal 2 agosto 2026 l\'art. 50 AI Act richiede di etichettare i contenuti generati da AI su temi di interesse pubblico (transitorio fino al 2 dicembre 2026; esente con revisione editoriale umana documentata). Da trattare nella due diligence contrattuale con i clienti.',
+    anchor: 's5',
   });
 
   const score = scoreFrom(checks);
