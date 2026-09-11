@@ -29,6 +29,7 @@ import { runMarketingAudienceSync } from './marketing-audience-sync';
 import { runMarketingSend } from './marketing-send';
 import { runMarketingSendWhatsApp } from './marketing-send-whatsapp';
 import { runMarketingAutomations } from './marketing-automations';
+import { runDeviceNotesTranscription } from './device-notes';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
@@ -215,6 +216,13 @@ const jobs: CronJob[] = [
     name: 'marketing-automations',
     intervalMs: 60 * 1000,
     run: runMarketingAutomations,
+  },
+  {
+    // Trascrizione note vocali ePaper: claim -> Gemini -> notes. 30s per
+    // dare feedback rapido al dispositivo (poll su GET /device/notes/:id).
+    name: 'device-notes-transcribe',
+    intervalMs: 30 * 1000,
+    run: runDeviceNotesTranscription,
   },
 ];
 

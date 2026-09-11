@@ -139,7 +139,8 @@ device.get('/ping', (c) => c.json({ ok: true, now: new Date().toISOString() }));
 
 // GET /api/device/agenda?date=YYYY-MM-DD — events overlapping the day
 // (all sources already aggregated in calendar_events: google, caldav,
-// bookings, festività) plus the next 7 days as a flat payload.
+// bookings, festività) + next_event / last_event_end per la lock adattiva
+// e i contatori per l'avatar.
 device.get('/agenda', async (c) => {
   const date = c.req.query('date') || new Date().toISOString().slice(0, 10);
   if (!isValidDate(date)) {
@@ -155,7 +156,31 @@ device.get('/agenda', async (c) => {
       AND end_time   > ${fromIso}::timestamptz
     ORDER BY start_time ASC
   `;
-  return c.json({ date, events });
+
+  const [counts] = await sql<Array<{ pending_tasks: number; pending_notes: number }>>`
+    SELECT
+      (SELECT COUNT(*)::int FROM project_tasks WHERE status = 'todo') AS pending_tasks,
+      (SELECT COUNT(*)::int FROM device_notes WHERE status IN ('pending', 'transcribing')) AS pending_notes
+  `;
+
+  const now = new Date();
+  const timed = events.filter((e) => !e.all_day);
+  // Primo evento non ancora finito (o in corso); null se la giornata è chiusa.
+  const nextEvent = timed.find((e) => new Date(e.end_time) > now) ?? null;
+  const lastEventEnd = timed.length
+    ? timed[timed.length - 1].end_time
+    : null;
+
+  return c.json({
+    date,
+    events,
+    next_event: nextEvent
+      ? { summary: nextEvent.summary, start_time: nextEvent.start_time, end_time: nextEvent.end_time }
+      : null,
+    last_event_end: lastEventEnd,
+    pending_tasks: counts?.pending_tasks ?? 0,
+    pending_notes: counts?.pending_notes ?? 0,
+  });
 });
 
 // POST /api/device/notes — multipart upload of one voice capture.
