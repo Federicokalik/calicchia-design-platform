@@ -8,11 +8,11 @@ import { Section } from '@/components/ui/Section';
 const STEP_KEYS = ['brief', 'strategy', 'design', 'build', 'launch'] as const;
 
 const STEP_IMAGES: Record<typeof STEP_KEYS[number], string> = {
-  brief: '/img/illustrations/1200x800_cpb-01.webp',
-  strategy: '/img/illustrations/1200x800_cpb-02.webp',
-  design: '/img/illustrations/1200x800_cpb-03.webp',
-  build: '/img/illustrations/1200x800_cpb-04.webp',
-  launch: '/img/illustrations/1200x800_cpb-05.webp',
+  brief: '/img/process/fase-01-ascolto.webp',
+  strategy: '/img/process/fase-02-strategia.webp',
+  design: '/img/process/fase-03-design.webp',
+  build: '/img/process/fase-04-sviluppo.webp',
+  launch: '/img/process/fase-05-lancio.webp',
 };
 
 interface ProcessLongformProps {
@@ -37,6 +37,7 @@ export function ProcessLongform({ hideHeader = false, index = '07' }: ProcessLon
     title: t(`steps.${key}.title`),
     body: t(`steps.${key}.body`),
     img: STEP_IMAGES[key],
+    imgAlt: t(`steps.${key}.imgAlt`),
   }));
 
   return (
@@ -80,8 +81,7 @@ export function ProcessLongform({ hideHeader = false, index = '07' }: ProcessLon
                   <Image
                     data-img
                     src={s.img}
-                    alt=""
-                    aria-hidden
+                    alt={s.imgAlt}
                     fill
                     sizes="(min-width: 1024px) 50vw, 100vw"
                     className="object-cover will-change-transform"

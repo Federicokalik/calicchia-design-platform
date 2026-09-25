@@ -291,7 +291,7 @@ body[data-menu-open='true'] [data-morph-ticker] {
 /* Call-to-action dentro l'articolo: una blockquote che chiude con un link a
    /contatti/ è un CTA, non una citazione → diventa una card con pulsante
    (convenzione del blog editor). Degrada a blockquote normale senza :has(). */
-.prose-blog blockquote:has(a[href*='/contatti/']) {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) {
   background: var(--color-bg-elev);
   border: 1px solid var(--color-line);
   border-left: 2px solid var(--color-accent);
@@ -304,7 +304,7 @@ body[data-menu-open='true'] [data-morph-ticker] {
   line-height: 1.7;
   color: var(--color-ink);
 }
-.prose-blog blockquote:has(a[href*='/contatti/']) strong {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) strong {
   display: block;
   font-family: var(--font-display);
   font-size: 1.5rem;
@@ -314,14 +314,14 @@ body[data-menu-open='true'] [data-morph-ticker] {
   color: var(--color-ink);
   margin-bottom: 0.5rem;
 }
-.prose-blog blockquote:has(a[href*='/contatti/']) p {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) p {
   color: var(--color-ink-muted);
   margin: 0 0 0.75rem;
 }
-.prose-blog blockquote:has(a[href*='/contatti/']) p:last-of-type {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) p:last-of-type {
   margin-bottom: 1.5rem;
 }
-.prose-blog blockquote:has(a[href*='/contatti/']) a {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) a {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -339,8 +339,360 @@ body[data-menu-open='true'] [data-morph-ticker] {
   text-decoration: none;
   transition: filter 0.3s ease;
 }
-.prose-blog blockquote:has(a[href*='/contatti/']) a:hover {
+.prose-blog blockquote:has(a[href*='/contatti/'], a[href*='/contact/']) a:hover {
   filter: brightness(0.92);
+}
+
+/* ── Blog: blocchi editoriali in HTML grezzo nel markdown ───────────────
+   Classi `bl-*` scritte a mano nel contenuto (il sanitizer tiene `class`,
+   non `style`): stat, timeline, casi, note, etichette file, fonti. */
+.prose-blog .bl-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+  margin: 0;
+}
+.prose-blog .bl-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  border-top: 1px solid var(--color-ink);
+  margin-top: 2.5rem;
+}
+.prose-blog .bl-stats > div {
+  padding: 1rem 1.25rem 1.25rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.prose-blog .bl-stats strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.prose-blog .bl-stats > div:first-child strong { color: var(--color-accent-deep); }
+.prose-blog .bl-stats span {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: var(--text-small);
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+.prose-blog .bl-note {
+  font-size: var(--text-small);
+  line-height: 1.6;
+  color: var(--color-ink-muted);
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-accent);
+  padding: 1rem 1.25rem;
+}
+.prose-blog .bl-src {
+  font-size: var(--text-small);
+  color: var(--color-ink-subtle);
+}
+.prose-blog .bl-file {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+  margin-top: 2rem;
+  margin-bottom: -1rem;
+}
+.prose-blog .bl-timeline {
+  list-style: none;
+  padding: 0;
+  border-left: 1px solid var(--color-line-strong);
+}
+.prose-blog .bl-timeline li {
+  position: relative;
+  padding: 0 0 1.1rem 1.5rem;
+  margin: 0;
+}
+.prose-blog .bl-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 0.55em;
+  width: 7px;
+  height: 7px;
+  background: var(--color-ink);
+}
+.prose-blog .bl-timeline li:last-child::before { background: var(--color-accent); }
+.prose-blog .bl-timeline time {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+.prose-blog .bl-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0 1.5rem;
+  margin-top: 2rem;
+}
+.prose-blog .bl-cases > div {
+  border-top: 1px solid var(--color-ink);
+  padding-top: 1rem;
+  font-size: var(--text-small);
+  line-height: 1.6;
+  color: var(--color-ink-muted);
+}
+.prose-blog .bl-cases h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+  color: var(--color-ink);
+}
+.prose-blog .bl-cases p { margin: 0.5rem 0 0; }
+.prose-blog .bl-cases strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--color-accent-deep);
+}
+
+/* ── Blog islands (BlogIslands.tsx): grafici e quiz ─────────────────── */
+.prose-blog .blog-island:empty { min-height: 12rem; }
+.prose-blog .bl-fig { margin: 2.5rem 0 0; }
+.prose-blog .bl-fig-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  border-top: 1px solid var(--color-ink);
+  padding-top: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+.prose-blog .bl-fig-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.prose-blog .bl-fig-head .bl-eyebrow { font-size: 0.7rem; }
+
+.prose-blog .bl-bars-rows { display: flex; flex-direction: column; gap: 0.6rem; }
+.prose-blog .bl-bar {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 9rem) 1fr;
+  align-items: center;
+  gap: 1rem;
+  font-size: var(--text-small);
+}
+.prose-blog .bl-bar-label { color: var(--color-ink-muted); line-height: 1.2; }
+.prose-blog .bl-bar-track {
+  position: relative;
+  height: 2rem;
+  background: var(--color-bg-elev);
+}
+.prose-blog .bl-bars.is-diverging .bl-bar-track::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -0.3rem;
+  bottom: -0.3rem;
+  width: 1px;
+  background: var(--color-ink);
+}
+.prose-blog .bl-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: var(--color-ink);
+}
+.prose-blog .bl-bar-fill.is-accent,
+.prose-blog .bl-legend i.is-accent { background: var(--color-accent); }
+.prose-blog .bl-bar-fill.is-hatch,
+.prose-blog .bl-legend i.is-hatch {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-line-strong) 0 4px,
+    transparent 4px 8px
+  );
+  outline: 1px solid var(--color-line-strong);
+  outline-offset: -1px;
+}
+.prose-blog .bl-bar-value {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.prose-blog .bl-bars-axis {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 9rem) 1fr;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.prose-blog .bl-bars-axis div {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-ink-subtle);
+}
+.prose-blog .bl-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1rem;
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+.prose-blog .bl-legend span { display: inline-flex; align-items: center; gap: 0.5rem; }
+.prose-blog .bl-legend i {
+  display: inline-block;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: var(--color-ink);
+}
+
+.prose-blog .bl-share-plot {
+  position: relative;
+  height: clamp(13rem, 28vw, 18rem);
+  margin: 2.5rem 0 0 2.75rem;
+}
+.prose-blog .bl-share-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.prose-blog .bl-grid { stroke: var(--color-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.prose-blog .bl-line {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+.prose-blog .bl-line.is-accent { stroke: var(--color-accent); stroke-width: 3; }
+.prose-blog .bl-share-tick {
+  position: absolute;
+  left: -2.75rem;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-ink-subtle);
+}
+.prose-blog .bl-share-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  background: var(--color-bg);
+  border: 2px solid var(--color-ink);
+  border-radius: 50%;
+}
+.prose-blog .bl-share-dot.is-accent { background: var(--color-accent); border-color: var(--color-accent); }
+.prose-blog .bl-share-label {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  line-height: 1.15;
+}
+.prose-blog .bl-share-label b {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.prose-blog .bl-share-label.is-accent b { color: var(--color-accent-deep); }
+.prose-blog .bl-share-label span {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-ink-subtle);
+}
+.prose-blog .bl-share-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-line);
+  font-size: var(--text-small);
+  color: var(--color-ink-muted);
+}
+
+.prose-blog .bl-waffle {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  max-width: 34rem;
+}
+.prose-blog .bl-waffle i {
+  aspect-ratio: 1;
+  background: var(--color-ink);
+}
+.prose-blog .bl-waffle i.is-accent { background: var(--color-accent); }
+
+.prose-blog .bl-picker {
+  margin-top: 2rem;
+  border-top: 1px solid var(--color-ink);
+  padding-top: 1rem;
+}
+.prose-blog .bl-picker fieldset { border: 0; padding: 0; margin: 1.5rem 0 0; }
+.prose-blog .bl-picker legend {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+.prose-blog .bl-picker-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.prose-blog .bl-picker-opts label { cursor: pointer; }
+.prose-blog .bl-picker-opts input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.prose-blog .bl-picker-opts span {
+  display: inline-block;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid var(--color-line-strong);
+  font-size: var(--text-small);
+  line-height: 1.3;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.prose-blog .bl-picker-opts label:hover span { border-color: var(--color-ink); }
+.prose-blog .bl-picker-opts input:checked + span {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
+}
+.prose-blog .bl-picker-opts input:focus-visible + span {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.prose-blog .bl-picker-out {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  border-left: 2px solid var(--color-accent);
+  min-height: 9rem;
+}
+.prose-blog .bl-picker-out p { margin: 0.4rem 0 0; }
+.prose-blog .bl-picker-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--color-ink);
 }
 
 /* ── Case study longform — Pentagram editorial ────────────────────── */

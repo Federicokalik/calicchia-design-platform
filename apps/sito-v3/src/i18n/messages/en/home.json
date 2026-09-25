@@ -95,27 +95,32 @@
       "brief": {
         "label": "Brief",
         "title": "I listen.",
-        "body": "A 30-minute call to understand who you are, what you sell, and why a client should pick you.\nNo agency-style questionnaires, no off-the-shelf decisions."
+        "body": "A 30-minute call to understand who you are, what you sell, and why a client should pick you.\nNo agency-style questionnaires, no off-the-shelf decisions.",
+        "imgAlt": "Hands taking notes in a notebook during a video call with the client"
       },
       "strategy": {
         "label": "Strategy",
         "title": "I draft the plan.",
-        "body": "I pick structure, tone, palette and stack.\nI explain why in ten minutes. No philosophy.\nThe plan is written, shared, editable."
+        "body": "I pick structure, tone, palette and stack.\nI explain why in ten minutes. No philosophy.\nThe plan is written, shared, editable.",
+        "imgAlt": "Site map made of paper cards linked in pencil, with colour swatches and type specimens"
       },
       "design": {
         "label": "Design",
         "title": "Pixels carry weight.",
-        "body": "Interactive mockups, not static frames.\nYou see the animations, hear how it moves.\nWe change things before writing code — when fixing costs nothing."
+        "body": "Interactive mockups, not static frames.\nYou see the animations, hear how it moves.\nWe change things before writing code — when fixing costs nothing.",
+        "imgAlt": "Monitor showing the site mockups linked by interactive prototype arrows"
       },
       "build": {
         "label": "Build",
         "title": "I build it well.",
-        "body": "Modern stack, obsessive performance, SEO wired in from day one.\nEvery line has a reason.\nInternal review: I write, I re-read, I break it to rebuild it cleaner."
+        "body": "Modern stack, obsessive performance, SEO wired in from day one.\nEvery line has a reason.\nInternal review: I write, I re-read, I break it to rebuild it cleaner.",
+        "imgAlt": "Hands writing code on a laptop with performance scores in green"
       },
       "launch": {
         "label": "Launch",
         "title": "I fix, I test, I ship.",
-        "body": "Tests on ten real devices, analytics monitoring, a 30-minute training session.\nThen a full year of support included — because real sites live on after launch."
+        "body": "Tests on ten real devices, analytics monitoring, a 30-minute training session.\nThen a full year of support included — because real sites live on after launch.",
+        "imgAlt": "Testing the same responsive site on laptop, tablet and smartphones"
       }
     }
   },

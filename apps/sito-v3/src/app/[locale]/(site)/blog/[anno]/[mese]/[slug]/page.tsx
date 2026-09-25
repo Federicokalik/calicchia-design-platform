@@ -5,6 +5,7 @@ import { fetchBlogArticle, buildBlogUrl } from '@/lib/blog-api';
 import { BlogHero } from '@/components/blog/BlogHero';
 import { BlogBody } from '@/components/blog/BlogBody';
 import { BlogDemoIslands } from '@/components/blog/BlogDemoIslands';
+import { BlogIslands } from '@/components/blog/BlogIslands';
 import { BlogTOC } from '@/components/blog/BlogTOC';
 import { BlogShare } from '@/components/blog/BlogShare';
 import { BlogComments } from '@/components/blog/BlogComments';
@@ -130,6 +131,9 @@ export default async function BlogArticlePage({
       {/* Hydrate AI demo placeholders (audit C-003). Renders nothing — runs
           on the client after mount and rewrites .demo-embed divs to iframes. */}
       {post.id ? <BlogDemoIslands postId={post.id} /> : null}
+
+      {/* Mount React islands (charts, quizzes) into div.blog-island placeholders. */}
+      <BlogIslands locale={locale} />
 
       <BlogShare title={post.title} url={fullUrl} />
 

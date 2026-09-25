@@ -24,8 +24,10 @@ export function sanitizeBlogHtml(html: string | null | undefined): string {
       // div.demo-embed[data-demo-index] is the AI-demo placeholder the client
       // island BlogDemoIslands hydrates into an iframe (audit C-003). Without
       // this allowlist sanitize-html stripped the data- attr and the island
-      // couldn't tell which demo to load.
-      div: ['data-demo-index'],
+      // couldn't tell which demo to load. div.blog-island[data-island] is the
+      // generic placeholder BlogIslands mounts a registered React component into
+      // (charts, quizzes): the key only selects a first-party component.
+      div: ['data-demo-index', 'data-island'],
       '*': ['class'],
     },
     allowedSchemes: ['http', 'https', 'mailto'],

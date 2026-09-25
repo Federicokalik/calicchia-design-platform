@@ -95,27 +95,32 @@
       "brief": {
         "label": "Brief",
         "title": "Ascolto.",
-        "body": "Una chiamata di 30 minuti per capire chi sei, cosa vendi e perché un cliente dovrebbe sceglierti.\nNiente questionari da agenzia, niente decisioni-pacchetto."
+        "body": "Una chiamata di 30 minuti per capire chi sei, cosa vendi e perché un cliente dovrebbe sceglierti.\nNiente questionari da agenzia, niente decisioni-pacchetto.",
+        "imgAlt": "Mani che prendono appunti su un taccuino durante una videochiamata con il cliente"
       },
       "strategy": {
         "label": "Strategia",
         "title": "Disegno il piano.",
-        "body": "Scelgo struttura, tono, palette e tecnologie.\nTi spiego perché in dieci minuti — senza filosofeggiare.\nIl piano è scritto, condiviso, modificabile."
+        "body": "Scelgo struttura, tono, palette e tecnologie.\nTi spiego perché in dieci minuti — senza filosofeggiare.\nIl piano è scritto, condiviso, modificabile.",
+        "imgAlt": "Mappa del sito fatta di foglietti collegati a matita, con campioni colore e specimen tipografici"
       },
       "design": {
         "label": "Design",
         "title": "I pixel pesano.",
-        "body": "Mockup interattivi, non statici.\nVedi le animazioni, ascolti come si muove.\nCambiamo prima di scrivere codice — quando costa zero sistemare."
+        "body": "Mockup interattivi, non statici.\nVedi le animazioni, ascolti come si muove.\nCambiamo prima di scrivere codice — quando costa zero sistemare.",
+        "imgAlt": "Monitor con i mockup del sito collegati da frecce di prototipo interattivo"
       },
       "build": {
         "label": "Sviluppo",
         "title": "Costruisco bene.",
-        "body": "Stack moderno, performance ossessive, SEO già configurata.\nOgni riga ha una ragione.\nCode review interno: io scrivo, io rileggo, io rompo per rifare meglio."
+        "body": "Stack moderno, performance ossessive, SEO già configurata.\nOgni riga ha una ragione.\nCode review interno: io scrivo, io rileggo, io rompo per rifare meglio.",
+        "imgAlt": "Mani che scrivono codice su un portatile con i punteggi di performance in verde"
       },
       "launch": {
         "label": "Lancio",
         "title": "Sistemo, testo, rilascio.",
-        "body": "Test su dieci dispositivi reali, monitoraggio analytics, training di 30 minuti.\nPoi un anno di assistenza inclusa — perché i siti veri vivono dopo il lancio."
+        "body": "Test su dieci dispositivi reali, monitoraggio analytics, training di 30 minuti.\nPoi un anno di assistenza inclusa — perché i siti veri vivono dopo il lancio.",
+        "imgAlt": "Test dello stesso sito responsive su portatile, tablet e smartphone"
       }
     }
   },
