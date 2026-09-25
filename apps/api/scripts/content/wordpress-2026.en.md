@@ -231,6 +231,8 @@ The most honest way to close the technical discussion is to show how I reason on
 
 I turned the reasoning into four questions. It doesn't replace a consultation, but it gives an idea of where to start.
 
+One premise outweighs the others: hosting. On shared hosting the choice is WordPress nine times out of ten, because not every shared plan can run Next.js, Composer or Bun. The only exception is a static Astro site, which after the build is just HTML uploaded over FTP. If the project needs application logic, you need a VPS.
+
 <div class="blog-island" data-island="wp2026-stack-picker"></div>
 
 ## So, does WordPress still make sense?

@@ -11,12 +11,28 @@ interface Pick {
   body: string;
 }
 
-/** Decision tree from the original article — same branches, localized copy. */
+/**
+ * Decision tree from the article. Shared hosting weighs first: not every shared
+ * plan can run Next.js, Composer or Bun, so there the answer is almost always
+ * WordPress. The only exception is a static Astro build, which is plain files.
+ */
 function pick({ chi, shop, logica, host }: Answers, locale: Locale): Pick {
   const en = locale === 'en';
-  const woo = shop === 'piccolo' ? (en ? ' and WooCommerce' : ' e WooCommerce') : '';
+  const shared = host === 'condiviso';
+  const woo = shop !== 'no' ? (en ? ' and WooCommerce' : ' e WooCommerce') : '';
 
   if (logica === 'core') {
+    if (shared) {
+      return en
+        ? {
+            title: 'Laravel or Next.js, on a VPS',
+            body: "The project is an application, and shared hosting won't carry it: not every plan runs Node, Composer or Bun. Budget for a VPS or cloud hosting from day one.",
+          }
+        : {
+            title: 'Laravel o Next.js, su VPS',
+            body: "Il progetto è un'applicazione e l'hosting condiviso non la regge: non tutti permettono di eseguire Node, Composer o Bun. Serve un VPS o un cloud fin dall'inizio.",
+          };
+    }
     return en
       ? {
           title: 'Laravel or Next.js',
@@ -27,6 +43,35 @@ function pick({ chi, shop, logica, host }: Answers, locale: Locale): Pick {
           body: "Il progetto è un'applicazione. Laravel se la complessità sta nel backend (ruoli, pagamenti, code, integrazioni), Next.js se sta nell'interfaccia. I contenuti editoriali, se servono, vanno in un CMS headless.",
         };
   }
+
+  if (shared) {
+    if (chi === 'dev' && shop === 'no' && logica === 'nessuna') {
+      return en
+        ? {
+            title: 'Astro, as a static site',
+            body: 'The one exception on shared hosting: a static build is plain HTML files uploaded over FTP, so it runs anywhere. No server-side code, nothing to execute on the host.',
+          }
+        : {
+            title: 'Astro, come sito statico',
+            body: "L'unica eccezione su hosting condiviso: la build statica è HTML puro caricato via FTP, quindi gira ovunque. Nessun codice lato server da eseguire sull'hosting.",
+          };
+    }
+    return en
+      ? {
+          title: `WordPress${woo}`,
+          body:
+            'On shared hosting the choice is WordPress nine times out of ten: not every shared plan can run Next.js, Composer or Bun, while WordPress runs everywhere. A custom theme, a few carefully chosen plugins and a maintenance contract.' +
+            (shop === 'grande' ? ' With a very large catalogue, plan the move to a VPS or Shopify.' : ''),
+        }
+      : {
+          title: `WordPress${woo}`,
+          body:
+            "Su hosting condiviso la scelta ricade 9 volte su 10 su WordPress: non tutti gli hosting condivisi permettono di eseguire Next.js, Composer o Bun, WordPress gira ovunque. Tema su misura, pochi plugin scelti con cura e un contratto di manutenzione." +
+            (shop === 'grande' ? ' Con un catalogo molto ampio, metti in conto il passaggio a un VPS o a Shopify.' : ''),
+        };
+  }
+
+  // VPS or cloud from here on.
   if (shop === 'grande') {
     return en
       ? {
@@ -40,25 +85,14 @@ function pick({ chi, shop, logica, host }: Answers, locale: Locale): Pick {
   }
   if (chi === 'cliente') {
     if (logica === 'media' || shop === 'piccolo') {
-      if (host === 'vps') {
-        return en
-          ? {
-              title: `WordPress with Roots${woo}`,
-              body: "The client manages content from the WordPress admin, while the code stays structured with Bedrock, Sage and Acorn. The hosting allows Composer and automated deploys.",
-            }
-          : {
-              title: `WordPress con Roots${woo}`,
-              body: "Il cliente gestisce i contenuti dall'admin di WordPress, il codice resta strutturato con Bedrock, Sage e Acorn. L'hosting permette Composer e deploy automatici.",
-            };
-      }
       return en
         ? {
-            title: `WordPress with a custom theme${woo}`,
-            body: 'Shared hosting limits the use of Roots. A custom-built theme, a few carefully chosen plugins and a maintenance contract are the bare minimum.',
+            title: `WordPress with Roots${woo}`,
+            body: 'The client manages content from the WordPress admin, while the code stays structured with Bedrock, Sage and Acorn. The hosting allows Composer and automated deploys.',
           }
         : {
-            title: `WordPress con tema su misura${woo}`,
-            body: "L'hosting condiviso limita l'uso di Roots. Un tema sviluppato su misura, pochi plugin scelti con cura e un contratto di manutenzione sono la base minima.",
+            title: `WordPress con Roots${woo}`,
+            body: "Il cliente gestisce i contenuti dall'admin di WordPress, il codice resta strutturato con Bedrock, Sage e Acorn. L'hosting permette Composer e deploy automatici.",
           };
     }
     return en

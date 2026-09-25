@@ -231,6 +231,8 @@ Il modo più onesto di chiudere il discorso tecnico è mostrare come ragiono su 
 
 Ho trasformato il ragionamento in quattro domande. Non sostituisce una consulenza, ma dà un'idea di dove si parte.
 
+Una premessa che pesa più delle altre: l'hosting. Su un hosting condiviso la scelta ricade 9 volte su 10 su WordPress, perché non tutti gli hosting condivisi permettono di eseguire Next.js, Composer o Bun. L'unica eccezione è un sito Astro statico, che dopo la build è solo HTML da caricare via FTP. Se il progetto ha bisogno di logica applicativa, serve un VPS.
+
 <div class="blog-island" data-island="wp2026-stack-picker"></div>
 
 ## Quindi, WordPress ha ancora senso?
