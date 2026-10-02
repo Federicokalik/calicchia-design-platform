@@ -117,13 +117,14 @@ export default function QuantoCostaSitoWebPage() {
         eyebrow="Pricing transparency — 6 capitoli · 7 minuti di lettura"
         title="Quanto costa un sito web. I 5 fattori che decidono il prezzo (senza listini fumosi)."
         lead={
-          <div className="whitespace-pre-line text-justify">
+          // span (non div): EditorialArticleLayout avvolge il lead in un <p>.
+          <span className="block whitespace-pre-line text-justify">
             Cerchi "quanto costa un sito web" e trovi listini con cifre fisse, "a partire da" e calcolatori
             che spuntano numeri dal nulla.<br />
             Non funziona così.<br />
             Il prezzo dipende da 5 fattori reali — qui te
             li spiego senza vendere niente.
-          </div>
+          </span>
         }
         chapters={CHAPTERS}
         readTime="7 min"

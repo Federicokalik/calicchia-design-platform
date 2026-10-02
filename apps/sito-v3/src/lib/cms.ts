@@ -13,7 +13,14 @@
 
 import { FAQS, type FaqEntry } from '@/data/faqs';
 import { TEAM, type TeamMember } from '@/data/team';
-import { GLOSSARIO, GLOSSARIO_LETTERS, type GlossarioEntry } from '@/data/glossario';
+import {
+  glossarioLetters,
+  type GlossarioCategory,
+  type GlossarioEntry,
+  type GlossarioLevel,
+  type GlossarioTermType,
+} from '@/data/glossario';
+import { GLOSSARIO_FALLBACK, GLOSSARIO_FALLBACK_UPDATED_AT } from '@/data/glossario-fallback';
 import { SEO_CITIES, type SeoCity } from '@/data/seo-cities';
 import { getServices, getMatrixServices, getStandaloneServices } from '@/data/services';
 import type { Service } from '@/data/types';
@@ -207,23 +214,35 @@ interface GlossarioRow {
   term: string;
   full_name: string | null;
   letter: string;
+  category: GlossarioCategory | null;
+  level: GlossarioLevel;
+  term_type: GlossarioTermType;
+  aliases: string[] | null;
+  related: string[] | null;
   what_it_is: string;
-  why_you_care: string;
-  what_to_demand: string;
+  why_you_care: string | null;
+  what_to_demand: string | null;
+  what_for: string | null;
+  when_yes: string | null;
+  when_no: string | null;
+  what_to_ask: string | null;
   sort_order: number | null;
+  updated_at: string | null;
+}
+
+export interface GlossarioData {
+  entries: GlossarioEntry[];
+  letters: string[];
+  /** ISO date of the most recent edit, for the "updated" meta. */
+  updatedAt: string;
 }
 
 /**
- * Returns the glossario entries + the unique letter index. Falls back to
- * data/glossario.ts when the DB is empty or the API is unreachable.
- *
- * Returns the SAME shape as the file constants (`GLOSSARIO` +
- * `GLOSSARIO_LETTERS`) so the consumer (glossario page) keeps its
- * existing render path.
+ * Returns the glossario entries for the locale + the letter index + the date
+ * of the latest edit. Falls back to the per-locale snapshot in
+ * data/glossario-fallback.ts when the DB is empty or the API is unreachable.
  */
-export async function getGlossario(
-  locale: Locale = 'it',
-): Promise<{ entries: GlossarioEntry[]; letters: string[] }> {
+export async function getGlossario(locale: Locale = 'it'): Promise<GlossarioData> {
   const res = await fetchCms<{ entries: GlossarioRow[] }>(
     `/api/public/cms/glossario?locale=${locale}`,
   );
@@ -233,14 +252,30 @@ export async function getGlossario(
       term: r.term,
       fullName: r.full_name ?? undefined,
       letter: r.letter,
+      category: r.category ?? undefined,
+      level: r.level ?? 'base',
+      type: r.term_type ?? 'concept',
+      aliases: r.aliases ?? [],
+      related: r.related ?? [],
       whatItIs: r.what_it_is,
-      whyYouCare: r.why_you_care,
-      whatToDemand: r.what_to_demand,
+      whyYouCare: r.why_you_care ?? undefined,
+      whatToDemand: r.what_to_demand ?? undefined,
+      whatFor: r.what_for ?? undefined,
+      whenYes: r.when_yes ?? undefined,
+      whenNo: r.when_no ?? undefined,
+      whatToAsk: r.what_to_ask ?? undefined,
     }));
-    const letters = Array.from(new Set(entries.map((e) => e.letter))).sort();
-    return { entries, letters };
+    const updatedAt = res.entries
+      .map((r) => r.updated_at ?? '')
+      .reduce((max, d) => (d > max ? d : max), '');
+    return {
+      entries,
+      letters: glossarioLetters(entries),
+      updatedAt: updatedAt || GLOSSARIO_FALLBACK_UPDATED_AT,
+    };
   }
-  return { entries: GLOSSARIO, letters: [...GLOSSARIO_LETTERS] };
+  const entries = GLOSSARIO_FALLBACK[locale];
+  return { entries, letters: glossarioLetters(entries), updatedAt: GLOSSARIO_FALLBACK_UPDATED_AT };
 }
 
 /**
