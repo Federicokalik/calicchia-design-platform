@@ -74,6 +74,9 @@ export async function GET(): Promise<Response> {
     { title: 'Contatti', path: '/contatti', description: 'Email, telefono, prenota una call' },
     { title: 'Blog', path: '/blog', description: 'Articoli su web design, SEO, performance' },
     { title: 'FAQ', path: '/faq', description: '7 domande frequenti' },
+    { title: 'Glossario Web Design', path: '/risorse/glossario-web-design', description: 'Termini di web design e sviluppo: cos\'è, perché ti riguarda, cosa pretendere (mirror .md con tutte le voci)' },
+    { title: 'Glossario SEO', path: '/risorse/glossario-seo', description: 'Termini chiave SEO spiegati senza fumo' },
+    { title: 'Glossario E-Commerce', path: '/risorse/glossario-e-commerce', description: 'Dropshipping, checkout, conversion rate, AOV, CAC, LTV' },
   ] satisfies Entry[]) {
     out.push(block(e));
   }
