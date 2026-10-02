@@ -199,7 +199,7 @@ export default async function ItalianWebDesignerForEuropeanBusinessPage() {
           <>
             For mid-market European companies — SaaS, manufacturing, B2B services, agencies — that
             need reliable engineering at competitive European rates without UK/DE/NL pricing or
-            offshore communication friction.\nEU contract law, GDPR-native, modern stack default.
+            offshore communication friction. EU contract law, GDPR-native, modern stack default.
           </>
         }
         chapters={CHAPTERS}
@@ -234,9 +234,9 @@ export default async function ItalianWebDesignerForEuropeanBusinessPage() {
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Italian freelance is the third option done well.\nSame EU regulatory environment as your
+            Italian freelance is the third option done well.{'\n'}Same EU regulatory environment as your
             local freelance market, similar engineering quality, but priced 30-50% lower because
-            the Italian domestic freelance market normalizes lower rates.\nThis is arbitrage, but
+            the Italian domestic freelance market normalizes lower rates.{'\n'}This is arbitrage, but
             it's not based on cutting corners — it's based on different cost-of-living and
             different market norms.
           </p>
@@ -245,7 +245,7 @@ export default async function ItalianWebDesignerForEuropeanBusinessPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             The page exists for procurement teams, CTOs, and founders evaluating freelance
-            engineering for European projects.\nIf you're already paying UK / DE / NL senior
+            engineering for European projects.{'\n'}If you're already paying UK / DE / NL senior
             freelance rates and want to know what changes if you hire from Italy instead — this
             covers it.
           </p>
@@ -469,28 +469,28 @@ export default async function ItalianWebDesignerForEuropeanBusinessPage() {
           <ol className="flex flex-col gap-6 list-decimal pl-6 max-w-[80ch]">
             <li className="body-longform text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
               <strong>Fixed-scope project.</strong> Marketing site, product page, e-commerce build,
-              custom dashboard.\nDiscovery call → written scope → 50% upfront / 50% on delivery.\nTypical timeline 4-12 weeks.\nBest fit for clearly-bounded deliverables.
+              custom dashboard.{'\n'}Discovery call → written scope → 50% upfront / 50% on delivery.{'\n'}Typical timeline 4-12 weeks.{'\n'}Best fit for clearly-bounded deliverables.
             </li>
             <li className="body-longform text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>Monthly retainer.</strong> 20h / 40h / 80h per month.\nBest fit for ongoing
+              <strong>Monthly retainer.</strong> 20h / 40h / 80h per month.{'\n'}Best fit for ongoing
               product development, regular feature shipping, mature companies with continuous
-              roadmap.\nHours don't roll over indefinitely (fair-use 2 months max), unused hours can
+              roadmap.{'\n'}Hours don't roll over indefinitely (fair-use 2 months max), unused hours can
               convert to additional fixed-scope work.
             </li>
             <li className="body-longform text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
               <strong>Senior-on-team augmentation.</strong> I act as one more senior on your team
-              for the engagement duration (3-12 months).\nPair on architecture, ship features,
-              review code, document for handoff.\nNo agency abstraction layer.\nStandard tools
+              for the engagement duration (3-12 months).{'\n'}Pair on architecture, ship features,
+              review code, document for handoff.{'\n'}No agency abstraction layer.{'\n'}Standard tools
               (Slack / Linear / GitHub).
             </li>
             <li className="body-longform text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
               <strong>White-label for agencies.</strong> EU agencies that land big clients but lack
-              senior dev capacity.\nI work as their dev partner, they keep client relationship.\nStandard freelance NDA, output looks like agency output, communication via agency PM.
+              senior dev capacity.{'\n'}I work as their dev partner, they keep client relationship.{'\n'}Standard freelance NDA, output looks like agency output, communication via agency PM.
             </li>
             <li className="body-longform text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
               <strong>Audit + advisory.</strong> Code review, architecture review, performance
-              audit, accessibility audit.\nBest fit for companies with internal team that want
-              senior outside perspective without long engagement.\n1-3 weeks fixed scope.
+              audit, accessibility audit.{'\n'}Best fit for companies with internal team that want
+              senior outside perspective without long engagement.{'\n'}1-3 weeks fixed scope.
             </li>
           </ol>
         </section>

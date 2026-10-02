@@ -239,7 +239,7 @@ export default function FaqCmsPage() {
               rows={6}
             />
             <p className="text-[10px] text-muted-foreground">
-              Newline interpretati come <code>\n</code>. HTML non sanitizzato — usa solo testo semplice.
+              Per andare a capo premi Invio (non scrivere <code>\n</code>, verrebbe mostrato così com'è). HTML non sanitizzato — usa solo testo semplice.
             </p>
           </div>
           <Button onClick={() => saveMutation.mutate(draft)} disabled={saveMutation.isPending || !draft.question.trim() || !draft.answer.trim()}>

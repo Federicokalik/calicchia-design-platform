@@ -171,9 +171,9 @@ export default async function ItalianRestaurantsWebsitePage() {
         lead={
           <>
             For trattorie, pizzerie, panetterie, gelaterie, ristoranti and osterie across the GTA,
-            New York, Boston, Chicago and beyond.\nBilingual menus done right, reservations that
+            New York, Boston, Chicago and beyond. Bilingual menus done right, reservations that
             don't lose covers, takeout that doesn't bleed margin to aggregators, Google Maps
-            optimization that actually wins.\nBuilt by a native Italian who's eaten in real Italian
+            optimization that actually wins. Built by a native Italian who's eaten in real Italian
             restaurants on both sides of the Atlantic.
           </>
         }
@@ -200,8 +200,8 @@ export default async function ItalianRestaurantsWebsitePage() {
             className="body-longform text-xl md:text-2xl leading-relaxed mb-6 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            Italian restaurants compete on authenticity.\nCustomers — both Italian-Canadian and
-            non-Italian — can sense when a restaurant is "real" vs "Italian-themed".\nThe website
+            Italian restaurants compete on authenticity.{'\n'}Customers — both Italian-Canadian and
+            non-Italian — can sense when a restaurant is "real" vs "Italian-themed".{'\n'}The website
             is part of that signal, often the first impression.
           </p>
           <p
@@ -210,7 +210,7 @@ export default async function ItalianRestaurantsWebsitePage() {
           >
             Toronto-area Italian restaurants are routinely served by web agencies that build the
             same template for every "ethnic" restaurant: red-white-green, "Mamma Mia", stock pasta
-            photos, faux-handwritten fonts.\nIt looks like Olive Garden marketing.\nCustomers
+            photos, faux-handwritten fonts.{'\n'}It looks like Olive Garden marketing.{'\n'}Customers
             register that as "this is a tourist trap" within three seconds of landing on the homepage.
           </p>
           <p
@@ -221,7 +221,7 @@ export default async function ItalianRestaurantsWebsitePage() {
             modern Italian (Pentagram-tier editorial, not theme-park), copy that reads like an
             Italian wrote it, regional context where it adds depth (Calabrese vs Toscano vs
             Siciliano have different culinary identities), photography of your actual food and
-            space instead of stock.\nI do all of this because I'm Italian and I care about the
+            space instead of stock.{'\n'}I do all of this because I'm Italian and I care about the
             distinction.
           </p>
         </section>
@@ -353,7 +353,7 @@ export default async function ItalianRestaurantsWebsitePage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             Most Italian restaurants in North America have surrendered ~30% of their delivery
-            margin to aggregators because direct ordering setup feels too complicated.\nIt's not
+            margin to aggregators because direct ordering setup feels too complicated.{'\n'}It's not
             complicated, and the math is decisive.
           </p>
           <p
@@ -361,7 +361,7 @@ export default async function ItalianRestaurantsWebsitePage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Uber Eats / SkipTheDishes typically charge 25-35% commission</strong> on each
-            order.\nOn a $30 dinner: restaurant nets ~$19-22 instead of $30.\nThe aggregator handles
+            order.{'\n'}On a $30 dinner: restaurant nets ~$19-22 instead of $30.{'\n'}The aggregator handles
             delivery, customer support, and discovery — that's worth something, but it's worth
             10-15%, not 30%.
           </p>
@@ -370,7 +370,7 @@ export default async function ItalianRestaurantsWebsitePage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Direct ordering on your own site</strong> costs Stripe Canada fees (~2.9% +
-            30¢): same $30 order nets $29.10.\nDifference is $7-10 per order.\nFor a restaurant
+            30¢): same $30 order nets $29.10.{'\n'}Difference is $7-10 per order.{'\n'}For a restaurant
             doing 50 delivery orders a day, that's $350-500/day in margin recovery — about
             $10k-15k/month.
           </p>
@@ -379,8 +379,8 @@ export default async function ItalianRestaurantsWebsitePage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>The realistic strategy:</strong> keep aggregators for discovery (new customers
-            find you on Uber Eats first), but every aggregator listing links back to your site.\nExisting customers see "Order direct, save 25%" prominently on the site and on the
-            aggregator description.\nWithin 6-12 months, repeat customers shift to direct, and you
+            find you on Uber Eats first), but every aggregator listing links back to your site.{'\n'}Existing customers see "Order direct, save 25%" prominently on the site and on the
+            aggregator description.{'\n'}Within 6-12 months, repeat customers shift to direct, and you
             keep margin instead of feeding it to an aggregator.
           </p>
           <p
@@ -389,7 +389,7 @@ export default async function ItalianRestaurantsWebsitePage() {
           >
             For delivery itself, options vary: own driver (lowest cost if volume justifies it),
             DoorDash Drive (use their drivers for direct orders, ~$8/order flat), or no delivery /
-            pickup-only (best margins, but limits market).\nDiscuss based on your geography and
+            pickup-only (best margins, but limits market).{'\n'}Discuss based on your geography and
             volume.
           </p>
         </section>
@@ -414,7 +414,7 @@ export default async function ItalianRestaurantsWebsitePage() {
           >
             For Italian restaurants in Vaughan, Woodbridge, Toronto and the broader GTA, the
             customer base is partly Italian-Canadian (community trust matters, word-of-mouth
-            dominates) and partly non-Italian (looking for "authentic Italian" experience).\nDifferent audiences, same restaurant — the website needs to land for both.
+            dominates) and partly non-Italian (looking for "authentic Italian" experience).{'\n'}Different audiences, same restaurant — the website needs to land for both.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"

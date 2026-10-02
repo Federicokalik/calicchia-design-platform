@@ -156,9 +156,9 @@ export default async function EnglishSpeakingItalyPage() {
         title="English-speaking web designer in Italy. For expats, international businesses, and bilingual operations."
         lead={
           <>
-            Native Italian + fluent professional English from one person.\nFor expats running
+            Native Italian + fluent professional English from one person. For expats running
             businesses in Italy, foreign companies entering the Italian market, Italian businesses
-            serving international clients.\nNo translation hand-offs, no agency overhead, GDPR + Italian
+            serving international clients. No translation hand-offs, no agency overhead, GDPR + Italian
             P.IVA compliance handled by default.
           </>
         }
@@ -186,7 +186,7 @@ export default async function EnglishSpeakingItalyPage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             You need a web designer or developer who works in English fluently AND understands
-            Italian business reality.\nThat combination is harder to find than it should be.
+            Italian business reality.{'\n'}That combination is harder to find than it should be.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
@@ -194,7 +194,7 @@ export default async function EnglishSpeakingItalyPage() {
           >
             Italian agencies sometimes claim "English-speaking team" but the practice is usually
             limited to a sales person with survival English and a designer who needs everything
-            translated.\nUK/US agencies handle English natively but miss Italian-market specifics
+            translated.{'\n'}UK/US agencies handle English natively but miss Italian-market specifics
             (P.IVA, IVA reverse-charge, GDPR-Italian-style, WhatsApp-first customer behavior).
           </p>
           <p
@@ -328,25 +328,25 @@ export default async function EnglishSpeakingItalyPage() {
           <ul className="flex flex-col gap-4 max-w-[65ch] list-disc pl-6 whitespace-pre-line text-justify">
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Briefs in your preferred language.</strong> Most non-Italian clients prefer
-              English; some Italian clients prefer Italian.\nI match.\nMid-meeting language switching
+              English; some Italian clients prefer Italian.{'\n'}I match.{'\n'}Mid-meeting language switching
               works fine if your team is mixed.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Site copy in both languages, written natively.</strong> No translation
-              hand-off.\nThe Italian version reads like an Italian wrote it (because I did), the
+              hand-off.{'\n'}The Italian version reads like an Italian wrote it (because I did), the
               English version reads like fluent professional English (because I write it daily).
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Design accommodates language differences.</strong> Italian text typically runs
-              15-20% longer than English.\nThe design accounts for this — buttons, headlines, navigation
+              15-20% longer than English.{'\n'}The design accounts for this — buttons, headlines, navigation
               don't break when language switches.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Bills in your currency.</strong> EUR, GBP, USD via wire transfer or Wise/Revolut.\nStandard 50% upfront / 50% on delivery for fixed projects.\nMonthly retainer for ongoing.
+              <strong>Bills in your currency.</strong> EUR, GBP, USD via wire transfer or Wise/Revolut.{'\n'}Standard 50% upfront / 50% on delivery for fixed projects.{'\n'}Monthly retainer for ongoing.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Async tools work in English.</strong> Slack, Linear, Notion, Figma, GitHub
-              Issues — all in English by default.\nProject board you can read at a glance.
+              Issues — all in English by default.{'\n'}Project board you can read at a glance.
             </li>
           </ul>
         </section>
@@ -377,7 +377,7 @@ export default async function EnglishSpeakingItalyPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>P.IVA + IVA basics:</strong> Italian VAT (IVA) is 22% standard, reduced rates
-            for specific categories.\nP.IVA must appear in site footer for VAT-registered businesses.\nReverse-charge B2B EU.\nOSS for distance selling.\nI configure all this in WooCommerce /
+            for specific categories.{'\n'}P.IVA must appear in site footer for VAT-registered businesses.{'\n'}Reverse-charge B2B EU.{'\n'}OSS for distance selling.{'\n'}I configure all this in WooCommerce /
             Shopify / Stripe correctly.
           </p>
           <p
@@ -385,7 +385,7 @@ export default async function EnglishSpeakingItalyPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>GDPR Italian-style:</strong> Italian Garante della Privacy is one of the more
-            active EU privacy regulators.\nCookie consent must be granular (categories, not single
+            active EU privacy regulators.{'\n'}Cookie consent must be granular (categories, not single
             accept), data processing agreements with all third-party processors, privacy policy
             that meets Italian regulatory expectations (more detailed than typical UK/US version).
           </p>
@@ -394,17 +394,17 @@ export default async function EnglishSpeakingItalyPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Italian customer behavior:</strong> WhatsApp is the default contact channel for
-            most Italian businesses (more than email or phone).\nTap-to-WhatsApp button on mobile is
-            non-negotiable.\nItalian customers expect human response, not bot — auto-reply tolerated
+            most Italian businesses (more than email or phone).{'\n'}Tap-to-WhatsApp button on mobile is
+            non-negotiable.{'\n'}Italian customers expect human response, not bot — auto-reply tolerated
             only as ack, not as actual response.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>European Accessibility Act:</strong> EAA in vigore from June 28, 2025.\nMandatory
-            for B2C digital services in the EU.\nWCAG 2.1 AA compliance.\nItalian fines up to €40k per
-            violation.\nI bake this into every project as default, not retrofit.
+            <strong>European Accessibility Act:</strong> EAA in vigore from June 28, 2025.{'\n'}Mandatory
+            for B2C digital services in the EU.{'\n'}WCAG 2.1 AA compliance.{'\n'}Italian fines up to €40k per
+            violation.{'\n'}I bake this into every project as default, not retrofit.
           </p>
         </section>
 

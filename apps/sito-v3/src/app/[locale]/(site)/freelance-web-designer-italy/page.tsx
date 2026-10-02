@@ -164,8 +164,8 @@ export default async function FreelanceWebDesignerItalyPage() {
         title="Freelance Web Designer & Developer based in Italy. Working in English with European, UK and US clients."
         lead={
           <>
-            One person, full stack, EU-based.\nModern engineering quality at competitive
-            European rates, GDPR-native, no agency middlemen, no offshore friction.\nItalian by
+            One person, full stack, EU-based. Modern engineering quality at competitive
+            European rates, GDPR-native, no agency middlemen, no offshore friction. Italian by
             location, English by default in business.
           </>
         }
@@ -193,7 +193,7 @@ export default async function FreelanceWebDesignerItalyPage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             You're considering hiring outside your country because local agencies cost too much
-            or your local talent pool is thin.\nThe two obvious alternatives — UK/US boutique
+            or your local talent pool is thin.{'\n'}The two obvious alternatives — UK/US boutique
             agencies or offshore providers — both have well-known problems.
           </p>
           <p
@@ -202,7 +202,7 @@ export default async function FreelanceWebDesignerItalyPage() {
           >
             <strong>Boutique agencies</strong> are expensive: you pay for offices in central
             London or NYC, account managers who don't write code, project managers forwarding
-            your emails to the actual designer.\nMargin on top of margin.\nFor projects under
+            your emails to the actual designer.{'\n'}Margin on top of margin.{'\n'}For projects under
             £50k / $60k the math doesn't add up.
           </p>
           <p
@@ -397,10 +397,10 @@ export default async function FreelanceWebDesignerItalyPage() {
           <ul className="flex flex-col gap-3 max-w-[65ch] list-disc pl-6 whitespace-pre-line text-justify">
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Web design + development</strong> — bespoke websites and landing pages,
-              not templates.\nModern stack (Next.js, React, TypeScript, Tailwind, headless CMS).
+              not templates.{'\n'}Modern stack (Next.js, React, TypeScript, Tailwind, headless CMS).
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>E-commerce</strong> — Shopify, WooCommerce, custom builds.\nStripe / PayPal
+              <strong>E-commerce</strong> — Shopify, WooCommerce, custom builds.{'\n'}Stripe / PayPal
               integration, EU+UK+US tax compliance, multi-currency.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
@@ -445,26 +445,26 @@ export default async function FreelanceWebDesignerItalyPage() {
           </p>
           <ol className="flex flex-col gap-6 list-decimal pl-6 max-w-[65ch] whitespace-pre-line text-justify">
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>30-minute discovery call.</strong> Free.\nWe figure out if it makes sense
-              to work together.\nI'll ask about goals, timeline, what already exists, what
-              you've tried.\nNo PowerPoint pitch.
+              <strong>30-minute discovery call.</strong> Free.{'\n'}We figure out if it makes sense
+              to work together.{'\n'}I'll ask about goals, timeline, what already exists, what
+              you've tried.{'\n'}No PowerPoint pitch.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Written scope and proposal.</strong> Within 3 working days.\nFixed-scope
-              project or hourly retainer, your call.\nEverything in writing — no surprise
+              <strong>Written scope and proposal.</strong> Within 3 working days.{'\n'}Fixed-scope
+              project or hourly retainer, your call.{'\n'}Everything in writing — no surprise
               extras mid-project.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Design & build, weekly check-ins.</strong> Async updates on Slack/Linear,
-              weekly 30-min sync video.\nYou see progress every week, can course-correct anytime.
+              weekly 30-min sync video.{'\n'}You see progress every week, can course-correct anytime.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Pre-launch QA.</strong> Performance audit, accessibility check, browser
-              testing, GDPR review.\nNot "we hope it works" — verified.
+              testing, GDPR review.{'\n'}Not "we hope it works" — verified.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Launch + handoff.</strong> Code repository, hosting credentials,
-              documentation.\nYou own everything from day one.\nOptional maintenance retainer
+              documentation.{'\n'}You own everything from day one.{'\n'}Optional maintenance retainer
               if you want me to keep monitoring and updating.
             </li>
           </ol>
