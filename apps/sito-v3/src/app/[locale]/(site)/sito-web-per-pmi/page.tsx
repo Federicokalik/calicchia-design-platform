@@ -143,9 +143,9 @@ export default function SitoWebPerPmiPage() {
         title="Sito Web per PMI · Quello che hai adesso ti sta facendo perdere clienti."
         lead={
           <>
-            Il tuo sito attuale lavora 24 ore al giorno.\nPer chi?\nProbabilmente per
-            nessuno.\nSe non vendi, contatti o converti da quella pagina, è un costo,
-            non uno strumento.\nCinque segnali per capirlo, cinque cose da pretendere
+            Il tuo sito attuale lavora 24 ore al giorno. Per chi? Probabilmente per
+            nessuno. Se non vendi, contatti o converti da quella pagina, è un costo,
+            non uno strumento. Cinque segnali per capirlo, cinque cose da pretendere
             prima di rifarlo.
           </>
         }
@@ -241,7 +241,7 @@ export default function SitoWebPerPmiPage() {
             style={{ color: 'var(--color-text-secondary)' }}
           >
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
-              Zero buzzword.\nSolo fatti.\nUn sito di PMI nel 2026 deve fare quattro cose,
+              Zero buzzword.{'\n'}Solo fatti.{'\n'}Un sito di PMI nel 2026 deve fare quattro cose,
               in ordine di importanza:
             </p>
             <ol className="list-decimal pl-6 space-y-3 max-w-[80ch]">
@@ -267,7 +267,7 @@ export default function SitoWebPerPmiPage() {
             </ol>
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
               Tutto il resto — animazioni, parallax, dark mode, AI chatbot — è
-              cosmetico.\nBello da vedere, irrilevante per il business.
+              cosmetico.{'\n'}Bello da vedere, irrilevante per il business.
             </p>
           </div>
         </section>
@@ -301,24 +301,24 @@ export default function SitoWebPerPmiPage() {
           >
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
               <strong>Errore 1: il sito parla di te.</strong> Quasi tutti i siti di PMI
-              iniziano con "La nostra storia".\nAl cliente non interessa.\nIl cliente
-              vuole sapere cosa fai per LUI.\nIl sito deve aprirsi sul problema che
+              iniziano con "La nostra storia".{'\n'}Al cliente non interessa.{'\n'}Il cliente
+              vuole sapere cosa fai per LUI.{'\n'}Il sito deve aprirsi sul problema che
               risolvi, non sull'anno di fondazione dell'azienda.
             </p>
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
               <strong>Errore 2: troppi servizi in vetrina.</strong> Se elenchi 15
-              servizi, sembri un tuttofare.\nI clienti scelgono lo specialista.\nMeglio
+              servizi, sembri un tuttofare.{'\n'}I clienti scelgono lo specialista.{'\n'}Meglio
               3-5 servizi messi bene che 15 in un elenco illeggibile.
             </p>
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
               <strong>Errore 3: niente prove.</strong> Il sito dice "siamo esperti,
-              professionali, affidabili".\nOgni concorrente dice la stessa cosa.\nQuello
+              professionali, affidabili".{'\n'}Ogni concorrente dice la stessa cosa.{'\n'}Quello
               che convince sono recensioni reali, casi studio con numeri, foto del
-              lavoro vero.\nLe agenzie le omettono perché non le hanno.
+              lavoro vero.{'\n'}Le agenzie le omettono perché non le hanno.
             </p>
             <p className="body-longform max-w-[80ch] whitespace-pre-line text-justify">
               <strong>Errore 4: form di contatto da 12 campi.</strong> Più campi metti,
-              meno persone compilano.\nTre campi: nome, email, messaggio.\nIl resto si
+              meno persone compilano.{'\n'}Tre campi: nome, email, messaggio.{'\n'}Il resto si
               chiede dopo, in chiamata.
             </p>
           </div>
@@ -476,8 +476,8 @@ export default function SitoWebPerPmiPage() {
             className="mb-6 whitespace-pre-line text-justify"
             style={{ maxWidth: '42ch' }}
           >
-            Il tuo sito attuale ti sta facendo perdere clienti.\nSai cosa deve
-            cambiare.\nDecidi tu se farlo da solo o con qualcuno che l'ha già fatto
+            Il tuo sito attuale ti sta facendo perdere clienti.{'\n'}Sai cosa deve
+            cambiare.{'\n'}Decidi tu se farlo da solo o con qualcuno che l'ha già fatto
             cento volte.
           </Heading>
           <Button href="/contatti" variant="underline" size="md">

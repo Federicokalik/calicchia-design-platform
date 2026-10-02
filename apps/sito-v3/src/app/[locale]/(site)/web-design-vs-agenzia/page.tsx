@@ -114,8 +114,8 @@ export default function WebDesignVsAgenziaPage() {
         title="Freelance vs Agenzia · Perché un'agenzia ti costa il triplo per metà del risultato."
         lead={
           <>
-            Ti hanno detto che "un'agenzia è più sicura".\nForse hanno omesso un dettaglio:
-            chi te l'ha detto era un'agenzia.\nConfronto onesto, senza vendere niente.
+            Ti hanno detto che "un'agenzia è più sicura". Forse hanno omesso un dettaglio:
+            chi te l'ha detto era un'agenzia. Confronto onesto, senza vendere niente.
           </>
         }
         chapters={CHAPTERS}
@@ -205,20 +205,20 @@ export default function WebDesignVsAgenziaPage() {
           heading="Quanto ti costa davvero un'agenzia."
         >
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
-            Apri il preventivo di un'agenzia.\nVedi una cifra, magari due righe di
-            descrizione.\nQuello che non vedi è la struttura interna che genera quella
+            Apri il preventivo di un'agenzia.{'\n'}Vedi una cifra, magari due righe di
+            descrizione.{'\n'}Quello che non vedi è la struttura interna che genera quella
             cifra: account manager, project manager, senior designer, junior designer,
-            sviluppatore, QA tester.\nSei persone su un sito.
+            sviluppatore, QA tester.{'\n'}Sei persone su un sito.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
-            Ognuna di queste persone fattura ore.\nL'agenzia ci aggiunge il suo margine
-            sopra (di solito 30-50%).\nIl risultato finale lo paghi tu.\nPer un sito che,
+            Ognuna di queste persone fattura ore.{'\n'}L'agenzia ci aggiunge il suo margine
+            sopra (di solito 30-50%).{'\n'}Il risultato finale lo paghi tu.{'\n'}Per un sito che,
             fatto da un freelance esperto, richiederebbe una persona sola.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>I margini sui margini.</strong> Se l'agenzia coinvolge uno
             sviluppatore esterno (capita spesso), quello sviluppatore fattura
-            all'agenzia, l'agenzia ci mette il suo margine, e ti fattura te.\nPagamento
+            all'agenzia, l'agenzia ci mette il suo margine, e ti fattura te.{'\n'}Pagamento
             doppio per lo stesso lavoro.
           </p>
         </EditorialChapter>
@@ -229,20 +229,20 @@ export default function WebDesignVsAgenziaPage() {
           heading="Quanto ti costa un freelance."
         >
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
-            Una persona, una tariffa.\nNiente margini di mezzo, niente costi di
+            Una persona, una tariffa.{'\n'}Niente margini di mezzo, niente costi di
             struttura, niente PM da pagare per "coordinare" un team che c'è perché
             l'agenzia ha bisogno di tenerlo occupato.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             Il freelance giusto ti costa il 40-60% di quello che ti costerebbe la
-            stessa cosa in agenzia.\nStesso risultato, spesso migliore (perché chi
+            stessa cosa in agenzia.{'\n'}Stesso risultato, spesso migliore (perché chi
             lavora sul tuo sito è anche chi te l'ha progettato — il contesto non si
             perde).
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>Nota onesta:</strong> il freelance giusto non è il freelance più
-            economico.\nIl freelance da 500€ che ti vende un sito in una settimana è la
-            categoria peggiore — quella che ti fa rimpiangere l'agenzia.\nIl freelance
+            economico.{'\n'}Il freelance da 500€ che ti vende un sito in una settimana è la
+            categoria peggiore — quella che ti fa rimpiangere l'agenzia.{'\n'}Il freelance
             senior, con clienti consolidati, costa di meno di un'agenzia ma non è
             gratis.
           </p>
@@ -254,30 +254,30 @@ export default function WebDesignVsAgenziaPage() {
           heading="Quando l'agenzia ha senso (sì, esiste)."
         >
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
-            Sono onesto: l'agenzia non è sempre la scelta sbagliata.\nTre casi reali in
+            Sono onesto: l'agenzia non è sempre la scelta sbagliata.{'\n'}Tre casi reali in
             cui ha senso:
           </p>
           <ul className="list-disc pl-6 space-y-3 whitespace-pre-line text-justify">
             <li>
               <strong>Progetti enterprise multinazionali</strong> con supporto 24/7
               contrattualizzato, SLA al 99,99%, integrazioni con sistemi corporate
-              (SAP, Salesforce, Workday).\nLì serve un team strutturato e un account
+              (SAP, Salesforce, Workday).{'\n'}Lì serve un team strutturato e un account
               dedicato.
             </li>
             <li>
               <strong>Multilingua reale</strong> con localizzazione in 10+ lingue,
-              traduzioni native, content team distribuito.\nUn freelance non lo
+              traduzioni native, content team distribuito.{'\n'}Un freelance non lo
               gestisce, e va bene così.
             </li>
             <li>
               <strong>Budget oltre i 100k</strong> con esigenze di governance, audit,
-              compliance (GDPR enterprise, accessibility WCAG AAA, ISO).\nTi serve la
+              compliance (GDPR enterprise, accessibility WCAG AAA, ISO).{'\n'}Ti serve la
               struttura, non il singolo bravo.
             </li>
           </ul>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             Per tutto il resto — PMI, professionisti, e-commerce sotto 200 prodotti,
-            landing campagne — l'agenzia è overkill.\nStai pagando una struttura che
+            landing campagne — l'agenzia è overkill.{'\n'}Stai pagando una struttura che
             non ti serve.
           </p>
         </EditorialChapter>
@@ -289,24 +289,24 @@ export default function WebDesignVsAgenziaPage() {
         >
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>PMI e professionisti.</strong> Avvocati, dentisti, ristoratori,
-            commercialisti, B&B.\nFatturato sotto i 5 milioni.\nHai bisogno di un sito
-            che funzioni, ti dia visibilità locale, porti contatti.\nNon hai bisogno di
+            commercialisti, B&B.{'\n'}Fatturato sotto i 5 milioni.{'\n'}Hai bisogno di un sito
+            che funzioni, ti dia visibilità locale, porti contatti.{'\n'}Non hai bisogno di
             un team di 6 persone per farlo.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>E-commerce sotto 200 prodotti.</strong> Catalogo gestibile,
-            checkout snello, integrazione gestionale.\nWooCommerce o Shopify configurati
-            bene fanno tutto.\nSopra i 200 prodotti si ragiona caso per caso.
+            checkout snello, integrazione gestionale.{'\n'}WooCommerce o Shopify configurati
+            bene fanno tutto.{'\n'}Sopra i 200 prodotti si ragiona caso per caso.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>Landing per campagne.</strong> Hai una campagna ADV partendo
-            lunedì e ti serve la landing online entro venerdì.\nUn freelance ti dice
-            "sì" o "no" subito.\nUn'agenzia ti chiede tre giorni solo per fare la
+            lunedì e ti serve la landing online entro venerdì.{'\n'}Un freelance ti dice
+            "sì" o "no" subito.{'\n'}Un'agenzia ti chiede tre giorni solo per fare la
             riunione di kick-off.
           </p>
           <p className="body-longform whitespace-pre-line text-justify" style={{ maxWidth: '80ch' }}>
             <strong>Restyling con scadenza.</strong> Il sito attuale ti sta perdendo
-            clienti, non puoi aspettare 6 mesi.\nUn freelance può consegnare in 4-6
+            clienti, non puoi aspettare 6 mesi.{'\n'}Un freelance può consegnare in 4-6
             settimane, l'agenzia ti dà date che si spostano sempre.
           </p>
         </EditorialChapter>

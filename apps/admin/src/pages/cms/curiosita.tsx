@@ -179,7 +179,7 @@ export default function CuriositaCmsPage() {
               onChange={(e) => setDraft({ ...draft, body: e.target.value })}
               rows={5}
             />
-            <p className="text-[10px] text-muted-foreground">Newline a-capo come <code>\n</code>. HTML non interpretato.</p>
+            <p className="text-[10px] text-muted-foreground">Per andare a capo premi Invio (non scrivere <code>\n</code>, verrebbe mostrato così com'è). HTML non interpretato.</p>
           </div>
           <Button onClick={() => saveMutation.mutate(draft)} disabled={saveMutation.isPending || !draft.label.trim() || !draft.body.trim()}>
             <Save className="h-4 w-4 mr-2" /> {saveMutation.isPending ? 'Salvataggio...' : 'Salva'}

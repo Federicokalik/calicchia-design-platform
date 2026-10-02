@@ -168,7 +168,7 @@ export default async function ItalianBusinessesTorontoPage() {
           <>
             For restaurants, contractors, professional firms, retailers and cultural organizations
             run by Italian-Canadians across Toronto, Vaughan, Woodbridge, Mississauga, Hamilton and
-            beyond.\nBilingual EN/IT done by a native Italian speaker, EU-quality engineering,
+            beyond. Bilingual EN/IT done by a native Italian speaker, EU-quality engineering,
             CAD-friendly rates, no agency middlemen pretending to "do Italian."
           </>
         }
@@ -195,9 +195,9 @@ export default async function ItalianBusinessesTorontoPage() {
             className="body-longform text-xl md:text-2xl leading-relaxed mb-6 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            About 1.5 million Canadians have Italian heritage.\nThe community is thickest in the
+            About 1.5 million Canadians have Italian heritage.{'\n'}The community is thickest in the
             Greater Toronto Area — Vaughan and Woodbridge especially — followed by Hamilton,
-            Montreal, and Vancouver.\nA lot of small to mid-sized businesses in those areas are
+            Montreal, and Vancouver.{'\n'}A lot of small to mid-sized businesses in those areas are
             Italian-owned, often family-run, often multi-generational.
           </p>
           <p
@@ -205,14 +205,14 @@ export default async function ItalianBusinessesTorontoPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             Most of those businesses get their websites built by Toronto agencies that don't really
-            understand the audience, or by random offshore freelancers who copy-paste templates.\nThe result is a market full of sites that look the same, sound generic, and miss the
+            understand the audience, or by random offshore freelancers who copy-paste templates.{'\n'}The result is a market full of sites that look the same, sound generic, and miss the
             cultural cues that actually matter for Italian-Canadian customers.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>I'm Italian.\nI have family in Vaughan.\nI build websites for a living.</strong>{' '}
+            <strong>I'm Italian.{'\n'}I have family in Vaughan.{'\n'}I build websites for a living.</strong>{' '}
             That combination isn't unique, but it's rare in this market — and it lets me build
             sites for Italian-Canadian businesses that don't feel like they were made for "any
             ethnic restaurant" by someone who's never been to a real trattoria.
@@ -355,14 +355,14 @@ export default async function ItalianBusinessesTorontoPage() {
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Anti-cliché visual design.</strong> No red-white-green flag dividers, no
-              tossed-spaghetti hero shots, no fake-handwritten "Mamma Mia" taglines.\nModern Italian
+              tossed-spaghetti hero shots, no fake-handwritten "Mamma Mia" taglines.{'\n'}Modern Italian
               design (Pentagram-tier, Swiss-influenced, editorial typography) — which is what
               actual Italian brands look like in 2026.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Proper character handling.</strong> Forms, databases, email templates
-              configured for é, à, ù, è, ò, ì from day one.\nCustomer names with apostrophes
-              (D'Angelo, D'Amico) handled correctly through the entire system.\nNo 'unsupported
+              configured for é, à, ù, è, ò, ì from day one.{'\n'}Customer names with apostrophes
+              (D'Angelo, D'Amico) handled correctly through the entire system.{'\n'}No 'unsupported
               character' errors months later.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
@@ -373,7 +373,7 @@ export default async function ItalianBusinessesTorontoPage() {
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Direct relationship.</strong> No account manager translating between you and
-              the Italian-speaking team in another country.\nYou email me, I reply.\nIf your
+              the Italian-speaking team in another country.{'\n'}You email me, I reply.{'\n'}If your
               parents/partners want to discuss something in Italian over the phone, that's how the
               call goes.
             </li>
@@ -399,7 +399,7 @@ export default async function ItalianBusinessesTorontoPage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             Vaughan and Woodbridge form the densest concentration of Italian-Canadians in North
-            America.\nItalian is spoken in homes, businesses, parishes, sports clubs.\nThe local
+            America.{'\n'}Italian is spoken in homes, businesses, parishes, sports clubs.{'\n'}The local
             economy has a strong bilingual undercurrent that doesn't exist anywhere else in Canada
             at the same density.
           </p>
@@ -418,16 +418,16 @@ export default async function ItalianBusinessesTorontoPage() {
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            The community runs on word of mouth and Google Maps reviews.\nSite → Maps profile →
-            reviews → site loop is critical.\nFor restaurants and retail this is often more
+            The community runs on word of mouth and Google Maps reviews.{'\n'}Site → Maps profile →
+            reviews → site loop is critical.{'\n'}For restaurants and retail this is often more
             important than paid ads.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>Disclosure:</strong> I have family in Vaughan.\nThat's why this market is in my
-            focus and why I take it seriously.\nIt's not a marketing line — it's the reason I
+            <strong>Disclosure:</strong> I have family in Vaughan.{'\n'}That's why this market is in my
+            focus and why I take it seriously.{'\n'}It's not a marketing line — it's the reason I
             understand the business culture from the inside.
           </p>
         </section>

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
-import { sql, sqlv } from '../db';
+import { sql, sqlInsert, sqlv } from '../db';
 import { logger } from '../lib/logger';
 import { revalidateSito } from '../lib/sito-revalidate';
 
@@ -276,18 +276,81 @@ cmsAdmin.delete('/seo-cities/:id', async (c) => {
 });
 
 // ── GLOSSARIO ────────────────────────────────────────────────────
+// Due template (mig 153): `concept` usa why_you_care + what_to_demand,
+// `technology` usa what_for + when_yes + when_no + what_to_ask. Il vincolo
+// site_glossario_fields_by_type lo garantisce anche lato DB.
+const GLOSSARIO_CATEGORIES = [
+  'seo', 'performance', 'infrastruttura', 'dominio-email', 'sviluppo',
+  'piattaforme', 'sicurezza-legale', 'design-ux', 'motion-3d',
+] as const;
+const GLOSSARIO_TYPE_FIELDS = {
+  concept: ['why_you_care', 'what_to_demand'],
+  technology: ['what_for', 'when_yes', 'when_no', 'what_to_ask'],
+} as const;
+const GLOSSARIO_FIELD_LABELS: Record<string, string> = {
+  why_you_care: 'Perché ti riguarda',
+  what_to_demand: 'Cosa pretendere',
+  what_for: 'A cosa serve',
+  when_yes: 'Quando conviene',
+  when_no: 'Quando no',
+  what_to_ask: 'Cosa chiedere al fornitore',
+};
+
+/** '' e solo spazi → null; undefined resta undefined (PUT parziale). */
+const optionalText = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() === '' ? null : v),
+  z.string().trim().nullable().optional(),
+);
+const uniqueStrings = (item: z.ZodString) =>
+  z.array(item).max(30).transform((xs) => Array.from(new Set(xs)));
+
 const glossarioUpsertSchema = z.object({
   locale: localeSchema.default('it'),
   slug: z.string().trim().regex(/^[a-z0-9-]+$/, 'Slug deve contenere solo lettere minuscole, numeri e trattini').min(1),
   term: z.string().trim().min(1, 'Termine richiesto'),
-  full_name: z.string().trim().nullable().optional().or(z.literal('').transform(() => null)),
+  full_name: optionalText,
   letter: z.string().trim().regex(/^[A-Z0-9]$/, 'Lettera deve essere una sola maiuscola A-Z o cifra').length(1),
+  category: z.enum(GLOSSARIO_CATEGORIES).nullable().optional(),
+  level: z.enum(['base', 'tecnico']).default('base'),
+  term_type: z.enum(['concept', 'technology']).default('concept'),
+  aliases: uniqueStrings(z.string().trim().toLowerCase().min(1).max(80)).default([]),
+  related: uniqueStrings(
+    z.string().trim().regex(/^[a-z0-9-]+$/, 'Correlati: usa gli slug delle altre voci'),
+  ).default([]),
   what_it_is: z.string().trim().min(1, 'Definizione richiesta'),
-  why_you_care: z.string().trim().min(1, 'Motivo richiesto'),
-  what_to_demand: z.string().trim().min(1, 'Pretesa richiesta'),
+  why_you_care: optionalText,
+  what_to_demand: optionalText,
+  what_for: optionalText,
+  when_yes: optionalText,
+  when_no: optionalText,
+  what_to_ask: optionalText,
   sort_order: z.number().int().nullable().optional(),
   is_published: z.boolean().default(true),
 });
+
+const GLOSSARIO_COLUMNS = [
+  'locale', 'slug', 'term', 'full_name', 'letter', 'category', 'level', 'term_type',
+  'aliases', 'related', 'what_it_is', 'why_you_care', 'what_to_demand', 'what_for',
+  'when_yes', 'when_no', 'what_to_ask', 'sort_order', 'is_published',
+] as const;
+
+/** Primo campo obbligatorio mancante per il template della voce, o null. */
+function glossarioMissingField(row: Record<string, unknown>): string | null {
+  const type = row.term_type === 'technology' ? 'technology' : 'concept';
+  for (const field of GLOSSARIO_TYPE_FIELDS[type]) {
+    const v = row[field];
+    if (typeof v !== 'string' || v.trim() === '') {
+      return `${GLOSSARIO_FIELD_LABELS[field]} richiesto per una voce ${type === 'technology' ? 'tecnologia' : 'concetto'}`;
+    }
+  }
+  return null;
+}
+
+function glossarioSaveError(err: unknown): string {
+  return err instanceof Error && /unique/i.test(err.message)
+    ? 'Slug già esistente per questa lingua'
+    : 'Errore nel salvataggio';
+}
 
 cmsAdmin.get('/glossario', async (c) => {
   const locale = c.req.query('locale');
@@ -304,50 +367,46 @@ cmsAdmin.post('/glossario', async (c) => {
   const body = await c.req.json();
   const parsed = glossarioUpsertSchema.safeParse(body);
   if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
-  const v = parsed.data;
+  const v = { ...parsed.data, letter: parsed.data.letter.toUpperCase() };
+  const missing = glossarioMissingField(v);
+  if (missing) return c.json({ error: missing }, 400);
+
+  const values: Record<string, unknown> = { source: 'admin' };
+  for (const k of GLOSSARIO_COLUMNS) values[k] = v[k] ?? null;
   try {
-    const [row] = await sql`
-      INSERT INTO site_glossario (
-        locale, slug, term, full_name, letter, what_it_is, why_you_care,
-        what_to_demand, sort_order, is_published, source
-      )
-      VALUES (
-        ${v.locale}, ${v.slug}, ${v.term}, ${v.full_name ?? null},
-        ${v.letter.toUpperCase()}, ${v.what_it_is}, ${v.why_you_care},
-        ${v.what_to_demand}, ${v.sort_order ?? null}, ${v.is_published}, 'admin'
-      )
-      RETURNING *
-    `;
+    const [row] = await sql`INSERT INTO site_glossario ${sqlInsert(values)} RETURNING *`;
     return c.json({ row }, 201);
   } catch (err) {
-    const msg = err instanceof Error && /unique/i.test(err.message)
-      ? 'Slug già esistente per questa lingua'
-      : 'Errore nel salvataggio';
-    return c.json({ error: msg }, 400);
+    log.warn({ err }, 'glossario insert failed');
+    return c.json({ error: glossarioSaveError(err) }, 400);
   }
 });
 
 cmsAdmin.put('/glossario/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json();
+  // .partial() non applica i default: le chiavi assenti restano undefined.
   const parsed = glossarioUpsertSchema.partial().safeParse(body);
   if (!parsed.success) return c.json({ error: parsed.error.issues[0]?.message }, 400);
 
   const patch: Record<string, unknown> = {};
-  for (const k of ['locale', 'slug', 'term', 'full_name', 'letter', 'what_it_is', 'why_you_care', 'what_to_demand', 'sort_order', 'is_published'] as const) {
+  for (const k of GLOSSARIO_COLUMNS) {
     if (parsed.data[k] !== undefined) patch[k] = k === 'letter' ? String(parsed.data[k]).toUpperCase() : parsed.data[k];
   }
   if (Object.keys(patch).length === 0) return c.json({ error: 'Nessuna modifica' }, 400);
+
+  const [current] = await sql`SELECT * FROM site_glossario WHERE id = ${id}`;
+  if (!current) return c.json({ error: 'Not found' }, 404);
+  const missing = glossarioMissingField({ ...current, ...patch });
+  if (missing) return c.json({ error: missing }, 400);
 
   try {
     const [row] = await sql`UPDATE site_glossario SET ${sql(patch)} WHERE id = ${id} RETURNING *`;
     if (!row) return c.json({ error: 'Not found' }, 404);
     return c.json({ row });
   } catch (err) {
-    const msg = err instanceof Error && /unique/i.test(err.message)
-      ? 'Slug già esistente per questa lingua'
-      : 'Errore nel salvataggio';
-    return c.json({ error: msg }, 400);
+    log.warn({ err, id }, 'glossario update failed');
+    return c.json({ error: glossarioSaveError(err) }, 400);
   }
 });
 

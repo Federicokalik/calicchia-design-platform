@@ -117,13 +117,14 @@ export default function QuantoCostaSitoWebPage() {
         eyebrow="Pricing transparency — 6 capitoli · 7 minuti di lettura"
         title="Quanto costa un sito web. I 5 fattori che decidono il prezzo (senza listini fumosi)."
         lead={
-          <div className="whitespace-pre-line text-justify">
+          // span (non div): EditorialArticleLayout avvolge il lead in un <p>.
+          <span className="block whitespace-pre-line text-justify">
             Cerchi "quanto costa un sito web" e trovi listini con cifre fisse, "a partire da" e calcolatori
             che spuntano numeri dal nulla.<br />
             Non funziona così.<br />
             Il prezzo dipende da 5 fattori reali — qui te
             li spiego senza vendere niente.
-          </div>
+          </span>
         }
         chapters={CHAPTERS}
         readTime="7 min"
@@ -148,24 +149,24 @@ export default function QuantoCostaSitoWebPage() {
             className="text-xl md:text-2xl leading-relaxed mb-6 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            Cerchi "quanto costa un sito web" su Google e trovi tre tipi di pagine: listini con prezzi finti.\n
-            Calcolatori che chiedono dati per inviarti un preventivo via email.\n
-            Agenzie che ti fanno scaricare un PDF di 18 pagine.\n
+            Cerchi "quanto costa un sito web" su Google e trovi tre tipi di pagine: listini con prezzi finti.{'\n'}
+            Calcolatori che chiedono dati per inviarti un preventivo via email.{'\n'}
+            Agenzie che ti fanno scaricare un PDF di 18 pagine.{'\n'}
             Nessuno risponde alla domanda davvero.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-6 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Il motivo è semplice: <strong>il prezzo di un sito web dipende da cosa deve fare</strong>.\n
-            Chi pubblica un numero prima di chiederti cosa fa il sito sta vendendo un template, non un progetto.\n
+            Il motivo è semplice: <strong>il prezzo di un sito web dipende da cosa deve fare</strong>.{'\n'}
+            Chi pubblica un numero prima di chiederti cosa fa il sito sta vendendo un template, non un progetto.{'\n'}
             Listino fisso = pacchetto pre-cotto.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-6 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Per dare un preventivo onesto serve mezz'ora di chiamata: capire cosa vendi, a chi, da dove arriva il traffico, cosa hai già, cosa ti serve.\n
+            Per dare un preventivo onesto serve mezz'ora di chiamata: capire cosa vendi, a chi, da dove arriva il traffico, cosa hai già, cosa ti serve.{'\n'}
             Senza queste informazioni qualsiasi prezzo è un'invenzione, e tu lo paghi a metà progetto in "extra non previsti".
           </p>
         </section>
@@ -188,7 +189,7 @@ export default function QuantoCostaSitoWebPage() {
             className="text-xl md:text-2xl leading-relaxed mb-10 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            Tutto si riduce a questi cinque.\n
+            Tutto si riduce a questi cinque.{'\n'}
             Cambiano da progetto a progetto, e insieme determinano le ore reali — quindi il costo reale.
           </p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -248,7 +249,7 @@ export default function QuantoCostaSitoWebPage() {
             className="text-xl md:text-2xl leading-relaxed mb-6 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            Un'agenzia non è "più professionale" di un freelance: è solo più persone.\n
+            Un'agenzia non è "più professionale" di un freelance: è solo più persone.{'\n'}
             Ogni persona costa, anche quando non lavora direttamente sul tuo progetto.
           </p>
           <p
@@ -267,16 +268,16 @@ export default function QuantoCostaSitoWebPage() {
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Tutto questo costo viene caricato sul tuo preventivo.\n
-            Non è "valore aggiunto": è costo strutturale che qualcuno deve pagare.\n
+            Tutto questo costo viene caricato sul tuo preventivo.{'\n'}
+            Non è "valore aggiunto": è costo strutturale che qualcuno deve pagare.{'\n'}
             <strong>Quel qualcuno sei tu.</strong>
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Un freelance non ha questa overhead.\n
-            Costa il proprio tempo, niente di più.\n
+            Un freelance non ha questa overhead.{'\n'}
+            Costa il proprio tempo, niente di più.{'\n'}
             Per progetti piccoli e medi, la differenza si misura in multipli, non in percentuali.
           </p>
         </section>
@@ -299,15 +300,15 @@ export default function QuantoCostaSitoWebPage() {
             className="text-xl md:text-2xl leading-relaxed mb-6 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            A volte è giusto NON pagare nessuno.\n
+            A volte è giusto NON pagare nessuno.{'\n'}
             Lo dico per primo, anche se è contro-interessato.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Se hai bisogno di un sito da 3 pagine per testare un'idea, dimostrare che esisti, raccogliere email per una newsletter — Wix, Squarespace o WordPress.com fanno il lavoro.\n
-            Costo basso, zero manutenzione, vivi da subito.\n
+            Se hai bisogno di un sito da 3 pagine per testare un'idea, dimostrare che esisti, raccogliere email per una newsletter — Wix, Squarespace o WordPress.com fanno il lavoro.{'\n'}
+            Costo basso, zero manutenzione, vivi da subito.{'\n'}
             Non è il momento di chiamare un freelance.
           </p>
           <p
@@ -315,14 +316,14 @@ export default function QuantoCostaSitoWebPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Chiamare un freelance ha senso quando il sito deve fare qualcosa di specifico:</strong>{' '}
-            convertire visite in clienti reali, gestire un catalogo, integrarsi con un gestionale, ranking SEO competitivo, design coerente con un brand serio.\n
+            convertire visite in clienti reali, gestire un catalogo, integrarsi con un gestionale, ranking SEO competitivo, design coerente con un brand serio.{'\n'}
             Lì il template DIY perde subito (limiti SEO, design uguale a tutti, performance scarse, integrazioni assenti).
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Regola pratica: se il sito è la <em>prima fonte di lead</em> del business, non scegliere DIY.\n
+            Regola pratica: se il sito è la <em>prima fonte di lead</em> del business, non scegliere DIY.{'\n'}
             Se è una vetrina secondaria, DIY va benissimo.
           </p>
         </section>
@@ -399,32 +400,32 @@ export default function QuantoCostaSitoWebPage() {
             className="text-xl md:text-2xl leading-relaxed mb-6 max-w-[65ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            Prima ancora di sapere quanto costa, devi sapere queste cinque cose.\n
+            Prima ancora di sapere quanto costa, devi sapere queste cinque cose.{'\n'}
             Se chi ti dà il preventivo non sa rispondere, il preventivo non vale il PDF su cui è scritto.
           </p>
           <ol className="flex flex-col gap-6 list-decimal pl-6 max-w-[65ch]">
             <li className="text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>Lo scope è scritto in modo chiaro?</strong> Pagine, funzionalità, integrazioni, contenuti inclusi e non inclusi.\n
+              <strong>Lo scope è scritto in modo chiaro?</strong> Pagine, funzionalità, integrazioni, contenuti inclusi e non inclusi.{'\n'}
               Senza un documento, ogni discussione futura è interpretazione.
             </li>
             <li className="text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>A chi appartiene il codice e l'hosting?</strong> Devi possedere tutto: codice sorgente, account hosting, dominio, credenziali database.\n
+              <strong>A chi appartiene il codice e l'hosting?</strong> Devi possedere tutto: codice sorgente, account hosting, dominio, credenziali database.{'\n'}
               Se ti vincolano, sei prigioniero.
             </li>
             <li className="text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>Cosa succede dopo il go-live?</strong> Manutenzione inclusa o opzionale?\n
-              Per quanto tempo?\n
-              Cosa è coperto (security patch, update, fix urgenti)?\n
+              <strong>Cosa succede dopo il go-live?</strong> Manutenzione inclusa o opzionale?{'\n'}
+              Per quanto tempo?{'\n'}
+              Cosa è coperto (security patch, update, fix urgenti)?{'\n'}
               Cosa è extra?
             </li>
             <li className="text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>Quanto è già stato fatto in casi simili?</strong> Portfolio reale con clienti veri, non concept o mockup decorativi.\n
+              <strong>Quanto è già stato fatto in casi simili?</strong> Portfolio reale con clienti veri, non concept o mockup decorativi.{'\n'}
               Possibilmente con risultati misurabili.
             </li>
             <li className="text-base md:text-lg leading-relaxed whitespace-pre-line text-justify" style={{ color: 'var(--color-ink)' }}>
-              <strong>Chi tocca il progetto giorno per giorno?</strong> Una persona o sei?\n
-              Se cambia, ti avvisano?\n
-              Se sparisce, cosa succede?\n
+              <strong>Chi tocca il progetto giorno per giorno?</strong> Una persona o sei?{'\n'}
+              Se cambia, ti avvisano?{'\n'}
+              Se sparisce, cosa succede?{'\n'}
               Niente passaggio di mano = niente bug "di qualcun altro".
             </li>
           </ol>
@@ -435,8 +436,8 @@ export default function QuantoCostaSitoWebPage() {
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            Quando avrai chiarito queste cinque domande, scoprirai che il prezzo non è il problema.\n
-            Il problema è che i preventivi opachi nascondono sempre qualcosa, e quando lo trovi è già troppo tardi.\n
+            Quando avrai chiarito queste cinque domande, scoprirai che il prezzo non è il problema.{'\n'}
+            Il problema è che i preventivi opachi nascondono sempre qualcosa, e quando lo trovi è già troppo tardi.{'\n'}
             Un preventivo trasparente parte da una conversazione, non da un listino.
           </p>
         </section>

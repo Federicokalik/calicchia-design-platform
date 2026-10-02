@@ -113,8 +113,8 @@ const IT_ONLY_PATHS = new Set<string>([
   '/sito-web-per-pmi',
   // NB: /servizi-per-professioni rimosso (2026-05-15) — ora bilingual.
   '/quanto-costa-sito-web',
-  // Pillar bilingual con EN attiva: rimossi da IT_ONLY (web-designer-vs-developer, EAA, CWV)
-  '/risorse/glossario-web-design',
+  // Pillar bilingual con EN attiva: rimossi da IT_ONLY (web-designer-vs-developer, EAA, CWV,
+  // glossario-web-design dal 2026-10-02)
   // Legal
   '/privacy-policy',
   '/cookie-policy',

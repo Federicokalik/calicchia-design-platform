@@ -167,7 +167,7 @@ export default async function FreelanceWebDesignerCanadaPage() {
         lead={
           <>
             For small businesses, professional firms, and the Italian-Canadian community across Toronto,
-            Vaughan, Mississauga, Montreal, Vancouver and beyond.\nModern engineering at European rates,
+            Vaughan, Mississauga, Montreal, Vancouver and beyond. Modern engineering at European rates,
             English and Italian bilingual, GDPR + PIPEDA aware, no agency middlemen.
           </>
         }
@@ -195,23 +195,23 @@ export default async function FreelanceWebDesignerCanadaPage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             Canadian web design pricing tracks US pricing — agencies in Toronto, Vancouver and Montreal
-            charge North American rates without delivering meaningfully more value than European agencies.\nItalian freelance is the arbitrage no one in Canada talks about.
+            charge North American rates without delivering meaningfully more value than European agencies.{'\n'}Italian freelance is the arbitrage no one in Canada talks about.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>Toronto / Vancouver agencies</strong> are expensive.\nA small business website project
-            in Canada typically lands $15-40k CAD with mid-tier agencies.\nHalf of that is paying for
+            <strong>Toronto / Vancouver agencies</strong> are expensive.{'\n'}A small business website project
+            in Canada typically lands $15-40k CAD with mid-tier agencies.{'\n'}Half of that is paying for
             the agency itself: offices in King West or Yaletown, account managers, project managers,
-            senior/junior tier markup.\nThe actual designer-developer time is a fraction.
+            senior/junior tier markup.{'\n'}The actual designer-developer time is a fraction.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Offshore providers</strong> (India, Philippines, parts of Eastern Europe) cut cost
-            but introduce 9-12h timezone gaps, communication friction, variable code quality.\nFor a
+            but introduce 9-12h timezone gaps, communication friction, variable code quality.{'\n'}For a
             small business owner who needs to iterate quickly and have someone reachable, offshore is
             often a false economy.
           </p>
@@ -394,8 +394,8 @@ export default async function FreelanceWebDesignerCanadaPage() {
             className="body-longform text-xl md:text-2xl leading-relaxed mb-6 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            About 1.5 million Canadians have Italian heritage.\nThe community is concentrated in the
-            Greater Toronto Area (Woodbridge / Vaughan especially), Hamilton, Montreal, Vancouver.\nIf
+            About 1.5 million Canadians have Italian heritage.{'\n'}The community is concentrated in the
+            Greater Toronto Area (Woodbridge / Vaughan especially), Hamilton, Montreal, Vancouver.{'\n'}If
             your business serves part of that community, building with someone Italian helps in ways
             that are hard to articulate but show up in the details.
           </p>
@@ -404,8 +404,8 @@ export default async function FreelanceWebDesignerCanadaPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             <strong>Bilingual content done right.</strong> Italian-Canadian businesses often have
-            customers who switch between English and Italian.\nA site that handles both languages
-            elegantly — without sounding machine-translated — is rare.\nI write Italian as a native
+            customers who switch between English and Italian.{'\n'}A site that handles both languages
+            elegantly — without sounding machine-translated — is rare.{'\n'}I write Italian as a native
             and English as a daily working language; I can audit translations, write copy in either,
             and structure the i18n properly.
           </p>
@@ -415,16 +415,16 @@ export default async function FreelanceWebDesignerCanadaPage() {
           >
             <strong>Cultural fit on smaller projects.</strong> Italian-Canadian small business owners
             (restaurants, contractors, professionals, importers, real estate) often want a relationship,
-            not just a vendor.\nI work that way: weekly calls, direct WhatsApp/email, no account manager
-            buffer.\nIt's how Italian-Canadian businesses tend to do business with each other anyway.
+            not just a vendor.{'\n'}I work that way: weekly calls, direct WhatsApp/email, no account manager
+            buffer.{'\n'}It's how Italian-Canadian businesses tend to do business with each other anyway.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>Disclosure:</strong> I have family in Vaughan.\nThat's not a marketing pitch — it's
+            <strong>Disclosure:</strong> I have family in Vaughan.{'\n'}That's not a marketing pitch — it's
             why this market matters to me personally and why I'm comfortable working with Canadian
-            small businesses across the Atlantic.\nPractical effect: I'm in North American working
+            small businesses across the Atlantic.{'\n'}Practical effect: I'm in North American working
             timezone for a few hours every working day already.
           </p>
         </section>
@@ -445,28 +445,28 @@ export default async function FreelanceWebDesignerCanadaPage() {
           </p>
           <ol className="flex flex-col gap-6 list-decimal pl-6 max-w-[65ch] whitespace-pre-line text-justify">
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>30-minute discovery call.</strong> Free.\nBest time slot: 13:00-17:00 Eastern
-              (afternoon for you, evening for me).\nFor Pacific timezone, 9:00-11:00 PT works (early
+              <strong>30-minute discovery call.</strong> Free.{'\n'}Best time slot: 13:00-17:00 Eastern
+              (afternoon for you, evening for me).{'\n'}For Pacific timezone, 9:00-11:00 PT works (early
               morning for you, afternoon for me).
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Written scope, CAD or USD pricing.</strong> Within 3 working days.\nFixed scope or
-              retainer.\nInvoiced in your preferred currency, paid via wire transfer or Wise/Revolut
+              <strong>Written scope, CAD or USD pricing.</strong> Within 3 working days.{'\n'}Fixed scope or
+              retainer.{'\n'}Invoiced in your preferred currency, paid via wire transfer or Wise/Revolut
               (clean, no surprise FX fees).
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Async + weekly sync.</strong> Daily updates on Slack/Linear/Notion (your choice).\nWeekly 30-min video call in your morning / my afternoon.\nYou see progress every week,
+              <strong>Async + weekly sync.</strong> Daily updates on Slack/Linear/Notion (your choice).{'\n'}Weekly 30-min video call in your morning / my afternoon.{'\n'}You see progress every week,
               can course-correct anytime.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Pre-launch QA.</strong> Performance audit, accessibility, browser/device testing,
-              PIPEDA + GDPR review.\nOptional: French copy-editing pass via Quebec-based partner if you
+              PIPEDA + GDPR review.{'\n'}Optional: French copy-editing pass via Quebec-based partner if you
               need Quebec-compliant content.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Launch + ongoing.</strong> You own everything: code repo, hosting, domain.\nI can
+              <strong>Launch + ongoing.</strong> You own everything: code repo, hosting, domain.{'\n'}I can
               host on Canadian-region cloud (AWS Canada Central, Cloudflare with Toronto presence) for
-              data residency.\nOptional retainer for monitoring, security, content updates.
+              data residency.{'\n'}Optional retainer for monitoring, security, content updates.
             </li>
           </ol>
         </section>

@@ -46,8 +46,8 @@ const EN_PATH_DISALLOWED_PREFIXES = [
   '/web-design-freelance-ciociaria',
   '/sito-web-per-pmi',
   '/zone',
-  // Glossario Web Design: IT-only (resta tale dopo la migrazione sotto /risorse).
-  '/risorse/glossario-web-design',
+  // NB (2026-10-02): /risorse/glossario-web-design rimosso — ora bilingual
+  // (righe EN in site_glossario, mig 154), stesso slug in IT ed EN.
   // NB: /servizi-per-professioni rimosso (2026-05-15) — l'hub è ora bilingual,
   // EN serve come /en/services-by-profession via PATHNAMES rewrite.
   '/quanto-costa-sito-web',

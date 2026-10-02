@@ -75,7 +75,8 @@ export default async function GlossarioEcommercePage() {
               description: t.whatItIs,
               slug: t.slug,
             })),
-            PATH,
+            buildCanonical(PATH, locale),
+            { name: m.breadcrumbGlossaryName, inLanguage: locale },
           ),
           breadcrumbSchema(breadcrumbs),
         ]}

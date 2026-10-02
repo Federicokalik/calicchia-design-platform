@@ -435,32 +435,48 @@ export function collectionPageSchema(args: CollectionPageArgs) {
 }
 
 /* ------------------------------------------------------------------ */
-/* ItemList con DefinedTerm (glossario)                                */
+/* DefinedTermSet (glossari)                                           */
 /* ------------------------------------------------------------------ */
 export interface DefinedTermArgs {
   name: string;
   description: string;
   /** URL slug fragment (e.g., "lcp") used as #anchor */
   slug: string;
+  /** Id dell'anchor se diverso dallo slug (es. "term-lcp") */
+  anchor?: string;
+  /** Sinonimi (schema.org Thing.alternateName) */
+  alternateName?: string[];
+}
+
+export interface DefinedTermSetOptions {
+  /** Nome del glossario, es. "Glossario Web Design" */
+  name: string;
+  /** BCP 47, es. "it" o "en" */
+  inLanguage: string;
 }
 
 export function definedTermListSchema(
   terms: DefinedTermArgs[],
-  pageUrl: string
+  pageUrl: string,
+  options: DefinedTermSetOptions,
 ) {
   const url = pageUrl.startsWith('http') ? pageUrl : `${SITE.url}${pageUrl}`;
+  const setId = `${url}#glossary`;
   return {
     '@context': 'https://schema.org',
     '@type': 'DefinedTermSet',
-    '@id': `${url}#glossary`,
-    name: 'Glossario Web Design',
-    inDefinedTermSet: url,
+    '@id': setId,
+    name: options.name,
+    url,
+    inLanguage: options.inLanguage,
     hasDefinedTerm: terms.map((t) => ({
       '@type': 'DefinedTerm',
+      '@id': `${url}#${t.anchor ?? t.slug}`,
       name: t.name,
+      ...(t.alternateName && t.alternateName.length > 0 ? { alternateName: t.alternateName } : {}),
       description: t.description,
-      url: `${url}#${t.slug}`,
-      inDefinedTermSet: `${url}#glossary`
-    }))
+      url: `${url}#${t.anchor ?? t.slug}`,
+      inDefinedTermSet: setId,
+    })),
   } as const;
 }

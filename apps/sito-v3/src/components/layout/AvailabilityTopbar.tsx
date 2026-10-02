@@ -179,7 +179,7 @@ function stripLocale(pathname: string, locale: string): string {
  *  - /contatti, /lista-attesa, ecc: la conversione è già lì, banner è rumore.
  *  - pagine legali (/privacy, /termini, /cookie, /faq): rompono la lettura formale.
  *  - blog dettaglio (/blog/YYYY/MM/slug): l'attenzione del lettore non va spezzata.
- *  - guida glossario (/glossario-*): stesso ragionamento del blog.
+ *  - glossari (/risorse/glossario-*): stesso ragionamento del blog.
  */
 function isExcludedPath(path: string): boolean {
   if (path.startsWith('/contatti')) return true;
@@ -187,7 +187,7 @@ function isExcludedPath(path: string): boolean {
   if (path.startsWith('/termini')) return true;
   if (path.startsWith('/cookie')) return true;
   if (path.startsWith('/faq')) return true;
-  if (path.startsWith('/glossario')) return true;
+  if (path.startsWith('/risorse/glossario-')) return true;
   // /blog è ok (lista), /blog/anno/mese/slug no.
   if (/^\/blog\/[^/]+\/[^/]+\/[^/]+/.test(path)) return true;
   return false;

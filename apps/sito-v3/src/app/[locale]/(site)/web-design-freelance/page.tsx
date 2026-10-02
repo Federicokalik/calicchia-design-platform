@@ -170,9 +170,9 @@ export default function WebDesignFreelancePage() {
         title="Web Designer Freelance in Italia · La guida onesta per chi non vuole farsi prendere in giro."
         lead={
           <>
-            L'80% dei siti online oggi è cosmesi.\nBelli da vedere, vuoti dentro: non
-            posizionano, non convertono, non portano un cliente.\nSe sei qui è perché stai
-            pensando di rifarne uno — o di rifarlo bene per la prima volta.\nQuesta guida
+            L'80% dei siti online oggi è cosmesi. Belli da vedere, vuoti dentro: non
+            posizionano, non convertono, non portano un cliente. Se sei qui è perché stai
+            pensando di rifarne uno — o di rifarlo bene per la prima volta. Questa guida
             ti dice quello che agenzie e venditori di template non ti diranno mai.
           </>
         }
@@ -188,19 +188,19 @@ export default function WebDesignFreelancePage() {
         >
           <p className="body-longform whitespace-pre-line text-justify">
             Un <strong>web designer freelance</strong> non è un grafico che "fa anche
-            siti".\nNon è un creativo che ti vende mockup di Figma e poi ti molla allo
-            sviluppatore di turno.\nNon è un consulente che parla in riunione e fattura
+            siti".{'\n'}Non è un creativo che ti vende mockup di Figma e poi ti molla allo
+            sviluppatore di turno.{'\n'}Non è un consulente che parla in riunione e fattura
             quando non scrive una riga di codice.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
             È una persona sola che fa tutto: progetta l'interfaccia, scrive il codice,
-            configura SEO e analytics, lancia il sito, lo segue dopo.\nQuattro mestieri
+            configura SEO e analytics, lancia il sito, lo segue dopo.{'\n'}Quattro mestieri
             in una bocca sola, una sola fattura, zero passaggi di mano.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
             Il mestiere vero: <em>design + sviluppo + SEO + strategia</em> in mano a una
-            persona che capisce cosa influenza ogni leva e sa tirarle insieme.\nLe
-            agenzie lo dividono in cinque ruoli per giustificare il costo.\nIo no.
+            persona che capisce cosa influenza ogni leva e sa tirarle insieme.{'\n'}Le
+            agenzie lo dividono in cinque ruoli per giustificare il costo.{'\n'}Io no.
           </p>
         </EditorialChapter>
 
@@ -212,26 +212,26 @@ export default function WebDesignFreelancePage() {
           <p className="body-longform whitespace-pre-line text-justify">
             Un'agenzia media coinvolge 4-6 figure su un singolo progetto: account
             manager, project manager, UX designer, UI designer, sviluppatore front-end,
-            sviluppatore back-end.\nA volte aggiungono copywriter e SEO specialist.{' '}
+            sviluppatore back-end.{'\n'}A volte aggiungono copywriter e SEO specialist.{' '}
             <strong>Ognuna di queste figure prende margine.</strong> Tu paghi tutto.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
             Il project manager, in particolare, è il costo più nascosto: ti viene
-            fatturato perché serve a "coordinare il team".\nÈ un costo che esiste solo
-            perché il team è grande.\nCon un freelance: zero project manager, zero
+            fatturato perché serve a "coordinare il team".{'\n'}È un costo che esiste solo
+            perché il team è grande.{'\n'}Con un freelance: zero project manager, zero
             coordinamento, zero margini di mezzo.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
-            I tempi seguono la stessa logica.\nIn agenzia il tuo progetto entra in una
-            coda con altri venti.\nDevi aspettare il turno per ogni passaggio.\nCon un
+            I tempi seguono la stessa logica.{'\n'}In agenzia il tuo progetto entra in una
+            coda con altri venti.{'\n'}Devi aspettare il turno per ogni passaggio.{'\n'}Con un
             freelance hai accesso diretto al tempo della persona che lavora — e capisci
             se ha capacità prima di firmare, non dopo.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
             <strong>Quando un freelance NON è la scelta giusta:</strong> progetti
             enterprise multinazionali con SLA 24/7, sistemi mission-critical con uptime
-            contrattualizzato al 99,99%, budget oltre i 100k.\nLì serve un team
-            strutturato, e va bene così.\nPer tutto il resto — PMI, professionisti,
+            contrattualizzato al 99,99%, budget oltre i 100k.{'\n'}Lì serve un team
+            strutturato, e va bene così.{'\n'}Per tutto il resto — PMI, professionisti,
             e-commerce sotto 200 prodotti, landing campagne — un freelance vince.
           </p>
         </EditorialChapter>
@@ -263,7 +263,7 @@ export default function WebDesignFreelancePage() {
             className="body-longform text-lg md:text-xl leading-relaxed mb-10 whitespace-pre-line text-justify"
             style={{ maxWidth: '80ch', color: 'var(--color-text-secondary)' }}
           >
-            Cinque servizi, un solo standard.\nOgni link ti porta alla pagina dedicata
+            Cinque servizi, un solo standard.{'\n'}Ogni link ti porta alla pagina dedicata
             con processo, deliverable e tempi.
           </p>
           <ul role="list" className="flex flex-col">
@@ -328,8 +328,8 @@ export default function WebDesignFreelancePage() {
             className="body-longform text-lg md:text-xl leading-relaxed mb-10 whitespace-pre-line text-justify"
             style={{ maxWidth: '80ch', color: 'var(--color-text-secondary)' }}
           >
-            Quattro fasi nette.\nNiente acronimi, niente "metodologia agile" da
-            consulente.\nSolo cosa succede.
+            Quattro fasi nette.{'\n'}Niente acronimi, niente "metodologia agile" da
+            consulente.{'\n'}Solo cosa succede.
           </p>
           <ol role="list" className="flex flex-col">
             {PROCESSO.map((p) => (
@@ -384,14 +384,14 @@ export default function WebDesignFreelancePage() {
         >
           <p className="body-longform whitespace-pre-line text-justify">
             Sui costi: ogni progetto è una proposta su misura, non un listino da
-            supermercato.\nCosa influenza il prezzo: complessità, numero di
+            supermercato.{'\n'}Cosa influenza il prezzo: complessità, numero di
             pagine/prodotti, integrazioni con sistemi esistenti, urgenza, quantità di
             contenuti che devo produrre vs quelli che mi consegni tu.
           </p>
           <p className="body-longform whitespace-pre-line text-justify">
-            Sui tempi: una landing one-page può andare online in 10 giorni.\nUn sito
-            multipagina richiede 3-4 settimane.\nUn e-commerce completo 8-12
-            settimane.\nSono tempi reali, non promesse di vendita.\nSe ti dicono "sito
+            Sui tempi: una landing one-page può andare online in 10 giorni.{'\n'}Un sito
+            multipagina richiede 3-4 settimane.{'\n'}Un e-commerce completo 8-12
+            settimane.{'\n'}Sono tempi reali, non promesse di vendita.{'\n'}Se ti dicono "sito
             in una settimana" stanno tagliando qualcosa di serio (analisi, mobile,
             SEO).
           </p>
@@ -401,18 +401,18 @@ export default function WebDesignFreelancePage() {
           <ul className="list-disc pl-6 space-y-3 whitespace-pre-line text-justify">
             <li>
               <strong>Template riciclato.</strong> Compri un sito Avada/Divi
-              customizzato male.\nSi carica in 8 secondi, non posiziona, è impossibile
-              da modificare.\nLo butti via dopo 18 mesi.
+              customizzato male.{'\n'}Si carica in 8 secondi, non posiziona, è impossibile
+              da modificare.{'\n'}Lo butti via dopo 18 mesi.
             </li>
             <li>
               <strong>Agenzia che sparisce post-lancio.</strong> Pagamento ricevuto,
               supporto a singhiozzo, e quando il sito si rompe ti rispondono dopo due
-              settimane.\nHai pagato un sito morto.
+              settimane.{'\n'}Hai pagato un sito morto.
             </li>
             <li>
               <strong>Cugino/amico che fa siti la domenica.</strong> Costa poco,
-              sembra il deal della vita.\nRisultato: niente SEO, niente accessibilità,
-              niente backup.\nQuando il dominio scade, scopri che era intestato a lui.
+              sembra il deal della vita.{'\n'}Risultato: niente SEO, niente accessibilità,
+              niente backup.{'\n'}Quando il dominio scade, scopri che era intestato a lui.
             </li>
           </ul>
         </EditorialChapter>

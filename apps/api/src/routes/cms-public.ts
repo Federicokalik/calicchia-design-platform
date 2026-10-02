@@ -102,13 +102,17 @@ cmsPublic.get('/glossario', async (c) => {
   const locale = parseLocale(c.req.query('locale'));
   let rows: Array<{
     id: string; slug: string; term: string; full_name: string | null;
-    letter: string; what_it_is: string; why_you_care: string;
-    what_to_demand: string; sort_order: number | null;
+    letter: string; category: string | null; level: string; term_type: string;
+    aliases: string[]; related: string[];
+    what_it_is: string; why_you_care: string | null; what_to_demand: string | null;
+    what_for: string | null; when_yes: string | null; when_no: string | null;
+    what_to_ask: string | null; sort_order: number | null; updated_at: string;
   }> = [];
   try {
     rows = await sql`
-      SELECT id, slug, term, full_name, letter, what_it_is, why_you_care,
-             what_to_demand, sort_order
+      SELECT id, slug, term, full_name, letter, category, level, term_type,
+             aliases, related, what_it_is, why_you_care, what_to_demand,
+             what_for, when_yes, when_no, what_to_ask, sort_order, updated_at
       FROM site_glossario
       WHERE is_published = true AND locale = ${locale}
       ORDER BY letter ASC, sort_order NULLS LAST, term ASC

@@ -1,185 +1,154 @@
 import type { Metadata } from 'next';
 import { getLocale } from 'next-intl/server';
 import { StructuredData } from '@/components/seo/StructuredData';
+import { definedTermListSchema } from '@/data/structured-data';
 import {
-  breadcrumbSchema,
-  definedTermListSchema,
-} from '@/data/structured-data';
-// Audit C-013/C-014 (PR20): glossario now DB-backed via getGlossario().
-// Falls back to data/glossario.ts on fresh installs / API outages.
+  GLOSSARIO_WEB_DESIGN_PATH as PATH,
+  glossarioTermAnchor,
+  glossarioWebDesignCopy,
+  normalizeSearch,
+  type GlossarioEntry,
+} from '@/data/glossario';
+// Glossario DB-backed via getGlossario() (site_glossario, mig 121/153/154).
+// Fallback per lingua su data/glossario-fallback.ts se l'API non risponde.
 import { getGlossario } from '@/lib/cms';
 import type { Locale } from '@/lib/i18n';
+import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
 import { Heading } from '@/components/ui/Heading';
 import { Button } from '@/components/ui/Button';
-import { MonoLabel } from '@/components/ui/MonoLabel';
 import {
   EditorialArticleLayout,
   type EditorialChapterEntry,
 } from '@/components/layout/EditorialArticleLayout';
+import { GlossarioFilters, type GlossarioIndexItem } from '@/components/risorse/GlossarioFilters';
+import { GlossarioTermItem } from '@/components/risorse/GlossarioTermItem';
 
-export const metadata: Metadata = {
-  title: {
-    absolute:
-      'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca | Federico Calicchia',
-  },
-  description:
-    "LCP, CLS, CMS, SEO, SSL, schema markup, hreflang… 30 termini tecnici spiegati semplici. Per ogni termine: cos'è, perché ti riguarda, cosa pretendere dal fornitore.",
-  alternates: { canonical: '/risorse/glossario-web-design' },
-  openGraph: {
-    type: 'website',
-    title:
-      'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca',
-    description:
-      "30 termini tecnici spiegati semplici. Cos'è, perché ti riguarda, cosa pretendere.",
-    url: '/risorse/glossario-web-design',
-    images: buildOgImage(
-      'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca',
-      'it',
-    ),
-  },
-  twitter: buildTwitterCard(
-    'Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca',
-    "30 termini tecnici spiegati semplici. Cos'è, perché ti riguarda, cosa pretendere.",
-    'it',
-  ),
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as Locale;
+  const { entries } = await getGlossario(locale);
+  const copy = glossarioWebDesignCopy(locale, entries.length);
+  return {
+    title: { absolute: copy.metaTitle },
+    description: copy.description,
+    alternates: buildI18nAlternates(PATH, locale),
+    openGraph: {
+      type: 'website',
+      title: copy.ogTitle,
+      description: copy.ogDescription,
+      url: buildCanonical(PATH, locale),
+      images: buildOgImage(copy.ogTitle, locale),
+      ...buildOgLocale(locale),
+    },
+    twitter: buildTwitterCard(copy.ogTitle, copy.ogDescription, locale),
+  };
+}
+
+function formatUpdatedAt(iso: string, locale: Locale): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'it-IT', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Rome',
+  }).format(date);
+}
 
 export default async function GlossarioPage() {
   const locale = (await getLocale()) as Locale;
-  const { entries: GLOSSARIO, letters: GLOSSARIO_LETTERS } = await getGlossario(locale);
+  const { entries, letters, updatedAt } = await getGlossario(locale);
+  const copy = glossarioWebDesignCopy(locale, entries.length);
 
-  // Group terms by letter for A-Z layout
-  const termsByLetter = new Map<string, typeof GLOSSARIO>();
-  for (const t of GLOSSARIO) {
+  const termsByLetter = new Map<string, GlossarioEntry[]>();
+  for (const t of entries) {
     if (!termsByLetter.has(t.letter)) termsByLetter.set(t.letter, []);
     termsByLetter.get(t.letter)!.push(t);
   }
 
-  const chapters: EditorialChapterEntry[] = GLOSSARIO_LETTERS.map((letter) => ({
+  // Correlati risolti sulle sole voci pubblicate in questa lingua.
+  const bySlug = new Map(entries.map((e) => [e.slug, e]));
+  const relatedOf = (e: GlossarioEntry) =>
+    e.related
+      .map((slug) => bySlug.get(slug))
+      .filter((r): r is GlossarioEntry => !!r && r.slug !== e.slug)
+      .map((r) => ({ slug: r.slug, term: r.term }));
+
+  const searchIndex: GlossarioIndexItem[] = entries.map((e) => ({
+    slug: e.slug,
+    letter: e.letter,
+    category: e.category,
+    level: e.level,
+    haystack: normalizeSearch([e.term, e.fullName ?? '', ...e.aliases].join(' ')),
+  }));
+
+  const chapters: EditorialChapterEntry[] = letters.map((letter) => ({
     id: `letter-${letter}`,
     number: letter,
-    label: `${termsByLetter.get(letter)!.length} termini`,
+    label: copy.letterTerms(termsByLetter.get(letter)!.length),
   }));
+
+  // Breadcrumbs emette già lo schema BreadcrumbList: qui solo il DefinedTermSet.
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    copy.breadcrumbParent,
+    { name: copy.breadcrumbGlossary, url: PATH },
+  ];
 
   return (
     <>
       <StructuredData
-        json={[
-          definedTermListSchema(
-            GLOSSARIO.map((t) => ({
-              name: t.term,
-              description: t.whatItIs,
-              slug: t.slug,
-            })),
-            '/risorse/glossario-web-design'
-          ),
-          breadcrumbSchema([
-            { name: 'Home', url: '/' },
-            { name: 'Web Designer Freelance', url: '/web-design-freelance' },
-            { name: 'Glossario', url: '/risorse/glossario-web-design' },
-          ]),
-        ]}
+        json={definedTermListSchema(
+          entries.map((t) => ({
+            name: t.term,
+            description: t.whatItIs,
+            slug: t.slug,
+            anchor: glossarioTermAnchor(t.slug),
+            alternateName: t.aliases,
+          })),
+          buildCanonical(PATH, locale),
+          { name: copy.jsonLdName, inLanguage: locale },
+        )}
       />
 
       <EditorialArticleLayout
-        breadcrumbs={[
-          { name: 'Home', url: '/' },
-          { name: 'Web Designer Freelance', url: '/web-design-freelance' },
-          { name: 'Glossario', url: '/risorse/glossario-web-design' },
-        ]}
-        eyebrow={`Glossario — ${GLOSSARIO.length} termini · ordine A-Z`}
-        title="Glossario Web Design · I 30 termini che le agenzie sperano tu non capisca."
-        lead={
-          <>
-            Il modo più veloce per farti vendere fumo è usare termini tecnici che non
-            capisci. Eccoli, spiegati per quello che sono — e perché ti riguardano.
-            Per ogni termine: cos'è, perché ti riguarda, cosa pretendere dal
-            fornitore.
-          </>
-        }
+        breadcrumbs={breadcrumbs}
+        eyebrow={copy.eyebrow}
+        title={copy.pageTitle}
+        lead={<>{copy.lead}</>}
         chapters={chapters}
         indexVariant="alphabet"
-        readTime="lettura libera"
-        updatedAt="5 maggio 2026"
+        readTime={copy.readTime}
+        updatedAt={formatUpdatedAt(updatedAt, locale)}
         showFinalCta={false}
       >
+        <GlossarioFilters locale={locale} index={searchIndex} />
+
         <div className="flex flex-col">
-          {GLOSSARIO_LETTERS.map((letter) => {
-            const terms = termsByLetter.get(letter)!;
-            return (
-              <section
-                key={letter}
-                id={`letter-${letter}`}
-                className="py-12 md:py-16 scroll-mt-32"
-                style={{ borderTop: '1px solid var(--color-border)' }}
+          {letters.map((letter) => (
+            <section
+              key={letter}
+              id={`letter-${letter}`}
+              data-glossario-letter={letter}
+              className="py-12 md:py-16 scroll-mt-32"
+              style={{ borderTop: '1px solid var(--color-border)' }}
+            >
+              <Heading
+                as="h2"
+                size="display-lg"
+                className="mb-10"
+                style={{ color: 'var(--color-accent-deep)' }}
               >
-                <Heading
-                  as="h2"
-                  size="display-lg"
-                  className="mb-10"
-                  style={{ color: 'var(--color-accent-deep)' }}
-                >
-                  {letter}
-                </Heading>
+                {letter}
+              </Heading>
 
-                <ul role="list" className="flex flex-col gap-12 md:gap-16">
-                  {terms.map((t) => (
-                    <li
-                      key={t.slug}
-                      id={t.slug}
-                      className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 scroll-mt-24"
-                    >
-                      <div className="md:col-span-4">
-                        <Heading as="h3" size="card" className="mb-2">
-                          {t.term}
-                        </Heading>
-                        {t.fullName ? (
-                          <MonoLabel as="p">{t.fullName}</MonoLabel>
-                        ) : null}
-                      </div>
-
-                      <div className="md:col-span-8 space-y-4">
-                        <div>
-                          <MonoLabel as="p" tone="accent" className="mb-2">
-                            Cos&apos;è
-                          </MonoLabel>
-                          <p
-                            className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
-                            style={{ color: 'var(--color-text-primary)' }}
-                          >
-                            {t.whatItIs}
-                          </p>
-                        </div>
-                        <div>
-                          <MonoLabel as="p" tone="accent" className="mb-2">
-                            Perché ti riguarda
-                          </MonoLabel>
-                          <p
-                            className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {t.whyYouCare}
-                          </p>
-                        </div>
-                        <div>
-                          <MonoLabel as="p" tone="accent" className="mb-2">
-                            Cosa pretendere
-                          </MonoLabel>
-                          <p
-                            className="body-longform max-w-[80ch] text-base md:text-lg leading-relaxed whitespace-pre-line text-justify"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {t.whatToDemand}
-                          </p>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            );
-          })}
+              <ul role="list" className="flex flex-col gap-12 md:gap-16">
+                {termsByLetter.get(letter)!.map((t) => (
+                  <GlossarioTermItem key={t.slug} entry={t} locale={locale} related={relatedOf(t)} />
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
 
         <div
@@ -195,21 +164,20 @@ export default async function GlossarioPage() {
             className="mb-6"
             style={{ maxWidth: '42ch' }}
           >
-            Adesso quando un fornitore ti dice "non preoccuparti del CLS, è normale
-            che sia rosso", sai cosa rispondere.
+            {copy.closingTitle}
           </Heading>
           <div className="flex flex-wrap gap-6">
             <Button href="/contatti" variant="underline" size="md">
-              Parlane con uno che capisce
+              {copy.ctaPrimary}
               <span aria-hidden="true">→</span>
             </Button>
             <Button
-              href="/web-design-freelance"
+              href={copy.ctaSecondary.href}
               variant="underline"
               size="md"
               className="opacity-70"
             >
-              Guida completa al web design freelance
+              {copy.ctaSecondary.label}
               <span aria-hidden="true">→</span>
             </Button>
           </div>

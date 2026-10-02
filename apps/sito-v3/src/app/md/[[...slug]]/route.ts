@@ -20,6 +20,7 @@
  *
  * Per pagine statiche (home, contatti, servizi, perché, pillar, glossari):
  * markdown sintetico con title, description, canonical, link interni.
+ * Eccezione: il Glossario Web Design espone tutte le voci (dati dal CMS).
  */
 import { NextResponse, after } from 'next/server';
 import { readFile } from 'node:fs/promises';
@@ -36,6 +37,15 @@ import {
 import { buildCanonical } from '@/lib/canonical';
 import { STATIC_PAGES } from '@/content/static-md-pages';
 import { getServiceDetail } from '@/data/services-detail';
+import { getGlossario } from '@/lib/cms';
+import {
+  GLOSSARIO_UI,
+  GLOSSARIO_WEB_DESIGN_PATH,
+  categoryLabel,
+  glossarioTermAnchor,
+  glossarioWebDesignCopy,
+  levelLabel,
+} from '@/data/glossario';
 
 interface Params {
   slug?: string[];
@@ -210,6 +220,80 @@ function renderService(slug: string, locale: Locale): NextResponse {
 }
 
 /**
+ * Glossario Web Design (`/risorse/glossario-web-design`): tutte le voci
+ * pubblicate, dalla stessa fonte della pagina HTML (getGlossario: DB con
+ * fallback per lingua). Qui il contenuto è il valore della pagina: lo
+ * esponiamo per intero, raggruppato per lettera, con il template per tipo.
+ */
+async function renderGlossarioWebDesign(locale: Locale): Promise<NextResponse> {
+  const { entries, letters, updatedAt } = await getGlossario(locale);
+  const copy = glossarioWebDesignCopy(locale, entries.length);
+  const ui = GLOSSARIO_UI[locale];
+  const canonical = buildCanonical(GLOSSARIO_WEB_DESIGN_PATH, locale);
+  const oneLine = (text: string) => text.replace(/\s*\n\s*/g, ' ').trim();
+  const bySlug = new Map(entries.map((e) => [e.slug, e]));
+
+  const termBlock = (e: (typeof entries)[number]): string[] => {
+    const fields: Array<[string, string | undefined]> =
+      e.type === 'technology'
+        ? [
+            [ui.whatItIs, e.whatItIs],
+            [ui.whatFor, e.whatFor],
+            [ui.whenYes, e.whenYes],
+            [ui.whenNo, e.whenNo],
+            [ui.whatToAsk, e.whatToAsk],
+          ]
+        : [
+            [ui.whatItIs, e.whatItIs],
+            [ui.whyYouCare, e.whyYouCare],
+            [ui.whatToDemand, e.whatToDemand],
+          ];
+    const meta = [categoryLabel(e.category, locale), levelLabel(e.level, locale)]
+      .filter(Boolean)
+      .join(' · ');
+    const related = e.related
+      .map((slug) => bySlug.get(slug))
+      .filter((r): r is NonNullable<typeof r> => !!r && r.slug !== e.slug)
+      .map((r) => `[${r.term}](${canonical}#${glossarioTermAnchor(r.slug)})`);
+    return [
+      `### ${e.term}${e.fullName ? ` — ${e.fullName}` : ''}`,
+      '',
+      `_${meta}_`,
+      '',
+      e.aliases.length > 0 ? `${ui.aliases}: ${e.aliases.join(', ')}` : '',
+      '',
+      ...fields.filter(([, text]) => !!text).map(([label, text]) => `- **${label}:** ${oneLine(text!)}`),
+      related.length > 0 ? `- **${ui.related}:** ${related.join(', ')}` : '',
+      '',
+    ].filter((line, i, arr) => line !== '' || arr[i - 1] !== '');
+  };
+
+  const md = [
+    frontMatter({
+      title: copy.ogTitle,
+      description: copy.description,
+      locale,
+      canonical,
+      modified: updatedAt,
+    }),
+    `# ${copy.ogTitle}`,
+    '',
+    `> ${copy.lead}`,
+    '',
+    ...letters.flatMap((letter) => [
+      `## ${letter}`,
+      '',
+      ...entries.filter((e) => e.letter === letter).flatMap(termBlock),
+    ]),
+    '---',
+    `Full page: <${canonical}>  ·  Site index: <${SITE.url}/llms.txt>`,
+    '',
+  ].join('\n');
+
+  return new NextResponse(md, { headers: HEADERS });
+}
+
+/**
  * Lookup di un file `.md` reale in `src/content/_md/`. Restituisce il body
  * raw (senza front-matter — viene wrappato dall'handler). Tenta:
  *   1. `<basename>.<locale>.md` (es. `home.it.md`, `lavori.en.md`)
@@ -350,6 +434,8 @@ export async function GET(
   } else if (segments[0] === 'servizi' && segments.length === 2) {
     // Service detail: /servizi/<slug> (EN /services/<slug> già denormalizzato)
     res = renderService(segments[1], locale);
+  } else if (itPath === GLOSSARIO_WEB_DESIGN_PATH) {
+    res = await renderGlossarioWebDesign(locale);
   } else {
     res = await renderStaticPage(itPath, locale);
   }

@@ -155,7 +155,7 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
         lead={
           <>
             For GTA small businesses and the Italian-Canadian community across Woodbridge, Vaughan,
-            Mississauga and beyond.\nEU-quality engineering, English and Italian, CAD-friendly rates,
+            Mississauga and beyond. EU-quality engineering, English and Italian, CAD-friendly rates,
             and yes — I have family in Vaughan, which is part of why this market matters to me.
           </>
         }
@@ -182,8 +182,8 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
             className="body-longform text-xl md:text-2xl leading-relaxed mb-6 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink-muted)' }}
           >
-            The GTA is the most expensive web design market in Canada.\nToronto agencies charge
-            New York rates because they can.\nMost GTA small businesses don't actually need a Toronto
+            The GTA is the most expensive web design market in Canada.{'\n'}Toronto agencies charge
+            New York rates because they can.{'\n'}Most GTA small businesses don't actually need a Toronto
             agency — they need someone who builds well, ships on time, and doesn't bill them for
             office rent on King Street.
           </p>
@@ -191,7 +191,7 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            European freelance solves the cost problem without the offshore drawbacks.\nYou get EU
+            European freelance solves the cost problem without the offshore drawbacks.{'\n'}You get EU
             engineering quality, English-fluent communication (Italian fluent too — useful in Vaughan
             and parts of Toronto), workable time zone (6h ahead), GDPR-native compliance that maps
             cleanly onto PIPEDA + Quebec Law 25.
@@ -201,7 +201,7 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
             style={{ color: 'var(--color-ink)' }}
           >
             And specifically for GTA: there's a 1.5M-strong Italian-Canadian community concentrated
-            here.\nIf your business serves part of that community, building with someone who actually
+            here.{'\n'}If your business serves part of that community, building with someone who actually
             speaks the language and understands the culture is a competitive edge that's hard to
             replicate.
           </p>
@@ -320,7 +320,7 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
             style={{ color: 'var(--color-ink-muted)' }}
           >
             Vaughan and Woodbridge host one of the largest Italian-Canadian populations outside
-            Italy.\nMany local businesses — restaurants, contractors, importers, retailers,
+            Italy.{'\n'}Many local businesses — restaurants, contractors, importers, retailers,
             professional services — have customers and operations that move between English and
             Italian.
           </p>
@@ -331,17 +331,17 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
             <strong>What changes with a native Italian developer:</strong> bilingual content reads
             naturally in both languages (no machine-translated awkwardness), regional cultural cues
             land properly (formal vs informal, traditional vs modern), Italian customer-facing
-            sections feel authentic instead of token.\nFor businesses that compete on community trust,
+            sections feel authentic instead of token.{'\n'}For businesses that compete on community trust,
             this is real differentiation.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed mb-4 max-w-[80ch] whitespace-pre-line text-justify"
             style={{ color: 'var(--color-ink)' }}
           >
-            <strong>Practical disclosure:</strong> I have family in Vaughan.\nThat's why I started
+            <strong>Practical disclosure:</strong> I have family in Vaughan.{'\n'}That's why I started
             building for the Canadian market in the first place — small business owners I know
             there were paying Toronto agency rates for sites that didn't even respect their bilingual
-            audience properly.\nThe economics didn't make sense, and the community fit was missing.
+            audience properly.{'\n'}The economics didn't make sense, and the community fit was missing.
           </p>
           <p
             className="body-longform text-base md:text-lg leading-relaxed max-w-[80ch] whitespace-pre-line text-justify"
@@ -371,27 +371,27 @@ export default async function FreelanceWebDesignerTorontoGTAPage() {
           <ol className="flex flex-col gap-6 list-decimal pl-6 max-w-[65ch] whitespace-pre-line text-justify">
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Discovery call (30 min, free).</strong> Best slots: 13:00-17:00 ET your time
-              (that's 19:00-23:00 my time, productive evening hours for me).\nFor Italian-Canadian
+              (that's 19:00-23:00 my time, productive evening hours for me).{'\n'}For Italian-Canadian
               clients who prefer Italian: call in Italian, switch to English for technical bits.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Scope + CAD pricing.</strong> Within 3 working days.\nInvoiced in CAD
-              (or USD if you prefer) via wire transfer or Wise/Revolut.\nNo hidden FX fees, clear
-              line-item breakdown.\nPayment terms: 50% upfront, 50% on delivery for fixed projects.
+              <strong>Scope + CAD pricing.</strong> Within 3 working days.{'\n'}Invoiced in CAD
+              (or USD if you prefer) via wire transfer or Wise/Revolut.{'\n'}No hidden FX fees, clear
+              line-item breakdown.{'\n'}Payment terms: 50% upfront, 50% on delivery for fixed projects.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Async + weekly sync.</strong> Slack or email for daily updates (your morning =
-              my afternoon = real-time).\nWeekly 30-min video sync at a time that works for both,
-              usually Tuesday afternoon ET.\nProject board on Linear or Notion you can check anytime.
+              my afternoon = real-time).{'\n'}Weekly 30-min video sync at a time that works for both,
+              usually Tuesday afternoon ET.{'\n'}Project board on Linear or Notion you can check anytime.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
               <strong>Pre-launch QA + Canadian compliance.</strong> Performance, accessibility,
-              browser/device testing, PIPEDA + Quebec Law 25 review (if relevant).\nSchema.org local
+              browser/device testing, PIPEDA + Quebec Law 25 review (if relevant).{'\n'}Schema.org local
               business markup for GTA, Google Business Profile linking, Maps embed for storefront.
             </li>
             <li className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--color-ink)' }}>
-              <strong>Launch + ongoing.</strong> Code repo, hosting, domain — all yours.\nCan host on
-              Canadian-region cloud (AWS Canada Central / Cloudflare GTA POP) for data residency.\nOptional retainer for monitoring, security, content updates.\nFor genuinely critical
+              <strong>Launch + ongoing.</strong> Code repo, hosting, domain — all yours.{'\n'}Can host on
+              Canadian-region cloud (AWS Canada Central / Cloudflare GTA POP) for data residency.{'\n'}Optional retainer for monitoring, security, content updates.{'\n'}For genuinely critical
               issues: 24h SLA regardless of time zone.
             </li>
           </ol>

@@ -250,7 +250,7 @@ export default function ServicesCmsPage() {
               <p className="text-[10px] text-muted-foreground">URL: <code>/servizi/{draft.slug || '...'}</code>. Cambiarlo rompe i link.</p>
             </div>
             <div className="space-y-1 col-span-3">
-              <Label className="text-xs">Lead (1-2 frasi, supporta \n)</Label>
+              <Label className="text-xs">Lead (1-2 frasi, Invio per andare a capo)</Label>
               <Textarea value={draft.lead} onChange={(e) => setDraft({ ...draft, lead: e.target.value })} rows={3} />
             </div>
             <div className="space-y-1">
