@@ -48,6 +48,9 @@ async function getVessatorieForQuote(projectTemplate: unknown): Promise<Contract
       vessatoria: true,
     }));
   }
+  // Documento su misura senza vessatorie dichiarate: nessuna. Le sezioni
+  // eventualmente presenti sono i default iniettati dall'editor, non il documento.
+  if (pt.custom_html) return [];
 
   const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
   const contratto = sections.find((s) => s?.type === 'contratto');
@@ -93,6 +96,7 @@ function getPagamentoForQuote(projectTemplate: unknown): Array<Record<string, un
   if (Array.isArray(pt.pagamento_custom) && pt.pagamento_custom.length) {
     return normalize(pt.pagamento_custom as unknown[]);
   }
+  if (pt.custom_html) return [];
   const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
   const pagamento = sections.find((s) => s?.type === 'pagamento');
   const modalita = (pagamento?.data as { modalita?: unknown[] } | undefined)?.modalita;

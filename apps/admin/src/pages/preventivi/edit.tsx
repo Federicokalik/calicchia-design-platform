@@ -136,6 +136,9 @@ export default function PreventivoEditorPage() {
   const [isCustomDoc, setIsCustomDoc] = useState(false);
   const customTemplateExtrasRef = useRef<Record<string, any>>({});
   const originalItemsRef = useRef<any[] | null>(null);
+  // Checklist salvata: le spunte "ricevuto" (tab Materiali del dettaglio) non
+  // devono azzerarsi a ogni salvataggio dell'editor.
+  const loadedMaterialsRef = useRef<Array<{ label: string; received?: boolean; received_at?: string | null }>>([]);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -193,16 +196,44 @@ export default function PreventivoEditorPage() {
       // defaults and a save would overwrite the imported/stored sections.
       try {
         const pt = typeof q.project_template === 'string' ? JSON.parse(q.project_template) : q.project_template;
-        if (Array.isArray(pt?.sections) && pt.sections.length) {
+        const rawItems = typeof q.items === 'string' ? JSON.parse(q.items) : q.items;
+        const items: any[] = Array.isArray(rawItems) ? rawItems : [];
+        const rawMaterials = typeof q.materials_checklist === 'string' ? JSON.parse(q.materials_checklist) : q.materials_checklist;
+        loadedMaterialsRef.current = Array.isArray(rawMaterials) ? rawMaterials : [];
+        if (pt?.custom_html) {
+          // Documento su misura: il contenuto è il file importato (l'import non
+          // scrive sezioni). Le sezioni di default (pagamento, contratto…)
+          // finivano in project_template e la pagina di firma le usava come
+          // pagamenti e vessatorie del documento.
+          setSections([]);
+        } else if (Array.isArray(pt?.sections) && pt.sections.length) {
           setSections(pt.sections);
+        } else if (items.length) {
+          // Preventivo senza sezioni (generatore AI con sole voci, API/MCP, righe
+          // legacy): le DEFAULT_SECTIONS hanno un'offerta vuota e il salvataggio
+          // ricostruirebbe items da lì, azzerando voci e totale.
+          setSections([{
+            id: uid(),
+            type: 'offerte',
+            data: {
+              offerte: items.map((i) => ({
+                id: uid(),
+                nome: i.description || '',
+                descrizione: '',
+                prezzo: Number(i.total) || Number(i.quantity) * Number(i.unit_price) || 0,
+                consigliata: false,
+                include: [],
+                esclude: [],
+              })),
+            },
+          }]);
         }
         if (pt && typeof pt === 'object') {
           const { sections: _s, ...extras } = pt;
           customTemplateExtrasRef.current = extras;
           if (extras.custom_html) {
             setIsCustomDoc(true);
-            const rawItems = typeof q.items === 'string' ? JSON.parse(q.items) : q.items;
-            originalItemsRef.current = Array.isArray(rawItems) ? rawItems : [];
+            originalItemsRef.current = items;
           }
         }
       } catch { /* malformed template → keep defaults */ }
@@ -272,9 +303,14 @@ export default function PreventivoEditorPage() {
         tax_rate: 0, // Forfettario, no IVA
         valid_until: validUntil || null,
         internal_notes: internalNotes,
-        materials_checklist: sections.find((s) => s.type === 'materiali')?.data.lista?.map((l: string) => ({ label: l, received: false })) || [],
-        auto_create_project: sections.find((s) => s.type === 'contratto')?.data.auto ?? true,
-        project_template: { ...customTemplateExtrasRef.current, sections },
+        // Documento su misura: checklist e flag progetto restano quelli salvati
+        // (omessi → il PUT li lascia invariati), niente sezioni nel template.
+        materials_checklist: isCustomDoc ? undefined : sections.find((s) => s.type === 'materiali')?.data.lista?.map((l: string) => {
+          const loaded = loadedMaterialsRef.current.find((m) => m.label === l);
+          return loaded ? { ...loaded, label: l } : { label: l, received: false };
+        }) || [],
+        auto_create_project: isCustomDoc ? undefined : sections.find((s) => s.type === 'contratto')?.data.auto ?? true,
+        project_template: isCustomDoc ? { ...customTemplateExtrasRef.current } : { ...customTemplateExtrasRef.current, sections },
       };
       if (isNew) return apiFetch('/api/quotes-v2', { method: 'POST', body: JSON.stringify(body) });
       return apiFetch(`/api/quotes-v2/${id}`, { method: 'PUT', body: JSON.stringify(body) });
