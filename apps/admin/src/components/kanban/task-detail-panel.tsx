@@ -65,6 +65,10 @@ export function TaskDetailPanel({
   const [activeTab, setActiveTab] = useState<Tab>('details');
   const [editTitle, setEditTitle] = useState(task.title);
   const [editDescription, setEditDescription] = useState(task.description || '');
+  // Ore e tag: stato locale salvato su blur. Con l'input legato a `task` e un
+  // PUT a ogni tasto i caratteri si perdevano (virgola rimossa, "1." → 1).
+  const [editHours, setEditHours] = useState(task.estimated_hours != null ? String(task.estimated_hours) : '');
+  const [editTags, setEditTags] = useState((task.tags || []).join(', '));
   const [newCheckItem, setNewCheckItem] = useState('');
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -224,7 +228,7 @@ export function TaskDetailPanel({
               </label>
               <Input
                 type="date"
-                value={task.due_date || ''}
+                value={task.due_date ? task.due_date.slice(0, 10) : ''}
                 onChange={(e) => onUpdate({ due_date: e.target.value || null })}
                 className="mt-1"
               />
@@ -240,8 +244,14 @@ export function TaskDetailPanel({
                 type="number"
                 step="0.5"
                 min="0"
-                value={task.estimated_hours || ''}
-                onChange={(e) => onUpdate({ estimated_hours: parseFloat(e.target.value) || null })}
+                value={editHours}
+                onChange={(e) => setEditHours(e.target.value)}
+                onBlur={() => {
+                  const hours = editHours.trim() ? parseFloat(editHours) : null;
+                  const next = hours != null && Number.isFinite(hours) ? hours : null;
+                  const current = task.estimated_hours != null ? Number(task.estimated_hours) : null;
+                  if (next !== current) onUpdate({ estimated_hours: next });
+                }}
                 className="mt-1"
                 placeholder="0"
               />
@@ -254,8 +264,12 @@ export function TaskDetailPanel({
                 Tag
               </label>
               <Input
-                value={(task.tags || []).join(', ')}
-                onChange={(e) => onUpdate({ tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                value={editTags}
+                onChange={(e) => setEditTags(e.target.value)}
+                onBlur={() => {
+                  const tags = editTags.split(',').map(t => t.trim()).filter(Boolean);
+                  if (tags.join(',') !== (task.tags || []).join(',')) onUpdate({ tags });
+                }}
                 className="mt-1"
                 placeholder="tag1, tag2, ..."
               />

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ProjectTask, TaskStatus } from '@/types/projects';
 import { TASK_STATUS_CONFIG } from '@/types/projects';
+import { format } from 'date-fns';
 
 interface TaskQuickActionsProps {
   task: ProjectTask;
@@ -118,7 +119,7 @@ export function TaskQuickActions({ task, onUpdate }: TaskQuickActionsProps) {
             mode="single"
             selected={task.due_date ? new Date(task.due_date) : undefined}
             onSelect={(d) => {
-              onUpdate(task.id, { due_date: d ? d.toISOString().slice(0, 10) : null });
+              onUpdate(task.id, { due_date: d ? format(d, 'yyyy-MM-dd') : null });
               setDateOpen(false);
             }}
             initialFocus

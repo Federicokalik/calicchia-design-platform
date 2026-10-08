@@ -22,6 +22,7 @@ import {
   PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_METHOD_COLORS,
   type PaymentMethod,
 } from '@/types/projects';
+import { format } from 'date-fns';
 
 type IncomeRow = {
   id: string;
@@ -56,7 +57,7 @@ const EMPTY_FORM: FormState = {
   description: '',
   amount: '',
   status: 'pagata',
-  paid_date: new Date().toISOString().slice(0, 10),
+  paid_date: format(new Date(), 'yyyy-MM-dd'),
   paid_amount: '',
   payment_method: '',
   external_ref: '',
@@ -185,7 +186,7 @@ export function ProjectIncomePanel({ projectId }: { projectId: string }) {
       description: row.description ?? '',
       amount: String(num(row.amount)),
       status: row.status ?? 'pagata',
-      paid_date: row.paid_date ?? '',
+      paid_date: row.paid_date?.slice(0, 10) ?? '',
       paid_amount: row.paid_amount != null ? String(num(row.paid_amount)) : '',
       payment_method: row.payment_method ?? '',
       external_ref: row.external_ref ?? '',

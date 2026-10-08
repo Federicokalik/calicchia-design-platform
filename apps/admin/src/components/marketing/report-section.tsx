@@ -16,6 +16,7 @@ import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch } from '@/lib/api';
 import type { CampaignReport, CampaignChannel, ReportPeriod } from '@/types/marketing';
 import { metricsForChannel, deriveKpis, DERIVED_KPI_LABELS, type DerivedKpis } from '@/lib/marketing-metrics';
+import { format } from 'date-fns';
 
 const PERIOD_LABELS: Record<ReportPeriod, string> = {
   daily: 'Giornaliero',
@@ -37,7 +38,7 @@ export function ReportSection({ campaignId, channel }: { campaignId: string; cha
   const queryClient = useQueryClient();
   const fields = metricsForChannel(channel);
   const [showAdd, setShowAdd] = useState(false);
-  const [reportDate, setReportDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [reportDate, setReportDate] = useState(() => format(new Date(), 'yyyy-MM-dd'));
   const [period, setPeriod] = useState<ReportPeriod>('weekly');
   const [metrics, setMetrics] = useState<Record<string, string>>({});
   const [summary, setSummary] = useState('');

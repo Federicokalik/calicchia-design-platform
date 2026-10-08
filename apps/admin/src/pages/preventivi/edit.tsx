@@ -184,7 +184,8 @@ export default function PreventivoEditorPage() {
       setTitle(q.title || '');
       setSubtitle(q.description || 'Preventivo e Contratto di Incarico');
       setCustomerId(q.customer_id || '');
-      setValidUntil(q.valid_until || '');
+      // colonna date: l'API la restituisce come timestamp ISO, l'input vuole yyyy-MM-dd
+      setValidUntil(q.valid_until ? String(q.valid_until).slice(0, 10) : '');
       setInternalNotes(q.internal_notes || '');
       // Restore sections. project_template can come back as a JSON *string*
       // (double-encoded jsonb) — the PDF renderer and sign page already parse
