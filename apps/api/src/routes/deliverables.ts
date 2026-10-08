@@ -30,7 +30,12 @@ deliverables.get('/', async (c) => {
       (
         SELECT COUNT(*)::int FROM deliverable_feedback f
         WHERE f.deliverable_id = pd.id AND f.is_resolved = false
-      ) AS open_feedback_count
+      ) AS open_feedback_count,
+      (
+        SELECT json_agg(f ORDER BY f.created_at)
+        FROM deliverable_feedback f
+        WHERE f.deliverable_id = pd.id
+      ) AS feedback
     FROM project_deliverables pd
     LEFT JOIN client_projects cp ON cp.id = pd.project_id
     LEFT JOIN customers cu ON cu.id = cp.customer_id

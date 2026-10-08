@@ -30,7 +30,7 @@ projectTasks.get('/', async (c) => {
     LEFT JOIN profiles pr ON pr.id = t.assigned_to
     LEFT JOIN project_milestones m ON m.id = t.milestone_id
     WHERE 1=1 ${statusFilter} ${projectFilter} ${customerFilter} ${assignedFilter} ${searchFilter}
-    ORDER BY t.sort_order ASC
+    ORDER BY t.sort_order ASC, t.created_at ASC
     LIMIT ${limit} OFFSET ${offset}
   `;
 
@@ -54,7 +54,7 @@ projectTasks.get('/by-project/:projectId', async (c) => {
     LEFT JOIN profiles pr ON pr.id = t.assigned_to
     LEFT JOIN project_milestones m ON m.id = t.milestone_id
     WHERE t.project_id = ${projectId} ${milestoneFilter}
-    ORDER BY t.sort_order ASC
+    ORDER BY t.sort_order ASC, t.created_at ASC
   `;
 
   const grouped: Record<string, Record<string, unknown>[]> = { todo: [], in_progress: [], review: [], done: [], blocked: [] };
@@ -78,7 +78,8 @@ projectTasks.post('/', async (c) => {
     FROM project_tasks
     WHERE project_id = ${body.project_id} AND status = ${body.status || 'todo'}
   `;
-  const sortOrder = (parseInt(maxRow.max_order as string) || -1) + 1;
+  // COALESCE(..., -1) copre già la lista vuota; con `|| -1` un max di 0 dava sempre 0.
+  const sortOrder = Number(maxRow.max_order) + 1;
 
   const [task] = await sql`INSERT INTO project_tasks ${sql({ ...body, sort_order: sortOrder })} RETURNING *`;
   return c.json({ task }, 201);

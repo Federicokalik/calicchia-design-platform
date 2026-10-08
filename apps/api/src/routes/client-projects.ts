@@ -391,9 +391,9 @@ clientProjects.get('/:id', async (c) => {
       LEFT JOIN profiles p ON p.id = t.assigned_to
       LEFT JOIN project_milestones m ON m.id = t.milestone_id
       WHERE t.project_id = ${id}
-      ORDER BY t.sort_order ASC
+      ORDER BY t.sort_order ASC, t.created_at ASC
     `,
-    sql`SELECT * FROM project_milestones WHERE project_id = ${id} ORDER BY sort_order ASC`,
+    sql`SELECT * FROM project_milestones WHERE project_id = ${id} ORDER BY sort_order ASC, created_at ASC`,
     sql`
       SELECT (
         EXISTS (SELECT 1 FROM quotes WHERE project_id = ${id})
