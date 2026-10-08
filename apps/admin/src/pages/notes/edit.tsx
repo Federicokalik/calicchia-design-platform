@@ -18,7 +18,22 @@ const SOURCE_ICONS: Record<string, React.ElementType> = {
   app: AppWindow, telegram: MessageCircle, agent: Bot,
 };
 
-export default function NoteEditorPage() {
+// L'API salva `content` con JSON.stringify in una colonna jsonb: arriva come
+// stringa JSON, non come oggetto.
+function parseNoteContent(content: unknown): JSONContent | null {
+  if (!content) return null;
+  if (typeof content !== 'string') return content as JSONContent;
+  try { return JSON.parse(content) as JSONContent; } catch { return null; }
+}
+
+// key per id: passando da una nota all'altra lo stato dell'editor deve ripartire
+// dalla nuova nota, non restare (e autosalvarsi) su quella precedente.
+export default function NoteEditorRoute() {
+  const { id } = useParams<{ id: string }>();
+  return <NoteEditorPage key={id} />;
+}
+
+function NoteEditorPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -33,6 +48,10 @@ export default function NoteEditorPage() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentInitialized = useRef(false);
+  // TiptapEditor legge `content` solo alla creazione: va montato dopo che il
+  // contenuto della nota è stato caricato nello stato, altrimenti parte vuoto
+  // e il primo autosave sovrascrive la nota.
+  const [editorReady, setEditorReady] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['note', id],
@@ -49,22 +68,29 @@ export default function NoteEditorPage() {
       setTitle(note.title);
       setTags(note.tags || []);
       // If note has raw_markdown but no content, use markdown as initial content
-      if (note.content) {
-        setContent(note.content as JSONContent);
+      const parsed = parseNoteContent(note.content);
+      if (parsed) {
+        setContent(parsed);
       } else if (note.raw_markdown) {
         // Tiptap will parse this as text content
         setContent({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: note.raw_markdown }] }] });
       }
       contentInitialized.current = true;
+      setEditorReady(true);
     }
   }, [note]);
 
   const saveMutation = useMutation({
     mutationFn: (data: Partial<Note>) =>
       apiFetch(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    onSuccess: () => {
+    // Autosave a ogni pausa di digitazione: niente refetch globale; la cache del
+    // dettaglio viene allineata alla risposta, così riaprendo la nota entro lo
+    // staleTime non si riparte da una versione vecchia.
+    meta: { skipGlobalInvalidation: true },
+    onSuccess: (res) => {
       setSaving(false);
       setLastSaved(new Date());
+      queryClient.setQueryData(['note', id], res);
       queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
     onError: () => { setSaving(false); toast.error('Errore salvataggio'); },
@@ -247,7 +273,7 @@ export default function NoteEditorPage() {
       </div>
 
       {/* Editor */}
-      <TiptapEditor
+      {editorReady && <TiptapEditor
         content={content}
         onChange={handleContentChange}
         onForceSave={() => {
@@ -255,7 +281,7 @@ export default function NoteEditorPage() {
           setSaving(true);
           saveMutation.mutate({ content: content as any });
         }}
-      />
+      />}
     </div>
   );
 }
