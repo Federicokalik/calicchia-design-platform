@@ -143,6 +143,38 @@ export async function getObjectHead(key: string, bytes = 32): Promise<Buffer> {
 }
 
 /**
+ * RFC 6266 Content-Disposition with an ASCII fallback plus the RFC 5987
+ * `filename*` form, so accented / non-Latin names survive the download.
+ */
+function contentDisposition(type: 'inline' | 'attachment', filename: string): string {
+  const fallback = filename.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
+  const encoded = encodeURIComponent(filename).replace(/['()*]/g, (ch) =>
+    `%${ch.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `${type}; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+}
+
+/**
+ * Presigned GET URL for reading a private object (admin download / preview).
+ * The bucket is private: the signature is the only capability, so keep the
+ * expiry short. `filename` restores the original name the client uploaded
+ * (the key carries a UUID prefix + sanitized name).
+ */
+export async function getPresignedDownloadUrl(
+  key: string,
+  opts: { filename: string; inline?: boolean; expiresIn?: number },
+): Promise<string> {
+  const client = getClient();
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ResponseContentDisposition: contentDisposition(opts.inline ? 'inline' : 'attachment', opts.filename),
+  });
+
+  return getSignedUrl(client, command, { expiresIn: opts.expiresIn ?? 300 });
+}
+
+/**
  * Delete an object (used to clean up files that fail post-upload validation).
  */
 export async function deleteObject(key: string): Promise<void> {

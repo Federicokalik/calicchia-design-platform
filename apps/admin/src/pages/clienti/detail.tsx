@@ -7,7 +7,7 @@ import {
   FolderKanban, Receipt, MessageSquare,
   Send, KeyRound, Copy, Check, RefreshCw, ExternalLink,
   FileBarChart, Plus, ShieldOff, Eye, EyeOff, FileCode2,
-  MessageCircle, Loader2,
+  MessageCircle, Loader2, Paperclip,
 } from 'lucide-react';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -35,6 +35,8 @@ import { downloadSdiXml } from '@/lib/sdi';
 import { cn } from '@/lib/utils';
 import { PORTAL_URL } from '@/lib/public-urls';
 import { LoadingState } from '@/components/shared/loading-state';
+import { ClientUploadsPanel } from '@/components/projects/client-uploads-panel';
+import { useClientUploads } from '@/hooks/use-client-uploads';
 import type { Customer, CustomerNote } from '@/types/customer';
 import { CUSTOMER_STATUS_CONFIG, NOTE_TYPE_CONFIG } from '@/types/customer';
 
@@ -78,6 +80,9 @@ export default function ClienteDetailPage() {
     enabled: !!id,
   });
 
+  // Files the customer uploaded from the portal (count for the tab badge)
+  const { data: uploadsData } = useClientUploads({ customerId: id });
+
   // Fetch portal preview (lazy: only when tab opens)
   const [portalTabActive, setPortalTabActive] = useState(false);
   const { data: portalPreviewData, isLoading: portalPreviewLoading } = useQuery<{
@@ -117,6 +122,7 @@ export default function ClienteDetailPage() {
   const projects = projectsData?.projects || [];
   const domains = domainsData?.domains || [];
   const payments = paymentsData?.payments || [];
+  const uploadsCount = uploadsData?.files.length ?? 0;
 
   useTopbar({ title: customer?.contact_name || 'Dettaglio Cliente', subtitle: customer?.company_name || '' });
   useSetAiEntityContext(
@@ -403,6 +409,13 @@ export default function ClienteDetailPage() {
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{projects.length}</Badge>
             )}
           </TabsTrigger>
+          <TabsTrigger value="files" className="gap-1.5">
+            <Paperclip className="h-3.5 w-3.5" />
+            File
+            {uploadsCount > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{uploadsCount}</Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="payments" className="gap-1.5">
             <Receipt className="h-3.5 w-3.5" />
             Pagamenti
@@ -619,6 +632,11 @@ export default function ClienteDetailPage() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Files uploaded by the customer from the portal */}
+        <TabsContent value="files">
+          <ClientUploadsPanel customerId={id} />
         </TabsContent>
 
         {/* Payments tab */}

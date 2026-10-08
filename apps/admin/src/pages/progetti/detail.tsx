@@ -19,7 +19,7 @@ import {
   ArrowLeft, CheckSquare, Milestone, StickyNote,
   Plus, Calendar, Clock, User, LayoutList, X, GripVertical,
   Activity, Send, Languages, TrendingUp, Receipt, MessageSquare, Package,
-  Wallet, CreditCard,
+  Wallet, CreditCard, Paperclip,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +40,8 @@ import { buildTasksConfig } from '@/components/tasks/task-entity-config';
 import { TaskDetailDrawer } from '@/components/tasks/task-detail-drawer';
 import { PortalMessageThread } from '@/components/projects/portal-message-thread';
 import { DeliverablesPanel } from '@/components/projects/deliverables-panel';
+import { ClientUploadsPanel } from '@/components/projects/client-uploads-panel';
+import { useClientUploads } from '@/hooks/use-client-uploads';
 import { ProjectPreviewsPanel } from '@/components/projects/project-previews-panel';
 import { ProjectIncomePanel } from '@/components/projects/project-income-panel';
 import { ProjectExpensesPanel } from '@/components/projects/project-expenses-panel';
@@ -165,6 +167,10 @@ export default function ProgettoDetailPage() {
     enabled: !!id,
   });
   const timelineEvents = timelineData?.events || [];
+
+  // Files the client uploaded from the portal for this project
+  const { data: uploadsData } = useClientUploads({ projectId: id });
+  const uploadsCount = uploadsData?.files.length ?? 0;
 
   // Profittabilità
   const { data: profitabilityData } = useQuery({
@@ -391,6 +397,13 @@ export default function ProgettoDetailPage() {
             <Package className="h-3.5 w-3.5" />
             Consegne
           </TabsTrigger>
+          <TabsTrigger value="file-cliente" className="gap-1.5">
+            <Paperclip className="h-3.5 w-3.5" />
+            File cliente
+            {uploadsCount > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{uploadsCount}</Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" />
             Timeline
@@ -598,6 +611,11 @@ export default function ProgettoDetailPage() {
         {/* Deliverables (audit D-005) */}
         <TabsContent value="consegne">
           <DeliverablesPanel projectId={id!} />
+        </TabsContent>
+
+        {/* Files uploaded by the client from the portal */}
+        <TabsContent value="file-cliente">
+          <ClientUploadsPanel projectId={id!} />
         </TabsContent>
 
         {/* Timeline */}
