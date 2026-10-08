@@ -471,6 +471,8 @@ portalAdmin.get('/uploads/:id/url', async (c) => {
   const url = await getPresignedDownloadUrl(upload.key, {
     filename: upload.original_name,
     inline,
+    // content_type is from the upload allowlist and magic-byte checked.
+    contentType: inline ? upload.content_type : undefined,
     expiresIn,
   });
 

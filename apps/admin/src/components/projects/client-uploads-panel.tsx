@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Download, ExternalLink, File, FileArchive, FileImage, FileText, FileVideo,
+  Download, Eye, File, FileArchive, FileImage, FileText, FileVideo,
   Loader2, Trash2, Upload,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,21 +11,20 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { EmptyState } from '@/components/shared/empty-state';
 import { LoadingState } from '@/components/shared/loading-state';
+import { ClientUploadLightbox } from '@/components/projects/client-upload-lightbox';
 import { useConfirm } from '@/hooks/use-confirm';
-import {
-  CLIENT_UPLOADS_QUERY_KEY, useClientUploads,
-  type ClientUpload, type ClientUploadStatus, type ClientUploadsScope,
-} from '@/hooks/use-client-uploads';
+import { CLIENT_UPLOADS_QUERY_KEY, useClientUploads } from '@/hooks/use-client-uploads';
 import { apiFetch } from '@/lib/api';
+import {
+  downloadClientUpload,
+  formatBytes,
+  formatUploadDate,
+  getPreviewKind,
+  type ClientUpload,
+  type ClientUploadStatus,
+  type ClientUploadsScope,
+} from '@/lib/client-uploads';
 import { cn } from '@/lib/utils';
-
-// Must mirror INLINE_UPLOAD_TYPES in apps/api/src/routes/portal-admin.ts:
-// the API forces a download for anything else anyway.
-const PREVIEWABLE_TYPES = new Set([
-  'image/jpeg', 'image/png', 'image/webp',
-  'application/pdf',
-  'video/mp4', 'video/quicktime',
-]);
 
 const STATUS_LABEL: Record<Exclude<ClientUploadStatus, 'completed'>, { label: string; className: string; hint: string }> = {
   uploading: {
@@ -45,14 +44,6 @@ const STATUS_LABEL: Record<Exclude<ClientUploadStatus, 'completed'>, { label: st
   },
 };
 
-function formatBytes(value: number | string): string {
-  const bytes = Number(value) || 0;
-  if (bytes === 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.min(units.length - 1, Math.floor(Math.log(bytes) / Math.log(1024)));
-  return `${parseFloat((bytes / 1024 ** i).toFixed(1))} ${units[i]}`;
-}
-
 function fileIcon(contentType: string) {
   if (contentType.startsWith('image/')) return FileImage;
   if (contentType.startsWith('video/')) return FileVideo;
@@ -65,10 +56,12 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const [includeAll, setIncludeAll] = useState(false);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
 
   const { data, isLoading } = useClientUploads({ customerId, projectId }, includeAll);
   const files = data?.files ?? [];
+  const previewable = files.filter((file) => getPreviewKind(file) !== null);
   // In the customer view files can belong to different projects (or none).
   const showProject = !projectId;
 
@@ -82,27 +75,14 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
     onError: (err: Error) => toast.error(err.message || 'Eliminazione file fallita'),
   });
 
-  const openFile = async (file: ClientUpload, mode: 'inline' | 'download') => {
-    // Open the tab synchronously, inside the click: a window.open() after the
-    // await below would be eaten by the popup blocker.
-    const tab = mode === 'inline' ? window.open('', '_blank') : null;
-    setBusyId(file.id);
+  const handleDownload = async (file: ClientUpload) => {
+    setDownloadingId(file.id);
     try {
-      const res: { url: string } = await apiFetch(
-        `/api/portal-admin/uploads/${file.id}/url?disposition=${mode === 'inline' ? 'inline' : 'attachment'}`,
-      );
-      if (tab) {
-        tab.opener = null;
-        tab.location.href = res.url;
-      } else {
-        // Content-Disposition: attachment → the browser downloads, no navigation.
-        window.location.assign(res.url);
-      }
+      await downloadClientUpload(file.id);
     } catch (err) {
-      tab?.close();
-      toast.error(err instanceof Error ? err.message : 'Impossibile aprire il file');
+      toast.error(err instanceof Error ? err.message : 'Download non riuscito');
     } finally {
-      setBusyId(null);
+      setDownloadingId(null);
     }
   };
 
@@ -146,24 +126,33 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
             const Icon = fileIcon(file.content_type);
             const completed = file.status === 'completed';
             const statusCfg = file.status === 'completed' ? null : STATUS_LABEL[file.status];
-            const busy = busyId === file.id;
+            const canPreview = getPreviewKind(file) !== null;
+            const downloading = downloadingId === file.id;
 
             return (
               <div key={file.id} className="flex items-center gap-3 px-4 py-3">
                 <Icon className={cn('h-5 w-5 shrink-0', completed ? 'text-muted-foreground' : 'text-muted-foreground/40')} />
                 <div className="flex-1 min-w-0">
-                  <p
-                    className={cn('text-sm font-medium truncate', !completed && 'text-muted-foreground')}
-                    title={file.original_name}
-                  >
-                    {file.original_name}
-                  </p>
+                  {canPreview ? (
+                    <button
+                      type="button"
+                      className="block max-w-full truncate text-left text-sm font-medium hover:underline focus-visible:underline focus-visible:outline-none"
+                      title={`Anteprima: ${file.original_name}`}
+                      onClick={() => setPreviewId(file.id)}
+                    >
+                      {file.original_name}
+                    </button>
+                  ) : (
+                    <p
+                      className={cn('text-sm font-medium truncate', !completed && 'text-muted-foreground')}
+                      title={file.original_name}
+                    >
+                      {file.original_name}
+                    </p>
+                  )}
                   <p className="text-xs text-muted-foreground truncate">
                     {showProject && <>{file.project_name ?? 'Archivio generale'} · </>}
-                    {formatBytes(file.size)} ·{' '}
-                    {new Date(file.uploaded_at).toLocaleString('it-IT', {
-                      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                    })}
+                    {formatBytes(file.size)} · {formatUploadDate(file.uploaded_at)}
                   </p>
                 </div>
 
@@ -174,17 +163,16 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
                 )}
 
                 <div className="flex items-center gap-1 shrink-0">
-                  {completed && PREVIEWABLE_TYPES.has(file.content_type) && (
+                  {canPreview && (
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8"
-                      title="Apri in una nuova scheda"
-                      disabled={busy}
-                      onClick={() => openFile(file, 'inline')}
+                      title="Anteprima"
+                      onClick={() => setPreviewId(file.id)}
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <Eye className="h-4 w-4" />
                     </Button>
                   )}
                   {completed && (
@@ -194,10 +182,10 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
                       size="icon"
                       className="h-8 w-8"
                       title="Scarica"
-                      disabled={busy}
-                      onClick={() => openFile(file, 'download')}
+                      disabled={downloading}
+                      onClick={() => handleDownload(file)}
                     >
-                      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                      {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     </Button>
                   )}
                   <Button
@@ -225,6 +213,15 @@ export function ClientUploadsPanel({ customerId, projectId }: ClientUploadsScope
           })}
         </div>
       )}
+
+      <ClientUploadLightbox
+        files={previewable}
+        activeId={previewId}
+        onActiveChange={setPreviewId}
+        onDownload={handleDownload}
+        downloadingId={downloadingId}
+        showProject={showProject}
+      />
     </div>
   );
 }

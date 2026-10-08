@@ -162,13 +162,16 @@ function contentDisposition(type: 'inline' | 'attachment', filename: string): st
  */
 export async function getPresignedDownloadUrl(
   key: string,
-  opts: { filename: string; inline?: boolean; expiresIn?: number },
+  opts: { filename: string; inline?: boolean; contentType?: string; expiresIn?: number },
 ): Promise<string> {
   const client = getClient();
   const command = new GetObjectCommand({
     Bucket: bucket,
     Key: key,
     ResponseContentDisposition: contentDisposition(opts.inline ? 'inline' : 'attachment', opts.filename),
+    // Pin the served type when rendering inline: an <iframe>/<video> fed a
+    // generic octet-stream would download instead of display.
+    ...(opts.contentType ? { ResponseContentType: opts.contentType } : {}),
   });
 
   return getSignedUrl(client, command, { expiresIn: opts.expiresIn ?? 300 });
