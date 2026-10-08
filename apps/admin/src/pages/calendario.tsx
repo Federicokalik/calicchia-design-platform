@@ -284,11 +284,11 @@ export default function CalendarioPage() {
 
     // Domains (expiry as single-day event)
     for (const d of (hidden.has('domain') ? [] : domainsData?.domains || [])) {
-      if (!d.expiry_date) continue;
+      if (!d.expiration_date) continue;
       events.push({
         id: `domain-${d.id}`,
-        title: `🌐 ${d.domain_name} scade`,
-        start: d.expiry_date,
+        title: `🌐 ${d.full_domain || d.domain_name} scade`,
+        start: String(d.expiration_date).slice(0, 10),
         allDay: true,
         editable: false,
         ...SOURCE_COLORS.domain,

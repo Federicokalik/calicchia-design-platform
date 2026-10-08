@@ -43,8 +43,8 @@ export function WidgetKpi() {
   const activeProjects = projects.filter((p: any) => p.status === 'in_progress').length;
   const revenueMese = payments.filter((p: any) => p.status === 'pagata').reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
   const expiringDomains = domains.filter((d: any) => {
-    if (!d.expiry_date) return false;
-    const days = Math.ceil((new Date(d.expiry_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (!d.expiration_date) return false;
+    const days = Math.ceil((new Date(d.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     return days >= 0 && days <= 30;
   }).length;
 
