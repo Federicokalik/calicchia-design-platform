@@ -44,7 +44,8 @@ interface FaqRow {
 interface DraftRow {
   id: string | null;
   locale: 'it' | 'en';
-  section: FaqSection;
+  // general | perche | service:<slug> (le FAQ delle pagine servizio)
+  section: string;
   question: string;
   answer: string;
   sort_order: string;
@@ -126,10 +127,11 @@ export default function FaqCmsPage() {
     },
   });
 
+  // conservare 'service:<slug>': prima ogni modifica spostava la FAQ in 'general'
   const editRow = (row: FaqRow) => setDraft({
     id: row.id,
     locale: row.locale,
-    section: (row.section === 'perche' ? 'perche' : 'general'),
+    section: row.section,
     question: row.question,
     answer: row.answer,
     sort_order: row.sort_order?.toString() ?? '',
@@ -140,7 +142,7 @@ export default function FaqCmsPage() {
     saveMutation.mutate({
       id: row.id,
       locale: row.locale,
-      section: (row.section === 'perche' ? 'perche' : 'general'),
+      section: row.section,
       question: row.question,
       answer: row.answer,
       sort_order: row.sort_order?.toString() ?? '',
@@ -189,11 +191,14 @@ export default function FaqCmsPage() {
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-1">
               <Label className="text-xs">Sezione</Label>
-              <Select value={draft.section} onValueChange={(v) => setDraft({ ...draft, section: v as FaqSection })}>
+              <Select value={draft.section} onValueChange={(v) => setDraft({ ...draft, section: v })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="general">{SECTION_LABEL.general}</SelectItem>
                   <SelectItem value="perche">{SECTION_LABEL.perche}</SelectItem>
+                  {draft.section !== 'general' && draft.section !== 'perche' && (
+                    <SelectItem value={draft.section}>{draft.section}</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -204,7 +204,8 @@ export default function PortfolioEditorPage() {
   const watchTitle = form.watch('title');
   useEffect(() => {
     if (isNew && watchTitle) {
-      form.setValue('slug', watchTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, ''));
+      // Come blog/CMS: NFD + rimozione dei diacritici, altrimenti "Caffè" → "caff"
+      form.setValue('slug', watchTitle.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
     }
   }, [watchTitle, isNew]);
 
@@ -255,7 +256,7 @@ export default function PortfolioEditorPage() {
       toast.success(isNew ? 'Progetto creato' : 'Salvato');
       navigate('/portfolio');
     },
-    onError: () => toast.error('Errore nel salvataggio'),
+    onError: (err: Error) => toast.error(err.message || 'Errore nel salvataggio'),
   });
 
   // AI: suggest seo_title + seo_description from title/description/brief.
@@ -300,7 +301,10 @@ export default function PortfolioEditorPage() {
         </Button>
       </div>
 
-      <form id="portfolio-form" onSubmit={form.handleSubmit((v) => saveMutation.mutate(v))}>
+      <form id="portfolio-form" onSubmit={form.handleSubmit(
+        (v) => saveMutation.mutate(v),
+        (errs) => toast.error(Object.values(errs)[0]?.message?.toString() || 'Controlla i campi del modulo'),
+      )}>
         <Tabs defaultValue="general" className="space-y-4">
           <TabsList>
             <TabsTrigger value="general">Generale</TabsTrigger>
@@ -343,7 +347,9 @@ export default function PortfolioEditorPage() {
                     min={1990}
                     max={2100}
                     placeholder="2024"
-                    {...form.register('year', { valueAsNumber: true })}
+                    // valueAsNumber trasforma il campo vuoto in NaN, che lo schema
+                    // rifiuta: lasciando l'anno vuoto non si creava né salvava nulla.
+                    {...form.register('year', { setValueAs: (v) => (v === '' || v == null ? undefined : Number(v)) })}
                   />
                   <p className="text-[10px] text-muted-foreground">
                     Se &gt;1 anno fa, il sito mostra "il sito potrebbe essere cambiato o non più online".
@@ -764,7 +770,7 @@ export default function PortfolioEditorPage() {
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">Ordine visualizzazione</Label>
-                <Input type="number" {...form.register('display_order', { valueAsNumber: true })} className="w-24" />
+                <Input type="number" {...form.register('display_order', { setValueAs: (v) => (v === '' || v == null ? 0 : Number(v)) })} className="w-24" />
               </div>
 
               {/* Link extraction from brief markdown — pure client-side regex.
