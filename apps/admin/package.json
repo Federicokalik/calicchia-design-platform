@@ -66,6 +66,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "docx-preview": "0.4.1",
     "elkjs": "^0.11.1",
     "lucide-react": "^0.468.0",
     "qrcode": "^1.5.4",
@@ -82,6 +83,7 @@
     "tippy.js": "^6.3.7",
     "turndown": "^7.2.2",
     "web-worker": "^1.5.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zod": "^3.24.0"
   },
   "devDependencies": {

@@ -143,6 +143,53 @@ export async function getObjectHead(key: string, bytes = 32): Promise<Buffer> {
 }
 
 /**
+ * Read a whole (small) object into memory. Callers must cap the size first:
+ * used to proxy DOCX bytes to the admin previewer, which can't fetch the
+ * presigned URL cross-origin without a CORS policy on the bucket.
+ */
+export async function getObjectBytes(key: string): Promise<Uint8Array> {
+  const client = getClient();
+  const result = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  if (!result.Body) throw new Error('Empty object body');
+  return result.Body.transformToByteArray();
+}
+
+/**
+ * RFC 6266 Content-Disposition with an ASCII fallback plus the RFC 5987
+ * `filename*` form, so accented / non-Latin names survive the download.
+ */
+function contentDisposition(type: 'inline' | 'attachment', filename: string): string {
+  const fallback = filename.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
+  const encoded = encodeURIComponent(filename).replace(/['()*]/g, (ch) =>
+    `%${ch.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+  return `${type}; filename="${fallback}"; filename*=UTF-8''${encoded}`;
+}
+
+/**
+ * Presigned GET URL for reading a private object (admin download / preview).
+ * The bucket is private: the signature is the only capability, so keep the
+ * expiry short. `filename` restores the original name the client uploaded
+ * (the key carries a UUID prefix + sanitized name).
+ */
+export async function getPresignedDownloadUrl(
+  key: string,
+  opts: { filename: string; inline?: boolean; contentType?: string; expiresIn?: number },
+): Promise<string> {
+  const client = getClient();
+  const command = new GetObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ResponseContentDisposition: contentDisposition(opts.inline ? 'inline' : 'attachment', opts.filename),
+    // Pin the served type when rendering inline: an <iframe>/<video> fed a
+    // generic octet-stream would download instead of display.
+    ...(opts.contentType ? { ResponseContentType: opts.contentType } : {}),
+  });
+
+  return getSignedUrl(client, command, { expiresIn: opts.expiresIn ?? 300 });
+}
+
+/**
  * Delete an object (used to clean up files that fail post-upload validation).
  */
 export async function deleteObject(key: string): Promise<void> {
