@@ -143,6 +143,18 @@ export async function getObjectHead(key: string, bytes = 32): Promise<Buffer> {
 }
 
 /**
+ * Read a whole (small) object into memory. Callers must cap the size first:
+ * used to proxy DOCX bytes to the admin previewer, which can't fetch the
+ * presigned URL cross-origin without a CORS policy on the bucket.
+ */
+export async function getObjectBytes(key: string): Promise<Uint8Array> {
+  const client = getClient();
+  const result = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+  if (!result.Body) throw new Error('Empty object body');
+  return result.Body.transformToByteArray();
+}
+
+/**
  * RFC 6266 Content-Disposition with an ASCII fallback plus the RFC 5987
  * `filename*` form, so accented / non-Latin names survive the download.
  */

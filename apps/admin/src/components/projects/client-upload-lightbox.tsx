@@ -1,7 +1,8 @@
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useRef, useState, type KeyboardEvent } from 'react';
 import { AlertTriangle, ChevronLeft, ChevronRight, Download, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
+import { DocxPreview } from '@/components/projects/client-upload-docx-preview';
 import { useClientUploadPreviewUrl } from '@/hooks/use-client-uploads';
 import {
   formatBytes,
@@ -33,7 +34,9 @@ export function ClientUploadLightbox({
   const index = activeId ? files.findIndex((f) => f.id === activeId) : -1;
   const file = index >= 0 ? files[index] : null;
   const kind = file ? getPreviewKind(file) : null;
-  const { data: url, isLoading, error } = useClientUploadPreviewUrl(file?.id ?? null);
+  // DOCX is parsed from bytes proxied by the API, not from a presigned URL.
+  const usesUrl = kind !== null && kind !== 'docx';
+  const { data: url, isLoading, error } = useClientUploadPreviewUrl(usesUrl ? file!.id : null);
   const canNavigate = files.length > 1;
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -75,7 +78,7 @@ export function ClientUploadLightbox({
                   {canNavigate && ` · ${index + 1} di ${files.length}`}
                 </DialogDescription>
               </div>
-              {url && (
+              {usesUrl && url && (
                 <Button asChild variant="ghost" size="sm" className="shrink-0" title="Apri in una nuova scheda">
                   <a href={url} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="h-4 w-4" />
@@ -101,10 +104,12 @@ export function ClientUploadLightbox({
             <div
               className={cn(
                 'relative flex min-h-0 flex-1 items-center justify-center bg-neutral-950',
-                kind !== 'pdf' && 'p-4 sm:px-16',
+                (kind === 'image' || kind === 'video') && 'p-4 sm:px-16',
               )}
             >
-              {isLoading ? (
+              {kind === 'docx' ? (
+                <DocxPane key={file.id} fileId={file.id} onDownload={() => onDownload(file)} />
+              ) : isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin text-white/60" />
               ) : error || !url ? (
                 <PreviewFallback
@@ -156,7 +161,7 @@ function PreviewMedia({
   onDownload,
 }: {
   file: ClientUpload;
-  kind: ClientUploadPreviewKind;
+  kind: Exclude<ClientUploadPreviewKind, 'docx'>;
   url: string;
   onDownload: () => void;
 }) {
@@ -197,6 +202,14 @@ function PreviewMedia({
       // and the S4 origin is cross-origin to the admin anyway.
       return <iframe src={url} title={file.original_name} className="h-full w-full border-0 bg-white" />;
   }
+}
+
+function DocxPane({ fileId, onDownload }: { fileId: string; onDownload: () => void }) {
+  const [failure, setFailure] = useState<string | null>(null);
+  const handleError = useCallback((message: string) => setFailure(message), []);
+
+  if (failure) return <PreviewFallback message={failure} onDownload={onDownload} />;
+  return <DocxPreview fileId={fileId} onError={handleError} />;
 }
 
 function PreviewFallback({ message, onDownload }: { message: string; onDownload: () => void }) {

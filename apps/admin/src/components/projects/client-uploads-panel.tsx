@@ -45,7 +45,7 @@ const STATUS_LABEL: Record<Exclude<ClientUploadStatus, 'completed'>, { label: st
 };
 
 function fileIcon(contentType: string) {
-  if (contentType.startsWith('image/')) return FileImage;
+  if (contentType.startsWith('image/') || contentType === 'application/illustrator') return FileImage;
   if (contentType.startsWith('video/')) return FileVideo;
   if (/zip|rar|7z/.test(contentType)) return FileArchive;
   if (contentType === 'application/pdf' || contentType.includes('officedocument')) return FileText;

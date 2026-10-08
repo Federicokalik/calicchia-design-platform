@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api';
 import {
+  fetchClientUploadBytes,
   fetchClientUploadUrl,
   type ClientUpload,
   type ClientUploadsScope,
@@ -8,6 +9,7 @@ import {
 
 export const CLIENT_UPLOADS_QUERY_KEY = 'client-uploads';
 const PREVIEW_URL_QUERY_KEY = 'client-upload-preview-url';
+const PREVIEW_BYTES_QUERY_KEY = 'client-upload-preview-bytes';
 // The inline URL is signed for 1h: reuse it while flipping back and forth in
 // the lightbox, but leave a wide margin so a reused URL never dies mid-video.
 const PREVIEW_URL_REUSE_MS = 30 * 60_000;
@@ -50,6 +52,21 @@ export function useClientUploadPreviewUrl(fileId: string | null) {
     enabled: !!fileId,
     staleTime: PREVIEW_URL_REUSE_MS,
     gcTime: PREVIEW_URL_REUSE_MS,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
+  });
+}
+
+/** Raw bytes for client-side previewers (DOCX). Kept briefly so prev/next in
+ *  the lightbox doesn't re-download, then dropped: they can be up to 25 MB. */
+export function useClientUploadBytes(fileId: string | null) {
+  return useQuery<ArrayBuffer>({
+    queryKey: [PREVIEW_BYTES_QUERY_KEY, fileId],
+    queryFn: () => fetchClientUploadBytes(fileId!),
+    enabled: !!fileId,
+    staleTime: 5 * 60_000,
+    gcTime: 2 * 60_000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: 1,

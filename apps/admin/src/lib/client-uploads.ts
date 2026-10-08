@@ -1,4 +1,4 @@
-import { apiFetch } from '@/lib/api';
+import { apiFetch, apiFetchRaw } from '@/lib/api';
 
 export type ClientUploadStatus = 'uploading' | 'completed' | 'failed' | 'rejected';
 
@@ -19,18 +19,22 @@ export interface ClientUploadsScope {
   projectId?: string;
 }
 
-export type ClientUploadPreviewKind = 'image' | 'pdf' | 'video';
+export type ClientUploadPreviewKind = 'image' | 'pdf' | 'video' | 'docx';
 
-// Must mirror INLINE_UPLOAD_TYPES in apps/api/src/routes/portal-admin.ts.
-// Everything else the portal accepts (archives, Office, PSD/AI, TIFF) has no
-// in-browser viewer here → download only.
+// Must mirror INLINE_UPLOAD_TYPES / ILLUSTRATOR_TYPE / PROXY_PREVIEW_TYPES in
+// apps/api/src/routes/portal-admin.ts. Everything else the portal accepts
+// (archives, XLSX/PPTX, PSD, EPS, TIFF) has no viewer here → download only.
 const PREVIEW_KIND_BY_TYPE: Record<string, ClientUploadPreviewKind> = {
   'image/jpeg': 'image',
   'image/png': 'image',
   'image/webp': 'image',
   'application/pdf': 'pdf',
+  // Served as PDF when PDF-compatible (Illustrator default); the API answers
+  // 422 for legacy PostScript .ai and the lightbox falls back to download.
+  'application/illustrator': 'pdf',
   'video/mp4': 'video',
   'video/quicktime': 'video',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
 };
 
 export function getPreviewKind(file: Pick<ClientUpload, 'content_type' | 'status'>): ClientUploadPreviewKind | null {
@@ -58,6 +62,12 @@ export async function fetchClientUploadUrl(id: string, disposition: 'inline' | '
     `/api/portal-admin/uploads/${id}/url?disposition=${disposition}`,
   );
   return res.url;
+}
+
+/** File bytes proxied by the API, for previewers that parse them client-side (DOCX). */
+export async function fetchClientUploadBytes(id: string): Promise<ArrayBuffer> {
+  const res = await apiFetchRaw(`/api/portal-admin/uploads/${id}/content`);
+  return res.arrayBuffer();
 }
 
 export async function downloadClientUpload(id: string): Promise<void> {

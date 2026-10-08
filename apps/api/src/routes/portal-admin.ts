@@ -399,7 +399,8 @@ portalAdmin.get('/reports/:customerId', async (c) => {
 // ── Client uploads (files the customer sent via /clienti/upload) ──
 // The portal writes client_uploads + the object on MEGA S4 (private bucket);
 // these endpoints are the admin read side: list per customer / project,
-// short-lived presigned download / preview, and delete (object + soft-delete row).
+// short-lived presigned download / preview, DOCX bytes for the in-admin
+// previewer, and delete (object + soft-delete row).
 const UUID_RE = /^[a-f0-9-]{36}$/i;
 const UPLOAD_LIST_LIMIT = 500;
 // A download is authorized once, when it starts: 5 minutes is plenty. A tab
@@ -409,12 +410,38 @@ const UPLOAD_LIST_LIMIT = 500;
 const UPLOAD_URL_EXPIRY_DOWNLOAD = 300; // 5 minutes
 const UPLOAD_URL_EXPIRY_INLINE = 3600; // 1 hour
 // Types the browser can render safely in a tab. Everything else is forced to
-// download (archives, Office, PSD/AI…). SVG is never accepted at upload.
+// download (archives, Office, PSD…). SVG is never accepted at upload.
 const INLINE_UPLOAD_TYPES = new Set([
   'image/jpeg', 'image/png', 'image/webp',
   'application/pdf',
   'video/mp4', 'video/quicktime',
 ]);
+// Illustrator 9+ saved with "Create PDF Compatible File" (the default) is a
+// valid PDF: served as application/pdf, the browser's PDF viewer renders it.
+const ILLUSTRATOR_TYPE = 'application/illustrator';
+// Rendered client-side (docx-preview) from bytes proxied by the API: the
+// browser can't fetch the presigned URL cross-origin without bucket CORS.
+const PROXY_PREVIEW_TYPES = new Set([
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+const PROXY_PREVIEW_MAX_BYTES = 25 * 1024 * 1024;
+
+type ClientUploadRow = { key: string; original_name: string; content_type: string; size: string | number; status: string };
+
+async function loadCompletedUpload(id: string): Promise<ClientUploadRow> {
+  if (!UUID_RE.test(id)) fail('id non valido', 400);
+
+  const [upload] = await sql`
+    SELECT key, original_name, content_type, size, status
+    FROM client_uploads
+    WHERE id = ${id}
+    LIMIT 1
+  ` as ClientUploadRow[];
+
+  if (!upload || upload.status === 'deleted') fail('File non trovato', 404);
+  if (upload.status !== 'completed') fail('Upload non completato: il file non è disponibile', 409);
+  return upload;
+}
 
 portalAdmin.get('/uploads', async (c) => {
   const customerId = c.req.query('customer_id');
@@ -452,31 +479,55 @@ portalAdmin.get('/uploads', async (c) => {
 });
 
 portalAdmin.get('/uploads/:id/url', async (c) => {
-  const id = c.req.param('id');
-  if (!UUID_RE.test(id)) fail('id non valido', 400);
+  const upload = await loadCompletedUpload(c.req.param('id'));
+  const wantsInline = c.req.query('disposition') === 'inline';
+  const { getPresignedDownloadUrl, getObjectHead } = await import('../lib/s4');
 
-  const [upload] = await sql`
-    SELECT key, original_name, content_type, status
-    FROM client_uploads
-    WHERE id = ${id}
-    LIMIT 1
-  ` as Array<{ key: string; original_name: string; content_type: string; status: string }>;
+  // content_type is from the upload allowlist and magic-byte checked.
+  let previewType = upload.content_type;
+  if (wantsInline && upload.content_type === ILLUSTRATOR_TYPE) {
+    // Old PostScript-based .ai (≤ v8) has no PDF stream: nothing to show.
+    const head = await getObjectHead(upload.key, 5);
+    if (head.toString('ascii') !== '%PDF-') {
+      fail('File Illustrator senza contenuto compatibile PDF: scaricalo per aprirlo', 422);
+    }
+    previewType = 'application/pdf';
+  }
 
-  if (!upload || upload.status === 'deleted') fail('File non trovato', 404);
-  if (upload.status !== 'completed') fail('Upload non completato: il file non è disponibile', 409);
-
-  const inline = c.req.query('disposition') === 'inline' && INLINE_UPLOAD_TYPES.has(upload.content_type);
+  const inline = wantsInline && INLINE_UPLOAD_TYPES.has(previewType);
   const expiresIn = inline ? UPLOAD_URL_EXPIRY_INLINE : UPLOAD_URL_EXPIRY_DOWNLOAD;
-  const { getPresignedDownloadUrl } = await import('../lib/s4');
   const url = await getPresignedDownloadUrl(upload.key, {
     filename: upload.original_name,
     inline,
-    // content_type is from the upload allowlist and magic-byte checked.
-    contentType: inline ? upload.content_type : undefined,
+    contentType: inline ? previewType : undefined,
     expiresIn,
   });
 
   return c.json({ url, inline, expiresIn });
+});
+
+// Raw bytes for the in-admin DOCX previewer (same-origin, so no bucket CORS
+// needed). Served as an opaque attachment: the global middleware adds nosniff
+// + a deny-all CSP, so opening this URL directly can never render it.
+portalAdmin.get('/uploads/:id/content', async (c) => {
+  const upload = await loadCompletedUpload(c.req.param('id'));
+
+  if (!PROXY_PREVIEW_TYPES.has(upload.content_type)) fail('Anteprima non disponibile per questo tipo di file', 422);
+  if (Number(upload.size) > PROXY_PREVIEW_MAX_BYTES) {
+    fail(`File troppo grande per l'anteprima (max ${PROXY_PREVIEW_MAX_BYTES / 1024 / 1024} MB): scaricalo`, 422);
+  }
+
+  const { getObjectBytes } = await import('../lib/s4');
+  const bytes = await getObjectBytes(upload.key);
+
+  return new Response(bytes, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': 'attachment',
+      'Cache-Control': 'private, no-store',
+    },
+  });
 });
 
 portalAdmin.delete('/uploads/:id', async (c) => {
