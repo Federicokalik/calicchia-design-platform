@@ -259,6 +259,8 @@ export default function PipelinePage() {
 
   const handleConvert = (lead: Lead) => {
     const projectName = window.prompt(t('lead.projectNamePrompt'));
+    // null = Annulla; stringa vuota = converti senza progetto
+    if (projectName === null) return;
     convertMutation.mutate({ id: lead.id, project_name: projectName || undefined });
   };
 
@@ -406,8 +408,9 @@ export default function PipelinePage() {
         </DndContext>
       )}
 
-      {/* Lead detail panel */}
+      {/* Lead detail panel — key per lead: il form legge il lead solo al mount */}
       <LeadDetail
+        key={selectedLead?.id ?? 'none'}
         lead={selectedLead}
         open={!!selectedLead}
         onClose={() => setSelectedLead(null)}

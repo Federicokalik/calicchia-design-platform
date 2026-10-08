@@ -131,7 +131,7 @@ workflows.put('/:id', async (c) => {
   const [row] = await sql`
     UPDATE workflows SET
       name = COALESCE(${body.name || null}, name),
-      description = ${body.description !== undefined ? body.description : null},
+      description = ${body.description !== undefined ? body.description : sql`description`},
       trigger_type = COALESCE(${body.trigger_type || null}, trigger_type),
       trigger_config = COALESCE(${triggerConfigJson}, trigger_config),
       nodes = COALESCE(${body.nodes ? JSON.stringify(body.nodes) : null}, nodes),

@@ -81,13 +81,13 @@ collaboratorsV2.put('/:id', async (c) => {
   const [row] = await sql`
     UPDATE collaborators SET
       name = COALESCE(${b.name || null}, name),
-      company = ${b.company !== undefined ? b.company : null},
-      email = ${b.email !== undefined ? b.email : null},
-      phone = ${b.phone !== undefined ? b.phone : null},
+      company = ${b.company !== undefined ? b.company : sql`company`},
+      email = ${b.email !== undefined ? b.email : sql`email`},
+      phone = ${b.phone !== undefined ? b.phone : sql`phone`},
       type = COALESCE(${b.type || null}, type),
-      specialization = ${b.specialization !== undefined ? b.specialization : null},
-      commission_rate = ${b.commission_rate !== undefined ? b.commission_rate : null},
-      notes = ${b.notes !== undefined ? b.notes : null},
+      specialization = ${b.specialization !== undefined ? b.specialization : sql`specialization`},
+      commission_rate = ${b.commission_rate !== undefined ? b.commission_rate : sql`commission_rate`},
+      notes = ${b.notes !== undefined ? b.notes : sql`notes`},
       status = COALESCE(${b.status || null}, status),
       updated_at = now()
     WHERE id = ${c.req.param('id')}
