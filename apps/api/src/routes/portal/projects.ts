@@ -190,7 +190,7 @@ projectsRoutes.get('/:id', portalAuth, async (c) => {
 
   let previews = (await sql`
     SELECT id, project_id, title, url, provider, status, visible_to_client,
-           sort_order, notes, created_at, updated_at, false AS is_legacy
+           sort_order, created_at, updated_at, false AS is_legacy
     FROM project_previews
     WHERE project_id = ${id} AND visible_to_client = true
     ORDER BY sort_order ASC, created_at ASC

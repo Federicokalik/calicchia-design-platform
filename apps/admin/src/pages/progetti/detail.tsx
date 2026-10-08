@@ -983,18 +983,35 @@ export default function ProgettoDetailPage() {
 
         {/* Notes */}
         <TabsContent value="notes">
-          <div className="rounded-lg border bg-card p-6">
-            <p className="text-xs text-muted-foreground mb-3">Appunti interni per questo progetto.</p>
-            <textarea
-              className="w-full min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Scrivi le tue note qui..."
-              defaultValue={project.client_notes || ''}
-              onBlur={(e) => {
-                if (e.target.value !== (project.client_notes || '')) {
-                  updateProjectMutation.mutate({ client_notes: e.target.value || null });
-                }
-              }}
-            />
+          <div className="rounded-lg border bg-card p-6 space-y-6">
+            <div>
+              <p className="text-xs text-muted-foreground mb-3">Appunti interni per questo progetto. Non visibili al cliente.</p>
+              <textarea
+                className="w-full min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Scrivi le tue note qui..."
+                defaultValue={project.internal_notes || ''}
+                onBlur={(e) => {
+                  if (e.target.value !== (project.internal_notes || '')) {
+                    updateProjectMutation.mutate({ internal_notes: e.target.value || null });
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Nota per il cliente: <strong className="text-foreground">visibile nel portale clienti</strong> come descrizione del progetto.
+              </p>
+              <textarea
+                className="w-full min-h-[100px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Testo mostrato al cliente..."
+                defaultValue={project.client_notes || ''}
+                onBlur={(e) => {
+                  if (e.target.value !== (project.client_notes || '')) {
+                    updateProjectMutation.mutate({ client_notes: e.target.value || null });
+                  }
+                }}
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>

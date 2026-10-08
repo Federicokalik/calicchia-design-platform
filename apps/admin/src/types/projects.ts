@@ -34,6 +34,7 @@ export interface ClientProject {
   progress_percentage: number;
   visible_to_client: boolean;
   client_notes: string | null;
+  internal_notes?: string | null;
   tags: string[];
   metadata: Record<string, unknown>;
   created_at: string;
