@@ -43,8 +43,9 @@ invoices.get('/', async (c) => {
     sent: rows.filter((i) => i.status === 'open' && i.sent_at).length,
     paid: rows.filter((i) => i.status === 'paid').length,
     overdue: rows.filter((i) => i.status === 'open' && i.due_date && new Date(i.due_date as string) < now).length,
-    total_amount: rows.reduce((acc, i) => acc + ((i.total as number) || (i.amount_due as number) || 0), 0),
-    paid_amount: rows.reduce((acc, i) => acc + (i.status === 'paid' ? ((i.total as number) || (i.amount_due as number) || 0) : 0), 0),
+    // numeric arriva da postgres-js come stringa: senza Number() il reduce concatena
+    total_amount: rows.reduce((acc, i) => acc + (Number(i.total) || Number(i.amount_due) || 0), 0),
+    paid_amount: rows.reduce((acc, i) => acc + (i.status === 'paid' ? (Number(i.total) || Number(i.amount_due) || 0) : 0), 0),
   };
 
   return c.json({ invoices: rows, stats });

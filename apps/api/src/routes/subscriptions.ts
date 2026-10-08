@@ -34,7 +34,7 @@ subscriptions.get('/', async (c) => {
   const customerFilter = customerId ? sql`AND s.customer_id = ${customerId}` : sql``;
 
   let upcomingFilter = sql``;
-  if (upcoming) {
+  if (upcoming && Number.isFinite(parseInt(upcoming))) {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + parseInt(upcoming));
     const futureDateStr = futureDate.toISOString().split('T')[0];
