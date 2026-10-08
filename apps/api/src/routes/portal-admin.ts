@@ -399,10 +399,15 @@ portalAdmin.get('/reports/:customerId', async (c) => {
 // ── Client uploads (files the customer sent via /clienti/upload) ──
 // The portal writes client_uploads + the object on MEGA S4 (private bucket);
 // these endpoints are the admin read side: list per customer / project,
-// short-lived presigned download, and delete (object + soft-delete row).
+// short-lived presigned download / preview, and delete (object + soft-delete row).
 const UUID_RE = /^[a-f0-9-]{36}$/i;
 const UPLOAD_LIST_LIMIT = 500;
-const UPLOAD_URL_EXPIRY = 300; // 5 minutes
+// A download is authorized once, when it starts: 5 minutes is plenty. A tab
+// opened inline keeps issuing Range requests against the same signed URL
+// (video seek/buffering, large PDFs), each re-checked against the expiry —
+// so preview links must outlive a realistic viewing session.
+const UPLOAD_URL_EXPIRY_DOWNLOAD = 300; // 5 minutes
+const UPLOAD_URL_EXPIRY_INLINE = 3600; // 1 hour
 // Types the browser can render safely in a tab. Everything else is forced to
 // download (archives, Office, PSD/AI…). SVG is never accepted at upload.
 const INLINE_UPLOAD_TYPES = new Set([
@@ -461,14 +466,15 @@ portalAdmin.get('/uploads/:id/url', async (c) => {
   if (upload.status !== 'completed') fail('Upload non completato: il file non è disponibile', 409);
 
   const inline = c.req.query('disposition') === 'inline' && INLINE_UPLOAD_TYPES.has(upload.content_type);
+  const expiresIn = inline ? UPLOAD_URL_EXPIRY_INLINE : UPLOAD_URL_EXPIRY_DOWNLOAD;
   const { getPresignedDownloadUrl } = await import('../lib/s4');
   const url = await getPresignedDownloadUrl(upload.key, {
     filename: upload.original_name,
     inline,
-    expiresIn: UPLOAD_URL_EXPIRY,
+    expiresIn,
   });
 
-  return c.json({ url, inline, expiresIn: UPLOAD_URL_EXPIRY });
+  return c.json({ url, inline, expiresIn });
 });
 
 portalAdmin.delete('/uploads/:id', async (c) => {
