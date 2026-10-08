@@ -110,6 +110,8 @@ export default function ImpostazioniPage() {
   const { data: integrationsStatus, refetch: refetchIntegrations } = useQuery({
     queryKey: ['integrations-check'],
     queryFn: async () => { try { return await apiFetch('/api/settings/integrations-check'); } catch { return {}; } },
+    // Interroga servizi esterni (Telegram, WhatsApp…): si aggiorna solo col bottone dedicato.
+    meta: { skipGlobalRefetch: true },
   });
   const { data: aiUsage } = useQuery({
     queryKey: ['ai-usage'],

@@ -38,7 +38,6 @@ export function useClientUploads(scope: ClientUploadsScope, includeAll = false) 
     queryKey: uploadsQueryKey(scope, includeAll),
     queryFn: () => apiFetch(`/api/portal-admin/uploads?${params.toString()}`),
     enabled: !!(scope.projectId || scope.customerId),
-    // The global 5-minute staleTime would hide a file the client just sent.
     staleTime: 30_000,
   });
 }
@@ -54,6 +53,7 @@ export function useClientUploadPreviewUrl(fileId: string | null) {
     gcTime: PREVIEW_URL_REUSE_MS,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    meta: { skipGlobalRefetch: true },
     retry: 1,
   });
 }
@@ -69,6 +69,7 @@ export function useClientUploadBytes(fileId: string | null) {
     gcTime: 2 * 60_000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
+    meta: { skipGlobalRefetch: true },
     retry: 1,
   });
 }
