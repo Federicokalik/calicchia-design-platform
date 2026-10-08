@@ -339,13 +339,13 @@ function KnowledgeTab() {
 
   const { data: notesData } = useQuery({
     queryKey: ['brain-knowledge-notes', search],
-    queryFn: () => apiFetch(`/api/notes?search=${search}&limit=20`),
+    queryFn: () => apiFetch(`/api/notes?search=${encodeURIComponent(search)}&limit=20`),
     enabled: !typeFilter || typeFilter === 'note',
   });
 
   const { data: boardsData } = useQuery({
     queryKey: ['brain-knowledge-boards', search],
-    queryFn: () => apiFetch(`/api/boards?search=${search}&limit=20`),
+    queryFn: () => apiFetch(`/api/boards?search=${encodeURIComponent(search)}&limit=20`),
     enabled: !typeFilter || typeFilter === 'sketch' || typeFilter === 'mindmap',
   });
 

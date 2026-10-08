@@ -20,13 +20,13 @@ export function LinkEntityPicker({ linkedType, linkedId, onChange }: LinkEntityP
 
   const { data: projects } = useQuery({
     queryKey: ['link-projects', search],
-    queryFn: () => apiFetch(`/api/client-projects?search=${search}&limit=8`),
+    queryFn: () => apiFetch(`/api/client-projects?search=${encodeURIComponent(search)}&limit=8`),
     enabled: open && tab === 'project',
   });
 
   const { data: customers } = useQuery({
     queryKey: ['link-customers', search],
-    queryFn: () => apiFetch(`/api/customers?search=${search}&limit=8`),
+    queryFn: () => apiFetch(`/api/customers?search=${encodeURIComponent(search)}&limit=8`),
     enabled: open && tab === 'customer',
   });
 

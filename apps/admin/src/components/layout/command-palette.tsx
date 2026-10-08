@@ -63,19 +63,19 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
 
   const { data: customerResults } = useQuery({
     queryKey: ['cmd-customers', search],
-    queryFn: () => apiFetch(`/api/customers?search=${search}&limit=5`),
+    queryFn: () => apiFetch(`/api/customers?search=${encodeURIComponent(search)}&limit=5`),
     enabled: open && search.length >= 2,
   });
 
   const { data: _leadResults } = useQuery({
     queryKey: ['cmd-leads', search],
-    queryFn: () => apiFetch(`/api/leads?search=${search}`),
+    queryFn: () => apiFetch(`/api/leads?search=${encodeURIComponent(search)}`),
     enabled: open && search.length >= 2,
   });
 
   const { data: noteResults } = useQuery({
     queryKey: ['cmd-notes', search],
-    queryFn: () => apiFetch(`/api/notes?search=${search}&limit=5`),
+    queryFn: () => apiFetch(`/api/notes?search=${encodeURIComponent(search)}&limit=5`),
     enabled: open && search.length >= 2,
   });
 

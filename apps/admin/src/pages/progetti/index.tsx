@@ -69,7 +69,7 @@ export default function ProgettiPage() {
       toast.success('Progetto creato');
       if (res?.project?.id) navigate(`/progetti/${res.project.id}`);
     },
-    onError: () => toast.error('Errore nella creazione'),
+    onError: (err: Error) => toast.error(err.message || 'Errore nella creazione'),
   });
 
   const projects: ClientProjectView[] = data?.projects || [];
@@ -224,7 +224,7 @@ export default function ProgettiPage() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (!newForm.name.trim()) return;
+              if (!newForm.name.trim() || !newForm.customer_id) return;
               createMutation.mutate({
                 name: newForm.name.trim(),
                 customer_id: newForm.customer_id || null,
@@ -240,7 +240,8 @@ export default function ProgettiPage() {
               <Input value={newForm.name} onChange={(e) => setNewForm({ ...newForm, name: e.target.value })} autoFocus />
             </div>
             <div className="space-y-1.5">
-              <Label>Cliente</Label>
+              {/* client_projects.customer_id è NOT NULL: l'API risponde 400 senza cliente */}
+              <Label>Cliente *</Label>
               <Select value={newForm.customer_id} onValueChange={(v) => setNewForm({ ...newForm, customer_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Seleziona cliente..." /></SelectTrigger>
                 <SelectContent>
@@ -278,7 +279,7 @@ export default function ProgettiPage() {
             </label>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowNew(false)}>Annulla</Button>
-              <Button type="submit" disabled={!newForm.name.trim() || createMutation.isPending}>Crea</Button>
+              <Button type="submit" disabled={!newForm.name.trim() || !newForm.customer_id || createMutation.isPending}>Crea</Button>
             </DialogFooter>
           </form>
         </DialogContent>

@@ -113,13 +113,15 @@ export default function PipelinePage() {
   );
 
   // Fetch leads
-  const { data: leads = [], isLoading } = useQuery({
+  const { data: leadsData, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: async () => {
       const res = await apiFetch('/api/leads');
       return res.leads as Lead[];
     },
   });
+  // Riferimento stabile: `data: leads = []` creava un array nuovo a ogni render.
+  const leads = useMemo(() => leadsData ?? [], [leadsData]);
 
   // Audit D-007: setState during render — under React 19 strict/concurrent
   // rendering this caused the setter to fire twice per render plus an O(N)
@@ -127,11 +129,9 @@ export default function PipelinePage() {
   // mid-drag snapshots from clobbering the optimistic local copy.
   useEffect(() => {
     if (activeLead) return;
-    if (leads.length === 0) return;
-    if (localLeads.length === 0) {
-      setLocalLeads(leads);
-      return;
-    }
+    // Solo a dati caricati, ma anche a lista vuota: eliminando l'ultimo lead la
+    // copia locale lo mostrava ancora.
+    if (!leadsData) return;
     if (JSON.stringify(leads) !== JSON.stringify(localLeads)) {
       setLocalLeads(leads);
     }
@@ -357,6 +357,9 @@ export default function PipelinePage() {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          // Esc / cambio scheda durante il drag: senza reset activeLead restava
+          // valorizzato e la board smetteva di sincronizzarsi col server.
+          onDragCancel={() => { setActiveLead(null); setLocalLeads(leads); }}
         >
           <div className="relative">
             {/* Scroll left button */}

@@ -31,7 +31,15 @@ import { LoadingState } from '@/components/shared/loading-state';
 import { apiFetch } from '@/lib/api';
 import { PORTAL_URL } from '@/lib/public-urls';
 
-export default function CollaboratoreDetailPage() {
+// key per id: gli input non controllati (defaultValue + salvataggio su blur)
+// riusati passando da un record all'altro mostravano, e al blur salvavano,
+// i valori del record precedente.
+export default function CollaboratoreDetailRoute() {
+  const { id } = useParams();
+  return <CollaboratoreDetailPage key={id} />;
+}
+
+function CollaboratoreDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -109,7 +117,7 @@ export default function CollaboratoreDetailPage() {
       toast.success('Progetto creato');
       if (res?.project?.id) navigate(`/progetti/${res.project.id}`);
     },
-    onError: () => toast.error('Errore creazione'),
+    onError: (err: Error) => toast.error(err.message || 'Errore creazione'),
   });
 
   const generateCodeMutation = useMutation({
@@ -330,7 +338,7 @@ export default function CollaboratoreDetailPage() {
       <Dialog open={showNewProject} onOpenChange={setShowNewProject}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>Nuovo Progetto da {collab.name}</DialogTitle></DialogHeader>
-          <form onSubmit={(e) => { e.preventDefault(); if (projectForm.name) createProjectMutation.mutate(); }} className="space-y-3">
+          <form onSubmit={(e) => { e.preventDefault(); if (projectForm.name && projectForm.customer_id) createProjectMutation.mutate(); }} className="space-y-3">
             <div className="space-y-1.5"><Label className="text-xs">Nome progetto *</Label><Input value={projectForm.name} onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })} autoFocus /></div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5"><Label className="text-xs">Tipo</Label>
@@ -346,9 +354,10 @@ export default function CollaboratoreDetailPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1.5"><Label className="text-xs">Cliente finale</Label>
+              {/* client_projects.customer_id è NOT NULL: l'API risponde 400 senza cliente */}
+              <div className="space-y-1.5"><Label className="text-xs">Cliente finale *</Label>
                 <Select value={projectForm.customer_id} onValueChange={(v) => setProjectForm({ ...projectForm, customer_id: v })}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="Opzionale..." /></SelectTrigger>
+                  <SelectTrigger className="h-9"><SelectValue placeholder="Seleziona cliente..." /></SelectTrigger>
                   <SelectContent>
                     {customers.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.contact_name}</SelectItem>)}
                   </SelectContent>
@@ -358,7 +367,7 @@ export default function CollaboratoreDetailPage() {
             <div className="space-y-1.5"><Label className="text-xs">Brief / Note</Label><Textarea value={projectForm.notes} onChange={(e) => setProjectForm({ ...projectForm, notes: e.target.value })} rows={2} placeholder="Cosa serve..." /></div>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowNewProject(false)}>Annulla</Button>
-              <Button type="submit" disabled={!projectForm.name}>Crea Progetto</Button>
+              <Button type="submit" disabled={!projectForm.name || !projectForm.customer_id}>Crea Progetto</Button>
             </DialogFooter>
           </form>
         </DialogContent>

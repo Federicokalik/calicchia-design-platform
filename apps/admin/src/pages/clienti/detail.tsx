@@ -40,7 +40,15 @@ import { useClientUploads } from '@/hooks/use-client-uploads';
 import type { Customer, CustomerNote } from '@/types/customer';
 import { CUSTOMER_STATUS_CONFIG, NOTE_TYPE_CONFIG } from '@/types/customer';
 
-export default function ClienteDetailPage() {
+// key per id: gli input non controllati (defaultValue + salvataggio su blur)
+// riusati passando da un record all'altro mostravano, e al blur salvavano,
+// i valori del record precedente.
+export default function ClienteDetailRoute() {
+  const { id } = useParams();
+  return <ClienteDetailPage key={id} />;
+}
+
+function ClienteDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

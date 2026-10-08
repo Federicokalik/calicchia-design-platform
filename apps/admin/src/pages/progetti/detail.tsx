@@ -96,7 +96,15 @@ function SortablePipelineStep({ id, step, index, currentStep, onRemove }: {
   );
 }
 
-export default function ProgettoDetailPage() {
+// key per id: gli input non controllati (defaultValue + salvataggio su blur)
+// riusati passando da un record all'altro mostravano, e al blur salvavano,
+// i valori del record precedente.
+export default function ProgettoDetailRoute() {
+  const { id } = useParams();
+  return <ProgettoDetailPage key={id} />;
+}
+
+function ProgettoDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -847,7 +855,7 @@ export default function ProgettoDetailPage() {
                 <div>
                   <p className="text-sm font-semibold">Dettagli calcolo</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Le spese (€ {profitability ? profitability.expenses_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}) verranno integrate dalla Fase 5 (OCR ricevute).
+                    Margine = preventivato − costo ore fatturabili − spese del progetto (€ {profitability ? profitability.expenses_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}, dal tab Spese).
                   </p>
                 </div>
                 {profitability && profitability.running_timers > 0 && (
