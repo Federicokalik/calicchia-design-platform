@@ -79,7 +79,9 @@ function deriveTriggerFromNodes(nodes: Node[]): { trigger_type: string; trigger_
   const data = (triggerNode.data ?? {}) as Record<string, unknown>;
   switch (triggerNode.type) {
     case 'trigger_event':
-      return { trigger_type: 'event', trigger_config: { event_type: data.event_type ?? null } };
+      // L'inspector mostra 'nuovo_lead' come selezionato anche se data.event_type
+      // non è mai stato impostato: senza default il workflow si salvava con null.
+      return { trigger_type: 'event', trigger_config: { event_type: data.event_type ?? 'nuovo_lead' } };
     case 'trigger_cron':
       return {
         trigger_type: 'cron',
@@ -184,7 +186,8 @@ function WorkflowEditorInner() {
       return apiFetch(`/api/workflows/${id}/execute`, { method: 'POST', body: '{}' });
     },
     onSuccess: (res: any) => {
-      toast.success(t('workflow.execution', { status: formatStatus('workflow', res.status) }));
+      if (res.status === 'failed') toast.error(res.result?.error || t('workflow.executionError'));
+      else toast.success(t('workflow.execution', { status: formatStatus('workflow', res.status) }));
       // Start polling for steps
       if (res.executionId) pollExecution(res.executionId);
     },

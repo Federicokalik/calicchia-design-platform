@@ -59,7 +59,8 @@ export default function WorkflowsPage() {
   const executeMutation = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/workflows/${id}/execute`, { method: 'POST', body: '{}' }),
     onSuccess: (res: any) => {
-      toast.success(t('workflow.executed', { status: formatStatus('workflow', res.status) }));
+      if (res?.status === 'failed') toast.error(res.result?.error || t('workflow.executed', { status: formatStatus('workflow', res.status) }));
+      else toast.success(t('workflow.executed', { status: formatStatus('workflow', res.status) }));
       queryClient.invalidateQueries({ queryKey: ['workflows'] });
     },
     onError: () => toast.error(t('workflow.executionError')),
