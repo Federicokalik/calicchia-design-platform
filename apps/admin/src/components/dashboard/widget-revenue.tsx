@@ -24,24 +24,22 @@ export function WidgetRevenue() {
   const now = new Date();
   const windowStart = new Date(now.getFullYear(), now.getMonth() - 6, 1);
 
-  // Group by month
-  const monthMap = new Map<string, number>();
+  // Group by month — chiave anno-mese: col solo nome del mese i pagamenti di
+  // ottobre 2025 finivano nella colonna di ottobre 2026.
+  const monthKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}`;
+  const monthMap = new Map<string, { month: string; revenue: number }>();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = d.toLocaleDateString(intlLocale, { month: 'short' });
-    monthMap.set(key, 0);
+    monthMap.set(monthKey(d), { month: d.toLocaleDateString(intlLocale, { month: 'short' }), revenue: 0 });
   }
 
   for (const p of payments) {
     if (p.status !== 'pagata' || !p.paid_date) continue;
-    const d = new Date(p.paid_date);
-    const key = d.toLocaleDateString(intlLocale, { month: 'short' });
-    if (monthMap.has(key)) {
-      monthMap.set(key, (monthMap.get(key) || 0) + parseFloat(p.amount || 0));
-    }
+    const bucket = monthMap.get(monthKey(new Date(p.paid_date)));
+    if (bucket) bucket.revenue += parseFloat(p.amount || 0);
   }
 
-  const chartData = Array.from(monthMap.entries()).map(([month, revenue]) => ({ month, revenue }));
+  const chartData = Array.from(monthMap.values());
 
   const byMethod = useMemo(() => {
     const map = new Map<PaymentMethod | 'unknown', number>();

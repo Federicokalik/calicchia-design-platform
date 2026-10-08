@@ -29,7 +29,7 @@ interface TaxForecast {
  */
 export function WidgetTasse() {
   const { formatCurrency } = useI18n();
-  const { data, isLoading } = useQuery<TaxForecast>({
+  const { data, isLoading, isError } = useQuery<TaxForecast>({
     queryKey: ['tax-forecast'],
     queryFn: () => apiFetch('/api/tax/forecast'),
   });
@@ -62,7 +62,8 @@ export function WidgetTasse() {
 
       {isLoading || !t ? (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">Caricamento...</p>
+          {/* senza isError una query fallita restava su "Caricamento..." per sempre */}
+          <p className="text-xs text-muted-foreground">{isError ? 'Dati non disponibili' : 'Caricamento...'}</p>
         </div>
       ) : t.regime !== 'forfettario' ? (
         <div className="flex-1 flex flex-col items-start justify-center gap-1">

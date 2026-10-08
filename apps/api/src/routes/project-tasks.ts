@@ -17,6 +17,9 @@ projectTasks.get('/', async (c) => {
   const customerFilter = customerId ? sql`AND p.customer_id = ${customerId}` : sql``;
   const assignedFilter = assignedTo ? sql`AND t.assigned_to = ${assignedTo}` : sql``;
   const searchFilter = search ? sql`AND t.title ILIKE ${'%' + search + '%'}` : sql``;
+  // Usato dal widget "Agenda oggi": senza questo filtro arrivavano task qualsiasi.
+  const dueDate = c.req.query('due_date');
+  const dueFilter = dueDate && /^\d{4}-\d{2}-\d{2}$/.test(dueDate) ? sql`AND t.due_date = ${dueDate}::date` : sql``;
 
   const tasks = await sql`
     SELECT t.*, COUNT(*) OVER() AS _total_count,
@@ -29,7 +32,7 @@ projectTasks.get('/', async (c) => {
     LEFT JOIN customers c ON c.id = p.customer_id
     LEFT JOIN profiles pr ON pr.id = t.assigned_to
     LEFT JOIN project_milestones m ON m.id = t.milestone_id
-    WHERE 1=1 ${statusFilter} ${projectFilter} ${customerFilter} ${assignedFilter} ${searchFilter}
+    WHERE 1=1 ${statusFilter} ${projectFilter} ${customerFilter} ${assignedFilter} ${searchFilter} ${dueFilter}
     ORDER BY t.sort_order ASC, t.created_at ASC
     LIMIT ${limit} OFFSET ${offset}
   `;

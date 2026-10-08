@@ -21,10 +21,12 @@ export function WidgetProjects() {
   const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ['widget-projects'],
-    queryFn: () => apiFetch('/api/client-projects?limit=5'),
+    queryFn: () => apiFetch('/api/client-projects?limit=50'),
   });
 
-  const projects = (data?.projects || []).filter((p: any) => p.status !== 'completed' && p.status !== 'cancelled');
+  // Filtra prima di tagliare: con limit=5 lato API, se i 5 più recenti erano
+  // conclusi il widget restava vuoto pur con progetti attivi.
+  const projects = (data?.projects || []).filter((p: any) => p.status !== 'completed' && p.status !== 'cancelled').slice(0, 5);
 
   return (
     <div className="flex flex-col h-full">

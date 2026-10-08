@@ -51,7 +51,7 @@ const STATUS_TEXT_COLOR: Record<CapacityWeek['status'], string> = {
  * Status: light (<80%), optimal (80-100%), overbooked (>100%).
  */
 export function WidgetCapacity() {
-  const { data, isLoading } = useQuery<CapacityWeek>({
+  const { data, isLoading, isError } = useQuery<CapacityWeek>({
     queryKey: ['capacity-week'],
     queryFn: () => apiFetch('/api/dashboard/capacity-week'),
     refetchInterval: 5 * 60_000,
@@ -72,7 +72,8 @@ export function WidgetCapacity() {
 
       {isLoading || !data ? (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">Caricamento...</p>
+          {/* senza isError una query fallita restava su "Caricamento..." per sempre */}
+          <p className="text-xs text-muted-foreground">{isError ? 'Dati non disponibili' : 'Caricamento...'}</p>
         </div>
       ) : (
         <>

@@ -40,8 +40,13 @@ export function WidgetKpi() {
   const payments = paymentsData?.payments || [];
 
   const activeLeads = leads.filter((l: any) => !['won', 'lost'].includes(l.status)).length;
-  const activeProjects = projects.filter((p: any) => p.status === 'in_progress').length;
-  const revenueMese = payments.filter((p: any) => p.status === 'pagata').reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
+  // stats.in_progress è calcolato su tutti i progetti, la lista solo sui primi 100
+  const activeProjects = projectsData?.stats?.in_progress ?? projects.filter((p: any) => p.status === 'in_progress').length;
+  // Solo i pagamenti incassati nel mese corrente (prima sommava tutto lo storico)
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const revenueMese = payments
+    .filter((p: any) => p.status === 'pagata' && p.paid_date && new Date(p.paid_date) >= monthStart)
+    .reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
   const expiringDomains = domains.filter((d: any) => {
     if (!d.expiration_date) return false;
     const days = Math.ceil((new Date(d.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));

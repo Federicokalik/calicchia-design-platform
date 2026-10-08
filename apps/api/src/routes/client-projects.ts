@@ -180,7 +180,7 @@ clientProjects.get('/:id/profitability', async (c) => {
   const project = projectRows[0];
   if (!project) return c.json({ error: 'Project not found' }, 404);
 
-  const [settingsRows, timeRows] = await Promise.all([
+  const [settingsRows, timeRows, expenseRows] = await Promise.all([
     sql`
       SELECT (value->>'default_hourly_rate_cents')::int AS cents
       FROM site_settings
@@ -194,6 +194,7 @@ clientProjects.get('/:id/profitability', async (c) => {
       FROM time_entries
       WHERE project_id = ${id}
     `,
+    sql`SELECT COALESCE(SUM(amount), 0)::float8 AS total FROM expenses WHERE project_id = ${id}`,
   ]);
 
   const round2 = (value: number) => Math.round(value * 100) / 100;
@@ -220,7 +221,8 @@ clientProjects.get('/:id/profitability', async (c) => {
   const hoursTotal = round2(hoursBillable + hoursNonBillable);
   const timeCostEur = round2(hoursBillable * rateEur);
   const quotedEur = round2(project.budget_amount === null ? 0 : Number(project.budget_amount));
-  const expensesEur = 0;
+  // Spese registrate nel tab Spese del progetto
+  const expensesEur = round2(Number(expenseRows[0]?.total ?? 0));
   const netEur = round2(quotedEur - timeCostEur - expensesEur);
 
   return c.json({
