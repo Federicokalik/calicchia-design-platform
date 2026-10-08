@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import Markdown from 'react-markdown';
 import { Send, Sparkles, X, Minimize2, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { apiFetch } from '@/lib/api';
+import { refreshAllQueries } from '@/lib/query-refresh';
 import { useAiEntityContext, useClearAiEntityContext } from '@/hooks/use-ai-entity-context';
 import { useAiPanel } from '@/hooks/use-ai-panel';
 import { useI18n } from '@/hooks/use-i18n';
@@ -70,6 +72,7 @@ const SUGGESTIONS: Record<string, string[]> = {
 
 export function AiBar() {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const location = useLocation();
   const [expanded, setExpanded] = useState(false);
   // Open-state is shared (sidebar trigger + ⌘J + FAB all drive it). At rest the
@@ -159,6 +162,8 @@ export function AiBar() {
         pendingAction: pending,
         actionState: pending ? 'pending' : undefined,
       }]);
+      // I tool a basso rischio vengono eseguiti già durante la chat
+      void refreshAllQueries(queryClient);
     } catch {
       setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: t('ai.connectionError') }]);
     } finally {
@@ -175,6 +180,9 @@ export function AiBar() {
         method: 'POST',
         body: JSON.stringify({ tool: action.tool, args: action.args }),
       });
+      // Le azioni passano da apiFetch, non da useMutation: senza questo la pagina
+      // aperta mostrava i dati vecchi (task/lead creati o modificati) fino al refresh.
+      if (res.ok) void refreshAllQueries(queryClient);
       // ok:false (rate limit / tool error) → keep the button available to retry.
       setMessages((prev) => [
         ...prev.map((m) => (m.id === messageId ? { ...m, actionState: res.ok ? ('done' as const) : ('pending' as const) } : m)),

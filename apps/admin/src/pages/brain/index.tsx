@@ -303,7 +303,8 @@ function FactsTab() {
                   </div>
                 ) : (
                   <>
-                    <p className="text-xs">{fact.content}</p>
+                    {/* la colonna è `fact`: `content` non esiste e la riga restava vuota */}
+                    <p className="text-xs">{fact.fact}</p>
                     <div className="flex items-center gap-2 mt-1">
                       {fact.category && <Badge variant="outline" className="text-[9px] px-1.5 py-0">{fact.category}</Badge>}
                       {fact.entity_type && <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{fact.entity_type}</Badge>}
@@ -314,7 +315,7 @@ function FactsTab() {
               </div>
               {editingId !== fact.id && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => { setEditingId(fact.id); setEditContent(fact.content); }} className="p-1 rounded hover:bg-muted">
+                  <button onClick={() => { setEditingId(fact.id); setEditContent(fact.fact); }} className="p-1 rounded hover:bg-muted">
                     <Edit3 className="h-3 w-3 text-muted-foreground" />
                   </button>
                   <button onClick={async () => { if (await confirm({ title: t('common.confirm'), variant: 'destructive' })) deleteMutation.mutate(fact.id); }} className="p-1 rounded hover:bg-muted">

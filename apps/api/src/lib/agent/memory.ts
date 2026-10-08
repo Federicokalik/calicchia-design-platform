@@ -63,17 +63,28 @@ export async function addFact(
   fact: string,
   source = 'manual'
 ): Promise<void> {
+  // Un fatto vuoto (nodo workflow lasciato vuoto) matchava '%%' e azzerava un
+  // fatto esistente qualsiasi.
+  const text = fact.trim();
+  if (!text) return;
+
   // Check if similar fact exists to avoid duplicates
   const existing = entityId
-    ? await sql`SELECT id FROM brain_facts WHERE entity_type = ${entityType} AND entity_id = ${entityId} AND fact ILIKE ${'%' + fact.slice(0, 50) + '%'} LIMIT 1`
-    : await sql`SELECT id FROM brain_facts WHERE entity_type = ${entityType} AND entity_id IS NULL AND fact ILIKE ${'%' + fact.slice(0, 50) + '%'} LIMIT 1`;
+    ? await sql`SELECT id, fact FROM brain_facts WHERE entity_type = ${entityType} AND entity_id = ${entityId} AND fact ILIKE ${'%' + text.slice(0, 50) + '%'} LIMIT 1`
+    : await sql`SELECT id, fact FROM brain_facts WHERE entity_type = ${entityType} AND entity_id IS NULL AND fact ILIKE ${'%' + text.slice(0, 50) + '%'} LIMIT 1`;
 
   if (existing.length) {
-    await sql`UPDATE brain_facts SET fact = ${fact}, updated_at = now() WHERE id = ${existing[0].id}`;
+    // Il fatto salvato contiene già questo testo: si sostituisce solo con una
+    // versione più completa, mai con una più corta che lo troncherebbe.
+    if (text.length >= String(existing[0].fact).length) {
+      await sql`UPDATE brain_facts SET fact = ${text}, updated_at = now() WHERE id = ${existing[0].id}`;
+    } else {
+      await sql`UPDATE brain_facts SET updated_at = now() WHERE id = ${existing[0].id}`;
+    }
   } else {
     await sql`
       INSERT INTO brain_facts (entity_type, entity_id, fact, source)
-      VALUES (${entityType}, ${entityId}, ${fact}, ${source})
+      VALUES (${entityType}, ${entityId}, ${text}, ${source})
     `;
   }
 }

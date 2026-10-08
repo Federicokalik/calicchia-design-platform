@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/hooks/use-theme';
 import { I18nProvider } from '@/hooks/use-i18n';
 import { ConfirmProvider } from '@/hooks/use-confirm';
 import { bugsink } from '@/lib/bugsink';
+import { refreshAllQueries } from '@/lib/query-refresh';
 import App from './App';
 import './index.css';
 import './styles/whatsapp.css';
@@ -32,7 +33,7 @@ const queryClient = new QueryClient({
   mutationCache: new MutationCache({
     onSuccess: (_data, _variables, _context, mutation) => {
       if (mutation.meta?.skipGlobalInvalidation) return;
-      void queryClient.invalidateQueries({ predicate: (query) => !query.meta?.skipGlobalRefetch });
+      void refreshAllQueries(queryClient);
     },
     // Molte mutation non hanno onError: un salvataggio fallito (409, 400, 500)
     // passava in silenzio e sembrava riuscito. Quelle con un proprio onError

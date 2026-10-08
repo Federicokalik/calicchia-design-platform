@@ -74,8 +74,11 @@ brain.get('/facts', async (c) => {
 // PUT /api/brain/facts/:id
 brain.put('/facts/:id', async (c) => {
   const body = await c.req.json();
+  const text = typeof body.fact === 'string' ? body.fact.trim() : '';
+  if (!text) return c.json({ error: 'Il testo del fatto è obbligatorio' }, 400);
+  // entity_type è NOT NULL: la UI invia solo { fact }, quindi resta invariato se assente
   const [fact] = await sql`
-    UPDATE brain_facts SET fact = ${body.fact}, entity_type = ${body.entity_type || null}, updated_at = now()
+    UPDATE brain_facts SET fact = ${text}, entity_type = COALESCE(${body.entity_type || null}, entity_type), updated_at = now()
     WHERE id = ${c.req.param('id')} RETURNING *
   `;
   if (!fact) return c.json({ error: 'Fatto non trovato' }, 404);
