@@ -76,13 +76,17 @@ export function CreateSubscriptionDialog({ open, onOpenChange, prefilledCustomer
         method: 'POST',
         body: JSON.stringify(body),
       }),
-    onSuccess: (data: { approve_url?: string; subscription_id?: string }) => {
-      toast.success('Abbonamento creato. Invio link al cliente…');
+    // L'API restituisce checkout_url (Stripe Checkout / approvazione PayPal) e
+    // non invia nulla al cliente: il link va girato dall'admin.
+    onSuccess: (data: { checkout_url?: string }) => {
       queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
       onOpenChange(false);
-      if (data?.approve_url) {
-        // Open approve URL in new tab so admin can verify or share
-        window.open(data.approve_url, '_blank', 'noopener');
+      if (data?.checkout_url) {
+        void navigator.clipboard?.writeText(data.checkout_url).catch(() => {});
+        window.open(data.checkout_url, '_blank', 'noopener');
+        toast.success('Abbonamento creato: link di pagamento aperto e copiato negli appunti. Invialo al cliente per attivarlo.');
+      } else {
+        toast.success('Abbonamento creato');
       }
     },
     onError: (err: Error) => toast.error(err.message || 'Errore creazione abbonamento'),

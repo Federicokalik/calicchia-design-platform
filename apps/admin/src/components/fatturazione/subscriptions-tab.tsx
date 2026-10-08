@@ -179,9 +179,9 @@ export default function SubscriptionsTab() {
     if (!editing) return;
     const patch: Record<string, unknown> = {
       auto_renew: form.auto_renew,
-      dunning_grace_days: parseInt(form.dunning_grace_days, 10) || 7,
+      dunning_grace_days: Number.isFinite(parseInt(form.dunning_grace_days, 10)) ? parseInt(form.dunning_grace_days, 10) : 7,
       dunning_reminder_days: parseReminderDaysCsv(form.dunning_reminder_days),
-      dunning_suspend_days: parseInt(form.dunning_suspend_days, 10) || 30,
+      dunning_suspend_days: Number.isFinite(parseInt(form.dunning_suspend_days, 10)) ? parseInt(form.dunning_suspend_days, 10) : 30,
     };
     if (form.next_billing_date) patch.next_billing_date = form.next_billing_date;
     else patch.next_billing_date = null;

@@ -147,7 +147,10 @@ export default function SpesePage() {
           vat_amount: parseFloat(form.vat_amount) || 0,
           category: form.category,
           description: form.description.trim() || null,
-          deductible_percent: parseInt(form.deductible_percent, 10) || 100,
+          // 0% è un valore valido (spesa non deducibile): `|| 100` lo trasformava in 100
+          deductible_percent: Number.isFinite(parseInt(form.deductible_percent, 10))
+            ? Math.min(100, Math.max(0, parseInt(form.deductible_percent, 10)))
+            : 100,
           notes: form.notes.trim() || null,
         }),
       }),

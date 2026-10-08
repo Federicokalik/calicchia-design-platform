@@ -132,7 +132,10 @@ paymentTracker.post('/', async (c) => {
     )
     VALUES (
       ${customer_id || null}, ${project_id || null}, ${description}, ${amount}, ${status || 'emessa'},
-      ${due_date || null}, ${paid_date || null}, ${paid_amount ?? 0}, ${notes || null}, ${external_ref || null}, ${method}
+      ${due_date || null},
+      ${paid_date || (status === 'pagata' ? sql`CURRENT_DATE` : null)},
+      ${paid_amount ?? (status === 'pagata' ? amount : 0)},
+      ${notes || null}, ${external_ref || null}, ${method}
     )
     RETURNING *
   `;
