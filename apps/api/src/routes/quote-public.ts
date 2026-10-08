@@ -257,13 +257,17 @@ quotePublic.post('/:token/otp', async (c) => {
     hint = String(rows[0].customer_phone).replace(/.(?=.{4})/g, '•');
   } else {
     const otpEmail = await renderOtpCodeEmail({ code: otp, expiresMinutes: 10 });
-    await sendEmail({
+    const sent = await sendEmail({
       to: rows[0].customer_email,
       subject: 'Codice di verifica per firma preventivo',
       html: otpEmail.html,
       text: otpEmail.text,
       transport: 'critical',
     });
+    if (!sent.success) {
+      log.error({ error: sent.error }, 'OTP email send failed');
+      return c.json({ error: 'Invio email fallito — riprova' }, 502);
+    }
     hint = rows[0].customer_email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
   }
 

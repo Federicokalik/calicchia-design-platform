@@ -753,7 +753,8 @@ export const tools: ToolDefinition[] = [
     execute: async (args) => {
       try {
         const { sendEmail } = await import('../email');
-        await sendEmail({ to: args.to as string, subject: args.subject as string, html: args.body as string });
+        const result = await sendEmail({ to: args.to as string, subject: args.subject as string, html: args.body as string });
+        if (!result.success) return JSON.stringify({ error: `Email non inviata: ${result.error || 'errore sconosciuto'}` });
         return JSON.stringify({ sent: true });
       } catch (err) {
         return JSON.stringify({ error: 'Errore invio email' });

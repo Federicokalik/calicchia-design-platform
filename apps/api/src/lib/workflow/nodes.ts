@@ -359,8 +359,8 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
       const to = interpolate(config.to, input);
       const subject = interpolate(config.subject, input);
       const body = interpolate(config.body, input);
-      await sendEmail({ to, subject, html: body });
-      return { sent: true, to, subject };
+      const result = await sendEmail({ to, subject, html: body });
+      return result.success ? { sent: true, to, subject } : { sent: false, to, subject, error: result.error || 'Invio email fallito' };
     },
   },
   tool_send_whatsapp: {
