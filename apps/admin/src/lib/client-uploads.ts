@@ -19,11 +19,14 @@ export interface ClientUploadsScope {
   projectId?: string;
 }
 
-export type ClientUploadPreviewKind = 'image' | 'pdf' | 'video' | 'docx';
+export type ClientUploadPreviewKind = 'image' | 'pdf' | 'video' | 'docx' | 'xlsx';
+
+/** Kinds parsed client-side from bytes proxied by the API (no presigned URL). */
+export const BYTES_PREVIEW_KINDS: ReadonlySet<ClientUploadPreviewKind> = new Set(['docx', 'xlsx']);
 
 // Must mirror INLINE_UPLOAD_TYPES / ILLUSTRATOR_TYPE / PROXY_PREVIEW_TYPES in
 // apps/api/src/routes/portal-admin.ts. Everything else the portal accepts
-// (archives, XLSX/PPTX, PSD, EPS, TIFF) has no viewer here → download only.
+// (archives, PPTX, PSD, EPS, TIFF) has no viewer here → download only.
 const PREVIEW_KIND_BY_TYPE: Record<string, ClientUploadPreviewKind> = {
   'image/jpeg': 'image',
   'image/png': 'image',
@@ -35,6 +38,7 @@ const PREVIEW_KIND_BY_TYPE: Record<string, ClientUploadPreviewKind> = {
   'video/mp4': 'video',
   'video/quicktime': 'video',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
 };
 
 export function getPreviewKind(file: Pick<ClientUpload, 'content_type' | 'status'>): ClientUploadPreviewKind | null {
@@ -64,7 +68,7 @@ export async function fetchClientUploadUrl(id: string, disposition: 'inline' | '
   return res.url;
 }
 
-/** File bytes proxied by the API, for previewers that parse them client-side (DOCX). */
+/** File bytes proxied by the API, for previewers that parse them client-side (DOCX/XLSX). */
 export async function fetchClientUploadBytes(id: string): Promise<ArrayBuffer> {
   const res = await apiFetchRaw(`/api/portal-admin/uploads/${id}/content`);
   return res.arrayBuffer();

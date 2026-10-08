@@ -399,8 +399,8 @@ portalAdmin.get('/reports/:customerId', async (c) => {
 // ── Client uploads (files the customer sent via /clienti/upload) ──
 // The portal writes client_uploads + the object on MEGA S4 (private bucket);
 // these endpoints are the admin read side: list per customer / project,
-// short-lived presigned download / preview, DOCX bytes for the in-admin
-// previewer, and delete (object + soft-delete row).
+// short-lived presigned download / preview, DOCX/XLSX bytes for the in-admin
+// previewers, and delete (object + soft-delete row).
 const UUID_RE = /^[a-f0-9-]{36}$/i;
 const UPLOAD_LIST_LIMIT = 500;
 // A download is authorized once, when it starts: 5 minutes is plenty. A tab
@@ -419,10 +419,11 @@ const INLINE_UPLOAD_TYPES = new Set([
 // Illustrator 9+ saved with "Create PDF Compatible File" (the default) is a
 // valid PDF: served as application/pdf, the browser's PDF viewer renders it.
 const ILLUSTRATOR_TYPE = 'application/illustrator';
-// Rendered client-side (docx-preview) from bytes proxied by the API: the
-// browser can't fetch the presigned URL cross-origin without bucket CORS.
+// Rendered client-side (docx-preview / SheetJS) from bytes proxied by the API:
+// the browser can't fetch the presigned URL cross-origin without bucket CORS.
 const PROXY_PREVIEW_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ]);
 const PROXY_PREVIEW_MAX_BYTES = 25 * 1024 * 1024;
 
@@ -506,7 +507,7 @@ portalAdmin.get('/uploads/:id/url', async (c) => {
   return c.json({ url, inline, expiresIn });
 });
 
-// Raw bytes for the in-admin DOCX previewer (same-origin, so no bucket CORS
+// Raw bytes for the in-admin DOCX/XLSX previewers (same-origin, so no bucket CORS
 // needed). Served as an opaque attachment: the global middleware adds nosniff
 // + a deny-all CSP, so opening this URL directly can never render it.
 portalAdmin.get('/uploads/:id/content', async (c) => {

@@ -3,8 +3,10 @@ import { AlertTriangle, ChevronLeft, ChevronRight, Download, ExternalLink, Loade
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { DocxPreview } from '@/components/projects/client-upload-docx-preview';
+import { XlsxPreview } from '@/components/projects/client-upload-xlsx-preview';
 import { useClientUploadPreviewUrl } from '@/hooks/use-client-uploads';
 import {
+  BYTES_PREVIEW_KINDS,
   formatBytes,
   formatUploadDate,
   getPreviewKind,
@@ -34,10 +36,13 @@ export function ClientUploadLightbox({
   const index = activeId ? files.findIndex((f) => f.id === activeId) : -1;
   const file = index >= 0 ? files[index] : null;
   const kind = file ? getPreviewKind(file) : null;
-  // DOCX is parsed from bytes proxied by the API, not from a presigned URL.
-  const usesUrl = kind !== null && kind !== 'docx';
+  // DOCX/XLSX are parsed from bytes proxied by the API, not from a presigned URL.
+  const usesUrl = kind !== null && !BYTES_PREVIEW_KINDS.has(kind);
   const { data: url, isLoading, error } = useClientUploadPreviewUrl(usesUrl ? file!.id : null);
   const canNavigate = files.length > 1;
+  // The spreadsheet grid runs edge to edge: side arrows would cover cells,
+  // so for XLSX prev/next move into the header.
+  const navInHeader = kind === 'xlsx';
   const contentRef = useRef<HTMLDivElement>(null);
 
   const go = (delta: number) => {
@@ -46,8 +51,10 @@ export function ClientUploadLightbox({
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    // Arrow keys on a focused <video> seek: leave them to the player.
+    // Arrow keys on a focused <video> seek, on a focused grid they scroll:
+    // leave them to the element.
     if (event.target instanceof HTMLMediaElement) return;
+    if (event.target instanceof Element && event.target.closest('[data-lightbox-arrows="native"]')) return;
     if (event.key === 'ArrowRight') go(1);
     else if (event.key === 'ArrowLeft') go(-1);
   };
@@ -78,6 +85,16 @@ export function ClientUploadLightbox({
                   {canNavigate && ` · ${index + 1} di ${files.length}`}
                 </DialogDescription>
               </div>
+              {canNavigate && navInHeader && (
+                <div className="flex shrink-0 items-center">
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Precedente (←)" onClick={() => go(-1)}>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8" title="Successivo (→)" onClick={() => go(1)}>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               {usesUrl && url && (
                 <Button asChild variant="ghost" size="sm" className="shrink-0" title="Apri in una nuova scheda">
                   <a href={url} target="_blank" rel="noopener noreferrer">
@@ -107,8 +124,8 @@ export function ClientUploadLightbox({
                 (kind === 'image' || kind === 'video') && 'p-4 sm:px-16',
               )}
             >
-              {kind === 'docx' ? (
-                <DocxPane key={file.id} fileId={file.id} onDownload={() => onDownload(file)} />
+              {kind === 'docx' || kind === 'xlsx' ? (
+                <BytesPreviewPane key={file.id} kind={kind} fileId={file.id} onDownload={() => onDownload(file)} />
               ) : isLoading ? (
                 <Loader2 className="h-6 w-6 animate-spin text-white/60" />
               ) : error || !url ? (
@@ -122,7 +139,7 @@ export function ClientUploadLightbox({
                 <PreviewMedia key={file.id} file={file} kind={kind} url={url} onDownload={() => onDownload(file)} />
               )}
 
-              {canNavigate && (
+              {canNavigate && !navInHeader && (
                 <>
                   <Button
                     type="button"
@@ -161,7 +178,7 @@ function PreviewMedia({
   onDownload,
 }: {
   file: ClientUpload;
-  kind: Exclude<ClientUploadPreviewKind, 'docx'>;
+  kind: Exclude<ClientUploadPreviewKind, 'docx' | 'xlsx'>;
   url: string;
   onDownload: () => void;
 }) {
@@ -204,12 +221,22 @@ function PreviewMedia({
   }
 }
 
-function DocxPane({ fileId, onDownload }: { fileId: string; onDownload: () => void }) {
+function BytesPreviewPane({
+  kind,
+  fileId,
+  onDownload,
+}: {
+  kind: 'docx' | 'xlsx';
+  fileId: string;
+  onDownload: () => void;
+}) {
   const [failure, setFailure] = useState<string | null>(null);
   const handleError = useCallback((message: string) => setFailure(message), []);
 
   if (failure) return <PreviewFallback message={failure} onDownload={onDownload} />;
-  return <DocxPreview fileId={fileId} onError={handleError} />;
+  return kind === 'docx'
+    ? <DocxPreview fileId={fileId} onError={handleError} />
+    : <XlsxPreview fileId={fileId} onError={handleError} />;
 }
 
 function PreviewFallback({ message, onDownload }: { message: string; onDownload: () => void }) {

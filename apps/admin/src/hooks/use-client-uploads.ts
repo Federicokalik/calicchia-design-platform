@@ -58,7 +58,7 @@ export function useClientUploadPreviewUrl(fileId: string | null) {
   });
 }
 
-/** Raw bytes for client-side previewers (DOCX). Kept briefly so prev/next in
+/** Raw bytes for client-side previewers (DOCX/XLSX). Kept briefly so prev/next in
  *  the lightbox doesn't re-download, then dropped: they can be up to 25 MB. */
 export function useClientUploadBytes(fileId: string | null) {
   return useQuery<ArrayBuffer>({
