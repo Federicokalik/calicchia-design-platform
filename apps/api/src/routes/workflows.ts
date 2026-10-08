@@ -104,10 +104,10 @@ workflows.post('/', async (c) => {
       ${body.name || 'Nuovo Workflow'},
       ${body.description || null},
       ${triggerType},
-      ${JSON.stringify(prepared.config)},
-      ${JSON.stringify(body.nodes || [])},
-      ${JSON.stringify(body.edges || [])},
-      ${JSON.stringify(body.variables || {})}
+      ${sql.json(prepared.config as never)},
+      ${sql.json(body.nodes || [])},
+      ${sql.json(body.edges || [])},
+      ${sql.json(body.variables || {})}
     )
     RETURNING *
   `;
@@ -120,12 +120,15 @@ workflows.put('/:id', async (c) => {
   const body = await c.req.json();
 
   // For webhook workflows, ensure creds exist before saving (merging with existing config if needed)
-  let triggerConfigJson: string | null = null;
+  // sql.json, non JSON.stringify: una stringa passata a una colonna jsonb diventa
+  // uno scalare stringa e trigger_config->>'event_type' resta NULL, quindi i
+  // workflow a evento/webhook non venivano mai trovati da fireEvent e /api/wh.
+  let triggerConfig: Record<string, unknown> | null = null;
   if (body.trigger_config) {
     const existing = await getExistingWorkflow(id);
     const effectiveType = body.trigger_type || existing?.trigger_type;
     const mergedConfig = mergeTriggerConfigs(existing?.trigger_config ?? {}, body.trigger_config);
-    triggerConfigJson = JSON.stringify(prepareWebhookCreds(effectiveType, mergedConfig).config);
+    triggerConfig = prepareWebhookCreds(effectiveType, mergedConfig).config;
   }
 
   const [row] = await sql`
@@ -133,10 +136,10 @@ workflows.put('/:id', async (c) => {
       name = COALESCE(${body.name || null}, name),
       description = ${body.description !== undefined ? body.description : sql`description`},
       trigger_type = COALESCE(${body.trigger_type || null}, trigger_type),
-      trigger_config = COALESCE(${triggerConfigJson}, trigger_config),
-      nodes = COALESCE(${body.nodes ? JSON.stringify(body.nodes) : null}, nodes),
-      edges = COALESCE(${body.edges ? JSON.stringify(body.edges) : null}, edges),
-      variables = COALESCE(${body.variables ? JSON.stringify(body.variables) : null}, variables),
+      trigger_config = COALESCE(${triggerConfig ? sql.json(triggerConfig as never) : null}, trigger_config),
+      nodes = COALESCE(${body.nodes ? sql.json(body.nodes) : null}, nodes),
+      edges = COALESCE(${body.edges ? sql.json(body.edges) : null}, edges),
+      variables = COALESCE(${body.variables ? sql.json(body.variables) : null}, variables),
       updated_at = now()
     WHERE id = ${id}
     RETURNING *
@@ -158,7 +161,7 @@ workflows.post('/:id/webhook/regenerate', async (c) => {
   if (typeof next.webhook_id !== 'string' || !/^[a-f0-9-]{36}$/.test(next.webhook_id)) {
     next.webhook_id = randomUUID();
   }
-  await sql`UPDATE workflows SET trigger_config = ${JSON.stringify(next)}, updated_at = now() WHERE id = ${id}`;
+  await sql`UPDATE workflows SET trigger_config = ${sql.json(next as never)}, updated_at = now() WHERE id = ${id}`;
   return c.json({ webhook_id: next.webhook_id, webhook_secret: plaintextSecret });
 });
 
