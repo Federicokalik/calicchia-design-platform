@@ -127,6 +127,9 @@ export function McpTokensSection() {
             const expiresIn = token.expires_at
               ? Math.max(0, Math.floor((new Date(token.expires_at).getTime() - Date.now()) / 86_400_000))
               : null;
+            // La lista "attivi" include anche quelli oltre la scadenza: senza
+            // segnalarlo sembravano utilizzabili ma l'MCP rispondeva 401.
+            const isExpired = !!token.expires_at && new Date(token.expires_at).getTime() <= Date.now();
             return (
               <div key={token.id} className="flex items-center gap-3 px-5 py-3.5">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -138,7 +141,12 @@ export function McpTokensSection() {
                     <Badge variant="outline" className={`${badge.className} text-[10px]`}>
                       {t(badge.labelKey)}
                     </Badge>
-                    {expiresIn !== null && expiresIn < 7 && (
+                    {isExpired && (
+                      <Badge variant="outline" className="bg-red-100 text-red-700 border-red-200 text-[10px]">
+                        {t('settings.mcp.expired')}
+                      </Badge>
+                    )}
+                    {!isExpired && expiresIn !== null && expiresIn < 7 && (
                       <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-200 text-[10px]">
                         {t('settings.mcp.expiresIn', { days: expiresIn })}
                       </Badge>

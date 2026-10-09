@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { fromZonedTime } from 'date-fns-tz';
 import { sql } from '../db';
 import { generateMcpToken } from '../lib/mcp/tokens';
 
@@ -90,9 +91,17 @@ mcpTokens.post('/', async (c) => {
     if (typeof body.expires_at !== 'string') {
       return c.json({ error: 'expires_at deve essere una stringa ISO valida' }, 400);
     }
-    const parsed = new Date(body.expires_at);
+    // Una data senza ora (<input type="date">) vale fino a fine giornata a
+    // Roma: new Date('YYYY-MM-DD') è la mezzanotte UTC di quel giorno, quindi
+    // il token scadeva un giorno prima e con "oggi" nasceva già scaduto.
+    const parsed = /^\d{4}-\d{2}-\d{2}$/.test(body.expires_at)
+      ? fromZonedTime(`${body.expires_at}T23:59:59.999`, 'Europe/Rome')
+      : new Date(body.expires_at);
     if (Number.isNaN(parsed.getTime())) {
       return c.json({ error: 'expires_at deve essere una data ISO valida' }, 400);
+    }
+    if (parsed.getTime() <= Date.now()) {
+      return c.json({ error: 'La scadenza deve essere futura' }, 400);
     }
     expiresAt = parsed.toISOString();
   }

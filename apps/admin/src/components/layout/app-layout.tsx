@@ -19,7 +19,7 @@ export function AppLayout() {
   const commandPalette = useCommandPalette();
   const location = useLocation();
   useSessionWarning();
-  const hideAiBar = /^\/(boards\/(sketch|mindmap))\//.test(location.pathname);
+  const hideAiBar = /^\/boards\/(sketch|mindmap|mind-maps)\//.test(location.pathname);
 
   return (
     <TopbarProvider>

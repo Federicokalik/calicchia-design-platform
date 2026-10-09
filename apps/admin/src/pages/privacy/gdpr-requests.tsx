@@ -79,8 +79,13 @@ export default function GdprRequestsPage() {
         method: 'PUT',
         body: JSON.stringify(args.patch),
       }),
-    onSuccess: () => {
+    onSuccess: (res: { request?: GdprRequest }) => {
       queryClient.invalidateQueries({ queryKey: ['gdpr-requests'] });
+      // selected è una copia locale: senza aggiornarla il dialog mostrava
+      // ancora lo stato vecchio e sembrava che il salvataggio non fosse riuscito.
+      if (res?.request) {
+        setSelected((cur) => (cur && cur.id === res.request!.id ? { ...cur, ...res.request } : cur));
+      }
       toast.success('Richiesta aggiornata');
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore aggiornamento'),

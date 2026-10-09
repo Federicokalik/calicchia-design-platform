@@ -55,8 +55,16 @@ importRoutes.post('/customers', async (c) => {
       if (!data.email) { results.errors.push(`Missing email: ${JSON.stringify(row)}`); continue; }
 
       if (mode === 'upsert') {
-        await sql`INSERT INTO customers ${sql(data)} ON CONFLICT (email) DO UPDATE SET ${sql(data)}`;
-        results.created++;
+        // customers non ha un vincolo UNIQUE(email): ON CONFLICT (email)
+        // falliva su ogni riga. Lookup case-insensitive, poi UPDATE o INSERT.
+        const [existing] = await sql`SELECT id FROM customers WHERE LOWER(email) = LOWER(${data.email}) LIMIT 1`;
+        if (existing) {
+          await sql`UPDATE customers SET ${sql(data)} WHERE id = ${existing.id}`;
+          results.updated++;
+        } else {
+          await sql`INSERT INTO customers ${sql(data)}`;
+          results.created++;
+        }
       } else if (mode === 'update') {
         await sql`UPDATE customers SET ${sql(data)} WHERE email = ${data.email}`;
         results.updated++;
@@ -90,10 +98,12 @@ importRoutes.post('/newsletter', async (c) => {
 
       if (!email) { results.errors.push(`Missing email: ${JSON.stringify(row)}`); continue; }
 
-      const [existing] = await sql`SELECT id FROM newsletter_subscribers WHERE email = ${email}`;
+      const [existing] = await sql`SELECT id FROM newsletter_subscribers WHERE LOWER(email) = LOWER(${email})`;
       if (existing) { results.skipped++; continue; }
 
-      await sql`INSERT INTO newsletter_subscribers ${sql({ email, name, status: 'active' })}`;
+      // 'active' non è ammesso dal CHECK (pending/confirmed/unsubscribed):
+      // ogni riga falliva. Un import di iscritti già acquisiti vale 'confirmed'.
+      await sql`INSERT INTO newsletter_subscribers ${sql({ email, name, status: 'confirmed', confirmed_at: new Date().toISOString() })}`;
       results.created++;
     } catch (err) {
       results.errors.push(`Error importing ${row.email}: ${(err as Error).message}`);
@@ -134,8 +144,16 @@ importRoutes.post('/collaborators', async (c) => {
       if (!data.email) { results.errors.push(`Missing email: ${JSON.stringify(row)}`); continue; }
 
       if (mode === 'upsert') {
-        await sql`INSERT INTO collaborators ${sql(data)} ON CONFLICT (email) DO UPDATE SET ${sql(data)}`;
-        results.created++;
+        // collaborators non ha un vincolo UNIQUE(email): ON CONFLICT (email)
+        // falliva su ogni riga. Lookup case-insensitive, poi UPDATE o INSERT.
+        const [existing] = await sql`SELECT id FROM collaborators WHERE LOWER(email) = LOWER(${data.email}) LIMIT 1`;
+        if (existing) {
+          await sql`UPDATE collaborators SET ${sql(data)} WHERE id = ${existing.id}`;
+          results.updated++;
+        } else {
+          await sql`INSERT INTO collaborators ${sql(data)}`;
+          results.created++;
+        }
       } else if (mode === 'update') {
         await sql`UPDATE collaborators SET ${sql(data)} WHERE email = ${data.email}`;
         results.updated++;

@@ -6,6 +6,8 @@ import { getClientIp } from './client-ip';
 export const ADMIN_REFRESH_COOKIE_NAME = 'admin_refresh';
 export const ADMIN_REFRESH_MAX_AGE_SECONDS = 30 * 24 * 60 * 60;
 const ADMIN_REFRESH_TTL_MS = ADMIN_REFRESH_MAX_AGE_SECONDS * 1000;
+/** Finestra in cui l'hash appena ruotato identifica una richiesta concorrente, non un riuso. */
+const ROTATION_GRACE_MS = 30_000;
 
 export type AdminSessionUser = {
   id: string;
@@ -14,7 +16,9 @@ export type AdminSessionUser = {
 };
 
 export type AdminRefreshResult =
-  | { ok: true; token: string; user: AdminSessionUser }
+  // token null: richiesta concorrente persa, il cookie valido è quello già
+  // impostato dalla richiesta vincitrice e non va sovrascritto.
+  | { ok: true; token: string | null; user: AdminSessionUser }
   | { ok: false; reason: 'missing' | 'invalid' | 'expired' | 'revoked' | 'reused' };
 
 function hashRefreshSecret(secret: string): string {
@@ -72,6 +76,8 @@ export async function rotateAdminSession(token: string | null | undefined): Prom
       s.refresh_token_hash,
       s.expires_at,
       s.revoked_at,
+      s.previous_refresh_token_hash,
+      s.rotated_at,
       u.id AS user_id,
       u.email,
       u.role
@@ -84,6 +90,8 @@ export async function rotateAdminSession(token: string | null | undefined): Prom
     refresh_token_hash: string;
     expires_at: string;
     revoked_at: string | null;
+    previous_refresh_token_hash: string | null;
+    rotated_at: string | null;
     user_id: string;
     email: string;
     role: string;
@@ -96,33 +104,51 @@ export async function rotateAdminSession(token: string | null | undefined): Prom
     return { ok: false, reason: 'expired' };
   }
 
-  const presentedHash = hashRefreshSecret(parsed.secret);
-  if (!safeEqualHash(presentedHash, session.refresh_token_hash)) {
-    await sql`UPDATE admin_sessions SET revoked_at = NOW() WHERE id = ${session.id} AND revoked_at IS NULL`;
-    return { ok: false, reason: 'reused' };
-  }
-
   if (session.role !== 'admin') {
     await sql`UPDATE admin_sessions SET revoked_at = NOW() WHERE id = ${session.id} AND revoked_at IS NULL`;
     return { ok: false, reason: 'invalid' };
   }
 
-  const nextSecret = newRefreshSecret();
-  await sql`
-    UPDATE admin_sessions
-    SET refresh_token_hash = ${hashRefreshSecret(nextSecret)}, last_used_at = NOW()
-    WHERE id = ${session.id}
-  `;
+  const user = { id: session.user_id, email: session.email, role: session.role };
+  const presentedHash = hashRefreshSecret(parsed.secret);
+  // Hash appena sostituito da una richiesta concorrente: è la richiesta
+  // "perdente" della stessa rotazione, non un riuso del token rubato.
+  const isRecentPrevious = (row: { previous_refresh_token_hash: string | null; rotated_at: string | Date | null }) =>
+    !!row.previous_refresh_token_hash &&
+    !!row.rotated_at &&
+    Date.now() - new Date(row.rotated_at).getTime() <= ROTATION_GRACE_MS &&
+    safeEqualHash(presentedHash, row.previous_refresh_token_hash);
 
-  return {
-    ok: true,
-    token: makeRefreshToken(session.id, nextSecret),
-    user: {
-      id: session.user_id,
-      email: session.email,
-      role: session.role,
-    },
-  };
+  if (!safeEqualHash(presentedHash, session.refresh_token_hash)) {
+    if (isRecentPrevious(session)) return { ok: true, token: null, user };
+    await sql`UPDATE admin_sessions SET revoked_at = NOW() WHERE id = ${session.id} AND revoked_at IS NULL`;
+    return { ok: false, reason: 'reused' };
+  }
+
+  // Compare-and-swap: vince una sola richiesta per hash presentato. Prima
+  // l'UPDATE senza condizione sull'hash lasciava passare due rotazioni.
+  const nextSecret = newRefreshSecret();
+  const swapped = await sql`
+    UPDATE admin_sessions
+    SET refresh_token_hash = ${hashRefreshSecret(nextSecret)},
+        previous_refresh_token_hash = refresh_token_hash,
+        rotated_at = NOW(),
+        last_used_at = NOW()
+    WHERE id = ${session.id}
+      AND refresh_token_hash = ${presentedHash}
+      AND revoked_at IS NULL
+    RETURNING id
+  `;
+  if (swapped.length === 0) {
+    const [current] = await sql`
+      SELECT previous_refresh_token_hash, rotated_at, revoked_at
+      FROM admin_sessions WHERE id = ${session.id}
+    ` as Array<{ previous_refresh_token_hash: string | null; rotated_at: string | null; revoked_at: string | null }>;
+    if (current && !current.revoked_at && isRecentPrevious(current)) return { ok: true, token: null, user };
+    return { ok: false, reason: 'revoked' };
+  }
+
+  return { ok: true, token: makeRefreshToken(session.id, nextSecret), user };
 }
 
 export async function revokeAdminSession(token: string | null | undefined): Promise<void> {

@@ -283,7 +283,9 @@ auth.post('/refresh', async (c) => {
     role: refreshed.user.role,
   });
   setAuthCookie(c, token);
-  setAdminRefreshCookie(c, refreshed.token);
+  // null = richiesta concorrente persa: il browser ha già il cookie valido
+  // impostato dalla richiesta vincitrice.
+  if (refreshed.token) setAdminRefreshCookie(c, refreshed.token);
 
   return c.json({ ok: true });
 });
