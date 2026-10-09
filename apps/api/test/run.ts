@@ -31,6 +31,9 @@ const SUITES: Record<string, string> = {
   smoke: 'test/smoke/**/*.test.ts',
   contracts: 'test/contracts/**/*.test.ts',
   calendar: 'test/calendar/**/*.test.ts',
+  // Radicale reale, mock di verify-credentials e inventario: senza Radicale le
+  // suite che lo richiedono vengono saltate (helpers/radicale.ts).
+  integration: 'test/integration/**/*.test.ts',
 };
 
 /** Opzioni di node --test che accettano il valore come argomento separato. */

@@ -12,6 +12,7 @@
     "migrate:new": "tsx --env-file=../../.env scripts/migrate.ts",
     "verify:calendar": "tsx --env-file=../../.env scripts/verify-calendar-schema.ts",
     "verify:calendar:smoke": "tsx --env-file=../../.env scripts/verify-calendar.ts",
+    "calendar:inventory": "tsx scripts/calendar-inventory.ts",
     "calendar:fix-dst": "tsx --env-file-if-exists=../../.env scripts/fix-dst-exceptions.ts",
     "contract:mcp-snapshot": "tsx scripts/mcp-contract-snapshot.ts",
     "contract:mcp-check": "tsx scripts/mcp-contract-snapshot.ts --check",
@@ -22,7 +23,8 @@
     "test:migrate": "tsx --import ./test/helpers/preload.mjs scripts/migrate.ts",
     "test:smoke": "tsx test/run.ts smoke",
     "test:contracts": "tsx test/run.ts contracts",
-    "test:calendar": "tsx test/run.ts calendar"
+    "test:calendar": "tsx test/run.ts calendar",
+    "test:integration": "tsx test/run.ts integration"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
