@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 
 export const marketing = new Hono();
 
@@ -42,8 +42,11 @@ marketing.get('/campaigns', async (c) => {
       cu.contact_name AS customer_name,
       cu.company_name AS customer_company,
       (SELECT COUNT(*)::int FROM campaign_assets a WHERE a.campaign_id = mc.id) AS asset_count,
+      -- Solo asset inviati al cliente (status review) o con revisione chiesta:
+      -- approval_status vale 'pending' di default anche per le bozze.
       (SELECT COUNT(*)::int FROM campaign_assets a
-        WHERE a.campaign_id = mc.id AND a.approval_status IN ('pending', 'revision_requested')
+        WHERE a.campaign_id = mc.id
+          AND ((a.status = 'review' AND a.approval_status = 'pending') OR a.approval_status = 'revision_requested')
       ) AS pending_approval_count,
       (SELECT json_build_object('report_date', r.report_date, 'metrics_json', r.metrics_json, 'summary', r.summary)
        FROM campaign_reports r WHERE r.campaign_id = mc.id ORDER BY r.report_date DESC LIMIT 1) AS last_report
@@ -84,8 +87,8 @@ marketing.post('/campaigns', async (c) => {
        start_date, end_date, notes, objective, target_audience)
     VALUES
       (${project_id || null}, ${customer_id || null}, ${quote_id || null}, ${campaign_name}, ${campaign_type}, ${channel}, ${status},
-       ${budget_planned || null}, ${budget_actual || null}, ${currency},
-       ${JSON.stringify(kpi_target)}, ${JSON.stringify(kpi_actual)},
+       ${budget_planned ?? null}, ${budget_actual ?? null}, ${currency},
+       ${jsonb(kpi_target ?? {})}, ${jsonb(kpi_actual ?? {})},
        ${start_date || null}, ${end_date || null}, ${notes || null},
        ${objective || null}, ${target_audience || null})
     RETURNING *
@@ -138,15 +141,17 @@ marketing.patch('/campaigns/:id', async (c) => {
       campaign_type = COALESCE(${body.campaign_type ?? null}, campaign_type),
       channel = COALESCE(${body.channel ?? null}, channel),
       status = COALESCE(${body.status ?? null}, status),
-      budget_planned = COALESCE(${body.budget_planned ?? null}, budget_planned),
-      budget_actual = COALESCE(${body.budget_actual ?? null}, budget_actual),
-      kpi_target = COALESCE(${body.kpi_target ? JSON.stringify(body.kpi_target) : null}::jsonb, kpi_target),
-      kpi_actual = COALESCE(${body.kpi_actual ? JSON.stringify(body.kpi_actual) : null}::jsonb, kpi_actual),
-      start_date = COALESCE(${body.start_date ?? null}, start_date),
-      end_date = COALESCE(${body.end_date ?? null}, end_date),
-      notes = COALESCE(${body.notes ?? null}, notes),
-      objective = COALESCE(${body.objective ?? null}, objective),
-      target_audience = COALESCE(${body.target_audience ?? null}, target_audience)
+      budget_planned = ${'budget_planned' in body ? body.budget_planned : sql`budget_planned`},
+      budget_actual = ${'budget_actual' in body ? body.budget_actual : sql`budget_actual`},
+      kpi_target = COALESCE(${body.kpi_target ? jsonb(body.kpi_target) : null}::jsonb, kpi_target),
+      kpi_actual = COALESCE(${body.kpi_actual ? jsonb(body.kpi_actual) : null}::jsonb, kpi_actual),
+      -- Campi svuotabili: null esplicito li azzera (COALESCE rimetteva il
+      -- valore vecchio e "Salva" sembrava ignorare la modifica).
+      start_date = ${'start_date' in body ? body.start_date || null : sql`start_date`},
+      end_date = ${'end_date' in body ? body.end_date || null : sql`end_date`},
+      notes = ${'notes' in body ? body.notes || null : sql`notes`},
+      objective = ${'objective' in body ? body.objective || null : sql`objective`},
+      target_audience = ${'target_audience' in body ? body.target_audience || null : sql`target_audience`}
     WHERE id = ${id}
     RETURNING *
   ` as Row[];
@@ -255,7 +260,7 @@ marketing.post('/campaigns/:id/reports', async (c) => {
 
   const rows = await sql`
     INSERT INTO campaign_reports (campaign_id, report_date, report_period, metrics_json, summary)
-    VALUES (${id}, ${report_date}, ${report_period}, ${JSON.stringify(metrics_json)}, ${summary || null})
+    VALUES (${id}, ${report_date}, ${report_period}, ${jsonb(metrics_json ?? {})}, ${summary || null})
     ON CONFLICT (campaign_id, report_date, report_period) DO UPDATE SET
       metrics_json = EXCLUDED.metrics_json,
       summary = EXCLUDED.summary

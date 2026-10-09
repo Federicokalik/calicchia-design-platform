@@ -18,12 +18,12 @@ export function WidgetDeadlines() {
   });
 
   const domains = (domainsData?.domains || [])
-    .filter((d: any) => d.expiry_date)
+    .filter((d: any) => d.expiration_date)
     .map((d: any) => ({
       id: d.id,
-      label: d.domain_name,
-      date: d.expiry_date,
-      daysLeft: Math.ceil((new Date(d.expiry_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
+      label: d.full_domain || d.domain_name,
+      date: d.expiration_date,
+      daysLeft: Math.ceil((new Date(d.expiration_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)),
       type: 'domain' as const,
     }))
     .filter((d: any) => d.daysLeft >= 0 && d.daysLeft <= 60)

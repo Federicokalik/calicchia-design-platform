@@ -105,18 +105,25 @@ export async function checkAndSendReminders(): Promise<{
         WHERE id = ANY(${domains.map((d) => d.id)})
       `;
 
-      const adminRows = await sql`SELECT id FROM profiles WHERE role = 'admin' LIMIT 1`;
-      if (adminRows.length) {
-        const domainList = domains.map((d) => d.full_domain).join(', ');
-        await sql`
-          INSERT INTO notifications ${sql({
-            user_id: adminRows[0].id,
-            type: 'domain_expiring',
-            title: `Reminder inviato a ${customerName}`,
-            message: `Email scadenza domini inviata per: ${domainList}`,
-            action_url: '/domains',
-          })}
-        `;
+      // Notifica interna best-effort: un errore qui (prima: FK legacy verso
+      // auth.users, migrazione 159) non deve interrompere il ciclo e lasciare
+      // senza promemoria i clienti successivi.
+      try {
+        const adminRows = await sql`SELECT id FROM profiles WHERE role = 'admin' LIMIT 1`;
+        if (adminRows.length) {
+          const domainList = domains.map((d) => d.full_domain).join(', ');
+          await sql`
+            INSERT INTO notifications ${sql({
+              user_id: adminRows[0].id,
+              type: 'domain_expiring',
+              title: `Reminder inviato a ${customerName}`,
+              message: `Email scadenza domini inviata per: ${domainList}`,
+              action_url: '/domini',
+            })}
+          `;
+        }
+      } catch (err) {
+        log.warn({ err, customerName }, 'domain-cron: notifica interna non registrata');
       }
     } else {
       result.errors.push(`${customerName} (${first.customer_email}): ${emailResult.error}`);

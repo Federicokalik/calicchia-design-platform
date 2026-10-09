@@ -85,6 +85,10 @@ async function writeAuditLog(args: {
   `;
 }
 
+// Annullato dall'admin (DELETE /api/signables/:id) o già scaduto: il link non
+// deve più permettere né la visione né la firma.
+const isWithdrawn = (status: string) => status === 'cancelled' || status === 'expired';
+
 signablesPublic.get('/:token', async (c) => {
   const { token } = c.req.param();
   if (!isUuid(token)) return c.json({ error: 'Token non valido' }, 400);
@@ -96,6 +100,7 @@ signablesPublic.get('/:token', async (c) => {
     LIMIT 1
   ` as PublicSignableDocument[];
   if (!doc) return c.json({ error: 'Documento non trovato' }, 404);
+  if (isWithdrawn(doc.status)) return c.json({ error: 'Documento annullato o scaduto' }, 410);
   if (doc.expires_at && new Date(doc.expires_at) < new Date()) {
     await sql`
       UPDATE signable_documents
@@ -147,6 +152,7 @@ signablesPublic.post('/:token/request-otp', async (c) => {
     LIMIT 1
   ` as SignableDocument[];
   if (!doc || doc.status === 'signed') return c.json({ error: 'Non disponibile' }, 400);
+  if (isWithdrawn(doc.status)) return c.json({ error: 'Documento annullato o scaduto' }, 410);
   if (doc.expires_at && new Date(doc.expires_at) < new Date()) return c.json({ error: 'Documento scaduto' }, 410);
 
   const otp = generateOtpCode();
@@ -218,6 +224,7 @@ signablesPublic.post('/:token/sign', async (c) => {
   ` as SignableDocument[];
   if (!doc) return c.json({ error: 'Documento non trovato' }, 404);
   if (doc.status === 'signed') return c.json({ error: "Gia' firmato" }, 400);
+  if (isWithdrawn(doc.status)) return c.json({ error: 'Documento annullato o scaduto' }, 410);
   if (doc.expires_at && new Date(doc.expires_at) < new Date()) return c.json({ error: 'Documento scaduto' }, 410);
 
   const { ip, ua } = extractIpUa({ header: (name) => c.req.header(name) });
@@ -281,11 +288,11 @@ signablesPublic.post('/:token/sign', async (c) => {
       otp_hash = NULL,
       otp_expires_at = NULL,
       otp_attempts = 0
-    WHERE id = ${doc.id} AND status <> 'signed'
+    WHERE id = ${doc.id} AND status NOT IN ('signed', 'cancelled', 'expired')
     RETURNING id
   `;
   if (!claimed) {
-    return c.json({ error: "Gia' firmato" }, 400);
+    return c.json({ error: "Gia' firmato o annullato" }, 400);
   }
 
   await writeAuditLog({

@@ -22,6 +22,18 @@ export const sql = postgres(process.env.DATABASE_URL, {
   onnotice: () => {}, // silence NOTICE messages
 });
 
+/**
+ * Valore per una colonna jsonb: oggetti, array e scalari vengono serializzati
+ * una sola volta con tipo jsonb; null/undefined diventano SQL NULL.
+ *
+ * NON passare `JSON.stringify(x)` (nemmeno con `::jsonb`): postgres-js
+ * ricodifica la stringa e la colonna riceve uno scalare stringa. Con
+ * `col || ${JSON.stringify(obj)}::jsonb` il merge produce addirittura un
+ * array [vecchio, "stringa"] e `col->>'chiave'` smette di funzionare.
+ */
+export const jsonb = (value: unknown): any =>
+  value === null || value === undefined ? null : sql.json(value as Parameters<typeof sql.json>[0]);
+
 // Helper to cast complex objects (Stripe/Google/external APIs) for sql() inserts
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const sqlv = (obj: Record<string, unknown>): any => obj;

@@ -38,14 +38,17 @@ export interface QuoteTemplateInput {
   company_name?: string;
   items?: Array<{ description: string; quantity: number; unit_price: number; total: number }> | string;
   total?: number | string;
-  valid_until?: string | null;
+  // Dal JSON dell'API arrivano stringhe ISO; dalla riga postgres-js (PDF lato
+  // server) arrivano oggetti Date.
+  valid_until?: string | Date | null;
   notes?: string | null;
-  created_at?: string | null;
-  signed_at?: string | null;
+  created_at?: string | Date | null;
+  signed_at?: string | Date | null;
   signer_name?: string | null;
   signature_image?: string | null;
-  vessatorie_approved_at?: string | null;
-  project_template?: { sections?: QuoteSectionInput[] | string } | null;
+  vessatorie_approved_at?: string | Date | null;
+  // jsonb scritto con JSON.stringify: la riga può contenerlo come stringa JSON.
+  project_template?: { sections?: QuoteSectionInput[] | string } | string | null;
 }
 
 /** Subset of the `quote.settings` site_settings row the template reads. */
@@ -168,6 +171,10 @@ function arr<T = unknown>(v: unknown): T[] {
 }
 function str(v: unknown): string {
   return typeof v === 'string' ? v : '';
+}
+function dateStr(v: unknown): string {
+  if (v instanceof Date) return Number.isNaN(v.getTime()) ? '' : v.toISOString();
+  return str(v);
 }
 function num(v: unknown): number {
   const n = typeof v === 'string' ? parseFloat(v) : (v as number);
@@ -445,7 +452,11 @@ interface NormalizedQuote {
 }
 
 function normalizeQuote(input: QuoteTemplateInput, settings: QuoteTemplateSettings): NormalizedQuote {
-  const rawSections = input.project_template?.sections;
+  let template = input.project_template;
+  if (typeof template === 'string') {
+    try { template = JSON.parse(template) as { sections?: QuoteSectionInput[] | string }; } catch { template = null; }
+  }
+  const rawSections = template?.sections;
   let sections: QuoteSectionInput[] = [];
   try {
     sections = typeof rawSections === 'string' ? JSON.parse(rawSections) : arr<QuoteSectionInput>(rawSections);
@@ -489,13 +500,13 @@ function normalizeQuote(input: QuoteTemplateInput, settings: QuoteTemplateSettin
     companyName: str(input.company_name),
     total,
     bollo,
-    validUntil: str(input.valid_until),
+    validUntil: dateStr(input.valid_until),
     notes: str(input.notes),
-    createdAt: str(input.created_at) || new Date().toISOString(),
-    signedAt: str(input.signed_at),
+    createdAt: dateStr(input.created_at) || new Date().toISOString(),
+    signedAt: dateStr(input.signed_at),
     signerName: str(input.signer_name),
     signatureImage: safeDataImage(input.signature_image),
-    vessatorieApprovedAt: str(input.vessatorie_approved_at),
+    vessatorieApprovedAt: dateStr(input.vessatorie_approved_at),
     sections,
   };
 }

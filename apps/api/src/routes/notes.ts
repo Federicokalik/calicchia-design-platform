@@ -14,6 +14,45 @@ const sanitizeMarkdown = (md: string | null | undefined): string | null => {
   return trimmed.length > 0 ? sanitizeBlogHtml(trimmed) : '';
 };
 
+// raw_markdown alimenta la ricerca full-text (search_vector), l'anteprima in
+// lista e i tool dell'agente AI, ma l'editor salva solo `content` (JSON Tiptap):
+// senza derivarlo le note scritte nell'admin non si trovavano per contenuto.
+type TiptapNode = { type?: string; text?: string; attrs?: Record<string, unknown>; content?: TiptapNode[] };
+
+function tiptapToMarkdown(input: unknown): string {
+  let doc = input as TiptapNode | null;
+  if (typeof input === 'string') {
+    try { doc = JSON.parse(input) as TiptapNode; } catch { return ''; }
+  }
+  if (!doc || typeof doc !== 'object') return '';
+  const inline = (n: TiptapNode): string =>
+    n.type === 'text' ? (n.text ?? '') : n.type === 'hardBreak' ? '\n' : (n.content ?? []).map(inline).join('');
+  const block = (n: TiptapNode, depth: number): string[] => {
+    const children = n.content ?? [];
+    switch (n.type) {
+      case 'heading':
+        return ['#'.repeat(Number(n.attrs?.level) || 1) + ' ' + inline(n)];
+      case 'paragraph':
+        return [inline(n)];
+      case 'listItem':
+      case 'taskItem': {
+        const marker = n.type === 'taskItem' ? (n.attrs?.checked ? '- [x] ' : '- [ ] ') : '- ';
+        const [first, ...rest] = children;
+        return ['  '.repeat(depth) + marker + (first ? inline(first) : ''), ...rest.flatMap((c) => block(c, depth + 1))];
+      }
+      case 'codeBlock':
+        return ['```', inline(n), '```'];
+      case 'blockquote':
+        return children.flatMap((c) => block(c, depth)).map((l) => '> ' + l);
+      case 'horizontalRule':
+        return ['---'];
+      default:
+        return n.text ? [n.text] : children.flatMap((c) => block(c, depth));
+    }
+  };
+  return block(doc, 0).join('\n').trim();
+}
+
 export const notes = new Hono();
 
 // GET /api/notes — list with filters (tsvector full-text search)
@@ -82,8 +121,8 @@ notes.post('/', async (c) => {
     INSERT INTO notes (title, content, raw_markdown, source, tags, linked_type, linked_id)
     VALUES (
       ${title || 'Senza titolo'},
-      ${content ? JSON.stringify(content) : null},
-      ${sanitizeMarkdown(raw_markdown)},
+      ${content ? sql.json(content) : null},
+      ${sanitizeMarkdown(raw_markdown === undefined && content ? tiptapToMarkdown(content) : raw_markdown)},
       ${source || 'app'},
       ${tags || []},
       ${linked_type || null},
@@ -101,8 +140,10 @@ notes.put('/:id', async (c) => {
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.title !== undefined) updates.title = body.title;
-  if (body.content !== undefined) updates.content = JSON.stringify(body.content);
+  // sql.json: con JSON.stringify il jsonb conteneva una stringa JSON
+  if (body.content !== undefined) updates.content = body.content === null ? null : sql.json(body.content);
   if (body.raw_markdown !== undefined) updates.raw_markdown = sanitizeMarkdown(body.raw_markdown);
+  else if (body.content) updates.raw_markdown = sanitizeMarkdown(tiptapToMarkdown(body.content));
   if (body.tags !== undefined) updates.tags = body.tags;
   if (body.linked_type !== undefined) updates.linked_type = body.linked_type;
   if (body.linked_id !== undefined) updates.linked_id = body.linked_id;

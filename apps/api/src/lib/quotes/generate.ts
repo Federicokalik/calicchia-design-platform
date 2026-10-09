@@ -4,7 +4,7 @@ import { readFileSync, statSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import matter from 'gray-matter';
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { generateText } from '../agent/llm-router';
 import { parseStructuredQuoteMarkdown } from './markdown-parser';
 
@@ -489,14 +489,14 @@ async function insertQuoteDraft(
       ${opts.clientId || null},
       ${llmOutput.title},
       ${llmOutput.description || 'Preventivo e Contratto di Incarico'},
-      ${JSON.stringify(items)},
+      ${jsonb(items)},
       ${subtotal}, ${0}, ${0}, ${total},
       ${llmOutput.valid_until || null},
       ${llmOutput.notes || null},
       ${opts.internalNotes},
-      ${JSON.stringify(materialsChecklist)},
+      ${jsonb(materialsChecklist)},
       ${autoCreateProject},
-      ${sections.length ? JSON.stringify({ sections }) : null}
+      ${sections.length ? jsonb({ sections }) : null}
     )
     RETURNING id, title
   `;

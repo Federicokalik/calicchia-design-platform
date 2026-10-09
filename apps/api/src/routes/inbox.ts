@@ -31,13 +31,14 @@ inbox.get('/', async (c) => {
       ORDER BY pt.created_at ASC
       LIMIT 20
     `,
-    // Quotes: sent but not accepted/rejected
+    // Quotes: inviati e non ancora firmati. I preventivi vivono in quotes_v2
+    // (la tabella legacy `quotes` non riceve più righe).
     sql`
-      SELECT q.id, q.quote_number, q.title, q.total, q.sent_at,
+      SELECT q.id, NULL::text AS quote_number, q.title, q.total, q.sent_at,
              c.company_name, c.contact_name
-      FROM quotes q
+      FROM quotes_v2 q
       LEFT JOIN customers c ON c.id = q.customer_id
-      WHERE q.status = 'sent' AND q.accepted_at IS NULL
+      WHERE q.status IN ('sent', 'viewed')
       ORDER BY q.sent_at DESC NULLS LAST
       LIMIT 20
     `,

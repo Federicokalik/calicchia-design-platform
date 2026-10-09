@@ -17,7 +17,7 @@ import { Hono } from 'hono';
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { Buffer } from 'node:buffer';
 import { sql } from '../db';
-import { signFileUrl, savePrivateFile } from '../lib/private-files';
+import { signFileUrl, savePrivateFile, deletePrivateFile } from '../lib/private-files';
 import { publicApiUrl } from '../lib/public-url';
 import {
   sendWhatsAppText,
@@ -765,8 +765,12 @@ whatsappAdmin.get('/conversations', async (c) => {
   const limit = Math.min(parseInt(c.req.query('limit') || '50'), 100);
   const offset = parseInt(c.req.query('offset') || '0');
   const archFilter = archived ? sql`AND wc.archived = TRUE` : sql`AND wc.archived = FALSE`;
+  // Anche sul cliente/lead collegato: la lista mostra quei nomi al posto di
+  // contact_name, quindi cercare ciò che si vede non trovava la chat.
+  const like = q ? '%' + q + '%' : '';
   const searchFilter = q
-    ? sql`AND (wc.contact_name ILIKE ${'%' + q + '%'} OR wc.phone ILIKE ${'%' + q + '%'} OR wc.last_message_preview ILIKE ${'%' + q + '%'})`
+    ? sql`AND (wc.contact_name ILIKE ${like} OR wc.phone ILIKE ${like} OR wc.last_message_preview ILIKE ${like}
+          OR c.contact_name ILIKE ${like} OR c.company_name ILIKE ${like} OR l.name ILIKE ${like})`
     : sql``;
   const rows = await sql`
     SELECT wc.*,
@@ -804,10 +808,16 @@ whatsappAdmin.get('/conversations/:id', async (c) => {
       ) AS tags,
       (SELECT MAX(m.created_at) FROM whatsapp_messages m
         WHERE m.conversation_id = wc.id AND m.direction = 'outbound'
+          AND NOT (m.ai_draft = TRUE AND m.ai_draft_approved_at IS NULL)
       ) AS last_outbound_at,
       (SELECT COUNT(*) FROM whatsapp_scheduled_messages s
         WHERE s.conversation_id = wc.id AND s.sent_at IS NULL AND s.error IS NULL
-      ) AS scheduled_pending,
+      )::int AS scheduled_pending,
+      -- Falliti dal cron (GOWA giù, opt-out…): non partono più da soli e senza
+      -- questo conteggio sparivano dalla UI insieme alla voce "Programmati".
+      (SELECT COUNT(*) FROM whatsapp_scheduled_messages s
+        WHERE s.conversation_id = wc.id AND s.sent_at IS NULL AND s.error IS NOT NULL
+      )::int AS scheduled_failed,
       cp.whatsapp_marketing AS pref_marketing,
       cp.whatsapp_operational AS pref_operational,
       cp.whatsapp_transactional AS pref_transactional
@@ -1052,6 +1062,9 @@ whatsappAdmin.post('/conversations/:id/messages/media', async (c) => {
     publishWaEvent({ type: 'conversation:updated', conversationId: conv.id, reason: 'message' });
     return c.json({ ok: true, id: msgRows[0].id, externalId, media_path: storedName });
   } catch (err) {
+    // Invio fallito: il file salvato prima non è referenziato da nessuna riga.
+    await deletePrivateFile('whatsapp', storedName).catch((e) =>
+      log.warn({ err: e, storedName }, 'whatsapp media: cleanup file orfano non riuscito'));
     return c.json({ ok: false, error: (err as Error).message }, 502);
   }
 });
@@ -1372,17 +1385,20 @@ whatsappAdmin.post('/messages/:msgId/react', async (c) => {
   const filtered = reactions.filter((r) => r.from !== 'admin');
   const next = emoji ? [...filtered, { emoji, from: 'admin', at: new Date().toISOString() }] : filtered;
 
+  // Prima GOWA, poi l'overlay locale: aggiornarlo comunque mostrava
+  // all'operatore una reazione che il contatto non riceveva mai.
+  try {
+    await sendWhatsAppReaction(target.phone, target.external_id, emoji);
+  } catch (err) {
+    log.warn({ err }, 'GOWA reaction send failed');
+    return c.json({ ok: false, error: (err as Error).message || 'Invio reazione non riuscito' }, 502);
+  }
+
   await sql`
     UPDATE whatsapp_messages
     SET meta = meta || ${sql.json({ reactions: next })}
     WHERE id = ${target.id}
   `;
-
-  try {
-    await sendWhatsAppReaction(target.phone, target.external_id, emoji);
-  } catch (err) {
-    log.warn({ err }, 'GOWA reaction send failed; local overlay updated anyway');
-  }
 
   publishWaEvent({
     type: 'message:reaction',
@@ -1406,12 +1422,25 @@ whatsappAdmin.post('/send-to-phone', async (c) => {
   const policy = await canSendWhatsApp(normalized, category as WhatsAppCategory, { customerId, leadId });
   if (!policy.allowed) return c.json({ error: 'opt_out', reason: policy.reason }, 403);
 
-  const conv = await ensureConversation({ chatId, phone: normalized, isGroup: false });
-  if (customerId || leadId) {
-    await sql`UPDATE whatsapp_conversations SET customer_id = ${customerId}, lead_id = ${leadId} WHERE id = ${conv.id}`;
-  }
+  let res: Awaited<ReturnType<typeof sendWhatsAppText>>;
   try {
-    const res = await sendWhatsAppText(normalized, text);
+    res = await sendWhatsAppText(normalized, text);
+  } catch (err) {
+    return c.json({ ok: false, error: (err as Error).message }, 502);
+  }
+  // Conversazione creata/collegata solo dopo un invio riuscito: prima ogni
+  // tentativo fallito lasciava nell'inbox una chat vuota.
+  try {
+    const conv = await ensureConversation({ chatId, phone: normalized, isGroup: false });
+    if (customerId || leadId) {
+      // COALESCE: passare solo il cliente non deve scollegare il lead (e viceversa).
+      await sql`
+        UPDATE whatsapp_conversations
+        SET customer_id = COALESCE(${customerId}, customer_id),
+            lead_id = COALESCE(${leadId}, lead_id)
+        WHERE id = ${conv.id}
+      `;
+    }
     await sql`
       INSERT INTO whatsapp_messages
         (conversation_id, external_id, direction, category, type, body, sender_kind, sender_user_id)
@@ -1422,9 +1451,12 @@ whatsappAdmin.post('/send-to-phone', async (c) => {
       SET last_message_at = now(), last_message_preview = ${text.slice(0, 200)}, unread_count = 0
       WHERE id = ${conv.id}
     `;
+    publishWaEvent({ type: 'conversation:updated', conversationId: conv.id, reason: 'message' });
     return c.json({ ok: true, conversationId: conv.id });
   } catch (err) {
-    return c.json({ ok: false, error: (err as Error).message }, 502);
+    // Il messaggio è partito: l'errore riguarda solo la registrazione locale.
+    log.error({ err, phone: normalized }, 'send-to-phone: messaggio inviato ma non registrato');
+    return c.json({ ok: true, conversationId: null, warning: 'Messaggio inviato ma non registrato nella chat' });
   }
 });
 
@@ -1647,20 +1679,26 @@ async function upsertGowaMessage(conversationId: string, msg: GowaChatMessage): 
   else type = 'text';
   const body = msg.content || null;
   const senderKind: 'user' | 'admin' = msg.is_from_me ? 'admin' : 'user';
-  // Per i media salviamo l'URL GOWA come hint (no download immediato — vedi
-  // commento sul `/sync` endpoint).
-  const mediaUrl = msg.url || null;
   // Outbound da backfill = inviati fuori dal gestionale (storico/telefono):
   // li marchiamo 'via: phone' per coerenza con la UI ("da telefono").
-  const meta = msg.is_from_me ? { via: 'phone' } : {};
+  const meta: Record<string, unknown> = msg.is_from_me ? { via: 'phone' } : {};
+  // Media: nessun download immediato (vedi commento sul `/sync` endpoint). Il
+  // binario lo scarica il cron whatsapp-media-fetch via external_id; l'URL
+  // GOWA resta in meta solo come riferimento. whatsapp_messages non ha una
+  // colonna media_url: inserirla faceva fallire ogni messaggio importato.
+  if (type !== 'text' && msg.url) meta.media_url_hint = msg.url;
+  if (['image', 'document', 'audio', 'video', 'sticker'].includes(type)) meta.media_pending = true;
 
-  await sql`
+  const inserted = await sql`
     INSERT INTO whatsapp_messages
       (conversation_id, external_id, direction, category, type, body,
-       media_url, media_mime, sender_kind, meta, created_at)
+       sender_kind, meta, created_at)
     VALUES
       (${conversationId}, ${msg.id ?? null}, ${direction}, 'operational', ${type}, ${body},
-       ${mediaUrl}, ${null}, ${senderKind}, ${sql.json(meta)}, ${msg.timestamp ?? null}::timestamptz)
+       ${senderKind}, ${sql.json(meta as Parameters<typeof sql.json>[0])},
+       COALESCE(${msg.timestamp ?? null}::timestamptz, now()))
+    ON CONFLICT (external_id) WHERE external_id IS NOT NULL DO NOTHING
+    RETURNING id
   `;
-  return 1;
+  return inserted.length;
 }

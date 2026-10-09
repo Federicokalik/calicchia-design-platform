@@ -1,0 +1,54 @@
+{
+  "$comment": [
+    "Differenze ammesse fra la baseline dei contratti F0 (PgLegacyStore, codice attuale) e gli store successivi (RadicaleStore da F2).",
+    "In F0 l'elenco attivo 'diffs' è vuoto: ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione.",
+    "Letto e validato da test/contracts/_json-contract.ts (loadAllowedDiffs): un campo sconosciuto o mancante fa fallire i test, invece di ammettere differenze per errore.",
+    "Una voce copre una differenza se coincidono contract, case (glob sull'id del caso: '*' non attraversa '/', '**' sì), path (JSON Pointer con '*' per un segmento e '**' per zero o più), kind se indicato e lo store corrente (CALENDAR_BACKEND, default 'postgres') se 'stores' è indicato.",
+    "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste."
+  ],
+  "version": 1,
+  "format": {
+    "id": "identificativo univoco in kebab-case, es. 'mcp-override-uid-master'",
+    "contract": "id del contratto: 'mcp-calendar-tools', 'public-calendar', 'admin-calendar-v1', 'feed', 'device-agenda', 'capacity-and-slots'",
+    "case": "glob sull'id del caso nel file di snapshot, es. 'list_events/*' oppure '**'",
+    "path": "JSON Pointer dentro l'elemento del caso, es. '/output/events/*/uid' oppure '/output/**'",
+    "kind": "opzionale: 'changed' | 'added' | 'removed' | 'type' (assente = qualsiasi)",
+    "stores": "opzionale: elenco di store a cui si applica, es. ['radicale'] (assente = tutti)",
+    "reason": "perché la differenza è corretta e non una regressione",
+    "design_ref": "riferimento al design, es. 'design.md §12, differenze ammesse, punto 1'",
+    "added_in": "opzionale: fase in cui è stata introdotta, es. 'F2'"
+  },
+  "planned": [
+    {
+      "id": "override-uid-del-master",
+      "contract": "mcp-calendar-tools",
+      "summary": "Gli override espongono l'UID del master (RFC 5545) invece di un uid proprio.",
+      "design_ref": "design.md §12, differenze ammesse, punto 1"
+    },
+    {
+      "id": "allday-iscrizioni-mezzanotte-roma",
+      "contract": "mcp-calendar-tools",
+      "summary": "Gli all-day delle iscrizioni passano dalla mezzanotte UTC alla mezzanotte di Roma.",
+      "design_ref": "design.md §12, differenze ammesse, punto 2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo",
+      "contract": "mcp-calendar-tools",
+      "summary": "Le iscrizioni mostrano l'insieme completo degli eventi (fix di parseIcs) invece del sottoinsieme bacato.",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'"
+    },
+    {
+      "id": "descrizione-proiezioni-ricomposta",
+      "contract": "mcp-calendar-tools",
+      "summary": "La descrizione delle proiezioni delle prenotazioni si ricompone dai dati correnti di calendar_bookings.",
+      "design_ref": "design.md §12, differenze ammesse, punto 4; decisione 3"
+    },
+    {
+      "id": "eccezioni-dst-riallineate",
+      "contract": "mcp-calendar-tools",
+      "summary": "Le occorrenze delle eccezioni riallineate da DST_SHIFTED_EXCEPTION (EXDATE e override con l'ora UTC del DTSTART) non ricompaiono più.",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2"
+    }
+  ],
+  "diffs": []
+}

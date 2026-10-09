@@ -1,4 +1,4 @@
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'mcp-audit' });
@@ -26,10 +26,10 @@ export async function writeMcpAudit(e: McpAuditEntry): Promise<void> {
       ${e.success ? 'INSERT' : 'UPDATE'},
       'mcp_call',
       ${'mcp:' + e.tokenLabel},
-      ${JSON.stringify({ tool: e.tool, args_summary: e.argsSummary, risk: e.risk, otp_required: e.otpRequired, success: e.success, error: e.error })}::jsonb,
+      ${jsonb({ tool: e.tool, args_summary: e.argsSummary, risk: e.risk, otp_required: e.otpRequired, success: e.success, error: e.error })}::jsonb,
       ${e.ip},
       ${e.userAgent},
-      ${JSON.stringify({ mcp_token_id: e.tokenId, duration_ms: e.durationMs })}::jsonb,
+      ${jsonb({ mcp_token_id: e.tokenId, duration_ms: e.durationMs })}::jsonb,
       now()
     )
   `.catch((err: unknown) => log.error({ err }, 'audit write failed'));

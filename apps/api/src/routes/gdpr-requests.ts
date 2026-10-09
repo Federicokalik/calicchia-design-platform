@@ -140,12 +140,19 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
   const customerIds = linked.filter(r => r.kind === 'customer').map(r => r.id);
   const leadIds = linked.filter(r => r.kind === 'lead').map(r => r.id);
 
+  const anyLinked = customerIds.length > 0 || leadIds.length > 0;
   const [
     contacts,
     newsletterSubs,
     waConvs,
     waMessages,
     commPrefs,
+    customerRows,
+    leadRows,
+    mktContacts,
+    geoAudits,
+    quotes,
+    invoices,
   ] = await Promise.all([
     sql`SELECT name, email, phone, company, message, services, sectors, wants_call, wants_meet, source_page, created_at FROM contacts WHERE LOWER(email) = ${email}`,
     sql`SELECT email, name, status, confirmed_at, created_at FROM newsletter_subscribers WHERE LOWER(email) = ${email}`,
@@ -169,13 +176,48 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
         WHERE LOWER(email) = ${email}
            OR customer_id = ANY(${customerIds as any})
            OR lead_id = ANY(${leadIds as any})`,
+    // Anagrafiche e dati principali: l'export (art. 15/20) li ometteva, cioè
+    // proprio i dati che riguardano di più l'interessato.
+    customerIds.length
+      ? sql`SELECT id, company_name, contact_name, email, phone, billing_address, notes, tags, status, created_at, updated_at
+            FROM customers WHERE id = ANY(${customerIds as any})`
+      : Promise.resolve([] as any[]),
+    leadIds.length
+      ? sql`SELECT id, name, email, phone, company, source, status, notes, tags, gdpr_consent, consent_ip, created_at, updated_at
+            FROM leads WHERE id = ANY(${leadIds as any})`
+      : Promise.resolve([] as any[]),
+    sql`SELECT email, phone, first_name, last_name, company, role, website, industry, city, country,
+               email_consent, email_legal_basis, wa_consent, consent_source, consent_collected_at, consent_ip,
+               tags, status, created_at, updated_at
+        FROM mkt_contacts
+        WHERE email_norm = ${email}
+           OR customer_id = ANY(${customerIds as any})
+           OR lead_id = ANY(${leadIds as any})`,
+    sql`SELECT url, score, email, locale, ip, created_at
+        FROM geo_audits
+        WHERE LOWER(email) = ${email} OR lead_id = ANY(${leadIds as any})`,
+    anyLinked
+      ? sql`SELECT id, title, total, status, created_at FROM quotes_v2
+            WHERE customer_id = ANY(${customerIds as any}) OR lead_id = ANY(${leadIds as any})
+            ORDER BY created_at`
+      : Promise.resolve([] as any[]),
+    customerIds.length
+      ? sql`SELECT id, invoice_number, issue_date, total, status FROM invoices
+            WHERE customer_id = ANY(${customerIds as any}) ORDER BY issue_date`
+      : Promise.resolve([] as any[]),
   ]);
 
   return c.json({
     export_date: new Date().toISOString(),
     email,
+    customers: customerRows,
+    leads: leadRows,
     contacts,
     newsletter: newsletterSubs,
+    marketing_contacts: mktContacts,
+    geo_audits: geoAudits,
+    quotes,
+    invoices,
     whatsapp_conversations: waConvs,
     whatsapp_messages: waMessages,
     communication_preferences: commPrefs,
@@ -189,7 +231,8 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
 //
 //  • DELETE — pure-PII records with no retention obligation:
 //      contacts, newsletter_subscribers, communication_preferences,
-//      whatsapp_conversations (whatsapp_messages cascade), portal_login_events.
+//      whatsapp_conversations (whatsapp_messages cascade), portal_login_events,
+//      mkt_contacts (audience marketing). geo_audits: email e IP azzerati.
 //
 //  • ANONYMIZE — records that cannot be deleted because fiscal/contractual
 //      children (invoices, payments, quotes) reference them under a 10-year
@@ -233,6 +276,19 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
     const deletedLoginEvents = await tx`
       DELETE FROM portal_login_events
       WHERE LOWER(email) = ${email} OR customer_id = ANY(${customerIds as any}) RETURNING id`;
+    // Audience marketing: senza questo l'interessato restava contatto
+    // 'confirmed' e continuava a ricevere campagne dopo la cancellazione.
+    // Le cascade coprono list_members, messaggi e automation_runs. Le fonti
+    // della sync notturna (clienti/lead anonimizzati, newsletter cancellata)
+    // non hanno più l'email, quindi non viene reinserito.
+    const deletedMktContacts = await tx`
+      DELETE FROM mkt_contacts
+      WHERE email_norm = ${email}
+         OR customer_id = ANY(${customerIds as any})
+         OR lead_id = ANY(${leadIds as any}) RETURNING id`;
+    const anonGeoAudits = await tx`
+      UPDATE geo_audits SET email = NULL, ip = NULL
+      WHERE LOWER(email) = ${email} OR lead_id = ANY(${leadIds as any}) RETURNING id`;
 
     // Anonymize customers — keep the row (fiscal children) but strip PII.
     const anonCustomers = customerIds.length
@@ -246,6 +302,7 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             notes = NULL,
             tags = '[]'::jsonb,
             portal_access_code_hash = NULL,
+            anonymized_at = NOW(),
             updated_at = NOW()
           WHERE id = ANY(${customerIds as any}) RETURNING id`
       : [];
@@ -258,6 +315,9 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             phone = NULL,
             notes = NULL,
             tags = '{}'::text[],
+            consent_ip = NULL,
+            consent_user_agent = NULL,
+            anonymized_at = NOW(),
             updated_at = NOW()
           WHERE id = ANY(${leadIds as any}) RETURNING id`
       : [];
@@ -268,6 +328,8 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
       deletedPrefs: deletedPrefs.length,
       deletedWaConvs: deletedWaConvs.length,
       deletedLoginEvents: deletedLoginEvents.length,
+      deletedMktContacts: deletedMktContacts.length,
+      anonGeoAudits: anonGeoAudits.length,
       anonCustomers: anonCustomers.length,
       anonLeads: anonLeads.length,
     };
@@ -282,8 +344,10 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
       communication_preferences: result.deletedPrefs,
       whatsapp_conversations: result.deletedWaConvs,
       portal_login_events: result.deletedLoginEvents,
+      marketing_contacts: result.deletedMktContacts,
     },
     anonymized: {
+      geo_audits: result.anonGeoAudits,
       customers: result.anonCustomers,
       leads: result.anonLeads,
     },

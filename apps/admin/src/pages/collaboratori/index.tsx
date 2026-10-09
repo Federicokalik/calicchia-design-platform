@@ -42,7 +42,7 @@ export default function CollaboratoriPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['collaborators-v2', search],
-    queryFn: () => apiFetch(`/api/collaborators-v2${search ? `?search=${search}` : ''}`),
+    queryFn: () => apiFetch(`/api/collaborators-v2${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   });
 
   const createMutation = useMutation({

@@ -26,7 +26,7 @@ export function KbWarningBanner() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const onSettings = location.pathname.startsWith('/impostazioni') || location.pathname.startsWith('/settings');
-  const onCanvas = /^\/boards\/(sketch|mindmap)\//.test(location.pathname);
+  const onCanvas = /^\/boards\/(sketch|mindmap|mind-maps)\//.test(location.pathname);
 
   const { data } = useQuery<KbHealth>({
     queryKey: ['kb-health'],

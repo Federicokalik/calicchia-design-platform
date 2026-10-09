@@ -76,15 +76,15 @@ leads.put('/:id', async (c) => {
   const rows = await sql`
     UPDATE leads SET
       name = COALESCE(${name || null}, name),
-      email = ${email !== undefined ? email : null},
-      phone = ${phone !== undefined ? phone : null},
-      company = ${company !== undefined ? company : null},
+      email = ${email !== undefined ? email : sql`email`},
+      phone = ${phone !== undefined ? phone : sql`phone`},
+      company = ${company !== undefined ? company : sql`company`},
       source = COALESCE(${source || null}, source),
       status = COALESCE(${status || null}, status),
-      estimated_value = ${estimated_value !== undefined ? estimated_value : null},
-      notes = ${notes !== undefined ? notes : null},
+      estimated_value = ${estimated_value !== undefined ? estimated_value : sql`estimated_value`},
+      notes = ${notes !== undefined ? notes : sql`notes`},
       tags = COALESCE(${tags || null}, tags),
-      lost_reason = ${lost_reason !== undefined ? lost_reason : null},
+      lost_reason = ${lost_reason !== undefined ? lost_reason : sql`lost_reason`},
       updated_at = now()
     WHERE id = ${id}
     RETURNING *
@@ -133,34 +133,37 @@ leads.post('/:id/convert', async (c) => {
 
   const lead = leadRows[0];
 
-  // Create customer
-  const customerRows = await sql`
-    INSERT INTO customers (name, email, phone, company, lead_id, status)
-    VALUES (${lead.name}, ${lead.email}, ${lead.phone}, ${lead.company}, ${id}, 'active')
-    RETURNING *
-  `;
-  const customer = customerRows[0];
-
-  // Optionally create project
-  let project = null;
-  if (project_name) {
-    const projectRows = await sql`
-      INSERT INTO client_projects (customer_id, name, project_type, status, priority)
-      VALUES (${customer.id}, ${project_name}, ${project_type || 'website'}, 'draft', 5)
+  // Cliente, progetto e chiusura del lead insieme: un errore a metà non deve
+  // lasciare un cliente orfano con il lead ancora aperto.
+  const { customer, project } = await sql.begin(async (txSql: any) => {
+    const [customer] = await txSql`
+      INSERT INTO customers (contact_name, email, phone, company_name, lead_id, status)
+      VALUES (${lead.name}, ${lead.email}, ${lead.phone}, ${lead.company}, ${id}, 'active')
       RETURNING *
     `;
-    project = projectRows[0];
-  }
 
-  // Update lead
-  await sql`
-    UPDATE leads SET
-      status = 'won',
-      converted_customer_id = ${customer.id},
-      converted_project_id = ${project?.id || null},
-      updated_at = now()
-    WHERE id = ${id}
-  `;
+    // Optionally create project
+    let project = null;
+    if (project_name) {
+      const projectRows = await txSql`
+        INSERT INTO client_projects (customer_id, name, project_type, status, priority)
+        VALUES (${customer.id}, ${project_name}, ${project_type || 'website'}, 'draft', 5)
+        RETURNING *
+      `;
+      project = projectRows[0];
+    }
+
+    await txSql`
+      UPDATE leads SET
+        status = 'won',
+        converted_customer_id = ${customer.id},
+        converted_project_id = ${project?.id || null},
+        updated_at = now()
+      WHERE id = ${id}
+    `;
+
+    return { customer, project };
+  });
 
   return c.json({ customer, project });
 });
@@ -181,7 +184,7 @@ leads.post('/:id/convert-to-quote', async (c) => {
       customer = existingCustomer;
     } else {
       const [createdCustomer] = await txSql`
-        INSERT INTO customers (name, email, phone, company, lead_id, status)
+        INSERT INTO customers (contact_name, email, phone, company_name, lead_id, status)
         VALUES (${lead.name}, ${lead.email}, ${lead.phone}, ${lead.company}, ${lead.id}, 'active')
         RETURNING *
       `;
@@ -201,9 +204,11 @@ leads.post('/:id/convert-to-quote', async (c) => {
       RETURNING *
     `;
 
+    // 'proposal' è lo stato della pipeline per "preventivo in corso"; 'quoted'
+    // non esiste in LeadStatus e il lead spariva dalla board.
     await txSql`
       UPDATE leads
-      SET status = 'quoted',
+      SET status = 'proposal',
           converted_customer_id = ${customer.id},
           updated_at = now()
       WHERE id = ${lead.id}

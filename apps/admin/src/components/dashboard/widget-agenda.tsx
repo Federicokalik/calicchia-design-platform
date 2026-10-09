@@ -61,14 +61,15 @@ export function WidgetAgenda() {
   }
 
   // Tasks due today
-  for (const t of tasksData?.tasks || []) {
-    if (t.status === 'done') continue;
+  for (const task of tasksData?.tasks || []) {
+    if (task.status === 'done') continue;
     items.push({
-      id: `task-${t.id}`,
-      time: t.due_date ? formatDateTime(t.due_date, { hour: '2-digit', minute: '2-digit', timeZone: CALENDAR_TZ }) : '-',
-      title: t.title,
+      id: `task-${task.id}`,
+      // due_date è una colonna date (senza orario): formattarla come ora dava "02:00"
+      time: t('common.allDay'),
+      title: task.title,
       type: 'task',
-      meta: t.project_name || undefined,
+      meta: task.project_name || undefined,
     });
   }
 

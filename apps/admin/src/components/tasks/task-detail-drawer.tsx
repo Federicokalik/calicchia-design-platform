@@ -153,6 +153,7 @@ export function TaskDetailDrawer({
       >
         {task && user ? (
           <TaskDetailPanel
+            key={task.id}
             task={task}
             milestones={milestones}
             timeEntries={timeEntries}

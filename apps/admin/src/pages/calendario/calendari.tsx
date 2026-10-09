@@ -97,7 +97,9 @@ export default function CalendariPage() {
     <div className="space-y-6">
       <CalendarTabs />
 
-      {showNew && <CalendarForm onClose={() => { setShowNew(false); setEditing(null); }} initial={editing} />}
+      {/* key: cliccando "Modifica" su un altro calendario a form aperto, lo stato del
+          form restava quello del primo e veniva salvato sul secondo */}
+      {showNew && <CalendarForm key={editing?.id ?? 'new'} onClose={() => { setShowNew(false); setEditing(null); }} initial={editing} />}
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Caricamento…</p>

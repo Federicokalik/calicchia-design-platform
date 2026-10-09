@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { z } from 'zod';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { zValidator } from '../lib/z-validator';
 import { createStripeSubscriptionCheckoutSession, cancelStripeSubscription, isStripeConfigured } from '../lib/stripe';
 import { createPaypalSubscription, cancelPaypalSubscription, isPaypalReady } from '../lib/paypal';
@@ -34,7 +34,7 @@ subscriptions.get('/', async (c) => {
   const customerFilter = customerId ? sql`AND s.customer_id = ${customerId}` : sql``;
 
   let upcomingFilter = sql``;
-  if (upcoming) {
+  if (upcoming && Number.isFinite(parseInt(upcoming))) {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + parseInt(upcoming));
     const futureDateStr = futureDate.toISOString().split('T')[0];
@@ -152,7 +152,7 @@ subscriptions.post('/', zValidator('json', createSubscriptionSchema), async (c) 
 
     await sql`
       UPDATE subscriptions
-      SET metadata = metadata || ${JSON.stringify({ checkout_session_id: session.id, approval_url: session.url })}::jsonb,
+      SET metadata = COALESCE(metadata, '{}'::jsonb) || ${jsonb({ checkout_session_id: session.id, approval_url: session.url })}::jsonb,
           updated_at = NOW()
       WHERE id = ${String(subscription.id)}
     `;
@@ -175,7 +175,7 @@ subscriptions.post('/', zValidator('json', createSubscriptionSchema), async (c) 
   await sql`
     UPDATE subscriptions
     SET paypal_subscription_id = ${paypal.id},
-        metadata = metadata || ${JSON.stringify({ paypal_status: paypal.status, approval_url: paypal.approve_url })}::jsonb,
+        metadata = COALESCE(metadata, '{}'::jsonb) || ${jsonb({ paypal_status: paypal.status, approval_url: paypal.approve_url })}::jsonb,
         updated_at = NOW()
     WHERE id = ${String(subscription.id)}
   `;

@@ -117,7 +117,10 @@ mktFormsPublic.post('/:slug/submit', async (c) => {
 
   // Double opt-in → send confirm (only if still unconfirmed). Fire-and-forget.
   if (form.double_optin && contact.email_consent === 'unconfirmed') {
+    // La funzione ritorna { success: false } senza lanciare: senza il .then
+    // un invio fallito non lasciava traccia e il contatto restava unconfirmed.
     sendMarketingFormConfirmEmail({ to: email, name: data.first_name || data.name, token: contact.double_optin_token })
+      .then((res) => { if (res && res.success === false) log.warn({ email, err: res.error }, 'form confirm email failed'); })
       .catch((err) => log.warn({ err, email }, 'form confirm email failed'));
   }
 

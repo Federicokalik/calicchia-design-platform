@@ -141,6 +141,12 @@ export interface CreateBookingInput {
    * garantito dalla EXCLUDE constraint).
    */
   allow_buffer_override?: boolean;
+  /**
+   * Flussi pubblici (pagina /prenota, form contatti, riprogrammazione del
+   * cliente): lo start deve essere uno degli slot calcolati. Admin e MCP
+   * possono invece fissare orari fuori disponibilità.
+   */
+  require_available_slot?: boolean;
   /** Audit trail GDPR art. 7 — IP raccolto al POST. Null se chiamante non lo passa (es. admin manual). */
   consent_ip?: string | null;
   /** Audit trail GDPR art. 7 — user-agent raccolto al POST. */
@@ -220,6 +226,8 @@ export interface CreateCalendarInput {
   is_default?: boolean;
   blocks_availability?: boolean;
   sort_order?: number;
+  /** Solo per i calendari creati dal sistema (es. festività): non eliminabili dall'UI. */
+  is_system?: boolean;
 }
 
 export interface CreateEventInput {

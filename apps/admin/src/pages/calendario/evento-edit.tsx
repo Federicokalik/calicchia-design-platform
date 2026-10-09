@@ -28,6 +28,9 @@ interface CalendarEvent {
   rrule?: string | null;
   source?: string;
   source_id?: string | null;
+  /** Presenti sull'occorrenza espansa passata dal calendario. */
+  original_start?: string | null;
+  is_override?: boolean;
 }
 
 interface Props {
@@ -36,6 +39,11 @@ interface Props {
   initialEnd?: string;
   onClose: () => void;
   onSaved: () => void;
+}
+
+interface FormProps extends Props {
+  /** original_start dell'occorrenza cliccata, se espansa da un master ricorrente. */
+  occurrenceStart?: string | null;
 }
 
 type RecurrenceType = 'none' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
@@ -172,10 +180,18 @@ export default function EventoEditModal(props: Props) {
   }
   // Se il fetch fallisce si ripiega sull'occorrenza: i guard "touched" del form
   // evitano comunque di riscrivere date e rrule non modificate dall'utente.
-  return <EventoEditForm {...props} initial={isEditing && data?.event ? data.event : props.initial} />;
+  const occurrenceStart =
+    props.initial?.original_start && !props.initial.is_override ? props.initial.original_start : null;
+  return (
+    <EventoEditForm
+      {...props}
+      initial={isEditing && data?.event ? data.event : props.initial}
+      occurrenceStart={occurrenceStart}
+    />
+  );
 }
 
-function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved }: Props) {
+function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, occurrenceStart }: FormProps) {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const isEdit = !!initial?.id;
@@ -254,15 +270,51 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved }:
     onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
   });
 
+  // initial qui è la riga master: DELETE su un master ricorrente elimina
+  // l'intera serie. Dal calendario si apre il modale cliccando UNA occorrenza,
+  // quindi per le serie si chiede esplicitamente cosa eliminare.
+  const isRecurringMaster = isEdit && !!initial?.rrule;
+  const [deleteChoiceOpen, setDeleteChoiceOpen] = useState(false);
+
   const remove = useMutation({
     mutationFn: () => apiFetch(`/api/admin/calendar/events/${initial!.id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
-      toast.success('Evento eliminato');
+      toast.success(isRecurringMaster ? 'Serie eliminata' : 'Evento eliminato');
       onSaved();
       onClose();
     },
   });
+
+  const removeOccurrence = useMutation({
+    mutationFn: () =>
+      apiFetch(`/api/admin/calendar/events/${initial!.id}/exception`, {
+        method: 'POST',
+        body: JSON.stringify({ original_start: occurrenceStart, status: 'cancelled' }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      toast.success('Occorrenza eliminata');
+      onSaved();
+      onClose();
+    },
+  });
+
+  const handleDelete = async () => {
+    if (isRecurringMaster) {
+      if (occurrenceStart) {
+        setDeleteChoiceOpen(true);
+        return;
+      }
+      if (await confirm({
+        title: "Eliminare l'intera serie?",
+        description: 'Verranno eliminate tutte le occorrenze di questo evento ricorrente. Per eliminarne una sola usa il menu dell\'evento nel calendario.',
+        variant: 'destructive',
+      })) remove.mutate();
+      return;
+    }
+    if (await confirm({ title: 'Eliminare questo evento?', variant: 'destructive' })) remove.mutate();
+  };
 
   const duplicate = useMutation({
     mutationFn: () =>
@@ -540,6 +592,29 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved }:
           </div>
         </div>
 
+        {deleteChoiceOpen && (
+          <div className="flex flex-wrap items-center gap-2 px-4 py-3 border-t bg-destructive/5">
+            <span className="text-sm mr-auto">Evento ricorrente: cosa vuoi eliminare?</span>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={removeOccurrence.isPending || remove.isPending}
+              onClick={() => removeOccurrence.mutate()}
+            >
+              Solo questa occorrenza
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={removeOccurrence.isPending || remove.isPending}
+              onClick={() => remove.mutate()}
+            >
+              Tutta la serie
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setDeleteChoiceOpen(false)}>Annulla</Button>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-t">
           <div className="flex flex-wrap gap-2">
             {isEdit && !isBookingAuto && (
@@ -547,9 +622,8 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved }:
                 size="sm"
                 variant="outline"
                 className="text-destructive"
-                onClick={async () => {
-                  if (await confirm({ title: 'Eliminare questo evento?', variant: 'destructive' })) remove.mutate();
-                }}
+                disabled={remove.isPending || removeOccurrence.isPending}
+                onClick={() => { void handleDelete(); }}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Elimina
               </Button>

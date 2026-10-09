@@ -9,6 +9,7 @@
  * delivery state lives in mkt_messages.
  */
 import { sql } from '../db';
+import { finalizeCampaign } from '../lib/marketing/finalize';
 import { sendWhatsAppText } from '../lib/whatsapp';
 import { canSendWhatsApp } from '../lib/whatsapp-policy';
 import { logger } from '../lib/logger';
@@ -75,7 +76,7 @@ async function drainWhatsAppCampaign(camp: CampaignRow, budget: number): Promise
   if (!claimed.length) {
     const [{ remaining }] = await sql`SELECT count(*)::int AS remaining FROM mkt_messages WHERE campaign_id=${camp.id} AND status IN ('queued','sending')`;
     if (remaining === 0) {
-      await sql`UPDATE mkt_campaigns SET status='sent', sent_at=COALESCE(sent_at, now()), updated_at=now() WHERE id=${camp.id} AND status='sending'`;
+      await finalizeCampaign(camp.id);
     }
     return 0;
   }

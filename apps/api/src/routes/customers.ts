@@ -199,6 +199,7 @@ customers.put('/:id', async (c) => {
 
   const updates = await prepareCustomerUpdate(body);
   const [customer] = await sql`UPDATE customers SET ${sql(updates)} WHERE id = ${id} RETURNING *`;
+  if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
 
   if (customer?.stripe_customer_id && isStripeConfigured()) {
     await stripe.customers.update(customer.stripe_customer_id as string, {

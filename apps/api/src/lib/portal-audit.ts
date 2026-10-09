@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { logger } from './logger';
 
 const log = logger.child({ scope: 'portal-audit' });
@@ -59,7 +59,7 @@ export async function auditPortalEvent(
         ${ipHeader},
         ${ua},
         ${opts.error_code ?? null},
-        ${JSON.stringify(opts.metadata ?? {})}
+        ${jsonb(opts.metadata ?? {})}
       )
     `;
   } catch (err) {

@@ -22,7 +22,8 @@ const postSchema = z.object({
   slug: z.string().min(1, 'Slug richiesto'),
   content: z.string().min(1, 'Contenuto richiesto'),
   excerpt: z.string().optional(),
-  cover_image: z.string().url().optional().or(z.literal('')),
+  // Anche chiavi di storage / path relativi (cover generate dall'AI), non solo URL
+  cover_image: z.string().optional(),
   category: z.string().optional(),
   tags: z.string().optional(),
   is_published: z.boolean().default(false),
@@ -54,8 +55,13 @@ export default function BlogEditPage() {
 
   useEffect(() => {
     if (post) {
+      // Le colonne nullable arrivano come null, che lo schema zod rifiuta: senza
+      // normalizzarle gli articoli senza copertina o categoria non si salvavano.
       reset({
         ...(post as PostFormData),
+        excerpt: (post.excerpt as string | null) ?? '',
+        category: (post.category as string | null) ?? '',
+        cover_image: (post.cover_image as string | null) ?? '',
         tags: Array.isArray(post.tags) ? (post.tags as string[]).join(', ') : '',
       });
     }
@@ -80,7 +86,9 @@ export default function BlogEditPage() {
         tags: data.tags?.split(',').map((t) => t.trim()).filter(Boolean) || [],
         cover_image: data.cover_image || null,
         reading_time,
-        published_at: data.is_published ? new Date().toISOString() : null,
+        // Un articolo già pubblicato mantiene la data originale: riscriverla a ogni
+        // salvataggio lo riportava in cima al blog e all'RSS.
+        published_at: data.is_published ? ((post?.published_at as string | null) ?? new Date().toISOString()) : null,
       };
 
       if (isNew) {
@@ -179,7 +187,10 @@ export default function BlogEditPage() {
         </Button>
       </div>
 
-      <form id="blog-form" onSubmit={handleSubmit((data) => saveMutation.mutate(data))}>
+      <form id="blog-form" onSubmit={handleSubmit(
+        (data) => saveMutation.mutate(data),
+        (errs) => toast.error(Object.values(errs)[0]?.message?.toString() || 'Controlla i campi del modulo'),
+      )}>
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2 space-y-6">
             <Card>

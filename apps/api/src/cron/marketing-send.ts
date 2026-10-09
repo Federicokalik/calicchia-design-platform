@@ -10,6 +10,7 @@
  * 'failed' for the admin to see. WhatsApp campaigns are drained by Phase 3.
  */
 import { sql } from '../db';
+import { finalizeCampaign } from '../lib/marketing/finalize';
 import {
   renderForMessage, sendMarketingEmail, personalize, type PersonalizationVars,
 } from '../lib/email-marketing';
@@ -81,8 +82,8 @@ async function drainEmailCampaign(camp: CampaignRow): Promise<void> {
     // Nothing left to claim → finalize if no queued rows remain.
     const [{ remaining }] = await sql`SELECT count(*)::int AS remaining FROM mkt_messages WHERE campaign_id=${camp.id} AND status IN ('queued','sending')`;
     if (remaining === 0) {
-      await sql`UPDATE mkt_campaigns SET status='sent', sent_at=COALESCE(sent_at, now()), updated_at=now() WHERE id=${camp.id} AND status='sending'`;
-      log.info({ campaignId: camp.id }, 'campaign sent');
+      const outcome = await finalizeCampaign(camp.id);
+      log.info({ campaignId: camp.id, outcome }, 'campaign finalized');
     }
     return;
   }

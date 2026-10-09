@@ -511,6 +511,8 @@ publicRoutes.get('/site-config', async (c) => {
     fiscal_code?: string; pec_email?: string; sdi_code?: string;
     email?: string; phone?: string; website?: string;
     address?: { street?: string; city?: string; postal_code?: string; country?: string };
+    // Chiavi piatte scritte dal form Impostazioni → Profilo (passthrough).
+    pec?: string; address_street?: string; address_zip?: string; address_city?: string;
   };
   type SitePublic = {
     brand?: string;
@@ -550,13 +552,15 @@ publicRoutes.get('/site-config', async (c) => {
     contact: {
       email: nz(bizProfile.email),
       phone: nz(bizProfile.phone),
-      pec: nz(bizProfile.pec_email),
+      // Impostazioni → Profilo salva chiavi piatte (pec, address_*): senza
+      // fallback le modifiche non arrivavano mai a footer, contatti e JSON-LD.
+      pec: nz(bizProfile.pec_email) ?? nz(bizProfile.pec),
       vat: nz(bizProfile.vat_number),
       sdi: nz(bizProfile.sdi_code),
       address: {
-        street: nz(addr.street),
-        city: nz(addr.city),
-        postalCode: nz(addr.postal_code),
+        street: nz(bizProfile.address_street) ?? nz(addr.street),
+        city: nz(bizProfile.address_city) ?? nz(addr.city),
+        postalCode: nz(bizProfile.address_zip) ?? nz(addr.postal_code),
         country: nz(addr.country),
       },
       cal: nz(sitePublic.cal),

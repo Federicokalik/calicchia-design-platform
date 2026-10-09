@@ -122,6 +122,7 @@ contacts.post('/', async (c) => {
           message: message || undefined,
         },
         source: 'contact_form',
+        require_available_slot: true,
         source_metadata: {
           source_page: source_page || null,
           source_service: source_service || null,

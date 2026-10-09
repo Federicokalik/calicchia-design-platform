@@ -5,7 +5,7 @@
  */
 
 import { Hono } from 'hono';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { fail } from '../lib/responses';
 import { logger } from '../lib/logger';
 
@@ -231,7 +231,7 @@ portalAdmin.post('/reports', async (c) => {
 
   const [report] = await sql`
     INSERT INTO portal_reports (customer_id, project_id, month, year, title, summary, data, pdf_url, published_at)
-    VALUES (${customer_id}, ${project_id || null}, ${month}, ${year}, ${title}, ${summary || null}, ${JSON.stringify(data || {})}, ${pdf_url || null}, NOW())
+    VALUES (${customer_id}, ${project_id || null}, ${month}, ${year}, ${title}, ${summary || null}, ${jsonb(data || {})}, ${pdf_url || null}, NOW())
     ON CONFLICT (customer_id, year, month) DO UPDATE SET
       title = EXCLUDED.title,
       summary = EXCLUDED.summary,
@@ -342,7 +342,7 @@ portalAdmin.post('/projects/:projectId/messages', async (c) => {
 
   const adminName = (typeof sender_name === 'string' && sender_name.trim()) ? sender_name.trim().slice(0, 200) : 'Calicchia';
   const attachments = attachment_url
-    ? JSON.stringify([{ url: attachment_url, name: attachment_name || 'Allegato' }])
+    ? jsonb([{ url: attachment_url, name: attachment_name || 'Allegato' }])
     : null;
 
   const [message] = await sql`

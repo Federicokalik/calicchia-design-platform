@@ -17,7 +17,14 @@ const Excalidraw = lazy(async () => {
   return { default: mod.Excalidraw };
 });
 
+// key per id: passando da una board all'altra Excalidraw (initialData) e il
+// titolo devono ripartire dalla nuova board, non restare su quella precedente.
 export default function SketchEditorPage() {
+  const { id } = useParams<{ id: string }>();
+  return <SketchEditor key={id} />;
+}
+
+function SketchEditor() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -46,7 +53,14 @@ export default function SketchEditorPage() {
   const saveMutation = useMutation({
     mutationFn: (updates: Partial<Board>) =>
       apiFetch(`/api/boards/${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
-    onSuccess: () => { setSaving(false); queryClient.invalidateQueries({ queryKey: ['boards'] }); },
+    // Autosave: niente refetch globale; la cache del dettaglio viene allineata
+    // alla risposta, altrimenti riaprendo lo sketch si ripartirebbe da una versione vecchia.
+    meta: { skipGlobalInvalidation: true },
+    onSuccess: (res) => {
+      setSaving(false);
+      queryClient.setQueryData(['board', id], res);
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    },
     onError: () => { setSaving(false); toast.error('Errore salvataggio'); },
   });
 

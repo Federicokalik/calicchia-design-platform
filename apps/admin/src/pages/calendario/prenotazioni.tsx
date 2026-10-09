@@ -84,6 +84,8 @@ export default function PrenotazioniPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      // `selected` è una copia della riga: restava su 'Confermata' con le azioni attive
+      setSelected(null);
       toast.success(t('common.updated'));
     },
   });

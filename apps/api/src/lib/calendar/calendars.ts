@@ -102,10 +102,30 @@ export async function getOrCreateFestivitaCalendar(): Promise<Calendar> {
     color: '#ef4444',
     timezone: 'Europe/Rome',
     blocks_availability: true,
+    // Eliminarlo dall'UI cancellava in cascata tutte le chiusure manuali (ferie,
+    // ponti) che il cron non ricrea: gli slot tornavano prenotabili.
+    is_system: true,
   });
 }
 
+/**
+ * Timezone IANA riconosciuta dal runtime. Un refuso (es. 'Europe/Rom') veniva
+ * salvato e poi rompeva con 500 il calcolo degli slot pubblici e admin.
+ */
+export function isValidTimeZone(tz: unknown): tz is string {
+  if (typeof tz !== 'string' || !tz.trim()) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function createCalendar(input: CreateCalendarInput): Promise<Calendar> {
+  if (input.timezone && !isValidTimeZone(input.timezone)) {
+    throw new CalendarValidationError('Timezone non valida (es. Europe/Rome)');
+  }
   if (!SLUG_REGEX.test(input.slug)) {
     throw new CalendarValidationError('Slug non valido (a-z, 0-9, -)');
   }
@@ -142,7 +162,7 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
       icon: input.icon || null,
       timezone: input.timezone || 'Europe/Rome',
       is_default: !!input.is_default,
-      is_system: false,
+      is_system: !!input.is_system,
       blocks_availability: input.blocks_availability !== false,
       ics_feed_token: generateFeedToken(),
       ics_feed_enabled: true,
@@ -162,7 +182,10 @@ export async function updateCalendar(
   if (input.description !== undefined) updates.description = input.description ? String(input.description).trim().slice(0, 1000) : null;
   if (input.color !== undefined && /^#[0-9a-f]{6}$/i.test(input.color)) updates.color = input.color;
   if (input.icon !== undefined) updates.icon = input.icon;
-  if (input.timezone !== undefined) updates.timezone = input.timezone;
+  if (input.timezone !== undefined) {
+    if (!isValidTimeZone(input.timezone)) throw new CalendarValidationError('Timezone non valida (es. Europe/Rome)');
+    updates.timezone = input.timezone;
+  }
   if (input.blocks_availability !== undefined) updates.blocks_availability = !!input.blocks_availability;
   if (input.ics_feed_enabled !== undefined) updates.ics_feed_enabled = !!input.ics_feed_enabled;
   if (input.sort_order !== undefined) updates.sort_order = parseInt(String(input.sort_order)) || 0;

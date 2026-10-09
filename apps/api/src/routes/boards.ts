@@ -56,7 +56,7 @@ boards.post('/', async (c) => {
     VALUES (
       ${title || 'Senza titolo'},
       ${type || 'sketch'},
-      ${JSON.stringify(data || {})},
+      ${sql.json(data || {})},
       ${linked_type || null},
       ${linked_id || null}
     ) RETURNING *
@@ -72,7 +72,8 @@ boards.put('/:id', async (c) => {
 
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (body.title !== undefined) updates.title = body.title;
-  if (body.data !== undefined) updates.data = JSON.stringify(body.data);
+  // sql.json: con JSON.stringify il jsonb conteneva una stringa JSON
+  if (body.data !== undefined) updates.data = sql.json(body.data ?? {});
   if (body.thumbnail !== undefined) updates.thumbnail = body.thumbnail;
   if (body.linked_type !== undefined) updates.linked_type = body.linked_type;
   if (body.linked_id !== undefined) updates.linked_id = body.linked_id;

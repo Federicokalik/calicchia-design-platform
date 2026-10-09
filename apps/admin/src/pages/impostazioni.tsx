@@ -110,6 +110,8 @@ export default function ImpostazioniPage() {
   const { data: integrationsStatus, refetch: refetchIntegrations } = useQuery({
     queryKey: ['integrations-check'],
     queryFn: async () => { try { return await apiFetch('/api/settings/integrations-check'); } catch { return {}; } },
+    // Interroga servizi esterni (Telegram, WhatsApp…): si aggiorna solo col bottone dedicato.
+    meta: { skipGlobalRefetch: true },
   });
   const { data: aiUsage } = useQuery({
     queryKey: ['ai-usage'],
@@ -124,14 +126,16 @@ export default function ImpostazioniPage() {
   // Audit C-013/C-014: site.public is the marketing-surface key consumed by
   // sito-v3 through /api/public/site-config (brand/social/geo/desc/cal).
   const sitePublic = settings['site.public'] || {};
-  const apiKeys = keysData?.keys || [];
+  // GET /api/keys risponde con l'array nudo: leggere solo .keys lasciava il
+  // tab sempre vuoto (chiavi non visibili né revocabili).
+  const apiKeys = Array.isArray(keysData) ? keysData : keysData?.keys || [];
   const auditLogs = auditData?.logs || auditData?.entries || [];
 
   const saveMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: any }) =>
       apiFetch(`/api/settings/${key}`, { method: 'PUT', body: JSON.stringify({ value }) }),
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['settings'] }); toast.success('Salvato'); },
-    onError: () => toast.error('Errore'),
+    onError: (err) => toast.error(err instanceof Error && err.message ? err.message : 'Errore'),
   });
 
   const deleteKeyMutation = useMutation({
@@ -152,7 +156,18 @@ export default function ImpostazioniPage() {
   });
 
   const [bp, setBp] = useState<Record<string, any>>({});
-  const getBp = (key: string) => bp[key] !== undefined ? bp[key] : businessProfile[key] ?? '';
+  // Il form usa chiavi piatte; lo schema canonico (seed, MCP, API) usa
+  // fiscal_code, pec_email e address.{street,postal_code,city}. In lettura si
+  // ripiega sulle canoniche così i campi non appaiono vuoti.
+  const BP_ALIASES: Record<string, (p: Record<string, any>) => unknown> = {
+    tax_code: (p) => p.fiscal_code,
+    pec: (p) => p.pec_email,
+    address_street: (p) => p.address?.street,
+    address_zip: (p) => p.address?.postal_code,
+    address_city: (p) => p.address?.city,
+  };
+  const getBp = (key: string) =>
+    bp[key] !== undefined ? bp[key] : businessProfile[key] ?? BP_ALIASES[key]?.(businessProfile) ?? '';
   const setBpField = (key: string, value: any) => setBp((prev) => ({ ...prev, [key]: value }));
 
   const [fs, setFs] = useState<Record<string, any>>({});
@@ -176,9 +191,20 @@ export default function ImpostazioniPage() {
     ? spGeoText
     : JSON.stringify(sitePublic.geo ?? {}, null, 2);
 
-  const saveQs = () => { saveMutation.mutate({ key: 'quote.settings', value: { ...quoteSettings, ...qs } }); setQs({}); };
-  const saveBp = () => { saveMutation.mutate({ key: 'business.profile', value: { ...businessProfile, ...bp } }); setBp({}); };
-  const saveFs = () => { saveMutation.mutate({ key: 'freelancer.studio', value: { ...freelancerStudio, ...fs } }); setFs({}); };
+  // Lo stato locale si azzera solo a salvataggio riuscito: prima veniva
+  // svuotato subito e un 400 di validazione buttava via le modifiche.
+  const saveQs = () => saveMutation.mutate(
+    { key: 'quote.settings', value: { ...quoteSettings, ...qs } },
+    { onSuccess: () => setQs({}) },
+  );
+  const saveBp = () => saveMutation.mutate(
+    { key: 'business.profile', value: { ...businessProfile, ...bp } },
+    { onSuccess: () => setBp({}) },
+  );
+  const saveFs = () => saveMutation.mutate(
+    { key: 'freelancer.studio', value: { ...freelancerStudio, ...fs } },
+    { onSuccess: () => setFs({}) },
+  );
   const saveSp = () => {
     // Parse the JSON textareas with a tolerant fallback to the existing value
     // — the Save button is the user's commit, so a malformed JSON should
@@ -199,10 +225,13 @@ export default function ImpostazioniPage() {
       social: parsedSocial,
       geo: parsedGeo,
     };
-    saveMutation.mutate({ key: 'site.public', value });
-    setSp({});
-    setSpSocialText(null);
-    setSpGeoText(null);
+    saveMutation.mutate({ key: 'site.public', value }, {
+      onSuccess: () => {
+        setSp({});
+        setSpSocialText(null);
+        setSpGeoText(null);
+      },
+    });
   };
 
   useTopbar({ title: 'Impostazioni', subtitle: 'Business, integrazioni, sicurezza, AI e sistema' });
@@ -953,7 +982,12 @@ export default function ImpostazioniPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm">
                         <span className="font-medium">{entry.action || entry.event_type || 'Azione'}</span>
-                        {entry.entity_type && <span className="text-muted-foreground"> su {entry.entity_type}</span>}
+                        {(entry.table_name || entry.entity_type) && (
+                          <span className="text-muted-foreground">
+                            {' '}su {entry.table_name || entry.entity_type}
+                            {entry.record_id ? ` #${String(entry.record_id).slice(0, 8)}` : ''}
+                          </span>
+                        )}
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">
                         {entry.created_at ? new Date(entry.created_at).toLocaleString('it-IT') : ''}
@@ -983,6 +1017,9 @@ function BackupSection() {
   const { data: info, isLoading } = useQuery({
     queryKey: ['backup-info'],
     queryFn: () => apiFetch('/api/backup/info'),
+    // COUNT(*) su tutte le tabelle: non serve rifarla a ogni salvataggio o focus.
+    meta: { skipGlobalRefetch: true },
+    refetchOnWindowFocus: false,
   });
 
   const exportBackup = async () => {

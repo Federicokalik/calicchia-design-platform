@@ -52,7 +52,8 @@ interface RulesDialogProps {
 interface FormState {
   id?: string;
   name: string;
-  priority: number;
+  /** '' mentre il campo è vuoto in modifica; al salvataggio vale 100. */
+  priority: number | '';
   active: boolean;
   match_from: string;
   match_subject: string;
@@ -90,7 +91,7 @@ export function RulesDialog({ open, onClose }: RulesDialogProps) {
     mutationFn: async (state: FormState) => {
       const payload = {
         name: state.name,
-        priority: state.priority,
+        priority: state.priority === '' ? 100 : state.priority,
         active: state.active,
         match_from: state.match_from || null,
         match_subject: state.match_subject || null,
@@ -328,7 +329,12 @@ export function RulesDialog({ open, onClose }: RulesDialogProps) {
                 <Input
                   type="number"
                   value={editing.priority}
-                  onChange={(e) => setEditing({ ...editing, priority: parseInt(e.target.value, 10) || 100 })}
+                  onChange={(e) => {
+                    // `|| 100` trasformava 0 (priorità massima) in 100 e
+                    // svuotando il campo lo riempiva di nuovo con 100.
+                    const n = parseInt(e.target.value, 10);
+                    setEditing({ ...editing, priority: Number.isNaN(n) ? '' : n });
+                  }}
                 />
                 <p className="text-[10px] text-muted-foreground mt-1">Minore = prima nell'ordine di valutazione.</p>
               </div>

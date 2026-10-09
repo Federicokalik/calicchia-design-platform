@@ -187,6 +187,30 @@ export async function deleteEvent(id: string): Promise<boolean> {
   const existing = await getEvent(id);
   if (!existing) return false;
   assertWritable(existing);
+  // Evento proiettato da una prenotazione attiva: cancellarlo lasciava il
+  // booking confermato ma invisibile in calendario, feed ICS e CalDAV (il
+  // cliente si presentava comunque). Si annulla da Prenotazioni.
+  if (existing.source === 'booking' && existing.source_id) {
+    const [active] = await sql`
+      SELECT 1 FROM calendar_bookings
+      WHERE uid = ${existing.source_id} AND status IN ('pending', 'confirmed')
+      LIMIT 1`;
+    if (active) {
+      throw new EventReadOnlyError('Evento di una prenotazione attiva: annullala da Calendario → Prenotazioni.');
+    }
+  }
+  // Un override sostituisce un'occorrenza del master: cancellarne la riga fa
+  // ricomparire l'occorrenza originale espansa dalla RRULE (l'utente elimina
+  // l'evento e lo ritrova al suo posto, all'orario della serie). Lo si marca
+  // invece come cancellato, così continua a sopprimere quell'occorrenza.
+  if (existing.recurrence_master_id) {
+    const rows = await sql`
+      UPDATE calendar_events SET status = 'cancelled', updated_at = NOW()
+      WHERE id = ${existing.id}::uuid
+      RETURNING id
+    `;
+    return rows.length > 0;
+  }
   const rows = await sql`DELETE FROM calendar_events WHERE id = ${existing.id}::uuid RETURNING id`;
   return rows.length > 0;
 }

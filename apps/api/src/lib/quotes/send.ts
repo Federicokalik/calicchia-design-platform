@@ -53,7 +53,8 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
 
   if (channels?.includes('email') && quote.customer_email) {
     try {
-      await sendEmail({
+      // sendEmail non lancia: restituisce { success: false } su errore o senza trasporto.
+      const result = await sendEmail({
         to: quote.customer_email,
         subject: `Preventivo: ${displayTitle}`,
         html: `
@@ -67,6 +68,7 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
           <p style="margin-top:16px;font-size:12px;color:#999;">Questo è un messaggio automatico inviato dal gestionale di Calicchia Design. Puoi rispondere direttamente a questa email per qualsiasi domanda.</p>
         `,
       });
+      if (!result.success) throw new Error(result.error || 'Invio email fallito');
       sentVia.push('email');
     } catch (err) {
       log.error({ err }, 'Error sending quote email');

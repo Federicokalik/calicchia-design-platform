@@ -53,8 +53,8 @@ interface CreateLinkResponse {
   bank_details?: {
     iban: string;
     bic: string;
-    intestatario: string;
-    causale: string;
+    holder_name: string;
+    causal: string;
   };
 }
 
@@ -247,12 +247,12 @@ export default function CreateLinkDialog({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Intestatario</span>
-                    <span>{result.bank_details.intestatario}</span>
+                    <span>{result.bank_details.holder_name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Causale</span>
                     <span className="text-right max-w-[200px]">
-                      {result.bank_details.causale}
+                      {result.bank_details.causal}
                     </span>
                   </div>
                 </div>

@@ -3,7 +3,7 @@
  * Executes a workflow graph: trigger → nodes → edges → output
  */
 
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { NODE_TYPES } from './nodes';
 
 interface WorkflowNode {
@@ -25,6 +25,19 @@ interface ExecutionContext {
   executionId: string;
   workflowId: string;
   variables: Record<string, any>;
+  /** Dati dell'evento/trigger, ripassati a ogni nodo (vedi carryInput). */
+  trigger: Record<string, any>;
+}
+
+/**
+ * Input del nodo successivo: i dati del trigger più l'output del nodo appena
+ * eseguito (che ha la precedenza). Passando solo l'output, dopo il primo nodo
+ * che restituisce un oggetto proprio (es. Telegram → { sent }) i dati
+ * dell'evento si perdevano e {{quote_id}}, {{title}}… diventavano vuoti.
+ */
+function carryInput(output: any, context: ExecutionContext): any {
+  if (!output || typeof output !== 'object' || Array.isArray(output)) return output;
+  return { ...context.trigger, ...output };
 }
 
 export async function executeWorkflow(
@@ -43,8 +56,8 @@ export async function executeWorkflow(
   // Create execution record
   const [execution] = await sql`
     INSERT INTO workflow_executions (workflow_id, trigger_data)
-    VALUES (${workflowId}, ${JSON.stringify(triggerData)})
-    RETURNING id
+    VALUES (${workflowId}, ${jsonb(triggerData)})
+    RETURNING id, started_at
   `;
   const executionId = execution.id;
 
@@ -52,6 +65,7 @@ export async function executeWorkflow(
     executionId,
     workflowId,
     variables: { ...(workflow.variables || {}), ...triggerData },
+    trigger: triggerData && typeof triggerData === 'object' && !Array.isArray(triggerData) ? triggerData : {},
   };
 
   try {
@@ -66,7 +80,7 @@ export async function executeWorkflow(
     const duration = Date.now() - new Date(execution.started_at || Date.now()).getTime();
     await sql`
       UPDATE workflow_executions SET
-        status = 'completed', result = ${JSON.stringify(result)},
+        status = 'completed', result = ${jsonb(result)},
         completed_at = now(), duration_ms = ${duration}
       WHERE id = ${executionId}
     `;
@@ -87,8 +101,11 @@ export async function executeWorkflow(
         status = 'failed', error = ${errorMsg}, completed_at = now()
       WHERE id = ${executionId}
     `;
+    // last_executed_at anche sul fallimento: lo scheduler cron lo usa come
+    // ultimo avvio e, se restava NULL, rieseguiva il workflow ogni 5 minuti
+    // ripetendo gli effetti dei nodi già eseguiti (email, Telegram…).
     await sql`
-      UPDATE workflows SET last_error = ${errorMsg}, updated_at = now()
+      UPDATE workflows SET last_error = ${errorMsg}, last_executed_at = now(), updated_at = now()
       WHERE id = ${workflowId}
     `;
     return { executionId, status: 'failed', result: { error: errorMsg } };
@@ -106,7 +123,7 @@ async function executeFromNode(
   const startTime = Date.now();
   await sql`
     INSERT INTO workflow_step_logs (execution_id, node_id, node_type, status, input)
-    VALUES (${context.executionId}, ${node.id}, ${node.type}, 'running', ${JSON.stringify(input)})
+    VALUES (${context.executionId}, ${node.id}, ${node.type}, 'running', ${jsonb(input)})
   `;
 
   // Execute node
@@ -129,7 +146,7 @@ async function executeFromNode(
   const duration = Date.now() - startTime;
   await sql`
     UPDATE workflow_step_logs SET
-      status = 'completed', output = ${JSON.stringify(output)},
+      status = 'completed', output = ${jsonb(output)},
       duration_ms = ${duration}, completed_at = now()
     WHERE execution_id = ${context.executionId} AND node_id = ${node.id} AND status = 'running'
   `;
@@ -145,16 +162,19 @@ async function executeFromNode(
     return output;
   }
 
-  // Handle branching (condition node)
-  if (output?._branch && outgoingEdges.length > 1) {
-    // Find edge matching the branch
+  // Handle branching (condition node): si segue solo l'arco del ramo scelto.
+  // Prima, con un solo arco collegato (es. solo "vero") il ramo veniva seguito
+  // anche quando la condizione era falsa. Archi senza sourceHandle = workflow
+  // creati quando il nodo aveva un'unica uscita: si mantiene il vecchio comportamento.
+  if (output?._branch) {
     const branchEdge = outgoingEdges.find((e) =>
       e.sourceHandle === output._branch || e.sourceHandle === `handle-${output._branch}`
-    ) || outgoingEdges[0];
+    ) ?? (outgoingEdges.every((e) => !e.sourceHandle) ? outgoingEdges[0] : undefined);
+    if (!branchEdge) return output;
 
     const nextNode = allNodes.find((n) => n.id === branchEdge.target);
     if (nextNode) {
-      return executeFromNode(nextNode, allNodes, allEdges, output, context);
+      return executeFromNode(nextNode, allNodes, allEdges, carryInput(output, context), context);
     }
     return output;
   }
@@ -178,7 +198,7 @@ async function executeFromNode(
   for (const edge of outgoingEdges) {
     const nextNode = allNodes.find((n) => n.id === edge.target);
     if (nextNode) {
-      lastResult = await executeFromNode(nextNode, allNodes, allEdges, output, context);
+      lastResult = await executeFromNode(nextNode, allNodes, allEdges, carryInput(output, context), context);
     }
   }
 

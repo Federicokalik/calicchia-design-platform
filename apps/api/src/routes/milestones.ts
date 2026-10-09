@@ -7,7 +7,7 @@ milestones.get('/by-project/:projectId', async (c) => {
   const rows = await sql`
     SELECT * FROM project_milestones
     WHERE project_id = ${c.req.param('projectId')}
-    ORDER BY sort_order ASC
+    ORDER BY sort_order ASC, created_at ASC
   `;
   return c.json({ milestones: rows });
 });
@@ -23,7 +23,8 @@ milestones.post('/', async (c) => {
     SELECT COALESCE(MAX(sort_order), -1) AS max_order
     FROM project_milestones WHERE project_id = ${body.project_id}
   `;
-  const sortOrder = (parseInt(maxRow.max_order as string) || -1) + 1;
+  // COALESCE(..., -1) copre già la lista vuota; con `|| -1` un max di 0 dava sempre 0.
+  const sortOrder = Number(maxRow.max_order) + 1;
 
   const [milestone] = await sql`
     INSERT INTO project_milestones ${sql({ ...body, sort_order: sortOrder })} RETURNING *

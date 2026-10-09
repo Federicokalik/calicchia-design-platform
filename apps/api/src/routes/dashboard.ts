@@ -129,7 +129,8 @@ dashboard.get('/revenue', async (c) => {
     `,
   ]);
 
-  const mrr = subscriptions.reduce((acc, s) => acc + ((s.amount as number) || 0), 0);
+  // numeric arriva da postgres-js come stringa: senza Number() il reduce concatena
+  const mrr = subscriptions.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
   const hoursWorked = Math.round(timeEntriesData.reduce((acc, t) => acc + ((t.duration_minutes as number) || 0), 0) / 60);
   const collectedAuto = Number((paymentLinksPaid[0] as { total: string | number })?.total ?? 0);
   const collectedManual = Number((trackerPaid[0] as { total: string | number })?.total ?? 0);
@@ -314,7 +315,7 @@ dashboard.get('/quotes-summary', async (c) => {
     sql`SELECT COUNT(*) AS count FROM quotes WHERE status = 'accepted' AND created_at >= ${monthStart}`,
   ]);
 
-  const pendingTotal = pendingQuotes.reduce((acc, q) => acc + ((q.total as number) || 0), 0);
+  const pendingTotal = pendingQuotes.reduce((acc, q) => acc + (Number(q.total) || 0), 0);
 
   return c.json({
     pending_count: pendingQuotes.length,

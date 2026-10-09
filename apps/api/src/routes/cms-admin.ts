@@ -429,7 +429,11 @@ const teamUpsertSchema = z.object({
   name: z.string().trim().min(1, 'Nome richiesto'),
   role: z.string().trim().min(1, 'Ruolo richiesto'),
   bio: z.string().nullable().optional(),
-  avatar_url: z.string().url().nullable().optional().or(z.literal('').transform(() => null)),
+  // URL assoluto o path relativo a sito-v3/public ('/img/team/…', come i membri
+  // esistenti): con .url() i membri reali non si potevano modificare né nascondere.
+  avatar_url: z.string().trim()
+    .refine((v) => /^https?:\/\//.test(v) || v.startsWith('/'), 'URL avatar non valido')
+    .nullable().optional().or(z.literal('').transform(() => null)),
   email: z.string().email().nullable().optional().or(z.literal('').transform(() => null)),
   socials: z.array(teamSocialSchema).default([]),
   sort_order: z.number().int().nullable().optional(),

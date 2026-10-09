@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { fail } from '../../lib/responses';
 import { portalAuth, type PortalEnv } from './auth';
 import { logger } from '../../lib/logger';
@@ -112,7 +112,7 @@ messagesRoutes.post('/projects/:id/messages', portalAuth, async (c) => {
   const senderName = sender?.contact_name || (role === 'collaborator' ? 'Collaboratore' : 'Cliente');
 
   const attachments = attachment_url
-    ? JSON.stringify([{ url: attachment_url, name: attachment_name || 'Allegato' }])
+    ? jsonb([{ url: attachment_url, name: attachment_name || 'Allegato' }])
     : null;
 
   const [message] = await sql`

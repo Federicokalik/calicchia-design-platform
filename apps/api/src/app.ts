@@ -391,7 +391,9 @@ app.post('/api/wh/:webhookId', async (c) => {
 app.route('/api/portal', portal);
 // GDPR cookie consent log — public endpoint, rate-limited 10 req / 60s per IP
 // (audit J-03). Schema-validated in the route handler with strict zod object.
-app.use('/api/cookie-consent', createRateLimit(10, 60 * 1000));
+// postOnly: il limite vale per la registrazione pubblica, non per la lista
+// admin (filtri e refetch la portavano in 429).
+app.use('/api/cookie-consent', postOnly(createRateLimit(10, 60 * 1000)));
 app.route('/api/cookie-consent', cookieConsent);
 // postOnly so the 3 req / 10 min cap throttles only the public submission,
 // not the admin GET listing (audit E-006: admin loading the queue 3x burned
@@ -562,9 +564,12 @@ app.route('/api/admin/kb', adminKb);
 app.route('/api/cms', cmsAdmin);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
+// Solo export e import: limitare anche GET /info (letta a ogni apertura del
+// tab Backup, al focus e dopo ogni salvataggio) esauriva i 3 tentativi e poi
+// export/ripristino rispondevano 429 proprio quando servivano.
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);
-app.use('/api/backup', backupRateLimit);
-app.use('/api/backup/*', backupRateLimit);
+app.use('/api/backup/export', backupRateLimit);
+app.use('/api/backup/import', backupRateLimit);
 app.route('/api/backup', backup);
 
 // MCP endpoints (service-token auth, separato dal JWT admin)

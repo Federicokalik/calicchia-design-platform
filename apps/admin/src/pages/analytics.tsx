@@ -83,11 +83,18 @@ export default function AnalyticsPage() {
   const tsData = useMemo(() => {
     const cur = ts?.series ?? [];
     const prev = ts?.seriesPrev ?? null;
-    return cur.map((p, i) => ({
-      bucket: p.bucket,
-      value: p.value,
-      valuePrev: prev?.[i]?.value ?? null,
-    }));
+    // Unione per bucket, non per indice: le due serie omettono i bucket senza
+    // eventi, quindi l'allineamento per posizione sfasava il confronto.
+    const byBucket = new Map<string, { bucket: string; value: number; valuePrev: number | null }>();
+    for (const p of cur) byBucket.set(p.bucket, { bucket: p.bucket, value: p.value, valuePrev: prev ? 0 : null });
+    if (prev) {
+      for (const p of prev) {
+        const e = byBucket.get(p.bucket);
+        if (e) e.valuePrev = p.value;
+        else byBucket.set(p.bucket, { bucket: p.bucket, value: 0, valuePrev: p.value });
+      }
+    }
+    return [...byBucket.values()].sort((a, b) => a.bucket.localeCompare(b.bucket));
   }, [ts]);
 
   const cur = overview?.current;
@@ -130,40 +137,40 @@ export default function AnalyticsPage() {
                 </CardContent>
               </Card>
 
-              <OverviewBreakdowns period={period} />
+              <OverviewBreakdowns period={period} totalPageviews={cur?.pageviews} />
             </>
           )}
         </TabsContent>
 
         {/* ─── PAGINE ────────────────────────────────────────────────────────── */}
         <TabsContent value="pages">
-          <BreakdownCard dimension="page" period={period} title="Top pagine" limit={50} />
+          <BreakdownCard totalPageviews={cur?.pageviews} dimension="page" period={period} title="Top pagine" limit={50} />
         </TabsContent>
 
         {/* ─── SORGENTI ──────────────────────────────────────────────────────── */}
         <TabsContent value="sources">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <BreakdownCard dimension="referrer" period={period} title="Top referrer" limit={20} />
-            <BreakdownCard dimension="utm_source" period={period} title="UTM source" limit={20} />
-            <BreakdownCard dimension="utm_medium" period={period} title="UTM medium" limit={20} />
-            <BreakdownCard dimension="utm_campaign" period={period} title="UTM campaign" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="referrer" period={period} title="Top referrer" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="utm_source" period={period} title="UTM source" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="utm_medium" period={period} title="UTM medium" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="utm_campaign" period={period} title="UTM campaign" limit={20} />
           </div>
         </TabsContent>
 
         {/* ─── TECNOLOGIA ────────────────────────────────────────────────────── */}
         <TabsContent value="tech">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <BreakdownCard dimension="browser" period={period} title="Browser" limit={20} />
-            <BreakdownCard dimension="os" period={period} title="Sistema operativo" limit={20} />
-            <BreakdownCard dimension="device" period={period} title="Dispositivo" limit={10} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="browser" period={period} title="Browser" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="os" period={period} title="Sistema operativo" limit={20} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="device" period={period} title="Dispositivo" limit={10} />
           </div>
         </TabsContent>
 
         {/* ─── GEO ───────────────────────────────────────────────────────────── */}
         <TabsContent value="geo">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <BreakdownCard dimension="country" period={period} title="Paesi" limit={30} />
-            <BreakdownCard dimension="city" period={period} title="Città" limit={30} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="country" period={period} title="Paesi" limit={30} />
+            <BreakdownCard totalPageviews={cur?.pageviews} dimension="city" period={period} title="Città" limit={30} />
           </div>
         </TabsContent>
 
@@ -208,18 +215,20 @@ export default function AnalyticsPage() {
 
 // ─── Sub-components ────────────────────────────────────────────────────────
 
-function OverviewBreakdowns({ period }: { period: PeriodValue }) {
+function OverviewBreakdowns({ period, totalPageviews }: { period: PeriodValue; totalPageviews?: number }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <BreakdownCard dimension="page" period={period} title="Top pagine" limit={8} compact />
-      <BreakdownCard dimension="referrer" period={period} title="Sorgenti" limit={8} compact />
-      <BreakdownCard dimension="country" period={period} title="Paesi" limit={8} compact />
+      <BreakdownCard totalPageviews={totalPageviews} dimension="page" period={period} title="Top pagine" limit={8} compact />
+      <BreakdownCard totalPageviews={totalPageviews} dimension="referrer" period={period} title="Sorgenti" limit={8} compact />
+      <BreakdownCard totalPageviews={totalPageviews} dimension="country" period={period} title="Paesi" limit={8} compact />
     </div>
   );
 }
 
-function BreakdownCard({ dimension, period, title, limit = 20, compact }: {
+function BreakdownCard({ dimension, period, title, limit = 20, compact, totalPageviews }: {
   dimension: string; period: PeriodValue; title: string; limit?: number; compact?: boolean;
+  /** Pageview totali del periodo: la quota % va calcolata su questo, non sulle sole righe top-N. */
+  totalPageviews?: number;
 }) {
   const { data } = useQuery<{ rows: Array<{ key: string | null; label: string; pageviews: number; visitors: number; sessions: number }> }>({
     queryKey: ['analytics-breakdown', dimension, period, limit],
@@ -232,7 +241,7 @@ function BreakdownCard({ dimension, period, title, limit = 20, compact }: {
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <BreakdownTable rows={data?.rows ?? []} emptyText="Nessun dato per il periodo" />
+        <BreakdownTable rows={data?.rows ?? []} totalPageviews={totalPageviews} emptyText="Nessun dato per il periodo" />
         {!compact && data && data.rows.length === limit && (
           <p className="text-[10px] text-muted-foreground mt-2 text-center">Limite {limit} righe</p>
         )}

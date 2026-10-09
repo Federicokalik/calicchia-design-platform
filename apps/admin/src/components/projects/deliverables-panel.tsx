@@ -297,9 +297,14 @@ export function DeliverablesPanel({ projectId }: { projectId: string }) {
               <Select value={newType} onValueChange={setNewType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
+                  {/* Valori ammessi dal CHECK chk_deliverable_type */}
+                  <SelectItem value="web">Web</SelectItem>
                   <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="document">Documento</SelectItem>
-                  <SelectItem value="code">Codice</SelectItem>
+                  <SelectItem value="logo">Logo</SelectItem>
+                  <SelectItem value="brand_identity">Brand identity</SelectItem>
+                  <SelectItem value="social">Social</SelectItem>
+                  <SelectItem value="print">Stampa</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
                   <SelectItem value="other">Altro</SelectItem>
                 </SelectContent>
               </Select>

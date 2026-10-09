@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { Handle, Position, useReactFlow, type NodeProps } from '@xyflow/react';
 import { cn } from '@/lib/utils';
 
 interface MindMapNodeData {
@@ -18,8 +18,9 @@ const COLORS = [
   'bg-primary/10 border-primary/30',
 ];
 
-function MindMapNode({ data, selected }: NodeProps) {
+function MindMapNode({ id, data, selected }: NodeProps) {
   const nodeData = data as MindMapNodeData;
+  const { updateNodeData } = useReactFlow();
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(nodeData.label || '');
   const inputRef = useRef<HTMLInputElement>(null);
@@ -31,12 +32,13 @@ function MindMapNode({ data, selected }: NodeProps) {
     }
   }, [editing]);
 
+  // updateNodeData passa da onNodesChange (change 'replace') e quindi
+  // dall'autosave del canvas; mutare data.label direttamente non salvava nulla.
   const finishEditing = useCallback(() => {
     setEditing(false);
-    if (label.trim() !== nodeData.label) {
-      nodeData.label = label.trim() || 'Nodo';
-    }
-  }, [label, nodeData]);
+    const next = label.trim() || 'Nodo';
+    if (next !== nodeData.label) updateNodeData(id, { label: next });
+  }, [id, label, nodeData.label, updateNodeData]);
 
   const depth = typeof nodeData.depth === 'number' ? nodeData.depth : 0;
   const colorIdx = depth % COLORS.length;

@@ -52,7 +52,7 @@ export default function DominiPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ['domains', search],
-    queryFn: () => apiFetch(`/api/domains${search ? `?search=${search}` : ''}`),
+    queryFn: () => apiFetch(`/api/domains${search ? `?search=${encodeURIComponent(search)}` : ''}`),
   });
 
   const { data: customersData } = useQuery({
@@ -62,7 +62,8 @@ export default function DominiPage() {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const body = { ...form };
+      // Campi opzionali vuoti → null (una stringa vuota su una colonna date dà 500).
+      const body = { ...form, hosting_server: form.hosting_server || null, notes: form.notes || null };
       if (editId) {
         return apiFetch(`/api/domains/${editId}`, { method: 'PUT', body: JSON.stringify(body) });
       }
@@ -75,7 +76,7 @@ export default function DominiPage() {
       setForm(EMPTY_FORM);
       toast.success(editId ? 'Dominio aggiornato' : 'Dominio aggiunto');
     },
-    onError: () => toast.error('Errore salvataggio'),
+    onError: (err: Error) => toast.error(err.message || 'Errore salvataggio'),
   });
 
   const deleteMutation = useMutation({
@@ -157,7 +158,7 @@ export default function DominiPage() {
                   <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="text-sm font-medium">{d.full_domain || `${d.domain_name}.${d.tld}`}</span>
                 </div>
-                <span className="text-sm text-muted-foreground truncate">{d.customer_name || '—'}</span>
+                <span className="text-sm text-muted-foreground truncate">{d.customers?.company_name || d.customers?.contact_name || '—'}</span>
                 <span className="text-sm text-muted-foreground">
                   {expDate ? new Date(expDate).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}
                 </span>
@@ -196,7 +197,7 @@ export default function DominiPage() {
           <form onSubmit={(e) => { e.preventDefault(); saveMutation.mutate(); }} className="space-y-3">
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2 space-y-1">
-                <Label className="text-xs">Nome dominio</Label>
+                <Label className="text-xs">Nome dominio *</Label>
                 <Input value={form.domain_name} onChange={(e) => setForm({ ...form, domain_name: e.target.value })} placeholder="example" />
               </div>
               <div className="space-y-1">
@@ -214,11 +215,11 @@ export default function DominiPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label className="text-xs">Data registrazione</Label>
+                <Label className="text-xs">Data registrazione *</Label>
                 <Input type="date" value={form.registration_date} onChange={(e) => setForm({ ...form, registration_date: e.target.value })} />
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Data scadenza</Label>
+                <Label className="text-xs">Data scadenza *</Label>
                 <Input type="date" value={form.expiration_date} onChange={(e) => setForm({ ...form, expiration_date: e.target.value })} />
               </div>
             </div>
@@ -236,7 +237,7 @@ export default function DominiPage() {
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs">Cliente</Label>
+                <Label className="text-xs">Cliente *</Label>
                 <Select value={form.customer_id} onValueChange={(v) => setForm({ ...form, customer_id: v })}>
                   <SelectTrigger className="h-9"><SelectValue placeholder="Seleziona..." /></SelectTrigger>
                   <SelectContent>
@@ -258,10 +259,12 @@ export default function DominiPage() {
                 <Select value={form.ssl_status} onValueChange={(v) => setForm({ ...form, ssl_status: v })}>
                   <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    {/* Valori ammessi dal CHECK domains_ssl_status_check */}
                     <SelectItem value="none">Nessuno</SelectItem>
-                    <SelectItem value="active">Attivo</SelectItem>
+                    <SelectItem value="lets_encrypt">Let's Encrypt</SelectItem>
+                    <SelectItem value="cloudflare">Cloudflare</SelectItem>
+                    <SelectItem value="custom">Personalizzato</SelectItem>
                     <SelectItem value="expired">Scaduto</SelectItem>
-                    <SelectItem value="pending">In attesa</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -274,7 +277,8 @@ export default function DominiPage() {
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditId(null); }}>Annulla</Button>
-              <Button type="submit" disabled={!form.domain_name || !form.expiration_date || saveMutation.isPending}>
+              {/* customer_id e registration_date sono NOT NULL in domains */}
+              <Button type="submit" disabled={!form.domain_name || !form.expiration_date || !form.registration_date || !form.customer_id || saveMutation.isPending}>
                 {editId ? 'Salva' : 'Aggiungi'}
               </Button>
             </DialogFooter>

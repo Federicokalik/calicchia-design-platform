@@ -62,6 +62,9 @@ export function SetupWizard({ onSaved }: SetupWizardProps) {
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
+  // Finché l'utente non tocca il campo, lo username segue l'email. Il vecchio
+  // `if (!username)` copiava solo il primo carattere digitato.
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [password, setPassword] = useState('');
   const [imapHost, setImapHost] = useState('');
   const [imapPort, setImapPort] = useState(993);
@@ -86,7 +89,7 @@ export function SetupWizard({ onSaved }: SetupWizardProps) {
 
   const handleEmailChange = (v: string) => {
     setEmail(v);
-    if (!username) setUsername(v);
+    if (!usernameTouched) setUsername(v);
   };
 
   const handleTest = async () => {
@@ -193,7 +196,7 @@ export function SetupWizard({ onSaved }: SetupWizardProps) {
             <Input
               id="username"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => { setUsernameTouched(true); setUsername(e.target.value); }}
             />
           </div>
           <div>

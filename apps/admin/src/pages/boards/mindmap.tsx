@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
   ReactFlow, Background, Controls, MiniMap,
   useNodesState, useEdgesState, addEdge,
-  type Connection, type Edge, type Node, BackgroundVariant,
+  type Connection, type Edge, type EdgeChange, type Node, type NodeChange, BackgroundVariant,
   ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -23,14 +23,28 @@ const nodeTypes = { mindmapNode: MindMapNode };
 
 let nodeIdCounter = 100;
 
+const DEFAULT_NODES: Node[] = [
+  { id: '1', type: 'mindmapNode', position: { x: 300, y: 250 }, data: { label: 'Idea centrale' } },
+];
+
+function parseBoardData(board: Board): { nodes?: Node[]; edges?: Edge[] } {
+  if (typeof board.data !== 'string') return (board.data as { nodes?: Node[]; edges?: Edge[] }) || {};
+  try { return JSON.parse(board.data); } catch { return {}; }
+}
+
+// Cambi che non modificano la mappa: ReactFlow emette 'dimensions' al mount
+// (misura dei nodi) e 'select' al click. Salvarli riscriveva la board a ogni apertura.
+const isPersistedNodeChange = (change: NodeChange) =>
+  change.type === 'add' || change.type === 'remove' || change.type === 'replace'
+  || (change.type === 'position' && !change.dragging);
+
+/**
+ * Lo stato di ReactFlow (useNodesState) legge il valore iniziale solo al primo
+ * render: il canvas va montato solo quando la board è caricata, altrimenti parte
+ * dal nodo di default e il primo autosave sovrascrive la mappa salvata.
+ */
 function MindMapEditor() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [title, setTitle] = useState('');
-  const [saving, setSaving] = useState(false);
-  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const titleInitialized = useRef(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ['board', id],
@@ -39,37 +53,57 @@ function MindMapEditor() {
   });
 
   const board: Board | undefined = data?.board;
-  const boardData = board ? (typeof board.data === 'string' ? JSON.parse(board.data as string) : board.data) : null;
 
-  const initialNodes: Node[] = boardData?.nodes || [
-    { id: '1', type: 'mindmapNode', position: { x: 300, y: 250 }, data: { label: 'Idea centrale' } },
-  ];
-  const initialEdges: Edge[] = boardData?.edges || [];
+  useTopbar({ title: 'Mappa concettuale' });
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-6 w-6 animate-spin" /></div>;
+  if (!board) return <div className="text-center text-muted-foreground py-12">Board non trovata</div>;
 
-  useEffect(() => {
-    if (board?.title && !titleInitialized.current) {
-      setTitle(board.title);
-      titleInitialized.current = true;
-    }
-  }, [board?.title]);
+  return <MindMapCanvas key={board.id} board={board} />;
+}
+
+function MindMapCanvas({ board }: { board: Board }) {
+  const id = board.id;
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState(board.title);
+  const [saving, setSaving] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [initial] = useState(() => parseBoardData(board));
+  const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes || DEFAULT_NODES);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges || []);
+
+  // L'autosave legge lo stato al momento dello scatto del timer, non quello
+  // catturato quando è stato programmato.
+  const nodesRef = useRef(nodes);
+  const edgesRef = useRef(edges);
+  nodesRef.current = nodes;
+  edgesRef.current = edges;
 
   const saveMutation = useMutation({
     mutationFn: (updates: Partial<Board>) =>
       apiFetch(`/api/boards/${id}`, { method: 'PUT', body: JSON.stringify(updates) }),
-    onSuccess: () => { setSaving(false); queryClient.invalidateQueries({ queryKey: ['boards'] }); },
+    // Autosave ogni 1,5s: niente refetch globale, la cache del dettaglio viene
+    // allineata con la risposta così riaprendo la mappa non si vede una versione vecchia.
+    meta: { skipGlobalInvalidation: true },
+    onSuccess: (res) => {
+      setSaving(false);
+      queryClient.setQueryData(['board', id], res);
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    },
     onError: () => { setSaving(false); toast.error('Errore salvataggio'); },
   });
+  const saveMutateRef = useRef(saveMutation.mutate);
+  saveMutateRef.current = saveMutation.mutate;
 
-  const scheduleAutosave = useCallback((currentNodes: Node[], currentEdges: Edge[]) => {
+  const scheduleAutosave = useCallback(() => {
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       setSaving(true);
-      saveMutation.mutate({ data: { nodes: currentNodes, edges: currentEdges } } as any);
+      saveMutateRef.current({ data: { nodes: nodesRef.current, edges: edgesRef.current } } as any);
     }, 1500);
-  }, [saveMutation]);
+  }, []);
 
   const onConnect = useCallback((connection: Connection) => {
     setEdges((eds) => {
@@ -79,61 +113,45 @@ function MindMapEditor() {
         animated: true,
         style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 },
       }, eds);
-      scheduleAutosave(nodes, newEdges);
       return newEdges;
     });
-  }, [setEdges, nodes, scheduleAutosave]);
+    scheduleAutosave();
+  }, [setEdges, scheduleAutosave]);
 
-  const handleNodesChange = useCallback((changes: any) => {
+  const handleNodesChange = useCallback((changes: NodeChange[]) => {
     onNodesChange(changes);
-    // Schedule save after node move/edit
-    setTimeout(() => {
-      setNodes((currentNodes) => {
-        setEdges((currentEdges) => {
-          scheduleAutosave(currentNodes, currentEdges);
-          return currentEdges;
-        });
-        return currentNodes;
-      });
-    }, 0);
-  }, [onNodesChange, scheduleAutosave, setNodes, setEdges]);
+    if (changes.some(isPersistedNodeChange)) scheduleAutosave();
+  }, [onNodesChange, scheduleAutosave]);
+
+  const handleEdgesChange = useCallback((changes: EdgeChange[]) => {
+    onEdgesChange(changes);
+    if (changes.some((change) => change.type === 'remove' || change.type === 'add' || change.type === 'replace')) scheduleAutosave();
+  }, [onEdgesChange, scheduleAutosave]);
 
   const addNodeFrom = useCallback((parentId?: string, asSibling = false) => {
     const newId = `node_${++nodeIdCounter}_${Date.now()}`;
+    let connectFrom = parentId;
+    let pos = { x: 200 + Math.random() * 300, y: 100 + Math.random() * 300 };
 
-    setNodes((nds) => {
-      setEdges((eds) => {
-        let connectFrom = parentId;
-        let pos = { x: 200 + Math.random() * 300, y: 100 + Math.random() * 300 };
+    const parent = parentId ? nodes.find((n) => n.id === parentId) : undefined;
+    if (parent) {
+      if (asSibling) {
+        // Find parent's parent via edges
+        const parentEdge = edges.find((e) => e.target === parentId);
+        connectFrom = parentEdge?.source || undefined;
+        pos = { x: parent.position.x, y: parent.position.y + 80 };
+      } else {
+        pos = { x: parent.position.x + 200, y: parent.position.y + (Math.random() - 0.5) * 100 };
+      }
+    }
 
-        if (parentId) {
-          const parent = nds.find((n) => n.id === parentId);
-          if (parent) {
-            if (asSibling) {
-              // Find parent's parent via edges
-              const parentEdge = eds.find((e) => e.target === parentId);
-              connectFrom = parentEdge?.source || undefined;
-              pos = { x: parent.position.x, y: parent.position.y + 80 };
-            } else {
-              pos = { x: parent.position.x + 200, y: parent.position.y + (Math.random() - 0.5) * 100 };
-            }
-          }
-        }
-
-        const newEdges = connectFrom
-          ? [...eds, { id: `e_${connectFrom}_${newId}`, source: connectFrom, target: newId, type: 'smoothstep', animated: true, style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 } }]
-          : eds;
-
-        const newNode: Node = { id: newId, type: 'mindmapNode', position: pos, data: { label: 'Nuovo nodo' }, selected: true };
-        const updated = [...nds.map((n) => ({ ...n, selected: false })), newNode];
-        scheduleAutosave(updated, newEdges);
-        return newEdges;
-      });
-
-      const newNode: Node = { id: newId, type: 'mindmapNode', position: { x: 0, y: 0 }, data: { label: 'Nuovo nodo' }, selected: true };
-      return [...nds.map((n) => ({ ...n, selected: false })), newNode];
-    });
-  }, [setNodes, setEdges, scheduleAutosave]);
+    const newNode: Node = { id: newId, type: 'mindmapNode', position: pos, data: { label: 'Nuovo nodo' }, selected: true };
+    setNodes([...nodes.map((n) => ({ ...n, selected: false })), newNode]);
+    if (connectFrom) {
+      setEdges([...edges, { id: `e_${connectFrom}_${newId}`, source: connectFrom, target: newId, type: 'smoothstep', animated: true, style: { stroke: 'hsl(var(--primary))', strokeWidth: 2 } }]);
+    }
+    scheduleAutosave();
+  }, [nodes, edges, setNodes, setEdges, scheduleAutosave]);
 
   const addNode = () => addNodeFrom();
 
@@ -157,16 +175,10 @@ function MindMapEditor() {
   }, [nodes, addNodeFrom]);
 
   const deleteSelected = () => {
-    setNodes((nds) => {
-      const remaining = nds.filter((n) => !n.selected);
-      setEdges((eds) => {
-        const selectedIds = new Set(nds.filter((n) => n.selected).map((n) => n.id));
-        const remainingEdges = eds.filter((e) => !e.selected && !selectedIds.has(e.source) && !selectedIds.has(e.target));
-        scheduleAutosave(remaining, remainingEdges);
-        return remainingEdges;
-      });
-      return remaining;
-    });
+    const selectedIds = new Set(nodes.filter((n) => n.selected).map((n) => n.id));
+    setNodes(nodes.filter((n) => !n.selected));
+    setEdges(edges.filter((e) => !e.selected && !selectedIds.has(e.source) && !selectedIds.has(e.target)));
+    scheduleAutosave();
   };
 
   // Compute depth for color coding
@@ -206,7 +218,7 @@ function MindMapEditor() {
   const autoLayout = async (direction: LayoutDirection) => {
     const laid = await layoutNodes(nodes, edges, direction);
     setNodes(laid);
-    scheduleAutosave(laid, edges);
+    scheduleAutosave();
     toast.success('Layout applicato');
   };
 
@@ -224,7 +236,7 @@ function MindMapEditor() {
       if (res.nodes && res.edges) {
         setNodes(res.nodes);
         setEdges(res.edges);
-        scheduleAutosave(res.nodes, res.edges);
+        scheduleAutosave();
         setShowAiInput(false);
         setAiTopic('');
         toast.success('Mappa generata con AI');
@@ -265,7 +277,7 @@ function MindMapEditor() {
         });
         setNodes((nds) => [...nds, ...newNodes]);
         setEdges((eds) => [...eds, ...newEdges]);
-        scheduleAutosave([...nodes, ...newNodes], [...edges, ...newEdges]);
+        scheduleAutosave();
         toast.success(`${res.ideas.length} idee generate`);
       }
     } catch { toast.error('Errore brainstorm AI'); }
@@ -273,15 +285,10 @@ function MindMapEditor() {
   };
 
   const handleTitleBlur = () => {
-    if (board && title !== board.title) {
+    if (title !== board.title) {
       saveMutation.mutate({ title } as any);
     }
   };
-
-  useTopbar({ title: 'Mappa concettuale' });
-
-  if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-6 w-6 animate-spin" /></div>;
-  if (!board) return <div className="text-center text-muted-foreground py-12">Board non trovata</div>;
 
   return (
     <div className="space-y-3">
@@ -356,7 +363,7 @@ function MindMapEditor() {
           nodes={nodes}
           edges={edges}
           onNodesChange={handleNodesChange}
-          onEdgesChange={onEdgesChange}
+          onEdgesChange={handleEdgesChange}
           onConnect={onConnect}
           nodeTypes={nodeTypes}
           fitView

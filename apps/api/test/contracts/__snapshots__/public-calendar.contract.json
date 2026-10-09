@@ -1,0 +1,3247 @@
+{
+  "contract": "public-calendar",
+  "version": 1,
+  "description": "API pubblica del calendario (/api/calendar/* e /api/contacts/cal-slots) sullo scenario di test/contracts/public-calendar.contract.test.ts: richiesta, status, header e corpo normalizzati (id, uid, token, timestamp di sistema, prefisso dei dati), con gli effetti sul database delle scritture. Baseline F0 su PgLegacyStore.",
+  "regenerate": "UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/public-calendar.contract.test.ts",
+  "cases": {
+    "event-types/lista": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "event_types": [
+          {
+            "id": "<event-type:main>",
+            "slug": "<prefix>-consulenza",
+            "title": "<prefix> Consulenza di prova",
+            "description": "Videochiamata conoscitiva.",
+            "duration_minutes": 60,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:approval>",
+            "slug": "<prefix>-approvazione",
+            "title": "<prefix> Su approvazione",
+            "description": null,
+            "duration_minutes": 60,
+            "location_type": "phone",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:inPerson>",
+            "slug": "<prefix>-sopralluogo",
+            "title": "<prefix> Sopralluogo di prova",
+            "description": "Incontro presso la sede del cliente.",
+            "duration_minutes": 60,
+            "location_type": "in_person",
+            "location_value": "Via del Corso 1, Roma",
+            "color": "#0ea5e9",
+            "custom_questions": [
+              {
+                "key": "azienda",
+                "type": "text",
+                "label": "Nome azienda",
+                "required": true
+              },
+              {
+                "key": "budget",
+                "type": "select",
+                "label": "Budget",
+                "options": [
+                  "fino a 1.000 €",
+                  "oltre 1.000 €"
+                ],
+                "required": false
+              }
+            ],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:custom>",
+            "slug": "<prefix>-orari-speciali",
+            "title": "<prefix> Orari speciali",
+            "description": null,
+            "duration_minutes": 60,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:advance>",
+            "slug": "<prefix>-anticipo",
+            "title": "<prefix> Anticipo breve",
+            "description": null,
+            "duration_minutes": 60,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 4
+          },
+          {
+            "id": "<event-type:notice>",
+            "slug": "<prefix>-preavviso",
+            "title": "<prefix> Preavviso lungo",
+            "description": null,
+            "duration_minutes": 60,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 98,
+            "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:asymmetric>",
+            "slug": "<prefix>-buffer-asimmetrici",
+            "title": "<prefix> Buffer asimmetrici",
+            "description": null,
+            "duration_minutes": 30,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
+          }
+        ]
+      }
+    },
+    "event-types/dettaglio": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-sopralluogo"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "event_type": {
+          "id": "<event-type:inPerson>",
+          "slug": "<prefix>-sopralluogo",
+          "title": "<prefix> Sopralluogo di prova",
+          "description": "Incontro presso la sede del cliente.",
+          "duration_minutes": 60,
+          "location_type": "in_person",
+          "location_value": "Via del Corso 1, Roma",
+          "color": "#0ea5e9",
+          "custom_questions": [
+            {
+              "key": "azienda",
+              "type": "text",
+              "label": "Nome azienda",
+              "required": true
+            },
+            {
+              "key": "budget",
+              "type": "select",
+              "label": "Budget",
+              "options": [
+                "fino a 1.000 €",
+                "oltre 1.000 €"
+              ],
+              "required": false
+            }
+          ],
+          "min_notice_hours": 0,
+          "max_advance_days": 365
+        }
+      }
+    },
+    "event-types/dettaglio-404-inesistente": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-inesistente"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "event-types/dettaglio-404-non-pubblico": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-riservato"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "event-types/dettaglio-404-inattivo": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-disattivato"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "slots/400-from-mancante": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "to": "2027-03-12"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Parametro from richiesto (YYYY-MM-DD)"
+      }
+    },
+    "slots/400-from-non-valido": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "8/3/2027",
+          "to": "2027-03-12"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Parametro from richiesto (YYYY-MM-DD)"
+      }
+    },
+    "slots/400-to-mancante": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-08"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Parametro to richiesto (YYYY-MM-DD)"
+      }
+    },
+    "slots/400-range-oltre-60-giorni": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-05-08"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Range massimo 60 giorni"
+      }
+    },
+    "slots/400-to-prima-di-from": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-12",
+          "to": "2027-03-08"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "to deve essere >= from"
+      }
+    },
+    "slots/404-inesistente": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-inesistente/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-12"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "slots/404-non-pubblico": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-riservato/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-12"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "slots/404-inattivo": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-disattivato/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-12"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non trovata"
+      }
+    },
+    "slots/settimana-scenario": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-14"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {
+          "2027-03-08": [
+            {
+              "start": "2027-03-08T08:00:00.000Z",
+              "end": "2027-03-08T09:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T10:30:00.000Z",
+              "end": "2027-03-08T11:30:00.000Z"
+            },
+            {
+              "start": "2027-03-08T11:00:00.000Z",
+              "end": "2027-03-08T12:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T13:00:00.000Z",
+              "end": "2027-03-08T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T13:30:00.000Z",
+              "end": "2027-03-08T14:30:00.000Z"
+            },
+            {
+              "start": "2027-03-08T14:00:00.000Z",
+              "end": "2027-03-08T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T14:30:00.000Z",
+              "end": "2027-03-08T15:30:00.000Z"
+            },
+            {
+              "start": "2027-03-08T15:00:00.000Z",
+              "end": "2027-03-08T16:00:00.000Z"
+            }
+          ],
+          "2027-03-09": [
+            {
+              "start": "2027-03-09T09:00:00.000Z",
+              "end": "2027-03-09T10:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T09:30:00.000Z",
+              "end": "2027-03-09T10:30:00.000Z"
+            },
+            {
+              "start": "2027-03-09T10:00:00.000Z",
+              "end": "2027-03-09T11:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T10:30:00.000Z",
+              "end": "2027-03-09T11:30:00.000Z"
+            },
+            {
+              "start": "2027-03-09T11:00:00.000Z",
+              "end": "2027-03-09T12:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T13:00:00.000Z",
+              "end": "2027-03-09T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T13:30:00.000Z",
+              "end": "2027-03-09T14:30:00.000Z"
+            },
+            {
+              "start": "2027-03-09T14:00:00.000Z",
+              "end": "2027-03-09T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T14:30:00.000Z",
+              "end": "2027-03-09T15:30:00.000Z"
+            },
+            {
+              "start": "2027-03-09T15:00:00.000Z",
+              "end": "2027-03-09T16:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T15:30:00.000Z",
+              "end": "2027-03-09T16:30:00.000Z"
+            },
+            {
+              "start": "2027-03-09T16:00:00.000Z",
+              "end": "2027-03-09T17:00:00.000Z"
+            }
+          ],
+          "2027-03-10": [
+            {
+              "start": "2027-03-10T08:00:00.000Z",
+              "end": "2027-03-10T09:00:00.000Z"
+            },
+            {
+              "start": "2027-03-10T08:30:00.000Z",
+              "end": "2027-03-10T09:30:00.000Z"
+            },
+            {
+              "start": "2027-03-10T13:00:00.000Z",
+              "end": "2027-03-10T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-10T13:30:00.000Z",
+              "end": "2027-03-10T14:30:00.000Z"
+            },
+            {
+              "start": "2027-03-10T14:00:00.000Z",
+              "end": "2027-03-10T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-10T14:30:00.000Z",
+              "end": "2027-03-10T15:30:00.000Z"
+            },
+            {
+              "start": "2027-03-10T15:00:00.000Z",
+              "end": "2027-03-10T16:00:00.000Z"
+            },
+            {
+              "start": "2027-03-10T15:30:00.000Z",
+              "end": "2027-03-10T16:30:00.000Z"
+            },
+            {
+              "start": "2027-03-10T16:00:00.000Z",
+              "end": "2027-03-10T17:00:00.000Z"
+            }
+          ],
+          "2027-03-11": [],
+          "2027-03-12": [
+            {
+              "start": "2027-03-12T09:30:00.000Z",
+              "end": "2027-03-12T10:30:00.000Z"
+            },
+            {
+              "start": "2027-03-12T10:00:00.000Z",
+              "end": "2027-03-12T11:00:00.000Z"
+            },
+            {
+              "start": "2027-03-12T10:30:00.000Z",
+              "end": "2027-03-12T11:30:00.000Z"
+            },
+            {
+              "start": "2027-03-12T11:00:00.000Z",
+              "end": "2027-03-12T12:00:00.000Z"
+            },
+            {
+              "start": "2027-03-12T13:00:00.000Z",
+              "end": "2027-03-12T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-12T15:00:00.000Z",
+              "end": "2027-03-12T16:00:00.000Z"
+            },
+            {
+              "start": "2027-03-12T15:30:00.000Z",
+              "end": "2027-03-12T16:30:00.000Z"
+            },
+            {
+              "start": "2027-03-12T16:00:00.000Z",
+              "end": "2027-03-12T17:00:00.000Z"
+            }
+          ],
+          "2027-03-13": [],
+          "2027-03-14": []
+        },
+        "slots": [
+          {
+            "start": "2027-03-08T08:00:00.000Z",
+            "end": "2027-03-08T09:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T10:30:00.000Z",
+            "end": "2027-03-08T11:30:00.000Z"
+          },
+          {
+            "start": "2027-03-08T11:00:00.000Z",
+            "end": "2027-03-08T12:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T13:00:00.000Z",
+            "end": "2027-03-08T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T13:30:00.000Z",
+            "end": "2027-03-08T14:30:00.000Z"
+          },
+          {
+            "start": "2027-03-08T14:00:00.000Z",
+            "end": "2027-03-08T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T14:30:00.000Z",
+            "end": "2027-03-08T15:30:00.000Z"
+          },
+          {
+            "start": "2027-03-08T15:00:00.000Z",
+            "end": "2027-03-08T16:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T09:00:00.000Z",
+            "end": "2027-03-09T10:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T09:30:00.000Z",
+            "end": "2027-03-09T10:30:00.000Z"
+          },
+          {
+            "start": "2027-03-09T10:00:00.000Z",
+            "end": "2027-03-09T11:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T10:30:00.000Z",
+            "end": "2027-03-09T11:30:00.000Z"
+          },
+          {
+            "start": "2027-03-09T11:00:00.000Z",
+            "end": "2027-03-09T12:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T13:00:00.000Z",
+            "end": "2027-03-09T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T13:30:00.000Z",
+            "end": "2027-03-09T14:30:00.000Z"
+          },
+          {
+            "start": "2027-03-09T14:00:00.000Z",
+            "end": "2027-03-09T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T14:30:00.000Z",
+            "end": "2027-03-09T15:30:00.000Z"
+          },
+          {
+            "start": "2027-03-09T15:00:00.000Z",
+            "end": "2027-03-09T16:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T15:30:00.000Z",
+            "end": "2027-03-09T16:30:00.000Z"
+          },
+          {
+            "start": "2027-03-09T16:00:00.000Z",
+            "end": "2027-03-09T17:00:00.000Z"
+          },
+          {
+            "start": "2027-03-10T08:00:00.000Z",
+            "end": "2027-03-10T09:00:00.000Z"
+          },
+          {
+            "start": "2027-03-10T08:30:00.000Z",
+            "end": "2027-03-10T09:30:00.000Z"
+          },
+          {
+            "start": "2027-03-10T13:00:00.000Z",
+            "end": "2027-03-10T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-10T13:30:00.000Z",
+            "end": "2027-03-10T14:30:00.000Z"
+          },
+          {
+            "start": "2027-03-10T14:00:00.000Z",
+            "end": "2027-03-10T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-10T14:30:00.000Z",
+            "end": "2027-03-10T15:30:00.000Z"
+          },
+          {
+            "start": "2027-03-10T15:00:00.000Z",
+            "end": "2027-03-10T16:00:00.000Z"
+          },
+          {
+            "start": "2027-03-10T15:30:00.000Z",
+            "end": "2027-03-10T16:30:00.000Z"
+          },
+          {
+            "start": "2027-03-10T16:00:00.000Z",
+            "end": "2027-03-10T17:00:00.000Z"
+          },
+          {
+            "start": "2027-03-12T09:30:00.000Z",
+            "end": "2027-03-12T10:30:00.000Z"
+          },
+          {
+            "start": "2027-03-12T10:00:00.000Z",
+            "end": "2027-03-12T11:00:00.000Z"
+          },
+          {
+            "start": "2027-03-12T10:30:00.000Z",
+            "end": "2027-03-12T11:30:00.000Z"
+          },
+          {
+            "start": "2027-03-12T11:00:00.000Z",
+            "end": "2027-03-12T12:00:00.000Z"
+          },
+          {
+            "start": "2027-03-12T13:00:00.000Z",
+            "end": "2027-03-12T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-12T15:00:00.000Z",
+            "end": "2027-03-12T16:00:00.000Z"
+          },
+          {
+            "start": "2027-03-12T15:30:00.000Z",
+            "end": "2027-03-12T16:30:00.000Z"
+          },
+          {
+            "start": "2027-03-12T16:00:00.000Z",
+            "end": "2027-03-12T17:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "slots/fine-settimana-senza-finestre": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-13",
+          "to": "2027-03-14"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {},
+        "slots": []
+      }
+    },
+    "slots/cambio-ora-e-festivita": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-consulenza/slots",
+        "query": {
+          "from": "2027-03-28",
+          "to": "2027-03-30"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {
+          "2027-03-28": [],
+          "2027-03-29": [],
+          "2027-03-30": [
+            {
+              "start": "2027-03-30T07:00:00.000Z",
+              "end": "2027-03-30T08:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T07:30:00.000Z",
+              "end": "2027-03-30T08:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T08:00:00.000Z",
+              "end": "2027-03-30T09:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T08:30:00.000Z",
+              "end": "2027-03-30T09:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T09:00:00.000Z",
+              "end": "2027-03-30T10:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T09:30:00.000Z",
+              "end": "2027-03-30T10:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T10:00:00.000Z",
+              "end": "2027-03-30T11:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T12:00:00.000Z",
+              "end": "2027-03-30T13:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T12:30:00.000Z",
+              "end": "2027-03-30T13:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T13:00:00.000Z",
+              "end": "2027-03-30T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T13:30:00.000Z",
+              "end": "2027-03-30T14:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T14:00:00.000Z",
+              "end": "2027-03-30T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-30T14:30:00.000Z",
+              "end": "2027-03-30T15:30:00.000Z"
+            },
+            {
+              "start": "2027-03-30T15:00:00.000Z",
+              "end": "2027-03-30T16:00:00.000Z"
+            }
+          ]
+        },
+        "slots": [
+          {
+            "start": "2027-03-30T07:00:00.000Z",
+            "end": "2027-03-30T08:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T07:30:00.000Z",
+            "end": "2027-03-30T08:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T08:00:00.000Z",
+            "end": "2027-03-30T09:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T08:30:00.000Z",
+            "end": "2027-03-30T09:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T09:00:00.000Z",
+            "end": "2027-03-30T10:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T09:30:00.000Z",
+            "end": "2027-03-30T10:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T10:00:00.000Z",
+            "end": "2027-03-30T11:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T12:00:00.000Z",
+            "end": "2027-03-30T13:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T12:30:00.000Z",
+            "end": "2027-03-30T13:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T13:00:00.000Z",
+            "end": "2027-03-30T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T13:30:00.000Z",
+            "end": "2027-03-30T14:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T14:00:00.000Z",
+            "end": "2027-03-30T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-30T14:30:00.000Z",
+            "end": "2027-03-30T15:30:00.000Z"
+          },
+          {
+            "start": "2027-03-30T15:00:00.000Z",
+            "end": "2027-03-30T16:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "slots/schedule-con-override": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-orari-speciali/slots",
+        "query": {
+          "from": "2027-03-29",
+          "to": "2027-03-31"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {
+          "2027-03-29": [],
+          "2027-03-30": [],
+          "2027-03-31": [
+            {
+              "start": "2027-03-31T13:00:00.000Z",
+              "end": "2027-03-31T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-31T14:00:00.000Z",
+              "end": "2027-03-31T15:00:00.000Z"
+            }
+          ]
+        },
+        "slots": [
+          {
+            "start": "2027-03-31T13:00:00.000Z",
+            "end": "2027-03-31T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-31T14:00:00.000Z",
+            "end": "2027-03-31T15:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "slots/min-notice": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-preavviso/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-09"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {
+          "2027-03-08": [],
+          "2027-03-09": [
+            {
+              "start": "2027-03-09T09:00:00.000Z",
+              "end": "2027-03-09T10:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T10:00:00.000Z",
+              "end": "2027-03-09T11:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T11:00:00.000Z",
+              "end": "2027-03-09T12:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T13:00:00.000Z",
+              "end": "2027-03-09T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T14:00:00.000Z",
+              "end": "2027-03-09T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T15:00:00.000Z",
+              "end": "2027-03-09T16:00:00.000Z"
+            },
+            {
+              "start": "2027-03-09T16:00:00.000Z",
+              "end": "2027-03-09T17:00:00.000Z"
+            }
+          ]
+        },
+        "slots": [
+          {
+            "start": "2027-03-09T09:00:00.000Z",
+            "end": "2027-03-09T10:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T10:00:00.000Z",
+            "end": "2027-03-09T11:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T11:00:00.000Z",
+            "end": "2027-03-09T12:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T13:00:00.000Z",
+            "end": "2027-03-09T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T14:00:00.000Z",
+            "end": "2027-03-09T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T15:00:00.000Z",
+            "end": "2027-03-09T16:00:00.000Z"
+          },
+          {
+            "start": "2027-03-09T16:00:00.000Z",
+            "end": "2027-03-09T17:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "slots/max-advance": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-anticipo/slots",
+        "query": {
+          "from": "2027-03-08",
+          "to": "2027-03-09"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 60,
+        "slots_by_date": {
+          "2027-03-08": [
+            {
+              "start": "2027-03-08T08:00:00.000Z",
+              "end": "2027-03-08T09:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T11:00:00.000Z",
+              "end": "2027-03-08T12:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T13:00:00.000Z",
+              "end": "2027-03-08T14:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T14:00:00.000Z",
+              "end": "2027-03-08T15:00:00.000Z"
+            },
+            {
+              "start": "2027-03-08T15:00:00.000Z",
+              "end": "2027-03-08T16:00:00.000Z"
+            }
+          ],
+          "2027-03-09": []
+        },
+        "slots": [
+          {
+            "start": "2027-03-08T08:00:00.000Z",
+            "end": "2027-03-08T09:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T11:00:00.000Z",
+            "end": "2027-03-08T12:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T13:00:00.000Z",
+            "end": "2027-03-08T14:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T14:00:00.000Z",
+            "end": "2027-03-08T15:00:00.000Z"
+          },
+          {
+            "start": "2027-03-08T15:00:00.000Z",
+            "end": "2027-03-08T16:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "bookings/200-confermata": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-12T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:nuova>",
+          "status": "confirmed",
+          "start_time": "2027-04-12T08:00:00.000Z",
+          "end_time": "2027-04-12T09:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza"
+        }
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:nuova>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente dal sito",
+          "attendee_email": "<prefix>-sito@test.invalid",
+          "attendee_phone": "+39 351 000 0000",
+          "attendee_company": "Officina Rossi",
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": "Vorrei parlare del nuovo sito.",
+          "custom_responses": {},
+          "start_time": "2027-04-12T08:00:00.000Z",
+          "end_time": "2027-04-12T09:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {
+            "user_agent": null,
+            "source_page": "/prenota/consulenza"
+          },
+          "has_lead": true,
+          "has_consent_ip": true
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Consulenza di prova – Cliente dal sito",
+            "description": "Cliente: Cliente dal sito <<prefix>-sito@test.invalid>\nTel: +39 351 000 0000\nAzienda: Officina Rossi\n\nNote:\nVorrei parlare del nuovo sito.\n\nUID prenotazione: <booking:nuova>",
+            "location": "https://meet.caldes.test/<prefix>-consulenza",
+            "url": "https://meet.caldes.test/<prefix>-consulenza",
+            "start_time": "2027-04-12T08:00:00.000Z",
+            "end_time": "2027-04-12T09:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": [
+          {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "source": "booking_<prefix>-consulenza",
+            "status": "new",
+            "notes": "Vorrei parlare del nuovo sito."
+          }
+        ]
+      }
+    },
+    "bookings/200-pending": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-approvazione",
+          "start": "2027-04-13T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:pending>",
+          "status": "pending",
+          "start_time": "2027-04-13T08:00:00.000Z",
+          "end_time": "2027-04-13T09:00:00.000Z",
+          "location_type": "phone",
+          "location_value": "Telefonata"
+        }
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:pending>",
+          "status": "pending",
+          "source": "public_page",
+          "attendee_name": "Cliente dal sito",
+          "attendee_email": "<prefix>-sito@test.invalid",
+          "attendee_phone": "+39 351 000 0000",
+          "attendee_company": "Officina Rossi",
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": "Vorrei parlare del nuovo sito.",
+          "custom_responses": {},
+          "start_time": "2027-04-13T08:00:00.000Z",
+          "end_time": "2027-04-13T09:00:00.000Z",
+          "location_type": "phone",
+          "location_value": "Telefonata",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {
+            "user_agent": null,
+            "source_page": "/prenota/consulenza"
+          },
+          "has_lead": true,
+          "has_consent_ip": true
+        },
+        "projections": [],
+        "leads": [
+          {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "source": "booking_<prefix>-approvazione",
+            "status": "new",
+            "notes": "Vorrei parlare del nuovo sito."
+          }
+        ]
+      }
+    },
+    "bookings/200-domande-in-presenza": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-sopralluogo",
+          "start": "2027-04-13T13:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza",
+          "custom_responses": {
+            "azienda": "  Officina Rossi  ",
+            "budget": "oltre 1.000 €",
+            "ignota": "scartata"
+          }
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:sopralluogo>",
+          "status": "confirmed",
+          "start_time": "2027-04-13T13:00:00.000Z",
+          "end_time": "2027-04-13T14:00:00.000Z",
+          "location_type": "in_person",
+          "location_value": "Via del Corso 1, Roma"
+        }
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:sopralluogo>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente dal sito",
+          "attendee_email": "<prefix>-sito@test.invalid",
+          "attendee_phone": "+39 351 000 0000",
+          "attendee_company": "Officina Rossi",
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": "Vorrei parlare del nuovo sito.",
+          "custom_responses": {
+            "budget": "oltre 1.000 €",
+            "azienda": "Officina Rossi"
+          },
+          "start_time": "2027-04-13T13:00:00.000Z",
+          "end_time": "2027-04-13T14:00:00.000Z",
+          "location_type": "in_person",
+          "location_value": "Via del Corso 1, Roma",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {
+            "user_agent": null,
+            "source_page": "/prenota/consulenza"
+          },
+          "has_lead": true,
+          "has_consent_ip": true
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Sopralluogo di prova – Cliente dal sito",
+            "description": "Cliente: Cliente dal sito <<prefix>-sito@test.invalid>\nTel: +39 351 000 0000\nAzienda: Officina Rossi\n\nNote:\nVorrei parlare del nuovo sito.\n\nUID prenotazione: <booking:sopralluogo>",
+            "location": "Via del Corso 1, Roma",
+            "url": null,
+            "start_time": "2027-04-13T13:00:00.000Z",
+            "end_time": "2027-04-13T14:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": [
+          {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "source": "booking_<prefix>-sopralluogo",
+            "status": "new",
+            "notes": "Vorrei parlare del nuovo sito."
+          }
+        ]
+      }
+    },
+    "bookings/400-corpo-non-json": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": "non è json"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Body JSON richiesto"
+      }
+    },
+    "bookings/400-corpo-vuoto": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {}
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Required"
+      }
+    },
+    "bookings/400-consenso-mancante": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-14T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Consenso GDPR richiesto"
+      }
+    },
+    "bookings/400-email-non-valida": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-14T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "non-una-email",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Email non valida"
+      }
+    },
+    "bookings/400-nome-corto": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-14T08:00:00.000Z",
+          "attendee": {
+            "name": "A",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Nome richiesto (min 2 caratteri)"
+      }
+    },
+    "bookings/400-telefono-non-valido": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-14T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "abc",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Numero di telefono non valido"
+      }
+    },
+    "bookings/400-start-non-iso": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "lunedì prossimo",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "start ISO richiesto"
+      }
+    },
+    "bookings/400-domanda-obbligatoria": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-sopralluogo",
+          "start": "2027-04-14T13:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Risposta obbligatoria mancante: Nome azienda",
+        "code": "BOOKING_VALIDATION"
+      }
+    },
+    "bookings/400-opzione-non-valida": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-sopralluogo",
+          "start": "2027-04-14T13:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza",
+          "custom_responses": {
+            "azienda": "Rossi",
+            "budget": "gratis"
+          }
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Valore non valido per: Budget",
+        "code": "BOOKING_VALIDATION"
+      }
+    },
+    "bookings/400-nel-passato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-03-04T09:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Devi prenotare con almeno 0 ore di anticipo",
+        "code": "BOOKING_VALIDATION"
+      }
+    },
+    "bookings/400-oltre-max-advance": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-anticipo",
+          "start": "2027-03-12T09:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Puoi prenotare al massimo 4 giorni in anticipo",
+        "code": "BOOKING_VALIDATION"
+      }
+    },
+    "bookings/403-captcha": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-14T09:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 403,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Verifica anti-bot fallita. Ricarica la pagina e riprova."
+      }
+    },
+    "bookings/404-inesistente": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-inesistente",
+          "start": "2027-04-14T10:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non disponibile"
+      }
+    },
+    "bookings/404-non-pubblico": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-riservato",
+          "start": "2027-04-14T10:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non disponibile"
+      }
+    },
+    "bookings/404-inattivo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-disattivato",
+          "start": "2027-04-14T10:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non disponibile"
+      }
+    },
+    "bookings/409-slot-preso": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-12T13:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-nel-buffer": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-12T14:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-fuori-griglia": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-12T15:15:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-fuori-orario": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-04-12T17:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-chiusura": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-03-11T09:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-festivita": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-03-29T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-evento-bloccante": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-consulenza",
+          "start": "2027-03-08T09:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "slots/buffer-asimmetrici": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-buffer-asimmetrici/slots",
+        "query": {
+          "from": "2027-04-27",
+          "to": "2027-04-27"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 30,
+        "slots_by_date": {
+          "2027-04-27": [
+            {
+              "start": "2027-04-27T07:00:00.000Z",
+              "end": "2027-04-27T07:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:15:00.000Z",
+              "end": "2027-04-27T07:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:30:00.000Z",
+              "end": "2027-04-27T08:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:45:00.000Z",
+              "end": "2027-04-27T08:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T09:45:00.000Z",
+              "end": "2027-04-27T10:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:00:00.000Z",
+              "end": "2027-04-27T10:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:15:00.000Z",
+              "end": "2027-04-27T10:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:30:00.000Z",
+              "end": "2027-04-27T11:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:00:00.000Z",
+              "end": "2027-04-27T12:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:15:00.000Z",
+              "end": "2027-04-27T12:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:30:00.000Z",
+              "end": "2027-04-27T13:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:45:00.000Z",
+              "end": "2027-04-27T13:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:00:00.000Z",
+              "end": "2027-04-27T13:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:15:00.000Z",
+              "end": "2027-04-27T13:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:30:00.000Z",
+              "end": "2027-04-27T14:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:45:00.000Z",
+              "end": "2027-04-27T14:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:00:00.000Z",
+              "end": "2027-04-27T14:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:15:00.000Z",
+              "end": "2027-04-27T14:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:30:00.000Z",
+              "end": "2027-04-27T15:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:45:00.000Z",
+              "end": "2027-04-27T15:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:00:00.000Z",
+              "end": "2027-04-27T15:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:15:00.000Z",
+              "end": "2027-04-27T15:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:30:00.000Z",
+              "end": "2027-04-27T16:00:00.000Z"
+            }
+          ]
+        },
+        "slots": [
+          {
+            "start": "2027-04-27T07:00:00.000Z",
+            "end": "2027-04-27T07:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:15:00.000Z",
+            "end": "2027-04-27T07:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:30:00.000Z",
+            "end": "2027-04-27T08:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:45:00.000Z",
+            "end": "2027-04-27T08:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T09:45:00.000Z",
+            "end": "2027-04-27T10:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:00:00.000Z",
+            "end": "2027-04-27T10:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:15:00.000Z",
+            "end": "2027-04-27T10:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:30:00.000Z",
+            "end": "2027-04-27T11:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:00:00.000Z",
+            "end": "2027-04-27T12:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:15:00.000Z",
+            "end": "2027-04-27T12:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:30:00.000Z",
+            "end": "2027-04-27T13:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:45:00.000Z",
+            "end": "2027-04-27T13:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:00:00.000Z",
+            "end": "2027-04-27T13:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:15:00.000Z",
+            "end": "2027-04-27T13:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:30:00.000Z",
+            "end": "2027-04-27T14:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:45:00.000Z",
+            "end": "2027-04-27T14:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:00:00.000Z",
+            "end": "2027-04-27T14:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:15:00.000Z",
+            "end": "2027-04-27T14:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:30:00.000Z",
+            "end": "2027-04-27T15:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:45:00.000Z",
+            "end": "2027-04-27T15:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:00:00.000Z",
+            "end": "2027-04-27T15:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:15:00.000Z",
+            "end": "2027-04-27T15:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:30:00.000Z",
+            "end": "2027-04-27T16:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "bookings/409-buffer-asimmetrici-nel-buffer-dopo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-buffer-asimmetrici-nel-buffer-prima": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T09:30:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/200-buffer-asimmetrici-oltre-buffer-prima": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T09:45:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:oltre-buffer>",
+          "status": "confirmed",
+          "start_time": "2027-04-27T09:45:00.000Z",
+          "end_time": "2027-04-27T10:15:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici"
+        }
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:oltre-buffer>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente dal sito",
+          "attendee_email": "<prefix>-sito@test.invalid",
+          "attendee_phone": "+39 351 000 0000",
+          "attendee_company": "Officina Rossi",
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": "Vorrei parlare del nuovo sito.",
+          "custom_responses": {},
+          "start_time": "2027-04-27T09:45:00.000Z",
+          "end_time": "2027-04-27T10:15:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {
+            "user_agent": null,
+            "source_page": "/prenota/consulenza"
+          },
+          "has_lead": true,
+          "has_consent_ip": true
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Buffer asimmetrici – Cliente dal sito",
+            "description": "Cliente: Cliente dal sito <<prefix>-sito@test.invalid>\nTel: +39 351 000 0000\nAzienda: Officina Rossi\n\nNote:\nVorrei parlare del nuovo sito.\n\nUID prenotazione: <booking:oltre-buffer>",
+            "location": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "url": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "start_time": "2027-04-27T09:45:00.000Z",
+            "end_time": "2027-04-27T10:15:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": [
+          {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "source": "booking_<prefix>-buffer-asimmetrici",
+            "status": "new",
+            "notes": "Vorrei parlare del nuovo sito."
+          }
+        ]
+      }
+    },
+    "manage/dettaglio": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:gestione>?token=<token:gestione>"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "booking": {
+          "uid": "<booking:gestione>",
+          "status": "confirmed",
+          "attendee_name": "Cliente gestione",
+          "attendee_email": "<prefix>-cliente@test.invalid",
+          "attendee_timezone": "Europe/Rome",
+          "start_time": "2027-04-14T07:00:00.000Z",
+          "end_time": "2027-04-14T08:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+          "cancelled_at": null
+        },
+        "event_type": {
+          "id": "<event-type:main>",
+          "slug": "<prefix>-consulenza",
+          "title": "<prefix> Consulenza di prova",
+          "description": "Videochiamata conoscitiva.",
+          "duration_minutes": 60,
+          "location_type": "custom_url",
+          "location_value": null,
+          "color": "#7c3aed",
+          "custom_questions": [],
+          "min_notice_hours": 0,
+          "max_advance_days": 365
+        }
+      }
+    },
+    "manage/dettaglio-401-senza-token": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:gestione>"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Token mancante o scaduto"
+      }
+    },
+    "manage/dettaglio-401-scaduto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:gestione>?token=<token:non-valido>"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Token mancante o scaduto"
+      }
+    },
+    "manage/dettaglio-401-contraffatto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:gestione>?token=<token:non-valido>"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Token mancante o scaduto"
+      }
+    },
+    "manage/dettaglio-401-altro-uid": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:gestione>?token=<token:non-valido>"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Token mancante o scaduto"
+      }
+    },
+    "manage/dettaglio-404": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/inesistente1?token=<token:inesistente>"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Prenotazione non trovata"
+      }
+    },
+    "manage/ics-request": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:ics>/ics?token=<token:ics>"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "attachment; filename=\"prenotazione-<booking:ics>.ics\"",
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Booking//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:REQUEST",
+        "BEGIN:VEVENT",
+        "UID:<booking:ics>@caldes.it",
+        "SEQUENCE:0",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270414T120000Z",
+        "DTEND:20270414T130000Z",
+        "SUMMARY:<prefix> Consulenza di prova",
+        "DESCRIPTION:Videochiamata conoscitiva.\\n\\nMessaggio: Riga uno\\nRiga due",
+        "LOCATION:https://meet.caldes.test/<prefix>-consulenza",
+        "STATUS:CONFIRMED",
+        "ORGANIZER;CN=Federico Calicchia:mailto:info@calicchia.design",
+        "ATTENDEE;CN=Cliente\\, ICS\\; prova;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:<prefix>-cliente@test.invalid",
+        "TRANSP:OPAQUE",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT24H",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:Promemoria 24h: <prefix> Consulenza di prova",
+        "END:VALARM",
+        "BEGIN:VALARM",
+        "TRIGGER:-PT30M",
+        "ACTION:DISPLAY",
+        "DESCRIPTION:Promemoria 30 minuti: <prefix> Consulenza di prova",
+        "END:VALARM",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "manage/ics-cancel": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/bookings/<booking:ics-annullata>/ics?token=<token:ics>"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "attachment; filename=\"prenotazione-<booking:ics-annullata>.ics\"",
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Booking//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:CANCEL",
+        "BEGIN:VEVENT",
+        "UID:<booking:ics-annullata>@caldes.it",
+        "SEQUENCE:0",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270414T140000Z",
+        "DTEND:20270414T150000Z",
+        "SUMMARY:<prefix> Consulenza di prova",
+        "DESCRIPTION:Videochiamata conoscitiva.",
+        "LOCATION:https://meet.caldes.test/<prefix>-consulenza",
+        "STATUS:CANCELLED",
+        "ORGANIZER;CN=Federico Calicchia:mailto:info@calicchia.design",
+        "ATTENDEE;CN=Cliente di test;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE:mailto:<prefix>-cliente@test.invalid",
+        "TRANSP:TRANSPARENT",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "manage/cancel": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:da-annullare>/cancel?token=<token:gestione>",
+        "body": {
+          "reason": "Imprevisto di lavoro"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:da-annullare>",
+          "status": "cancelled",
+          "source": "public_page",
+          "attendee_name": "Cliente di test",
+          "attendee_email": "<prefix>-cliente@test.invalid",
+          "attendee_phone": null,
+          "attendee_company": null,
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": null,
+          "custom_responses": {},
+          "start_time": "2027-04-15T07:00:00.000Z",
+          "end_time": "2027-04-15T08:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+          "cancelled_by": "attendee",
+          "cancellation_reason": "Imprevisto di lavoro",
+          "cancelled_at": "<timestamp>",
+          "rescheduled_from_uid": null,
+          "source_metadata": {},
+          "has_lead": false,
+          "has_consent_ip": false
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Consulenza di prova – Cliente di test",
+            "description": "Cliente: Cliente di test <<prefix>-cliente@test.invalid>\n\nUID prenotazione: <booking:da-annullare>",
+            "location": "https://meet.caldes.test/<prefix>-consulenza",
+            "url": "https://meet.caldes.test/<prefix>-consulenza",
+            "start_time": "2027-04-15T07:00:00.000Z",
+            "end_time": "2027-04-15T08:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "cancelled"
+          }
+        ],
+        "leads": []
+      }
+    },
+    "manage/cancel-404": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/inesistente3/cancel?token=<token:inesistente>",
+        "body": {}
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Prenotazione non trovata"
+      }
+    },
+    "manage/reschedule": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "2027-04-16T13:00:00.000Z"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:riprogrammata>",
+          "start_time": "2027-04-16T13:00:00.000Z",
+          "end_time": "2027-04-16T14:00:00.000Z"
+        }
+      },
+      "effects": {
+        "originale": {
+          "booking": {
+            "uid": "<booking:originale>",
+            "status": "cancelled",
+            "source": "public_page",
+            "attendee_name": "Cliente di test",
+            "attendee_email": "<prefix>-cliente@test.invalid",
+            "attendee_phone": null,
+            "attendee_company": null,
+            "attendee_timezone": "Europe/Rome",
+            "attendee_message": null,
+            "custom_responses": {},
+            "start_time": "2027-04-16T07:00:00.000Z",
+            "end_time": "2027-04-16T08:00:00.000Z",
+            "location_type": "custom_url",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "cancelled_by": "attendee",
+            "cancellation_reason": "Rescheduled: Riprogrammata dal partecipante",
+            "cancelled_at": "<timestamp>",
+            "rescheduled_from_uid": null,
+            "source_metadata": {},
+            "has_lead": false,
+            "has_consent_ip": false
+          },
+          "projections": [
+            {
+              "calendar": "bookings",
+              "summary": "<prefix> Consulenza di prova – Cliente di test",
+              "description": "Cliente: Cliente di test <<prefix>-cliente@test.invalid>\n\nUID prenotazione: <booking:originale>",
+              "location": "https://meet.caldes.test/<prefix>-consulenza",
+              "url": "https://meet.caldes.test/<prefix>-consulenza",
+              "start_time": "2027-04-16T07:00:00.000Z",
+              "end_time": "2027-04-16T08:00:00.000Z",
+              "all_day": false,
+              "source": "booking",
+              "status": "cancelled"
+            }
+          ],
+          "leads": []
+        },
+        "riprogrammata": {
+          "booking": {
+            "uid": "<booking:riprogrammata>",
+            "status": "confirmed",
+            "source": "public_page",
+            "attendee_name": "Cliente di test",
+            "attendee_email": "<prefix>-cliente@test.invalid",
+            "attendee_phone": null,
+            "attendee_company": null,
+            "attendee_timezone": "Europe/Rome",
+            "attendee_message": null,
+            "custom_responses": {},
+            "start_time": "2027-04-16T13:00:00.000Z",
+            "end_time": "2027-04-16T14:00:00.000Z",
+            "location_type": "custom_url",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "cancelled_by": null,
+            "cancellation_reason": null,
+            "cancelled_at": null,
+            "rescheduled_from_uid": "<booking:originale>",
+            "source_metadata": {
+              "rescheduled_from": "<booking:originale>"
+            },
+            "has_lead": false,
+            "has_consent_ip": false
+          },
+          "projections": [
+            {
+              "calendar": "bookings",
+              "summary": "<prefix> Consulenza di prova – Cliente di test",
+              "description": "Cliente: Cliente di test <<prefix>-cliente@test.invalid>\n\nUID prenotazione: <booking:riprogrammata>",
+              "location": "https://meet.caldes.test/<prefix>-consulenza",
+              "url": null,
+              "start_time": "2027-04-16T13:00:00.000Z",
+              "end_time": "2027-04-16T14:00:00.000Z",
+              "all_day": false,
+              "source": "booking",
+              "status": "confirmed"
+            }
+          ],
+          "leads": []
+        }
+      }
+    },
+    "manage/reschedule-400-start-mancante": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {}
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "start ISO richiesto"
+      }
+    },
+    "manage/reschedule-400-start-non-valido": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "domani"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "start ISO richiesto"
+      }
+    },
+    "manage/reschedule-403-captcha": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "2027-04-19T09:00:00.000Z",
+          "turnstile_token": "token-captcha-di-prova"
+        }
+      },
+      "status": 403,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Verifica anti-bot fallita. Riprova."
+      }
+    },
+    "manage/reschedule-409-slot-occupato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "2027-04-19T13:00:00.000Z"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:originale>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente di test",
+          "attendee_email": "<prefix>-cliente@test.invalid",
+          "attendee_phone": null,
+          "attendee_company": null,
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": null,
+          "custom_responses": {},
+          "start_time": "2027-04-19T07:00:00.000Z",
+          "end_time": "2027-04-19T08:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {},
+          "has_lead": false,
+          "has_consent_ip": false
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Consulenza di prova – Cliente di test",
+            "description": "Cliente: Cliente di test <<prefix>-cliente@test.invalid>\n\nUID prenotazione: <booking:originale>",
+            "location": "https://meet.caldes.test/<prefix>-consulenza",
+            "url": "https://meet.caldes.test/<prefix>-consulenza",
+            "start_time": "2027-04-19T07:00:00.000Z",
+            "end_time": "2027-04-19T08:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": []
+      }
+    },
+    "manage/reschedule-404": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/inesistente4/reschedule?token=<token:inesistente>",
+        "body": {
+          "start": "2027-04-19T09:00:00.000Z"
+        }
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Prenotazione non trovata"
+      }
+    },
+    "manage/reschedule-400-gia-annullata": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:annullata>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "2027-04-19T14:30:00.000Z"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Prenotazione già cancellata",
+        "code": "BOOKING_VALIDATION"
+      }
+    },
+    "manage/reschedule-409-sovrapposta-originale": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings/<booking:originale>/reschedule?token=<token:gestione>",
+        "body": {
+          "start": "2027-04-20T08:30:00.000Z"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:originale>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente di test",
+          "attendee_email": "<prefix>-cliente@test.invalid",
+          "attendee_phone": null,
+          "attendee_company": null,
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": null,
+          "custom_responses": {},
+          "start_time": "2027-04-20T08:00:00.000Z",
+          "end_time": "2027-04-20T09:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {},
+          "has_lead": false,
+          "has_consent_ip": false
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Consulenza di prova – Cliente di test",
+            "description": "Cliente: Cliente di test <<prefix>-cliente@test.invalid>\n\nUID prenotazione: <booking:originale>",
+            "location": "https://meet.caldes.test/<prefix>-consulenza",
+            "url": "https://meet.caldes.test/<prefix>-consulenza",
+            "start_time": "2027-04-20T08:00:00.000Z",
+            "end_time": "2027-04-20T09:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": []
+      }
+    },
+    "cal-slots/2027-03-08": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "2027-03-08"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "slots": {
+          "2027-03-08": [
+            {
+              "time": "2027-03-08T08:00:00.000Z"
+            },
+            {
+              "time": "2027-03-08T08:30:00.000Z"
+            },
+            {
+              "time": "2027-03-08T10:30:00.000Z"
+            },
+            {
+              "time": "2027-03-08T11:00:00.000Z"
+            },
+            {
+              "time": "2027-03-08T11:30:00.000Z"
+            },
+            {
+              "time": "2027-03-08T13:00:00.000Z"
+            },
+            {
+              "time": "2027-03-08T13:30:00.000Z"
+            },
+            {
+              "time": "2027-03-08T14:00:00.000Z"
+            },
+            {
+              "time": "2027-03-08T14:30:00.000Z"
+            },
+            {
+              "time": "2027-03-08T15:00:00.000Z"
+            },
+            {
+              "time": "2027-03-08T15:30:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "cal-slots/2027-03-09": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "2027-03-09"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "slots": {
+          "2027-03-09": [
+            {
+              "time": "2027-03-09T09:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T09:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T10:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T10:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T11:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T11:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T13:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T13:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T14:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T14:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T15:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T15:30:00.000Z"
+            },
+            {
+              "time": "2027-03-09T16:00:00.000Z"
+            },
+            {
+              "time": "2027-03-09T16:30:00.000Z"
+            }
+          ]
+        }
+      }
+    },
+    "cal-slots/2027-03-13": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "2027-03-13"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "slots": {}
+      }
+    },
+    "cal-slots/400-data-mancante": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {}
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Parametro date richiesto (YYYY-MM-DD)"
+      }
+    },
+    "cal-slots/400-data-non-valida": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "09-03-2027"
+        }
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Parametro date richiesto (YYYY-MM-DD)"
+      }
+    },
+    "cal-slots/503-tipo-non-disponibile": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "2027-03-08"
+        }
+      },
+      "status": 503,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non disponibile"
+      }
+    }
+  }
+}

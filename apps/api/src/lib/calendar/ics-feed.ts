@@ -54,16 +54,61 @@ function formatUtcDateTime(iso: string | Date): string {
   return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 }
 
-function formatDateOnly(iso: string | Date): string {
-  return new Date(iso).toISOString().slice(0, 10).replace(/-/g, '');
+function zonedParts(iso: string | Date, tz: string): Record<string, string> {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date(iso));
+  return Object.fromEntries(parts.map((p) => [p.type, p.value]));
 }
+
+// Gli all-day sono salvati come mezzanotte locale (22:00/23:00Z del giorno
+// prima): con toISOString() il feed li spostava al giorno precedente.
+function formatDateOnly(iso: string | Date, tz: string): string {
+  const p = zonedParts(iso, tz);
+  return `${p.year}${p.month}${p.day}`;
+}
+
+/** Wall-clock nel fuso, formato RFC 5545 da usare con ;TZID= */
+function formatLocalDateTime(iso: string | Date, tz: string): string {
+  const p = zonedParts(iso, tz);
+  return `${p.year}${p.month}${p.day}T${p.hour}${p.minute}${p.second}`;
+}
+
+// Serie ricorrenti con DTSTART in UTC vengono ripetute dai client (iPhone,
+// Google) alla stessa ora UTC: dopo il cambio d'ora slittano di un'ora. Per
+// master ricorrenti e loro eccezioni si emette l'ora locale con TZID, che
+// RFC 5545 vuole accompagnata dal VTIMEZONE (regole UE vigenti per Europe/Rome).
+const RECURRING_TZ = 'Europe/Rome';
+const VTIMEZONE_EUROPE_ROME = [
+  'BEGIN:VTIMEZONE',
+  'TZID:Europe/Rome',
+  'BEGIN:DAYLIGHT',
+  'TZOFFSETFROM:+0100',
+  'TZOFFSETTO:+0200',
+  'TZNAME:CEST',
+  'DTSTART:19700329T020000',
+  'RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU',
+  'END:DAYLIGHT',
+  'BEGIN:STANDARD',
+  'TZOFFSETFROM:+0200',
+  'TZOFFSETTO:+0100',
+  'TZNAME:CET',
+  'DTSTART:19701025T030000',
+  'RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU',
+  'END:STANDARD',
+  'END:VTIMEZONE',
+];
+
+const usesRecurringTz = (ev: CalendarEvent, tz: string) =>
+  tz === RECURRING_TZ && !ev.all_day && Boolean(ev.rrule || ev.recurrence_id);
 
 function nowUtcCompact(): string {
   return formatUtcDateTime(new Date().toISOString());
 }
 
-// NB: nessun VTIMEZONE — i tempi sono emessi in UTC (Z) o come DATE all-day;
-// RFC 5545 richiede VTIMEZONE solo per tempi referenziati con TZID.
+// I tempi sono emessi in UTC (Z) o come DATE all-day; solo i ricorrenti usano
+// TZID=Europe/Rome con il relativo VTIMEZONE (vedi usesRecurringTz).
 
 interface BuildOpts {
   calendar: Calendar;
@@ -88,9 +133,11 @@ export function buildIcsFeed(opts: BuildOpts): string {
     `X-APPLE-CALENDAR-COLOR:${opts.calendar.color}`,
   ];
 
-  for (const ev of opts.events) {
-    if (ev.status === 'cancelled') continue;
-    lines.push(...buildVEvent(ev, uidDomain));
+  const tz = opts.calendar.timezone || RECURRING_TZ;
+  const visible = opts.events.filter((ev) => ev.status !== 'cancelled');
+  if (visible.some((ev) => usesRecurringTz(ev, tz))) lines.push(...VTIMEZONE_EUROPE_ROME);
+  for (const ev of visible) {
+    lines.push(...buildVEvent(ev, uidDomain, tz));
   }
 
   lines.push('END:VCALENDAR');
@@ -119,16 +166,22 @@ export function buildIcsResource(opts: {
     'PRODID:-//Caldes//Calendar//IT',
     'CALSCALE:GREGORIAN',
   ];
-  lines.push(...buildVEvent(opts.master, uidDomain));
+  const tz = opts.calendar.timezone || RECURRING_TZ;
+  if ([opts.master, ...(opts.overrides || [])].some((ev) => usesRecurringTz(ev, tz))) {
+    lines.push(...VTIMEZONE_EUROPE_ROME);
+  }
+  lines.push(...buildVEvent(opts.master, uidDomain, tz));
   for (const ov of opts.overrides || []) {
     // L'override condivide l'UID del master (lo distingue il RECURRENCE-ID).
-    lines.push(...buildVEvent({ ...ov, uid: opts.master.uid }, uidDomain));
+    lines.push(...buildVEvent({ ...ov, uid: opts.master.uid }, uidDomain, tz));
   }
   lines.push('END:VCALENDAR');
   return lines.filter(Boolean).map((l) => fold(l)).join(CRLF) + CRLF;
 }
 
-function buildVEvent(ev: CalendarEvent, uidDomain: string): string[] {
+function buildVEvent(ev: CalendarEvent, uidDomain: string, tz: string): string[] {
+  const local = usesRecurringTz(ev, tz);
+  const dateTime = (d: string | Date) => (local ? `;TZID=${tz}:${formatLocalDateTime(d, tz)}` : `:${formatUtcDateTime(d)}`);
   const uid = `${ev.uid}@${uidDomain}`;
   const lines: string[] = [
     'BEGIN:VEVENT',
@@ -137,11 +190,11 @@ function buildVEvent(ev: CalendarEvent, uidDomain: string): string[] {
   ];
 
   if (ev.all_day) {
-    lines.push(`DTSTART;VALUE=DATE:${formatDateOnly(ev.start_time)}`);
-    lines.push(`DTEND;VALUE=DATE:${formatDateOnly(ev.end_time)}`);
+    lines.push(`DTSTART;VALUE=DATE:${formatDateOnly(ev.start_time, tz)}`);
+    lines.push(`DTEND;VALUE=DATE:${formatDateOnly(ev.end_time, tz)}`);
   } else {
-    lines.push(`DTSTART:${formatUtcDateTime(ev.start_time)}`);
-    lines.push(`DTEND:${formatUtcDateTime(ev.end_time)}`);
+    lines.push(`DTSTART${dateTime(ev.start_time)}`);
+    lines.push(`DTEND${dateTime(ev.end_time)}`);
   }
 
   lines.push(`SUMMARY:${escapeText(ev.summary)}`);
@@ -153,13 +206,13 @@ function buildVEvent(ev: CalendarEvent, uidDomain: string): string[] {
   if (ev.rrule) {
     lines.push(`RRULE:${ev.rrule}`);
     if (ev.exdates && ev.exdates.length > 0) {
-      const exdateValues = ev.exdates.map((d) => formatUtcDateTime(d)).join(',');
-      lines.push(`EXDATE:${exdateValues}`);
+      const exdateValues = ev.exdates.map((d) => (local ? formatLocalDateTime(d, tz) : formatUtcDateTime(d))).join(',');
+      lines.push(local ? `EXDATE;TZID=${tz}:${exdateValues}` : `EXDATE:${exdateValues}`);
     }
   }
 
   if (ev.recurrence_id) {
-    lines.push(`RECURRENCE-ID:${formatUtcDateTime(ev.recurrence_id)}`);
+    lines.push(`RECURRENCE-ID${dateTime(ev.recurrence_id)}`);
   }
 
   lines.push(`STATUS:${ev.status.toUpperCase()}`);

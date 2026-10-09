@@ -1,0 +1,755 @@
+{
+  "contract": "mcp-calendar-tools",
+  "version": 1,
+  "description": "Lista vincolante dei tool di calendario esposti a MCP, chat admin/Telegram e workflow (array tools di src/lib/agent/tools.ts): nomi, description, inputSchema, rischio, conferma ed esposizione per scope MCP. Gli output su fixture sono in mcp-calendar-tools.outputs.json. Design §12, piano F0.",
+  "source": "apps/api/src/lib/agent/tools.ts",
+  "regenerate": "pnpm --filter @calicchia/api contract:mcp-snapshot",
+  "count": 19,
+  "tools": [
+    {
+      "name": "get_calendar_today",
+      "family": "mixed",
+      "description": "Ottieni prenotazioni ed eventi di oggi dal calendario live (timezone Europe/Rome)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "create_cal_booking",
+      "family": "booking",
+      "description": "Alias di create_booking: crea una prenotazione sul calendario live. Usa quando l'utente dice \"prendi appuntamento\", \"crea meeting\", \"fissa call\". Invia email di conferma. RICHIEDE CONFERMA.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type_slug": {
+            "type": "string",
+            "description": "Slug dell'event type (es. consulenza-gratuita-30min); vedi list_event_types"
+          },
+          "start": {
+            "type": "string",
+            "description": "ISO UTC datetime (es. 2026-04-26T09:00:00Z)"
+          },
+          "attendee_name": {
+            "type": "string"
+          },
+          "attendee_email": {
+            "type": "string"
+          },
+          "attendee_phone": {
+            "type": "string"
+          },
+          "attendee_company": {
+            "type": "string"
+          },
+          "attendee_message": {
+            "type": "string"
+          },
+          "allow_buffer_override": {
+            "type": "boolean",
+            "description": "Consenti lo slot anche se viola i buffer dell'event type (default false)"
+          }
+        },
+        "required": [
+          "event_type_slug",
+          "start",
+          "attendee_name",
+          "attendee_email"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "create_booking",
+        "create_cal_booking"
+      ]
+    },
+    {
+      "name": "update_cal_booking",
+      "family": "booking",
+      "description": "Alias di reschedule_booking: sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante. RICHIEDE CONFERMA.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "UID pubblico del booking (accettato anche come booking_id)"
+          },
+          "booking_id": {
+            "type": "string",
+            "description": "Sinonimo legacy di uid"
+          },
+          "start": {
+            "type": "string",
+            "description": "Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo (opzionale)"
+          }
+        },
+        "required": [
+          "start"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "reschedule_booking",
+        "update_cal_booking"
+      ]
+    },
+    {
+      "name": "cancel_cal_booking",
+      "family": "booking",
+      "description": "Alias di cancel_booking: cancella una prenotazione per UID. Notifica il partecipante via email. RICHIEDE CONFERMA.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "UID pubblico del booking (accettato anche come booking_id)"
+          },
+          "booking_id": {
+            "type": "string",
+            "description": "Sinonimo legacy di uid"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo cancellazione (opzionale)"
+          }
+        }
+      },
+      "riskLevel": "high",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "cancel_booking",
+        "cancel_cal_booking"
+      ]
+    },
+    {
+      "name": "list_cal_bookings",
+      "family": "booking",
+      "description": "Alias di list_bookings: elenca le prenotazioni del calendario live con filtri per stato e date.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "pending",
+              "cancelled",
+              "completed",
+              "no_show",
+              "all"
+            ],
+            "description": "Filtra per stato (default: confirmed)"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD: solo bookings con start >= questa data"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD: solo bookings con start <= questa data"
+          },
+          "limit": {
+            "type": "number"
+          }
+        }
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "list_bookings",
+        "list_cal_bookings"
+      ]
+    },
+    {
+      "name": "list_event_types",
+      "family": "booking",
+      "description": "Lista delle tipologie di prenotazione disponibili (consulenza, sopralluogo, ecc.)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "get_calendar_availability",
+      "family": "mixed",
+      "description": "Calcola gli slot disponibili per un event type in un range di date (date locali Europe/Rome)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type_slug": {
+            "type": "string",
+            "description": "Slug dell'event type (es. consulenza-gratuita-30min)"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "Data inizio YYYY-MM-DD"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "Data fine YYYY-MM-DD (max 60 giorni dopo from_date)"
+          }
+        },
+        "required": [
+          "event_type_slug",
+          "from_date",
+          "to_date"
+        ]
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "list_bookings",
+      "family": "booking",
+      "description": "Lista delle prenotazioni con filtri opzionali per stato e date",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "pending",
+              "cancelled",
+              "completed",
+              "no_show",
+              "all"
+            ],
+            "description": "Filtra per stato (default: confirmed)"
+          },
+          "from_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD: solo bookings con start >= questa data"
+          },
+          "to_date": {
+            "type": "string",
+            "description": "YYYY-MM-DD: solo bookings con start <= questa data"
+          },
+          "limit": {
+            "type": "number"
+          }
+        }
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "list_bookings",
+        "list_cal_bookings"
+      ]
+    },
+    {
+      "name": "create_booking",
+      "family": "booking",
+      "description": "Crea una nuova prenotazione manuale per conto di un partecipante. Invia email di conferma.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type_slug": {
+            "type": "string",
+            "description": "Slug dell'event type (es. consulenza-gratuita-30min); vedi list_event_types"
+          },
+          "start": {
+            "type": "string",
+            "description": "ISO UTC datetime (es. 2026-04-26T09:00:00Z)"
+          },
+          "attendee_name": {
+            "type": "string"
+          },
+          "attendee_email": {
+            "type": "string"
+          },
+          "attendee_phone": {
+            "type": "string"
+          },
+          "attendee_company": {
+            "type": "string"
+          },
+          "attendee_message": {
+            "type": "string"
+          },
+          "allow_buffer_override": {
+            "type": "boolean",
+            "description": "Consenti lo slot anche se viola i buffer dell'event type (default false)"
+          }
+        },
+        "required": [
+          "event_type_slug",
+          "start",
+          "attendee_name",
+          "attendee_email"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "create_booking",
+        "create_cal_booking"
+      ]
+    },
+    {
+      "name": "reschedule_booking",
+      "family": "booking",
+      "description": "Sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante via email.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "UID pubblico del booking"
+          },
+          "start": {
+            "type": "string",
+            "description": "Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo (opzionale, mostrato al partecipante)"
+          }
+        },
+        "required": [
+          "uid",
+          "start"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "reschedule_booking",
+        "update_cal_booking"
+      ]
+    },
+    {
+      "name": "cancel_booking",
+      "family": "booking",
+      "description": "Cancella una prenotazione esistente per UID. Notifica il partecipante via email.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "string",
+            "description": "UID pubblico del booking"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo (opzionale, mostrato al partecipante)"
+          }
+        },
+        "required": [
+          "uid"
+        ]
+      },
+      "riskLevel": "high",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "admin"
+        ]
+      },
+      "sharedExecutor": [
+        "cancel_booking",
+        "cancel_cal_booking"
+      ]
+    },
+    {
+      "name": "list_calendars",
+      "family": "events",
+      "description": "Lista tutti i calendari self-hosted (Lavoro, Personale, Bookings, Scadenze, ecc.) con colore, conteggio eventi, ICS feed URL.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "list_events",
+      "family": "events",
+      "description": "Lista eventi calendario in un range di date, con espansione automatica delle ricorrenze. Filtra opzionalmente per calendario specifico (slug o id).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendar": {
+            "type": "string",
+            "description": "Slug o id calendario (es. \"lavoro\"). Omettere per tutti i calendari."
+          },
+          "from": {
+            "type": "string",
+            "description": "ISO datetime inizio (es. 2026-04-26T00:00:00Z)"
+          },
+          "to": {
+            "type": "string",
+            "description": "ISO datetime fine. Max 366 giorni dopo from."
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ]
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "get_events_for_today",
+      "family": "events",
+      "description": "Helper rapido: ritorna gli eventi del giorno corrente per un calendario (o tutti). Usa il timezone Europe/Rome per \"today\".",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendar": {
+            "type": "string",
+            "description": "Slug calendario (opzionale)"
+          }
+        }
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "find_free_slots",
+      "family": "events",
+      "description": "Trova finestre libere (no eventi confermati) in un calendario tra due date di durata minima specificata. Utile per proporre orari per nuovi appuntamenti.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "ISO datetime inizio finestra di ricerca"
+          },
+          "to": {
+            "type": "string",
+            "description": "ISO datetime fine"
+          },
+          "duration_minutes": {
+            "type": "number",
+            "description": "Durata minima slot libero in minuti"
+          },
+          "working_hours_start": {
+            "type": "string",
+            "description": "Ora inizio giornata lavorativa (HH:MM, default 09:00)"
+          },
+          "working_hours_end": {
+            "type": "string",
+            "description": "Ora fine giornata lavorativa (HH:MM, default 18:00)"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "duration_minutes"
+        ]
+      },
+      "riskLevel": "low",
+      "requiresConfirmation": false,
+      "mcp": {
+        "readTool": true,
+        "scopes": [
+          "read",
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "create_event",
+      "family": "events",
+      "description": "Crea un nuovo evento calendario. Supporta ricorrenze RRULE (es. FREQ=WEEKLY;BYDAY=MO,WE per lun/mer settimanali).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "calendar": {
+            "type": "string",
+            "description": "Slug o id calendario destinazione (es. \"lavoro\")"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Titolo evento"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "description": "Link meeting (Meet/Zoom)"
+          },
+          "start": {
+            "type": "string",
+            "description": "ISO datetime inizio (es. 2026-04-26T09:00:00Z)"
+          },
+          "end": {
+            "type": "string",
+            "description": "ISO datetime fine"
+          },
+          "all_day": {
+            "type": "boolean"
+          },
+          "rrule": {
+            "type": "string",
+            "description": "RFC 5545 RRULE senza prefisso (es. \"FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10\")"
+          }
+        },
+        "required": [
+          "calendar",
+          "summary",
+          "start",
+          "end"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "create_calendar",
+      "family": "events",
+      "description": "Crea un nuovo calendario. Imposta blocks_availability=true se gli eventi del calendario devono bloccare la disponibilità per le prenotazioni (es. festività, ferie).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome del calendario (es. \"Festività\")"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug opzionale (a-z, 0-9, -). Se assente viene derivato dal nome."
+          },
+          "color": {
+            "type": "string",
+            "description": "Colore hex (es. #ef4444). Default viola."
+          },
+          "blocks_availability": {
+            "type": "boolean",
+            "description": "Se true gli eventi bloccano le prenotazioni. Default true."
+          },
+          "timezone": {
+            "type": "string",
+            "description": "IANA timezone. Default Europe/Rome."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "update_event",
+      "family": "events",
+      "description": "Sposta o modifica un evento esistente (per id o uid). Per ricorrenti: questa modifica si applica al MASTER e quindi a tutte le occorrenze future. Per modificare singola occorrenza usa \"create_event_exception\".",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id_or_uid": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "description": "ISO datetime nuovo inizio"
+          },
+          "end": {
+            "type": "string",
+            "description": "ISO datetime nuova fine"
+          },
+          "rrule": {
+            "type": "string",
+            "description": "Nuova RRULE (vuota = rimuove ricorrenza)"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "tentative",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "id_or_uid"
+        ]
+      },
+      "riskLevel": "medium",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "write",
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    },
+    {
+      "name": "delete_event",
+      "family": "events",
+      "description": "Cancella un evento. Per ricorrenti, cancella tutta la serie. Per cancellare singola occorrenza usa \"create_event_exception\" con status=cancelled.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id_or_uid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id_or_uid"
+        ]
+      },
+      "riskLevel": "high",
+      "requiresConfirmation": true,
+      "mcp": {
+        "readTool": false,
+        "scopes": [
+          "admin"
+        ]
+      },
+      "sharedExecutor": null
+    }
+  ]
+}

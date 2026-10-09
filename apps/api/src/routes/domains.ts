@@ -19,7 +19,7 @@ domains.get('/', async (c) => {
     : sql``;
 
   let expiringFilter = sql``;
-  if (expiring) {
+  if (expiring && Number.isFinite(parseInt(expiring))) {
     const futureDate = new Date();
     futureDate.setDate(futureDate.getDate() + parseInt(expiring));
     expiringFilter = sql`AND d.expiration_date <= ${futureDate.toISOString().split('T')[0]}`;

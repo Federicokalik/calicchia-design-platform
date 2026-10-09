@@ -10,6 +10,7 @@
 
 // rrule è CommonJS — Node 24 ESM non vede i named exports, serve default import + destructure
 import rrulePkg from 'rrule';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'rrule' });
@@ -29,8 +30,11 @@ export function expandRRule(opts: {
   exdates?: string[];
   /** Cap massimo di occorrenze per evitare loop infiniti */
   limit?: number;
+  /** Fuso in cui la serie si ripete (ora e giorno "da muro"). Default Europe/Rome. */
+  timezone?: string;
 }): string[] {
   const limit = opts.limit ?? 500;
+  const tz = opts.timezone || 'Europe/Rome';
   const masterStart = new Date(opts.masterStartIso);
   const from = new Date(opts.fromIso);
   const to = new Date(opts.toIso);
@@ -39,12 +43,19 @@ export function expandRRule(opts: {
     return [];
   }
 
+  // Espansione in ora "flottante" (wall-clock del fuso rappresentato come UTC):
+  // con DTSTART in UTC la libreria ripeteva l'ora UTC, quindi dopo il cambio
+  // d'ora la serie slittava di un'ora, BYDAY cadeva sul giorno UTC (eventi
+  // serali/notturni e all-day nel giorno sbagliato). Le occorrenze vengono
+  // poi riconvertite nell'istante reale del fuso.
+  const floating = !opts.rrule.startsWith('DTSTART:');
+
   let rule;
   try {
     // rrulestr accetta sia 'RRULE:FREQ=...' che 'FREQ=...' (con DTSTART opzionale)
-    const fullStr = opts.rrule.startsWith('DTSTART:') || opts.rrule.startsWith('RRULE:')
-      ? opts.rrule
-      : `DTSTART:${formatUtcCompact(masterStart)}\nRRULE:${opts.rrule}`;
+    const fullStr = floating
+      ? `DTSTART:${formatUtcCompact(toFloating(masterStart, tz))}\nRRULE:${floatUntil(opts.rrule.replace(/^RRULE:/, ''), tz)}`
+      : opts.rrule;
     rule = rrulestr(fullStr);
   } catch (err) {
     log.error({ err, input: opts.rrule }, 'Parse error');
@@ -52,7 +63,9 @@ export function expandRRule(opts: {
   }
 
   // between() ritorna le occorrenze nel range
-  const occurrences = rule.between(from, to, true);
+  const occurrences = floating
+    ? rule.between(toFloating(from, tz), toFloating(to, tz), true).map((d) => fromFloating(d, tz))
+    : rule.between(from, to, true);
 
   // Filtra exdates
   const exdateSet = new Set((opts.exdates || []).map((d) => normalizeIso(d)));
@@ -69,6 +82,23 @@ function normalizeIso(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return iso;
   return d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** Istante reale → wall-clock nel fuso, rappresentato come Date UTC ("flottante"). */
+function toFloating(date: Date, tz: string): Date {
+  const z = toZonedTime(date, tz);
+  return new Date(Date.UTC(z.getFullYear(), z.getMonth(), z.getDate(), z.getHours(), z.getMinutes(), z.getSeconds()));
+}
+
+/** Data flottante → istante reale (l'ora "da muro" interpretata nel fuso). */
+function fromFloating(date: Date, tz: string): Date {
+  return fromZonedTime(date.toISOString().slice(0, 19), tz);
+}
+
+/** UNTIL salvato come istante UTC (…Z) → stesso istante in ora flottante. */
+function floatUntil(rrule: string, tz: string): string {
+  return rrule.replace(/UNTIL=(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/, (_m, y, mo, d, h, mi, se) =>
+    `UNTIL=${formatUtcCompact(toFloating(new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +se)), tz))}`);
 }
 
 /** Formato compatto RFC 5545 senza puntuazione: 20260426T090000Z */

@@ -34,11 +34,12 @@ interface Lead {
 
 interface Quote {
   id: string;
-  quote_number: string | null;
+  quote_number?: string | null;
   title: string | null;
   status: string;
   total: number | null;
-  issue_date: string | null;
+  issue_date?: string | null;
+  created_at?: string | null;
 }
 
 interface Invoice {
@@ -113,7 +114,7 @@ export function CustomerPanel({ open, onOpenChange, customerId, leadId }: Custom
 
   const { data: quotesData } = useQuery<{ quotes: Quote[] }>({
     queryKey: ['wa-panel-quotes', customerId],
-    queryFn: () => apiFetch(`/api/quotes?customer_id=${customerId}`),
+    queryFn: () => apiFetch(`/api/quotes-v2?customer_id=${customerId}`),
     enabled: open && Boolean(customerId),
   });
   const quotes = (quotesData?.quotes ?? []).slice(0, 5);
@@ -214,7 +215,7 @@ function CustomerBody({ customer, quotes, invoices }: { customer: Customer | und
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between gap-2 mt-1 text-xs text-muted-foreground">
-                    <span>{fmtDate(q.issue_date)}</span>
+                    <span>{fmtDate(q.issue_date ?? q.created_at ?? null)}</span>
                     <span className="font-mono">{fmtMoney(q.total)}</span>
                   </div>
                 </Link>

@@ -96,7 +96,15 @@ function SortablePipelineStep({ id, step, index, currentStep, onRemove }: {
   );
 }
 
-export default function ProgettoDetailPage() {
+// key per id: gli input non controllati (defaultValue + salvataggio su blur)
+// riusati passando da un record all'altro mostravano, e al blur salvavano,
+// i valori del record precedente.
+export default function ProgettoDetailRoute() {
+  const { id } = useParams();
+  return <ProgettoDetailPage key={id} />;
+}
+
+function ProgettoDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -847,7 +855,7 @@ export default function ProgettoDetailPage() {
                 <div>
                   <p className="text-sm font-semibold">Dettagli calcolo</p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Le spese (€ {profitability ? profitability.expenses_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}) verranno integrate dalla Fase 5 (OCR ricevute).
+                    Margine = preventivato − costo ore fatturabili − spese del progetto (€ {profitability ? profitability.expenses_eur.toLocaleString('it-IT', { minimumFractionDigits: 2 }) : '0,00'}, dal tab Spese).
                   </p>
                 </div>
                 {profitability && profitability.running_timers > 0 && (
@@ -983,18 +991,35 @@ export default function ProgettoDetailPage() {
 
         {/* Notes */}
         <TabsContent value="notes">
-          <div className="rounded-lg border bg-card p-6">
-            <p className="text-xs text-muted-foreground mb-3">Appunti interni per questo progetto.</p>
-            <textarea
-              className="w-full min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Scrivi le tue note qui..."
-              defaultValue={project.client_notes || ''}
-              onBlur={(e) => {
-                if (e.target.value !== (project.client_notes || '')) {
-                  updateProjectMutation.mutate({ client_notes: e.target.value || null });
-                }
-              }}
-            />
+          <div className="rounded-lg border bg-card p-6 space-y-6">
+            <div>
+              <p className="text-xs text-muted-foreground mb-3">Appunti interni per questo progetto. Non visibili al cliente.</p>
+              <textarea
+                className="w-full min-h-[200px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Scrivi le tue note qui..."
+                defaultValue={project.internal_notes || ''}
+                onBlur={(e) => {
+                  if (e.target.value !== (project.internal_notes || '')) {
+                    updateProjectMutation.mutate({ internal_notes: e.target.value || null });
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Nota per il cliente: <strong className="text-foreground">visibile nel portale clienti</strong> come descrizione del progetto.
+              </p>
+              <textarea
+                className="w-full min-h-[100px] rounded-md border bg-background px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+                placeholder="Testo mostrato al cliente..."
+                defaultValue={project.client_notes || ''}
+                onBlur={(e) => {
+                  if (e.target.value !== (project.client_notes || '')) {
+                    updateProjectMutation.mutate({ client_notes: e.target.value || null });
+                  }
+                }}
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>

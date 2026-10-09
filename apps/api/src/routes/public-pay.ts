@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { z } from 'zod';
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { zValidator } from '../lib/z-validator';
 import { stripe, isStripeConfigured } from '../lib/stripe';
 import { createPaypalOrderEmbedded, isPaypalReady, capturePaypalOrder } from '../lib/paypal';
@@ -191,7 +191,7 @@ publicPay.post('/:id/checkout', zValidator('param', linkIdSchema), async (c) => 
       UPDATE payment_links
       SET provider_order_id = ${session.id},
           status = 'active',
-          payload_json = payload_json || ${JSON.stringify({
+          payload_json = payload_json || ${jsonb({
             session_id: session.id,
             client_secret: session.client_secret,
           })}::jsonb,
@@ -232,7 +232,7 @@ publicPay.post('/:id/checkout', zValidator('param', linkIdSchema), async (c) => 
       UPDATE payment_links
       SET provider_order_id = ${order.id},
           status = 'active',
-          payload_json = payload_json || ${JSON.stringify({
+          payload_json = payload_json || ${jsonb({
             order_id: order.id,
             status: order.status,
           })}::jsonb,
@@ -273,7 +273,7 @@ publicPay.post('/:id/capture', zValidator('param', linkIdSchema), async (c) => {
     if (capture.capture_id) {
       await sql`
         UPDATE payment_links
-        SET payload_json = payload_json || ${JSON.stringify({ capture_id: capture.capture_id })}::jsonb,
+        SET payload_json = payload_json || ${jsonb({ capture_id: capture.capture_id })}::jsonb,
             updated_at = NOW()
         WHERE id = ${link.id}
       `;

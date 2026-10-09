@@ -40,7 +40,15 @@ import { useClientUploads } from '@/hooks/use-client-uploads';
 import type { Customer, CustomerNote } from '@/types/customer';
 import { CUSTOMER_STATUS_CONFIG, NOTE_TYPE_CONFIG } from '@/types/customer';
 
-export default function ClienteDetailPage() {
+// key per id: gli input non controllati (defaultValue + salvataggio su blur)
+// riusati passando da un record all'altro mostravano, e al blur salvavano,
+// i valori del record precedente.
+export default function ClienteDetailRoute() {
+  const { id } = useParams();
+  return <ClienteDetailPage key={id} />;
+}
+
+function ClienteDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -669,9 +677,9 @@ export default function ClienteDetailPage() {
                 <div key={d.id} className="flex items-center gap-4 px-4 py-3">
                   <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium">{d.domain_name}</p>
+                    <p className="text-sm font-medium">{d.full_domain || `${d.domain_name}.${d.tld}`}</p>
                     <p className="text-xs text-muted-foreground">
-                      Scadenza: {d.expiry_date ? new Date(d.expiry_date).toLocaleDateString('it-IT') : 'N/D'}
+                      Scadenza: {d.expiration_date ? new Date(d.expiration_date).toLocaleDateString('it-IT') : 'N/D'}
                     </p>
                   </div>
                   <Badge variant="outline" className="text-xs">{d.auto_renew ? 'Auto-rinnovo' : 'Manuale'}</Badge>
@@ -715,7 +723,8 @@ export default function ClienteDetailPage() {
                     <Select value={reportProjectId} onValueChange={setReportProjectId}>
                       <SelectTrigger><SelectValue placeholder="Nessuno" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Nessuno</SelectItem>
+                        {/* Radix Select vieta value="" sugli item: lancia e manda in crash l'app */}
+                        <SelectItem value="none">Nessuno</SelectItem>
                         {projects.map((p: any) => (
                           <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                         ))}
@@ -752,7 +761,7 @@ export default function ClienteDetailPage() {
                         year: Number(reportYear),
                         title,
                         summary: reportSummary.trim() || undefined,
-                        project_id: reportProjectId || undefined,
+                        project_id: reportProjectId && reportProjectId !== 'none' ? reportProjectId : undefined,
                       });
                     }}
                   >

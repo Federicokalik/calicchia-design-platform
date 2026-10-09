@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { z } from 'zod';
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { stripe, isStripeConfigured, createStripeRefund } from '../lib/stripe';
 import { createPaypalOrder, capturePaypalOrder, getPaypalOrder, isPaypalConfigured, isPaypalReady, refundPaypalCapture } from '../lib/paypal';
 import { createRevolutOrder, getRevolutOrder, cancelRevolutOrder, isRevolutConfigured, isRevolutReady } from '../lib/revolut';
@@ -447,11 +447,27 @@ payments.post('/links', zValidator('json', createPaymentLinkSchema), async (c) =
       : [];
     const defaultAccount = accounts.find((a) => Boolean(a.is_default)) ?? accounts[0];
 
+    // billing.bank_accounts non ha una UI: l'IBAN che l'admin inserisce è in
+    // Impostazioni → Profilo aziendale (business.profile). Stessi ripieghi dello
+    // snapshot dei preventivi (quotes.ts), compreso invoice_settings.
+    const [profileRow] = await sql`
+      SELECT value FROM site_settings WHERE key = 'business.profile' LIMIT 1
+    ` as Array<{ value: unknown }>;
+    const profile = isRecord(profileRow?.value) ? profileRow.value : {};
+    const [invoiceFallback] = await sql`
+      SELECT company_name, bank_iban, bank_bic FROM invoice_settings ORDER BY updated_at DESC LIMIT 1
+    ` as Array<{ company_name: string | null; bank_iban: string | null; bank_bic: string | null }>;
+
+    const iban = String(defaultAccount?.iban || profile.bank_iban || invoiceFallback?.bank_iban || '').trim();
+    if (!iban) {
+      return c.json({ error: 'IBAN non configurato: inseriscilo in Impostazioni → Profilo aziendale' }, 400);
+    }
+
     linkPayload = {
       type: 'bank_transfer',
-      iban: String(defaultAccount?.iban ?? ''),
-      bic: String(defaultAccount?.bic ?? ''),
-      holder_name: String(defaultAccount?.holder_name ?? ''),
+      iban,
+      bic: String(defaultAccount?.bic || profile.bank_bic || invoiceFallback?.bank_bic || ''),
+      holder_name: String(defaultAccount?.holder_name || profile.legal_name || profile.company_name || invoiceFallback?.company_name || ''),
       causal: String(body.causal ?? defaultAccount?.default_causal ?? ''),
       amount,
       currency,
@@ -613,7 +629,7 @@ payments.post('/links/:id/capture', zValidator('param', idParamSchema), async (c
   if (capture.capture_id) {
     await sql`
       UPDATE payment_links
-      SET payload_json = payload_json || ${JSON.stringify({ capture_id: capture.capture_id })}::jsonb,
+      SET payload_json = payload_json || ${jsonb({ capture_id: capture.capture_id })}::jsonb,
           updated_at = NOW()
       WHERE id = ${id}
     `;
@@ -765,6 +781,12 @@ payments.post('/links/:id/refresh', async (c) => {
       newStatus = 'cancelled';
     }
     payload = { ...payload, revolut_state: order.state };
+  }
+
+  // Stripe (payment_status) e PayPal (COMPLETED) restano 'paid' anche dopo un
+  // rimborso: uno stato di rimborso già registrato non va declassato a 'paid'.
+  if (['refunded', 'partially_refunded'].includes(String(link.status))) {
+    newStatus = String(link.status);
   }
 
   // If the provider now reports paid, run the FULL payment pipeline via

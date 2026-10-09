@@ -67,7 +67,30 @@ export async function apiFetch(
     window.location.assign(`/login?next=${encodeURIComponent(back)}`);
   }
 
-  throw new Error(data?.error || `HTTP ${res.status}`);
+  throw buildApiError(data, res.status);
+}
+
+/**
+ * Errore con il messaggio del server e, se presenti, i dettagli di
+ * validazione ({ path, message }[]): con il solo "Validazione fallita"
+ * l'utente non poteva sapere quale campo correggere.
+ */
+function buildApiError(data: unknown, status: number): Error & { details?: unknown } {
+  const body = (data && typeof data === 'object' ? data : {}) as { error?: unknown; details?: unknown };
+  let message = typeof body.error === 'string' && body.error ? body.error : `HTTP ${status}`;
+  if (Array.isArray(body.details) && body.details.length > 0) {
+    const parts = body.details
+      .map((d) => {
+        if (!d || typeof d !== 'object') return null;
+        const { path, message: m } = d as { path?: unknown; message?: unknown };
+        if (typeof m !== 'string') return null;
+        const p = Array.isArray(path) ? path.join('.') : typeof path === 'string' ? path : '';
+        return p ? `${p}: ${m}` : m;
+      })
+      .filter((x): x is string => !!x);
+    if (parts.length) message = `${message} — ${parts.slice(0, 3).join('; ')}`;
+  }
+  return Object.assign(new Error(message), { details: body.details });
 }
 
 /**

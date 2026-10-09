@@ -44,7 +44,9 @@ export default function EventTypesPage() {
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
       apiFetch(`/api/admin/calendar/event-types/${id}`, {
         method: 'PUT',
-        body: JSON.stringify({ is_active }),
+        // "Disattiva" azzera anche is_public: riattivando solo is_active il tipo
+        // risultava 'Attivo' ma la pagina /prenota/<slug> rispondeva 404.
+        body: JSON.stringify(is_active ? { is_active, is_public: true } : { is_active }),
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-event-types'] });

@@ -12,6 +12,7 @@ import {
 } from '../email-marketing';
 import { sendWhatsAppText } from '../whatsapp';
 import { canSendWhatsApp } from '../whatsapp-policy';
+import { isEmailEligible } from './eligibility';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'mkt-automation' });
@@ -84,22 +85,22 @@ export async function executeStep(
 
     case 'send_email': {
       if (!contact.email) return;
-      // Eligibility: never send to opted-out / suppressed contacts.
-      if (['unsubscribed', 'bounced', 'complained'].includes(contact.email_consent)) return;
-      if (contact.email_norm) {
-        const [supp] = await sql`SELECT 1 FROM mkt_suppression WHERE email_norm = ${contact.email_norm}`;
-        if (supp) return;
-      }
+      // Stessa eleggibilità delle campagne: opt-out, soppressione, opposizione
+      // nelle preferenze e double opt-in non confermato.
+      if (!(await isEmailEligible(contact.id))) return;
       const blocks = (cfg.blocks as Block[]) ?? [];
       const rawSubject = String(cfg.subject ?? '');
       if (!rawSubject || !blocks.length) return;
       const vars = contactVars(contact);
       const subject = personalize(rawSubject, vars);
       const html = renderStandaloneEmailHtml(blocks, contact.unsubscribe_token, cfg.preheader as string | undefined, vars);
-      await sendMarketingEmail({
+      const res = await sendMarketingEmail({
         to: contact.email, subject, html,
         unsubscribeUrl: `${API_URL}/api/mkt-track/u/${contact.unsubscribe_token}`,
       });
+      // sendEmail non lancia: ritorna { success: false }. Senza questo il run
+      // avanzava e l'email era persa in silenzio; lanciando, il cron ritenta.
+      if (res && res.success === false) throw new Error(res.error || 'Invio email non riuscito');
       return;
     }
 

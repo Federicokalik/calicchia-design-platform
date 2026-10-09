@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import crypto from 'crypto';
 import { resolveContractArticles, type ContractArticle } from '@calicchia/shared';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { sendEmail } from '../lib/email';
 import { renderOtpCodeEmail } from '../templates/otp-code';
 import { logger } from '../lib/logger';
@@ -48,6 +48,9 @@ async function getVessatorieForQuote(projectTemplate: unknown): Promise<Contract
       vessatoria: true,
     }));
   }
+  // Documento su misura senza vessatorie dichiarate: nessuna. Le sezioni
+  // eventualmente presenti sono i default iniettati dall'editor, non il documento.
+  if (pt.custom_html) return [];
 
   const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
   const contratto = sections.find((s) => s?.type === 'contratto');
@@ -93,6 +96,7 @@ function getPagamentoForQuote(projectTemplate: unknown): Array<Record<string, un
   if (Array.isArray(pt.pagamento_custom) && pt.pagamento_custom.length) {
     return normalize(pt.pagamento_custom as unknown[]);
   }
+  if (pt.custom_html) return [];
   const sections = Array.isArray(pt.sections) ? (pt.sections as Array<{ type?: string; data?: unknown }>) : [];
   const pagamento = sections.find((s) => s?.type === 'pagamento');
   const modalita = (pagamento?.data as { modalita?: unknown[] } | undefined)?.modalita;
@@ -257,17 +261,21 @@ quotePublic.post('/:token/otp', async (c) => {
     hint = String(rows[0].customer_phone).replace(/.(?=.{4})/g, '•');
   } else {
     const otpEmail = await renderOtpCodeEmail({ code: otp, expiresMinutes: 10 });
-    await sendEmail({
+    const sent = await sendEmail({
       to: rows[0].customer_email,
       subject: 'Codice di verifica per firma preventivo',
       html: otpEmail.html,
       text: otpEmail.text,
       transport: 'critical',
     });
+    if (!sent.success) {
+      log.error({ error: sent.error }, 'OTP email send failed');
+      return c.json({ error: 'Invio email fallito — riprova' }, 502);
+    }
     hint = rows[0].customer_email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
   }
 
-  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${JSON.stringify({ channel, ...(channel === 'whatsapp' ? { phone: rows[0].customer_phone } : { email: rows[0].customer_email }) })})`;
+  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${jsonb({ channel, ...(channel === 'whatsapp' ? { phone: rows[0].customer_phone } : { email: rows[0].customer_email }) })})`;
 
   // email_hint kept for backward compatibility with already-built clients.
   return c.json({ success: true, channel, hint, email_hint: hint });
@@ -321,10 +329,10 @@ quotePublic.post('/:token/sign', async (c) => {
         SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL
         WHERE id = ${quote.id}
       `;
-      await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+      await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${jsonb({ attempts })})`;
       return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
     }
-    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${jsonb({ attempts })})`;
     return c.json({ error: 'Codice OTP non valido o scaduto' }, 400);
   }
 
@@ -334,9 +342,12 @@ quotePublic.post('/:token/sign', async (c) => {
 
   // Freeze the approved clauses as presented at signature time — later edits
   // to quote.settings must not change what was approved (evidentiary value).
-  const vessatorieSnapshot = vessatorie.length
-    ? JSON.stringify(vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo })))
+  const vessatorieList = vessatorie.length
+    ? vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo }))
     : null;
+  // Parametro jsonb per le query; nell'hash va il valore semplice (quello che
+  // si rilegge dalla colonna vessatorie_snapshot).
+  const vessatorieSnapshot = jsonb(vessatorieList);
 
   // Evidentiary hash bound to the ACTUAL approved content + signer + signature,
   // not the meaningless `id-Date.now()`. Recomputable from the stored quote to
@@ -352,7 +363,7 @@ quotePublic.post('/:token/sign', async (c) => {
     currency: quote.currency,
     notes: quote.notes,
     project_template: quote.project_template,
-    vessatorie_snapshot: vessatorieSnapshot,
+    vessatorie_snapshot: vessatorieList,
     signer_name: signer_name || null,
     signer_email: quote.customer_email,
     signature_image_sha: crypto.createHash('sha256').update(String(signature_image)).digest('hex'),
@@ -384,7 +395,7 @@ quotePublic.post('/:token/sign', async (c) => {
   if (vessatorie.length) {
     await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'vessatorie_approved', ${ip}, ${ua}, ${vessatorieSnapshot})`;
   }
-  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${JSON.stringify({ signer_name, pdf_hash: pdfHash })})`;
+  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${jsonb({ signer_name, pdf_hash: pdfHash })})`;
 
   // Signed → the quote becomes a "lavoro": auto-create the linked project
   // (budget = quote total) so it shows up in admin outside the leads pipeline.

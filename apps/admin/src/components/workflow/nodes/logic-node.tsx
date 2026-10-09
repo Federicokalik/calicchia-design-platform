@@ -2,9 +2,12 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { cn } from '@/lib/utils';
 import { GitBranch } from 'lucide-react';
 
-export function LogicNode({ data, selected }: NodeProps) {
+export function LogicNode({ data, selected, type }: NodeProps) {
   const { label, subtype } = data as Record<string, any>;
-  const isCondition = subtype === 'condition';
+  // I nodi trascinati dalla palette hanno solo { label }: senza il controllo sul
+  // tipo il nodo Condizione aveva un'unica uscita e l'engine seguiva sempre il
+  // primo arco, qualunque fosse l'esito.
+  const isCondition = subtype === 'condition' || type === 'logic_condition';
 
   return (
     <div className={cn(
@@ -20,8 +23,8 @@ export function LogicNode({ data, selected }: NodeProps) {
       <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-amber-500 !bg-card" />
       {isCondition ? (
         <>
-          <Handle type="source" position={Position.Right} id="handle-true" className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-emerald-500 !bg-card" style={{ top: '35%' }} />
-          <Handle type="source" position={Position.Right} id="handle-false" className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-red-500 !bg-card" style={{ top: '65%' }} />
+          <Handle type="source" position={Position.Right} id="true" className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-emerald-500 !bg-card" style={{ top: '35%' }} />
+          <Handle type="source" position={Position.Right} id="false" className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-red-500 !bg-card" style={{ top: '65%' }} />
         </>
       ) : (
         <Handle type="source" position={Position.Right} className="!h-2.5 !w-2.5 !rounded-full !border-2 !border-amber-500 !bg-card" />

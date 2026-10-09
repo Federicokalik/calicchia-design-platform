@@ -91,6 +91,7 @@ import ClientsCmsPage from '@/pages/cms/clients';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -101,7 +102,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    return <Navigate to="/login" replace />;
+    // ?next: aprendo a freddo un link profondo (es. da una notifica) si torna
+    // lì dopo il login invece che in dashboard.
+    const back = location.pathname + location.search;
+    const target = back && back !== '/' ? `/login?next=${encodeURIComponent(back)}` : '/login';
+    return <Navigate to={target} replace />;
   }
 
   return <>{children}</>;

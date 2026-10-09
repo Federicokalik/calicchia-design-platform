@@ -1,0 +1,587 @@
+{
+  "contract": "device-agenda",
+  "version": 1,
+  "description": "Agenda del device GET /api/device/agenda (e ping/pairing per l'autenticazione) sullo scenario di test/contracts/device-agenda.contract.test.ts: richiesta, status, header e corpo normalizzati; pending_tasks e pending_notes dipendono da tabelle globali e sono sostituiti da '<conteggio>' (i filtri sullo stato sono verificati nel test come differenza da una base). Baseline F0 su PgLegacyStore.",
+  "regenerate": "UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/device-agenda.contract.test.ts",
+  "cases": {
+    "auth/401-senza-token": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "nessuna"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Device token richiesto"
+      }
+    },
+    "auth/401-jwt-admin": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "admin"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Device token richiesto"
+      }
+    },
+    "auth/401-token-sconosciuto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "device sconosciuto"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Device token non valido"
+      }
+    },
+    "auth/401-token-revocato": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "device revocato"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Device token non valido"
+      }
+    },
+    "auth/401-token-scaduto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "device scaduto"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Device token scaduto"
+      }
+    },
+    "auth/ping": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/ping",
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "now": "2027-03-10T09:30:00.000Z"
+      }
+    },
+    "pairing/201": {
+      "request": {
+        "method": "POST",
+        "path": "/api/device/admin/pair",
+        "body": {
+          "label": "<prefix> ePaper scrivania",
+          "expires_days": 30
+        },
+        "auth": "admin"
+      },
+      "status": 201,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "device_token": "<token:1>",
+        "id": "<id:1>",
+        "token_prefix": "<token:2>",
+        "label": "<prefix> ePaper scrivania",
+        "expires_at": "2027-04-09T09:30:00.000Z",
+        "created_at": "<timestamp>"
+      }
+    },
+    "agenda/2027-03-10": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-10"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-03-10",
+        "events": [
+          {
+            "summary": "<prefix> Trasferta Milano",
+            "start_time": "2027-03-09T23:00:00.000Z",
+            "end_time": "2027-03-10T23:00:00.000Z",
+            "all_day": true,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Colazione di lavoro",
+            "start_time": "2027-03-10T07:00:00.000Z",
+            "end_time": "2027-03-10T08:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Call con il cliente",
+            "start_time": "2027-03-10T10:00:00.000Z",
+            "end_time": "2027-03-10T11:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "Pranzo (Google)",
+            "start_time": "2027-03-10T11:30:00.000Z",
+            "end_time": "2027-03-10T12:00:00.000Z",
+            "all_day": false,
+            "source": "ics_pull",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Consulenza – Mario Rossi",
+            "start_time": "2027-03-10T13:00:00.000Z",
+            "end_time": "2027-03-10T14:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Dentista",
+            "start_time": "2027-03-10T14:00:00.000Z",
+            "end_time": "2027-03-10T15:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Forse aperitivo",
+            "start_time": "2027-03-10T17:30:00.000Z",
+            "end_time": "2027-03-10T18:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "tentative"
+          },
+          {
+            "summary": "<prefix> Notturno",
+            "start_time": "2027-03-10T23:15:00.000Z",
+            "end_time": "2027-03-10T23:45:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "<prefix> Call con il cliente",
+          "start_time": "2027-03-10T10:00:00.000Z",
+          "end_time": "2027-03-10T11:00:00.000Z"
+        },
+        "last_event_end": "2027-03-10T23:45:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/2027-03-09": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-09"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-03-09",
+        "events": [
+          {
+            "summary": "<prefix> Standup",
+            "start_time": "2027-03-09T08:15:00.000Z",
+            "end_time": "2027-03-09T08:30:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Trasferta Milano",
+            "start_time": "2027-03-09T23:00:00.000Z",
+            "end_time": "2027-03-10T23:00:00.000Z",
+            "all_day": true,
+            "source": "manual",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": null,
+        "last_event_end": "2027-03-09T08:30:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/2027-03-11": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-11"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-03-11",
+        "events": [
+          {
+            "summary": "<prefix> Revisione del giovedì",
+            "start_time": "2027-03-11T09:00:00.000Z",
+            "end_time": "2027-03-11T10:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "<prefix> Revisione del giovedì",
+          "start_time": "2027-03-11T09:00:00.000Z",
+          "end_time": "2027-03-11T10:00:00.000Z"
+        },
+        "last_event_end": "2027-03-11T10:00:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/2027-03-12": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-03-12"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-03-12",
+        "events": [
+          {
+            "summary": "<prefix> Standup",
+            "start_time": "2027-03-12T09:00:00.000Z",
+            "end_time": "2027-03-12T09:15:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "<prefix> Standup",
+          "start_time": "2027-03-12T09:00:00.000Z",
+          "end_time": "2027-03-12T09:15:00.000Z"
+        },
+        "last_event_end": "2027-03-12T09:15:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/festivita-2027-06-01": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-06-01"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-06-01",
+        "events": [
+          {
+            "summary": "Festa della Repubblica",
+            "start_time": "2027-06-01T22:00:00.000Z",
+            "end_time": "2027-06-02T22:00:00.000Z",
+            "all_day": false,
+            "source": "system",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "Festa della Repubblica",
+          "start_time": "2027-06-01T22:00:00.000Z",
+          "end_time": "2027-06-02T22:00:00.000Z"
+        },
+        "last_event_end": "2027-06-02T22:00:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/festivita-2027-06-02": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "2027-06-02"
+        },
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-06-02",
+        "events": [
+          {
+            "summary": "Festa della Repubblica",
+            "start_time": "2027-06-01T22:00:00.000Z",
+            "end_time": "2027-06-02T22:00:00.000Z",
+            "all_day": false,
+            "source": "system",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "Festa della Repubblica",
+          "start_time": "2027-06-01T22:00:00.000Z",
+          "end_time": "2027-06-02T22:00:00.000Z"
+        },
+        "last_event_end": "2027-06-02T22:00:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/data-di-default": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "auth": "device"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "date": "2027-03-10",
+        "events": [
+          {
+            "summary": "<prefix> Trasferta Milano",
+            "start_time": "2027-03-09T23:00:00.000Z",
+            "end_time": "2027-03-10T23:00:00.000Z",
+            "all_day": true,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Colazione di lavoro",
+            "start_time": "2027-03-10T07:00:00.000Z",
+            "end_time": "2027-03-10T08:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Call con il cliente",
+            "start_time": "2027-03-10T10:00:00.000Z",
+            "end_time": "2027-03-10T11:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "Pranzo (Google)",
+            "start_time": "2027-03-10T11:30:00.000Z",
+            "end_time": "2027-03-10T12:00:00.000Z",
+            "all_day": false,
+            "source": "ics_pull",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Consulenza – Mario Rossi",
+            "start_time": "2027-03-10T13:00:00.000Z",
+            "end_time": "2027-03-10T14:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Dentista",
+            "start_time": "2027-03-10T14:00:00.000Z",
+            "end_time": "2027-03-10T15:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          },
+          {
+            "summary": "<prefix> Forse aperitivo",
+            "start_time": "2027-03-10T17:30:00.000Z",
+            "end_time": "2027-03-10T18:00:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "tentative"
+          },
+          {
+            "summary": "<prefix> Notturno",
+            "start_time": "2027-03-10T23:15:00.000Z",
+            "end_time": "2027-03-10T23:45:00.000Z",
+            "all_day": false,
+            "source": "manual",
+            "status": "confirmed"
+          }
+        ],
+        "next_event": {
+          "summary": "<prefix> Notturno",
+          "start_time": "2027-03-10T23:15:00.000Z",
+          "end_time": "2027-03-10T23:45:00.000Z"
+        },
+        "last_event_end": "2027-03-10T23:45:00.000Z",
+        "pending_tasks": "<conteggio>",
+        "pending_notes": "<conteggio>"
+      }
+    },
+    "agenda/400-formato": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "10/03/2027"
+        },
+        "auth": "device"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "date non valida (YYYY-MM-DD)"
+      }
+    },
+    "agenda/400-testo": {
+      "request": {
+        "method": "GET",
+        "path": "/api/device/agenda",
+        "query": {
+          "date": "oggi"
+        },
+        "auth": "device"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "date non valida (YYYY-MM-DD)"
+      }
+    }
+  }
+}

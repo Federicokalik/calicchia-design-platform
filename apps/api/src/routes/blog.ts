@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { marked } from 'marked';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import * as openai from '../lib/ai/openai';
 import * as perplexity from '../lib/ai/perplexity';
 import * as coverGenerator from '../lib/ai/cover-generator';
@@ -607,7 +607,7 @@ blog.post('/generate', async (c) => {
       is_published: settings.auto_publish,
       published_at: settings.auto_publish ? new Date().toISOString() : null,
       reading_time: article.readingTimeMinutes,
-      demos: JSON.stringify(demos),
+      demos: jsonb(demos),
     };
 
     if (coverImage?.savedToStorage && coverImage.storageKey) {

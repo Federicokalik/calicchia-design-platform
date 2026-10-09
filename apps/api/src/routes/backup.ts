@@ -22,16 +22,38 @@ type ColumnInfo = {
   is_identity: 'YES' | 'NO';
 };
 
+// information_schema riporta come BASE TABLE sia una tabella partizionata
+// (analytics) sia ognuna delle sue partizioni: esportandole tutte, ogni evento
+// finiva due volte nel backup e il ripristino falliva sempre per chiave
+// duplicata. Si tiene solo il padre: SELECT, TRUNCATE e INSERT sul padre
+// coprono già le partizioni (le righe vengono instradate da Postgres).
 async function listTables(): Promise<TableRef[]> {
   const rows = await sql`
-    SELECT table_schema AS schema, table_name AS table
-    FROM information_schema.tables
-    WHERE table_schema = ANY(${[...ALLOWED_SCHEMAS] as unknown as string[]})
-      AND table_type = 'BASE TABLE'
-    ORDER BY table_schema, table_name
+    SELECT t.table_schema AS schema, t.table_name AS table
+    FROM information_schema.tables t
+    JOIN pg_namespace n ON n.nspname = t.table_schema
+    JOIN pg_class c ON c.relnamespace = n.oid AND c.relname = t.table_name
+    WHERE t.table_schema = ANY(${[...ALLOWED_SCHEMAS] as unknown as string[]})
+      AND t.table_type = 'BASE TABLE'
+      AND NOT c.relispartition
+    ORDER BY t.table_schema, t.table_name
   ` as unknown as TableRef[];
   return rows;
 }
+
+/** "schema.tabella" delle partizioni: nei backup vecchi duplicano il padre. */
+async function listPartitionKeys(): Promise<Set<string>> {
+  const rows = await sql`
+    SELECT n.nspname || '.' || c.relname AS key
+    FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE c.relispartition AND c.relkind IN ('r', 'p')
+      AND n.nspname = ANY(${[...ALLOWED_SCHEMAS] as unknown as string[]})
+  ` as unknown as Array<{ key: string }>;
+  return new Set(rows.map((r) => r.key));
+}
+
+const INSERT_BATCH = 500;
 
 // Fetch column metadata for every allowed table in one query (DBX-02: avoids a
 // per-table round-trip), grouped by "schema.table".
@@ -175,7 +197,10 @@ backup.post('/import', async (c) => {
   const liveTables = await listTables();
   const liveKey = (t: TableRef) => `${t.schema}.${t.table}`;
   const liveSet = new Set(liveTables.map(liveKey));
-  const incoming = Object.keys(parsed.tables);
+  // Backup creati prima del fix contengono anche le partizioni di analytics:
+  // le loro righe sono già nel padre, quindi si ignorano.
+  const partitionKeys = await listPartitionKeys();
+  const incoming = Object.keys(parsed.tables).filter((k) => !partitionKeys.has(k));
   const unknownTables = incoming.filter((k) => !liveSet.has(k));
   if (unknownTables.length > 0) {
     return c.json({
@@ -221,26 +246,43 @@ backup.post('/import', async (c) => {
 
         await tx.unsafe(`SET LOCAL search_path TO "${t.schema}"`);
 
+        // Inserimento a blocchi di righe con le stesse colonne (una INSERT per
+        // riga rendeva il ripristino di analytics lentissimo).
+        let batch: Record<string, unknown>[] = [];
+        let batchCols: string[] = [];
+        const flush = async () => {
+          if (batch.length === 0) return;
+          await tx`INSERT INTO ${tx(t.table)} ${tx(batch, ...batchCols)}`;
+          stats.rowsInserted += batch.length;
+          batch = [];
+        };
+
         for (const raw of rows) {
           const obj: Record<string, unknown> = {};
           for (const col of writable) {
             if (!(col.column_name in raw)) continue;
-            let value = raw[col.column_name];
-            // JSONB/JSON: pass objects through (postgres.js will encode).
-            // For arrays/scalars destined to jsonb columns, JSON.stringify
-            // to avoid being interpreted as PG arrays.
-            if (jsonCols.has(col.column_name) && value !== null && value !== undefined) {
-              if (typeof value !== 'string') {
-                value = JSON.stringify(value);
-              }
-            }
-            obj[col.column_name] = value;
+            const value = raw[col.column_name];
+            // JSONB/JSON: tx.json() invia il valore con tipo jsonb e lo
+            // serializza una sola volta. Pre-serializzarlo con JSON.stringify
+            // lo faceva ricodificare dal serializer jsonb di postgres-js:
+            // ogni oggetto tornava come stringa JSON (impostazioni, codici
+            // MFA, contenuti… tutti corrotti dopo il ripristino).
+            obj[col.column_name] =
+              jsonCols.has(col.column_name) && value !== null && value !== undefined
+                ? tx.json(value)
+                : value;
           }
           const cleaned = Object.keys(obj).filter((k) => writableNames.has(k));
           if (cleaned.length === 0) continue;
-          await tx`INSERT INTO ${tx(t.table)} ${tx(obj, ...cleaned)}`;
-          stats.rowsInserted++;
+          // Limite di 65535 parametri per statement in Postgres.
+          const maxRows = Math.max(1, Math.min(INSERT_BATCH, Math.floor(60000 / cleaned.length)));
+          if (batch.length >= maxRows || cleaned.join(',') !== batchCols.join(',')) {
+            await flush();
+            batchCols = cleaned;
+          }
+          batch.push(obj);
         }
+        await flush();
         stats.tablesRestored++;
       }
 

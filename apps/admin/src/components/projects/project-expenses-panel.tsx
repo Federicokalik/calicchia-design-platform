@@ -22,6 +22,7 @@ import {
   PAYMENT_METHODS, PAYMENT_METHOD_LABELS, PAYMENT_METHOD_COLORS,
   type PaymentMethod,
 } from '@/types/projects';
+import { format } from 'date-fns';
 
 const EXPENSE_CATEGORIES = [
   'software', 'hardware', 'office', 'travel', 'meals', 'training',
@@ -67,7 +68,7 @@ type FormState = {
   deductible_percent: string;
 };
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
+const todayISO = () => format(new Date(), 'yyyy-MM-dd');
 
 const EMPTY_FORM: FormState = {
   occurred_on: todayISO(),

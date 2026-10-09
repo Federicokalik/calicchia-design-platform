@@ -47,10 +47,19 @@ export default function TrackerTab() {
   });
 
   const payments = data?.payments || [];
-  const totaleMese = payments.reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
+  // Le righe annullate (link annullati/rifatti) non sono crediti.
+  const totaleMese = payments
+    .filter((p: any) => p.status !== 'annullata')
+    .reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
+  // paid_amount arriva come stringa numeric: "0.00" è truthy e azzerava le righe
+  // 'pagata' create senza importo pagato. Per 'pagata' senza paid_amount vale l'importo.
+  const incassato = (p: any) => {
+    const paid = parseFloat(p.paid_amount || 0);
+    return p.status === 'pagata' && !(paid > 0) ? parseFloat(p.amount || 0) : paid;
+  };
   const totaleIncassato = payments
     .filter((p: any) => p.status === 'pagata' || p.status === 'parziale')
-    .reduce((s: number, p: any) => s + parseFloat(p.paid_amount || p.amount || 0), 0);
+    .reduce((s: number, p: any) => s + incassato(p), 0);
   const daIncassare = payments.filter((p: any) => p.status === 'emessa').reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
   const scaduto = payments.filter((p: any) => p.status === 'scaduta').reduce((s: number, p: any) => s + parseFloat(p.amount || 0), 0);
 

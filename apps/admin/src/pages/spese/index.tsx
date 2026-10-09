@@ -24,6 +24,7 @@ import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
 import { useConfirm } from '@/hooks/use-confirm';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 
 type Category =
   | 'software' | 'hardware' | 'office' | 'travel' | 'meals'
@@ -84,7 +85,7 @@ interface ExpenseForm {
 }
 
 const EMPTY_FORM: ExpenseForm = {
-  occurred_on: new Date().toISOString().slice(0, 10),
+  occurred_on: format(new Date(), 'yyyy-MM-dd'),
   vendor: '',
   amount: '',
   vat_amount: '',
@@ -146,7 +147,10 @@ export default function SpesePage() {
           vat_amount: parseFloat(form.vat_amount) || 0,
           category: form.category,
           description: form.description.trim() || null,
-          deductible_percent: parseInt(form.deductible_percent, 10) || 100,
+          // 0% è un valore valido (spesa non deducibile): `|| 100` lo trasformava in 100
+          deductible_percent: Number.isFinite(parseInt(form.deductible_percent, 10))
+            ? Math.min(100, Math.max(0, parseInt(form.deductible_percent, 10)))
+            : 100,
           notes: form.notes.trim() || null,
         }),
       }),
@@ -200,7 +204,7 @@ export default function SpesePage() {
       });
       const e = data.extracted ?? {};
       setForm({
-        occurred_on: e.occurred_on || new Date().toISOString().slice(0, 10),
+        occurred_on: e.occurred_on || format(new Date(), 'yyyy-MM-dd'),
         vendor: e.vendor || '',
         amount: e.amount != null ? String(e.amount) : '',
         vat_amount: e.vat_amount != null ? String(e.vat_amount) : '',

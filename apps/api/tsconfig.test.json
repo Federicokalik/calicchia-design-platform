@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    "scripts/calendar-inventory.ts",
+    "scripts/fix-dst-exceptions.ts",
+    "scripts/mcp-contract-snapshot.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

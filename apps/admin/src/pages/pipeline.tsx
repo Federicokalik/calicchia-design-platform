@@ -113,13 +113,15 @@ export default function PipelinePage() {
   );
 
   // Fetch leads
-  const { data: leads = [], isLoading } = useQuery({
+  const { data: leadsData, isLoading } = useQuery({
     queryKey: ['leads'],
     queryFn: async () => {
       const res = await apiFetch('/api/leads');
       return res.leads as Lead[];
     },
   });
+  // Riferimento stabile: `data: leads = []` creava un array nuovo a ogni render.
+  const leads = useMemo(() => leadsData ?? [], [leadsData]);
 
   // Audit D-007: setState during render — under React 19 strict/concurrent
   // rendering this caused the setter to fire twice per render plus an O(N)
@@ -127,11 +129,9 @@ export default function PipelinePage() {
   // mid-drag snapshots from clobbering the optimistic local copy.
   useEffect(() => {
     if (activeLead) return;
-    if (leads.length === 0) return;
-    if (localLeads.length === 0) {
-      setLocalLeads(leads);
-      return;
-    }
+    // Solo a dati caricati, ma anche a lista vuota: eliminando l'ultimo lead la
+    // copia locale lo mostrava ancora.
+    if (!leadsData) return;
     if (JSON.stringify(leads) !== JSON.stringify(localLeads)) {
       setLocalLeads(leads);
     }
@@ -259,6 +259,8 @@ export default function PipelinePage() {
 
   const handleConvert = (lead: Lead) => {
     const projectName = window.prompt(t('lead.projectNamePrompt'));
+    // null = Annulla; stringa vuota = converti senza progetto
+    if (projectName === null) return;
     convertMutation.mutate({ id: lead.id, project_name: projectName || undefined });
   };
 
@@ -355,6 +357,9 @@ export default function PipelinePage() {
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
+          // Esc / cambio scheda durante il drag: senza reset activeLead restava
+          // valorizzato e la board smetteva di sincronizzarsi col server.
+          onDragCancel={() => { setActiveLead(null); setLocalLeads(leads); }}
         >
           <div className="relative">
             {/* Scroll left button */}
@@ -406,8 +411,9 @@ export default function PipelinePage() {
         </DndContext>
       )}
 
-      {/* Lead detail panel */}
+      {/* Lead detail panel — key per lead: il form legge il lead solo al mount */}
       <LeadDetail
+        key={selectedLead?.id ?? 'none'}
         lead={selectedLead}
         open={!!selectedLead}
         onClose={() => setSelectedLead(null)}

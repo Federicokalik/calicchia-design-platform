@@ -126,9 +126,25 @@ newsletter.get('/unsubscribe', async (c) => {
     UPDATE newsletter_subscribers
     SET status = 'unsubscribed', unsubscribed_at = NOW()
     WHERE unsubscribe_token = ${token}::uuid
-    RETURNING id
+    RETURNING id, email
   `;
   if (!updated) return c.json({ error: 'Token non valido o gia utilizzato' }, 404);
+
+  // Opt-out immediato anche nell'audience marketing (art. 21 GDPR): prima il
+  // contatto restava 'confirmed' e riceveva campagne fino alla sync notturna.
+  try {
+    await sql`
+      UPDATE mkt_contacts SET email_consent = 'unsubscribed', updated_at = now()
+      WHERE subscriber_id = ${updated.id} OR email_norm = lower(btrim(${updated.email}))
+    `;
+    await sql`
+      INSERT INTO mkt_suppression (email_norm, reason)
+      VALUES (lower(btrim(${updated.email})), 'unsubscribed')
+      ON CONFLICT (email_norm) DO NOTHING
+    `;
+  } catch (err) {
+    log.error({ err, subscriberId: updated.id }, 'newsletter unsubscribe: propagazione al marketing fallita');
+  }
   return c.json({ success: true, message: 'Disiscrizione completata.' });
 });
 

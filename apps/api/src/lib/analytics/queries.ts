@@ -96,9 +96,11 @@ export async function fetchTimeseries(
   websiteId: string,
   offsetInterval?: Period,
 ) {
-  const offset = offsetInterval
-    ? sql`- CAST(${offsetInterval} AS INTERVAL)`
-    : sql``;
+  // Periodo precedente: righe in [NOW()-period-offset, NOW()-offset) spostate
+  // IN AVANTI di offset, così i bucket coincidono con quelli correnti. Prima
+  // l'offset era sottratto e la finestra cadeva nel futuro: serie sempre vuota.
+  const shift = offsetInterval ? sql`+ CAST(${offsetInterval} AS INTERVAL)` : sql``;
+  const windowEnd = offsetInterval ? sql`NOW() - CAST(${offsetInterval} AS INTERVAL)` : sql`NOW()`;
 
   // Build the metric expression
   const metricExpr =
@@ -110,12 +112,12 @@ export async function fetchTimeseries(
 
   return await sql`
     SELECT
-      date_trunc(${granularity}, created_at ${offset}) AS bucket,
+      date_trunc(${granularity}, created_at ${shift}) AS bucket,
       ${metricExpr} AS value
     FROM analytics
     WHERE website_id = ${websiteId}
-      AND created_at ${offset} >= NOW() - CAST(${period} AS INTERVAL)
-      AND created_at ${offset} < NOW()
+      AND created_at >= ${windowEnd} - CAST(${period} AS INTERVAL)
+      AND created_at < ${windowEnd}
     GROUP BY bucket
     ORDER BY bucket
   ` as Array<{ bucket: string; value: number }>;
@@ -363,6 +365,13 @@ export async function fetchFunnel(
 
   for (let i = 0; i < capped.length; i++) {
     const step = capped[i];
+    // Step precedente vuoto: nessuna sessione può proseguire. Senza questo il
+    // filtro sugli step precedenti saltava e lo step successivo contava tutte
+    // le sessioni (funnel non monotono).
+    if (prevIds !== null && prevIds.length === 0) {
+      results.push({ step: i + 1, count: 0 });
+      continue;
+    }
     let rows: Array<{ session_id: string }> = [];
 
     if (step.type === 'pageview' && step.path) {
