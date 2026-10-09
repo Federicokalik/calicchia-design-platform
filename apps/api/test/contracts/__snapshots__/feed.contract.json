@@ -1,0 +1,493 @@
+{
+  "contract": "feed",
+  "version": 1,
+  "description": "Feed ICS pubblico GET /api/calendar/feed/<token>.ics e gestione del token dall'admin (toggle e rotate-token) sullo scenario di test/contracts/feed.contract.test.ts: richiesta, status, header e corpo normalizzati (righe iCalendar dopo l'unfold, DTSTAMP e UID sostituiti). Baseline F0 su PgLegacyStore.",
+  "regenerate": "UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/feed.contract.test.ts",
+  "cases": {
+    "feed/calendario-condiviso": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:condiviso>.ics"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "inline; filename=\"<prefix>-condiviso.ics\"",
+        "cache-control": "private, max-age=300",
+        "access-control-allow-origin": "*",
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Calendar//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:<prefix> Agenda condivisa",
+        "X-WR-CALDESC:Calendario condiviso con gli abbonati",
+        "X-WR-TIMEZONE:Europe/Rome",
+        "X-APPLE-CALENDAR-COLOR:#22c55e",
+        "BEGIN:VTIMEZONE",
+        "TZID:Europe/Rome",
+        "BEGIN:DAYLIGHT",
+        "TZOFFSETFROM:+0100",
+        "TZOFFSETTO:+0200",
+        "TZNAME:CEST",
+        "DTSTART:19700329T020000",
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU",
+        "END:DAYLIGHT",
+        "BEGIN:STANDARD",
+        "TZOFFSETFROM:+0200",
+        "TZOFFSETTO:+0100",
+        "TZNAME:CET",
+        "DTSTART:19701025T030000",
+        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU",
+        "END:STANDARD",
+        "END:VTIMEZONE",
+        "BEGIN:VEVENT",
+        "UID:<uid:1>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;TZID=Europe/Rome:20250101T080000",
+        "DTEND;TZID=Europe/Rome:20250101T083000",
+        "SUMMARY:<prefix> Report mensile",
+        "RRULE:FREQ=MONTHLY;BYMONTHDAY=1",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:2>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20261210T090000Z",
+        "DTEND:20261210T100000Z",
+        "SUMMARY:<prefix> Evento di dicembre",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:3>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;TZID=Europe/Rome:20270308T090000",
+        "DTEND;TZID=Europe/Rome:20270308T093000",
+        "SUMMARY:<prefix> Riunione settimanale",
+        "RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=6",
+        "EXDATE;TZID=Europe/Rome:20270315T090000",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:4>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270310T090000Z",
+        "DTEND:20270310T100000Z",
+        "SUMMARY:<prefix> Riunione con il cliente\\, revisione\\; budget",
+        "DESCRIPTION:Prima riga\\nSeconda riga con \\\\ backslash",
+        "LOCATION:Sala 2\\, piano 1",
+        "URL:https://example.test/riunione?x=1&y=2",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:5>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270311T130000Z",
+        "DTEND:20270311T143000Z",
+        "SUMMARY:<prefix> Revisione trimestrale del progetto con il cliente: perché è così importante andare più a fondo",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:6>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;VALUE=DATE:20270312",
+        "DTEND;VALUE=DATE:20270313",
+        "SUMMARY:<prefix> Giornata di formazione",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:7>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;VALUE=DATE:20270315",
+        "DTEND;VALUE=DATE:20270317",
+        "SUMMARY:<prefix> Fiera",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:8>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270318T150000Z",
+        "DTEND:20270318T160000Z",
+        "SUMMARY:<prefix> Da confermare",
+        "STATUS:TENTATIVE",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:9>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;TZID=Europe/Rome:20270322T110000",
+        "DTEND;TZID=Europe/Rome:20270322T113000",
+        "SUMMARY:<prefix> Riunione settimanale (spostata)",
+        "RECURRENCE-ID;TZID=Europe/Rome:20270322T090000",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:10>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART;TZID=Europe/Rome:20270413T183000",
+        "DTEND;TZID=Europe/Rome:20270413T193000",
+        "SUMMARY:<prefix> Corso annullato",
+        "RECURRENCE-ID;TZID=Europe/Rome:20270413T180000",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:11>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20280220T090000Z",
+        "DTEND:20280220T100000Z",
+        "SUMMARY:<prefix> Lontano ma incluso",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "feed/festivita-f": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:f>.ics"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "inline; filename=\"f.ics\"",
+        "cache-control": "private, max-age=300",
+        "access-control-allow-origin": "*",
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Calendar//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:Festività e chiusure",
+        "X-WR-CALDESC:Festività nazionali italiane (auto) e chiusure manuali (ferie\\, ponti)",
+        "X-WR-TIMEZONE:Europe/Rome",
+        "X-APPLE-CALENDAR-COLOR:#ef4444",
+        "BEGIN:VEVENT",
+        "UID:<uid:1>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20261224T230000Z",
+        "DTEND:20261225T230000Z",
+        "SUMMARY:Natale",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:2>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270601T220000Z",
+        "DTEND:20270602T220000Z",
+        "SUMMARY:Festa della Repubblica",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:3>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270808T220000Z",
+        "DTEND:20270813T220000Z",
+        "SUMMARY:<prefix> Ferie estive",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "feed/bookings": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:bookings>.ics"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "inline; filename=\"bookings.ics\"",
+        "cache-control": "private, max-age=300",
+        "access-control-allow-origin": "*",
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Calendar//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:Bookings",
+        "X-WR-CALDESC:Prenotazioni clienti dal sito (auto-create da calendar_bookings)",
+        "X-WR-TIMEZONE:Europe/Rome",
+        "X-APPLE-CALENDAR-COLOR:#0ea5e9",
+        "BEGIN:VEVENT",
+        "UID:<uid:1>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270310T140000Z",
+        "DTEND:20270310T150000Z",
+        "SUMMARY:<prefix> Consulenza – Mario Rossi",
+        "DESCRIPTION:Cliente: Mario Rossi <<prefix>-cliente@test.invalid>\\nTel: +39 06 1234567\\n\\nUID prenotazione: <booking:confermata>",
+        "LOCATION:https://meet.caldes.test/<prefix>-consulenza",
+        "URL:https://meet.caldes.test/<prefix>-consulenza",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "BEGIN:VEVENT",
+        "UID:<uid:2>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270312T140000Z",
+        "DTEND:20270312T150000Z",
+        "SUMMARY:<prefix> Evento manuale in Prenotazioni",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "feed/400-token-corto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/abc123.ics"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "text/plain;charset=UTF-8",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "text": "Invalid feed token"
+    },
+    "feed/400-token-maiuscolo": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.ics"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "text/plain;charset=UTF-8",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "text": "Invalid feed token"
+    },
+    "feed/400-token-con-simboli": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-.ics"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "text/plain;charset=UTF-8",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "text": "Invalid feed token"
+    },
+    "feed/404-token-sconosciuto": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/00000000000000000000000000000000.ics"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain;charset=UTF-8",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "text": "Feed not found or disabled"
+    },
+    "feed/404-senza-estensione": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:condiviso>"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "admin/feed-disattivato": {
+      "request": {
+        "method": "PUT",
+        "path": "/api/admin/calendar/calendars/<calendar:toggle>",
+        "body": {
+          "ics_feed_enabled": false
+        },
+        "auth": "admin"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "calendar": {
+          "id": "<calendar:toggle>",
+          "slug": "<prefix>-toggle",
+          "name": "<prefix> Feed da disattivare",
+          "description": null,
+          "color": "#7c3aed",
+          "icon": null,
+          "timezone": "Europe/Rome",
+          "is_default": false,
+          "is_system": false,
+          "blocks_availability": false,
+          "ics_feed_token": "<token:toggle>",
+          "ics_feed_enabled": false,
+          "sort_order": 0,
+          "created_at": "<timestamp>",
+          "updated_at": "<timestamp>",
+          "ics_feed_url": null
+        }
+      }
+    },
+    "feed/404-disattivato": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:toggle>.ics"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "text/plain;charset=UTF-8",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "text": "Feed not found or disabled"
+    },
+    "feed/riattivato": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:toggle>.ics"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "inline; filename=\"<prefix>-toggle.ics\"",
+        "cache-control": "private, max-age=300",
+        "access-control-allow-origin": "*",
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Calendar//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:<prefix> Feed da disattivare",
+        "X-WR-CALDESC:Calendario <prefix> Feed da disattivare",
+        "X-WR-TIMEZONE:Europe/Rome",
+        "X-APPLE-CALENDAR-COLOR:#7c3aed",
+        "BEGIN:VEVENT",
+        "UID:<uid:1>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270310T080000Z",
+        "DTEND:20270310T090000Z",
+        "SUMMARY:<prefix> Evento del feed",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    },
+    "admin/rotate-token": {
+      "request": {
+        "method": "POST",
+        "path": "/api/admin/calendar/calendars/<calendar:rotazione>/rotate-token",
+        "auth": "admin"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "calendar": {
+          "id": "<calendar:rotazione>",
+          "slug": "<prefix>-rotazione",
+          "name": "<prefix> Feed da rigenerare",
+          "description": null,
+          "color": "#7c3aed",
+          "icon": null,
+          "timezone": "Europe/Rome",
+          "is_default": false,
+          "is_system": false,
+          "blocks_availability": false,
+          "ics_feed_token": "<token:nuovo>",
+          "ics_feed_enabled": true,
+          "sort_order": 0,
+          "created_at": "<timestamp>",
+          "updated_at": "<timestamp>",
+          "ics_feed_url": "https://api.caldes.test/api/calendar/feed/<token:nuovo>.ics"
+        }
+      }
+    },
+    "feed/token-rigenerato": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/feed/<token:nuovo>.ics"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "text/calendar; charset=utf-8",
+        "content-disposition": "inline; filename=\"<prefix>-rotazione.ics\"",
+        "cache-control": "private, max-age=300",
+        "access-control-allow-origin": "*",
+        "etag": null
+      },
+      "ics": [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Caldes//Calendar//IT",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        "X-WR-CALNAME:<prefix> Feed da rigenerare",
+        "X-WR-CALDESC:Calendario <prefix> Feed da rigenerare",
+        "X-WR-TIMEZONE:Europe/Rome",
+        "X-APPLE-CALENDAR-COLOR:#7c3aed",
+        "BEGIN:VEVENT",
+        "UID:<uid:1>@api.caldes.test",
+        "DTSTAMP:<dtstamp>",
+        "DTSTART:20270310T080000Z",
+        "DTEND:20270310T090000Z",
+        "SUMMARY:<prefix> Evento del feed",
+        "STATUS:CONFIRMED",
+        "TRANSP:OPAQUE",
+        "END:VEVENT",
+        "END:VCALENDAR"
+      ]
+    }
+  }
+}
