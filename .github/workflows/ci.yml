@@ -1,6 +1,7 @@
 name: CI
 
-# Gate qualità sulle PR verso main: typecheck, lint e build di tutti i workspace.
+# Gate qualità sulle PR verso main: typecheck, lint e build di tutti i workspace,
+# più i test dell'API su Postgres effimero (job api-tests).
 # NB: il job "build" intercetta volutamente il finding AD-01 (build admin rotta)
 # finché non viene risolto — è la CI che fa il suo lavoro.
 #
@@ -92,3 +93,39 @@ jobs:
       - name: API e2e smoke (non-blocking finché TQ-02 non è risolto)
         run: pnpm --filter @calicchia/api test:e2e
         continue-on-error: true
+
+  # Test dell'API (node:test eseguito da tsx, vedi apps/api/test/README.md)
+  # contro un Postgres 17 effimero: smoke dell'infrastruttura, contratti e casi
+  # del calendario. Radicale entrerà nel job calendar-integration (F0, harness).
+  api-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: caldes_test
+          POSTGRES_USER: caldes
+          POSTGRES_PASSWORD: caldes
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U caldes -d caldes_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f0'.
+      TEST_DATABASE_URL: postgresql://caldes:caldes@localhost:5432/caldes_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Stesso runner del boot dell'API, sul solo database dei test (non usa .env).
+      - name: Migrazioni
+        run: pnpm --filter @calicchia/api test:migrate
+      - name: Typecheck dei test
+        run: pnpm --filter @calicchia/api typecheck:test
+      - name: Test API
+        run: pnpm --filter @calicchia/api test
