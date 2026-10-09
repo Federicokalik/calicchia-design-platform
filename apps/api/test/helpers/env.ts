@@ -18,7 +18,8 @@
  *
  * Cosa garantisce:
  * 1. Protezione dai DB veri: TEST_DATABASE_URL è obbligatoria, deve puntare a
- *    localhost e il nome del database deve contenere 'test' o 'caldes_f0'.
+ *    localhost e il nome del database deve contenere 'test' oppure il
+ *    marcatore di fase 'caldes_f<N>' (es. caldes_f0, caldes_f1_found).
  *    DATABASE_URL viene SEMPRE sovrascritta, mai ereditata dalla shell.
  * 2. Ambiente ermetico: rimuove le variabili dei servizi esterni (email,
  *    Telegram, captcha, pagamenti, AI, S4, WhatsApp...) così nessun test manda
@@ -44,8 +45,12 @@ const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
  */
 const ALLOWED_QUERY_PARAMS = new Set(['sslmode', 'ssl', 'application_name', 'connect_timeout', 'TimeZone']);
 
-/** Frammenti che il nome del database deve contenere (almeno uno). */
-const ALLOWED_DB_NAME_MARKERS = ['test', 'caldes_f0'];
+/**
+ * Il nome del database deve contenere 'test' oppure il marcatore di fase
+ * 'caldes_f<N>' (database locali delle fasi del piano: caldes_f0, caldes_f1_*).
+ * Il database applicativo 'caldes' non corrisponde a nessuno dei due.
+ */
+const ALLOWED_DB_NAME_PATTERN = /test|caldes_f\d/;
 
 export interface TestDatabaseTarget {
   /** URL normalizzato, con TimeZone=UTC aggiunto se assente. */
@@ -64,7 +69,7 @@ function redactUrl(raw: string): string {
 /**
  * Valida l'URL del database dei test. Lancia con un messaggio esplicito se
  * l'URL manca, non è postgres, non punta a localhost o il nome del database
- * non contiene 'test' o 'caldes_f0'. Esportata per i test della protezione.
+ * non contiene 'test' o 'caldes_f<N>'. Esportata per i test della protezione.
  */
 export function parseTestDatabaseUrl(raw: string | undefined): TestDatabaseTarget {
   const refuse = (reason: string): never => {
@@ -103,8 +108,8 @@ export function parseTestDatabaseUrl(raw: string | undefined): TestDatabaseTarge
     return refuse(`nome del database mancante o non valido (${redactUrl(raw)})`);
   }
   const lower = database.toLowerCase();
-  if (!ALLOWED_DB_NAME_MARKERS.some((marker) => lower.includes(marker))) {
-    return refuse(`il database "${database}" non contiene 'test' né 'caldes_f0' nel nome`);
+  if (!ALLOWED_DB_NAME_PATTERN.test(lower)) {
+    return refuse(`il database "${database}" non contiene 'test' né 'caldes_f<N>' nel nome`);
   }
 
   for (const key of url.searchParams.keys()) {
@@ -181,11 +186,23 @@ const SCRUB_EXACT = new Set([
   'PRIVATE_URL_TTL_DAYS',
   'PUBLIC_BASE_URL',
   'QUOTE_PUBLIC_URL',
+  // Client CalDAV di servizio e control-plane di Radicale (contratto
+  // control-plane §1.3): i test passano i valori in modo esplicito. Restano
+  // RADICALE_BIN, RADICALE_PYTHON e RADICALE_REQUIRED, che sono del harness.
+  'RADICALE_DATA_DIR',
+  'RADICALE_PRINCIPAL',
+  'RADICALE_PROBE_PASSWORD',
+  'RADICALE_SVC_PASSWORD',
+  'RADICALE_SVC_USER',
+  'RADICALE_TIMEOUT_MS',
+  'RADICALE_URL',
   'UNSPLASH_ACCESS_KEY',
   'WORKFLOW_HTTP_ALLOWLIST',
 ]);
 
 const SCRUB_PREFIXES = [
+  // CALDES_POLICY_FILE, CALDES_CONTROL_PLANE, CALDES_IDENTITY_SOURCE... (control-plane).
+  'CALDES_',
   'CAP_',
   'CAPTCHA_PROVIDER',
   'CAPTURE_',
@@ -246,7 +263,7 @@ function applyTestEnvironment(): TestDatabaseTarget {
   return target;
 }
 
-/** Database dei test validato (host loopback, nome con 'test' o 'caldes_f0'). */
+/** Database dei test validato (host loopback, nome con 'test' o 'caldes_f<N>'). */
 export const TEST_DATABASE: TestDatabaseTarget = globalRef[APPLIED] ?? (globalRef[APPLIED] = applyTestEnvironment());
 
 // ─── Override temporanei ───────────────────────────────

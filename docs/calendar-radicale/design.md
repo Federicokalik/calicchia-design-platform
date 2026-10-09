@@ -163,12 +163,18 @@ Le risolvo innestando le idee migliori delle altre proposte e del laboratorio "m
 - Utente radicale con uid/gid 2999; `/data` ha permessi 770.
 
 ### 3.2 Configurazione (`apps/radicale/config/config`)
+
+Estratto delle chiavi che contano (il file reale, commentato, è la fonte). Radicale legge il config con `RawConfigParser`, che non conosce i commenti in fondo alla riga: ogni commento sta su una riga propria, altrimenti finisce nel valore.
+
 ```
 [server]
 hosts = 0.0.0.0:5232
 max_connections = 16
 max_content_length = 20000000
+max_resource_size = 10000000
 timeout = 30
+# 500 senza ritardo (contratto control-plane §10): il default di Radicale è 1 s
+delay_on_error = 0
 # vale anche IN LETTURA (cache miss): mai abbassarlo dopo che ci sono dati
 max_vevent_rrule_occurrence = 50000
 [auth]
@@ -186,7 +192,8 @@ filesystem_folder = /data/collections
 use_mtime_and_size_for_item_cache = True
 max_sync_token_age = 5184000
 skip_broken_item = True
-strict_preconditions = False   # True dopo la matrice device di F3
+# True dopo la matrice device di F3
+strict_preconditions = False
 predefined_collections = {}
 [hook]
 type = none
@@ -197,6 +204,7 @@ type = none
 [logging]
 level = info
 mask_passwords = True
+bad_put_request_content = False
 ```
 
 Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
@@ -383,7 +391,7 @@ Tabelle persistenti, incluse nel backup SQL completo ma mai nel ripristino JSON:
 - `cal_booking_conflicts`.
 
 **165 Migrazione.**
-- `calendar_backend_state` (singleton): mode (`postgres|cutover|radicale|rollback|finalized`), shadow_enabled, write_freeze, volume_id, epoch, cutover_at/by, rollback_until, finalized_at, policy_version, credential_epoch, api_min_version, restore_guard_until, rebuild_required, horizon_start/end.
+- `calendar_backend_state` (singleton; creata già dalla 162 con le colonne che servono in F1, la 165 aggiunge le altre: vedi [contratto del control-plane §2](contracts/control-plane.md)): mode (`postgres|cutover|radicale|rollback|finalized`), shadow_enabled, write_freeze, volume_id, epoch, cutover_at/by, rollback_until, finalized_at, policy_version, credential_epoch, api_min_version, restore_guard_until, rebuild_required, horizon_start/end.
 - `cal_migration_runs`.
 - `cal_migration_ledger` (per href): legacy_key, legacy_snapshot JSONB, legacy_hash, intent_fingerprint, intent_at, written_etag, written_at, adopted, derived.
 - `cal_migration_items`.
@@ -1141,12 +1149,18 @@ Il formato v1 resta (è un contratto).
 
 | Gruppo | Tabelle | Export | Import |
 |---|---|---|---|
-| S: stato e derivati | `calendar_backend_state`, `cal_migration_*`, `cal_jobs`, `cal_collection_state`, `cal_objects`, `cal_components`, `cal_occurrences`, `cal_booking_conflicts`, `cal_object_ids`, `cal_object_versions` | sì | mai, in nessuna modalità (saltate e riportate nel report) |
+| S: stato e derivati | `schema_migrations`, `calendar_backend_state`, `cal_migration_*`, `cal_jobs`, `cal_collection_state`, `cal_objects`, `cal_components`, `cal_occurrences`, `cal_booking_conflicts`, `cal_object_ids`, `cal_object_versions` | sì | mai, in nessuna modalità (saltate e riportate nel report) |
 | D: dominio iCalendar | `calendars`, `calendar_events` (o `_legacy`), `calendar_subscriptions` | sì | solo in `mode=postgres`; altrimenti saltate, con l'avviso "usa il ripristino coordinato o il ripristino da versioni" |
 | B: business | prenotazioni, event types, disponibilità, app-password, reminders | sì | come oggi |
 
+Precisazioni dell'implementazione (F1, `apps/api/src/routes/backup.ts`):
+- S è un elenco esplicito più il prefisso `cal_migration_`, non una regola `cal_*`: `cal_bookings`, `cal_sync_log` e `cal_webhook_logs` (Cal.com, migrazione 023) sono business. Le migrazioni 163-165 devono usare esattamente questi nomi.
+- `schema_migrations` sta in S: il ripristino non cambia lo schema, quindi il ledger delle migrazioni non torna mai indietro (da un backup precedente alla 162 toglierebbe la riga della 162).
+- Le tabelle B si svuotano senza CASCADE, su un insieme chiuso rispetto alle FK: se una tabella protetta (S, `calendars`, D fuori da `mode=postgres`) referenzia una tabella da svuotare, l'import risponde 409 prima di toccare i dati.
+
 **Regole dell'import di D in `mode=postgres`**
-- `calendars` in UPSERT per id sulle sole colonne presenti nel backup. Niente TRUNCATE: il CASCADE svuoterebbe indice e id. Le colonne del sidecar restano; le righe assenti dal backup vanno in `needs_review` e non vengono cancellate.
+- `calendars` in UPSERT per id sulle sole colonne presenti nel backup. Niente TRUNCATE: il CASCADE svuoterebbe indice e id. Le colonne del sidecar restano; le righe assenti dal backup vanno in `needs_review` (`missing_in_backup`) e non vengono cancellate. Se una riga mantenuta occupa uno slug, un token del feed, un `collection_name` o il default che servono a una riga del backup, li cede (slug → `<slug>-<prime 8 cifre dell'id>`, token rigenerato, `collection_name` riassegnato dalla riconciliazione): è il caso del ripristino su un database nuovo, con gli stessi slug e id diversi.
+- Dopo il caricamento si verificano le FK che toccano le tabelle D ripristinate: una riga orfana annulla l'import.
 - `calendar_events` e `calendar_subscriptions`: TRUNCATE senza CASCADE. L'insieme è chiuso rispetto alle FK, perché le tabelle nuove non hanno FK verso `calendar_events`.
 
 **Dopo ogni import**

@@ -50,7 +50,7 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 3. caldes_rights: policy più heartbeat (stale oltre 10 minuti → frozen) più identità del volume (dead prop volume-id ed epoch sul principal); nessun W su altri principal; _canary; readonly e hidden dai ruoli.
 4. caldes_vobject_fix con sitecustomize. Eliminare caldes_storage.py. Config come al §3.2.
 5. Compose: rete caldav-int interna con subnet fissa e alias, volumi radicale_collections, caldes_control e radicale_authcache, niente build: per radicale, tag sha pinnati, nessun depends_on rigido. Runbook del deploy in due commit. CloudPanel: X-Remote-Addr e client_max_body_size.
-6. Migrazione 162: sidecar con lifecycle, calendar_sidecar_reconcile(), colonne delle iscrizioni (blocks_availability e device_visible a false). Writer di policy e heartbeat tramite policyFromState().
+6. Migrazione 162: sidecar con lifecycle, calendar_sidecar_reconcile(), colonne delle iscrizioni (blocks_availability e device_visible a false), calendar_backend_state con le colonne di F1. Writer di policy e heartbeat tramite policyFromState(). Formati e semantica nel [contratto del control-plane](contracts/control-plane.md).
 7. caldav-backend e caldav-tokens: verify-credentials con principal canonico, X-Forwarded-For, rate limit per (IP, username); username riservati rifiutati; UI con username fisso 'federico'; route /collections* rimosse.
 8. backup.ts: partizione S/D/B (§16.2); S mai ripristinate; D solo in mode postgres; calendars in UPSERT; reconcile, rebuild_required e restore_guard dopo l'import; avviso nella UI.
 9. Script unico backup-calendar-stack.sh (pg_dump più tar del volume sotto flock, ogni 6 h, manifest unico, S4); runbook di restore; drill.
@@ -61,8 +61,8 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 - `apps/radicale/config/config`
 - `apps/radicale/plugins/{caldes_auth,caldes_rights,caldes_vobject_fix,sitecustomize,caldes_healthcheck,caldes_selftest}.py`
 - `apps/radicale/plugins/caldes_storage.py (eliminato)`
-- `apps/radicale/tests/{test_auth,test_rights,test_fidelity,test_layout_contract,test_identity}.py`
-- `apps/radicale/tests/mock_api.py`
+- `apps/radicale/tests/{test_auth,test_rights,test_fidelity,test_layout_contract,test_identity,test_image,test_stack}.py`, `caldes_harness.py`
+- `apps/api/test/helpers/mock_verify.py` (mock di verify-credentials del harness F0, condiviso con i test dei plugin)
 - `apps/radicale/README.md`
 - `.github/workflows/build-radicale-image.yml`
 - `docker-compose.portainer.yml`
@@ -75,11 +75,14 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 - `apps/api/src/routes/caldav-tokens.ts`
 - `apps/api/src/lib/calendar/caldav-passwords.ts`
 - `apps/admin/src/pages/impostazioni/caldav-tokens-section.tsx`
-- `apps/api/src/lib/calendar/radicale/{client,errors,policy,heartbeat,identity}.ts`
+- `apps/api/src/lib/calendar/radicale/{types,client,errors,dav-xml,policy,heartbeat,identity}.ts`
+- `apps/api/scripts/radicale-init.ts` (inizializzazione manuale del volume in F1: `pnpm --filter @calicchia/api calendar:radicale-init`)
+- `docs/calendar-radicale/contracts/` (contratto del control-plane, schemi JSON, casi condivisi)
 - `apps/api/src/routes/backup.ts`
-- `apps/admin/src/pages/backup.tsx (avviso)`
+- `apps/admin/src/pages/impostazioni.tsx` (avviso nella sezione Backup)
 - `scripts/backup-calendar-stack.sh`
 - `scripts/restore-calendar-stack.sh`
+- `scripts/calendar_stack.py` (manifest, identità e inventario del volume per i due script)
 - `scripts/backup-db.sh (delega allo script unico)`
 
 **Test**
@@ -89,6 +92,7 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 - pytest fedeltà e contratto del layout (mtime, .Radicale.props)
 - backup.ts: import di un backup v1 precedente alla 162 in mode postgres → ruoli preservati, nessun TRUNCATE su calendars; stato e tabelle cal_* mai toccati
 - Contratti F0 ancora verdi
+- End-to-end del criterio di uscita (`apps/api/test/integration/radicale-f1-e2e.test.ts`): config e plugin reali del repository, policy e heartbeat dal control-plane dell'API, verify-credentials dall'API vera
 
 **Criterio di uscita.** Un device reale si autentica con un'app-password esistente, anche con username diverso da federico, e vede /federico/ in sola lettura dopo l'inizializzazione. Su un volume vuoto riceve 403 e non si crea nulla. Il login del servizio da internet dà 401. CI dell'immagine verde. Drill di backup e restore riuscito. Nessuna regressione nei contratti.
 
@@ -149,7 +153,7 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 
 **Attività**
 
-1. Migrazione 165 (calendar_backend_state con volume_id, epoch, write_freeze, restore_guard e api_min_version; ledger con legacy_snapshot, righe d'intento, adopted e derived; runs; items).
+1. Migrazione 165 (colonne di calendar_backend_state non ancora presenti, fra cui api_min_version: la tabella nasce nella 162, vedi [contratto del control-plane §2](contracts/control-plane.md); ledger con legacy_snapshot, righe d'intento, adopted e derived; runs; items).
 2. migration/: preflight (identità, gate, canary, test negativo del servizio, app-password riservate), init (unico punto di MKCOL e MKCALENDAR, marker volume-id/epoch, _canary), inventory con le anomalie nuove (DST_SHIFTED_EXCEPTION, NON_PROJECTION_IN_BOOKINGS, SUBSCRIPTION_BLOCKING_IMPACT, NON_CANONICAL_APP_PASSWORD), serializer che riusa gli href e lega le proiezioni alle righe legacy, apply con righe d'intento, adozione per fingerprint e gestione di no-uid-conflict, verify V1-V5 con V3 a finestre di 60 giorni e V4 con e senza iscrizioni, shadow con patch per campo sugli oggetti esistenti.
 3. Proiezione delle prenotazioni (solo dopo la decisione 3) e riconciliazione in sola lettura per le orfane. Sidecar delle iscrizioni con flag per singola iscrizione.
 4. Route /api/admin/calendar/migration e wizard a 6 passi, con l'inizializzazione nel passo 1.

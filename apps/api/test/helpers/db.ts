@@ -400,7 +400,9 @@ export const SEED_EVENT_TYPE_SLUGS = ['consulenza-gratuita-30min', 'sopralluogo-
  *   eventi rimasti nei calendari seminati;
  * - cancella app-password CalDAV, schedule non di default e override;
  * - ripristina gli slot dello schedule di default (lun-ven 09-13 e 14-18,
- *   migrazione 068) e 'lavoro' come calendario di default.
+ *   migrazione 068) e 'lavoro' come calendario di default;
+ * - riporta calendar_backend_state (162) a mode postgres, volume non
+ *   inizializzato, senza freeze, restore guard né rebuild.
  *
  * Non tocca le righe seminate di calendari e tipi di prenotazione (i test non
  * devono modificarle: si creano le proprie con le fixture) né le altre aree
@@ -429,6 +431,23 @@ export async function resetCalendarBaseline(): Promise<void> {
       UPDATE calendars SET is_default = (slug = 'lavoro')
       WHERE is_default IS DISTINCT FROM (slug = 'lavoro')
     `;
+
+    // Stato del backend calendario (migrazione 162) ai default di un database
+    // appena migrato: mode postgres, volume non inizializzato, nessuna guardia.
+    // credential_epoch e policy_version restano: sono monotoni per contratto
+    // (docs/calendar-radicale/contracts/control-plane.md §2).
+    const [{ hasState }]: Array<{ hasState: boolean }> = await tx`
+      SELECT to_regclass('public.calendar_backend_state') IS NOT NULL AS "hasState"
+    `;
+    if (hasState) {
+      await tx`
+        UPDATE calendar_backend_state
+        SET mode = 'postgres', write_freeze = false, volume_id = NULL, epoch = 0,
+            restore_guard_until = NULL, rebuild_required = false
+        WHERE (mode, write_freeze, volume_id, epoch, restore_guard_until, rebuild_required)
+              IS DISTINCT FROM ('postgres', false, NULL::uuid, 0, NULL::timestamptz, false)
+      `;
+    }
 
     const [defaultSchedule]: Array<{ id: string }> = await tx`
       SELECT id FROM calendar_availability_schedules

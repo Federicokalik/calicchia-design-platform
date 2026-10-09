@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://calicchia.design/schemas/caldes/heartbeat.v1.schema.json",
+  "title": "heartbeat.json (schema 1)",
+  "description": "Heartbeat dell'API, riscritto ogni 30 s sul volume caldes_control e letto da caldes_rights. Se manca, è invalido, più vecchio di 600 s, nel futuro di oltre 60 s, ha un epoch diverso da quello della policy o (con policy live) un mode diverso da radicale/finalized, la modalità effettiva dei device diventa frozen. Nessuna firma: l'integrità poggia sul volume, scrivibile solo dall'API (control-plane.md §7). Lo schema descrive ciò che il writer DEVE produrre; i lettori ignorano i campi sconosciuti.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "api_version", "mode", "epoch", "ts"],
+  "properties": {
+    "schema": {
+      "description": "Versione del formato. I lettori rifiutano qualsiasi valore diverso da 1.",
+      "const": 1
+    },
+    "api_version": {
+      "description": "Versione dell'API che scrive (es. sha dell'immagine). ASCII stampabile senza spazi, solo informativa.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[\\x21-\\x7e]+$"
+    },
+    "mode": {
+      "description": "calendar_backend_state.mode letto dall'API in questo giro.",
+      "enum": ["postgres", "cutover", "radicale", "rollback", "finalized"]
+    },
+    "epoch": {
+      "description": "calendar_backend_state.epoch letto dall'API in questo giro. Deve coincidere con epoch della policy.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "ts": {
+      "description": "Istante di scrittura, ISO 8601 UTC con millisecondi (Date.prototype.toISOString). L'età si valuta a ogni richiesta, non al reload.",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    }
+  },
+  "examples": [
+    {
+      "schema": 1,
+      "api_version": "sha-1a2b3c4",
+      "mode": "postgres",
+      "epoch": 1,
+      "ts": "2026-10-09T18:00:30.123Z"
+    }
+  ]
+}
