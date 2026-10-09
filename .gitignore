@@ -241,3 +241,6 @@ graphify-out/
 # =====================================================
 __pycache__/
 *.pyc
+
+# Stato runtime della knowledge base AI (scritto da kb-bootstrap all'avvio)
+apps/api/src/lib/agent/.kb-metadata.json
