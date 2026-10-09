@@ -145,16 +145,18 @@ export async function runDunningEngine(): Promise<void> {
   log.info('run finished');
 }
 
-async function writeAudit(action: 'REMINDER' | 'SUSPEND', row: DunningRow): Promise<void> {
+// audit_logs_action_check ammette solo INSERT/UPDATE/DELETE/EXPORT/IMPORT:
+// la riga e' un UPDATE della subscription, il verbo del dunning va nei metadata.
+async function writeAudit(dunningAction: 'REMINDER' | 'SUSPEND', row: DunningRow): Promise<void> {
   await sql`
     INSERT INTO audit_logs (
       user_id, user_email, user_role, action, table_name, record_id,
       old_data, new_data, changed_fields, user_agent, metadata
     ) VALUES (
       ${null}, ${'system@dunning'}, ${'system'},
-      ${action}, ${'subscriptions'}, ${row.id},
+      ${'UPDATE'}, ${'subscriptions'}, ${row.id},
       ${null}, ${null}, ${null}, ${'cron/dunning-engine'},
-      ${sqlv({ subscription_name: row.name, days_late: Number(row.days_late) })}
+      ${sqlv({ dunning_action: dunningAction, subscription_name: row.name, days_late: Number(row.days_late) })}
     )
   `.catch((err: unknown) => log.error({ err }, 'audit error'));
 }
