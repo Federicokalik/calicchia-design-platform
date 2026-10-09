@@ -20,9 +20,13 @@ Internet ─HTTPS─▶ Cloudflare ─HTTPS─▶ CloudPanel (nginx, host) ─HT
                                           ├─▶ 127.0.0.1:3002  (mcp)
                                           ├─▶ 127.0.0.1:3000  (sito-v3)
                                           ├─▶ 127.0.0.1:8081  (admin nginx -> :80)
+                                          ├─▶ 127.0.0.1:3011  (radicale, CalDAV dei device: dav.calicchia.design)
                                           └─▶ 127.0.0.1:9000  (dockhand UI, restricted)
 
 Tutti i container app vivono su `app-net` (bridge interno).
+api e radicale sono anche sulla rete interna `caldav-int` (172.31.250.0/29,
+internal: true): api-int 172.31.250.2, radicale-int 172.31.250.3. Solo da lì
+l'API parla con Radicale come utente di servizio (§9).
 Postgres NON espone porte sull'host.
 Dockhand gira su un suo stack a parte, parla col Docker daemon via socket.
 ```
@@ -113,7 +117,9 @@ Dalla UI Dockhand:
 8. **Deploy**.
 
 Ordine d'avvio dal compose: `postgres` (healthy) → `migrate`
-(completed_successfully) → `api` → `sito-v3` + `admin` + `mcp`.
+(completed_successfully) → `api` → `sito-v3` + `admin` + `mcp`. `radicale` non
+dipende da nessuno, e nessuno dipende da lui (§9): parte anche con l'API giù e
+viceversa.
 
 A ogni push su `main`, Dockhand rileva il nuovo commit (o solo un nuovo tag
 sulle immagini ghcr.io se imposti la modalità "image polling"), fa
@@ -130,7 +136,7 @@ curl -I http://127.0.0.1:8081/              # admin (nginx SPA)
 
 ---
 
-## 5. CloudPanel — 3 reverse proxy sites (invariati)
+## 5. CloudPanel — reverse proxy sites
 
 Per ogni sottodominio crea un **Site → Reverse Proxy**, abilita Let's Encrypt.
 
@@ -213,6 +219,31 @@ proxy_request_buffering off;
 proxy_read_timeout 300s;
 ```
 
+### 5e. `dav.calicchia.design` → `http://127.0.0.1:3011`
+
+CalDAV dei device (Radicale, §9). Direttive del sito:
+```nginx
+# Corpo massimo: allineato a max_content_length = 20000000 del config di Radicale.
+client_max_body_size 20m;
+proxy_http_version 1.1;
+proxy_set_header Host              $host;
+proxy_set_header X-Forwarded-Proto $scheme;
+# IP del device per rate limit e audit di verify-credentials. Sostituisce sempre
+# l'header del client. Non è un controllo di sicurezza: gli utenti di servizio si
+# riconoscono dal peer TCP sulla rete caldav-int.
+proxy_set_header X-Remote-Addr     $remote_addr;
+proxy_connect_timeout 10s;
+proxy_send_timeout    120s;
+proxy_read_timeout    120s;
+send_timeout          120s;
+client_body_timeout   60s;
+# Buffering del corpo attivo (default): un upload lento non occupa un thread di Radicale.
+```
+- I metodi WebDAV (PROPFIND, REPORT, MKCALENDAR, PROPPATCH, MOVE) passano con il `proxy_pass`: niente `limit_except`.
+- `/.well-known/caldav` lo gestisce Radicale da solo, con un 301 verso `/`.
+- Dietro il proxy di Cloudflare `$remote_addr` diventa l'IP di Cloudflare, a meno che nginx non usi `real_ip`: per `dav` meglio un record in DNS only.
+- Dal vhost della vecchia Fase 3 vanno tolte `client_max_body_size 100M` e `proxy_request_buffering off`.
+
 ---
 
 ## 6. GitHub repo Variables / Secrets
@@ -227,9 +258,14 @@ gh secret delete PORTAINER_DEPLOY_WEBHOOK
 gh secret delete DOKPLOY_DEPLOY_WEBHOOK   # se ancora presente
 ```
 
-I 4 workflow `.github/workflows/build-*-image.yml` non hanno più lo step
+I workflow `.github/workflows/build-*-image.yml` non hanno più lo step
 "Notifica … per il redeploy": l'unico effetto del push su `main` è pubblicare
 le immagini su ghcr.io. Dockhand le tirerà al prossimo poll.
+
+Eccezione: `build-radicale-image.yml` esegue prima i test dei plugin (pytest con
+Radicale 3.7.8 e selftest) e pubblica **solo** `sha-<short>`, senza `latest`. Il
+compose punta a un tag sha pinnato, che cambia solo con un commit del compose
+(§9).
 
 ---
 
@@ -291,9 +327,107 @@ curl -I https://calicchia.design                       # 200
 curl -I https://admin.calicchia.design                 # 200
 ```
 
-In Dockhand i 5 servizi dello stack (postgres, api, mcp, sito-v3, admin)
-devono essere `running` (postgres anche `healthy`). `migrate` deve essere
-`exited 0` (one-shot).
+In Dockhand i servizi dello stack (postgres, api, mcp, sito-v3, admin,
+radicale, valkey, cap, worker) devono essere `running` (postgres e radicale
+anche `healthy`). `migrate` deve essere `exited 0` (one-shot). Per il CalDAV
+vedi i controlli di §9.
+
+---
+
+## 9. Calendario su Radicale: deploy in due commit
+
+Fase F1 del [passaggio del calendario a Radicale](calendar-radicale/README.md): Radicale 3.7.8 con storage nativo, gate dei device (policy, heartbeat, identità del volume) e Postgres ancora autorevole. Dettagli operativi (inizializzazione, device, restore, troubleshooting) in [apps/radicale/README.md](../apps/radicale/README.md).
+
+Il compose di produzione non builda mai e il servizio `radicale` usa un tag `sha-<short>` pinnato. Il deploy è quindi sempre in due commit: prima si pubblica l'immagine, poi un commit del compose la mette in produzione. Così l'immagine che gira è sempre quella testata dalla CI, e il tag cambia solo con un commit.
+
+### 9.1 Prima del primo deploy (una volta, sul server)
+
+```sh
+# a) La subnet di caldav-int deve essere libera (nessun output):
+docker network ls -q | xargs docker network inspect --format '{{.Name}} {{range .IPAM.Config}}{{.Subnet}} {{end}}' | grep '172\.31\.250\.'
+# Se è occupata: scegliere un'altra /29 e cambiarla nel compose in quattro punti
+# (subnet, gateway, ipv4_address di api e radicale) più CALDES_SVC_CIDR.
+
+# b) Filesystem locale dei volumi (ext2/ext3 = ext4, xfs, btrfs; NON nfs/cifs):
+stat -f -c '%T' /var/lib/docker/volumes
+
+# c) Vecchio volume della Fase 0: backup tar, NON cancellarlo (decisione 7)
+docker volume ls --format '{{.Name}}' | grep radicale_data && \
+  docker run --rm -v <progetto>_radicale_data:/v:ro -v /root:/out alpine tar czf /out/radicale_data-fase0-$(date +%F).tgz -C /v .
+```
+
+Poi:
+- **d) Segreti.** Generarli (comandi in apps/radicale/README.md, "Variabili e segreti") e aggiungerli all'env dello stack in Dockhand: `RADICALE_SVC_PASSWORD`, `CALDES_SVC_PASSWORD_SHA256`, `CALDES_PROBE_PASSWORD`, `CALDES_PROBE_PASSWORD_SHA256`, `CALDES_AUTHCACHE_KEY`. `CALDAV_SERVICE_TOKEN` c'è già.
+- **e) CloudPanel.** Aggiornare il vhost `dav.calicchia.design` con le direttive del §5e (`X-Remote-Addr $remote_addr`, `client_max_body_size 20m`, timeout).
+
+### 9.2 Commit 1: l'immagine
+
+Il commit contiene le modifiche ad `apps/radicale/**` e il resto della fase (API, migrazione 162, workflow). **Non** contiene il servizio `radicale` nuovo di `docker-compose.portainer.yml`.
+
+1. Push su `main`. `build-radicale-image` esegue compilazione, selftest e pytest dei plugin, builda l'immagine (il Dockerfile riesegue il selftest) e pubblica `ghcr.io/federicokalik/calicchia-radicale:sha-<short>`. Il tag compare nel riepilogo del job, alla voce "Tag per docker-compose.portainer.yml".
+2. Dockhand rileva il commit e fa `pull` e `up -d`:
+   - `migrate` applica la 162;
+   - l'API riparte con il codice nuovo. Senza il volume `caldes_control` il control-plane resta spento (CALDES_CONTROL_PLANE=auto: la cartella manca);
+   - il Radicale vecchio continua a girare: il compose punta ancora alla vecchia immagine, e il workflow non pubblica più `latest`.
+3. Il CalDAV di produzione resta rotto come oggi. Se il container vecchio si riavvia fra i due commit legge il config nuovo (montato dal repository) e non parte: nessun impatto sui device, che oggi non sincronizzano.
+
+### 9.3 Commit 2: il compose
+
+1. In `docker-compose.portainer.yml` sostituire `sha-SEGNAPOSTO` con il tag del passo 9.2 (servizio `radicale`) e committare il compose (rete `caldav-int`, volumi `radicale_collections`, `caldes_control`, `radicale_authcache`, variabili di `api` e `radicale`).
+2. Dockhand fa `pull` (fallisce se il tag non esiste: in quel caso non cambia nulla) e `up -d`:
+   - crea rete e volumi e ricrea `radicale` e `api`;
+   - Radicale parte su un volume vuoto senza policy: i device ricevono 403 sotto `/federico/`;
+   - l'API scrive subito `policy.json` (shadow, `volume_id: null`) e poi `heartbeat.json` ogni 30 s.
+3. Nessun `depends_on` fra `api` e `radicale`. Radicale con l'API giù usa la cache persistita, o risponde 500 a un device mai visto; l'API con Radicale giù funziona come oggi.
+
+### 9.4 Verifica
+
+```sh
+P=<progetto>   # docker compose ls
+docker compose -p $P ps radicale                                   # running (healthy)
+docker compose -p $P exec api cat /run/caldes-control/policy.json  # backend_mode postgres, mode shadow, volume_id null
+docker compose -p $P exec api cat /run/caldes-control/heartbeat.json
+docker compose -p $P logs --since 10m radicale | grep caldes_event
+curl -s -o /dev/null -w '%{http_code}\n' -u 'caldes-svc:<password>' -X PROPFIND -H 'Depth: 0' https://dav.calicchia.design/              # 401
+curl -s -o /dev/null -w '%{http_code}\n' -u 'federico:<app-password>' -X PROPFIND -H 'Depth: 0' https://dav.calicchia.design/            # 207
+curl -s -o /dev/null -w '%{http_code}\n' -u 'federico:<app-password>' -X PROPFIND -H 'Depth: 1' https://dav.calicchia.design/federico/   # 403 (volume vuoto)
+```
+
+L'inizializzazione del volume (facoltativa in F1, poi nel wizard della F3) e la prova con un device reale sono in apps/radicale/README.md, "Inizializzazione del volume". Dopo l'inizializzazione `/federico/` risponde 207 in sola lettura e una PUT 403.
+
+### 9.5 Aggiornamenti successivi dell'immagine e rollback
+
+- **Ogni modifica ad `apps/radicale/**`** segue lo stesso flusso: commit 1, attesa del tag, commit 2 con il tag nuovo. Il config `apps/radicale/config/config` è montato dal repository e si rilegge solo all'avvio: va cambiato solo insieme a un'immagine nuova, e il riavvio lo fa il commit 2.
+- **Rollback dell'immagine Radicale:** un commit del compose con il tag sha precedente. I tag sha restano su ghcr.io.
+- **Rollback della F1 intera:** revert dei due commit. In F1 Postgres è autorevole: nessun dato da recuperare. I volumi nuovi restano (non cancellarli: dal cutover in poi contengono la fonte di verità), e l'API senza il volume `caldes_control` spegne da sola il control-plane.
+
+---
+
+## 10. Backup coordinato (DB e volume di Radicale)
+
+`scripts/backup-calendar-stack.sh` sostituisce l'uso separato di `backup-db.sh`, che resta per compatibilità e gli delega il lavoro. Ogni 6 h, come root sull'host, da una copia del repository (per esempio `/opt/calicchia-design-platform`):
+
+```sh
+# /root/.caldes-backup.env (0600)
+COMPOSE_PROJECT=<progetto>
+BACKUP_DIR=/var/backups/caldes
+RETENTION_DAYS=30
+S4_ENDPOINT=...
+S4_BUCKET=...
+S4_ACCESS_KEY_ID=...
+S4_SECRET_ACCESS_KEY=...
+
+# crontab -e (root)
+17 */6 * * * cd /opt/calicchia-design-platform && set -a && . /root/.caldes-backup.env && set +a && ./scripts/backup-calendar-stack.sh >> /var/log/caldes-backup.log 2>&1
+```
+
+In ogni run:
+1. `pg_dump` con il `pg_dump` del container postgres (stessa versione del server);
+2. tar del volume `radicale_collections` sotto il lock condiviso di Radicale;
+3. un solo `manifest.json` con checksum, stato del backend e identità del volume;
+4. retention e copia su S4 in `s3://$S4_BUCKET/calendar-stack/<id>/`.
+
+Richiede `python3`, `flock` e, per S4, la AWS CLI. Il restore coordinato (`scripts/restore-calendar-stack.sh`, con verifica dell'identità e conferma esplicita) e il drill trimestrale sono in apps/radicale/README.md, "Backup e restore". Durante un restore va sospeso l'aggiornamento automatico dello stack in Dockhand.
 
 ---
 
@@ -303,7 +437,7 @@ devono essere `running` (postgres anche `healthy`). `migrate` deve essere
 |---|---|---|
 | Routing | Traefik via label / UI Domains | CloudPanel (nginx sull'host) |
 | TLS | Let's Encrypt via Traefik | Let's Encrypt via CloudPanel |
-| Compose | `docker-compose.prod.yml` (rete `dokploy-network` esterna) | `docker-compose.portainer.yml` (rete `app-net` bridge, `ports: 127.0.0.1:*`) |
+| Compose | `docker-compose.prod.yml` (rete `dokploy-network` esterna), **deprecato**: senza lo stack del calendario su Radicale | `docker-compose.portainer.yml` (rete `app-net` bridge, `ports: 127.0.0.1:*`, rete interna `caldav-int`) |
 | Auto redeploy | non funziona (Branch Not Match) | **Git polling Dockhand** — pulla `main` e fa `compose pull && up -d` |
 | Visibilità Docker | scarsa, deduce | Dockhand UI: log, exec, healthcheck, stack editor |
 | Registry credentials | gestite da Dokploy UI | `docker login` sull'host una volta |

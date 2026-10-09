@@ -12,7 +12,7 @@ Test automatici di `@calicchia/api` con `node:test` eseguito da `tsx` (nessun fr
 export TEST_DATABASE_URL=postgresql://caldes:caldes@localhost:5432/caldes_test
 ```
 
-`TEST_DATABASE_URL` è obbligatoria e non viene mai letta da `.env`. I test si rifiutano di partire se l'host non è `localhost`, `127.0.0.1` o `::1`, oppure se il nome del database non contiene `test` o `caldes_f0`. `DATABASE_URL` viene sempre sovrascritta con `TEST_DATABASE_URL`, anche se è già impostata nella shell.
+`TEST_DATABASE_URL` è obbligatoria e non viene mai letta da `.env`. I test si rifiutano di partire se l'host non è `localhost`, `127.0.0.1` o `::1`, oppure se il nome del database non contiene `test` o il marcatore di fase `caldes_f<N>` (per esempio `caldes_f0`, `caldes_f1_found`). `DATABASE_URL` viene sempre sovrascritta con `TEST_DATABASE_URL`, anche se è già impostata nella shell.
 
 ## Comandi
 
@@ -26,7 +26,7 @@ Da `apps/api`, oppure dalla radice con `pnpm --filter @calicchia/api <script>`:
 | `pnpm test:contracts` | Esegue i test di contratto (`test/contracts`). |
 | `pnpm test:calendar` | Esegue i casi del calendario (`test/calendar`). |
 | `pnpm test:integration` | Esegue i test di integrazione (`test/integration`): Radicale reale, mock di verify-credentials, inventario. |
-| `pnpm typecheck:test` | Typecheck di `src`, `test` e degli script F0 (`tsconfig.test.json`). |
+| `pnpm typecheck:test` | Typecheck di `src`, `test` e degli script F0 e F1 (`tsconfig.test.json`). |
 
 Script della fase F0 collegati ai test (stessa cartella):
 
@@ -36,6 +36,12 @@ Script della fase F0 collegati ai test (stessa cartella):
 | `pnpm calendar:fix-dst` | Dry-run della correzione delle eccezioni DST (serie timed e all-day); `-- --apply --expect-plan <hash>` applica il piano visto (`--apply` senza `--expect-plan` è rifiutato). `--out <file>` salva il report JSON con permessi 0600. Legge `../../.env` se esiste. |
 | `pnpm contract:mcp-snapshot` | Rigenera la lista vincolante dei tool MCP di calendario (`__snapshots__/mcp-calendar-tools.schema.json`). |
 | `pnpm contract:mcp-check` | Verifica la lista senza database (exit 1 se diversa). |
+
+Script della fase F1:
+
+| Script | Cosa fa |
+|---|---|
+| `pnpm calendar:radicale-init` | Prova a vuoto dell'inizializzazione del volume di Radicale (contratto control-plane §4.4): stato in PG, principal su Radicale come `caldes-svc`, identità, collezioni del sidecar. `-- --apply` la esegue (o crea solo le collezioni mancanti di un volume già inizializzato). Exit 3 se le precondizioni non tengono. Usa `DATABASE_URL`, `RADICALE_URL`, `RADICALE_SVC_PASSWORD`, `RADICALE_PRINCIPAL`; nessun `.env`. |
 
 Le migrazioni vengono applicate anche all'avvio di ogni file di test: `test:migrate` serve a separare un eventuale errore di schema dagli errori dei test, ad esempio in CI.
 
@@ -70,16 +76,19 @@ test/
     radicale.ts          Radicale reale su porta effimera e mock di verify-credentials
     caldav.ts            client CalDAV minimale, parser XML e utilità iCalendar
     mock_verify.py       mock di POST /api/caldav-backend/verify-credentials (stdlib)
+    json-schema-lite.ts  validatore minimo di JSON Schema per gli schemi dei contratti di Radicale
   smoke/infra.test.ts    prova che tutti i pezzi funzionano insieme
-  contracts/             contratti F0 (sito, admin v1, MCP, feed, agenda, capacity/slot)
+  contracts/             contratti F0 (sito, admin v1, MCP, feed, agenda, capacity/slot) e F1 (backend CalDAV interno e app-password)
     _json-contract.ts    store JSON degli snapshot di contratto e differenze ammesse
     _http-contract.ts    voci di snapshot per i contratti HTTP
     _admin-v1.ts         alias, effetti sul DB e server ICS simulato del contratto admin
     _mcp-scenario.ts     scenario e alias del contratto MCP
     allowed-diffs.json   differenze ammesse fra la baseline F0 e gli store successivi
     __snapshots__/       snapshot JSON committati, uno per contratto
-  calendar/              casi del calendario (verify-calendar*, correzione DST)
-  integration/           Radicale reale, plugin di autenticazione di prova, inventario
+  calendar/              casi del calendario (verify-calendar*, correzione DST, migrazione 162, policy dallo stato,
+                         control-plane di Radicale, partizione S/D/B del backup JSON)
+  integration/           Radicale reale: smoke CalDAV, plugin del repository, client di servizio e control-plane,
+                         caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario
 ```
 
 ## Ambiente (`helpers/env.ts`)
@@ -88,7 +97,7 @@ Molti moduli leggono `process.env` al momento dell'import: `src/db/index.ts` cre
 
 - **Valori fissi**: `NODE_ENV=test`, secret noti (`JWT_SECRET`, `BOOKING_TOKEN_SECRET`, `WEBHOOK_ENCRYPTION_KEY`, `CALDAV_SERVICE_TOKEN`), URL pubblici su domini `.test` (`https://api.caldes.test`, `https://sito.caldes.test`, `https://admin.caldes.test`, `https://portale.caldes.test`) e directory di upload temporanee. Sono esportati come `TEST_ENV`.
 - **Determinismo**: `TZ=UTC` nel processo e `TimeZone=UTC` nella sessione Postgres, come il container di produzione.
-- **Ambiente ermetico**: vengono rimosse le variabili dei servizi esterni (Resend/SMTP, Telegram, captcha, Stripe/PayPal/Revolut, AI, S4, WhatsApp…). Nessun test manda email o chiama API esterne, e il captcha viene saltato come in sviluppo.
+- **Ambiente ermetico**: vengono rimosse le variabili dei servizi esterni (Resend/SMTP, Telegram, captcha, Stripe/PayPal/Revolut, AI, S4, WhatsApp…). Nessun test manda email o chiama API esterne, e il captcha viene saltato come in sviluppo. Spariscono anche le variabili del client di Radicale e del control-plane (`RADICALE_URL`, `RADICALE_PRINCIPAL`, `RADICALE_DATA_DIR`, `CALDES_*`…): i test le passano in modo esplicito. Restano `RADICALE_BIN`, `RADICALE_PYTHON` e `RADICALE_REQUIRED`, che sono del harness.
 - **Log**: pino è impostato a `silent` e il logger HTTP di Hono è filtrato. Per indagare: `TEST_LOG_LEVEL=debug` e `TEST_HTTP_LOG=1`.
 - **`withEnv(overrides, fn)`**: cambia alcune variabili solo per `fn` e poi le ripristina. Vale solo per le variabili lette al momento della chiamata, ad esempio `NODE_ENV=production` per far rifiutare il captcha non configurato con un 403.
 
@@ -96,7 +105,7 @@ Molti moduli leggono `process.env` al momento dell'import: `src/db/index.ts` cre
 
 - **`useTestDatabase({ resetBaseline? })`**: va chiamata in cima al file ed è idempotente. Applica le migrazioni prima del primo test e chiude il pool dopo l'ultimo; senza la chiusura il processo resterebbe appeso. Con `resetBaseline: true` riporta prima il dominio calendario alla baseline.
 - **`onDatabaseReady(task)` / `onBeforeDatabaseClose(task)`**: eseguono `task` dentro il `before` di `useTestDatabase` (dopo migrazioni, baseline e pre-pulizia delle fixture) e nel suo `after` (prima della chiusura del pool). Lo scenario condiviso di un file va costruito qui e **non** con un `before()` di primo livello: con `node --test` i `before()` di primo livello partono subito e in parallelo fra loro, quindi la creazione dei dati finirebbe in gara con migrazioni e `resetCalendarBaseline()` (fino al deadlock). Gli `after()` di primo livello vanno bene per ciò che non usa il database (orologio, flush degli snapshot).
-- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, e lo schedule di default con lun-ven 09-13 e 14-18. Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
+- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, lo schedule di default con lun-ven 09-13 e 14-18 e lo stato del backend calendario (`calendar_backend_state`, migrazione 162) in `mode=postgres` con il volume non inizializzato. Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
 - **`testPrefix(label)`**: genera un prefisso `tst-<etichetta>`, deterministico e quindi stabile negli snapshot. Con `{ random: true }` aggiunge un suffisso casuale. Rifiuta un prefisso che ne contiene un altro già usato nel processo, o che è contenuto in uno già usato.
 - **`cleanupTestData(prefix, tracked)`**: cancella in ordine di foreign key tutto ciò che porta il prefisso (slug, nomi, titoli, email, label) o è registrato per id. Copre prenotazioni con proiezioni e lead, tipi di prenotazione, schedule, calendari con le cascate, eventi, iscrizioni, app-password, token MCP e device, e le righe di `audit_logs` scritte dai trigger.
 - **`databaseNow()` / `cleanupCalendarAudit({ since, prefixes, ids })`**: per le righe di `audit_logs` che la pulizia per prefisso non riconosce (eventi cancellati dalle route o dal sync delle iscrizioni, aggiornamenti dei calendari seminati). `since` si legge con `databaseNow()` in `onDatabaseReady`, perché i trigger usano `NOW()` del server e non l'orologio fermo.
@@ -178,7 +187,7 @@ Ordine degli elementi, ordine delle chiavi e campi semantici (`start_time`, `end
 ## Radicale (`helpers/radicale.ts`)
 
 - **`radicaleAvailability()`**: prova sincrona (`<bin> --version`), utilizzabile nelle opzioni `skip` di `describe`. Il binario è `RADICALE_BIN` oppure `radicale` nel `PATH`. Senza binario le suite vengono saltate con il motivo; con `RADICALE_BIN` impostata oppure `RADICALE_REQUIRED=1` l'assenza è un errore.
-- **`useRadicale(options)` / `startRadicale(options)`**: un Radicale reale con config generata (default del design §3.2: storage multifilesystem, limiti, permessi sulle collezioni), utenti htpasswd oppure un plugin di autenticazione o dei rights, porta scelta dal sistema e directory temporanea rimossa allo stop.
+- **`useRadicale(options)` / `startRadicale(options)`**: un Radicale reale con config generata (default del design §3.2: storage multifilesystem, limiti, permessi sulle collezioni), utenti htpasswd oppure un plugin di autenticazione o dei rights, porta scelta dal sistema e directory temporanea rimossa allo stop. Con `configText` il file è scritto così com'è: `integration/radicale-f1-e2e.test.ts` lo usa per far girare il config di produzione (`apps/radicale/config/config`) con i soli percorsi sostituiti.
 - **`useMockVerify(options)` / `startMockVerify(options)`**: il mock di verify-credentials (`mock_verify.py`, solo libreria standard) con principal canonico, modalità di guasto (`deny`, `error`, `unavailable`, `rate_limited`, `slow`, `garbage`, `drop`) e registro delle chiamate (password mai in chiaro).
 - **`CalDavClient`** (da `helpers/caldav.ts`): PUT/GET/DELETE con precondizioni, PROPFIND, PROPPATCH, MKCALENDAR, calendar-query, calendar-multiget e sync-collection. Con `fromAddress('127.0.0.2')` la connessione parte da un altro indirizzo di loopback, per i test del peer TCP di F1 senza reti Docker.
 
@@ -229,11 +238,17 @@ In F0 i bug non si correggono in `src/`: i test asseriscono il comportamento att
 - `expandRRule.between` perde le occorrenze di una serie già iniziate prima di `from`; un UID con la forma di un UUID viene cercato come id; dopo una riprogrammazione la proiezione ha `url` null.
 - Feed ICS: le occorrenze cancellate con override ricompaiono, gli override hanno un UID proprio, DTSTAMP cambia a ogni lettura (casi `test.todo` per F2 in `feed.contract.test.ts`).
 - Agenda device: serie non espanse e giorno UTC invece che di Roma; capacity: confini delle settimane in UTC e timer in corso contato fino a fine settimana.
-- Il plugin `apps/radicale/plugins/caldes_auth.py` con Radicale 3.7.8 risponde 500 a ogni richiesta autenticata (`Auth.login()` con la firma vecchia): congelato in `integration/radicale-smoke.test.ts`, da sostituire in F1.
+- Il plugin `apps/radicale/plugins/caldes_auth.py` di F0 rispondeva 500 a ogni richiesta autenticata (`Auth.login()` con la firma vecchia). In F1 è riscritto (`_login_ext`, contratto control-plane §9): `integration/radicale-smoke.test.ts` ne tiene uno smoke, la suite completa è pytest (`apps/radicale/tests/test_auth.py`), e `integration/caldav-backend-e2e.test.ts` e `integration/radicale-f1-e2e.test.ts` lo provano contro la route reale di verify-credentials. Il mock risponde con `Connection: close` quando la richiesta lo chiede, come Node: è il percorso in cui il plugin aveva un secondo bug (500 a ogni login contro l'API vera), ora corretto.
+
+## End-to-end della F1 (`integration/radicale-f1-e2e.test.ts`)
+
+Il criterio di uscita della fase in locale, con tutti i pezzi reali: Radicale 3.7.8 con il config di produzione e i plugin del repository, `verify-credentials` servito dall'API vera su una porta effimera, `policy.json` e `heartbeat.json` scritti dal control-plane dell'API avviato come in produzione (`startCalendarControlPlane`, con LISTEN del NOTIFY), inizializzazione con lo script `calendar:radicale-init` e healthcheck dell'immagine. Prova il 401 di `caldes-svc` da un peer non interno, il 403 senza directory create su un volume vuoto, la sola lettura di `/federico/` con un'app-password storica (`iphone`) dopo l'inizializzazione, il frozen con il heartbeat scaduto (con una policy live temporanea, per vedere le scritture tornare 403), il marker diverso e la revoca tramite `credential_epoch`. Richiede `RADICALE_BIN` e, per i peer, 127.0.0.2 e 127.0.0.3 utilizzabili come indirizzi sorgente (Linux); dura circa 35 s per via del `delay = 1` del config di produzione.
 
 ## CI
 
 Due job di `.github/workflows/ci.yml` girano su ogni PR verso `main`, entrambi con un Postgres 17 come service (database `caldes_test`) e Node 22.12:
 
 - `api-tests`: `contract:mcp-check` (senza database), `test:migrate`, `typecheck:test` e `test`. Le suite che richiedono Radicale vengono saltate.
-- `calendar-integration`: installa Radicale 3.7.8 e vobject 0.9.9 in un venv, imposta `RADICALE_BIN` e `RADICALE_REQUIRED=1`, poi esegue `test:migrate`, `typecheck:test` e `test:integration`. In F2 diventerà la matrice `CALENDAR_BACKEND=postgres|radicale` del design §15.
+- `calendar-integration`: installa Radicale 3.7.8, vobject 0.9.9 e pytest in un venv, imposta `RADICALE_BIN` e `RADICALE_REQUIRED=1`, esegue il selftest e i pytest dei plugin (`apps/radicale/tests`), poi `test:migrate`, `typecheck:test` e `test:integration`. In F2 diventerà la matrice `CALENDAR_BACKEND=postgres|radicale` del design §15.
+
+Il workflow `build-radicale-image.yml` esegue anche lui selftest e pytest dei plugin (con Python 3.14 come l'immagine) prima di buildare l'immagine.
