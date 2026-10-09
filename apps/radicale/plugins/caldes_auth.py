@@ -19,7 +19,8 @@ maiuscole e minuscole, è riservato e non entra MAI nel ramo device):
   - password verificata con lo sha256 in env e confronto a tempo costante;
   - qualsiasi altro `caldes-*`, peer non ammesso o password errata → 401.
 Il peer si legge solo dal socket, mai da un header: il traffico pubblicato su
-127.0.0.1:3011 arriva dal gateway di app-net, che non è mai in CALDES_SVC_CIDR.
+127.0.0.1:3011 arriva dal gateway della rete dav-pub, che non è mai in
+CALDES_SVC_CIDR.
 
 Device (ogni altro login):
   1. cache in memoria (60 s dall'ultima conferma del backend) → principal;
@@ -27,9 +28,23 @@ Device (ogni altro login):
      X-Remote-Addr, timeout complessivo di 1 s):
        200 {ok: true}  → RADICALE_PRINCIPAL qualunque sia lo username;
        401 {ok: false} → negazione esplicita: la voce esce da entrambe le cache;
+       429             → negazione temporanea (troppi tentativi FALLITI per
+                         IP e username: l'API non limita mai una password
+                         corretta): "" senza toccare le cache e SENZA
+                         consultare la cache persistita, quindi Radicale
+                         risponde 401 dopo il proprio delay;
        altro           → errore del backend:
   3.     voce valida nella cache persistita (HMAC, 24 h) → principal (stale-if-error);
   4.     altrimenti eccezione → 500.
+Il 429 non apre lo stale-if-error: altrimenti chiunque, esaurendo il proprio
+bucket con password sbagliate, otterrebbe dal plugin un confronto senza
+ritardo contro la cache persistita, che può contenere credenziali non più
+valide nel database.
+
+X-Remote-Addr (IP del device, messo da CloudPanel) diventa X-Forwarded-For
+solo se è un IP valido e, con CALDES_XRA_PEER_CIDR impostata, solo se il peer
+TCP è in quella rete (il gateway di dav-pub): un altro container non può
+scegliere l'IP con cui l'API conta il rate limit e registra last_used_ip.
 La chiave delle cache lega ogni voce a `credential_epoch` della policy: quando
 l'epoch cambia il plugin svuota la cache in memoria e riscrive authcache.json
 vuoto; con la policy assente o invalida l'epoch è sconosciuto e nessuna voce
@@ -38,8 +53,9 @@ vuoto; con la policy assente o invalida l'epoch è sconosciuto e nessuna voce
 Configurazione solo da env (contratto §1.2): RADICALE_PRINCIPAL,
 CALDAV_BACKEND_URL, CALDAV_SERVICE_TOKEN, CALDES_SVC_CIDR,
 CALDES_SVC_PASSWORD_SHA256, CALDES_PROBE_PASSWORD_SHA256, CALDES_AUTHCACHE_KEY
-obbligatorie; CALDES_AUTHCACHE_DIR (default /var/lib/caldes-auth) e
-CALDES_POLICY_FILE (default /control/policy.json) facoltative. Una variabile
+obbligatorie; CALDES_AUTHCACHE_DIR (default /var/lib/caldes-auth),
+CALDES_POLICY_FILE (default /control/policy.json) e CALDES_XRA_PEER_CIDR
+(default: X-Remote-Addr accettato da qualsiasi peer) facoltative. Una variabile
 obbligatoria assente o malformata fa fallire il caricamento: Radicale non parte.
 Della config di Radicale si legge solo `[rights] caldes_policy_file`, per
 verificare che auth e rights leggano la stessa policy; `Configuration.get()`
@@ -48,7 +64,11 @@ come KeyError.
 
 Eventi (contratto §9.7): una riga `caldes_event {json}` a livello WARNING
 (ERROR per backend_error e config_error); mai password, chiavi di cache o
-segreti. Solo libreria standard.
+segreti. Gli eventi che un client può provocare a piacere (backend_error,
+stale_if_error, rate_limited, reserved_denied) passano da un limite per nome
+(EVENT_BURST per minuto): oltre, si contano e il primo evento successivo
+porta `suppressed` con il numero di quelli non scritti. Solo libreria
+standard.
 """
 
 from __future__ import annotations
@@ -107,6 +127,9 @@ AUTHCACHE_FILENAME = "authcache.json"
 AUTHCACHE_SCHEMA = 1
 #: Eventi ripetibili (X-Remote-Addr mancante, errori di scrittura della cache): al massimo uno al minuto.
 EVENT_RATE_LIMIT_SECONDS = 60.0
+#: Eventi provocabili da un client (backend_error, stale_if_error, rate_limited,
+#: reserved_denied): al massimo EVENT_BURST per nome ogni EVENT_RATE_LIMIT_SECONDS.
+EVENT_BURST = 10
 #: Lunghezze massime dei campi di verify-credentials (verify-credentials.schema.json).
 LOGIN_MAX_BYTES = 255
 PASSWORD_MAX_CHARS = 1024
@@ -173,6 +196,49 @@ def _event(name: str, level: int = logging.WARNING, **fields: Any) -> None:
 def _loggable_login(login: str) -> str:
     """Login per i log: troncato (json.dumps ne esegue l'escape dei controlli)."""
     return login[:LOGIN_MAX_BYTES]
+
+
+class EventThrottle:
+    """
+    Limite degli eventi per nome: al massimo `burst` righe per finestra di
+    `window` secondi (orologio monotono). Gli eventi oltre il limite si
+    contano; il primo evento scritto dopo porta `suppressed` con il loro
+    numero. Un client non può così allagare log e alert (Telegram, Bugsink)
+    con richieste fatte apposta per fallire.
+    """
+
+    def __init__(self, burst: int = EVENT_BURST, window: float = EVENT_RATE_LIMIT_SECONDS) -> None:
+        self.burst = burst
+        self.window = window
+        self._lock = threading.Lock()
+        #: nome → [inizio della finestra, eventi scritti nella finestra, eventi soppressi da riportare]
+        self._state: Dict[str, List[float]] = {}
+
+    def admit(self, name: str) -> Optional[int]:
+        """None se l'evento va soppresso, altrimenti il numero di eventi soppressi da riportare."""
+        now = _monotonic()
+        with self._lock:
+            state = self._state.get(name)
+            if state is None or now - state[0] >= self.window:
+                suppressed = int(state[2]) if state is not None else 0
+                self._state[name] = [now, 1, 0]
+                return suppressed
+            if state[1] < self.burst:
+                state[1] += 1
+                suppressed = int(state[2])
+                state[2] = 0
+                return suppressed
+            state[2] += 1
+            return None
+
+
+def _throttled_event(throttle: EventThrottle, name: str, level: int = logging.WARNING, **fields: Any) -> None:
+    suppressed = throttle.admit(name)
+    if suppressed is None:
+        return
+    if suppressed:
+        fields["suppressed"] = suppressed
+    _event(name, level, **fields)
 
 
 # ─── Validazioni condivise con types.ts ───────────────────────────────
@@ -384,6 +450,8 @@ class Settings(NamedTuple):
     authcache_key: bytes
     authcache_dir: str
     policy_file: str
+    #: Reti da cui X-Remote-Addr è affidabile; vuota = qualsiasi peer.
+    xra_networks: Tuple[IPNetwork, ...] = ()
 
 
 def _required(environ: Mapping[str, str], name: str) -> str:
@@ -416,8 +484,7 @@ def _parse_endpoint(raw: str) -> BackendEndpoint:
     return BackendEndpoint(parts.scheme, parts.hostname, port, path)
 
 
-def _parse_networks(raw: str) -> Tuple[IPNetwork, ...]:
-    name = "CALDES_SVC_CIDR"
+def _parse_networks(raw: str, name: str = "CALDES_SVC_CIDR", allow_loopback: bool = False) -> Tuple[IPNetwork, ...]:
     networks: List[IPNetwork] = []
     for piece in raw.split(","):
         text = piece.strip()
@@ -435,7 +502,7 @@ def _parse_networks(raw: str) -> Tuple[IPNetwork, ...]:
             ipaddress.IPv6Address("::1"),
             ipaddress.IPv6Address("::ffff:127.0.0.1"),
         )
-        if any(addr in network for addr in loopbacks):
+        if not allow_loopback and any(addr in network for addr in loopbacks):
             raise ConfigError(name, "rete %s: contiene il loopback, riservato al probe" % network)
         networks.append(network)
     return tuple(networks)
@@ -485,6 +552,12 @@ def load_settings(environ: Mapping[str, str], configuration: Any) -> Settings:
 
     authcache_dir = _absolute_path(environ, "CALDES_AUTHCACHE_DIR", DEFAULT_AUTHCACHE_DIR)
 
+    # Facoltativa: peer TCP da cui X-Remote-Addr è affidabile (il gateway della
+    # rete dav-pub della porta pubblicata). Il loopback è ammesso: nei test il
+    # "gateway" è un indirizzo di loopback.
+    raw_xra = environ.get("CALDES_XRA_PEER_CIDR", "")
+    xra_networks = _parse_networks(raw_xra, "CALDES_XRA_PEER_CIDR", allow_loopback=True) if raw_xra.strip() else ()
+
     # La policy di auth (credential_epoch) e quella dei rights DEVONO coincidere.
     rights_type = _config_option(configuration, "rights", "type")
     rights_policy = _config_option(configuration, "rights", "caldes_policy_file")
@@ -514,6 +587,7 @@ def load_settings(environ: Mapping[str, str], configuration: Any) -> Settings:
         authcache_key=key.encode("utf-8"),
         authcache_dir=authcache_dir,
         policy_file=policy_file,
+        xra_networks=xra_networks,
     )
 
 
@@ -775,7 +849,7 @@ class BackendUnavailableError(RuntimeError):
 
 
 class VerifyOutcome(NamedTuple):
-    #: "ok", "denied" oppure "error".
+    #: "ok", "denied", "rate_limited" oppure "error".
     kind: str
     status: Optional[int] = None
     error: Optional[str] = None
@@ -786,7 +860,7 @@ class VerifyOutcome(NamedTuple):
     expires_known: bool = True
 
 
-OK, DENIED, ERROR = "ok", "denied", "error"
+OK, DENIED, RATE_LIMITED, ERROR = "ok", "denied", "rate_limited", "error"
 
 # Dalla 3.10 socket.timeout è un alias deprecato di TimeoutError: si solleva
 # TimeoutError e si riconoscono entrambi (fino alla 3.9 erano classi diverse).
@@ -910,9 +984,11 @@ def post_verify_credentials(
 
 def classify_response(status: int, body: bytes) -> VerifyOutcome:
     """
-    Esito di verify-credentials (contratto §9.4): negazione SOLO con 401 e
-    corpo {ok: false}; successo solo con 200 e {ok: true}; il resto è errore
-    del backend (compreso il 401 del middleware del Bearer).
+    Esito di verify-credentials (contratto §9.4): negazione esplicita SOLO con
+    401 e corpo {ok: false}; negazione temporanea con 429 (troppi tentativi
+    falliti: l'API verifica sempre prima la password, quindi una password
+    corretta non riceve mai 429); successo solo con 200 e {ok: true}; il resto
+    è errore del backend (compreso il 401 del middleware del Bearer).
     """
     try:
         doc = _decode_json(body)
@@ -939,6 +1015,8 @@ def classify_response(status: int, body: bytes) -> VerifyOutcome:
         return VerifyOutcome(DENIED, status=status)
     if status == 401:
         return VerifyOutcome(ERROR, status=status, error="bearer_rejected")
+    if status == 429:
+        return VerifyOutcome(RATE_LIMITED, status=status)
     if 200 <= status < 300:
         return VerifyOutcome(ERROR, status=status, error="out_of_contract")
     return VerifyOutcome(ERROR, status=status)
@@ -1008,11 +1086,13 @@ class Auth(auth.BaseAuth):
         self._store.prepare_directory()
         self._store.load(_wall_time())
         self._last_missing_xra_at: Optional[float] = None
+        self._throttle = EventThrottle()
         logger.info(
-            "caldes_auth: principal %r, backend %s, rete di servizio %s, policy %s, cache persistita %s",
+            "caldes_auth: principal %r, backend %s, rete di servizio %s, X-Remote-Addr da %s, policy %s, cache persistita %s",
             settings.principal,
             settings.endpoint.display,
             ", ".join(str(n) for n in settings.svc_networks),
+            ", ".join(str(n) for n in settings.xra_networks) or "qualsiasi peer",
             settings.policy_file,
             self._store.path,
         )
@@ -1050,7 +1130,8 @@ class Auth(auth.BaseAuth):
             if allowed and password_ok:
                 return login
             reason = "peer" if not allowed else "password"
-        _event(
+        _throttled_event(
+            self._throttle,
             "reserved_denied",
             login=_loggable_login(login),
             peer=str(peer) if peer is not None else (raw_peer or None),
@@ -1081,15 +1162,21 @@ class Auth(auth.BaseAuth):
         if outcome.kind == DENIED:
             self._forget(login, password, epoch)
             return ""
+        if outcome.kind == RATE_LIMITED:
+            # Negazione temporanea: niente stale-if-error (la cache persistita
+            # non si consulta) e cache intatte; Radicale risponde 401 dopo il
+            # proprio delay, come per una password sbagliata.
+            _throttled_event(self._throttle, "rate_limited", login=_loggable_login(login), status=outcome.status)
+            return ""
 
         fields: Dict[str, Any] = {"login": _loggable_login(login)}
         if outcome.status is not None:
             fields["status"] = outcome.status
         if outcome.error is not None:
             fields["error"] = outcome.error
-        _event("backend_error", logging.ERROR, **fields)
+        _throttled_event(self._throttle, "backend_error", logging.ERROR, **fields)
         if key is not None and epoch is not None and self._stale_hit(key, epoch):
-            _event("stale_if_error", login=_loggable_login(login))
+            _throttled_event(self._throttle, "stale_if_error", login=_loggable_login(login))
             return principal
         detail = " ".join(str(part) for part in (outcome.status, outcome.error) if part is not None)
         raise BackendUnavailableError(
@@ -1097,14 +1184,23 @@ class Auth(auth.BaseAuth):
         )
 
     def _forwarded_for(self, context: Any) -> Optional[str]:
-        """X-Forwarded-For da X-Remote-Addr (solo se è un IP valido); altrimenti evento rate-limited."""
+        """
+        X-Forwarded-For da X-Remote-Addr: solo se è un IP valido e, con
+        CALDES_XRA_PEER_CIDR, solo dal peer TCP atteso (il gateway della rete
+        della porta pubblicata). Altrimenti nessun header ed evento rate-limited.
+        """
         raw = getattr(context, "x_remote_addr", None)
         reason = "absent"
         if isinstance(raw, str) and raw.strip():
-            try:
-                return str(ipaddress.ip_address(raw.strip()))
-            except ValueError:
-                reason = "invalid"
+            networks = self._settings.xra_networks
+            peer = _peer_address(getattr(context, "remote_addr", None))
+            if networks and (peer is None or not _in_networks(peer, networks)):
+                reason = "untrusted_peer"
+            else:
+                try:
+                    return str(ipaddress.ip_address(raw.strip()))
+                except ValueError:
+                    reason = "invalid"
         now = _monotonic()
         with self._state_lock:
             if self._last_missing_xra_at is not None and now - self._last_missing_xra_at < EVENT_RATE_LIMIT_SECONDS:

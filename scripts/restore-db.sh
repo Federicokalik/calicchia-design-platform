@@ -2,7 +2,10 @@
 # Restore del database Postgres — Calicchia Design Platform.
 #
 # Uso:   ./scripts/restore-db.sh <file.sql.gz>
-#        ./scripts/restore-db.sh s3://<bucket>/db/caldes-YYYYMMDD-HHMMSS.sql.gz
+#        ./scripts/restore-db.sh s3://<bucket>/calendar-stack/<id>/caldes-db.sql.gz
+#        (dalla fase F1 i dump stanno nei run di backup-calendar-stack.sh; in
+#        s3://<bucket>/db/ restano solo quelli precedenti, mai aggiornati. Per
+#        database e volume di Radicale insieme: restore-calendar-stack.sh)
 # Legge DATABASE_URL dall'ambiente. Richiede `psql` (postgresql-client).
 # Per il restore da S4 serve anche la AWS CLI e le env S4_*.
 #

@@ -181,6 +181,15 @@ describe('162: il trigger completa il sidecar dei calendari creati dal codice le
       await insertLegacy(tx, fx.slug('esplicito'), 'Festività e chiusure', { dav_props: tx.json({ '{urn:calicchia:caldes}role': 'user' }) });
       await insertLegacy(tx, fx.slug('dead'), fx.name('Altro'), { dav_props: tx.json({ '{urn:calicchia:caldes}role': 'tasks' }) });
       await insertLegacy(tx, fx.slug('scelto'), fx.name('Scelto'), { role: 'subscription', origin: 'migration' });
+      // Dead prop scritte da un device sulla propria collezione: mai fidate.
+      await insertLegacy(tx, fx.slug('finta'), fx.name('Finta'), {
+        origin: 'device',
+        dav_props: tx.json({ '{urn:calicchia:caldes}role': 'bookings' }),
+      });
+      await insertLegacy(tx, fx.slug('archivio'), fx.name('Archivio'), {
+        origin: 'migration',
+        dav_props: tx.json({ '{urn:calicchia:caldes}role': 'holidays' }),
+      });
 
       assert.equal((await sidecar(tx, fx.slug('fest-nome'))).role, 'holidays', 'nome storico esatto, anche senza is_system');
       assert.equal((await sidecar(tx, fx.slug('fest-sys'))).role, 'user', 'slug diverso da f/festivita e nome con prefisso');
@@ -189,6 +198,8 @@ describe('162: il trigger completa il sidecar dei calendari creati dal codice le
       assert.equal((await sidecar(tx, fx.slug('esplicito'))).role, 'user', 'la dead prop batte le regole');
       assert.equal((await sidecar(tx, fx.slug('dead'))).role, 'tasks');
       assert.equal((await sidecar(tx, fx.slug('scelto'))).role, 'subscription', 'un ruolo esplicito non si tocca');
+      assert.equal((await sidecar(tx, fx.slug('finta'))).role, 'user', 'mai la dead prop di una collezione nata da un device');
+      assert.equal((await sidecar(tx, fx.slug('archivio'))).role, 'holidays', 'la dead prop vale per la migrazione');
       assert.equal((await sidecar(tx, fx.slug('fest-sys'))).origin, 'system');
     });
   });
@@ -243,9 +254,17 @@ describe('162: calendar_sidecar_reconcile()', () => {
         INSERT INTO calendar_subscriptions (calendar_id, name, ics_url, collection_calendar_id)
         VALUES (${target.id}, ${fx.name('iscrizione')}, 'https://example.test/feed.ics', ${sub.id})
       `;
+      // Collezioni nate da un device con dead prop falsificate (in live il
+      // device scrive le dead prop delle proprie collezioni): né promozione
+      // né conflitto.
+      const forged = fx.slug('dal-telefono');
+      const forgedConflict = fx.slug('dal-telefono-conflitto');
+      await insertLegacy(tx, forged, fx.name('Dal telefono'), { origin: 'device' });
+      await insertLegacy(tx, forgedConflict, fx.name('Dal telefono 2'), { origin: 'device', role: 'tasks' });
       // La discovery ha letto le dead prop dopo un ripristino del backup.
       await tx`UPDATE calendars SET dav_props = ${tx.json({ '{urn:calicchia:caldes}role': 'holidays' })} WHERE slug = ${restored}`;
       await tx`UPDATE calendars SET dav_props = ${tx.json({ '{urn:calicchia:caldes}role': 'holidays' })} WHERE slug = ${conflict}`;
+      await tx`UPDATE calendars SET dav_props = ${tx.json({ '{urn:calicchia:caldes}role': 'bookings' })} WHERE slug IN (${forged}, ${forgedConflict})`;
 
       assert.deepEqual(await reconcile(tx), [
         { slug: conflict, field: 'needs_review', old_value: null, new_value: 'role_conflict' },
@@ -254,6 +273,10 @@ describe('162: calendar_sidecar_reconcile()', () => {
       ]);
       assert.equal((await sidecar(tx, conflict)).role, 'bookings', 'un ruolo diverso dal default non si sovrascrive');
       assert.equal((await sidecar(tx, conflict)).review_reason, 'role_conflict');
+      assert.equal((await sidecar(tx, forged)).role, 'user');
+      assert.equal((await sidecar(tx, forged)).needs_review, false);
+      assert.equal((await sidecar(tx, forgedConflict)).role, 'tasks');
+      assert.equal((await sidecar(tx, forgedConflict)).needs_review, false);
       assert.deepEqual(await reconcile(tx), []);
     });
   });

@@ -9,7 +9,7 @@ Verifica, con l'interprete e le librerie dell'immagine:
 2. sitecustomize attivo: la patch di fedeltà di vobject è già applicata
    all'avvio dell'interprete, prima di qualsiasi import esplicito (PYTHONPATH
    e sitecustomize funzionano come in Radicale), e il suo self-test passa;
-3. config montata (/config/config): si carica con il parser di Radicale e ha
+3. config dell'immagine (/app/config/config): si carica con il parser di Radicale e ha
    i valori da cui dipendono sicurezza e semantica (plugin, limiti, storage);
 4. plugin: caldes_auth implementa `_login_ext` senza ridefinire `login` (in
    3.7.8 è @final: ridefinirlo era il bug che rispondeva 500 a ogni richiesta)
@@ -22,7 +22,7 @@ Verifica, con l'interprete e le librerie dell'immagine:
    identico nei punti che vobject senza patch perderebbe; heartbeat scaduto →
    di nuovo sola lettura; DELETE di una collezione negata al device.
 
-Uso: `python caldes_selftest.py [percorso del config]` (default /config/config,
+Uso: `python caldes_selftest.py [percorso del config]` (default /app/config/config,
 oppure CALDES_SELFTEST_CONFIG). Exit 0 se tutto passa, 1 altrimenti.
 Solo libreria standard + Radicale e vobject.
 """
@@ -386,7 +386,7 @@ def check_real_path() -> str:
 
 
 def main(argv: List[str]) -> int:
-    config_path = argv[1] if len(argv) > 1 else os.environ.get("CALDES_SELFTEST_CONFIG", "/config/config")
+    config_path = argv[1] if len(argv) > 1 else os.environ.get("CALDES_SELFTEST_CONFIG", "/app/config/config")
     checks: List[Tuple[str, Callable[[], str]]] = [
         ("versioni", check_versions),
         ("patch vobject", check_vobject_patch),

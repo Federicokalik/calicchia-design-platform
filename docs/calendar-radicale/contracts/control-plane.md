@@ -44,6 +44,7 @@ Versione 1 del contratto fra l'API (TypeScript), i plugin di Radicale (`caldes_a
 | `CALDES_AUTHCACHE_KEY` | env | sì | Chiave HMAC della cache persistita, almeno 32 caratteri |
 | `CALDES_AUTHCACHE_DIR` | env | no | Default `/var/lib/caldes-auth` |
 | `CALDES_POLICY_FILE` | env | no | Policy letta da `caldes_auth` per `credential_epoch`. Default `/control/policy.json` |
+| `CALDES_XRA_PEER_CIDR` | env | no | Reti (come `CALDES_SVC_CIDR`, loopback ammesso) del peer TCP da cui `X-Remote-Addr` è affidabile: in produzione il gateway della rete `dav-pub` della porta pubblicata. Da un altro peer l'header vale come assente (§9.4). Assente: qualsiasi peer, come prima |
 | `[rights] caldes_policy_file` | config | no | Default `/control/policy.json` |
 | `[rights] caldes_heartbeat_file` | config | no | Default `/control/heartbeat.json` |
 | `[rights] caldes_reload_interval` | config | no | Secondi fra due controlli di policy, heartbeat e props (default `1`, ammessi 0..60). Solo per i test (`0`): in produzione resta il default |
@@ -67,6 +68,7 @@ Versione 1 del contratto fra l'API (TypeScript), i plugin di Radicale (`caldes_a
 | `CALDES_IDENTITY_SOURCE` | `auto` | Sorgente dell'identità del volume (§4.3): `file` (mount di `RADICALE_DATA_DIR`), `remote` (PROPFIND come `caldes-svc`), `auto` (il mount se esiste, altrimenti `remote` se c'è `RADICALE_URL`, altrimenti nessuna sorgente: identità `unverified`) |
 | `CALDES_API_VERSION` | `GIT_COMMIT_SHA`/`GIT_SHA`/`SOURCE_COMMIT` come `sha-<7>`, altrimenti `unversioned` | `api_version` del heartbeat |
 | `CALDAV_SERVICE_TOKEN` | — | Bearer atteso su caldav-backend |
+| `CALDAV_BACKEND_ALLOWED_PEERS` | — | Reti CIDR (separate da virgola, prefisso ≥ 1) dei peer TCP ammessi su `/api/caldav-backend/*`, controllate prima del Bearer: in produzione `172.31.250.3/32`, Radicale su `caldav-int`. Da un altro peer (il vhost pubblico dell'API) la risposta è 404 anche con il Bearer giusto; un valore non valido chiude il backend con 503. Assente: nessun controllo (sviluppo e test in-process) |
 
 `api_version` del heartbeat è un identificativo della build (es. `sha-1a2b3c4`), ASCII stampabile senza spazi, al massimo 64 caratteri.
 
@@ -138,7 +140,7 @@ In F1 il codice legacy non legge queste colonne: il busy continua a usare solo `
 
 `calendar_sidecar_reconcile()` è idempotente (una seconda chiamata consecutiva non restituisce righe) e restituisce `(calendar_id, field, old_value, new_value)` per ogni modifica. La chiamano la 162, ogni import di backup (in `mode=postgres`, dopo l'UPSERT di `calendars`) e l'auditor. Per ogni riga:
 1. `collection_name` NULL → `slug` se valido e libero, altrimenti `needs_review = collection_name_conflict`;
-2. `role` di default (`user`) → dead prop `role` da `dav_props` se presente e ammessa (vale anche un `user` esplicito), altrimenti le regole storiche, queste solo per `origin` ∈ {`admin`, `system`}. Un ruolo diverso dal default NON viene mai sovrascritto: se la dead prop lo contraddice, `needs_review = role_conflict`;
+2. `role` di default (`user`) → dead prop `role` da `dav_props` se presente e ammessa (vale anche un `user` esplicito), altrimenti le regole storiche, queste solo per `origin` ∈ {`admin`, `system`}. La dead prop conta solo per `origin` ∈ {`admin`, `system`, `migration`}: una collezione nata da un device (`origin = device`) la ignora sempre, perché in live il device scrive le dead prop delle proprie collezioni (§8) e potrebbe promuoversi a `bookings` o `holidays` (provenienza `booking` o `system` dei suoi item, invariante 4 del design). Un ruolo diverso dal default NON viene mai sovrascritto: se la dead prop lo contraddice, `needs_review = role_conflict`;
 3. `is_system` con `origin = admin` → `origin = system`;
 4. `role = subscription` senza un'iscrizione che la referenzi → `needs_review = orphan_subscription`.
 
@@ -206,9 +208,11 @@ Un volume non vuoto senza marker, o con un marker diverso, NON viene mai inizial
 | Chiave | Valore |
 |---|---|
 | `{urn:calicchia:caldes}calendar-id` | `calendars.id`, UUID minuscolo: la discovery adotta la riga per questa prop |
-| `{urn:calicchia:caldes}role` | `calendars.role`: dopo un ripristino la riconciliazione la usa per le righe con ruolo di default |
+| `{urn:calicchia:caldes}role` | `calendars.role`: dopo un ripristino la riconciliazione la usa per le righe con ruolo di default e `origin` diversa da `device` (§3.3) |
 
-La discovery le copia, con le altre proprietà DAV, in `calendars.dav_props`.
+La discovery le copia, con le altre proprietà DAV, in `calendars.dav_props`. Le scrive `caldes-svc` (inizializzazione e creazione dall'API), ma in live un device può riscriverle sulle collezioni che può scrivere (§8), quindi la discovery (F2) le tratta come dati non fidati:
+- adotta una riga del sidecar per `calendar-id` solo se anche il nome della collezione coincide con il suo `collection_name`, e mai per una collezione nata da un device: una MKCALENDAR con il `calendar-id` di `bookings` non dirotta la riga di `bookings`;
+- non copia in `dav_props` le dead prop `urn:calicchia:caldes` di una collezione scrivibile dai device (ruolo non `readonly` nel sidecar, o `origin = device`): per quelle vale solo PG, e una `role` falsificata su `c` non arriva mai alla riconciliazione.
 
 ## 5. `policy.json`
 
@@ -368,7 +372,7 @@ P (qualsiasi device) e caldes-probe:
   ''                   → R
   altro principal      → ''           (/iphone/, /caldes-svc/: nessuna auto-creazione)
   identity_ok falso    → ''           (sotto P: 403 e nessuna directory creata)
-  P                    → RW se M = live, altrimenti R
+  P                    → R            (anche in live: il marker d'identità lo scrive solo caldes-svc, §4.2)
   P/_canary            → rw se utente = caldes-probe e M = live, altrimenti ''
   P/<'_'…> o hidden    → ''           (non elencata)
   P/<readonly>         → r
@@ -378,7 +382,9 @@ qualsiasi altro utente → ''
 ```
 
 Conseguenze verificabili (Radicale 3.7.8):
-- MKCALENDAR di `P/<nuova>` richiede `w` sul path nuovo: ammessa solo in `live`. MKCOL del principal richiede `W` su `P`, che senza identità valida non c'è: il principal non si auto-crea mai al login di un device.
+- MKCALENDAR di `P/<nuova>` richiede `w` sul path nuovo, non la `W` del principal: ammessa solo in `live`. MKCOL del principal richiede `W` su `P`, che i device non hanno mai: il principal non si auto-crea mai al login di un device.
+- PROPPATCH del principal da un device (togliere o falsificare `volume-id`/`epoch`): 403 in ogni modalità. Con `W` in live un'app-password valida (telefono rubato, client difettoso) poteva rendere l'identità diversa per tutti (nessun permesso ai device, facade in sola lettura, decisioni in 503).
+- In live un device scrive le dead prop delle collezioni che può scrivere, anche `{urn:calicchia:caldes}role` e `calendar-id` (Radicale non distingue PROPPATCH da PUT). I rights non lo impediscono: per questo quelle dead prop non sono mai fidate da sole (§3.3, §4.5).
 - DELETE di una collezione: `permit_delete_collection = False` e nessuna `D` per i device → 403.
 - Il principal e le collezioni nascoste non compaiono nei PROPFIND Depth:1 dei device.
 
@@ -389,7 +395,7 @@ Conseguenze verificabili (Radicale 3.7.8):
 | caldes-svc | `federico/<qualsiasi>` | rwD | rwD |
 | caldes-svc | altri principal | — | — |
 | device o probe | `''` | R | R |
-| device o probe | `federico` | R | RW |
+| device o probe | `federico` | R | R |
 | device o probe | `federico/<readonly>` | r | r |
 | device o probe | `federico/<hidden>`, `federico/_*` | — | — |
 | caldes-probe | `federico/_canary` | — | rw |
@@ -431,10 +437,14 @@ k   = chiave di cache (§9.5) calcolata con eph (se eph è None non c'è chiave)
 2. POST verify-credentials (timeout complessivo 1 s)
    200 con ok === true                     → salva in memoria e su disco (solo se eph è noto), → P
    401 con corpo JSON {ok: false}           → rimuove k da entrambe le cache, → ''
+   429 (qualsiasi corpo)                    → '' senza toccare le cache e senza consultare
+                                              la cache persistita (evento rate_limited)
    qualsiasi altra risposta o errore        → errore del backend:
 3.   k nella cache persistita, exp > now, stesso eph  → P (evento stale_if_error)
 4.   altrimenti                                       → eccezione (500, evento backend_error)
 ```
+
+Il 429 è una negazione temporanea, non un errore del backend. L'API lo restituisce solo per un tentativo fallito oltre il limite (§9.4): una password corretta non lo riceve mai. Se aprisse lo stale-if-error, chiunque potrebbe esaurire il proprio bucket con password sbagliate e ottenere dal plugin un confronto senza ritardo né limite contro la cache persistita, che può contenere credenziali non più valide nel database. Con `''` Radicale risponde 401 dopo il proprio `[auth] delay`.
 
 Il plugin non usa la cache dei login di Radicale (`cache_logins` vale solo per i tipi interni).
 
@@ -442,17 +452,17 @@ Il plugin non usa la cache dei login di Radicale (`cache_logins` vale solo per i
 
 Definito da [verify-credentials.schema.json](verify-credentials.schema.json).
 
-Richiesta: `POST ${CALDAV_BACKEND_URL}/verify-credentials` con `Authorization: Bearer ${CALDAV_SERVICE_TOKEN}`, `Content-Type: application/json`, corpo `{"username", "password"}`, `X-Forwarded-For: <IP>` solo se `X-Remote-Addr` è presente ed è un IP valido. Se `X-Remote-Addr` manca il plugin registra l'evento `missing_x_remote_addr` (al massimo una volta al minuto) e non manda l'header.
+Richiesta: `POST ${CALDAV_BACKEND_URL}/verify-credentials` con `Authorization: Bearer ${CALDAV_SERVICE_TOKEN}`, `Content-Type: application/json`, corpo `{"username", "password"}`, `X-Forwarded-For: <IP>` solo se `X-Remote-Addr` è presente, è un IP valido e, con `CALDES_XRA_PEER_CIDR`, arriva dal peer TCP atteso (il gateway della porta pubblicata). Altrimenti il plugin registra l'evento `missing_x_remote_addr` (motivo `absent`, `invalid` o `untrusted_peer`, al massimo una volta al minuto) e non manda l'header.
 
 | Risposta | Significato | Per il plugin |
 |---|---|---|
 | `200 {"ok": true, "principal": "federico", "expires_at": "…" \| null}` | credenziali valide | successo; `expires_at` limita il TTL della cache persistita |
 | `401 {"ok": false}` | credenziali non valide, revocate, scadute, o username riservato | negazione esplicita |
 | `401 {"error": "Unauthorized"}` | Bearer assente o errato (configurazione) | errore del backend, MAI negazione |
-| `429 {"error": "…"}` | rate limit per (IP del device, username) | errore del backend |
+| `429 {"error": "…"}` | tentativo fallito oltre il limite per (IP del device, username) | negazione temporanea: `''` senza stale-if-error (§9.3) |
 | `503`, altri 5xx, timeout, connessione rifiutata, corpo non JSON, `200` senza `ok: true` | backend indisponibile o fuori contratto | errore del backend |
 
-Lato API (F1): `principal` sempre `RADICALE_PRINCIPAL`; gli username riservati rispondono `401 {"ok": false}` senza cercare nel DB; `X-Forwarded-For` si accetta solo dietro il Bearer valido (la route è già protetta da `caldavServiceAuth`); `last_used_ip` e il rate limit usano quell'IP; `expires_at` è la scadenza dell'app-password o `null`.
+Lato API (F1): `principal` sempre `RADICALE_PRINCIPAL`; gli username riservati rispondono `401 {"ok": false}` senza cercare nel DB; `X-Forwarded-For` si accetta solo dietro il Bearer valido e, con `CALDAV_BACKEND_ALLOWED_PEERS`, solo dal peer di Radicale su `caldav-int` (§1.3); `last_used_ip` e il rate limit usano quell'IP; `expires_at` è la scadenza dell'app-password o `null`. Il rate limit conta solo i tentativi falliti (30 al minuto per IP e username, senza distinguere maiuscole): le credenziali si verificano sempre prima del limite, quindi una password corretta risponde sempre 200 e non consuma il bucket, e chi esaurisce il bucket di uno username (anche quello comune senza `X-Remote-Addr`) non blocca il device legittimo. Oltre il limite un tentativo fallito risponde 429 invece di 401.
 
 ### 9.5 Cache
 
@@ -472,6 +482,7 @@ Lato API (F1): `principal` sempre `RADICALE_PRINCIPAL`; gli username riservati r
 ### 9.6 Revoca: `credential_epoch`
 
 - L'API incrementa `calendar_backend_state.credential_epoch` nella stessa transazione di ogni revoca, rigenerazione o cancellazione di app-password, poi riscrive subito la policy (il NOTIFY della 162 la provoca comunque). La creazione di un'app-password nuova non lo cambia.
+- I ripristini seguono la stessa regola. L'import del backup JSON (`backup.ts`) svuota e reinserisce `caldav_app_passwords` (gruppo B), ma nella stessa transazione rimette le revoche del database corrente sulle righe che il backup riporta attive (stesso id o stesso hash, con data e motivo originali): una revoca non si annulla mai con un ripristino. Se dopo l'import una credenziale valida prima non lo è più (creata dopo il backup, svuotata per chiusura FK), incrementa `credential_epoch` nella stessa UPDATE della guardia post-ripristino e lo segnala negli avvisi. Il ripristino coordinato (`restore-calendar-stack.sh`) lo incrementa sempre.
 - Il plugin rilegge `credential_epoch` dalla policy al massimo una volta al secondo. Quando cambia (anche all'indietro), svuota la cache in memoria e riscrive `authcache.json` vuoto con il nuovo epoch, prima di rispondere alla richiesta in corso.
 - Policy assente o invalida: epoch sconosciuto, quindi nessuna voce è utilizzabile (§5.3), ma le cache non si toccano: se la policy torna con lo stesso epoch, tornano utilizzabili.
 - Scadenza naturale di un'app-password: il backend la rifiuta subito; la cache persistita la copre al massimo fino a `expires_at`.
@@ -480,12 +491,15 @@ Lato API (F1): `principal` sempre `RADICALE_PRINCIPAL`; gli username riservati r
 
 Una riga per evento a livello WARNING (ERROR per `backend_error` e `config_error`), con prefisso `caldes_event` seguito da un oggetto JSON con almeno `event`, `plugin` (`caldes_auth` o `caldes_rights`: entrambi registrano `policy_invalid`/`policy_valid`) e i campi indicati; mai password, mai `k`. I campi in più sono informativi. L'API li riporterà in Telegram e Bugsink (design §16.5).
 
+Gli eventi che un client può provocare a piacere hanno un limite, così nessuno allaga log e alert: `missing_x_remote_addr` al massimo uno al minuto; `reserved_denied`, `backend_error`, `stale_if_error` e `rate_limited` al massimo 10 al minuto per nome. Quelli oltre il limite si contano, e il primo evento scritto dopo porta il campo `suppressed` con il loro numero.
+
 | `event` | Campi |
 |---|---|
 | `reserved_denied` | `login`, `peer` |
-| `missing_x_remote_addr` | `peer` |
+| `missing_x_remote_addr` | `peer`, `reason` |
 | `backend_error` | `login`, `status` o `error` |
 | `stale_if_error` | `login` |
+| `rate_limited` | `login`, `status` |
 | `credential_epoch_changed` | `old`, `new` |
 | `policy_invalid` / `policy_valid` | `reason` |
 | `effective_mode_changed` | `mode`, `reasons` |
@@ -506,7 +520,8 @@ Una riga per evento a livello WARNING (ERROR per `backend_error` e `config_error
 | Device in live, DELETE di una collezione | 403 |
 | Device in live, PUT in `c` o MKCALENDAR di una collezione nuova | 201/204 |
 | Credenziali rifiutate dal backend (`401 {ok:false}`) | 401 dopo il delay |
-| Backend giù, timeout, 5xx, 429 o Bearer errato, credenziali in cache valida | come con il backend su |
+| Troppi tentativi falliti (`429`), anche con una voce nella cache persistita | 401 dopo il delay |
+| Backend giù, timeout, 5xx o Bearer errato, credenziali in cache valida | come con il backend su |
 | Idem senza cache valida (o policy illeggibile) | 500 senza delay |
 | `caldes-svc` o `caldes-probe` da un peer non ammesso, anche con la password giusta | 401 |
 | Qualsiasi altro `caldes-*` | 401 |
@@ -536,4 +551,7 @@ Una riga per evento a livello WARNING (ERROR per `backend_error` e `config_error
 8. La chiave HMAC della cache include `credential_epoch` e il file porta un `key_id`.
 9. `verify-credentials` restituisce anche `expires_at`, che limita la cache persistita.
 10. Il heartbeat si scrive solo con la policy allineata allo stato (§7.1): un errore di scrittura della policy porta i device in frozen dopo 10 minuti invece di lasciarli su una policy vecchia.
-11. Backup JSON (design §16.2): nel gruppo S c'è anche `schema_migrations`; S è un elenco esplicito più il prefisso `cal_migration_` (le tabelle Cal.com `cal_bookings`, `cal_sync_log`, `cal_webhook_logs` sono business); una tabella protetta che referenzia una tabella da svuotare blocca l'import con 409.
+11. Backup JSON (design §16.2): nel gruppo S c'è anche `schema_migrations`; S è un elenco esplicito più il prefisso `cal_migration_` (le tabelle Cal.com `cal_bookings`, `cal_sync_log`, `cal_webhook_logs` sono business); una tabella protetta che referenzia una tabella da svuotare blocca l'import con 409. L'import non annulla mai una revoca di app-password e incrementa `credential_epoch` se toglie credenziali valide (§9.6).
+12. Il 429 di verify-credentials è una negazione temporanea, non un errore del backend (design §3.3 diceva "5xx o 429"): l'API conta solo i tentativi falliti e non limita mai una password corretta, il plugin risponde `''` senza consultare la cache persistita (§9.3-§9.4).
+13. I device hanno sempre e solo `R` sul principal, anche in `live` (design §3.4 diceva `RW`): il marker d'identità è scrivibile solo da `caldes-svc` (§4.2, §8).
+14. `X-Remote-Addr` vale solo dal peer della porta pubblicata (`CALDES_XRA_PEER_CIDR`) e `/api/caldav-backend/*` risponde solo al peer di Radicale (`CALDAV_BACKEND_ALLOWED_PEERS`); Radicale è su una rete `dav-pub` dedicata invece che su `app-net` (design §3.5).

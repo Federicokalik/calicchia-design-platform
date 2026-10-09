@@ -20,7 +20,14 @@
  *  - 401 {"ok": false} per credenziali non valide, revocate, scadute, login
  *    malformati e username riservati (`caldes-*`, rifiutati senza cercare nel
  *    database): è l'unica risposta che caldes_auth tratta come negazione;
- *  - 429 {"error"} oltre il limite di tentativi per (IP del device, username);
+ *  - 429 {"error"} al posto del 401 quando (IP del device, username) ha già
+ *    esaurito i tentativi FALLITI della finestra. Il limite conta solo i
+ *    fallimenti e non si applica mai a una password corretta: le credenziali
+ *    si verificano sempre prima, quindi un device legittimo non riceve mai
+ *    429, nemmeno se qualcuno ha esaurito il bucket del suo username (con
+ *    X-Remote-Addr assente il bucket è comune). Per caldes_auth il 429 è una
+ *    negazione temporanea (401 dopo il delay di Radicale), mai un errore del
+ *    backend: non apre lo stale-if-error (contratto §9.3-§9.4);
  *  - 503 {"error"} se il database o la configurazione non permettono di
  *    rispondere: per il plugin è un errore del backend (stale-if-error), mai
  *    una negazione che invaliderebbe la password sul device.
@@ -28,10 +35,12 @@
  * IP del device: caldes_auth manda `X-Forwarded-For` con il valore di
  * `X-Remote-Addr` messo da CloudPanel; si accetta anche `X-Remote-Addr`
  * inoltrato così com'è. Gli header si considerano affidabili solo perché la
- * richiesta ha già superato il Bearer di servizio; CF-Connecting-IP e
- * X-Real-IP, che il plugin non manda mai, sono ignorati. Senza un IP valido
- * l'ultimo uso non registra l'IP (sarebbe quello di Radicale) e il rate limit
- * usa un bucket comune per username.
+ * richiesta ha già superato il Bearer di servizio e, in produzione, arriva
+ * dal peer TCP di Radicale su caldav-int (CALDAV_BACKEND_ALLOWED_PEERS,
+ * middleware caldav-service-auth.ts); CF-Connecting-IP e X-Real-IP, che il
+ * plugin non manda mai, sono ignorati. Senza un IP valido l'ultimo uso non
+ * registra l'IP (sarebbe quello di Radicale) e il rate limit usa un bucket
+ * comune per username.
  *
  * Il campo credential_epoch non compare nella risposta: il contratto lo
  * distribuisce solo tramite policy.json (§9.6).
@@ -48,7 +57,11 @@ export const caldavBackend = new Hono();
 
 // ─── Rate limit per (IP del device, username) ───────────────
 
-/** Tentativi ammessi per chiave in una finestra (il device ripassa l'auth a ogni richiesta senza cache). */
+/**
+ * Tentativi FALLITI ammessi per chiave in una finestra; oltre, i fallimenti
+ * rispondono 429 invece di 401. Le credenziali valide non contano e non sono
+ * mai limitate.
+ */
 export const VERIFY_RATE_LIMIT_MAX = 30;
 /** Durata della finestra del rate limit. */
 export const VERIFY_RATE_LIMIT_WINDOW_MS = 60_000;
@@ -58,9 +71,9 @@ const VERIFY_RATE_LIMIT_MAX_KEYS = 10_000;
 const RATE_LIMIT_ERROR = 'Troppi tentativi. Riprova tra qualche minuto.';
 
 /**
- * Limite a finestra fissa per chiave, in memoria (una sola replica dell'API,
- * come gli altri limiter). La memoria resta limitata a VERIFY_RATE_LIMIT_MAX_KEYS
- * voci anche con username sempre diversi.
+ * Limite dei fallimenti a finestra fissa per chiave, in memoria (una sola
+ * replica dell'API, come gli altri limiter). La memoria resta limitata a
+ * VERIFY_RATE_LIMIT_MAX_KEYS voci anche con username sempre diversi.
  */
 class KeyedRateLimiter {
   private readonly entries = new Map<string, { count: number; resetAt: number; rejected: number }>();
@@ -72,8 +85,8 @@ class KeyedRateLimiter {
   ) {}
 
   /**
-   * Conta un tentativo per `key`. 'allowed' se rientra nel limite,
-   * 'limited' se la chiave ha già esaurito la finestra corrente,
+   * Conta un tentativo fallito per `key`. 'allowed' se rientra nel limite,
+   * 'limited' se la chiave aveva già esaurito la finestra corrente,
    * 'limited_first' per il primo rifiuto della finestra (per registrarlo una
    * volta sola, senza riempire i log durante un attacco).
    */
@@ -153,14 +166,13 @@ caldavBackend.post('/verify-credentials', async (c) => {
   const password = typeof body.password === 'string' ? body.password : '';
   const ip = deviceIp(c);
 
-  const limit = verifyLimiter.hit(rateLimitKey(ip, username));
-  if (limit !== 'allowed') {
-    if (limit === 'limited_first') {
-      log.warn({ ip, username: username.slice(0, 256) }, 'verify-credentials: rate limit superato');
-    }
-    return c.json({ error: RATE_LIMIT_ERROR }, 429);
-  }
-
+  // Prima la verifica, poi il limite: una password corretta risponde sempre
+  // 200 e non consuma il bucket. Chi esaurisce il bucket di (IP, username)
+  // con password sbagliate ottiene solo 429 al posto di 401 (per caldes_auth
+  // sono entrambi una negazione, con il delay di Radicale); il device
+  // legittimo con la password giusta non viene mai bloccato. Il carico resta
+  // limitato a monte da Radicale (delay di 1 s per ogni login fallito e
+  // max_connections), e le app-password hanno 128 bit di entropia.
   let result;
   try {
     result = await verifyCredentials(username, password, ip);
@@ -173,8 +185,15 @@ caldavBackend.post('/verify-credentials', async (c) => {
   }
 
   if (!result.ok) {
+    const limit = verifyLimiter.hit(rateLimitKey(ip, username));
+    if (limit !== 'allowed') {
+      if (limit === 'limited_first') {
+        log.warn({ ip, username: username.slice(0, 256) }, 'verify-credentials: troppi tentativi falliti');
+      }
+      return c.json({ error: RATE_LIMIT_ERROR }, 429);
+    }
     if (result.reason === 'reserved') {
-      log.warn({ ip, username }, 'verify-credentials: username riservato rifiutato');
+      log.warn({ ip, username: username.slice(0, 256) }, 'verify-credentials: username riservato rifiutato');
     }
     return c.json({ ok: false }, 401);
   }

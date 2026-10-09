@@ -28,7 +28,8 @@ Cosa decide, a ogni chiamata di authorization(user, path):
   canonico (niente /iphone/ né /caldes-svc/), `_canary` scrivibile solo dal
   probe in live, collezioni `readonly` in sola lettura, `hidden` e `_*` senza
   permessi (non elencate), mai `D` ai device (con permit_delete_collection =
-  False la DELETE di una collezione risponde 403). `caldes-svc` ha R sulla
+  False la DELETE di una collezione risponde 403), sempre e solo R sul
+  principal (anche in live: il marker lo scrive solo caldes-svc). `caldes-svc` ha R sulla
   root, RW sul principal e rwD sulle collezioni senza controlli di modalità o
   identità: serve all'inizializzazione (MKCOL e PROPPATCH del marker).
 
@@ -582,7 +583,13 @@ def compute_rights(
         return ""
     live = mode == "live"
     if depth == 1:
-        return "RW" if live else "R"
+        # Sempre e solo R, anche in live: il marker d'identità e le altre dead
+        # prop del principal li scrive solo caldes-svc (contratto §4.2). Con W
+        # un device potrebbe riscrivere o togliere volume-id/epoch (nessun
+        # permesso per tutti, facade in sola lettura: DoS e falsa identità).
+        # MKCALENDAR di una collezione nuova resta ammessa in live: Radicale
+        # controlla la `w` del path nuovo, non la W del principal.
+        return "R"
     if depth > 2:
         return ""
     name = segments[1]

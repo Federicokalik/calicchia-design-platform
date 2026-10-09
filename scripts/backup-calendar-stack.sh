@@ -39,7 +39,15 @@
 #     RADICALE_VOLUME      nome del volume Docker (es. <progetto>_radicale_collections)
 #     COMPOSE_PROJECT      → volume <progetto>_radicale_collections
 #   RADICALE_BACKUP     required (default) | auto (senza volume configurato: solo DB,
-#                       con un avviso) | skip (solo DB, come --db-only)
+#                       con un avviso) | skip (solo DB, come --db-only). Con required
+#                       un volume assente, senza collections/ o non leggibile (lock,
+#                       tar) NON ferma il dump: il run si chiude con il solo database,
+#                       marcato incompleto nel manifest, e lo script esce con 3
+#   ALERT_TELEGRAM_BOT_TOKEN, ALERT_TELEGRAM_CHAT_ID
+#                       alert Telegram per ogni run fallito o incompleto (exit ≠ 0,
+#                       tranne 75); in mancanza si usano TELEGRAM_BOT_TOKEN e
+#                       TELEGRAM_CHAT_ID dell'API. Senza nessuno dei due, solo il log
+#   ALERT_TELEGRAM_API_URL  default https://api.telegram.org (solo per i test)
 #   RADICALE_PRINCIPAL  default federico (marker d'identità e inventario)
 #   LOCK_TIMEOUT        secondi di attesa del lock di Radicale, default 120
 #   BACKUP_DIR          default ./backups → i run in $BACKUP_DIR/calendar-stack/<id>/
@@ -53,7 +61,8 @@
 #                       (comportamento storico di backup-db.sh)
 #
 # Ripristino: scripts/restore-calendar-stack.sh <cartella del run | s3://… | latest>.
-# Exit: 0 ok, 1 errore, 2 uso errato, 75 un altro backup è già in corso.
+# Exit: 0 ok, 1 errore, 2 uso errato, 3 run incompleto (database salvato, volume di
+# Radicale no, con RADICALE_BACKUP=required), 75 un altro backup è già in corso.
 set -Eeuo pipefail
 
 SCRIPT_NAME="backup-calendar-stack"
@@ -62,7 +71,40 @@ TOOL="${SCRIPT_DIR}/calendar_stack.py"
 
 log() { printf '%s [%s] %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRIPT_NAME" "$*"; }
 warn() { printf '%s [%s] ATTENZIONE: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRIPT_NAME" "$*" >&2; }
-die() { printf '%s [%s] ERRORE: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRIPT_NAME" "$*" >&2; exit 1; }
+LAST_ERROR=""
+die() {
+  LAST_ERROR="$*"
+  printf '%s [%s] ERRORE: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$SCRIPT_NAME" "$*" >&2
+  exit 1
+}
+# Riga dell'ultimo comando fallito con set -e (senza testo del comando: potrebbe
+# contenere un DATABASE_URL con la password).
+trap 'LAST_ERROR="${LAST_ERROR:-comando fallito alla riga $LINENO}"' ERR
+
+# Alert di un run fallito o incompleto: il cron scrive solo in un file di log,
+# quindi senza alert un backup fermo da giorni passerebbe inosservato. Mai
+# bloccante: un errore dell'alert si registra e basta. Il token non finisce né
+# nella riga di comando di curl (config da stdin) né nei log.
+notify_failure() {
+  local code="$1" detail="$2"
+  local token="${ALERT_TELEGRAM_BOT_TOKEN:-${TELEGRAM_BOT_TOKEN:-}}"
+  local chat="${ALERT_TELEGRAM_CHAT_ID:-${TELEGRAM_CHAT_ID:-}}"
+  local api="${ALERT_TELEGRAM_API_URL:-https://api.telegram.org}"
+  [ -n "$token" ] && [ -n "$chat" ] || return 0
+  if ! command -v curl >/dev/null 2>&1; then
+    warn "curl assente: alert Telegram non inviato"
+    return 0
+  fi
+  local text
+  text="$(printf 'Backup del calendario su %s: %s (exit %s).\n%s\nLog: /var/log/caldes-backup.log' \
+    "$(hostname 2>/dev/null || echo host)" "$([ "$code" = 3 ] && echo 'run INCOMPLETO, salvato solo il database' || echo 'run FALLITO')" \
+    "$code" "$detail")"
+  if ! printf 'url = "%s/bot%s/sendMessage"\n' "${api%/}" "$token" \
+      | curl -sS --max-time 10 --fail -o /dev/null -K - \
+          --data-urlencode "chat_id=${chat}" --data-urlencode "text=${text}" 2>/dev/null; then
+    warn "invio dell'alert Telegram non riuscito"
+  fi
+}
 now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 now_ms() { date +%s%3N; }
 
@@ -172,8 +214,24 @@ identity_of() {
 
 # ─── Sorgente del volume ──────────────────────────────────────
 
+# Con RADICALE_BACKUP=required un problema del volume NON ferma il run prima
+# del dump: il database (tutta la piattaforma, non solo il calendario) si salva
+# comunque, il run si chiude come "solo database" marcato incompleto nel
+# manifest e lo script esce con 3 (alert compreso). VOLUME_PROBLEM ne tiene il
+# motivo.
 VOLUME_DIR=""
 VOLUME_SOURCE=""
+VOLUME_PROBLEM=""
+volume_unavailable() {
+  if [ "$RADICALE_BACKUP" = required ]; then
+    VOLUME_PROBLEM="$1"
+    warn "$1: salvo comunque il database, il run sarà INCOMPLETO (exit 3)"
+  else
+    warn "$1: backup SOLO del database (non è un backup coordinato del calendario)"
+  fi
+  VOLUME_DIR=""
+  VOLUME_SOURCE=""
+}
 if [ "$RADICALE_BACKUP" != skip ]; then
   if [ -n "${RADICALE_VOLUME_DIR:-}" ]; then
     VOLUME_DIR="$RADICALE_VOLUME_DIR"
@@ -182,24 +240,13 @@ if [ "$RADICALE_BACKUP" != skip ]; then
     need docker
     vol="${RADICALE_VOLUME:-${COMPOSE_PROJECT}_radicale_collections}"
     VOLUME_DIR="$(docker volume inspect --format '{{ .Mountpoint }}' "$vol" 2>/dev/null || true)"
-    if [ -z "$VOLUME_DIR" ] && [ "$RADICALE_BACKUP" = required ]; then
-      die "volume Docker $vol non trovato"
-    fi
     VOLUME_SOURCE="volume:${vol}"
+    [ -n "$VOLUME_DIR" ] || volume_unavailable "volume Docker $vol non trovato"
+  else
+    volume_unavailable "volume di Radicale non configurato (RADICALE_VOLUME_DIR, RADICALE_VOLUME o COMPOSE_PROJECT; per il solo database --db-only)"
   fi
-  if [ -z "$VOLUME_DIR" ]; then
-    if [ "$RADICALE_BACKUP" = required ]; then
-      die "volume di Radicale non configurato: imposta RADICALE_VOLUME_DIR, RADICALE_VOLUME o COMPOSE_PROJECT (oppure --db-only)"
-    fi
-    warn "volume di Radicale non configurato: backup SOLO del database (non è un backup coordinato del calendario)"
-    VOLUME_SOURCE=""
-  elif [ ! -d "$VOLUME_DIR/collections" ]; then
-    if [ "$RADICALE_BACKUP" = required ]; then
-      die "nel volume $VOLUME_DIR manca collections/: Radicale non è mai partito su questo volume?"
-    fi
-    warn "nel volume $VOLUME_DIR manca collections/: backup SOLO del database"
-    VOLUME_DIR=""
-    VOLUME_SOURCE=""
+  if [ -n "$VOLUME_DIR" ] && [ ! -d "$VOLUME_DIR/collections" ]; then
+    volume_unavailable "nel volume $VOLUME_DIR manca collections/ (Radicale non è mai partito su questo volume, o è il percorso sbagliato)"
   fi
 fi
 
@@ -229,6 +276,9 @@ cleanup() {
   if [ -n "${WORK:-}" ] && [ -d "$WORK" ]; then
     rm -rf -- "$WORK"
     [ "$code" -ne 0 ] && echo "$(now_iso) [$SCRIPT_NAME] run $ID fallito: cartella parziale rimossa" >&2
+  fi
+  if [ "$code" -ne 0 ] && [ "$code" -ne 75 ]; then
+    notify_failure "$code" "${LAST_ERROR:-uscita con codice $code}"
   fi
   exit "$code"
 }
@@ -298,20 +348,34 @@ PY
   RADICALE_LOCKED=1
   t0="$(now_ms)"
   if ! flock -s -w "$LOCK_TIMEOUT" 9; then
-    die "lock di Radicale non ottenuto in ${LOCK_TIMEOUT} s ($LOCKFILE): una scrittura molto lunga in corso?"
+    volume_failure="lock di Radicale non ottenuto in ${LOCK_TIMEOUT} s ($LOCKFILE): una scrittura molto lunga in corso?"
+  else
+    LOCK_WAITED_MS=$(( $(now_ms) - t0 ))
+    VOL_STARTED_AT="$(now_iso)"
+    if tar --create --gzip --file "$WORK/radicale-collections.tar.gz" \
+        --directory "$VOLUME_DIR" --numeric-owner --sort=name \
+        --exclude='.Radicale.cache' --exclude='.Radicale.tmp-*' \
+        --anchored --exclude='collections/.Radicale.lock' \
+        collections; then
+      VOL_FINISHED_AT="$(now_iso)"
+      volume_failure=""
+    else
+      volume_failure="tar del volume $VOLUME_DIR fallito"
+    fi
+    flock -u 9
   fi
-  LOCK_WAITED_MS=$(( $(now_ms) - t0 ))
-  VOL_STARTED_AT="$(now_iso)"
-  tar --create --gzip --file "$WORK/radicale-collections.tar.gz" \
-      --directory "$VOLUME_DIR" --numeric-owner --sort=name \
-      --exclude='.Radicale.cache' --exclude='.Radicale.tmp-*' \
-      --anchored --exclude='collections/.Radicale.lock' \
-      collections
-  VOL_FINISHED_AT="$(now_iso)"
-  flock -u 9
   exec 9<&-
   RADICALE_LOCKED=0
-  log "snapshot del volume completato: $(du -h "$WORK/radicale-collections.tar.gz" | cut -f1) (attesa del lock ${LOCK_WAITED_MS} ms)"
+  if [ -n "$volume_failure" ]; then
+    # Il dump è già fatto e resta: il run si chiude con il solo database.
+    rm -f -- "$WORK/radicale-collections.tar.gz"
+    VOL_STARTED_AT=""
+    VOLUME_PROBLEM="$volume_failure"
+    VOLUME_SOURCE=""
+    warn "$volume_failure: salvo comunque il database, il run sarà INCOMPLETO (exit 3)"
+  else
+    log "snapshot del volume completato: $(du -h "$WORK/radicale-collections.tar.gz" | cut -f1) (attesa del lock ${LOCK_WAITED_MS} ms)"
+  fi
 fi
 
 # ─── 3. Manifest ──────────────────────────────────────────────
@@ -325,6 +389,7 @@ RESULT="$(CS_ID="$ID" CS_CREATED_AT="$CREATED_AT" CS_HOST="$(hostname 2>/dev/nul
   CS_DB_SOURCE="$DB_SOURCE" CS_DB_SERVER_VERSION="$SERVER_VERSION" CS_PG_DUMP_VERSION="$PG_DUMP_VERSION" \
   CS_DB_LAST_MIGRATION="$LAST_MIGRATION" CS_VOLUME_SOURCE="$VOLUME_SOURCE" CS_VOLUME_LOCK="shared" \
   CS_VOLUME_LOCK_WAITED_MS="$LOCK_WAITED_MS" CS_VOLUME_STARTED_AT="$VOL_STARTED_AT" CS_VOLUME_FINISHED_AT="$VOL_FINISHED_AT" \
+  CS_INCOMPLETE="$VOLUME_PROBLEM" \
   python3 "$TOOL" write-manifest --dir "$WORK")"
 IDENTITY="$(printf '%s' "$RESULT" | python3 -c 'import json,sys; print(json.load(sys.stdin)["identity"])')"
 # Il run si verifica come lo verificherà il ripristino, prima di pubblicarlo.
@@ -333,11 +398,19 @@ python3 "$TOOL" verify --dir "$WORK" >/dev/null || die "verifica del run fallita
 mv -T "$WORK" "$ROOT/$ID"
 WORK=""
 ln -sfn "$ID" "$ROOT/.latest.tmp" && mv -T "$ROOT/.latest.tmp" "$ROOT/latest"
-log "run $ID completo e verificato (identità DB ↔ volume: $IDENTITY)"
+if [ -n "$VOLUME_PROBLEM" ]; then
+  log "run $ID INCOMPLETO, verificato: solo database (volume: $VOLUME_PROBLEM)"
+else
+  log "run $ID completo e verificato (identità DB ↔ volume: $IDENTITY)"
+fi
 case "$IDENTITY" in
   mismatch|unverified)
     mode="$(python3 "$TOOL" get --file "$ROOT/$ID/manifest.json" --path database.backend_state.mode --default '')"
     warn "identità del volume e stato del DB non coincidono ($IDENTITY, modalità ${mode:-?}): con Radicale autorevole questo snapshot NON è ripristinabile così com'è (vedi apps/radicale/README.md)" ;;
+  uninitialized)
+    if [ "$(python3 "$TOOL" get --file "$ROOT/$ID/manifest.json" --path radicale.inventory.marker.state --default '')" = ok ]; then
+      warn "database non inizializzato (epoch 0) ma il volume ha un marker d'identità: dopo un ripristino i device resterebbero negati (vedi apps/radicale/README.md, riallineamento)"
+    fi ;;
 esac
 
 # ─── 4. Retention locale ──────────────────────────────────────
@@ -397,4 +470,9 @@ else
   log "S4 non configurato (S4_BUCKET/S4_ENDPOINT): backup solo locale"
 fi
 
+if [ -n "$VOLUME_PROBLEM" ]; then
+  LAST_ERROR="run $ID con il solo database: $VOLUME_PROBLEM"
+  printf '%s [%s] ERRORE: %s\n' "$(now_iso)" "$SCRIPT_NAME" "$LAST_ERROR" >&2
+  exit 3
+fi
 log "fatto: $ROOT/$ID"

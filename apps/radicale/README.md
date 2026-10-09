@@ -16,7 +16,7 @@ Riferimenti:
    https://dav.calicchia.design/federico/<slug>/
         │ TLS CloudPanel, X-Remote-Addr: $remote_addr (solo per IP e rate limit)
         ▼
- 127.0.0.1:3011 ──► app-net ──► radicale :5232   (peer = gateway di app-net)
+ 127.0.0.1:3011 ──► dav-pub ──► radicale :5232   (peer = gateway di dav-pub, 172.31.251.0/29: rete del solo radicale)
                                  │ caldes_auth    device → POST api-int:3001/api/caldav-backend/verify-credentials
                                  │                caldes-svc / caldes-probe → sha256 in env, solo dal peer giusto
                                  │                cache 60 s + cache persistita 24 h (radicale_authcache)
@@ -27,13 +27,16 @@ Riferimenti:
                                  ▲
  rete interna caldav-int 172.31.250.0/29 (internal: true, nessuna porta pubblicata)
    api  172.31.250.2 (alias api-int)   ── CalDAV come caldes-svc ──►  radicale 172.31.250.3 (alias radicale-int)
+   │ verify-credentials risponde solo al peer 172.31.250.3 (CALDAV_BACKEND_ALLOWED_PEERS)
    │ scrive policy.json e heartbeat.json su caldes_control (rw), legge radicale_collections (:ro)
    ▼
  Postgres: calendar_backend_state (mode, volume_id, epoch, credential_epoch…) + sidecar dei calendari (162)
 ```
 
 - **Device.** Qualsiasi app-password valida diventa il principal canonico `federico`, anche se è stata creata con un altro username (per esempio `iphone`). Lo username resta solo per audit e rate limit.
-- **Utenti di servizio.** `caldes-svc` vale solo dal peer TCP dell'API su `caldav-int` (`CALDES_SVC_CIDR=172.31.250.2/32`). `caldes-probe` vale anche da `127.0.0.1`, per l'healthcheck. Tutto il traffico pubblicato arriva invece dal gateway di `app-net`. Una password di servizio trapelata resta quindi inutilizzabile da internet: risponde 401, e uno username `caldes-*` non entra mai nel ramo device.
+- **Utenti di servizio.** `caldes-svc` vale solo dal peer TCP dell'API su `caldav-int` (`CALDES_SVC_CIDR=172.31.250.2/32`). `caldes-probe` vale anche da `127.0.0.1`, per l'healthcheck. Tutto il traffico pubblicato arriva invece dal gateway di `dav-pub`. Una password di servizio trapelata resta quindi inutilizzabile da internet: risponde 401, e uno username `caldes-*` non entra mai nel ramo device.
+- **IP del device.** `X-Remote-Addr` (CloudPanel) vale solo dal gateway di `dav-pub` (`CALDES_XRA_PEER_CIDR`). Radicale non è su `app-net`: gli altri container dello stack non lo raggiungono, quindi non possono scegliere l'IP con cui l'API conta il rate limit e registra `last_used_ip`. L'API, a sua volta, accetta `verify-credentials` solo dal peer di Radicale su `caldav-int` (`CALDAV_BACKEND_ALLOWED_PEERS`): dal vhost pubblico risponde 404 anche con il Bearer.
+- **Rate limit.** L'API conta solo i tentativi falliti per (IP, username) e verifica sempre prima la password: una password corretta non riceve mai 429. Il 429 per il plugin è una negazione temporanea (401 dopo il delay), mai un errore del backend: non apre la cache persistita.
 - **Modalità** (`policyFromState()`, design §13.1):
   - in `mode=postgres` la policy è `shadow`: i device sono in sola lettura;
   - `frozen` vale quando c'è un restore guard, un rebuild richiesto, un'identità diversa o non verificata, oppure quando l'heartbeat dell'API manca o ha più di 10 minuti;
@@ -44,7 +47,7 @@ Riferimenti:
 
 | Percorso | Cosa contiene |
 |---|---|
-| `Dockerfile` | `tomsquest/docker-radicale:3.7.8.0` pinnata per digest, plugin in `/app/plugins`, config in `/config/config`, selftest in build, healthcheck (PROPFIND sulla root come `caldes-probe`) |
+| `Dockerfile` | `tomsquest/docker-radicale:3.7.8.0` pinnata per digest, plugin in `/app/plugins`, config in `/app/config/config` (fuori dai `VOLUME` della base, avviato da `CMD`), selftest in build, healthcheck (PROPFIND sulla root come `caldes-probe`) |
 | `config/config` | config di produzione (design §3.2): `caldes_auth`, `caldes_rights`, `multifilesystem` su `/data/collections`, `max_vevent_rrule_occurrence = 50000`, `delay_on_error = 0` |
 | `plugins/caldes_auth.py` | autenticazione: utenti di servizio dal peer, device via `verify-credentials`, cache, revoca con `credential_epoch` |
 | `plugins/caldes_rights.py` | permessi: policy, heartbeat, identità del volume, matrice del contratto §8 |
@@ -67,7 +70,7 @@ Nel `.env` dello stack Dockhand (modello: [.env.prod.example](../../.env.prod.ex
 | `CALDES_PROBE_PASSWORD_SHA256` | radicale | sha256 di `CALDES_PROBE_PASSWORD` |
 | `CALDES_AUTHCACHE_KEY` | radicale | chiave HMAC della cache persistita, almeno 32 caratteri |
 
-Fisse nel compose: `RADICALE_PRINCIPAL=federico`, `CALDES_SVC_CIDR=172.31.250.2/32`, `CALDAV_BACKEND_URL=http://api-int:3001/api/caldav-backend`, `RADICALE_URL=http://radicale-int:5232`, `CALDES_CONTROL_PLANE=on`, i percorsi di policy e heartbeat. Generazione, una volta sola:
+Fisse nel compose: `RADICALE_PRINCIPAL=federico`, `CALDES_SVC_CIDR=172.31.250.2/32`, `CALDES_XRA_PEER_CIDR=172.31.251.0/29`, `CALDAV_BACKEND_URL=http://api-int:3001/api/caldav-backend`, `CALDAV_BACKEND_ALLOWED_PEERS=172.31.250.3/32` (API), `RADICALE_URL=http://radicale-int:5232`, `CALDES_CONTROL_PLANE=on`, i percorsi di policy e heartbeat. Generazione, una volta sola:
 
 ```sh
 p=$(openssl rand -hex 32); echo "RADICALE_SVC_PASSWORD=$p"; echo "CALDES_SVC_PASSWORD_SHA256=$(printf %s "$p" | sha256sum | cut -d' ' -f1)"
@@ -82,21 +85,28 @@ Una variabile obbligatoria assente o malformata fa fallire il caricamento del pl
 Il runbook completo, con i comandi per Dockhand e CloudPanel, è in [docs/portainer-cloudpanel.md §9](../../docs/portainer-cloudpanel.md#9-calendario-su-radicale-deploy-in-due-commit). In sintesi:
 
 1. **Prima del primo deploy, sul server:**
-   - verificare che la subnet `172.31.250.0/29` sia libera;
+   - verificare che le subnet `172.31.250.0/29` (`caldav-int`) e `172.31.251.0/29` (`dav-pub`) siano libere;
    - verificare che il filesystem dei volumi sia ext4, xfs o btrfs;
    - salvare in un tar il vecchio volume `radicale_data` della Fase 0, se esiste (decisione 7: non va cancellato);
    - aggiungere all'env dello stack le variabili della tabella sopra;
    - aggiornare il vhost `dav.calicchia.design` in CloudPanel (sezione sotto).
-2. **Commit 1, l'immagine.** Contiene le modifiche ad `apps/radicale/**` (e il resto del lavoro della fase, migrazione 162 compresa), ma non `docker-compose.portainer.yml`.
+2. **Commit 1, l'immagine: il merge del branch della fase.** Contiene le modifiche ad `apps/radicale/**` e il resto del lavoro della fase (migrazione 162 compresa), ma **non** cambia `docker-compose.portainer.yml`: le modifiche del compose stanno in [docs/calendar-radicale/deploy/f1-compose.patch](../../docs/calendar-radicale/deploy/f1-compose.patch).
    - La CI esegue i test e pubblica `sha-<short>`.
-   - Il Radicale in produzione non cambia, perché il compose punta ancora alla vecchia immagine e non c'è più un `latest` che si muove.
-   - L'API riparte con il codice nuovo. Il control-plane resta spento finché manca il volume `caldes_control`.
-3. **Commit 2, il compose.** Porta in `docker-compose.portainer.yml` il tag `sha-<short>` al posto di `sha-SEGNAPOSTO`, la rete `caldav-int`, i volumi e le variabili. Dockhand ricrea radicale e api:
+   - Dockhand aggiorna lo stack come sempre (il compose non cita immagini inesistenti): `migrate` applica la 162 e l'API riparte con il codice nuovo, con il control-plane spento perché manca il volume `caldes_control`.
+   - Il Radicale in produzione non cambia: il compose punta ancora alla vecchia immagine, e non c'è più un `latest` che si muove. Il config nuovo è dentro l'immagine nuova, quindi un riavvio del container vecchio non lo legge.
+3. **Commit 2, il compose.** Applica la patch e mette il tag pubblicato al posto di `sha-SEGNAPOSTO`:
+   ```sh
+   git apply docs/calendar-radicale/deploy/f1-compose.patch
+   sed -i 's/sha-SEGNAPOSTO/sha-<short>/' docker-compose.portainer.yml
+   git rm docs/calendar-radicale/deploy/f1-compose.patch
+   git commit -am "deploy(radicale): immagine sha-<short> e compose della F1"
+   ```
+   Dockhand crea reti e volumi e ricrea radicale e api:
    - Radicale parte con il volume vuoto e nessuna policy: i device ricevono 403;
    - l'API scrive `policy.json` (shadow, `volume_id: null`) e `heartbeat.json`.
-4. **Verifica e inizializzazione** (sezioni sotto).
+4. **Verifica e inizializzazione** (sezioni sotto). Solo dopo il commit 2 si installa il cron del backup coordinato (sezione "Backup e restore").
 
-Una modifica a `config/config` entra in vigore al primo avvio del container, perché il file è montato dal repository. Per questo va fatta solo insieme a un'immagine nuova, con lo stesso flusso in due commit. Il mount è comunque necessario: l'immagine base dichiara `VOLUME /config`, e senza mount Compose riuserebbe a ogni ricreazione il config del primo avvio.
+Config e plugin sono dentro l'immagine (`/app/config/config`, `/app/plugins`): una modifica a `config/config` segue lo stesso flusso in due commit ed entra in vigore solo con il tag nuovo, mai con un checkout aggiornato sul server. È anche il config verificato dal selftest in build. Il `VOLUME /config` dell'immagine base resta, ma non lo legge nessuno.
 
 ## CloudPanel: vhost `dav.calicchia.design`
 
@@ -193,7 +203,7 @@ In F1 i calendari sono in sola lettura per tutti i device. `bookings`, `f` e `sc
 
 ## Backup e restore
 
-Un solo script per DB e volume ([scripts/backup-calendar-stack.sh](../../scripts/backup-calendar-stack.sh), design §16.1), da cron sull'host come root ogni 6 h. `scripts/backup-db.sh` resta per compatibilità e delega a questo script.
+Un solo script per DB e volume ([scripts/backup-calendar-stack.sh](../../scripts/backup-calendar-stack.sh), design §16.1), da cron sull'host come root ogni 6 h, installato dopo il commit 2 del deploy. `scripts/backup-db.sh` resta per compatibilità e delega a questo script.
 
 In ogni run:
 1. `pg_dump` completo, con lo stato del backend letto prima e dopo (se modalità o identità cambiano durante il dump il run fallisce);
@@ -208,6 +218,8 @@ In ogni run:
 
 Il dump viene prima dello snapshot, quindi il volume non è mai più vecchio del database. RPO: 6 ore per entrambi.
 
+Un problema del volume (assente, senza `collections/`, lock non ottenuto, tar fallito) non ferma mai il backup del database: il run si chiude con il solo dump, marcato `"complete": false` nel manifest con il motivo, e lo script esce con 3. Ogni run fallito o incompleto manda un alert Telegram (`ALERT_TELEGRAM_BOT_TOKEN`/`ALERT_TELEGRAM_CHAT_ID`, o in mancanza `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID`).
+
 ```sh
 # /root/.caldes-backup.env (0600): COMPOSE_PROJECT, BACKUP_DIR, RETENTION_DAYS, S4_*
 17 */6 * * * cd /opt/calicchia-design-platform && set -a && . /root/.caldes-backup.env && set +a && ./scripts/backup-calendar-stack.sh >> /var/log/caldes-backup.log 2>&1
@@ -219,11 +231,14 @@ Le variabili sono descritte in testa allo script e in `.env.prod.example`. `COMP
 
 [scripts/restore-calendar-stack.sh](../../scripts/restore-calendar-stack.sh) (design §16.3) prima di modificare qualcosa:
 - verifica checksum, gzip e inventario dell'archivio;
+- controlla la destinazione del volume: deve essere il `/data` di Radicale (per un volume Docker `…/<volume>/_data`), cioè una cartella vuota o con `collections/` (o un `collections.pre-restore-*`), e con `COMPOSE_PROJECT` il Mountpoint di `<progetto>_radicale_collections`; altrimenti si rifiuta, salvo `--force-target`. Il piano mostra il marker attuale della destinazione;
 - calcola l'identità che risulterà dal ripristino: marker del volume contro `calendar_backend_state`;
-- si rifiuta se l'identità sarà `mismatch` (anche per un epoch tornato indietro) o `unverified`, salvo `--accept-identity-mismatch`;
+- si rifiuta, salvo `--accept-identity-mismatch`, se l'identità sarà `mismatch` o `unverified`, se l'epoch torna indietro, o se il database sarà non inizializzato (epoch 0) con un marker valido sul volume: in quel caso caldes_rights negherebbe tutto e `calendar:radicale-init` rifiuterebbe. Il piano stampa la procedura di riallineamento (sotto);
 - vuole la conferma esplicita `RIPRISTINA <id>`.
 
-Copie di sicurezza: un dump del database corrente in `pre-restore-<ts>/` e la `collections` corrente spostata in `collections.pre-restore-<ts>`, mai cancellate dallo script.
+Copie di sicurezza: un dump del database corrente in `pre-restore-<ts>/` e la `collections` corrente spostata in `collections.pre-restore-<ts>`, mai cancellate dallo script. La `collections` si sposta solo dopo che il database è stato caricato: un caricamento fallito non lascia il volume senza `collections/`. Se estrazione o confronto dell'inventario falliscono, l'estratto va in `collections.failed-restore-<ts>` e la `collections` precedente torna al suo posto.
+
+**Riallineamento dell'identità** (in F1 il wizard non c'è ancora): la via preferibile è ripristinare database e volume dallo stesso manifest (`--only all`), oppure un dump successivo all'inizializzazione. Se il volume è davvero quello dello stack e il database è in `mode=postgres`, si può riallineare a mano lo stato al marker del volume: `UPDATE calendar_backend_state SET volume_id = '<volume-id del marker>', epoch = <epoch del marker> WHERE id AND mode = 'postgres'`, poi si controlla la policy (identità ok) prima di riaprire i device.
 
 Dopo il ripristino:
 - `restore_guard_until` va a `now() + 48 h` e `rebuild_required` a `true`, quindi la policy è frozen;
@@ -301,8 +316,8 @@ docker run --rm -v <P>_radicale_data:/v:ro -v /root:/out alpine \
 | 401 con un'app-password giusta | app-password revocata o scaduta (l'API risponde `401 {ok:false}`), oppure username `caldes-*`; 401 anche per `caldes-svc` da un peer diverso dall'API |
 | 403 su `/federico/` | volume non inizializzato, identità diversa da PG (`effective_mode_changed` con `marker` nei log), o policy mai letta dall'avvio di Radicale |
 | Device in sola lettura in live | heartbeat assente o vecchio (`heartbeat_stale`): l'API è giù da oltre 10 minuti o non ha il volume `caldes_control`; oppure restore guard o rebuild attivi |
-| Lo stack non si aggiorna dopo il commit 2 | il pull fallisce: tag rimasto `sha-SEGNAPOSTO` o non ancora pubblicato; subnet di `caldav-int` sovrapposta (`Pool overlaps`) |
-| Diagnosi della discovery di un device | i log `info` hanno già una riga per richiesta. Per il livello `debug`, temporaneamente, nel servizio `radicale` del compose: `command: ["/venv/bin/radicale", "--config", "/config/config", "--logging-level", "debug"]` (un commit, da togliere subito dopo: i log di debug contengono dati personali) |
+| Lo stack non si aggiorna dopo il commit 2 | il pull fallisce: tag rimasto `sha-SEGNAPOSTO` o non ancora pubblicato; subnet di `caldav-int` o `dav-pub` sovrapposta (`Pool overlaps`) |
+| Diagnosi della discovery di un device | i log `info` hanno già una riga per richiesta. Per il livello `debug`, temporaneamente, nel servizio `radicale` del compose: `command: ["/venv/bin/radicale", "--config", "/app/config/config", "--logging-level", "debug"]` (il primo argomento deve restare `/venv/bin/radicale`, altrimenti l'entrypoint non passa all'utente radicale) (un commit, da togliere subito dopo: i log di debug contengono dati personali) |
 
 ## Sviluppo e test
 

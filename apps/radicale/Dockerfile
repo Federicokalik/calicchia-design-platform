@@ -39,7 +39,7 @@ LABEL org.opencontainers.image.title="calicchia-radicale" \
 # - TAKE_FILE_OWNERSHIP=false: l'entrypoint non fa chown -R di /data a ogni
 #   avvio (lento sui volumi grandi e inutile: i file li crea già l'utente
 #   radicale 2999). Nessuna variabile RADICALE_CONFIG_*: l'entrypoint
-#   riscriverebbe il config montato in sola lettura (design §3.1);
+#   proverebbe a riscrivere il config (design §3.1);
 # - TZ=UTC come il container dell'API (design §3.5).
 ENV PYTHONPATH=/app/plugins \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -47,12 +47,14 @@ ENV PYTHONPATH=/app/plugins \
     TAKE_FILE_OWNERSHIP=false \
     TZ=UTC
 
-# Plugin e config. Il config è anche montato in sola lettura dal compose
-# (./apps/radicale/config:/config:ro); la copia nell'immagine evita che un
-# container avviato senza mount giri con il config di default di tomsquest
-# (auth type = none).
+# Plugin e config nell'immagine, fuori dai VOLUME dell'immagine base
+# (/config e /data): /app/config/config segue il tag sha come i plugin, è
+# quello verificato dal selftest qui sotto e nessun bind mount dal repository
+# lo sostituisce. Un checkout aggiornato sul server non porta mai un config
+# nuovo a un'immagine vecchia (il compose non monta più ./apps/radicale/config).
+# Il VOLUME /config dell'immagine base resta, ma non lo legge nessuno.
 COPY plugins/ /app/plugins/
-COPY config/config /config/config
+COPY config/config /app/config/config
 
 # Permessi:
 # - plugin e config di root, leggibili da tutti e non scrivibili dall'utente
@@ -63,7 +65,7 @@ COPY config/config /config/config
 #   dell'immagine, quindi il plugin può scriverci authcache.json (0600);
 # - punto di mount di caldes_control (policy.json e heartbeat.json): lo
 #   scrive solo l'API, qui è montato in sola lettura.
-RUN chmod -R u=rwX,go=rX /app/plugins /config \
+RUN chmod -R u=rwX,go=rX /app/plugins /app/config \
  && mkdir -p /var/lib/caldes-auth /control \
  && chown radicale:radicale /var/lib/caldes-auth \
  && chmod 0700 /var/lib/caldes-auth \
@@ -73,7 +75,7 @@ RUN chmod -R u=rwX,go=rX /app/plugins /config \
 # sitecustomize, config, firma dei plugin (login() non ridefinito) e un
 # percorso reale in memoria (identità, shadow, live, PUT/GET fedele,
 # heartbeat scaduto). Se fallisce, la build fallisce.
-RUN /venv/bin/python /app/plugins/caldes_selftest.py /config/config
+RUN /venv/bin/python /app/plugins/caldes_selftest.py /app/config/config
 
 # PROPFIND Depth:0 sulla root come caldes-probe da 127.0.0.1 (207 atteso):
 # passa per auth e rights, quindi un plugin rotto rende il container
@@ -83,5 +85,8 @@ RUN /venv/bin/python /app/plugins/caldes_selftest.py /config/config
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD ["/venv/bin/python", "-I", "/app/plugins/caldes_healthcheck.py"]
 
-# Entrypoint e comando dell'immagine base: docker-entrypoint.sh passa
-# all'utente radicale (su-exec) e avvia /venv/bin/radicale --config /config/config.
+# Entrypoint dell'immagine base (docker-entrypoint.sh): se il primo argomento
+# è esattamente /venv/bin/radicale passa all'utente radicale con su-exec,
+# altrimenti esegue il comando così com'è (come root). Il comando quindi deve
+# iniziare con /venv/bin/radicale; cambia solo il config, quello dell'immagine.
+CMD ["/venv/bin/radicale", "--config", "/app/config/config"]

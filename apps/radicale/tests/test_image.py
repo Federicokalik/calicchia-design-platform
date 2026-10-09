@@ -164,8 +164,12 @@ def test_dockerfile_plugin_selftest_e_healthcheck() -> None:
     text = DOCKERFILE.read_text(encoding="utf-8")
     assert re.search(r"^ENV PYTHONPATH=/app/plugins\b", text, flags=re.MULTILINE)
     assert "COPY plugins/ /app/plugins/" in text
-    assert "COPY config/config /config/config" in text
-    assert "RUN /venv/bin/python /app/plugins/caldes_selftest.py /config/config" in text
+    # Config nell'immagine, fuori dai VOLUME della base (/config, /data), e
+    # comando che lo usa: il compose non lo monta dal repository.
+    assert "COPY config/config /app/config/config" in text
+    assert "RUN /venv/bin/python /app/plugins/caldes_selftest.py /app/config/config" in text
+    assert re.search(r'^CMD \["/venv/bin/radicale", "--config", "/app/config/config"\]$', text, flags=re.MULTILINE)
+    assert "/config/config" not in re.sub(r"/app/config/config", "", re.sub(r"^#.*$", "", text, flags=re.MULTILINE))
     assert re.search(r'^HEALTHCHECK .*\n\s+CMD \["/venv/bin/python", "-I", "/app/plugins/caldes_healthcheck.py"\]',
                      text, flags=re.MULTILINE)
     assert "TAKE_FILE_OWNERSHIP=false" in text

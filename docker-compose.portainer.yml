@@ -101,45 +101,8 @@ services:
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
       BUGSINK_DSN: ${BUGSINK_DSN}
       CRON_SECRET: ${CRON_SECRET}
-      # Secret condiviso API↔Radicale: Bearer che caldes_auth manda a
-      # POST /api/caldav-backend/verify-credentials (caldavServiceAuth).
+      # Secret condiviso API↔Radicale per il backend CalDAV interno.
       CALDAV_SERVICE_TOKEN: ${CALDAV_SERVICE_TOKEN}
-      # ── Calendario su Radicale (fase F1, docs/calendar-radicale/) ──
-      # Client CalDAV di servizio: l'API parla con Radicale solo come
-      # caldes-svc sulla rete interna caldav-int (alias radicale-int).
-      # caldes_auth accetta quell'utente solo dal peer TCP dell'API su
-      # caldav-int (CALDES_SVC_CIDR del servizio radicale): da internet la
-      # credenziale non serve a nulla. Password in chiaro qui, il suo sha256
-      # in CALDES_SVC_PASSWORD_SHA256 lato Radicale (contratto control-plane §1).
-      RADICALE_URL: http://radicale-int:5232
-      RADICALE_SVC_USER: caldes-svc
-      RADICALE_SVC_PASSWORD: ${RADICALE_SVC_PASSWORD}
-      # Password del probe (canary su _canary dalla F2/F3): la stessa
-      # CALDES_PROBE_PASSWORD dell'healthcheck di Radicale.
-      RADICALE_PROBE_PASSWORD: ${CALDES_PROBE_PASSWORD}
-      # Principal canonico: deve coincidere con RADICALE_PRINCIPAL di Radicale.
-      RADICALE_PRINCIPAL: federico
-      # Collezioni montate in sola lettura (identità del volume, campanello
-      # della F2): volume radicale_collections su /radicale-data.
-      RADICALE_DATA_DIR: /radicale-data/collections
-      # Control-plane: policy.json (derivata da calendar_backend_state con
-      # policyFromState()) e heartbeat.json ogni 30 s, sul volume caldes_control.
-      # `on`: il volume in produzione c'è sempre, una cartella assente è un
-      # errore da vedere nei log (con `auto` il control-plane resterebbe
-      # spento in silenzio e dopo 10 minuti i device andrebbero in frozen).
-      CALDES_CONTROL_PLANE: "on"
-      CALDES_POLICY_FILE: /run/caldes-control/policy.json
-      CALDES_HEARTBEAT_FILE: /run/caldes-control/heartbeat.json
-      # Identità del volume letta dal mount :ro (in mancanza del mount l'API
-      # ripiegherebbe su PROPFIND; qui il mount c'è, quindi `file`).
-      CALDES_IDENTITY_SOURCE: file
-      # Identificativo della build nel heartbeat (api_version, informativo).
-      # Va allineato al tag dell'immagine API quando viene pinnato (F5).
-      CALDES_API_VERSION: ${CALDES_API_VERSION:-latest}
-      # Già il default del container (alpine senza TZ); esplicito come in
-      # Radicale: date e orari si calcolano in Europe/Rome dove serve, mai
-      # dal fuso del processo.
-      TZ: UTC
       ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
       MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY}
       BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
@@ -218,32 +181,13 @@ services:
       - uploads_data:/data/uploads
       - private_data:/data/private
       - kb_data:/data/kb
-      # Volume di Radicale in SOLA LETTURA: l'API non scrive mai sui file di
-      # Radicale (solo via CalDAV), li legge per l'identità e il campanello.
-      - radicale_collections:/radicale-data:ro
-      # Control-plane: l'API (root nel container) scrive policy.json e
-      # heartbeat.json 0644 in una cartella 0755; Radicale li monta :ro.
-      - caldes_control:/run/caldes-control
-    # /data di Radicale ha permessi 770 (utente e gruppo radicale 2999): il
-    # gruppo supplementare permette la lettura anche se l'API smettesse di
-    # girare come root.
-    group_add:
-      - "2999"
-    # Nessuna dipendenza da radicale (design §3.5): l'API parte anche con
-    # Radicale giù, e Radicale parte con l'API giù (cache persistita).
     depends_on:
       postgres:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
     networks:
-      app-net: {}
-      # Rete interna verso Radicale. IP fisso: è l'unico peer ammesso per
-      # caldes-svc (CALDES_SVC_CIDR=172.31.250.2/32 nel servizio radicale).
-      caldav-int:
-        aliases:
-          - api-int
-        ipv4_address: 172.31.250.2
+      - app-net
     # Solo su loopback: CloudPanel proxa da `http://127.0.0.1:3001`.
     ports:
       - "127.0.0.1:3001:3001"
@@ -372,118 +316,42 @@ services:
     ports:
       - "127.0.0.1:3010:3000"
 
-  # CalDAV dei device (iPhone, Mac, DAVx5, Thunderbird) — fase F1 del
-  # passaggio del calendario a Radicale (docs/calendar-radicale/design.md
-  # §3, contratto docs/calendar-radicale/contracts/control-plane.md).
-  # Radicale 3.7.8 con storage nativo sul volume radicale_collections e i
-  # plugin caldes_auth (app-password verificate dall'API, utenti di servizio
-  # dal peer TCP), caldes_rights (policy shadow/live/frozen, heartbeat
-  # dell'API, identità del volume) e la fix di fedeltà di vobject. In F1
-  # Postgres resta la fonte di verità: la policy scritta dall'API tiene i
-  # device in sola lettura (shadow), o senza accesso finché il volume non è
-  # inizializzato. Runbook: apps/radicale/README.md e
-  # docs/portainer-cloudpanel.md §9.
-  #
-  # Immagine: SOLO il tag sha-<short> pubblicato dalla CI
-  # (.github/workflows/build-radicale-image.yml, che esegue pytest dei plugin
-  # e selftest prima del push). Niente `build:` e niente `latest`: in
-  # produzione Compose non deve mai buildare sul VPS saltando i test, e il
-  # tag cambia solo con un commit di questo file (deploy in due commit:
-  # prima le modifiche ad apps/radicale/** fanno pubblicare sha-X, poi un
-  # secondo commit porta qui sha-X).
-  # SEGNAPOSTO: `sha-SEGNAPOSTO` va sostituito nel commit 2 con il tag
-  # pubblicato dalla CI per il commit 1 (vedi runbook). Finché c'è il
-  # segnaposto il pull fallisce e Dockhand non aggiorna lo stack.
+  # CalDAV server — FASE 3 (backend Postgres via API). Vedi
+  # apps/radicale/README.md. L'immagine custom (build da apps/radicale/Dockerfile)
+  # include i plugin caldes_auth + caldes_storage che parlano con
+  # /api/caldav-backend/* (Bearer CALDAV_SERVICE_TOKEN). Postgres resta
+  # l'unica fonte di verità: nessun file storage, nessun htpasswd.
+  # Richiede sul server: env CALDAV_SERVICE_TOKEN + vhost CloudPanel
+  # dav.calicchia.design → http://127.0.0.1:3011.
+  # In produzione usare l'immagine pubblicata su ghcr (workflow CI); in dev
+  # locale `docker compose build radicale` builda dal Dockerfile.
   radicale:
-    image: ghcr.io/federicokalik/calicchia-radicale:sha-SEGNAPOSTO
+    image: ghcr.io/federicokalik/calicchia-radicale:latest
+    build:
+      context: apps/radicale
     restart: always
     init: true
     security_opt:
       - no-new-privileges:true
-    # L'entrypoint dell'immagine gira come root solo per passare all'utente
-    # radicale (2999) con su-exec: SETUID e SETGID. KILL serve a docker-init
-    # (PID 1, root) per inoltrare SIGTERM a Radicale, che ha un altro uid.
-    # Niente CHOWN: con TAKE_FILE_OWNERSHIP=false l'entrypoint non fa chown.
     cap_drop:
       - ALL
     cap_add:
+      - CHOWN
       - SETUID
       - SETGID
       - KILL
     environment:
-      # Avvertenze dell'immagine tomsquest (design §3.1): niente chown -R di
-      # /data a ogni avvio, nessuna variabile RADICALE_CONFIG_* (l'entrypoint
-      # riscriverebbe il config) e nessuna UID/GID (l'entrypoint cambierebbe
-      # l'uid dell'utente radicale, proprietario del volume).
+      # Niente più htpasswd / storage file: i plugin leggono tutto da env.
       TAKE_FILE_OWNERSHIP: "false"
-      TZ: UTC
-      # Principal canonico: ogni app-password valida diventa questo utente
-      # (anche se creata come `iphone`), quindi tutti i device vedono
-      # /federico/<slug>/. Uguale a RADICALE_PRINCIPAL dell'API.
-      RADICALE_PRINCIPAL: federico
-      # Verifica delle app-password: API sulla rete interna caldav-int.
-      # Timeout di 1 s nel plugin; API giù → cache persistita o 500.
-      CALDAV_BACKEND_URL: http://api-int:3001/api/caldav-backend
+      # Bearer secret condiviso con l'API (caldavServiceAuth middleware).
+      # Generare con: openssl rand -hex 32. Deve matchare lato API.
       CALDAV_SERVICE_TOKEN: ${CALDAV_SERVICE_TOKEN}
-      # Peer TCP ammessi per caldes-svc (e per caldes-probe oltre a
-      # 127.0.0.1): solo l'IP fisso dell'API su caldav-int. Più stretto
-      # dell'intera subnet: esclude il gateway del bridge (l'host) e Radicale
-      # stesso. Il traffico pubblicato su 127.0.0.1:3011 arriva dal gateway
-      # di app-net e non è mai in questa rete. Se cambi subnet o IP di
-      # caldav-int, cambia anche questo valore.
-      CALDES_SVC_CIDR: 172.31.250.2/32
-      # sha256 esadecimale minuscolo delle password degli utenti di servizio
-      # (le password in chiaro: RADICALE_SVC_PASSWORD nell'API,
-      # CALDES_PROBE_PASSWORD qui sotto). Generazione nel runbook.
-      CALDES_SVC_PASSWORD_SHA256: ${CALDES_SVC_PASSWORD_SHA256}
-      CALDES_PROBE_PASSWORD_SHA256: ${CALDES_PROBE_PASSWORD_SHA256}
-      # In chiaro solo per l'healthcheck (caldes_healthcheck.py).
-      CALDES_PROBE_PASSWORD: ${CALDES_PROBE_PASSWORD}
-      # Chiave HMAC della cache persistita delle credenziali (almeno 32
-      # caratteri). Ruotarla svuota la cache (key_id diverso).
-      CALDES_AUTHCACHE_KEY: ${CALDES_AUTHCACHE_KEY}
-      CALDES_AUTHCACHE_DIR: /var/lib/caldes-auth
-      # Stesso file di `[rights] caldes_policy_file` nel config: caldes_auth
-      # ne legge credential_epoch (revoca delle app-password).
-      CALDES_POLICY_FILE: /control/policy.json
+      # URL interno dell'API su app-net (override della config default).
+      CALDAV_BACKEND_URL: http://api:3001/api/caldav-backend
     volumes:
-      # Fonte di verità degli eventi dopo il cutover (F4-F5). Nome nuovo:
-      # il vecchio volume radicale_data della Fase 0 NON va mai montato qui
-      # (decisione 7: backup tar e import in archivio-fase0 dal wizard).
-      - radicale_collections:/data
-      # Config versionato nel repo. Va montato: l'immagine base dichiara
-      # VOLUME /config, e senza mount Compose riuserebbe a ogni ricreazione
-      # il volume anonimo del primo avvio, con il config di allora. Il file
-      # si rilegge solo all'avvio: una modifica va fatta insieme a una nuova
-      # immagine (stesso flusso in due commit), mai da sola.
       - ./apps/radicale/config:/config:ro
-      # policy.json e heartbeat.json: li scrive solo l'API.
-      - caldes_control:/control:ro
-      # Cache persistita di caldes_auth (authcache.json 0600, cartella 0700
-      # dell'utente radicale): copre deploy e brevi down dell'API (24 h).
-      - radicale_authcache:/var/lib/caldes-auth
-    # Stesso controllo dell'HEALTHCHECK dell'immagine, esplicito qui per
-    # Dockhand: PROPFIND Depth:0 sulla root come caldes-probe da 127.0.0.1,
-    # 207 atteso. Passa per auth e rights (un plugin rotto rende il container
-    # unhealthy) e funziona anche prima dell'inizializzazione del principal.
-    healthcheck:
-      test: ["CMD", "/venv/bin/python", "-I", "/app/plugins/caldes_healthcheck.py"]
-      interval: 30s
-      timeout: 5s
-      start_period: 20s
-      retries: 3
-    # Nessun depends_on verso l'API (design §3.5, rischi.md): con l'API
-    # unhealthy i device resterebbero senza CalDAV e la cache persistita non
-    # servirebbe a nulla.
     networks:
-      # app-net solo per la porta pubblicata verso CloudPanel.
-      app-net: {}
-      caldav-int:
-        aliases:
-          - radicale-int
-        ipv4_address: 172.31.250.3
-    # Solo su loopback: CloudPanel (vhost dav.calicchia.design) proxa da
-    # `http://127.0.0.1:3011` con `X-Remote-Addr $remote_addr`.
+      - app-net
     ports:
       - "127.0.0.1:3011:5232"
 
@@ -546,33 +414,7 @@ volumes:
   kb_data:
   valkey_data:
   profiles_data:
-  # Calendario su Radicale (F1). Nomi nuovi, mai riusare radicale_data (Fase 0).
-  # Collezioni di Radicale: rw per radicale (/data), ro per l'API. Backup:
-  # scripts/backup-calendar-stack.sh (tar sotto flock condiviso su
-  # collections/.Radicale.lock, insieme al pg_dump, ogni 6 h).
-  radicale_collections:
-  # policy.json e heartbeat.json: rw per l'API, ro per radicale. Contenuto
-  # derivato dal DB, non va nel backup.
-  caldes_control:
-  # Cache persistita delle credenziali di caldes_auth (solo radicale).
-  # Ricostruibile, non va nel backup.
-  radicale_authcache:
 
 networks:
   app-net:
     driver: bridge
-  # Rete interna API ↔ Radicale (design §3.5): nessuna uscita verso
-  # l'esterno e nessuna porta pubblicata; vi sono collegati solo api
-  # (alias api-int, 172.31.250.2) e radicale (alias radicale-int,
-  # 172.31.250.3). Subnet fissa perché l'IP dell'API è l'unico peer
-  # ammesso per caldes-svc (CALDES_SVC_CIDR). Prima del deploy verificare
-  # che non si sovrapponga alle reti esistenti (comando nel runbook,
-  # docs/portainer-cloudpanel.md §9).
-  caldav-int:
-    driver: bridge
-    internal: true
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.31.250.0/29
-          gateway: 172.31.250.1

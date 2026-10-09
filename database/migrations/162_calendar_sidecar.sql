@@ -220,9 +220,13 @@ $$;
 --  2. role di default ('user'): dead prop role se presente (vale anche un
 --     'user' esplicito), altrimenti le regole storiche, queste ultime solo per
 --     le righe nate dall'admin o dal sistema (mai per quelle dei device o
---     della migrazione, che hanno un nome scelto altrove). Un ruolo diverso dal
---     default non viene mai sovrascritto: se la dead prop lo contraddice la
---     riga va in needs_review 'role_conflict';
+--     della migrazione, che hanno un nome scelto altrove). La dead prop conta
+--     solo per origin admin, system o migration: in live un device scrive le
+--     dead prop delle proprie collezioni, e con role=bookings o holidays
+--     promuoverebbe i suoi item a provenienza booking o system (contratto
+--     control-plane §3.3 e §8). Un ruolo diverso dal default non viene mai
+--     sovrascritto: se la dead prop lo contraddice la riga va in needs_review
+--     'role_conflict';
 --  3. origin 'system' per i calendari is_system;
 --  4. sidecar d'iscrizione (role=subscription) senza iscrizione collegata →
 --     needs_review 'orphan_subscription'.
@@ -266,8 +270,10 @@ BEGIN
       END IF;
     END IF;
 
-    -- 2. Ruolo.
-    v_dead_role := calendar_sidecar_dead_role(r.dav_props);
+    -- 2. Ruolo. La dead prop di una collezione nata da un device non è fidata.
+    v_dead_role := CASE
+      WHEN r.origin IN ('admin', 'system', 'migration') THEN calendar_sidecar_dead_role(r.dav_props)
+    END;
     v_role := r.role;
     IF r.role = 'user' THEN
       v_role := COALESCE(
@@ -336,7 +342,7 @@ BEGIN
 
   IF NEW.role = 'user' THEN
     v_role := COALESCE(
-      calendar_sidecar_dead_role(NEW.dav_props),
+      CASE WHEN NEW.origin IN ('admin', 'system', 'migration') THEN calendar_sidecar_dead_role(NEW.dav_props) END,
       CASE WHEN NEW.origin IN ('admin', 'system') THEN calendar_sidecar_classify(NEW.slug, NEW.name, NEW.is_system) END
     );
     IF v_role IS NOT NULL THEN

@@ -65,7 +65,7 @@ Riferimento: [design.md](design.md). Decisioni: [decisioni.md](decisioni.md).
 - `apps/api/test/helpers/mock_verify.py` (mock di verify-credentials del harness F0, condiviso con i test dei plugin)
 - `apps/radicale/README.md`
 - `.github/workflows/build-radicale-image.yml`
-- `docker-compose.portainer.yml`
+- `docker-compose.portainer.yml` (invariato nel commit 1: le modifiche sono in `docs/calendar-radicale/deploy/f1-compose.patch`, applicata nel commit 2 con il tag sha pubblicato)
 - `docker-compose.prod.yml (nota di deprecazione)`
 - `docs/portainer-cloudpanel.md`
 - `.env.example`

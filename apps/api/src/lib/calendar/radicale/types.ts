@@ -650,7 +650,10 @@ export function expectedRadicaleRights(user: string, path: string, ctx: RightsCo
   if (depth === 0) return 'R';
   if (segments[0] !== ctx.principal || !ctx.identityOk) return '';
   const live = ctx.mode === 'live';
-  if (depth === 1) return live ? 'RW' : 'R';
+  // Sempre e solo R sul principal, anche in live: il marker d'identità lo
+  // scrive solo caldes-svc (contratto §4.2). MKCALENDAR di una collezione
+  // nuova in live usa la `w` del path nuovo, non la W del principal.
+  if (depth === 1) return 'R';
   if (depth > 2) return '';
 
   const name = segments[1];

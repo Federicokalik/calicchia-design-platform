@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { customAlphabet } from 'nanoid';
-import { sql, sqlv } from '../db';
+import { jsonb, sql, sqlv } from '../db';
 import {
   type BackendMode,
   type CalendarBackendState,
@@ -51,7 +51,10 @@ const qualified = (key: string): string => {
 //     'postgres'. Fuori da 'postgres' la fonte è il volume Radicale e si usa
 //     il ripristino coordinato (dump più snapshot) o quello da versioni.
 //  B  tutto il resto (prenotazioni, tipi, disponibilità, app-password,
-//     promemoria, CRM…): TRUNCATE e reinserimento come prima.
+//     promemoria, CRM…): TRUNCATE e reinserimento come prima. Le
+//     app-password hanno due regole in più: le revoche del database corrente
+//     restano, e se il ripristino toglie credenziali valide credential_epoch
+//     sale di uno (contratto control-plane §9.6).
 //
 // session_replication_role = 'replica' spegne i trigger (anche i vincoli dei
 // trigger 162 e la guardia 166 della F4): l'esclusione di S e D DEVE stare qui
@@ -112,6 +115,16 @@ export const RESTORE_GUARD_HOURS = 48;
 
 /** Codice di needs_review per le righe di calendars assenti dal backup (contratto control-plane §3.1). */
 export const MISSING_IN_BACKUP = 'missing_in_backup';
+
+/**
+ * App-password CalDAV: gruppo B, ma con due regole in più (contratto
+ * control-plane §9.6). Un ripristino non annulla mai una revoca, e se toglie
+ * credenziali valide incrementa credential_epoch, così caldes_auth svuota le
+ * cache (60 s in memoria, 24 h su disco) delle password che non esistono più.
+ */
+const APP_PASSWORDS_KEY = 'public.caldav_app_passwords';
+/** revoked_reason di una revoca rimessa dopo il ripristino senza un motivo registrato. */
+const RESTORE_REVOKED_REASON = 'revoca mantenuta dopo il ripristino di un backup';
 
 // ─── Catalogo ────────────────────────────────────────────────────────────────
 
@@ -765,6 +778,104 @@ async function resyncSequences(tx: Tx, tables: readonly string[]): Promise<void>
   }
 }
 
+// ─── App-password (contratto control-plane §9.6) ─────────────────────────────
+
+/** Una riga di caldav_app_passwords come la vede verify-credentials. */
+interface AppPasswordState {
+  id: string;
+  token_hash: string;
+  username: string;
+  /** Verificabile adesso: attiva, non revocata, non scaduta (stesso filtro di verifyCredentials). */
+  valid: boolean;
+  /** Revocata (o disattivata): una revoca non si annulla mai con un ripristino. */
+  revoked: boolean;
+  revoked_at: string | null;
+  revoked_reason: string | null;
+}
+
+/** Effetto del ripristino sulle app-password, nella risposta e nell'audit. */
+export interface AppPasswordsRestoreReport {
+  /** Revoche successive al backup rimesse sulle righe che il backup riportava attive. */
+  revocations_kept: number;
+  /** Credenziali valide prima del ripristino e non più valide dopo (create dopo il backup, o cambiate). */
+  removed: number;
+  /** credential_epoch incrementato: le cache di caldes_auth delle credenziali tolte sono invalidate. */
+  credential_epoch_bumped: boolean;
+}
+
+async function readAppPasswordStates(tx: Tx): Promise<AppPasswordState[]> {
+  const rows = await tx`
+    SELECT id::text AS id, token_hash, username,
+           (is_active IS TRUE AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS valid,
+           (is_active IS NOT TRUE OR revoked_at IS NOT NULL) AS revoked,
+           revoked_at, revoked_reason
+    FROM public.caldav_app_passwords
+  ` as Array<Omit<AppPasswordState, 'revoked_at'> & { revoked_at: Date | null }>;
+  return rows.map((r) => ({ ...r, revoked_at: r.revoked_at ? new Date(r.revoked_at).toISOString() : null }));
+}
+
+/**
+ * Dopo il reinserimento del gruppo B, con i trigger attivi:
+ *  - rimette le revoche del database corrente sulle righe che il backup
+ *    riportava attive (stesso id o stesso hash), con data e motivo originali:
+ *    una revoca fatta dopo il backup (telefono rubato) resta valida;
+ *  - conta le credenziali valide prima e non più valide dopo (create dopo il
+ *    backup, svuotate per chiusura FK, username diverso).
+ * L'incremento di credential_epoch lo fa il chiamante, nella stessa UPDATE
+ * della guardia post-ripristino (un solo cambio di policy_version).
+ */
+async function reapplyAppPasswordRevocations(
+  tx: Tx,
+  before: readonly AppPasswordState[],
+): Promise<Omit<AppPasswordsRestoreReport, 'credential_epoch_bumped'>> {
+  const revoked = before
+    .filter((r) => r.revoked)
+    .map((r) => ({ id: r.id, token_hash: r.token_hash, revoked_at: r.revoked_at, revoked_reason: r.revoked_reason }));
+  let revocationsKept = 0;
+  if (revoked.length > 0) {
+    const rows = await tx`
+      UPDATE public.caldav_app_passwords p
+      SET is_active = false,
+          revoked_at = COALESCE(p.revoked_at, r.revoked_at, now()),
+          revoked_reason = COALESCE(p.revoked_reason, r.revoked_reason, ${RESTORE_REVOKED_REASON})
+      FROM jsonb_to_recordset(${jsonb(revoked)})
+           AS r(id uuid, token_hash text, revoked_at timestamptz, revoked_reason text)
+      WHERE (p.id = r.id OR p.token_hash = r.token_hash)
+        AND (p.is_active IS NOT FALSE OR p.revoked_at IS NULL)
+      RETURNING p.id
+    ` as Array<{ id: string }>;
+    revocationsKept = new Set(rows.map((r) => r.id)).size;
+  }
+
+  const after = await readAppPasswordStates(tx);
+  const validAfter = new Set(after.filter((r) => r.valid).map((r) => `${r.token_hash}\u0000${r.username}`));
+  const removed = before.filter((r) => r.valid && !validAfter.has(`${r.token_hash}\u0000${r.username}`)).length;
+  return { revocations_kept: revocationsKept, removed };
+}
+
+function appPasswordsWarning(report: AppPasswordsRestoreReport): string | null {
+  const parts: string[] = [];
+  if (report.removed > 0) {
+    parts.push(
+      report.removed === 1
+        ? "un'app-password valida prima del ripristino non esiste più nel backup: il dispositivo che la usa va ricollegato con una password nuova"
+        : `${report.removed} app-password valide prima del ripristino non esistono più nel backup: i dispositivi che le usano vanno ricollegati con password nuove`,
+    );
+  }
+  if (report.revocations_kept > 0) {
+    parts.push(
+      report.revocations_kept === 1
+        ? "un'app-password revocata dopo il backup resta revocata"
+        : `${report.revocations_kept} app-password revocate dopo il backup restano revocate`,
+    );
+  }
+  if (parts.length === 0) return null;
+  const epoch = report.credential_epoch_bumped
+    ? ' Le credenziali in cache su Radicale sono state invalidate (credential_epoch incrementato).'
+    : '';
+  return `App-password CalDAV: ${parts.join('; ')}.${epoch}`;
+}
+
 // ─── Import ──────────────────────────────────────────────────────────────────
 
 const CALENDAR_SKIPPED_WARNING =
@@ -841,6 +952,7 @@ backup.post('/import', async (c) => {
     backend: CalendarBackendSummary;
     calendars: CalendarRestoreReport | null;
     reconciled: Array<{ calendar_id: string; field: string; old_value: string | null; new_value: string | null }>;
+    appPasswords: AppPasswordsRestoreReport | null;
   };
 
   try {
@@ -857,6 +969,11 @@ backup.post('/import', async (c) => {
           plan.blocked,
         );
       }
+
+      // App-password prima del TRUNCATE: revoche da rimettere e credenziali
+      // valide, per sapere se il ripristino ne toglie qualcuna (§9.6).
+      const appPasswordsTouched = plan.truncate.includes(APP_PASSWORDS_KEY);
+      const appPasswordsBefore = appPasswordsTouched ? await readAppPasswordStates(tx) : [];
 
       await tx.unsafe(`SET LOCAL session_replication_role = 'replica'`);
 
@@ -917,6 +1034,19 @@ backup.post('/import', async (c) => {
       //    policy_version e il NOTIFY fa riscrivere subito la policy.
       await tx.unsafe(`SET LOCAL session_replication_role = 'origin'`);
 
+      // Una revoca non si annulla mai: un'app-password revocata dopo il
+      // backup (telefono rubato) non torna valida con il ripristino.
+      const appPasswordChanges = appPasswordsTouched
+        ? await reapplyAppPasswordRevocations(tx, appPasswordsBefore)
+        : null;
+      // Credenziali valide tolte dal ripristino: credential_epoch + 1, così
+      // caldes_auth svuota anche la cache persistita (stale-if-error) invece
+      // di accettarle fino a 24 h (contratto control-plane §9.6).
+      const credentialsRemoved = (appPasswordChanges?.removed ?? 0) > 0;
+      let appPasswords: AppPasswordsRestoreReport | null = appPasswordChanges
+        ? { ...appPasswordChanges, credential_epoch_bumped: false }
+        : null;
+
       let reconciled: Array<{ calendar_id: string; field: string; old_value: string | null; new_value: string | null }> = [];
       let backend = summarizeBackend(backendRead);
       if (backendRead.kind !== 'absent') {
@@ -943,11 +1073,13 @@ backup.post('/import', async (c) => {
               restore_guard_until = GREATEST(
                 COALESCE(restore_guard_until, now()),
                 now() + make_interval(hours => ${RESTORE_GUARD_HOURS})
-              )
+              ),
+              credential_epoch = credential_epoch + ${credentialsRemoved ? 1 : 0}::int
           WHERE id = true
           RETURNING mode, write_freeze, volume_id, epoch, credential_epoch, policy_version,
                     restore_guard_until, rebuild_required
         `;
+        if (appPasswords) appPasswords = { ...appPasswords, credential_epoch_bumped: credentialsRemoved && updated.length === 1 };
         if (updated.length === 1) {
           try {
             backend = summarizeBackend({ kind: 'ok', state: normalizeBackendState(updated[0] as Record<string, unknown>) });
@@ -957,7 +1089,7 @@ backup.post('/import', async (c) => {
         }
       }
 
-      return { plan, backend, calendars, reconciled };
+      return { plan, backend, calendars, reconciled, appPasswords };
     });
   } catch (err) {
     if (err instanceof RestorePlanError) {
@@ -974,7 +1106,7 @@ backup.post('/import', async (c) => {
     }, 500);
   }
 
-  const { plan, backend, calendars, reconciled } = result;
+  const { plan, backend, calendars, reconciled, appPasswords } = result;
   const warnings: string[] = [];
   if (plan.skippedCalendar.length > 0) {
     warnings.push(
@@ -993,6 +1125,9 @@ backup.post('/import', async (c) => {
           : '.'),
     );
   }
+
+  const appPasswordsNote = appPasswords ? appPasswordsWarning(appPasswords) : null;
+  if (appPasswordsNote) warnings.push(appPasswordsNote);
 
   const calendarReport = {
     ...backend,
@@ -1027,6 +1162,7 @@ backup.post('/import', async (c) => {
           reconciled: calendarReport.reconciled.length,
           restore_guard_until: calendarReport.restore_guard_until,
         },
+        appPasswords,
       })}
     )
   `;
@@ -1038,6 +1174,7 @@ backup.post('/import', async (c) => {
     skipped,
     emptied: plan.emptied,
     calendar: calendarReport,
+    appPasswords,
     warnings,
   });
 });

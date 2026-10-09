@@ -95,6 +95,7 @@ ENV_NAMES = (
     "CALDES_AUTHCACHE_KEY",
     "CALDES_AUTHCACHE_DIR",
     "CALDES_POLICY_FILE",
+    "CALDES_XRA_PEER_CIDR",
 )
 
 SECRETS = (TOKEN, SVC_PASSWORD, PROBE_PASSWORD, AUTHCACHE_KEY, IPHONE[1])
@@ -638,6 +639,10 @@ MALFORMED_ENV = [
     ("CALDES_AUTHCACHE_KEY", "chiave-corta"),
     ("CALDES_AUTHCACHE_DIR", "relativa/caldes-auth"),
     ("CALDES_POLICY_FILE", "policy.json"),
+    ("CALDES_XRA_PEER_CIDR", "dav-pub"),
+    ("CALDES_XRA_PEER_CIDR", "0.0.0.0/0"),
+    ("CALDES_XRA_PEER_CIDR", "172.31.251.1/29"),
+    ("CALDES_XRA_PEER_CIDR", "172.31.251.0/29,"),
 ]
 
 
@@ -715,11 +720,13 @@ RESERVED_CASES = [
 ]
 
 
-def test_utenti_di_servizio_riconosciuti_solo_dal_peer_ammesso(unit: SimpleNamespace) -> None:
+def test_utenti_di_servizio_riconosciuti_solo_dal_peer_ammesso(unit: SimpleNamespace, clock: FakeClock) -> None:
     auth = unit.make()
     for login, password, peer, expected in RESERVED_CASES:
         # X-Remote-Addr con un IP interno non conta: il peer si legge solo dal socket.
         assert unit.login(auth, login, password, peer=peer, xra=UNIT_INTERNAL_PEER) == expected, (login, peer)
+        # Un minuto fra i casi: ogni rifiuto compare nei log (limite degli eventi).
+        clock.advance(61)
     assert unit.backend.calls() == [], "un login riservato non chiama mai verify-credentials"
     denied = caldes_events(unit.caplog.text, "reserved_denied")
     assert len(denied) == sum(1 for case in RESERVED_CASES if not case[3])
@@ -727,6 +734,38 @@ def test_utenti_di_servizio_riconosciuti_solo_dal_peer_ammesso(unit: SimpleNames
     assert gateway and gateway[0]["reason"] == "peer"
     assert any(e["login"] == "caldes-svc" and e["reason"] == "password" for e in denied)
     assert any(e["login"] == "caldes-admin" and e["reason"] == "unknown_user" for e in denied)
+
+
+def test_eventi_provocabili_da_un_client_hanno_un_limite_per_minuto(unit: SimpleNamespace, clock: FakeClock) -> None:
+    """
+    reserved_denied, backend_error, stale_if_error e rate_limited: al massimo
+    EVENT_BURST righe al minuto per nome; le altre si contano e il primo
+    evento successivo le riporta in `suppressed` (un attaccante non allaga
+    log e alert con richieste fatte apposta per fallire).
+    """
+    auth = unit.make()
+    burst = caldes_auth.EVENT_BURST
+    for i in range(burst + 25):
+        assert unit.login(auth, "caldes-svc", "sbagliata-%d" % i, peer=UNIT_GATEWAY_PEER) == ""
+    denied = caldes_events(unit.caplog.text, "reserved_denied")
+    assert len(denied) == burst
+    assert all("suppressed" not in e for e in denied)
+
+    # Nella stessa finestra un altro nome ha il proprio limite.
+    unit.backend.set(mode="unavailable")
+    for _ in range(3):
+        with pytest.raises(caldes_auth.BackendUnavailableError):
+            unit.login(auth, *IPHONE)
+    assert len(caldes_events(unit.caplog.text, "backend_error")) == 3
+
+    clock.advance(61)
+    assert unit.login(auth, "caldes-svc", "sbagliata", peer=UNIT_GATEWAY_PEER) == ""
+    denied = caldes_events(unit.caplog.text, "reserved_denied")
+    assert len(denied) == burst + 1
+    assert denied[-1]["suppressed"] == 25
+    # Il conteggio riparte: la riga successiva non lo ripete.
+    assert unit.login(auth, "caldes-svc", "sbagliata", peer=UNIT_GATEWAY_PEER) == ""
+    assert "suppressed" not in caldes_events(unit.caplog.text, "reserved_denied")[-1]
 
 
 def test_username_riservati_non_entrano_mai_nel_ramo_device(unit: SimpleNamespace) -> None:
@@ -785,6 +824,27 @@ def test_x_forwarded_for_solo_da_un_x_remote_addr_valido(unit: SimpleNamespace, 
     assert [(e["peer"], e["reason"]) for e in events] == [(UNIT_GATEWAY_PEER, "absent"), (UNIT_GATEWAY_PEER, "absent")]
 
 
+def test_x_remote_addr_solo_dal_peer_della_porta_pubblicata(unit: SimpleNamespace, monkeypatch: pytest.MonkeyPatch, clock: FakeClock) -> None:
+    """
+    Con CALDES_XRA_PEER_CIDR (il gateway della rete dav-pub) un altro
+    container che raggiunge Radicale direttamente non sceglie l'IP con cui
+    l'API conta il rate limit e registra last_used_ip: il suo X-Remote-Addr
+    vale come assente.
+    """
+    monkeypatch.setenv("CALDES_XRA_PEER_CIDR", "172.18.0.0/29")
+    unit.backend.set(users=[{"username": IPHONE[0], "password": IPHONE[1]}])
+    auth = unit.make()
+    assert "X-Remote-Addr da 172.18.0.0/29" in unit.caplog.text
+    assert unit.login(auth, *IPHONE, peer=UNIT_GATEWAY_PEER, xra="203.0.113.7") == PRINCIPAL
+    clock.advance(61)
+    assert unit.login(auth, *IPHONE, peer="172.18.0.9", xra="198.51.100.7") == PRINCIPAL
+    clock.advance(61)
+    assert unit.login(auth, *IPHONE, peer="::ffff:172.18.0.1", xra="203.0.113.8") == PRINCIPAL
+    assert [c["x_forwarded_for"] for c in unit.backend.calls()] == ["203.0.113.7", None, "203.0.113.8"]
+    events = caldes_events(unit.caplog.text, "missing_x_remote_addr")
+    assert [(e["peer"], e["reason"]) for e in events] == [("172.18.0.9", "untrusted_peer")]
+
+
 @pytest.mark.parametrize(
     "login,password",
     [
@@ -838,7 +898,6 @@ def test_cache_in_memoria_di_60_secondi_e_401_esplicito(unit: SimpleNamespace, c
 FAILURES = [
     ("unavailable", {"mode": "unavailable"}, {"status": 503}),
     ("error", {"mode": "error"}, {"status": 500}),
-    ("rate_limited", {"mode": "rate_limited"}, {"status": 429}),
     ("garbage", {"mode": "garbage"}, {"status": 200, "error": "out_of_contract"}),
     ("drop", {"mode": "drop"}, {"error": "connection_closed"}),
     ("slow", {"mode": "slow", "delay_ms": 1500}, {"error": "timeout"}),
@@ -872,6 +931,38 @@ def test_backend_in_errore_senza_cache_solleva_eccezione(
         assert events[0][field] == value, (field, events[0])
     assert events[0]["login"] == "iphone"
     assert any(r.levelno == logging.ERROR and "backend_error" in r.getMessage() for r in unit.caplog.records)
+
+
+def test_429_e_una_negazione_temporanea_mai_stale_if_error(unit: SimpleNamespace, clock: FakeClock) -> None:
+    """
+    L'API conta solo i tentativi falliti e verifica sempre la password prima
+    del limite: un 429 vuol dire "password sbagliata, troppe volte". Il
+    plugin risponde "" (Radicale: 401 dopo il delay) senza consultare la
+    cache persistita: esaurire il proprio bucket non dà un confronto senza
+    ritardo contro credenziali che il database non ha più.
+    """
+    unit.backend.set(users=[{"username": IPHONE[0], "password": IPHONE[1]}])
+    auth = unit.make()
+    assert unit.login(auth, *IPHONE) == PRINCIPAL
+    key = expected_cache_key(0, *IPHONE)
+    assert key in read_authcache(unit.authcache)["entries"]
+
+    # La riga sparisce dal database (ripristino) e qualcuno esaurisce il bucket.
+    clock.advance(61)
+    unit.backend.set(mode="rate_limited")
+    assert unit.login(auth, *IPHONE) == "", "la cache persistita non si consulta con un 429"
+    assert unit.login(auth, IPHONE[0], "sbagliata") == ""
+    assert caldes_events(unit.caplog.text, "stale_if_error") == []
+    assert caldes_events(unit.caplog.text, "backend_error") == []
+    limited = caldes_events(unit.caplog.text, "rate_limited")
+    assert [(e["login"], e["status"]) for e in limited] == [("iphone", 429), ("iphone", 429)]
+    # Le cache restano: il 429 non è la negazione esplicita del contratto.
+    assert key in read_authcache(unit.authcache)["entries"]
+
+    # Con un errore vero del backend la cache persistita torna a valere.
+    unit.backend.set(mode="unavailable")
+    assert unit.login(auth, *IPHONE) == PRINCIPAL
+    assert caldes_events(unit.caplog.text, "stale_if_error")
 
 
 def test_timeout_complessivo_anche_sulla_risoluzione_dns(unit: SimpleNamespace, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -987,7 +1078,8 @@ def test_lettura_della_risposta_con_ogni_framing_http(framing: str) -> None:
         (401, b"", "error", {"error": "bearer_rejected"}),
         (401, b'{"ok": "false"}', "error", {}),
         (403, b'{"ok": false}', "error", {"status": 403}),
-        (429, b'{"error": "Troppi tentativi"}', "error", {"status": 429}),
+        (429, b'{"error": "Troppi tentativi"}', "rate_limited", {"status": 429}),
+        (429, b"", "rate_limited", {"status": 429}),
         (302, b"", "error", {"status": 302}),
         (503, b"<html>", "error", {"status": 503}),
     ],
@@ -1475,11 +1567,15 @@ def test_backend_giu_senza_cache_500_senza_delay(tmp_path: Path, backend: MockVe
         denied = server.propfind("/federico/", user=user, password="sbagliata")
         assert denied.status == 401 and denied.elapsed >= 0.9, "credenziali rifiutate: 401 dopo il delay"
 
-        for mode in ("unavailable", "error", "rate_limited", "garbage", "drop"):
+        for mode in ("unavailable", "error", "garbage", "drop"):
             backend.set(mode=mode)
             response = server.propfind("/federico/", user=user, password=password)
             assert response.status == 500, mode
             assert response.elapsed < 0.6, "%s: 500 senza delay (%.3f s)" % (mode, response.elapsed)
+        # 429 (troppi tentativi falliti): negazione temporanea, 401 dopo il delay.
+        backend.set(mode="rate_limited")
+        limited = server.propfind("/federico/", user=user, password=password)
+        assert limited.status == 401 and limited.elapsed >= 0.9, "429: 401 dopo il delay (%.3f s)" % limited.elapsed
         backend.set(mode="slow", delay_ms=1500)
         response = server.propfind("/federico/", user=user, password=password)
         assert response.status == 500 and 0.9 <= response.elapsed < 1.7, "timeout di 1 s (%.3f s)" % response.elapsed
@@ -1492,7 +1588,8 @@ def test_backend_giu_senza_cache_500_senza_delay(tmp_path: Path, backend: MockVe
         assert server.propfind("/federico/", user=user, password=password).status == 207
         logs = server.logs()
         assert "verify-credentials non disponibile" in logs
-        assert len(caldes_events(logs, "backend_error")) == 7
+        assert len(caldes_events(logs, "backend_error")) == 6
+        assert len(caldes_events(logs, "rate_limited")) == 1
         assert password not in logs
     finally:
         server.stop()

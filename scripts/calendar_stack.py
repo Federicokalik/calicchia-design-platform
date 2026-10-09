@@ -499,6 +499,13 @@ def write_manifest(run_dir: str) -> Dict[str, Any]:
         identity, detail = identity_status(state, radicale["inventory"]["marker"])
     else:
         identity, detail = "not_captured", "volume di Radicale non incluso in questo backup"
+    # Volume richiesto ma non salvato (assente, senza collections/, lock o tar
+    # falliti): il dump c'è, ma il run non è un backup coordinato.
+    incomplete = (_env("CS_INCOMPLETE") or "").strip()
+    if incomplete and radicale is not None:
+        raise ToolError("CS_INCOMPLETE con il volume presente nel run: incoerente")
+    if incomplete:
+        detail = "%s: %s" % (detail, incomplete)
     doc = {
         "schema": MANIFEST_SCHEMA,
         "kind": MANIFEST_KIND,
@@ -508,6 +515,11 @@ def write_manifest(run_dir: str) -> Dict[str, Any]:
         "host": _env("CS_HOST"),
         "script": _env("CS_SCRIPT"),
         "principal": principal,
+        # false: salvato solo il database perché il volume richiesto non era
+        # disponibile (incomplete_reason); i manifest precedenti non hanno il
+        # campo e valgono come completi.
+        "complete": not incomplete,
+        "incomplete_reason": incomplete or None,
         "database": db,
         "radicale": radicale,
         "consistency": {

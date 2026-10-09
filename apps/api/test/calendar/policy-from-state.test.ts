@@ -610,7 +610,9 @@ describe('permessi di caldes_rights (§8, fixtures/rights-matrix.cases.json)', (
       assert.equal(r('federico', 'federico/nuova', mode), 'r', 'MKCALENDAR negata');
       assert.equal(r(PROBE_USER, 'federico/_canary', mode), '', 'la PUT del probe su _canary risponde 403');
     }
-    assert.equal(r('federico', 'federico', 'live'), 'RW');
+    // Sempre e solo R sul principal, anche in live: il marker lo scrive solo caldes-svc.
+    assert.equal(r('federico', 'federico', 'live'), 'R');
+    assert.equal(r(PROBE_USER, 'federico', 'live'), 'R');
     assert.equal(r('federico', 'federico/c', 'live'), 'rw');
     assert.equal(r('federico', 'federico/nuova', 'live'), 'rw', 'MKCALENDAR ammessa');
     assert.equal(r(PROBE_USER, 'federico/_canary', 'live'), 'rw');

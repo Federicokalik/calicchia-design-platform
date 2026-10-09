@@ -14,7 +14,12 @@
  *  - revoca dall'admin: finché la policy porta il vecchio credential_epoch la
  *    cache di 60 s del plugin accetta ancora la password; con la policy
  *    riscritta dallo stato (policyFromState, credential_epoch + 1) il plugin
- *    svuota le cache e la richiesta successiva riceve 401.
+ *    svuota le cache e la richiesta successiva riceve 401;
+ *  - rate limit: chi esaurisce il bucket di (IP, username) con password
+ *    sbagliate riceve 401 da Radicale (429 = negazione temporanea per il
+ *    plugin), mentre il device con la password giusta dallo stesso IP passa;
+ *  - CALDAV_BACKEND_ALLOWED_PEERS: la route risponde solo al peer di
+ *    Radicale, un altro peer riceve 404 anche con il Bearer.
  *
  * I permessi qui sono quelli di default del harness (owner_only): la matrice
  * dei permessi di caldes_rights ha i propri test. La policy la scrive il test
@@ -26,13 +31,14 @@
 
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { request as httpRequest } from 'node:http';
 import { mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import type { AddressInfo } from 'node:net';
+import { createServer, type AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, describe, test } from 'node:test';
 import { serve, type ServerType } from '@hono/node-server';
-import { TEST_ENV } from '../helpers/env';
+import { TEST_ENV, withEnv } from '../helpers/env';
 import { sql } from '../helpers/db';
 import { api } from '../helpers/http';
 import { useFixtures } from '../helpers/fixtures';
@@ -46,6 +52,7 @@ import {
   xmlChild,
 } from '../helpers/radicale';
 import { app } from '../../src/app';
+import { VERIFY_RATE_LIMIT_MAX } from '../../src/routes/calendar/caldav-backend';
 import {
   normalizeBackendState,
   policyFromState,
@@ -67,6 +74,48 @@ function sha256(text: string): string {
 }
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** POST diretto a verify-credentials con il Bearer, da un indirizzo sorgente scelto. */
+function postVerify(
+  url: string,
+  body: { username: string; password: string },
+  opts: { forwardedFor?: string; localAddress?: string } = {},
+): Promise<{ status: number; text: string }> {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(body);
+    const req = httpRequest(
+      `${url}/verify-credentials`,
+      {
+        method: 'POST',
+        localAddress: opts.localAddress,
+        headers: {
+          authorization: `Bearer ${TEST_ENV.CALDAV_SERVICE_TOKEN}`,
+          'content-type': 'application/json',
+          'content-length': Buffer.byteLength(payload),
+          connection: 'close',
+          ...(opts.forwardedFor ? { 'x-forwarded-for': opts.forwardedFor } : {}),
+        },
+      },
+      (res) => {
+        let text = '';
+        res.setEncoding('utf8');
+        res.on('data', (chunk: string) => { text += chunk; });
+        res.on('end', () => resolve({ status: res.statusCode ?? 0, text }));
+      },
+    );
+    req.on('error', reject);
+    req.end(payload);
+  });
+}
+
+/** Indirizzo di loopback utilizzabile come sorgente (Linux: tutta 127.0.0.0/8). */
+function canUseSource(address: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = createServer();
+    probe.once('error', () => resolve(false));
+    probe.listen(0, address, () => probe.close(() => resolve(true)));
+  });
+}
 
 /**
  * Regressione: con la richiesta "Connection: close" l'API Node risponde con
@@ -196,5 +245,49 @@ describe('caldes_auth reale contro la route verify-credentials reale', { skip: r
     await sleep(1_100);
     assert.equal((await client.propfind('/')).status, 401, 'dopo il cambio di epoch la password revocata è rifiutata');
     assert.match(rad.server.logs(), /credential_epoch_changed/);
+  });
+
+  test('rate limit dei soli tentativi falliti: l\'attaccante riceve 401, il device con la password giusta passa', async () => {
+    await writePolicyFromState();
+    const { password, row } = await fx.appPassword({ username: 'ipad', device: 'iPad rate limit e2e' });
+    const ip = '203.0.113.90';
+    // Bucket di (IP, 'ipad') esaurito direttamente sulla route, con il Bearer.
+    for (let i = 0; i <= VERIFY_RATE_LIMIT_MAX; i++) {
+      const res = await postVerify(backendUrl, { username: 'ipad', password: `${i}`.padStart(32, 'f') }, { forwardedFor: ip });
+      assert.equal(res.status, i < VERIFY_RATE_LIMIT_MAX ? 401 : 429, `tentativo ${i + 1}: ${res.text}`);
+    }
+    const mark = rad.server.logs().length;
+    // Attraverso Radicale: password sbagliata → 429 → 401 (mai 500 né stale-if-error).
+    const attacker = rad.server.client('ipad', 'e'.repeat(32)).withHeaders({ 'X-Remote-Addr': ip });
+    assert.equal((await attacker.propfind('/')).status, 401);
+    // Il device legittimo dallo stesso IP: la password giusta non è mai limitata.
+    const device = rad.server.client('ipad', password).withHeaders({ 'X-Remote-Addr': ip });
+    assert.equal((await device.propfind('/')).status, 207);
+    const logs = rad.server.logs().slice(mark);
+    assert.match(logs, /"event":"rate_limited"/);
+    assert.doesNotMatch(logs, /"event":"(stale_if_error|backend_error)"/);
+    const [usage] = await sql<Array<{ last_used_ip: string | null; usage_count: number }>>`
+      SELECT last_used_ip, usage_count FROM caldav_app_passwords WHERE id = ${row.id}
+    `;
+    assert.deepEqual(usage, { last_used_ip: ip, usage_count: 1 });
+  });
+
+  test('CALDAV_BACKEND_ALLOWED_PEERS: la route risponde solo al peer di Radicale, gli altri ricevono 404', async (t) => {
+    if (!(await canUseSource('127.0.0.2'))) {
+      t.skip('127.0.0.2 non utilizzabile come indirizzo sorgente su questo sistema');
+      return;
+    }
+    await writePolicyFromState();
+    const { password } = await fx.appPassword({ device: 'Peer ammessi e2e' });
+    // Radicale chiama l'API da 127.0.0.1 (CALDAV_BACKEND_URL su 127.0.0.1).
+    await withEnv({ CALDAV_BACKEND_ALLOWED_PEERS: '127.0.0.1/32' }, async () => {
+      assert.equal((await rad.server.client('federico', password).propfind('/')).status, 207, 'peer di Radicale ammesso');
+      // Un altro peer (il vhost pubblico in produzione) non vede la route, anche con il Bearer.
+      const other = await postVerify(backendUrl, { username: 'federico', password }, { localAddress: '127.0.0.2' });
+      assert.equal(other.status, 404, other.text);
+      assert.deepEqual(JSON.parse(other.text), { error: 'Not Found' });
+      const allowed = await postVerify(backendUrl, { username: 'federico', password }, { localAddress: '127.0.0.1' });
+      assert.equal(allowed.status, 200, allowed.text);
+    });
   });
 });

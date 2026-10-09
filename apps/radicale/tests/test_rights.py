@@ -586,18 +586,55 @@ def test_utente_anonimo_401(server: h.InProcessRadicale) -> None:
                           password="sbagliata").status == 401
 
 
-def test_marker_manomesso_da_un_device_in_live_toglie_l_accesso(server: h.InProcessRadicale) -> None:
-    # La matrice del contratto §8 dà RW sul principal in live: un device può
-    # cambiare le dead prop del principal. L'effetto è fail-closed (identità
-    # diversa → 403 per tutti i device), mai un accesso in più. Vedi le
-    # segnalazioni del report di F1.
+def test_marker_del_principal_scrivibile_solo_da_caldes_svc_anche_in_live(server: h.InProcessRadicale) -> None:
+    """
+    I device hanno sempre e solo R sul principal (contratto §8): un'app-password
+    valida (telefono rubato, client difettoso) non può togliere o falsificare il
+    marker d'identità, che lo scrive solo caldes-svc (§4.2). MKCALENDAR di una
+    collezione nuova resta ammessa in live: Radicale controlla la `w` del path
+    nuovo, non la W del principal.
+    """
     server.control.set_mode("live")
-    assert server.proppatch(P + "/", h.PRINCIPAL, h.marker_proppatch_body(h.OTHER_VOLUME_ID, 1)).status == 207
-    assert server.propfind(P + "/", h.PRINCIPAL).status == 403
-    assert _put(server, "c") == 403
-    # caldes-svc lo ripristina (riassegnazione d'identità dal wizard).
-    assert server.proppatch(P + "/", h.SERVICE_USER, h.marker_proppatch_body(h.VOLUME_ID, 1)).status == 207
+    props = server.principal_dir() / ".Radicale.props"
+    before = props.read_bytes()
+    remove = ('<?xml version="1.0"?><D:propertyupdate xmlns:D="DAV:" xmlns:K="urn:calicchia:caldes">'
+              "<D:remove><D:prop><K:volume-id/><K:epoch/></D:prop></D:remove></D:propertyupdate>")
+    for user in (h.PRINCIPAL, h.PROBE_USER):
+        assert server.proppatch(P + "/", user, remove).status == 403, user
+        assert server.proppatch(P + "/", user, h.marker_proppatch_body(h.OTHER_VOLUME_ID, 7)).status == 403, user
+    assert props.read_bytes() == before, "marker intatto"
+    assert server.propfind(P + "/", h.PRINCIPAL).status == 207
+    assert server.propfind(P + "/", h.PROBE_USER).status == 207
+    # Le collezioni restano utilizzabili dal device in live.
+    assert server.mkcalendar(P + "/dal-telefono/", h.PRINCIPAL).status == 201
+    assert _put(server, "dal-telefono") == 201
     assert _put(server, "c") == 201
+    # caldes-svc resta l'unico che può riscriverlo (riassegnazione d'identità dal wizard).
+    assert server.proppatch(P + "/", h.SERVICE_USER, h.marker_proppatch_body(h.VOLUME_ID, 1)).status == 207
+
+
+def test_dead_prop_delle_collezioni_scritte_da_un_device_restano_dati_non_fidati(server: h.InProcessRadicale) -> None:
+    """
+    In live un device scrive le dead prop delle collezioni che può scrivere
+    (Radicale non distingue PROPPATCH da PUT): anche `{urn:calicchia:caldes}role`
+    e `calendar-id`. I rights non possono impedirlo; per questo la 162 non usa
+    mai la dead prop role di una riga nata da un device e la discovery (F2) non
+    adotta una collezione per calendar-id se il nome non coincide con il
+    sidecar (contratto §3.3 e §4.5). Qui si fissa il comportamento di Radicale
+    su cui poggiano quelle regole.
+    """
+    server.control.set_mode("live")
+    forged = ('<?xml version="1.0"?><D:propertyupdate xmlns:D="DAV:" xmlns:K="urn:calicchia:caldes">'
+              "<D:set><D:prop><K:role>bookings</K:role><K:calendar-id>11111111-2222-4333-8444-555555555555</K:calendar-id>"
+              "</D:prop></D:set></D:propertyupdate>")
+    assert server.mkcalendar(P + "/finta/", h.PRINCIPAL).status == 201
+    assert server.proppatch(P + "/finta/", h.PRINCIPAL, forged).status == 207
+    assert server.proppatch(P + "/c/", h.PRINCIPAL, forged).status == 207
+    # Sulle collezioni in sola lettura per i device no.
+    for name in ("f", "bookings", "scadenze"):
+        assert server.proppatch("%s/%s/" % (P, name), h.PRINCIPAL, forged).status == 403, name
+    props = json.loads((server.collection_dir("finta") / ".Radicale.props").read_text(encoding="utf-8"))
+    assert props.get("{urn:calicchia:caldes}role") == "bookings"
 
 
 def test_log_del_principal_di_servizio_a_debug(

@@ -186,6 +186,9 @@ const SCRUB_EXACT = new Set([
   'PRIVATE_URL_TTL_DAYS',
   'PUBLIC_BASE_URL',
   'QUOTE_PUBLIC_URL',
+  // Peer TCP ammessi su /api/caldav-backend: le richieste in-process non hanno
+  // un socket, quindi con la variabile impostata risponderebbero 404.
+  'CALDAV_BACKEND_ALLOWED_PEERS',
   // Client CalDAV di servizio e control-plane di Radicale (contratto
   // control-plane §1.3): i test passano i valori in modo esplicito. Restano
   // RADICALE_BIN, RADICALE_PYTHON e RADICALE_REQUIRED, che sono del harness.

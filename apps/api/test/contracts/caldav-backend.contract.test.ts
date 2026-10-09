@@ -362,34 +362,74 @@ test('verify-credentials: IP da X-Forwarded-For (primo elemento, IPv4-mapped) o 
 
 // ─── verify-credentials: rate limit ──────────────────────
 
-test('verify-credentials: rate limit per (IP, username), dopo il Bearer e senza toccare il database', async () => {
+test('verify-credentials: rate limit dei tentativi falliti per (IP, username), mai sulla password corretta', async () => {
   const federico = await fx.appPassword({ device: 'Rate limit federico' });
   const iphone = await fx.appPassword({ username: 'iphone', device: 'Rate limit iphone' });
   const ip = '203.0.113.30';
+  const wrong = { username: 'federico', password: '1'.repeat(32) };
 
   for (let i = 0; i < VERIFY_RATE_LIMIT_MAX; i++) {
-    assertDenied(await verify({ username: 'federico', password: '1'.repeat(32) }, { ip }), `tentativo ${i + 1}`);
+    assertDenied(await verify(wrong, { ip }), `tentativo ${i + 1}`);
   }
-  // Oltre il limite anche le credenziali giuste rispondono 429 (errore del
-  // backend per il plugin, che usa la cache persistita), e la riga non cambia.
-  const body = { username: 'federico', password: federico.password };
-  const limited = await verify(body, { ip });
+  // Oltre il limite un tentativo fallito risponde 429 invece di 401: per
+  // caldes_auth è una negazione temporanea (401 dopo il delay di Radicale),
+  // mai un errore del backend che aprirebbe lo stale-if-error.
+  const limited = await verify(wrong, { ip });
   assert.equal(limited.status, 429, limited.text);
   assertSchema('responseRateLimited', limited.json);
   assert.notDeepEqual(schemaErrors('responseDenied', limited.json), []);
-  assert.equal((await usage(federico.row.id)).usage_count, 0);
-  record('verify-credentials/rate-limit-superato', limited, verifyRequest(body));
+  record('verify-credentials/rate-limit-superato', limited, verifyRequest(wrong));
 
-  // Stesso bucket senza distinzione di maiuscole.
+  // La password corretta non è mai limitata: chi esaurisce il bucket di uno
+  // username (anche quello comune, senza X-Remote-Addr) non blocca il device
+  // legittimo. E un successo non consuma il bucket.
+  const body = { username: 'federico', password: federico.password };
+  for (let i = 0; i < 3; i++) {
+    const ok = await verify(body, { ip });
+    assert.equal(ok.status, 200, ok.text);
+    assertSchema('responseOk', ok.json);
+  }
+  assert.equal((await usage(federico.row.id)).usage_count, 3);
+  assert.equal((await usage(federico.row.id)).last_used_ip, ip);
+
+  // Stesso bucket senza distinzione di maiuscole (FEDERICO non è lo username
+  // dell'app-password: tentativo fallito).
   assert.equal((await verify({ username: 'FEDERICO', password: federico.password }, { ip })).status, 429);
-  // Il Bearer viene prima del limite.
-  assert.equal((await verify(body, { ip, bearer: 'token-sbagliato' })).status, 401);
-  // Altro username dallo stesso IP e stesso username da un altro IP: liberi.
+  // Il Bearer viene prima di tutto.
+  assert.equal((await verify(wrong, { ip, bearer: 'token-sbagliato' })).status, 401);
+  // Altro username dallo stesso IP e stesso username da un altro IP: bucket propri.
+  assertDenied(await verify({ username: 'iphone', password: '2'.repeat(32) }, { ip }), 'altro username');
   const otherUser = await verify({ username: 'iphone', password: iphone.password }, { ip });
   assert.equal(otherUser.status, 200, otherUser.text);
+  assertDenied(await verify(wrong, { ip: '203.0.113.31' }), 'altro IP');
   const otherIp = await verify(body, { ip: '203.0.113.31' });
   assert.equal(otherIp.status, 200, otherIp.text);
   assert.equal((await usage(federico.row.id)).last_used_ip, '203.0.113.31');
+});
+
+// ─── verify-credentials: peer TCP ammessi ────────────────
+
+test('verify-credentials: con CALDAV_BACKEND_ALLOWED_PEERS solo il peer di Radicale, anche con il Bearer giusto', async () => {
+  const { password } = await fx.appPassword({ device: 'Peer ammessi' });
+  const body = { username: 'federico', password };
+  // Le richieste in-process non hanno un socket: peer sconosciuto → 404 come
+  // se la route non esistesse (il vhost pubblico dell'API resta cieco).
+  await withEnv({ CALDAV_BACKEND_ALLOWED_PEERS: '172.31.250.3/32' }, async () => {
+    const res = await verify(body);
+    assert.equal(res.status, 404, res.text);
+    assert.deepEqual(res.json, { error: 'Not Found' });
+    assert.equal((await verify(body, { bearer: false })).status, 404, 'il peer viene prima del Bearer');
+  });
+  // Valore non valido: backend chiuso con 503 (errore di configurazione per
+  // caldes_auth, mai una negazione).
+  for (const value of ['non-una-rete', '172.31.250.0/0', '172.31.250.3/33', '172.31.250.3/x']) {
+    await withEnv({ CALDAV_BACKEND_ALLOWED_PEERS: value }, async () => {
+      const res = await verify(body);
+      assert.equal(res.status, 503, `${value}: ${res.text}`);
+    });
+  }
+  // Senza variabile (sviluppo, test): controllo spento.
+  assert.equal((await verify(body)).status, 200);
 });
 
 // ─── Route /collections* rimosse ─────────────────────────

@@ -759,6 +759,70 @@ describe('import del backup JSON', () => {
     }
   });
 
+  test('app-password: una revoca successiva al backup resta, le password tolte invalidano le cache (credential_epoch + 1)', async () => {
+    await resetBackendState();
+    const verify = (username: string, password: string) =>
+      api.post('/api/caldav-backend/verify-credentials', { auth: { caldavService: true }, body: { username, password } });
+
+    const stolen = await fx.appPassword({ username: 'iphone', device: 'iPhone rubato' });
+    assert.equal((await verify('iphone', stolen.password)).status, 200);
+    const file = await exportBackup();
+
+    // Dopo l'export: revoca del telefono rubato (epoch + 1) e un device nuovo.
+    const revoke = await api.delete(`/api/caldav-tokens/${stolen.row.id}`, { auth: 'admin' });
+    assert.equal(revoke.status, 200, revoke.text);
+    assert.equal((await verify('iphone', stolen.password)).status, 401);
+    const [{ revoked_at: revokedAt }] = await sql<Array<{ revoked_at: Date }>>`
+      SELECT revoked_at FROM caldav_app_passwords WHERE id = ${stolen.row.id}::uuid
+    `;
+    const fresh = await fx.appPassword({ username: 'federico', device: 'Mac nuovo' });
+    assert.equal((await verify('federico', fresh.password)).status, 200);
+    const stateBefore = await readState();
+
+    const res = await withTripwires(PROTECTED_ALWAYS, () => importBackup(file));
+    assert.equal(res.status, 200, res.text);
+
+    // La revoca resta, con data e motivo originali: il backup non la annulla.
+    const [row] = await sql<Array<{ is_active: boolean; revoked_at: Date | null; revoked_reason: string | null }>>`
+      SELECT is_active, revoked_at, revoked_reason FROM caldav_app_passwords WHERE id = ${stolen.row.id}::uuid
+    `;
+    assert.equal(row.is_active, false);
+    assert.equal(row.revoked_at?.toISOString(), revokedAt.toISOString());
+    assert.equal(row.revoked_reason, 'revoked from admin');
+    assert.equal((await verify('iphone', stolen.password)).status, 401);
+
+    // La password creata dopo il backup non esiste più: epoch + 1, così
+    // caldes_auth svuota anche la cache persistita.
+    const [{ n }] = await sql<Array<{ n: number }>>`
+      SELECT count(*)::int AS n FROM caldav_app_passwords WHERE id = ${fresh.row.id}::uuid
+    `;
+    assert.equal(n, 0);
+    assert.equal((await verify('federico', fresh.password)).status, 401);
+    const stateAfter = await readState();
+    assert.equal(stateAfter.credential_epoch, stateBefore.credential_epoch + 1);
+    assert.ok(stateAfter.policy_version > stateBefore.policy_version);
+    await assertRestoreGuard(stateAfter);
+
+    assert.deepEqual(res.json.appPasswords, { revocations_kept: 1, removed: 1, credential_epoch_bumped: true });
+    assert.equal(res.json.warnings.length, 1);
+    assert.match(res.json.warnings[0], /^App-password CalDAV: un'app-password valida prima del ripristino non esiste più/);
+    assert.match(res.json.warnings[0], /revocata dopo il backup resta revocata/);
+    assert.match(res.json.warnings[0], /credential_epoch incrementato/);
+    const [audit] = await sql<Array<{ metadata: Row }>>`
+      SELECT metadata FROM audit_logs WHERE table_name = 'backup' AND action = 'IMPORT'
+      ORDER BY created_at DESC LIMIT 1
+    `;
+    assert.deepEqual(audit.metadata.appPasswords, { revocations_kept: 1, removed: 1, credential_epoch_bumped: true });
+
+    // Un secondo import dello stesso backup non toglie più nulla: epoch invariato.
+    const again = await importBackup(file);
+    assert.equal(again.status, 200, again.text);
+    assert.deepEqual(again.json.appPasswords, { revocations_kept: 1, removed: 0, credential_epoch_bumped: false });
+    assert.equal((await readState()).credential_epoch, stateAfter.credential_epoch);
+    assert.equal((await verify('iphone', stolen.password)).status, 401);
+    await resetBackendState();
+  });
+
   test('round-trip export → import → export: dati identici, cambia solo la guardia dello stato', async () => {
     await resetBackendState();
     const first = await exportBackup();

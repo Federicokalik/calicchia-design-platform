@@ -8,9 +8,10 @@
 # docs/calendar-radicale/contracts/control-plane.md.
 #
 # Regole di questo file:
-# - il config è montato in sola lettura (./apps/radicale/config:/config:ro) e
-#   copiato anche nell'immagine; nessuna variabile RADICALE_CONFIG_*: l'entrypoint
-#   dell'immagine tomsquest riscriverebbe il file (design §3.1);
+# - il config sta nell'immagine (/app/config/config, CMD del Dockerfile) e
+#   cambia solo con un tag sha nuovo: il compose non lo monta dal repository;
+#   nessuna variabile RADICALE_CONFIG_*: l'entrypoint dell'immagine tomsquest
+#   proverebbe a riscriverlo (design §3.1);
 # - i commenti stanno sempre su righe proprie: Radicale legge il file con
 #   RawConfigParser, che non conosce i commenti in fondo alla riga e li
 #   tratterebbe come parte del valore ("False   # ..." non è un booleano);
