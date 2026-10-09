@@ -577,9 +577,11 @@ app.use('/api/mcp', mcpAuthMiddleware);
 app.use('/api/mcp/*', mcpAuthMiddleware);
 app.route('/api/mcp', mcp);
 
-// CalDAV backend — endpoint interni per il plugin Radicale (service-token auth).
-// Path top-level (NON sotto /api/calendar, che è il router pubblico). Mai
-// esposto dal reverse proxy: raggiungibile solo da Radicale su app-net.
+// CalDAV backend — POST /verify-credentials per il plugin caldes_auth di
+// Radicale (service-token auth, contratto control-plane §9.4). Path top-level
+// (NON sotto /api/calendar, che è il router pubblico). Radicale lo chiama sulla
+// rete interna caldav-int (CALDAV_BACKEND_URL=http://api-int:3001/...); il vhost
+// pubblico dell'API inoltra anche questo path, quindi la protezione è il Bearer.
 app.use('/api/caldav-backend', caldavServiceAuth);
 app.use('/api/caldav-backend/*', caldavServiceAuth);
 app.route('/api/caldav-backend', caldavBackend);

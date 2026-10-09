@@ -1,8 +1,11 @@
 /**
  * Auth del backend CalDAV: protegge gli endpoint interni `/api/caldav-backend/*`
- * chiamati SOLO dal container Radicale su app-net. Secret singolo condiviso
- * (`CALDAV_SERVICE_TOKEN`) in Bearer, confronto constant-time. Questi endpoint
- * non sono mai esposti dal reverse proxy pubblico.
+ * chiamati SOLO dal plugin caldes_auth di Radicale, sulla rete interna
+ * caldav-int. Secret singolo condiviso (`CALDAV_SERVICE_TOKEN`) in Bearer,
+ * confronto constant-time. Il vhost pubblico dell'API inoltra anche questi
+ * path: il Bearer è l'unica protezione, e un 401 di questo middleware non è
+ * mai una negazione delle credenziali per il plugin (contratto control-plane
+ * §9.4).
  */
 
 import { Context, Next } from 'hono';

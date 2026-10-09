@@ -276,7 +276,8 @@ test('fixture: app-password, iscrizioni, token MCP e device', async () => {
   });
   const ok = await verify(password);
   assert.equal(ok.status, 200);
-  assert.deepEqual(ok.json, { ok: true, principal: 'federico' });
+  // F1 (contratto control-plane §9.4): principal canonico ed expires_at (null: nessuna scadenza).
+  assert.deepEqual(ok.json, { ok: true, principal: 'federico', expires_at: null });
   assert.equal((await verify('password-sbagliata')).status, 401);
   assert.equal((await verify(password, false)).status, 401);
 
