@@ -1,7 +1,7 @@
 -- Inventario del calendario prima del passaggio a Radicale: SOLA LETTURA.
 --
 -- Fase F0, attività 1 del piano (docs/calendar-radicale/piano.md); anomalie
--- del design §13.4. Copia adattata di docs/calendar-radicale/inventario-produzione.sql:
+-- del design §13.4. Nata come copia adattata della prima bozza in docs/calendar-radicale (ora rimossa):
 --  - ogni query ha una chiave stabile e un titolo, per il report JSON/Markdown
 --    di scripts/calendar-inventory.ts;
 --  - le annotazioni @anomaly collegano i risultati ai codici del design;
