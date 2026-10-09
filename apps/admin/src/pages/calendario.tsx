@@ -263,7 +263,16 @@ export default function CalendarioPage() {
         allDay: false,
         editable: false,
         ...SOURCE_COLORS.calcom,
-        extendedProps: { source: 'calcom', data: b },
+        // Il pannello dettaglio legge summary/start_time/end_time: con la riga
+        // grezza mostrava titolo vuoto e "Invalid Date" (idem progetti e domini).
+        extendedProps: {
+          source: 'calcom',
+          data: {
+            summary: `[Cal.com] ${b.title}`, description: b.description ?? null,
+            start_time: b.start_time, end_time: b.end_time, all_day: false,
+            source: 'calcom', status: b.status, location: b.location ?? null, url: null,
+          },
+        },
       });
     }
 
@@ -278,7 +287,14 @@ export default function CalendarioPage() {
         allDay: true,
         editable: false,
         ...SOURCE_COLORS.project,
-        extendedProps: { source: 'project', data: p },
+        extendedProps: {
+          source: 'project',
+          data: {
+            summary: `📐 ${p.name}`, description: p.description ?? null,
+            start_time: p.start_date, end_time: p.target_end_date || p.start_date, all_day: true,
+            source: 'project', status: p.status, location: null, url: null,
+          },
+        },
       });
     }
 
@@ -292,7 +308,14 @@ export default function CalendarioPage() {
         allDay: true,
         editable: false,
         ...SOURCE_COLORS.domain,
-        extendedProps: { source: 'domain', data: d },
+        extendedProps: {
+          source: 'domain',
+          data: {
+            summary: `🌐 ${d.full_domain || d.domain_name} scade`, description: d.registrar ? `Registrar: ${d.registrar}` : null,
+            start_time: String(d.expiration_date).slice(0, 10), end_time: String(d.expiration_date).slice(0, 10), all_day: true,
+            source: 'domain', status: d.status, location: null, url: null,
+          },
+        },
       });
     }
 
@@ -569,7 +592,17 @@ export default function CalendarioPage() {
 
   // Right-click context menu actions per evento del calendario. Mirror delle
   // azioni del detail panel: Modifica / Duplica / Elimina.
-  const buildEventActions = (ev: CalendarEventOcc): RowAction[] => [
+  const buildEventActions = (ev: CalendarEventOcc): RowAction[] => ev.source === 'booking'
+    ? [
+      // Come nel modale: l'evento di una prenotazione non si elimina da qui
+      // (il booking resterebbe confermato ma invisibile).
+      {
+        label: 'Apri prenotazioni',
+        icon: Pencil,
+        onClick: () => navigate('/calendario/prenotazioni'),
+      },
+    ]
+    : [
     {
       label: 'Modifica',
       icon: Pencil,
