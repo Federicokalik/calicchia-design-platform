@@ -96,6 +96,7 @@ await bootstrapKBs();
 const { serve } = await import('@hono/node-server');
 const { app } = await import('./app');
 const { startCronEngine, stopCronEngine } = await import('./cron');
+const { startCalendarControlPlane, stopCalendarControlPlane } = await import('./lib/calendar/radicale/heartbeat');
 const { assertKBsValid } = await import('./lib/quotes/generate');
 const { sql } = await import('./db');
 
@@ -124,13 +125,25 @@ const server = serve({
 // Start cron jobs
 startCronEngine();
 
+// Control-plane di Radicale (F1, docs/calendar-radicale/contracts/control-plane.md):
+// policy.json derivata da calendar_backend_state e heartbeat.json ogni 30 s sul
+// volume caldes_control. Attivo solo se il volume è montato (CALDES_CONTROL_PLANE);
+// non blocca il boot e i suoi errori non fermano l'API.
+startCalendarControlPlane().catch((err) => {
+  console.error(`⚠️  Calendar control-plane not started: ${(err as Error).message}`);
+});
+
 console.log(`✅ API server running at http://localhost:${port}`);
 
 // Graceful shutdown
 function shutdown(signal: string) {
   console.log(`\n${signal} received — shutting down gracefully...`);
   stopCronEngine();
+  // Ferma timer e LISTEN del control-plane e attende il giro in corso prima di
+  // chiudere il pool (il giro usa il database).
+  const controlPlaneStopped = stopCalendarControlPlane().catch(() => {});
   server.close(async () => {
+    await controlPlaneStopped;
     // Drain the Postgres pool so in-flight queries finish before exit (DBX-01).
     await sql.end({ timeout: 5 }).catch(() => {});
     console.log('Server closed.');

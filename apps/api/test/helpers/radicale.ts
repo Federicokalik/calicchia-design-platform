@@ -280,6 +280,17 @@ export interface StartRadicaleOptions {
   predefinedCollections?: Record<string, Record<string, string>>;
   /** Sezioni e chiavi aggiuntive o sovrascritte, applicate per ultime. */
   config?: Record<string, Record<string, ConfigValue>>;
+  /**
+   * Testo della config scritto così com'è al posto di quello generato (es. il
+   * config di produzione del repository con i soli percorsi sostituiti, vedi
+   * integration/radicale-f1-e2e.test.ts). Riceve i percorsi del server; il
+   * testo deve tenere `hosts = 127.0.0.1:0` e il livello di log almeno info,
+   * perché il harness legge la porta dal log. Con questa opzione `auth`,
+   * `rights` e le opzioni della config generata non finiscono nel file:
+   * PYTHONPATH e variabili dei plugin vanno passati con `pythonPath` ed `env`
+   * (o con `auth`/`rights` di tipo plugin, che li forniscono comunque).
+   */
+  configText?: (paths: { rootDir: string; storageDir: string }) => string;
   /** Variabili d'ambiente aggiuntive del processo Radicale. */
   env?: Record<string, string>;
   /** Directory aggiunte a PYTHONPATH (oltre a quelle di auth e rights). */
@@ -538,7 +549,10 @@ export async function startRadicale(options: StartRadicaleOptions = {}): Promise
 
   writeFileSync(htpasswdPath, htpasswdContent(users), { mode: 0o600 });
   if (typeof rights !== 'string' && rights.type === 'from_file') writeFileSync(rightsPath, rights.rules);
-  writeFileSync(configPath, buildRadicaleConfig({ storageDir, htpasswdPath, rightsPath, options }));
+  writeFileSync(
+    configPath,
+    options.configText ? options.configText({ rootDir, storageDir }) : buildRadicaleConfig({ storageDir, htpasswdPath, rightsPath, options }),
+  );
 
   const pythonPath = [
     ...(auth.type === 'plugin' ? auth.pythonPath ?? [] : []),
@@ -733,6 +747,11 @@ export interface MockVerifyUser {
   password: string;
   /** Principal restituito per questo utente (default: quello canonico o lo username, secondo principalMode). */
   principal?: string;
+  /**
+   * Scadenza dell'app-password nella risposta 200 (contratto control-plane
+   * §9.4): stringa ISO o null. Se assente la risposta non ha `expires_at`.
+   */
+  expires_at?: string | null;
 }
 
 export interface MockVerifyState {
