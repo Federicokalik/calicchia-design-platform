@@ -143,12 +143,19 @@ async function rewriteLinks(html: string, campaignId: string): Promise<string> {
   while ((m = re.exec(html))) urls.add(m[1]);
   if (!urls.size) return html;
 
+  // L'href nell'HTML è escapato (& → &amp;): salvato così, il redirect
+  // portava a '...?a=1&amp;b=2' e i parametri dopo il primo (UTM compresi) si
+  // perdevano. In mkt_links va l'URL decodificato; la chiave della mappa resta
+  // l'href escapato, che è quello da sostituire nell'HTML.
+  const decodeHref = (href: string) => href
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
   const tokenByUrl = new Map<string, string>();
   for (const url of urls) {
     const token = randomUUID().replace(/-/g, '').slice(0, 22);
     const [row] = await sql`
       INSERT INTO mkt_links (campaign_id, token, original_url)
-      VALUES (${campaignId}, ${token}, ${url})
+      VALUES (${campaignId}, ${token}, ${decodeHref(url)})
       ON CONFLICT (token) DO NOTHING
       RETURNING token`;
     tokenByUrl.set(url, row?.token ?? token);

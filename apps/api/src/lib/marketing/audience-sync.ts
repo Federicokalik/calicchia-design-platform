@@ -9,6 +9,8 @@
  *  - ENRICHMENT-ONLY: existing non-null fields are preserved (COALESCE); the sync
  *    only fills gaps, so manual admin edits are not clobbered.
  *  - IDEMPOTENT: dedup via the partial unique index on email_norm + ON CONFLICT.
+ *  - Contatti eliminati a mano dall'Audience (soppressione 'manual') non
+ *    vengono reimportati.
  *    Only rows WITH an email are synced (phone-only CRM rows would duplicate on
  *    re-run since there is no phone arbiter — those are added manually instead).
  */
@@ -46,6 +48,7 @@ export async function syncFromSubscribers(): Promise<number> {
       ns.consent_ip, ns.consent_user_agent, ns.created_at
     FROM newsletter_subscribers ns
     WHERE ns.email IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM mkt_suppression s WHERE s.email_norm = lower(btrim(ns.email)) AND s.reason = 'manual')
     ON CONFLICT (email_norm) WHERE email IS NOT NULL DO UPDATE SET
       subscriber_id = COALESCE(mkt_contacts.subscriber_id, EXCLUDED.subscriber_id),
       first_name    = COALESCE(mkt_contacts.first_name, EXCLUDED.first_name),
@@ -67,6 +70,7 @@ export async function syncFromLeads(): Promise<number> {
       COALESCE(l.tags, '{}')
     FROM leads l
     WHERE l.email IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM mkt_suppression s WHERE s.email_norm = lower(btrim(l.email)) AND s.reason = 'manual')
     ON CONFLICT (email_norm) WHERE email IS NOT NULL DO UPDATE SET
       lead_id    = COALESCE(mkt_contacts.lead_id, EXCLUDED.lead_id),
       first_name = COALESCE(mkt_contacts.first_name, EXCLUDED.first_name),
@@ -87,6 +91,7 @@ export async function syncFromCustomers(): Promise<number> {
       'unconfirmed', 'soft_optin', 'warm', 'customer'
     FROM customers c
     WHERE c.email IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM mkt_suppression s WHERE s.email_norm = lower(btrim(c.email)) AND s.reason = 'manual')
     ON CONFLICT (email_norm) WHERE email IS NOT NULL DO UPDATE SET
       customer_id = COALESCE(mkt_contacts.customer_id, EXCLUDED.customer_id),
       first_name  = COALESCE(mkt_contacts.first_name, EXCLUDED.first_name),

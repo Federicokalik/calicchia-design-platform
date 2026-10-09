@@ -172,7 +172,15 @@ emailMarketing.patch('/contacts/:id', async (c) => {
 });
 
 emailMarketing.delete('/contacts/:id', async (c) => {
-  await sql`DELETE FROM mkt_contacts WHERE id = ${c.req.param('id')}`;
+  // La sync notturna reinseriva il contatto da clienti/lead/iscritti (come
+  // soft opt-in, quindi inviabile). L'email va in soppressione 'manual':
+  // emailEligibility la esclude e la sync non la reimporta.
+  const [deleted] = await sql`DELETE FROM mkt_contacts WHERE id = ${c.req.param('id')} RETURNING email_norm`;
+  if (deleted?.email_norm) {
+    await sql`
+      INSERT INTO mkt_suppression (email_norm, reason) VALUES (${deleted.email_norm}, 'manual')
+      ON CONFLICT (email_norm) DO NOTHING`;
+  }
   return c.json({ success: true });
 });
 

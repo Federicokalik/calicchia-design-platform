@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -46,9 +46,20 @@ interface OverviewForm {
   kpi_actual: Kpis;
 }
 
-function toKpiStrings(obj: Record<string, number | string> | null | undefined): Kpis {
+function toKpiStrings(obj: Record<string, number | string> | string | null | undefined): Kpis {
+  // Righe vecchie salvate come stringa JSON: Object.entries su una stringa
+  // creava chiavi "0", "1"… che a ogni salvataggio sporcavano i KPI.
+  let src: unknown = obj;
+  if (typeof src === 'string') {
+    try { src = JSON.parse(src); } catch { src = null; }
+  }
   const out: Kpis = {};
-  if (obj) for (const [k, v] of Object.entries(obj)) out[k] = String(v ?? '');
+  if (src && typeof src === 'object' && !Array.isArray(src)) {
+    for (const [k, v] of Object.entries(src as Record<string, unknown>)) {
+      if (/^\d+$/.test(k)) continue;
+      out[k] = String(v ?? '');
+    }
+  }
   return out;
 }
 
@@ -76,8 +87,13 @@ export default function CampagnaDetailPage() {
   const customers = customersData?.customers || [];
   const projects = projectsData?.projects || [];
 
+  // Il form si idrata una volta per campagna: aggiungere asset o report
+  // ricarica ['campaign', id] e prima riscriveva il form perdendo le
+  // modifiche non ancora salvate della Panoramica.
+  const hydratedId = useRef<string | null>(null);
   useEffect(() => {
-    if (!campaign) return;
+    if (!campaign || hydratedId.current === campaign.id) return;
+    hydratedId.current = campaign.id;
     setForm({
       campaign_name: campaign.campaign_name || '',
       campaign_type: campaign.campaign_type,
@@ -156,8 +172,9 @@ export default function CampagnaDetailPage() {
     actions: topbarActions,
   });
 
-  if (isLoading || !form) return <LoadingState />;
+  if (isLoading) return <LoadingState />;
   if (!campaign) return <div className="p-6 text-muted-foreground">Campagna non trovata.</div>;
+  if (!form) return <LoadingState />;
 
   const kpiFields = metricsForChannel(form.channel);
 

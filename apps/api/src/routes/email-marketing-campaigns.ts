@@ -3,6 +3,7 @@
  * Mounted under /api/email-marketing (admin-only via app.ts protected loop).
  */
 import { Hono } from 'hono';
+import { fromZonedTime } from 'date-fns-tz';
 import { z } from 'zod';
 import { sql } from '../db';
 import { logger } from '../lib/logger';
@@ -33,12 +34,12 @@ const blockSchema = z.object({
 const campaignSchema = z.object({
   name: z.string().trim().min(1).max(200),
   channel: z.enum(['email', 'whatsapp']).default('email'),
-  subject: z.string().trim().max(255).optional(),
-  preheader: z.string().trim().max(255).optional(),
+  subject: z.string().trim().max(255).nullable().optional(),
+  preheader: z.string().trim().max(255).nullable().optional(),
   content_mode: z.enum(['blocks', 'html', 'ai']).default('blocks'),
   content_blocks: z.object({ blocks: z.array(blockSchema) }).optional(),
   content_html: z.string().optional(),
-  wa_body: z.string().max(4096).optional(),
+  wa_body: z.string().max(4096).nullable().optional(),
   from_identity_id: z.string().uuid().optional().nullable(),
   audience_kind: z.enum(['list', 'segment']).optional(),
   list_id: z.string().uuid().optional().nullable(),
@@ -125,16 +126,18 @@ campaignsRouter.patch('/:id', async (c) => {
     UPDATE mkt_campaigns SET
       name = ${d.name ?? existing.name},
       channel = ${d.channel ?? existing.channel},
-      subject = ${d.subject ?? existing.subject},
-      preheader = ${d.preheader ?? existing.preheader},
+      -- Testi svuotabili: '' o null inviati esplicitamente azzerano il campo
+      -- (con ?? il preheader tolto restava e finiva nell'anteprima inbox).
+      subject = ${'subject' in d ? d.subject || null : existing.subject},
+      preheader = ${'preheader' in d ? d.preheader || null : existing.preheader},
       content_mode = ${d.content_mode ?? existing.content_mode},
       content_blocks = ${d.content_blocks ? sql.json(d.content_blocks as never) : existing.content_blocks},
       content_html = ${d.content_html ?? existing.content_html},
-      wa_body = ${d.wa_body ?? existing.wa_body},
+      wa_body = ${'wa_body' in d ? d.wa_body || null : existing.wa_body},
       from_identity_id = ${d.from_identity_id ?? existing.from_identity_id},
       audience_kind = ${d.audience_kind ?? existing.audience_kind},
-      list_id = ${d.list_id ?? existing.list_id},
-      segment_id = ${d.segment_id ?? existing.segment_id},
+      list_id = ${'list_id' in d ? d.list_id ?? null : existing.list_id},
+      segment_id = ${'segment_id' in d ? d.segment_id ?? null : existing.segment_id},
       throttle_per_min = ${d.throttle_per_min ?? existing.throttle_per_min},
       track_opens = ${d.track_opens ?? existing.track_opens},
       track_clicks = ${d.track_clicks ?? existing.track_clicks},
@@ -215,11 +218,26 @@ async function senderFrom(identityId: string | null): Promise<{ from?: string; r
 campaignsRouter.post('/:id/send', async (c) => {
   const [campaign] = await sql`SELECT * FROM mkt_campaigns WHERE id = ${c.req.param('id')}`;
   if (!campaign) return c.json({ error: 'Campagna non trovata' }, 404);
-  if (!['draft', 'scheduled', 'paused'].includes(campaign.status)) {
+  if (!['draft', 'scheduled', 'paused', 'failed'].includes(campaign.status)) {
     return c.json({ error: 'Campagna già in coda o inviata' }, 409);
   }
   const body = await c.req.json().catch(() => ({}));
-  const scheduledAt: string | null = body.scheduled_at ?? null;
+  // <input type="datetime-local"> manda 'YYYY-MM-DDTHH:mm' senza fuso: Postgres
+  // (in UTC) lo salvava come UTC e la campagna partiva 1-2 ore dopo. Senza
+  // offset l'orario si intende Europe/Rome.
+  let scheduledAt: string | null = null;
+  if (body.scheduled_at) {
+    const raw = String(body.scheduled_at);
+    const hasOffset = /(Z|[+-]\d{2}:?\d{2})$/i.test(raw);
+    const parsed = hasOffset ? new Date(raw) : fromZonedTime(raw, 'Europe/Rome');
+    if (Number.isNaN(parsed.getTime())) return c.json({ error: 'Data di pianificazione non valida' }, 400);
+    scheduledAt = parsed.toISOString();
+  }
+  // Ritentare una campagna fallita: i messaggi falliti tornano in coda.
+  if (campaign.status === 'failed') {
+    await sql`UPDATE mkt_messages SET status = 'queued', error = NULL, failed_at = NULL
+              WHERE campaign_id = ${campaign.id} AND status = 'failed'`;
+  }
 
   // Validation gates.
   if (campaign.channel === 'email' && !campaign.subject) return c.json({ error: 'Oggetto richiesto' }, 400);

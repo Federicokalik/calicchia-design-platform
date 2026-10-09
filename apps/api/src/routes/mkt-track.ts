@@ -93,11 +93,17 @@ async function resolveUnsubToken(token: string): Promise<{ contactId: string; em
 }
 
 async function applyUnsub(r: { contactId: string; emailNorm: string | null; campaignId: string | null; messageId: string | null }, ip: string | null, ua: string | null): Promise<void> {
-  await sql`UPDATE mkt_contacts SET email_consent = 'unsubscribed', updated_at = now() WHERE id = ${r.contactId}`;
+  // Idempotente: GET + POST one-click (Gmail) o un link scanner sullo stesso
+  // messaggio contavano più disiscrizioni per un solo contatto.
+  const changed = await sql`
+    UPDATE mkt_contacts SET email_consent = 'unsubscribed', updated_at = now()
+    WHERE id = ${r.contactId} AND email_consent <> 'unsubscribed'
+    RETURNING id`;
   if (r.emailNorm) {
     await sql`INSERT INTO mkt_suppression (email_norm, reason) VALUES (${r.emailNorm}, 'unsubscribed')
               ON CONFLICT (email_norm) DO NOTHING`;
   }
+  if (changed.length === 0) return;
   if (r.campaignId) await sql`UPDATE mkt_campaigns SET total_unsub = total_unsub + 1 WHERE id = ${r.campaignId}`;
   await sql`INSERT INTO mkt_events (message_id, campaign_id, contact_id, type, ip_trunc, user_agent)
             VALUES (${r.messageId}, ${r.campaignId}, ${r.contactId}, 'unsubscribe', ${ip}, ${ua})`;

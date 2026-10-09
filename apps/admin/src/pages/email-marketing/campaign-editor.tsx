@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Save, Send, FlaskConical, Plus, Trash2, ArrowUp, ArrowDown,
-  Eye, MousePointerClick, Users, Ban, Sparkles, Loader2,
+  Eye, MousePointerClick, Users, Ban, Sparkles, Loader2, Pause,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,11 +97,13 @@ export default function CampaignEditorPage() {
 
   function payload() {
     return {
-      name, subject: subject || undefined, preheader: preheader || undefined,
+      // Stringhe inviate così come sono: '' azzera il campo lato API (con
+      // `|| undefined` un preheader svuotato non veniva mai salvato).
+      name, subject, preheader,
       content_mode: contentMode,
       content_blocks: contentMode === 'blocks' || contentMode === 'ai' ? { blocks } : undefined,
       content_html: contentMode === 'html' ? html : undefined,
-      wa_body: waBody || undefined,
+      wa_body: waBody,
       audience_kind: audienceKind || undefined,
       list_id: audienceKind === 'list' ? (listId || null) : null,
       segment_id: audienceKind === 'segment' ? (segmentId || null) : null,
@@ -125,7 +127,8 @@ export default function CampaignEditorPage() {
 
   const sendMutation = useMutation({
     mutationFn: () => apiFetch(`/api/email-marketing/campaigns/${id}/send`, {
-      method: 'POST', body: JSON.stringify({ scheduled_at: scheduledAt || null }),
+      // datetime-local è ora locale senza fuso: si converte qui in ISO.
+      method: 'POST', body: JSON.stringify({ scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null }),
     }),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['mkt-campaign', id] });
@@ -135,13 +138,34 @@ export default function CampaignEditorPage() {
     onError: (err) => toast.error(err instanceof Error ? err.message : 'Invio fallito'),
   });
 
+  // Le campagne in coda/pianificate non erano fermabili dalla UI (/pause
+  // esisteva ma nessun bottone lo chiamava): partivano comunque all'orario.
+  const pauseMutation = useMutation({
+    mutationFn: () => apiFetch(`/api/email-marketing/campaigns/${id}/pause`, { method: 'POST' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['mkt-campaign', id] });
+      toast.success('Campagna in pausa: ora è modificabile');
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Pausa non riuscita'),
+  });
+
   // Save first, then send — ensures the latest content/audience are persisted.
   async function handleSend() {
     await saveMutation.mutateAsync();
     sendMutation.mutate();
   }
 
-  if (isLoading || !campaign) return <LoadingState />;
+  if (isLoading) return <LoadingState />;
+  if (!campaign) {
+    return (
+      <div className="space-y-3 p-6 text-sm text-muted-foreground">
+        <p>Campagna non trovata.</p>
+        <Button variant="outline" size="sm" onClick={() => navigate('/email-marketing/campagne')}>
+          <ArrowLeft className="h-4 w-4 mr-1.5" /> Torna alle campagne
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 max-w-3xl">
@@ -151,7 +175,17 @@ export default function CampaignEditorPage() {
         </Button>
         <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!isEditable} className="font-medium max-w-xs" />
         <Badge variant="outline">{campaign.status}</Badge>
+        {campaign.scheduled_at && ['queued', 'paused', 'scheduled'].includes(campaign.status) && (
+          <span className="text-xs text-muted-foreground">
+            Pianificata: {new Date(campaign.scheduled_at).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}
+          </span>
+        )}
         <div className="ml-auto flex gap-2">
+          {['queued', 'sending'].includes(campaign.status) && (
+            <Button variant="outline" size="sm" onClick={() => pauseMutation.mutate()} disabled={pauseMutation.isPending} className="gap-1.5">
+              <Pause className="h-4 w-4" /> Metti in pausa
+            </Button>
+          )}
           {isEmail && (
             <Button variant="outline" size="sm" onClick={() => setTestOpen(true)} className="gap-1.5">
               <FlaskConical className="h-4 w-4" /> Test
@@ -263,7 +297,7 @@ export default function CampaignEditorPage() {
               </Select>
             </div>
           )}
-          <AudiencePreview campaignId={id!} onSaveNeeded={() => saveMutation.mutateAsync()} />
+          <AudiencePreview campaignId={id!} onSaveNeeded={isEditable ? () => saveMutation.mutateAsync() : undefined} />
         </TabsContent>
 
         {/* ── SETTINGS ── */}
@@ -534,13 +568,15 @@ function PreviewBlock({ b }: { b: Block }) {
 }
 
 // ── Audience preview ──────────────────────────────────
-function AudiencePreview({ campaignId, onSaveNeeded }: { campaignId: string; onSaveNeeded: () => Promise<unknown> }) {
+function AudiencePreview({ campaignId, onSaveNeeded }: { campaignId: string; onSaveNeeded?: () => Promise<unknown> }) {
   const [data, setData] = useState<{ total: number; eligible: number; skipped: number } | null>(null);
   const [loading, setLoading] = useState(false);
   async function run() {
     setLoading(true);
     try {
-      await onSaveNeeded(); // persist current audience selection first
+      // Salva prima la selezione corrente, ma solo se la campagna è
+      // modificabile: su una campagna in coda/inviata il PATCH dava 409.
+      if (onSaveNeeded) await onSaveNeeded();
       const res = await apiFetch(`/api/email-marketing/campaigns/${campaignId}/audience-preview`);
       setData(res);
     } catch (err) {
