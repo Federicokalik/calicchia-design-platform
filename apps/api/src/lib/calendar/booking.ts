@@ -199,6 +199,23 @@ export async function createBooking(
     throw new BookingValidationError(`Puoi prenotare al massimo ${eventType.max_advance_days} giorni in anticipo`);
   }
 
+  if (input.require_available_slot) {
+    // Prima bastava rispettare min_notice/max_advance: un orario fuori
+    // disponibilità, in una chiusura/festività, sopra un evento occupato o nei
+    // buffer veniva confermato (pagina aperta da prima di una chiusura, o
+    // richiesta manipolata). Finestra ±1 giorno per coprire il fuso dello schedule.
+    const { computeAvailableSlots } = await import('./slots');
+    const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+    const available = await computeAvailableSlots({
+      eventTypeIdOrSlug: eventType.id,
+      fromDateLocal: day(startDate.getTime() - 86_400_000),
+      toDateLocal: day(startDate.getTime() + 86_400_000),
+    });
+    if (!available?.slots.some((s) => new Date(s.start).getTime() === startDate.getTime())) {
+      throw new BookingConflictError('Orario non più disponibile: scegli uno degli slot proposti');
+    }
+  }
+
   const uid = generateBookingUid();
   const startIso = startDate.toISOString();
   const endIso = endDate.toISOString();
@@ -336,7 +353,7 @@ export async function cancelBooking(uid: string, opts: {
   const booking = rows[0];
   if (!booking) return null;
   if (booking.status === 'cancelled') {
-    const et = await getEventType(booking.event_type_id);
+    const et = await getEventType(booking.event_type_id, { includeInactive: true });
     if (!et) return null;
     return { booking, eventType: et };
   }
@@ -365,7 +382,7 @@ export async function cancelBooking(uid: string, opts: {
     log.error({ err, bookingUid: booking.uid }, 'Sync cancel calendar_event FAILED for booking');
   }
 
-  const eventType = await getEventType(booking.event_type_id);
+  const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
   if (!eventType) return null;
   fireBookingWorkflow('booking_cancellato', updated[0], eventType, {
     reason: opts.reason || null,
@@ -379,6 +396,8 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
   reason?: string;
   /** Admin/MCP: consente il nuovo slot anche se viola i buffer dell'event type. */
   allow_buffer_override?: boolean;
+  /** Riprogrammazione dal cliente: il nuovo orario deve essere uno slot disponibile. */
+  require_available_slot?: boolean;
 }): Promise<{ booking: Booking; eventType: EventType; previousUid: string }> {
   // Cancel-old + create-new in un'unica transazione: se il nuovo INSERT
   // fallisce (EXCLUDE/capacità/buffer) il rollback ripristina automaticamente
@@ -420,6 +439,7 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
       contact_id: original.contact_id || undefined,
       lead_id: original.lead_id || undefined,
       allow_buffer_override: opts.allow_buffer_override,
+      require_available_slot: opts.require_available_slot,
     }, { db: tx, suppressWorkflowEvents: true });
 
     const linked = await tx`
@@ -478,7 +498,7 @@ export async function approveBooking(uid: string): Promise<{ booking: Booking; e
     throw new BookingValidationError('La prenotazione non è in attesa di approvazione');
   }
 
-  const eventType = await getEventType(booking.event_type_id);
+  const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
   if (!eventType) return null;
 
   await projectBookingEvent(updated[0], eventType, null);
@@ -517,7 +537,7 @@ export async function rejectBooking(
     throw new BookingValidationError('La prenotazione non è in attesa di approvazione');
   }
 
-  const eventType = await getEventType(booking.event_type_id);
+  const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
   if (!eventType) return null;
   fireBookingWorkflow('booking_cancellato', updated[0], eventType, {
     reason: reason || null,
@@ -532,7 +552,7 @@ export async function getBookingByUid(uid: string): Promise<BookingWithEventType
     SELECT * FROM calendar_bookings WHERE uid = ${uid} LIMIT 1
   `;
   if (!rows[0]) return null;
-  const eventType = await getEventType(rows[0].event_type_id);
+  const eventType = await getEventType(rows[0].event_type_id, { includeInactive: true });
   if (!eventType) return null;
   return { ...rows[0], event_type: eventType };
 }

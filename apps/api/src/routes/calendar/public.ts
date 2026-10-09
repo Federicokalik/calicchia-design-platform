@@ -171,6 +171,7 @@ calendarPublic.post('/bookings', async (c) => {
       },
       custom_responses: customResponses,
       source: 'public_page',
+      require_available_slot: true,
       source_metadata: {
         source_page: typeof body.source_page === 'string' ? body.source_page.slice(0, 255) : null,
         user_agent: c.req.header('user-agent')?.slice(0, 255) || null,
@@ -344,6 +345,7 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
     const result = await rescheduleBooking(uid, newStart, {
       by: 'attendee',
       reason: body.reason || 'Riprogrammata dal partecipante',
+      require_available_slot: true,
     });
 
     Promise.allSettled([

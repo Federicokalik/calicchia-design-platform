@@ -28,7 +28,10 @@ export interface DayWindow {
  * Restituisce l'event type completo per id o slug.
  * Lancia 404 se non esiste / non attivo.
  */
-export async function getEventType(idOrSlug: string, opts?: { onlyPublic?: boolean }): Promise<EventType | null> {
+// includeInactive: per gestire prenotazioni GIÀ esistenti (approva, annulla,
+// rifiuta, dettaglio) anche dopo che il tipo è stato disattivato. Le nuove
+// prenotazioni restano bloccate sui tipi inattivi.
+export async function getEventType(idOrSlug: string, opts?: { onlyPublic?: boolean; includeInactive?: boolean }): Promise<EventType | null> {
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
   const onlyPublic = opts?.onlyPublic === true;
 
@@ -46,7 +49,7 @@ export async function getEventType(idOrSlug: string, opts?: { onlyPublic?: boole
 
   const et = rows[0];
   if (!et) return null;
-  if (!et.is_active) return null;
+  if (!et.is_active && !opts?.includeInactive) return null;
   if (onlyPublic && !et.is_public) return null;
   return et;
 }

@@ -38,6 +38,7 @@ import {
   CalendarValidationError,
   CalendarConflictError,
   CalendarSystemError,
+  isValidTimeZone,
 } from '../../lib/calendar/calendars';
 import {
   listOccurrences,
@@ -266,8 +267,8 @@ calendarAdmin.get('/schedule', async (c) => {
 
 calendarAdmin.put('/schedule', async (c) => {
   const body = await c.req.json();
-  if (body.timezone !== undefined && typeof body.timezone !== 'string') {
-    return c.json({ error: 'timezone deve essere stringa IANA' }, 400);
+  if (body.timezone !== undefined && !isValidTimeZone(body.timezone)) {
+    return c.json({ error: 'Timezone non valida: usa un nome IANA (es. Europe/Rome)' }, 400);
   }
   const updates: Record<string, unknown> = {};
   if (body.timezone) updates.timezone = body.timezone;

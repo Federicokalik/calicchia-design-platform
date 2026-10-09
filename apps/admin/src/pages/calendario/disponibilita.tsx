@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, Save, X } from 'lucide-react';
@@ -24,13 +24,27 @@ export default function DisponibilitaPage() {
   const [slots, setSlots] = useState<SlotRow[]>([]);
   const [tz, setTz] = useState('Europe/Rome');
 
+  // Si riallinea solo quando cambiano i valori salvati: aggiungere un override,
+  // salvare la timezone (o qualsiasi mutation, col refresh globale) rifà il
+  // fetch e prima cancellava le modifiche agli orari non ancora salvate.
+  const syncedSlotsRef = useRef('');
+  const syncedTzRef = useRef('');
   useEffect(() => {
     if (data?.slots) {
-      setSlots(data.slots.map((s: SlotRow) => ({
+      const next = data.slots.map((s: SlotRow) => ({
         day_of_week: s.day_of_week, start_time: s.start_time, end_time: s.end_time,
-      })));
+      }));
+      const key = JSON.stringify(next);
+      if (key !== syncedSlotsRef.current) {
+        syncedSlotsRef.current = key;
+        setSlots(next);
+      }
     }
-    if (data?.schedule?.timezone) setTz(data.schedule.timezone);
+    const serverTz = data?.schedule?.timezone;
+    if (serverTz && serverTz !== syncedTzRef.current) {
+      syncedTzRef.current = serverTz;
+      setTz(serverTz);
+    }
   }, [data]);
 
   const saveSlots = useMutation({
