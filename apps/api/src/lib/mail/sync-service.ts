@@ -48,6 +48,8 @@ export interface SyncResult {
   linksCreated: number;
   serverTotal: number;
   cachedAfter: number;
+  /** Valorizzato se la sincronizzazione di questa cartella è fallita. */
+  error?: string;
 }
 
 export type SyncMode = 'latest' | 'older' | 'all';
@@ -240,59 +242,76 @@ export async function syncAccount(
 ): Promise<SyncResult[]> {
   const { mode = 'latest', maxMessages = 100 } = opts;
 
+  const recordError = async (message: string) => {
+    await sql`
+      UPDATE email_accounts SET last_error = ${message.slice(0, 500)}
+      WHERE id = ${accountId}
+    `;
+  };
+
   // Determine folders to sync:
   // - if explicit `folders` list → use it
   // - if explicit `folder` → single folder (legacy)
   // - else → INBOX + detected Sent (if any)
   let folders: string[];
-  if (opts.folders && opts.folders.length > 0) {
-    folders = opts.folders;
-  } else if (opts.folder) {
-    folders = [opts.folder];
-  } else {
-    // Load account + auto-detect Sent if missing
-    const [acc] = await sql<AccountRow[]>`
-      SELECT id, user_id, email, imap_host, imap_port, imap_secure, username,
-             password_enc, password_iv, password_tag, sent_folder
-      FROM email_accounts WHERE id = ${accountId} LIMIT 1
-    `;
-    if (!acc) throw new Error(`Account ${accountId} not found`);
-
-    let sentFolder = acc.sent_folder;
-    if (!sentFolder) {
-      const detected = await detectSentFolder({
-        host: acc.imap_host, port: acc.imap_port, secure: acc.imap_secure,
-        username: acc.username,
-        passwordBlob: { cipher: acc.password_enc, iv: acc.password_iv, tag: acc.password_tag },
-      });
-      if (detected) {
-        await sql`UPDATE email_accounts SET sent_folder = ${detected} WHERE id = ${accountId}`;
-        sentFolder = detected;
-      }
-    }
-    folders = ['INBOX'];
-    if (sentFolder) folders.push(sentFolder);
-  }
-
-  const results: SyncResult[] = [];
   try {
-    for (const f of folders) {
-      try {
-        const r = await syncAccountFolder(accountId, f, maxMessages, mode);
-        results.push(r);
-      } catch (err) {
-        log.error({ err: (err as Error).message }, `${accountId} folder=${f}`);
-        results.push({
-          folder: f, fetched: 0, skipped: 0, linksCreated: 0, serverTotal: 0, cachedAfter: 0,
+    if (opts.folders && opts.folders.length > 0) {
+      folders = opts.folders;
+    } else if (opts.folder) {
+      folders = [opts.folder];
+    } else {
+      // Load account + auto-detect Sent if missing
+      const [acc] = await sql<AccountRow[]>`
+        SELECT id, user_id, email, imap_host, imap_port, imap_secure, username,
+               password_enc, password_iv, password_tag, sent_folder
+        FROM email_accounts WHERE id = ${accountId} LIMIT 1
+      `;
+      if (!acc) throw new Error(`Account ${accountId} not found`);
+
+      let sentFolder = acc.sent_folder;
+      if (!sentFolder) {
+        const detected = await detectSentFolder({
+          host: acc.imap_host, port: acc.imap_port, secure: acc.imap_secure,
+          username: acc.username,
+          passwordBlob: { cipher: acc.password_enc, iv: acc.password_iv, tag: acc.password_tag },
         });
+        if (detected) {
+          await sql`UPDATE email_accounts SET sent_folder = ${detected} WHERE id = ${accountId}`;
+          sentFolder = detected;
+        }
       }
+      folders = ['INBOX'];
+      if (sentFolder) folders.push(sentFolder);
     }
-    return results;
   } catch (err) {
-    await sql`
-      UPDATE email_accounts SET last_error = ${(err as Error).message.slice(0, 500)}
-      WHERE id = ${accountId}
-    `;
+    await recordError((err as Error).message);
     throw err;
   }
+
+  // Ogni cartella fallita finisce nel risultato e in last_error. Prima
+  // l'errore restava solo nel log: la route rispondeva success e la UI
+  // mostrava "Casella aggiornata" anche con credenziali o server IMAP rotti.
+  const results: SyncResult[] = [];
+  for (const f of folders) {
+    try {
+      results.push(await syncAccountFolder(accountId, f, maxMessages, mode));
+    } catch (err) {
+      const message = (err as Error).message || 'Errore sconosciuto';
+      log.error({ err: message }, `${accountId} folder=${f}`);
+      results.push({
+        folder: f, fetched: 0, skipped: 0, linksCreated: 0, serverTotal: 0, cachedAfter: 0, error: message,
+      });
+    }
+  }
+
+  const failed = results.filter((r) => r.error);
+  if (failed.length > 0) {
+    // syncAccountFolder azzera last_error quando una cartella riesce: lo si
+    // riscrive dopo il ciclo così l'errore di una cartella non va perso.
+    await recordError(failed.map((r) => `${r.folder}: ${r.error}`).join(' · '));
+    if (failed.length === results.length) {
+      throw new Error(failed[0].error);
+    }
+  }
+  return results;
 }

@@ -69,6 +69,11 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
     };
 
     const invalidateConvs = () => qc.invalidateQueries({ queryKey: ['wa-conversations'] });
+    // Il dettaglio della chat aperta (unread_count, last_outbound_at,
+    // programmati…) viene fuso sopra la riga della lista: se resta indietro,
+    // i suoi valori vecchi coprono quelli aggiornati della lista.
+    const invalidateDetail = (convId: string) =>
+      qc.invalidateQueries({ queryKey: ['wa-conv-detail', convId] });
     const invalidateMsgs = (convId?: string) => {
       if (convId) qc.invalidateQueries({ queryKey: ['wa-messages', convId] });
       else qc.invalidateQueries({ queryKey: ['wa-messages'] });
@@ -108,6 +113,7 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
           };
           invalidateConvs();
           invalidateMsgs(evt.conversationId);
+          invalidateDetail(evt.conversationId);
           if (evt.direction === 'inbound') onInboundRef.current?.(evt.conversationId);
         } catch { /* ignore */ }
       });
@@ -153,6 +159,7 @@ export function useWhatsAppStream(options: WaStreamHookOptions = {}) {
         try {
           const evt = JSON.parse((e as MessageEvent).data) as { conversationId: string; reason: string };
           invalidateConvs();
+          invalidateDetail(evt.conversationId);
           // 'message' is the only reason that also affects the open thread;
           // others are list-only mutations.
           if (evt.reason === 'message') invalidateMsgs(evt.conversationId);

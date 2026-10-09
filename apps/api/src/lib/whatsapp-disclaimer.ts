@@ -104,6 +104,10 @@ export async function hasPriorOutboundTo(phone: string): Promise<boolean> {
       JOIN whatsapp_messages m ON m.conversation_id = c.id
       WHERE c.phone = ${target}
         AND m.direction = 'outbound'
+        -- Le bozze AI non approvate non sono mai partite: contarle saltava
+        -- l'informativa proprio sul primo messaggio reale (anche quello che
+        -- nasce approvando la bozza stessa).
+        AND NOT (m.ai_draft = TRUE AND m.ai_draft_approved_at IS NULL)
       LIMIT 1
     `) as Array<{ '?column?'?: number }>;
     return rows.length > 0;

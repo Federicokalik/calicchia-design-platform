@@ -37,10 +37,15 @@ mailSync.post('/:accountId', async (c) => {
   const maxMessages = Math.min(Math.max(Number(body.limit) || 100, 1), 5000);
 
   try {
-    const results = await syncAccount(accountId, { mode, maxMessages, folder: body.folder || 'INBOX' });
-    return c.json({ success: true, results });
+    // "Sincronizza ora" (latest) senza cartella esplicita aggiorna In arrivo
+    // + Inviati come il cron; forzare 'INBOX' lasciava Inviati indietro fino
+    // al giro successivo. Gli import di storico restano su In arrivo.
+    const folder = body.folder || (mode === 'latest' ? undefined : 'INBOX');
+    const results = await syncAccount(accountId, { mode, maxMessages, folder });
+    const failed = results.filter((r) => r.error);
+    return c.json({ success: failed.length === 0, results });
   } catch (err) {
-    return c.json({ error: `Sync fallita: ${(err as Error).message}` }, 500);
+    return c.json({ error: `Sync fallita: ${(err as Error).message}` }, 502);
   }
 });
 

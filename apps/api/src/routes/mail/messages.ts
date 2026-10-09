@@ -39,7 +39,7 @@ mailMessages.get('/', async (c) => {
   const search = c.req.query('search')?.trim();
 
   const searchFilter = search
-    ? sql`AND (subject ILIKE ${'%' + search + '%'} OR from_addr ILIKE ${'%' + search + '%'} OR snippet ILIKE ${'%' + search + '%'})`
+    ? sql`AND (subject ILIKE ${'%' + search + '%'} OR from_addr ILIKE ${'%' + search + '%'} OR from_name ILIKE ${'%' + search + '%'} OR snippet ILIKE ${'%' + search + '%'})`
     : sql``;
   const categoryFilter = category && category !== 'all'
     ? sql`AND category = ${category}`

@@ -12,7 +12,7 @@
  */
 import { createHmac, timingSafeEqual } from 'crypto';
 import { existsSync, mkdirSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { readFile, unlink, writeFile } from 'fs/promises';
 import { join, relative, resolve } from 'path';
 
 const PRIVATE_DIR = process.env.PRIVATE_UPLOAD_DIR || './private-uploads';
@@ -97,4 +97,13 @@ export function privateFileExists(category: string, name: string): boolean {
 
 export async function readPrivateFile(category: string, name: string): Promise<Buffer> {
   return readFile(privateFilePath(category, name));
+}
+
+/** Remove a private file; missing files are ignored (best-effort cleanup). */
+export async function deletePrivateFile(category: PrivateCategory, name: string): Promise<void> {
+  try {
+    await unlink(privateFilePath(category, name));
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
+  }
 }

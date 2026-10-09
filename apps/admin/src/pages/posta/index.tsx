@@ -52,6 +52,9 @@ interface MessagesResponse {
 }
 
 interface FullMessage extends MessageSummary {
+  /** Message-ID RFC 5322 (con le parentesi angolari), non l'id interno. */
+  message_id: string | null;
+  in_reply_to: string | null;
   to_addrs: Array<{ address: string; name: string }>;
   body_text: string | null;
   body_html: string | null;
@@ -116,7 +119,9 @@ export default function PostaPage() {
         folder,
         limit: '100',
       });
-      if (category !== 'all') qs.set('category', category);
+      // La categoria filtra solo In arrivo: in Inviati/Cestino il selettore è
+      // nascosto e il filtro (default "importanti") le faceva sembrare vuote.
+      if (folder === 'INBOX' && category !== 'all') qs.set('category', category);
       if (search) qs.set('search', search);
       return apiFetch(`/api/mail/messages?${qs.toString()}`);
     },
@@ -163,8 +168,17 @@ export default function PostaPage() {
       return { res, silent };
     },
     onSuccess: ({ res, silent }: { res: any; silent: boolean }) => {
-      const fetched = res?.results?.[0]?.fetched ?? 0;
-      if (!silent) toast.success(fetched > 0 ? `${fetched} nuove email` : 'Casella aggiornata');
+      const results: Array<{ folder: string; fetched: number; error?: string }> = res?.results ?? [];
+      const fetched = results.reduce((sum, r) => sum + (r.fetched || 0), 0);
+      const failed = results.filter((r) => r.error);
+      if (failed.length > 0) {
+        // Errore parziale (es. Inviati non raggiungibile): mai "Casella
+        // aggiornata". La sync automatica resta muta: c'è l'indicatore
+        // "Errore sync" in sidebar (last_error).
+        if (!silent) toast.error(`Sync incompleta: ${failed.map((r) => `${r.folder} — ${r.error}`).join('; ')}`);
+      } else if (!silent) {
+        toast.success(fetched > 0 ? `${fetched} nuove email` : 'Casella aggiornata');
+      }
       queryClient.invalidateQueries({ queryKey: ['mail-messages'] });
       queryClient.invalidateQueries({ queryKey: ['mail-accounts'] });
     },
@@ -183,6 +197,10 @@ export default function PostaPage() {
     onSuccess: (res: any) => {
       const r = res?.results?.[0];
       if (!r) return;
+      if (r.error) {
+        toast.error(`Import fallito: ${r.error}`);
+        return;
+      }
       toast.success(
         `${r.fetched} email importate · ${r.cachedAfter}/${r.serverTotal} totali in cache`,
         { duration: 6000 },
@@ -307,7 +325,12 @@ export default function PostaPage() {
       to: m.from_addr ?? '',
       subject: m.subject?.startsWith('Re:') ? m.subject : `Re: ${m.subject || ''}`,
       body: `\n\n---\nIl ${formatDateTime(m.received_at)} ${m.from_addr} ha scritto:\n${(m.body_text || '').slice(0, 500)}`,
-      in_reply_to: m.id,
+      // Header di threading: servono i Message-ID RFC. Con l'UUID interno la
+      // risposta arrivava al destinatario come una conversazione nuova.
+      in_reply_to: m.message_id || undefined,
+      references: m.message_id
+        ? [m.in_reply_to, m.message_id].filter((v): v is string => !!v)
+        : undefined,
     });
     setComposeOpen(true);
   };

@@ -66,6 +66,7 @@ interface ConversationSummary {
   pref_transactional?: boolean | null;
   last_outbound_at?: string | null;
   scheduled_pending?: number;
+  scheduled_failed?: number;
 }
 
 interface WaMessage {
@@ -385,10 +386,13 @@ export default function WhatsAppInboxPage() {
   useEffect(() => {
     if (selectedId && selectedConvUnread > 0) {
       apiFetch(`/api/whatsapp-admin/conversations/${selectedId}/read`, { method: 'POST' })
-        .then(() => refetchConvs())
+        .then(() => {
+          void refetchConvs();
+          void qc.invalidateQueries({ queryKey: ['wa-conv-detail', selectedId] });
+        })
         .catch(() => { /* ignore */ });
     }
-  }, [selectedId, selectedConvUnread, refetchConvs]);
+  }, [selectedId, selectedConvUnread, refetchConvs, qc]);
 
   // Auto-scroll to bottom when new messages arrive or thread changes.
   const threadEndRef = useRef<HTMLDivElement | null>(null);
@@ -1111,9 +1115,12 @@ export default function WhatsAppInboxPage() {
                       >
                         <Clock className="h-3.5 w-3.5 mr-2" /> Pianifica invio…
                       </DropdownMenuItem>
-                      {selectedConv && (selectedConv.scheduled_pending ?? 0) > 0 && (
+                      {selectedConv && (selectedConv.scheduled_pending ?? 0) + (selectedConv.scheduled_failed ?? 0) > 0 && (
                         <DropdownMenuItem onClick={() => setScheduleListOpen(true)}>
-                          <Inbox className="h-3.5 w-3.5 mr-2" /> Programmati ({selectedConv.scheduled_pending})
+                          <Inbox className="h-3.5 w-3.5 mr-2" /> Programmati ({selectedConv.scheduled_pending ?? 0})
+                          {(selectedConv.scheduled_failed ?? 0) > 0 && (
+                            <span className="ml-1.5 text-rose-600">· {selectedConv.scheduled_failed} non inviati</span>
+                          )}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>
