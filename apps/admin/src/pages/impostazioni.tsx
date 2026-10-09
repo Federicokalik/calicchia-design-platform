@@ -985,6 +985,9 @@ function BackupSection() {
   const { data: info, isLoading } = useQuery({
     queryKey: ['backup-info'],
     queryFn: () => apiFetch('/api/backup/info'),
+    // COUNT(*) su tutte le tabelle: non serve rifarla a ogni salvataggio o focus.
+    meta: { skipGlobalRefetch: true },
+    refetchOnWindowFocus: false,
   });
 
   const exportBackup = async () => {
