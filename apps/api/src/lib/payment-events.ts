@@ -12,7 +12,7 @@
  *    once Phase 4 lands; currently no-op stub).
  */
 
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { sendEmail } from './email';
 import { renderPaymentConfirmedEmail } from '../templates/payment-confirmed';
 import { maskPII } from './webhook-sanitize';
@@ -382,7 +382,7 @@ export async function recordRefund(input: RecordRefundInput): Promise<{
     UPDATE payment_links
     SET
       refunded_amount = ${newRefunded},
-      refund_history = ${JSON.stringify(history)}::jsonb,
+      refund_history = ${jsonb(history)}::jsonb,
       status = ${newStatus},
       updated_at = NOW()
     WHERE id = ${link.id}

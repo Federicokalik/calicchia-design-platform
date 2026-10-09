@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { capturePaypalOrder } from '../lib/paypal';
 import { extractPaypalSignatureHeaders, verifyPaypalSignature } from '../lib/paypal-webhook';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
@@ -124,7 +124,7 @@ paypalWebhook.post('/', async (c) => {
         if (capture.capture_id) {
           await sql`
             UPDATE payment_links
-            SET payload_json = payload_json || ${JSON.stringify({ capture_id: capture.capture_id })}::jsonb,
+            SET payload_json = payload_json || ${jsonb({ capture_id: capture.capture_id })}::jsonb,
                 updated_at = NOW()
             WHERE provider = 'paypal' AND provider_order_id = ${orderId}
           `;
@@ -146,7 +146,7 @@ paypalWebhook.post('/', async (c) => {
         if (orderId && captureId) {
           await sql`
             UPDATE payment_links
-            SET payload_json = payload_json || ${JSON.stringify({ capture_id: captureId })}::jsonb,
+            SET payload_json = payload_json || ${jsonb({ capture_id: captureId })}::jsonb,
                 updated_at = NOW()
             WHERE provider = 'paypal' AND provider_order_id = ${orderId}
           `;

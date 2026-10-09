@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import crypto from 'crypto';
 import { resolveContractArticles, type ContractArticle } from '@calicchia/shared';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { sendEmail } from '../lib/email';
 import { renderOtpCodeEmail } from '../templates/otp-code';
 import { logger } from '../lib/logger';
@@ -275,7 +275,7 @@ quotePublic.post('/:token/otp', async (c) => {
     hint = rows[0].customer_email.replace(/(.{2})(.*)(@.*)/, '$1***$3');
   }
 
-  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${JSON.stringify({ channel, ...(channel === 'whatsapp' ? { phone: rows[0].customer_phone } : { email: rows[0].customer_email }) })})`;
+  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${rows[0].id}, 'otp_sent', ${c.req.header('x-forwarded-for') || null}, ${c.req.header('user-agent') || null}, ${jsonb({ channel, ...(channel === 'whatsapp' ? { phone: rows[0].customer_phone } : { email: rows[0].customer_email }) })})`;
 
   // email_hint kept for backward compatibility with already-built clients.
   return c.json({ success: true, channel, hint, email_hint: hint });
@@ -329,10 +329,10 @@ quotePublic.post('/:token/sign', async (c) => {
         SET otp_hash = NULL, otp_code = NULL, otp_expires_at = NULL
         WHERE id = ${quote.id}
       `;
-      await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+      await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_locked', ${clientIp}, ${clientUa}, ${jsonb({ attempts })})`;
       return c.json({ error: 'Troppi tentativi. Richiedi un nuovo codice OTP.' }, 429);
     }
-    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${JSON.stringify({ attempts })})`;
+    await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'otp_failed', ${clientIp}, ${clientUa}, ${jsonb({ attempts })})`;
     return c.json({ error: 'Codice OTP non valido o scaduto' }, 400);
   }
 
@@ -342,9 +342,12 @@ quotePublic.post('/:token/sign', async (c) => {
 
   // Freeze the approved clauses as presented at signature time — later edits
   // to quote.settings must not change what was approved (evidentiary value).
-  const vessatorieSnapshot = vessatorie.length
-    ? JSON.stringify(vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo })))
+  const vessatorieList = vessatorie.length
+    ? vessatorie.map((a) => ({ numero: a.numero, titolo: a.titolo }))
     : null;
+  // Parametro jsonb per le query; nell'hash va il valore semplice (quello che
+  // si rilegge dalla colonna vessatorie_snapshot).
+  const vessatorieSnapshot = jsonb(vessatorieList);
 
   // Evidentiary hash bound to the ACTUAL approved content + signer + signature,
   // not the meaningless `id-Date.now()`. Recomputable from the stored quote to
@@ -360,7 +363,7 @@ quotePublic.post('/:token/sign', async (c) => {
     currency: quote.currency,
     notes: quote.notes,
     project_template: quote.project_template,
-    vessatorie_snapshot: vessatorieSnapshot,
+    vessatorie_snapshot: vessatorieList,
     signer_name: signer_name || null,
     signer_email: quote.customer_email,
     signature_image_sha: crypto.createHash('sha256').update(String(signature_image)).digest('hex'),
@@ -392,7 +395,7 @@ quotePublic.post('/:token/sign', async (c) => {
   if (vessatorie.length) {
     await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'vessatorie_approved', ${ip}, ${ua}, ${vessatorieSnapshot})`;
   }
-  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${JSON.stringify({ signer_name, pdf_hash: pdfHash })})`;
+  await sql`INSERT INTO signature_audit_log (quote_id, action, ip_address, user_agent, metadata) VALUES (${quote.id}, 'signature_submitted', ${ip}, ${ua}, ${jsonb({ signer_name, pdf_hash: pdfHash })})`;
 
   // Signed → the quote becomes a "lavoro": auto-create the linked project
   // (budget = quote total) so it shows up in admin outside the leads pipeline.

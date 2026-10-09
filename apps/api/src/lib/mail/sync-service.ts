@@ -8,7 +8,7 @@
  *  - Skip already-synced messages via UNIQUE(account_id, folder, uid, uidvalidity)
  *  - No IDLE, no push; caller decides when to sync.
  */
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { withImap, detectSentFolder } from './imap-client';
 import { parseRawMail } from './mail-parser';
 import { autoLinkMessage } from './auto-link';
@@ -190,8 +190,8 @@ export async function syncAccountFolder(
             ${accountId}, ${folder}, ${uid}, ${uidvalidity},
             ${parsed.messageId}, ${parsed.threadId}, ${parsed.inReplyTo},
             ${parsed.fromAddr}, ${parsed.fromName},
-            ${JSON.stringify(parsed.toAddrs)}::jsonb,
-            ${JSON.stringify(parsed.ccAddrs)}::jsonb,
+            ${jsonb(parsed.toAddrs)}::jsonb,
+            ${jsonb(parsed.ccAddrs)}::jsonb,
             ${parsed.subject}, ${parsed.snippet}, ${parsed.text}, ${parsed.html},
             ${parsed.attachments.length > 0}, ${flags},
             ${parsed.receivedAt}, ${category}

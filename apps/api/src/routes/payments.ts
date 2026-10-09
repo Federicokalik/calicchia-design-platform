@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { z } from 'zod';
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { stripe, isStripeConfigured, createStripeRefund } from '../lib/stripe';
 import { createPaypalOrder, capturePaypalOrder, getPaypalOrder, isPaypalConfigured, isPaypalReady, refundPaypalCapture } from '../lib/paypal';
 import { createRevolutOrder, getRevolutOrder, cancelRevolutOrder, isRevolutConfigured, isRevolutReady } from '../lib/revolut';
@@ -629,7 +629,7 @@ payments.post('/links/:id/capture', zValidator('param', idParamSchema), async (c
   if (capture.capture_id) {
     await sql`
       UPDATE payment_links
-      SET payload_json = payload_json || ${JSON.stringify({ capture_id: capture.capture_id })}::jsonb,
+      SET payload_json = payload_json || ${jsonb({ capture_id: capture.capture_id })}::jsonb,
           updated_at = NOW()
       WHERE id = ${id}
     `;

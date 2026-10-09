@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import crypto from 'crypto';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { sanitizeBlogHtml } from '../lib/html-sanitize';
 
 // Sanitize Tiptap-authored HTML inside line items before persist (audit D-002).
@@ -247,12 +247,12 @@ quotesV2.post('/import-html', async (c) => {
       ${typeof body.customer_id === 'string' && body.customer_id ? body.customer_id : null},
       ${title},
       ${'Documento su misura'},
-      ${JSON.stringify(items)},
+      ${jsonb(items)},
       ${totale}, ${0}, ${0}, ${totale},
       ${typeof body.valid_until === 'string' && body.valid_until ? body.valid_until : null},
       ${'Importato da HTML su misura.'},
       ${`quotes/${htmlName}`},
-      ${JSON.stringify({ custom_html: true, pagamento_custom: pagamento, vessatorie_custom: vessatorie })}
+      ${jsonb({ custom_html: true, pagamento_custom: pagamento, vessatorie_custom: vessatorie })}
     )
     RETURNING id, title
   `;
@@ -282,10 +282,10 @@ quotesV2.post('/', async (c) => {
       materials_checklist, project_template, auto_create_project
     )
     VALUES (
-      ${customer_id || null}, ${lead_id || null}, ${title}, ${description || null}, ${JSON.stringify(parsedItems)},
+      ${customer_id || null}, ${lead_id || null}, ${title}, ${description || null}, ${jsonb(parsedItems)},
       ${subtotal}, ${rate}, ${taxAmount}, ${total},
       ${valid_until || null}, ${notes || null}, ${internal_notes || null},
-      ${JSON.stringify(materials_checklist || [])}, ${JSON.stringify(project_template || null)}, ${auto_create_project ?? true}
+      ${jsonb(materials_checklist || [])}, ${jsonb(project_template || null)}, ${auto_create_project ?? true}
     )
     RETURNING *
   `;
@@ -403,17 +403,17 @@ quotesV2.put('/:id', async (c) => {
     UPDATE quotes_v2 SET
       customer_id = COALESCE(${body.customer_id || null}, customer_id),
       title = COALESCE(${body.title || null}, title),
-      description = ${body.description !== undefined ? body.description : null},
-      items = COALESCE(${body.items ? JSON.stringify(body.items) : null}, items),
+      description = ${body.description !== undefined ? body.description : sql`description`},
+      items = COALESCE(${body.items ? jsonb(body.items) : null}, items),
       subtotal = COALESCE(${subtotal}, subtotal),
       tax_rate = COALESCE(${body.tax_rate}, tax_rate),
       tax_amount = COALESCE(${taxAmount}, tax_amount),
       total = COALESCE(${total}, total),
-      valid_until = ${body.valid_until !== undefined ? body.valid_until : null},
+      valid_until = ${body.valid_until !== undefined ? body.valid_until : sql`valid_until`},
       notes = ${body.notes !== undefined ? body.notes : sql`notes`},
-      internal_notes = ${body.internal_notes !== undefined ? body.internal_notes : null},
-      materials_checklist = COALESCE(${body.materials_checklist ? JSON.stringify(body.materials_checklist) : null}, materials_checklist),
-      project_template = ${body.project_template !== undefined ? JSON.stringify(body.project_template) : null},
+      internal_notes = ${body.internal_notes !== undefined ? body.internal_notes : sql`internal_notes`},
+      materials_checklist = COALESCE(${body.materials_checklist ? jsonb(body.materials_checklist) : null}, materials_checklist),
+      project_template = ${body.project_template !== undefined ? jsonb(body.project_template) : sql`project_template`},
       auto_create_project = ${body.auto_create_project !== undefined ? body.auto_create_project : sql`auto_create_project`},
       updated_at = now()
     WHERE id = ${id}
@@ -508,7 +508,7 @@ quotesV2.post('/:id/materials', async (c) => {
 
   const rows = await sql`
     UPDATE quotes_v2 SET
-      materials_checklist = ${JSON.stringify(materials_checklist)},
+      materials_checklist = ${jsonb(materials_checklist)},
       materials_complete = ${allComplete},
       updated_at = now()
     WHERE id = ${id}

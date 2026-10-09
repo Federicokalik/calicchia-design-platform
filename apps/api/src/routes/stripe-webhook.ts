@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type Stripe from 'stripe';
 import { stripe, isStripeConfigured } from '../lib/stripe';
-import { sql, sqlv } from '../db';
+import { sql, sqlv, jsonb } from '../db';
 import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
 import { captureException } from '../lib/bugsink';
@@ -274,7 +274,7 @@ stripeWebhook.post('/', async (c) => {
         if (paymentIntentId) {
           await sql`
             UPDATE payment_links
-            SET payload_json = payload_json || ${JSON.stringify({ payment_intent_id: paymentIntentId })}::jsonb,
+            SET payload_json = payload_json || ${jsonb({ payment_intent_id: paymentIntentId })}::jsonb,
                 updated_at = NOW()
             WHERE provider = 'stripe' AND provider_order_id = ${session.id}
           `;

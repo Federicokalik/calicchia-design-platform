@@ -13,7 +13,7 @@
  */
 
 import { fromZonedTime } from 'date-fns-tz';
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { logger } from '../logger';
 
 const log = logger.child({ scope: 'tools' });
@@ -423,7 +423,7 @@ export const tools: ToolDefinition[] = [
           ${(args.company_name as string) || null},
           ${(args.phone as string) || null},
           ${(args.notes as string) || null},
-          ${JSON.stringify((args.tags as string[]) || [])}::jsonb
+          ${jsonb((args.tags as string[]) || [])}::jsonb
         )
         RETURNING id, contact_name, company_name, email
       `;
@@ -479,7 +479,7 @@ export const tools: ToolDefinition[] = [
           ${(args.estimated_hours as number) || null},
           ${(args.start_date as string) || null},
           ${(args.target_end_date as string) || null},
-          ${JSON.stringify((args.pipeline_steps as string[]) || [])}::jsonb
+          ${jsonb((args.pipeline_steps as string[]) || [])}::jsonb
         )
         RETURNING id, name, status, customer_id
       `;
@@ -1175,8 +1175,8 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
           in_reply_to_msgid, reply_to_message_id, source
         ) VALUES (
           ${acc.user_id}, ${acc.id},
-          ${JSON.stringify(to)}::jsonb,
-          ${JSON.stringify(cc)}::jsonb,
+          ${jsonb(to)}::jsonb,
+          ${jsonb(cc)}::jsonb,
           ${args.subject as string}, ${args.body as string},
           ${inReplyToMsgid}, ${replyToMessageId}, 'ai'
         )

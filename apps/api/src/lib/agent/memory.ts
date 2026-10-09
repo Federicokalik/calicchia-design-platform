@@ -3,7 +3,7 @@
  * 3 levels: episodic (conversations), semantic (facts), procedural (preferences)
  */
 
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { generateText } from './llm-router';
 
 // === EPISODIC: Conversations ===
@@ -37,7 +37,7 @@ export async function saveConversation(
   // Save conversation
   const rows = await sql`
     INSERT INTO brain_conversations (channel, context, messages, summary, tags, ended_at)
-    VALUES (${channel}, ${context || null}, ${JSON.stringify(messages)}, ${summary}, ${tags}, now())
+    VALUES (${channel}, ${context || null}, ${jsonb(messages)}, ${summary}, ${tags}, now())
     RETURNING id
   `;
   const convoId = rows[0].id;

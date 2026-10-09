@@ -3,7 +3,7 @@
  * Executes a workflow graph: trigger → nodes → edges → output
  */
 
-import { sql } from '../../db';
+import { sql, jsonb } from '../../db';
 import { NODE_TYPES } from './nodes';
 
 interface WorkflowNode {
@@ -56,7 +56,7 @@ export async function executeWorkflow(
   // Create execution record
   const [execution] = await sql`
     INSERT INTO workflow_executions (workflow_id, trigger_data)
-    VALUES (${workflowId}, ${JSON.stringify(triggerData)})
+    VALUES (${workflowId}, ${jsonb(triggerData)})
     RETURNING id, started_at
   `;
   const executionId = execution.id;
@@ -80,7 +80,7 @@ export async function executeWorkflow(
     const duration = Date.now() - new Date(execution.started_at || Date.now()).getTime();
     await sql`
       UPDATE workflow_executions SET
-        status = 'completed', result = ${JSON.stringify(result)},
+        status = 'completed', result = ${jsonb(result)},
         completed_at = now(), duration_ms = ${duration}
       WHERE id = ${executionId}
     `;
@@ -123,7 +123,7 @@ async function executeFromNode(
   const startTime = Date.now();
   await sql`
     INSERT INTO workflow_step_logs (execution_id, node_id, node_type, status, input)
-    VALUES (${context.executionId}, ${node.id}, ${node.type}, 'running', ${JSON.stringify(input)})
+    VALUES (${context.executionId}, ${node.id}, ${node.type}, 'running', ${jsonb(input)})
   `;
 
   // Execute node
@@ -146,7 +146,7 @@ async function executeFromNode(
   const duration = Date.now() - startTime;
   await sql`
     UPDATE workflow_step_logs SET
-      status = 'completed', output = ${JSON.stringify(output)},
+      status = 'completed', output = ${jsonb(output)},
       duration_ms = ${duration}, completed_at = now()
     WHERE execution_id = ${context.executionId} AND node_id = ${node.id} AND status = 'running'
   `;
