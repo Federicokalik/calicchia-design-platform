@@ -122,6 +122,10 @@ jobs:
           node-version: 22.12.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Senza database: segnala subito una modifica alla lista vincolante dei
+      # tool MCP di calendario (il test di contratto la confronta comunque).
+      - name: Contratto MCP (schema dei tool di calendario)
+        run: pnpm --filter @calicchia/api contract:mcp-check
       # Stesso runner del boot dell'API, sul solo database dei test (non usa .env).
       - name: Migrazioni
         run: pnpm --filter @calicchia/api test:migrate
