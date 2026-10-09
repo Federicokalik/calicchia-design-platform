@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --env-file=../../.env src/index.ts",
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "build": "tsc",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "migrate": "tsx --env-file=../../.env scripts/migrate.ts",
-    "migrate:new": "tsx --env-file=../../.env scripts/migrate.ts",
-    "verify:calendar": "tsx --env-file=../../.env scripts/verify-calendar-schema.ts",
-    "verify:calendar:smoke": "tsx --env-file=../../.env scripts/verify-calendar.ts",
+    "migrate": "tsx --env-file-if-exists=../../.env scripts/migrate.ts",
+    "migrate:new": "tsx --env-file-if-exists=../../.env scripts/migrate.ts",
+    "verify:calendar": "tsx --env-file-if-exists=../../.env scripts/verify-calendar-schema.ts",
+    "verify:calendar:smoke": "tsx --env-file-if-exists=../../.env scripts/verify-calendar.ts",
     "seed": "tsx scripts/seed.ts",
-    "seed:workflows": "tsx --env-file=../../.env scripts/seed-default-workflows.ts",
+    "seed:workflows": "tsx --env-file-if-exists=../../.env scripts/seed-default-workflows.ts",
     "test:e2e": "tsx scripts/test-e2e.ts"
   },
   "dependencies": {
