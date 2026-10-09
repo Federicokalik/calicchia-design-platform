@@ -104,19 +104,37 @@ export function onBeforeDatabaseClose(task: Task): void {
  *
  * Un solo `before` e un solo `after` garantiscono l'ordine fra migrazioni,
  * fixture e chiusura qualunque sia l'ordine delle chiamate nel file.
+ *
+ * L'`after` attende comunque la fine del `before`: in un run filtrato
+ * (--test-name-pattern) in cui il file non ha test selezionati, node --test
+ * avvia gli `after` di primo livello mentre il `before` è ancora in corso, e
+ * pulizia e chiusura del pool andrebbero in gara con baseline e scenario
+ * (40P01 deadlock detected). Se il `before` non è mai partito non c'è nulla da
+ * pulire: si chiude solo il pool.
  */
 export function useTestDatabase(opts: { resetBaseline?: boolean } = {}): void {
   if (opts.resetBaseline) resetRequested = true;
   if (hooksRegistered) return;
   hooksRegistered = true;
 
+  let setup: Promise<void> | null = null;
+
   before(async () => {
-    await migrateTestDatabase();
-    if (resetRequested) await resetCalendarBaseline();
-    for (const task of readyTasks) await task();
+    // L'after è già passato (pool chiuso): preparare il database non serve più.
+    if (closed) return;
+    setup = (async () => {
+      await migrateTestDatabase();
+      if (resetRequested) await resetCalendarBaseline();
+      for (const task of readyTasks) await task();
+    })();
+    await setup;
   });
   after(async () => {
     try {
+      if (!setup) return;
+      // Un errore del before è già riportato dal before stesso: qui conta
+      // solo che sia finito. La pulizia per prefisso va fatta comunque.
+      await setup.catch(() => {});
       for (const task of [...teardownTasks].reverse()) await task();
     } finally {
       await closeTestDatabase();

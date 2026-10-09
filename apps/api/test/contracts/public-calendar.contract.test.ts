@@ -8,7 +8,7 @@
  *  - GET  /api/calendar/bookings/:uid?token            dettaglio self-service
  *  - POST /api/calendar/bookings/:uid/cancel|reschedule
  *  - GET  /api/calendar/bookings/:uid/ics
- *  - GET  /api/contacts/cal-slots?date                 form contatti
+ *  - GET  /api/contacts/cal-slots?date                 form contatti (200, 400, 503)
  *
  * Gli snapshot (__snapshots__/public-calendar.contract.json) registrano per
  * ogni caso richiesta, status, header e corpo normalizzati, più gli effetti sul
@@ -24,7 +24,9 @@
  *  - 28-31 marzo: cambio dell'ora, Pasquetta nel calendario 'f' e uno
  *    schedule con override di data;
  *  - dal 12 aprile: le scritture (POST, cancel, reschedule), un giorno o un
- *    orario per test, così nessun test toglie slot a un altro.
+ *    orario per test, così nessun test toglie slot a un altro;
+ *  - 27 aprile: un tipo con buffer asimmetrici (15 prima, 45 dopo) e una sua
+ *    prenotazione, per il verso dei buffer negli slot e nelle POST.
  *
  * Captcha: con NODE_ENV=test e nessun provider configurato la verifica è
  * saltata come in sviluppo (lib/turnstile.ts); il 403 si ottiene con
@@ -107,6 +109,7 @@ interface Scenario {
     advance: EventType;
     hidden: EventType;
     inactive: EventType;
+    asymmetric: EventType;
   };
 }
 
@@ -163,6 +166,12 @@ async function buildScenario(): Promise<Scenario> {
     }),
     hidden: await fx.eventType({ key: 'riservato', title: 'Riservato', isPublic: false }),
     inactive: await fx.eventType({ key: 'disattivato', title: 'Disattivato', isActive: false }),
+    // Buffer diversi prima e dopo: con buffer simmetrici un'inversione dei due
+    // in slots.ts non si vedrebbe.
+    asymmetric: await fx.eventType({
+      key: 'buffer-asimmetrici', title: 'Buffer asimmetrici', durationMinutes: 30, slotIncrementMinutes: 15,
+      bufferBeforeMinutes: 15, bufferAfterMinutes: 45, sortOrder: 6,
+    }),
   };
 
   // Lunedì 8: evento bloccante 10:00-11:30; nel calendario non bloccante,
@@ -218,6 +227,10 @@ async function buildScenario(): Promise<Scenario> {
 
   // Lunedì 29 marzo: Pasquetta nel calendario 'f', come la crea il cron.
   await fx.holidays(holidays, { year: 2027, only: ['2027-03-29'] });
+
+  // Martedì 27 aprile: prenotazione 11:00-11:30 del tipo con buffer
+  // asimmetrici, in una settimana senza altre prenotazioni.
+  await fx.booking({ eventType: types.asymmetric, start: romeIso('2027-04-27', '11:00'), attendee: { name: 'Prenotazione con buffer' } });
 
   return { holidays, blocking, free, external, types };
 }
@@ -315,7 +328,7 @@ test('event-types: tipi pubblici e attivi, forma pubblica, ordine per sort_order
 
   assert.deepEqual(mine.map((et) => et.slug), [
     s.types.main.slug, s.types.approval.slug, s.types.inPerson.slug, s.types.custom.slug,
-    s.types.advance.slug, s.types.notice.slug,
+    s.types.advance.slug, s.types.notice.slug, s.types.asymmetric.slug,
   ], 'esclusi i non pubblici e gli inattivi; ordine sort_order, poi titolo');
   for (const et of all) assert.deepEqual(Object.keys(et), PUBLIC_EVENT_TYPE_KEYS);
   // L'indirizzo esce solo per in_person; l'URL della riunione resta privato.
@@ -647,6 +660,54 @@ test('POST /bookings: 409 per slot già preso, fuori griglia, in chiusura o sopr
   assert.equal(n, 0, 'nessuna prenotazione creata dai casi 409');
 });
 
+test('slots e POST /bookings: verso dei buffer asimmetrici attorno a una prenotazione esistente', async () => {
+  // Una prenotazione esistente blocca [inizio - buffer_after, fine +
+  // buffer_before] del nuovo slot (slots.ts): con 15 prima e 45 dopo, la
+  // prenotazione 11:00-11:30 toglie 10:15-11:45. Con i buffer invertiti
+  // sarebbero 10:45-12:15. Le POST dal sito (require_available_slot) passano
+  // dallo stesso calcolo: nessun altro controllo dei buffer per public_page.
+  const type = s.types.asymmetric;
+  const query = { from: '2027-04-27', to: '2027-04-27' };
+  const slots = await getSlots(type.slug, query);
+  assert.equal(slots.status, 200, slots.text);
+  assert.deepEqual(romeHoursByDate(slots.json.slots_by_date), {
+    '2027-04-27': [
+      // Ultimo slot prima: 09:45-10:15 finisce dove inizia il buffer dopo.
+      '09:00', '09:15', '09:30', '09:45',
+      // Primo slot dopo: 11:45, fine della prenotazione più il buffer prima.
+      '11:45', '12:00', '12:15', '12:30',
+      '14:00', '14:15', '14:30', '14:45', '15:00', '15:15', '15:30', '15:45',
+      '16:00', '16:15', '16:30', '16:45', '17:00', '17:15', '17:30',
+    ],
+  });
+  record('slots/buffer-asimmetrici', slots, normalizer(), {
+    method: 'GET', path: `/api/calendar/event-types/${type.slug}/slots`, query,
+  });
+
+  // Ai bordi: 10:00-10:30 non tocca la prenotazione ma lascia 30 minuti prima
+  // del suo inizio (meno dei 45 del buffer dopo); 11:30-12:00 parte quando
+  // finisce (meno dei 15 del buffer prima).
+  const conflict = { error: 'Orario non più disponibile: scegli uno degli slot proposti', code: 'BOOKING_CONFLICT' };
+  for (const [name, time] of [['nel-buffer-dopo', '10:00'], ['nel-buffer-prima', '11:30']] as const) {
+    const body = bookingBody(type, romeIso('2027-04-27', time));
+    const res = await api.post('/api/calendar/bookings', { body });
+    assert.equal(res.status, 409, `${name}: ${res.text}`);
+    assert.deepEqual(res.json, conflict, name);
+    record(`bookings/409-buffer-asimmetrici-${name}`, res, normalizer(), { method: 'POST', path: '/api/calendar/bookings', body });
+  }
+
+  // Subito oltre il buffer prima (11:30 + 15 minuti): accettata.
+  const body = bookingBody(type, romeIso('2027-04-27', '11:45'));
+  const res = await api.post('/api/calendar/bookings', { body });
+  assert.equal(res.status, 200, res.text);
+  assert.equal(res.json.booking.start_time, romeIso('2027-04-27', '11:45'));
+  assert.equal(res.json.booking.end_time, romeIso('2027-04-27', '12:15'));
+  const uid: string = res.json.booking.uid;
+  record('bookings/200-buffer-asimmetrici-oltre-buffer-prima', res, normalizer().alias(uid, 'booking:oltre-buffer'), {
+    method: 'POST', path: '/api/calendar/bookings', body,
+  }, { effects: await bookingState(uid) });
+});
+
 // ─── Gestione self-service con token ───────────────────────────────
 
 test('GET /bookings/:uid: dettaglio con token; 401 senza token, scaduto, contraffatto o di un altro uid; 404', async () => {
@@ -958,6 +1019,30 @@ test('contacts/cal-slots: slot del tipo del form contatti per una data; 400 senz
     assert.deepEqual(res.json, { error: 'Parametro date richiesto (YYYY-MM-DD)' });
     record(`cal-slots/400-${name}`, res, normalizer(), { method: 'GET', path: '/api/contacts/cal-slots', query });
   }
+});
+
+test('contacts/cal-slots: 503 se il tipo del form contatti non è pubblico (o manca, o è inattivo)', async () => {
+  // computeAvailableSlots con onlyPublic restituisce null per un tipo assente,
+  // non pubblico o inattivo: il form contatti riceve 503. Il tipo seminato
+  // viene reso non pubblico per il solo caso e ripristinato subito.
+  const [seed] = await sql<Array<{ is_public: boolean }>>`
+    SELECT is_public FROM calendar_event_types WHERE slug = ${CONTACT_FORM_EVENT_TYPE}
+  `;
+  assert.ok(seed, `Tipo ${CONTACT_FORM_EVENT_TYPE} (migrazione 067) assente nel database dei test`);
+  const query = { date: '2027-03-08' };
+  let res: TestResponse;
+  try {
+    await sql`UPDATE calendar_event_types SET is_public = false WHERE slug = ${CONTACT_FORM_EVENT_TYPE}`;
+    res = await api.get('/api/contacts/cal-slots', { query });
+  } finally {
+    await sql`UPDATE calendar_event_types SET is_public = ${seed.is_public} WHERE slug = ${CONTACT_FORM_EVENT_TYPE}`;
+  }
+  assert.equal(res.status, 503, res.text);
+  assert.deepEqual(res.json, { error: 'Tipologia di prenotazione non disponibile' });
+  record('cal-slots/503-tipo-non-disponibile', res, normalizer(), { method: 'GET', path: '/api/contacts/cal-slots', query });
+
+  // Ripristinato: di nuovo 200.
+  assert.equal((await api.get('/api/contacts/cal-slots', { query })).status, 200);
 });
 
 // ─── Copertura ───────────────────────────────

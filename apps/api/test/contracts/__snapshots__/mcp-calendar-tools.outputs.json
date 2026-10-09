@@ -10,6 +10,14 @@
       "output": {
         "events": [
           {
+            "title": "<prefix> Consulenza",
+            "start_time": "2027-03-30T05:00:00.000Z",
+            "end_time": "2027-03-30T06:00:00.000Z",
+            "attendee_name": "Lucia Bruni",
+            "status": "pending",
+            "kind": "booking"
+          },
+          {
             "title": "<prefix> Standup posticipato",
             "start_time": "2027-03-30T07:30:00.000Z",
             "end_time": "2027-03-30T07:45:00.000Z",
@@ -59,7 +67,7 @@
           }
         ],
         "date": "2027-03-30",
-        "count": 6
+        "count": 7
       }
     },
     "get_calendar_today/giorno-festivo": {
@@ -275,7 +283,7 @@
             "timezone": "Europe/Rome",
             "is_default": false,
             "is_system": false,
-            "event_count": 2,
+            "event_count": 5,
             "ics_feed_url": "https://api.caldes.test/api/calendar/feed/<feed:personale>.ics"
           },
           {
@@ -308,7 +316,7 @@
             "timezone": "Europe/Rome",
             "is_default": false,
             "is_system": true,
-            "event_count": 2,
+            "event_count": 3,
             "ics_feed_url": "https://api.caldes.test/api/calendar/feed/<feed:seed-bookings>.ics"
           },
           {
@@ -321,6 +329,130 @@
             "is_system": true,
             "event_count": 0,
             "ics_feed_url": "https://api.caldes.test/api/calendar/feed/<feed:seed-scadenze>.ics"
+          }
+        ]
+      }
+    },
+    "list_events/tetto-occorrenze": {
+      "tool": "list_events",
+      "args": {
+        "calendar": "<prefix>-personale",
+        "from": "2027-05-31T22:00:00.000Z",
+        "to": "2027-07-04T22:00:00.000Z"
+      },
+      "output": {
+        "count": 500,
+        "first": {
+          "id": "<ev:promemoria>",
+          "calendar_id": "<cal:personale>",
+          "uid": "<uid:promemoria>",
+          "summary": "<prefix> Promemoria orario",
+          "description": null,
+          "location": null,
+          "url": null,
+          "start_time": "2027-06-06T22:00:00.000Z",
+          "end_time": "2027-06-06T22:05:00.000Z",
+          "all_day": false,
+          "recurrence_id": null,
+          "source": "manual",
+          "source_id": null,
+          "status": "confirmed",
+          "created_at": "<timestamp>",
+          "updated_at": "<timestamp>",
+          "original_start": "2027-06-06T22:00:00.000Z",
+          "is_override": false
+        },
+        "last": {
+          "id": "<ev:promemoria>",
+          "calendar_id": "<cal:personale>",
+          "uid": "<uid:promemoria>",
+          "summary": "<prefix> Promemoria orario",
+          "description": null,
+          "location": null,
+          "url": null,
+          "start_time": "2027-06-27T17:00:00.000Z",
+          "end_time": "2027-06-27T17:05:00.000Z",
+          "all_day": false,
+          "recurrence_id": null,
+          "source": "manual",
+          "source_id": null,
+          "status": "confirmed",
+          "created_at": "<timestamp>",
+          "updated_at": "<timestamp>",
+          "original_start": "2027-06-27T17:00:00.000Z",
+          "is_override": false
+        }
+      }
+    },
+    "list_events/override-eredita-location-url": {
+      "tool": "list_events",
+      "args": {
+        "calendar": "<prefix>-personale",
+        "from": "2027-07-04T22:00:00.000Z",
+        "to": "2027-07-19T22:00:00.000Z"
+      },
+      "output": {
+        "count": 3,
+        "events": [
+          {
+            "id": "<ev:corso>",
+            "calendar_id": "<cal:personale>",
+            "uid": "<uid:corso>",
+            "summary": "<prefix> Corso serale",
+            "description": null,
+            "location": "Via Garibaldi 5, Frosinone",
+            "url": "https://meet.caldes.test/corso",
+            "start_time": "2027-07-05T16:00:00.000Z",
+            "end_time": "2027-07-05T17:30:00.000Z",
+            "all_day": false,
+            "recurrence_id": null,
+            "source": "manual",
+            "source_id": null,
+            "status": "confirmed",
+            "created_at": "<timestamp>",
+            "updated_at": "<timestamp>",
+            "original_start": "2027-07-05T16:00:00.000Z",
+            "is_override": false
+          },
+          {
+            "id": "<ev:corso-spostato>",
+            "calendar_id": "<cal:personale>",
+            "uid": "<uid:corso-spostato>",
+            "summary": "<prefix> Corso serale",
+            "description": null,
+            "location": "Via Garibaldi 5, Frosinone",
+            "url": "https://meet.caldes.test/corso",
+            "start_time": "2027-07-13T16:00:00.000Z",
+            "end_time": "2027-07-13T17:30:00.000Z",
+            "all_day": false,
+            "recurrence_id": "2027-07-12T16:00:00.000Z",
+            "source": "manual",
+            "source_id": null,
+            "status": "confirmed",
+            "created_at": "<timestamp>",
+            "updated_at": "<timestamp>",
+            "original_start": "2027-07-12T16:00:00.000Z",
+            "is_override": true
+          },
+          {
+            "id": "<ev:corso>",
+            "calendar_id": "<cal:personale>",
+            "uid": "<uid:corso>",
+            "summary": "<prefix> Corso serale",
+            "description": null,
+            "location": "Via Garibaldi 5, Frosinone",
+            "url": "https://meet.caldes.test/corso",
+            "start_time": "2027-07-19T16:00:00.000Z",
+            "end_time": "2027-07-19T17:30:00.000Z",
+            "all_day": false,
+            "recurrence_id": null,
+            "source": "manual",
+            "source_id": null,
+            "status": "confirmed",
+            "created_at": "<timestamp>",
+            "updated_at": "<timestamp>",
+            "original_start": "2027-07-19T16:00:00.000Z",
+            "is_override": false
           }
         ]
       }
@@ -1262,7 +1394,7 @@
       "tool": "list_event_types",
       "args": {},
       "output": {
-        "count": 6,
+        "count": 7,
         "event_types": [
           {
             "slug": "<prefix>-archiviato",
@@ -1272,6 +1404,16 @@
             "location_type": "custom_url",
             "color": "#7c3aed",
             "is_active": false,
+            "is_public": true
+          },
+          {
+            "slug": "<prefix>-buffer-asimmetrici",
+            "title": "<prefix> Buffer asimmetrici",
+            "description": null,
+            "duration_minutes": 30,
+            "location_type": "custom_url",
+            "color": "#7c3aed",
+            "is_active": true,
             "is_public": true
           },
           {
@@ -1451,6 +1593,115 @@
         }
       }
     },
+    "get_calendar_availability/buffer-asimmetrici": {
+      "tool": "get_calendar_availability",
+      "args": {
+        "event_type_slug": "<prefix>-buffer-asimmetrici",
+        "from_date": "2027-04-15",
+        "to_date": "2027-04-15"
+      },
+      "output": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 30,
+        "slots_count": 23,
+        "slots_by_date": {
+          "2027-04-15": [
+            {
+              "start": "2027-04-15T07:00:00.000Z",
+              "end": "2027-04-15T07:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T07:15:00.000Z",
+              "end": "2027-04-15T07:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T07:30:00.000Z",
+              "end": "2027-04-15T08:00:00.000Z"
+            },
+            {
+              "start": "2027-04-15T07:45:00.000Z",
+              "end": "2027-04-15T08:15:00.000Z"
+            },
+            {
+              "start": "2027-04-15T09:45:00.000Z",
+              "end": "2027-04-15T10:15:00.000Z"
+            },
+            {
+              "start": "2027-04-15T10:00:00.000Z",
+              "end": "2027-04-15T10:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T10:15:00.000Z",
+              "end": "2027-04-15T10:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T10:30:00.000Z",
+              "end": "2027-04-15T11:00:00.000Z"
+            },
+            {
+              "start": "2027-04-15T12:00:00.000Z",
+              "end": "2027-04-15T12:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T12:15:00.000Z",
+              "end": "2027-04-15T12:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T12:30:00.000Z",
+              "end": "2027-04-15T13:00:00.000Z"
+            },
+            {
+              "start": "2027-04-15T12:45:00.000Z",
+              "end": "2027-04-15T13:15:00.000Z"
+            },
+            {
+              "start": "2027-04-15T13:00:00.000Z",
+              "end": "2027-04-15T13:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T13:15:00.000Z",
+              "end": "2027-04-15T13:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T13:30:00.000Z",
+              "end": "2027-04-15T14:00:00.000Z"
+            },
+            {
+              "start": "2027-04-15T13:45:00.000Z",
+              "end": "2027-04-15T14:15:00.000Z"
+            },
+            {
+              "start": "2027-04-15T14:00:00.000Z",
+              "end": "2027-04-15T14:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T14:15:00.000Z",
+              "end": "2027-04-15T14:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T14:30:00.000Z",
+              "end": "2027-04-15T15:00:00.000Z"
+            },
+            {
+              "start": "2027-04-15T14:45:00.000Z",
+              "end": "2027-04-15T15:15:00.000Z"
+            },
+            {
+              "start": "2027-04-15T15:00:00.000Z",
+              "end": "2027-04-15T15:30:00.000Z"
+            },
+            {
+              "start": "2027-04-15T15:15:00.000Z",
+              "end": "2027-04-15T15:45:00.000Z"
+            },
+            {
+              "start": "2027-04-15T15:30:00.000Z",
+              "end": "2027-04-15T16:00:00.000Z"
+            }
+          ]
+        }
+      }
+    },
     "get_calendar_availability/tipo-privato": {
       "tool": "get_calendar_availability",
       "args": {
@@ -1543,8 +1794,19 @@
       "tool": "list_bookings",
       "args": {},
       "output": {
-        "count": 1,
+        "count": 2,
         "bookings": [
+          {
+            "uid": "<bk:buffer-asimmetrico>",
+            "status": "confirmed",
+            "attendee_name": "Rita Ocra",
+            "attendee_email": "<prefix>-rita@test.invalid",
+            "start_time": "2027-04-15T09:00:00.000Z",
+            "end_time": "2027-04-15T09:30:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "event_type_title": "<prefix> Buffer asimmetrici",
+            "event_type_slug": "<prefix>-buffer-asimmetrici"
+          },
           {
             "uid": "<bk:confermata>",
             "status": "confirmed",
@@ -1565,8 +1827,19 @@
         "status": "all"
       },
       "output": {
-        "count": 3,
+        "count": 6,
         "bookings": [
+          {
+            "uid": "<bk:buffer-asimmetrico>",
+            "status": "confirmed",
+            "attendee_name": "Rita Ocra",
+            "attendee_email": "<prefix>-rita@test.invalid",
+            "start_time": "2027-04-15T09:00:00.000Z",
+            "end_time": "2027-04-15T09:30:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "event_type_title": "<prefix> Buffer asimmetrici",
+            "event_type_slug": "<prefix>-buffer-asimmetrici"
+          },
           {
             "uid": "<bk:in-attesa>",
             "status": "pending",
@@ -1590,12 +1863,34 @@
             "event_type_slug": "<prefix>-sopralluogo"
           },
           {
+            "uid": "<bk:annullata-oggi>",
+            "status": "cancelled",
+            "attendee_name": "Marco Celeste",
+            "attendee_email": "<prefix>-marco@test.invalid",
+            "start_time": "2027-03-30T17:00:00.000Z",
+            "end_time": "2027-03-30T18:00:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "event_type_title": "<prefix> Consulenza",
+            "event_type_slug": "<prefix>-consulenza"
+          },
+          {
             "uid": "<bk:confermata>",
             "status": "confirmed",
             "attendee_name": "Mario Rossi",
             "attendee_email": "<prefix>-mario@test.invalid",
             "start_time": "2027-03-30T13:00:00.000Z",
             "end_time": "2027-03-30T14:00:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "event_type_title": "<prefix> Consulenza",
+            "event_type_slug": "<prefix>-consulenza"
+          },
+          {
+            "uid": "<bk:in-attesa-oggi>",
+            "status": "pending",
+            "attendee_name": "Lucia Bruni",
+            "attendee_email": "<prefix>-lucia@test.invalid",
+            "start_time": "2027-03-30T05:00:00.000Z",
+            "end_time": "2027-03-30T06:00:00.000Z",
             "location_value": "https://meet.caldes.test/<prefix>-consulenza",
             "event_type_title": "<prefix> Consulenza",
             "event_type_slug": "<prefix>-consulenza"
@@ -1609,7 +1904,7 @@
         "status": "pending"
       },
       "output": {
-        "count": 1,
+        "count": 2,
         "bookings": [
           {
             "uid": "<bk:in-attesa>",
@@ -1618,6 +1913,17 @@
             "attendee_email": "<prefix>-anna@test.invalid",
             "start_time": "2027-04-01T09:00:00.000Z",
             "end_time": "2027-04-01T10:00:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "event_type_title": "<prefix> Consulenza",
+            "event_type_slug": "<prefix>-consulenza"
+          },
+          {
+            "uid": "<bk:in-attesa-oggi>",
+            "status": "pending",
+            "attendee_name": "Lucia Bruni",
+            "attendee_email": "<prefix>-lucia@test.invalid",
+            "start_time": "2027-03-30T05:00:00.000Z",
+            "end_time": "2027-03-30T06:00:00.000Z",
             "location_value": "https://meet.caldes.test/<prefix>-consulenza",
             "event_type_title": "<prefix> Consulenza",
             "event_type_slug": "<prefix>-consulenza"
@@ -1659,15 +1965,15 @@
         "count": 1,
         "bookings": [
           {
-            "uid": "<bk:in-attesa>",
-            "status": "pending",
-            "attendee_name": "Anna Neri",
-            "attendee_email": "<prefix>-anna@test.invalid",
-            "start_time": "2027-04-01T09:00:00.000Z",
-            "end_time": "2027-04-01T10:00:00.000Z",
-            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
-            "event_type_title": "<prefix> Consulenza",
-            "event_type_slug": "<prefix>-consulenza"
+            "uid": "<bk:buffer-asimmetrico>",
+            "status": "confirmed",
+            "attendee_name": "Rita Ocra",
+            "attendee_email": "<prefix>-rita@test.invalid",
+            "start_time": "2027-04-15T09:00:00.000Z",
+            "end_time": "2027-04-15T09:30:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "event_type_title": "<prefix> Buffer asimmetrici",
+            "event_type_slug": "<prefix>-buffer-asimmetrici"
           }
         ]
       }
@@ -1678,8 +1984,19 @@
         "status": "all"
       },
       "output": {
-        "count": 3,
+        "count": 6,
         "bookings": [
+          {
+            "uid": "<bk:buffer-asimmetrico>",
+            "status": "confirmed",
+            "attendee_name": "Rita Ocra",
+            "attendee_email": "<prefix>-rita@test.invalid",
+            "start_time": "2027-04-15T09:00:00.000Z",
+            "end_time": "2027-04-15T09:30:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "event_type_title": "<prefix> Buffer asimmetrici",
+            "event_type_slug": "<prefix>-buffer-asimmetrici"
+          },
           {
             "uid": "<bk:in-attesa>",
             "status": "pending",
@@ -1703,12 +2020,34 @@
             "event_type_slug": "<prefix>-sopralluogo"
           },
           {
+            "uid": "<bk:annullata-oggi>",
+            "status": "cancelled",
+            "attendee_name": "Marco Celeste",
+            "attendee_email": "<prefix>-marco@test.invalid",
+            "start_time": "2027-03-30T17:00:00.000Z",
+            "end_time": "2027-03-30T18:00:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "event_type_title": "<prefix> Consulenza",
+            "event_type_slug": "<prefix>-consulenza"
+          },
+          {
             "uid": "<bk:confermata>",
             "status": "confirmed",
             "attendee_name": "Mario Rossi",
             "attendee_email": "<prefix>-mario@test.invalid",
             "start_time": "2027-03-30T13:00:00.000Z",
             "end_time": "2027-03-30T14:00:00.000Z",
+            "location_value": "https://meet.caldes.test/<prefix>-consulenza",
+            "event_type_title": "<prefix> Consulenza",
+            "event_type_slug": "<prefix>-consulenza"
+          },
+          {
+            "uid": "<bk:in-attesa-oggi>",
+            "status": "pending",
+            "attendee_name": "Lucia Bruni",
+            "attendee_email": "<prefix>-lucia@test.invalid",
+            "start_time": "2027-03-30T05:00:00.000Z",
+            "end_time": "2027-03-30T06:00:00.000Z",
             "location_value": "https://meet.caldes.test/<prefix>-consulenza",
             "event_type_title": "<prefix> Consulenza",
             "event_type_slug": "<prefix>-consulenza"

@@ -7,7 +7,10 @@
  *    anomalie del design §13.4 che si possono contare in SQL;
  *  - il parser rifiuti istruzioni che scrivono, bloccano o sono multiple;
  *  - su dati noti (fixture con prefisso, baseline del calendario) i conteggi
- *    delle anomalie siano esatti, a partire dalle eccezioni DST;
+ *    delle anomalie siano esatti, a partire dalle eccezioni DST (timed e
+ *    all-day), e che exdates sporchi non facciano fallire le query;
+ *  - il report non contenga testo libero (titoli, nomi) né credenziali o
+ *    token degli URL delle iscrizioni;
  *  - la sola lettura sia garantita dal database (una funzione che scrive
  *    fallisce nel suo savepoint, le altre query proseguono) e nulla cambi;
  *  - la CLI scriva JSON e Markdown con permessi 0600 e usi gli exit code
@@ -19,7 +22,7 @@
  */
 
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -139,6 +142,38 @@ test('report su dati noti: sessione in sola lettura e conteggi esatti delle anom
       { originalStart: '2027-11-15T07:00:00.000Z', status: 'cancelled' },
     ],
   });
+  // Serie all-day (mezzanotte di Roma del mercoledì, 22:00Z in ora legale):
+  // EXDATE e override cancellato alle 22:00Z di novembre, la vecchia griglia.
+  // Stessa firma delle timed: contati anche loro.
+  const allDay = await fx.series({
+    calendar: lavoro,
+    summary: 'Serie all-day DST',
+    start_time: romeIso('2027-09-01'),
+    end_time: romeIso('2027-09-02'),
+    all_day: true,
+    rrule: 'FREQ=WEEKLY;COUNT=20',
+    exdates: ['2027-11-09T22:00:00.000Z'],
+    overrides: [{ originalStart: '2027-11-16T22:00:00.000Z', status: 'cancelled' }],
+  });
+  // Exdates sporchi (createEvent non li valida): un elemento non interpretabile
+  // non deve far fallire la 19b né nascondere l'eccezione DST valida accanto.
+  const dirty = await fx.series({
+    calendar: lavoro,
+    summary: 'Exdates sporchi',
+    start_time: romeIso('2027-09-01', '09:00'),
+    end_time: romeIso('2027-09-01', '10:00'),
+    rrule: 'FREQ=WEEKLY;COUNT=12',
+    exdates: ['2027-11-17T07:00:00.000Z', 'non-una-data', '2027-02-30T07:00:00.000Z'],
+  });
+  // exdates che non è un array JSON (dato legacy scritto via SQL): né la 02 né la 19b falliscono.
+  const notArray = await fx.series({
+    calendar: lavoro,
+    summary: 'Exdates oggetto',
+    start_time: romeIso('2027-03-01', '09:00'),
+    end_time: romeIso('2027-03-01', '10:00'),
+    rrule: 'FREQ=DAILY;COUNT=3',
+  });
+  await sql`UPDATE calendar_events SET exdates = '{"data":"2027-03-02"}'::jsonb WHERE id = ${notArray.master.id}::uuid`;
   // "fino al" dell'editor: UNTIL a mezzanotte UTC.
   await fx.series({
     calendar: lavoro,
@@ -178,6 +213,10 @@ test('report su dati noti: sessione in sola lettura e conteggi esatti delle anom
   // noto) → trappola del 304.
   const { subscription } = await fx.subscription({ calendar: lavoro, ics: 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n' });
   await sql`UPDATE calendar_subscriptions SET etag = '"tst-etag"' WHERE id = ${subscription.id}::uuid`;
+  // URL con credenziali (createSubscription controlla solo lo schema) e con un
+  // token nella query string senza percorso: nel report deve finire solo l'host.
+  await fx.subscription({ calendar: lavoro, name: 'Nextcloud', url: 'https://federico:app-secret-123@Cloud.Example.com:8443/remote.php/dav/calendars/federico/personal?export' });
+  await fx.subscription({ calendar: lavoro, name: 'Con token', url: 'https://calendar.example.com?token=s3cr3t' });
 
   const [before] = await sql<Array<{ audit: number; events: number }>>`
     SELECT (SELECT count(*)::int FROM audit_logs) AS audit, (SELECT count(*)::int FROM calendar_events) AS events
@@ -198,10 +237,12 @@ test('report su dati noti: sessione in sola lettura e conteggi esatti delle anom
 
   const anomalies = Object.fromEntries(report.anomalies.map((a) => [a.code, a.count]));
   assert.deepEqual(anomalies, {
-    ALLDAY_AMBIGUOUS: 0,
+    // L'override cancellato dell'all-day è una riga all-day che inizia alle
+    // 22:00Z di novembre (23:00 di Roma): né mezzanotte UTC né di Roma.
+    ALLDAY_AMBIGUOUS: 1,
     ALLDAY_UNTIL_DATETIME: 0,
     BOOKING_DRIFT: 0,
-    DST_SHIFTED_EXCEPTION: 2,
+    DST_SHIFTED_EXCEPTION: 5,
     DUPLICATE_HOLIDAY: 0,
     ICS_PULL_REFETCH: 1,
     INVALID_RRULE: 1,
@@ -216,25 +257,53 @@ test('report su dati noti: sessione in sola lettura e conteggi esatti delle anom
     UNTIL_BEFORE_DTSTART: 0,
   });
 
-  // Le due eccezioni DST, con i valori salvati e il DTSTART della serie.
+  // Le eccezioni DST, con i valori salvati e il DTSTART della serie: le due
+  // della serie timed, le due dell'all-day e quella valida degli exdates sporchi.
   const dstRows = report.queries.find((q) => q.key === '19b_eccezioni_dst')?.rows ?? [];
+  const byMaster = (r: { master_id: unknown; tipo: unknown; valore: unknown }): string => `${r.master_id}|${r.tipo}|${r.valore}`;
   assert.deepEqual(
-    dstRows.map((r) => [r.tipo, r.master_id, r.valore, r.dtstart]),
+    dstRows.map((r) => [r.tipo, r.master_id, r.valore, r.dtstart]).sort((a, b) => byMaster({ tipo: a[0], master_id: a[1], valore: a[2] }).localeCompare(byMaster({ tipo: b[0], master_id: b[1], valore: b[2] }))),
     [
       ['exdate', dst.master.id, '2027-11-08T07:00:00.000Z', '2027-09-06T07:00:00.000Z'],
       ['override', dst.master.id, '2027-11-15T07:00:00.000Z', '2027-09-06T07:00:00.000Z'],
-    ].sort((a, b) => String(a[0]).localeCompare(String(b[0]))),
+      ['exdate', allDay.master.id, '2027-11-09T22:00:00.000Z', '2027-08-31T22:00:00.000Z'],
+      ['override', allDay.master.id, '2027-11-16T22:00:00.000Z', '2027-08-31T22:00:00.000Z'],
+      ['exdate', dirty.master.id, '2027-11-17T07:00:00.000Z', '2027-09-01T07:00:00.000Z'],
+    ].sort((a, b) => byMaster({ tipo: a[0], master_id: a[1], valore: a[2] }).localeCompare(byMaster({ tipo: b[0], master_id: b[1], valore: b[2] }))),
   );
+  // Gli exdates non interpretabili sono elencati a parte (19c), con l'indice nell'array.
+  const invalid = report.queries.find((q) => q.key === '19c_exdates_non_validi')?.rows ?? [];
+  assert.deepEqual(
+    invalid.map((r) => [r.master_id, r.problema, r.tipo_json, r.indice, r.valore])
+      .sort((a, b) => `${a[0]}|${a[3]}`.localeCompare(`${b[0]}|${b[3]}`)),
+    [
+      [dirty.master.id, 'elemento non valido', 'string', 1, 'non-una-data'],
+      [dirty.master.id, 'elemento non valido', 'string', 2, '2027-02-30T07:00:00.000Z'],
+      [notArray.master.id, 'exdates non array', 'object', null, '{"data": "2027-03-02"}'],
+    ].sort((a, b) => `${a[0]}|${a[3]}`.localeCompare(`${b[0]}|${b[3]}`)),
+  );
+  const perCalendar = report.queries.find((q) => q.key === '02_eventi_per_calendario')?.rows ?? [];
+  assert.equal(perCalendar.reduce((acc, r) => acc + Number(r.exdates_non_array), 0), 1);
+
+  // Iscrizioni: solo l'host (minuscolo), mai credenziali, porta, percorso o query string.
+  const hosts = (report.queries.find((q) => q.key === '14_iscrizioni')?.rows ?? []).map((r) => r.host);
+  assert.deepEqual(hosts, ['feeds.caldes.test', 'cloud.example.com', 'calendar.example.com']);
+  // Nessun testo libero: titoli, nomi di calendari, iscrizioni e device delle
+  // fixture iniziano tutti con "<prefisso> " (gli slug con "<prefisso>-").
+  const serialized = JSON.stringify(report);
+  for (const secret of ['app-secret-123', 's3cr3t', `${fx.prefix} `]) {
+    assert.ok(!serialized.includes(secret), `il report contiene "${secret}"`);
+  }
 
   // Riepilogo: 4 calendari seminati più quello della fixture; numeri come numeri JSON.
   assert.deepEqual(report.summary, {
     calendari: 5,
-    eventi: 8,
+    eventi: 12,
     eventi_singoli: 2,
-    serie: 4,
-    override: 2,
+    serie: 7,
+    override: 3,
     prenotazioni_future: report.summary.prenotazioni_future, // dipende da now(): non asserito
-    iscrizioni: 1,
+    iscrizioni: 3,
     app_password_attive: 2,
   });
   const radicaleLimit = report.queries.find((q) => q.key === '06_rrule_limite_radicale')?.rows[0];
@@ -278,6 +347,10 @@ test('CLI: JSON e Markdown con permessi 0600, exit code documentati', async (t) 
   t.mock.method(console, 'error', (...args: unknown[]) => logs.push(args.join(' ')));
 
   const out = join(WORK_DIR, 'report');
+  // Un report precedente con permessi più larghi torna a 0600.
+  mkdirSync(out, { recursive: true });
+  writeFileSync(join(out, REPORT_FILES.json), '{}');
+  chmodSync(join(out, REPORT_FILES.json), 0o644);
   assert.equal(await main(['--out', out, '--max-md-rows', '5']), 0);
   for (const file of Object.values(REPORT_FILES)) {
     assert.equal(statSync(join(out, file)).mode & 0o777, 0o600, file);
@@ -287,14 +360,15 @@ test('CLI: JSON e Markdown con permessi 0600, exit code documentati', async (t) 
   assert.deepEqual(json.anomalies, report.anomalies);
   const md = readFileSync(join(out, REPORT_FILES.markdown), 'utf8');
   assert.match(md, /^# Inventario del calendario\n/);
-  assert.match(md, /\| DST_SHIFTED_EXCEPTION \| 2 \| 19b_eccezioni_dst \|/);
+  assert.match(md, /\| DST_SHIFTED_EXCEPTION \| 5 \| 19b_eccezioni_dst \|/);
   assert.match(md, /### 19b_eccezioni_dst: Eccezioni salvate prima del fix DST/);
-  assert.match(md, /Contiene dati personali/);
-  assert.ok(logs.some((l) => l.includes('DST_SHIFTED_EXCEPTION=2')));
+  assert.match(md, /Nessun testo libero/);
+  assert.ok(!md.includes(`${fx.prefix} `), 'nessun titolo o nome nel Markdown');
+  assert.ok(logs.some((l) => l.includes('DST_SHIFTED_EXCEPTION=5')));
 
   // Troncamento delle tabelle Markdown: l'elenco completo resta nel JSON.
   const truncated = renderInventoryMarkdown(report, { maxRows: 1 });
-  assert.match(truncated, /_Prime 1 righe di 2: l'elenco completo è nel JSON\._/);
+  assert.match(truncated, /_Prime 1 righe di 5: l'elenco completo è nel JSON\._/);
 
   // `pnpm calendar:inventory -- --out <dir>`: pnpm inoltra anche il separatore.
   assert.equal(await main(['--', '--out', join(WORK_DIR, 'via-pnpm')]), 0);

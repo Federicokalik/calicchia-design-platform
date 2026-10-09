@@ -1,7 +1,7 @@
 {
   "contract": "device-agenda",
   "version": 1,
-  "description": "Agenda del device GET /api/device/agenda (e ping/pairing per l'autenticazione) sullo scenario di test/contracts/device-agenda.contract.test.ts: richiesta, status, header e corpo normalizzati; pending_tasks e pending_notes dipendono da tabelle globali e sono sostituiti da '<conteggio>' (verificati contro il database nel test). Baseline F0 su PgLegacyStore.",
+  "description": "Agenda del device GET /api/device/agenda (e ping/pairing per l'autenticazione) sullo scenario di test/contracts/device-agenda.contract.test.ts: richiesta, status, header e corpo normalizzati; pending_tasks e pending_notes dipendono da tabelle globali e sono sostituiti da '<conteggio>' (i filtri sullo stato sono verificati nel test come differenza da una base). Baseline F0 su PgLegacyStore.",
   "regenerate": "UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/device-agenda.contract.test.ts",
   "cases": {
     "auth/401-senza-token": {

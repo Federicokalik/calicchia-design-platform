@@ -11,6 +11,12 @@
  * soli eventi timed. Pairing dall'admin (POST /api/device/admin/pair) per il
  * percorso con cui i token nascono.
  *
+ * pending_tasks e pending_notes contano righe di tabelle globali (project_tasks,
+ * device_notes): negli snapshot diventano '<conteggio>', e un test dedicato ne
+ * verifica i filtri sullo stato come differenza da una base letta dall'agenda
+ * stessa, con righe del prefisso (cliente, progetto, task e note) ripulite a
+ * fine file.
+ *
  * Gli snapshot sono in __snapshots__/device-agenda.contract.json. In F2
  * l'agenda passa a store.listOccurrences con la stessa forma JSON (design §12):
  * le differenze dovute ai bug sotto entreranno in allowed-diffs.json.
@@ -28,7 +34,7 @@
 
 import assert from 'node:assert/strict';
 import { after, test } from 'node:test';
-import { onDatabaseReady, sql } from '../helpers/db';
+import { onBeforeDatabaseClose, onDatabaseReady, sql } from '../helpers/db';
 import { api, signTestToken, type TestResponse } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
 import { createNormalizer, type SnapshotNormalizer } from '../helpers/normalize';
@@ -51,7 +57,7 @@ const store = httpContractStore(
   "Agenda del device GET /api/device/agenda (e ping/pairing per l'autenticazione) sullo scenario di " +
     'test/contracts/device-agenda.contract.test.ts: richiesta, status, header e corpo normalizzati; ' +
     "pending_tasks e pending_notes dipendono da tabelle globali e sono sostituiti da '<conteggio>' " +
-    '(verificati contro il database nel test). Baseline F0 su PgLegacyStore.',
+    '(i filtri sullo stato sono verificati nel test come differenza da una base). Baseline F0 su PgLegacyStore.',
 );
 
 /** "Adesso": mercoledì 10 marzo 2027, 10:30 a Roma (09:30Z). */
@@ -124,17 +130,66 @@ after(() => {
   store.flush();
 });
 
-// ─── Utilità ───────────────────────────────
+// ─── Task e note per i contatori ───────────────────────────────
 
-/** Conteggi globali che l'agenda riporta (tabelle fuori dallo scenario). */
-async function pendingCounts(): Promise<{ pending_tasks: number; pending_notes: number }> {
-  const [row] = await sql<Array<{ pending_tasks: number; pending_notes: number }>>`
-    SELECT
-      (SELECT COUNT(*)::int FROM project_tasks WHERE status = 'todo') AS pending_tasks,
-      (SELECT COUNT(*)::int FROM device_notes WHERE status IN ('pending', 'transcribing')) AS pending_notes
+/**
+ * Rimuove cliente, progetto, task e note del prefisso, con le righe di audit
+ * (customers, client_projects) e webhook (customers) scritte dai trigger. Le
+ * note seguono comunque il token del device (ON DELETE CASCADE nella pulizia
+ * delle fixture); qui si cancellano prima per non dipendere dall'ordine.
+ */
+async function cleanupCounterData(): Promise<void> {
+  const like = `${fx.prefix}%`;
+  await sql`
+    DELETE FROM device_notes
+    WHERE token_id IN (SELECT id FROM device_tokens WHERE label LIKE ${like})
   `;
-  return row;
+  const customers = (await sql<Array<{ id: string }>>`
+    SELECT id FROM customers WHERE contact_name LIKE ${like}
+  `).map((r) => r.id);
+  const projects = (await sql<Array<{ id: string }>>`
+    SELECT id FROM client_projects WHERE name LIKE ${like} OR customer_id = ANY(${customers}::uuid[])
+  `).map((r) => r.id);
+  if (!customers.length && !projects.length) return;
+  await sql`DELETE FROM project_tasks WHERE project_id = ANY(${projects}::uuid[])`;
+  await sql`DELETE FROM client_projects WHERE id = ANY(${projects}::uuid[])`;
+  await sql`DELETE FROM customers WHERE id = ANY(${customers}::uuid[])`;
+  await sql`DELETE FROM audit_logs WHERE record_id = ANY(${[...customers, ...projects]}::text[])`;
+  await sql`DELETE FROM webhook_events WHERE entity_id = ANY(${customers}::uuid[])`;
 }
+
+// Pre-pulizia (righe rimaste da un run interrotto) e pulizia a fine file,
+// prima di quella delle fixture (i task di chiusura girano in ordine inverso).
+onDatabaseReady(cleanupCounterData);
+onBeforeDatabaseClose(cleanupCounterData);
+
+/** Task di progetto con gli stati indicati, sotto un cliente e un progetto del prefisso. */
+async function insertTasks(statuses: string[]): Promise<void> {
+  const [customer] = await sql<Array<{ id: string }>>`
+    INSERT INTO customers (contact_name) VALUES (${fx.name('Cliente agenda')}) RETURNING id
+  `;
+  const [project] = await sql<Array<{ id: string }>>`
+    INSERT INTO client_projects (customer_id, name) VALUES (${customer.id}::uuid, ${fx.name('Progetto agenda')}) RETURNING id
+  `;
+  for (const [i, status] of statuses.entries()) {
+    await sql`
+      INSERT INTO project_tasks (project_id, title, status)
+      VALUES (${project.id}::uuid, ${fx.name(`Task ${i + 1} ${status}`)}, ${status}::task_status)
+    `;
+  }
+}
+
+/** Note vocali del device con gli stati indicati (nessun file audio: il contatore legge solo lo stato). */
+async function insertNotes(tokenId: string, statuses: string[]): Promise<void> {
+  for (const [i, status] of statuses.entries()) {
+    await sql`
+      INSERT INTO device_notes (token_id, audio_path, audio_bytes, duration_ms, tag, status)
+      VALUES (${tokenId}::uuid, ${`${fx.prefix}/nota-${i + 1}.wav`}, 0, 1000, 'note', ${status})
+    `;
+  }
+}
+
+// ─── Utilità ───────────────────────────────
 
 function normalizer(): SnapshotNormalizer {
   return createNormalizer({ prefixes: [fx.prefix] }).alias(s.device.token, 'token:device');
@@ -291,10 +346,9 @@ test('agenda: giorno con eventi di tutti i calendari, next_event e last_event_en
     end_time: romeIso('2027-03-10', '12:00'),
   });
   assert.equal(res.json.last_event_end, romeIso('2027-03-11', '00:45'));
-  assert.deepEqual(
-    { pending_tasks: res.json.pending_tasks, pending_notes: res.json.pending_notes },
-    await pendingCounts(),
-  );
+  // I valori dipendono da tabelle globali: qui solo il tipo, i filtri nel test dedicato.
+  assert.ok(Number.isInteger(res.json.pending_tasks) && res.json.pending_tasks >= 0);
+  assert.ok(Number.isInteger(res.json.pending_notes) && res.json.pending_notes >= 0);
 
   record('agenda/2027-03-10', res, { method: 'GET', path: '/api/device/agenda', query: { date: '2027-03-10' }, auth: 'device' }, {
     select: agendaBody,
@@ -351,6 +405,38 @@ test("agenda: festività nel calendario 'f' come evento timed, anche nel giorno 
       select: agendaBody,
     });
   }
+});
+
+test("agenda: pending_tasks conta i task 'todo', pending_notes le note 'pending' e 'transcribing'", async () => {
+  // Base letta dall'agenda stessa (non con una copia della query di
+  // device.ts), poi righe del prefisso in tutti gli stati: i valori attesi
+  // sono scritti a mano come differenza dalla base.
+  const before = await agenda('2027-03-10');
+  assert.equal(before.status, 200, before.text);
+
+  // Due 'todo' (uno è un sotto-task: conta anche lui) e uno per ogni altro stato.
+  await insertTasks(['todo', 'in_progress', 'review', 'done', 'blocked']);
+  const [parent] = await sql<Array<{ id: string; project_id: string }>>`
+    SELECT id, project_id FROM project_tasks WHERE title = ${fx.name('Task 1 todo')}
+  `;
+  await sql`
+    INSERT INTO project_tasks (project_id, parent_task_id, title, status)
+    VALUES (${parent.project_id}::uuid, ${parent.id}::uuid, ${fx.name('Sotto-task todo')}, 'todo')
+  `;
+  // Note di un device del gruppo (anche di un altro device: il conteggio è globale).
+  const other = await fx.deviceToken();
+  await insertNotes(s.device.id, ['pending', 'transcribing', 'done', 'failed']);
+  await insertNotes(other.id, ['pending']);
+
+  const res = await agenda('2027-03-10');
+  assert.equal(res.status, 200, res.text);
+  assert.equal(res.json.pending_tasks - before.json.pending_tasks, 2, "task 'todo' (compreso il sotto-task)");
+  assert.equal(res.json.pending_notes - before.json.pending_notes, 3, "note 'pending' e 'transcribing' di tutti i device");
+  // Il resto della risposta non cambia.
+  assert.deepEqual(
+    { ...res.json, pending_tasks: 0, pending_notes: 0 },
+    { ...before.json, pending_tasks: 0, pending_notes: 0 },
+  );
 });
 
 test('agenda: data di default = oggi in UTC; 400 per una data non valida', async () => {

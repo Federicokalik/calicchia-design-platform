@@ -16,9 +16,11 @@
 
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { chmodSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
-import { test } from 'node:test';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { onBeforeDatabaseClose, sql } from '../helpers/db';
 import { romeIso, useFixtures } from '../helpers/fixtures';
@@ -419,19 +421,7 @@ test('saltate e segnalate: fuso diverso, iscrizione ICS, conflitto, occorrenza i
     exdates: ['2027-11-08T22:30:00.000Z'],
   });
 
-  // Gli all-day non sono considerati (anomalie proprie, design §13.4).
-  const allDayCal = await fx.calendar({ key: 'tutto-il-giorno' });
-  await fx.series({
-    calendar: allDayCal,
-    summary: 'Ferie a rotazione',
-    start_time: romeIso('2027-09-01'),
-    end_time: romeIso('2027-09-02'),
-    all_day: true,
-    rrule: 'FREQ=WEEKLY',
-    exdates: ['2027-11-09T22:00:00.000Z'],
-  });
-
-  const cals = [ny.cal, icsCal, mixed.cal, nightCal, allDayCal];
+  const cals = [ny.cal, icsCal, mixed.cal, nightCal];
   const before = await Promise.all([ny.overrides[0], icsMaster, ...mixed.overrides, nightMaster].map((e) => state(e.id)));
   const dry = await dryRun(...cals);
 
@@ -468,7 +458,7 @@ test('saltate e segnalate: fuso diverso, iscrizione ICS, conflitto, occorrenza i
   assert.deepEqual(dry.summary.skipped, {
     ICS_PULL_READ_ONLY: 1, INVALID_VALUE: 1, OVERRIDE_CONFLICT: 1, NON_ROME_CALENDAR: 1, NO_MATCHING_OCCURRENCE: 1,
   });
-  // Serie timed: new-york, iscrizione, misto, notte (l'all-day è escluso).
+  // Serie: new-york, iscrizione, misto, notte.
   assert.equal(dry.summary.masters_scanned, 4);
   // Override delle 10:15Z: fuori griglia ma senza firma DST, non toccato.
   assert.equal(dry.summary.other_mismatch, 1);
@@ -478,6 +468,68 @@ test('saltate e segnalate: fuso diverso, iscrizione ICS, conflitto, occorrenza i
   assert.deepEqual((await state(mixed.master.id)).exdates, ['2027-12-01T08:00:00.000Z', 'non-una-data']);
   // Tutto il resto è intatto (nightMaster compreso: nessuna UPDATE).
   assert.deepEqual(await Promise.all([ny.overrides[0], icsMaster, ...mixed.overrides, nightMaster].map((e) => state(e.id))), before);
+});
+
+test('all-day: EXDATE e override cancellato della vecchia griglia riallineati a mezzanotte di Roma, le occorrenze non risorgono', async () => {
+  // Serie all-day del mercoledì dal 1° settembre, salvata come fa l'editor
+  // (mezzanotte di Roma = 22:00Z in ora legale). La vecchia griglia ripeteva le
+  // 22:00Z anche d'inverno (23:00 di Roma del giorno prima): eccezioni salvate
+  // lì oggi non combaciano con l'occorrenza delle 23:00Z (mezzanotte di Roma).
+  const cal = await fx.calendar({ key: 'tutto-il-giorno' });
+  const { master, overrides: [cancelled] } = await fx.series({
+    calendar: cal,
+    summary: 'Ferie a rotazione',
+    start_time: romeIso('2027-09-01'),
+    end_time: romeIso('2027-09-02'),
+    all_day: true,
+    rrule: 'FREQ=WEEKLY',
+    exdates: [
+      '2027-11-09T22:00:00.000Z', // vecchia griglia: da riallineare
+      '2027-09-14T22:00:00.000Z', // ora legale come il DTSTART: già allineato
+      '2027-12-07T23:00:00.000Z', // dopo il fix (mezzanotte di Roma): già allineato
+    ],
+    overrides: [{ originalStart: '2027-11-16T22:00:00.000Z', status: 'cancelled' }],
+  });
+  assert.equal(iso(master.start_time), '2027-08-31T22:00:00.000Z');
+
+  // Comportamento attuale: le due occorrenze eliminate risorgono.
+  assert.deepEqual(await occurrences(cal, '2027-11-08', '2027-11-20'), [
+    ['Ferie a rotazione', '2027-11-09T23:00:00.000Z', false],
+    ['Ferie a rotazione', '2027-11-16T23:00:00.000Z', false],
+  ]);
+
+  const dry = await dryRun(cal);
+  assert.deepEqual(dry.changes.map(brief), [
+    {
+      kind: 'exdate', outcome: 'realign', event_id: master.id, exdate_index: 0,
+      from: '2027-11-09T22:00:00.000Z', to: '2027-11-09T23:00:00.000Z', direction: 'legale→solare',
+    },
+    {
+      kind: 'override', outcome: 'realign', event_id: cancelled.id, exdate_index: null,
+      from: '2027-11-16T22:00:00.000Z', to: '2027-11-16T23:00:00.000Z', direction: 'legale→solare',
+    },
+  ]);
+  // Il valore corretto è la mezzanotte di Roma del giorno dell'occorrenza.
+  assert.deepEqual(dry.changes.map((c) => [c.from_rome, c.to_rome]), [
+    ['2027-11-09 23:00', '2027-11-10 00:00'],
+    ['2027-11-16 23:00', '2027-11-17 00:00'],
+  ]);
+  assert.equal(dry.summary.masters_scanned, 1);
+  assert.equal(dry.summary.aligned, 2);
+  assert.deepEqual(dry.skipped, []);
+
+  const applied = await apply([cal], dry.plan_fingerprint);
+  assert.deepEqual(applied.applied, { updated_rows: 2, audit_rows: 2 });
+  assert.deepEqual((await state(master.id)).exdates, [
+    '2027-11-09T23:00:00.000Z',
+    '2027-09-14T22:00:00.000Z',
+    '2027-12-07T23:00:00.000Z',
+  ]);
+  assert.equal(iso((await state(cancelled.id)).recurrence_id!), '2027-11-16T23:00:00.000Z');
+  assert.deepEqual(await occurrences(cal, '2027-11-08', '2027-11-20'), [], 'le occorrenze eliminate non devono ricomparire');
+  assert.deepEqual(await occurrences(cal, '2027-11-29', '2027-12-02'), [['Ferie a rotazione', '2027-11-30T23:00:00.000Z', false]]);
+  // Idempotente anche qui.
+  assert.equal((await dryRun(cal)).summary.to_fix.total, 0);
 });
 
 test('recurrence_id con i microsecondi (scritto via SQL): riallineato senza far fallire l\'apply', async () => {
@@ -533,6 +585,10 @@ test('planDstFix: impronta deterministica, indipendente dall\'ordine delle righe
 const API_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const TSX_CLI = createRequire(import.meta.url).resolve('tsx/cli');
 
+/** Directory temporanea per i report di --out, rimossa a fine file. */
+const OUT_DIR = mkdtempSync(join(tmpdir(), 'caldes-dst-fix-test-'));
+after(() => rmSync(OUT_DIR, { recursive: true, force: true }));
+
 /** Esegue lo script come in produzione, con il precarico dei test (DB dei test garantito). */
 function runCli(args: string[]): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((done, fail) => {
@@ -550,7 +606,7 @@ function runCli(args: string[]): Promise<{ code: number | null; stdout: string; 
   });
 }
 
-test('CLI: dry-run leggibile e JSON, --expect-plan sbagliata rifiutata, apply, errori d\'uso', async () => {
+test('CLI: dry-run leggibile e JSON, --out 0600, --apply solo con --expect-plan giusta, errori d\'uso', async () => {
   const { cal, overrides: [cancelled] } = await autumnSeries('cli', {
     overrides: [{ originalStart: '2027-11-10T07:00:00.000Z', status: 'cancelled' }],
   });
@@ -575,6 +631,23 @@ test('CLI: dry-run leggibile e JSON, --expect-plan sbagliata rifiutata, apply, e
     kind: 'override', outcome: 'realign', event_id: cancelled.id, exdate_index: null,
     from: '2027-11-10T07:00:00.000Z', to: '2027-11-10T08:00:00.000Z', direction: 'legale→solare',
   }]);
+
+  // --out: report JSON (titoli e uid delle serie) leggibile solo dal proprietario,
+  // anche se il file esisteva già con permessi più larghi.
+  const outFile = join(OUT_DIR, 'dst-report.json');
+  writeFileSync(outFile, '{}');
+  chmodSync(outFile, 0o644);
+  const saved = await runCli([...filter, '--out', outFile]);
+  assert.equal(saved.code, 0, saved.stderr);
+  assert.equal(statSync(outFile).mode & 0o777, 0o600);
+  assert.equal((JSON.parse(readFileSync(outFile, 'utf8')) as DstReport).plan_fingerprint, hint[1]);
+
+  // --apply senza --expect-plan: rifiutato senza toccare nulla (dalla CLI si
+  // applica solo un piano visto nel dry-run).
+  const unreviewed = await runCli([...filter, '--apply']);
+  assert.equal(unreviewed.code, 2);
+  assert.match(unreviewed.stderr, /--apply richiede --expect-plan <impronta>: esegui prima il dry-run/);
+  assert.equal(iso((await state(cancelled.id)).recurrence_id!), '2027-11-10T07:00:00.000Z');
 
   const mismatch = await runCli([...filter, '--apply', '--expect-plan', 'ffffffffffffffff']);
   assert.equal(mismatch.code, 3);

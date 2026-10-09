@@ -24,23 +24,28 @@
  *   pnpm calendar:inventory -- --out <dir> --sql <file.sql> --max-md-rows 100
  *   pnpm calendar:inventory -- --out <dir> --statement-timeout 120
  *
- * In produzione l'immagine dell'API non contiene scripts/: copiare questo file
- * e scripts/sql/calendar-inventory.sql nel container (stessi percorsi sotto
- * /app/apps/api) ed eseguire `npx tsx scripts/calendar-inventory.ts --out
- * /tmp/inventario-calendario`, oppure lanciarlo da un checkout con
- * DATABASE_URL verso il database. In alternativa, senza Node:
+ * In produzione l'immagine dell'API contiene già scripts/ (il Dockerfile copia
+ * apps/api/scripts): dopo il deploy di questi commit si esegue nel container,
+ * da /app/apps/api, `pnpm exec tsx scripts/calendar-inventory.ts --out
+ * /tmp/inventario-calendario`. Solo con un'immagine precedente a questi
+ * commit va copiato il file con scripts/sql/calendar-inventory.sql (docker cp,
+ * stessi percorsi sotto /app/apps/api); altrimenti si sovrascriverebbe la
+ * versione dell'immagine con quella del proprio checkout. In alternativa, da
+ * un checkout con DATABASE_URL verso il database, oppure senza Node:
  *   psql "$DATABASE_URL" -X -v ON_ERROR_STOP=1 -f scripts/sql/calendar-inventory.sql
  *
- * Output (permessi 0600: il report contiene titoli di eventi, username e nomi
- * dei device): <out>/calendar-inventory.json (tutte le righe) e
+ * Output: <out>/calendar-inventory.json (tutte le righe) e
  * <out>/calendar-inventory.md (riepilogo, anomalie e tabelle troncate a
- * --max-md-rows righe per query).
+ * --max-md-rows righe per query). Le query non leggono testo libero (titoli,
+ * nomi di calendari, iscrizioni e device): restano id, slug, username delle
+ * app-password e host delle iscrizioni, quindi i file sono comunque scritti
+ * con permessi 0600.
  *
  * Exit code: 0 ok, 1 errore, 2 uso errato, 3 report scritto ma con query fallite.
  */
 
 import { createHash } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -499,7 +504,7 @@ export function renderInventoryMarkdown(report: InventoryReport, opts: { maxRows
     `- Sessione: transaction_read_only=${mdCell(s.transaction_read_only ?? null)}, default_transaction_read_only=${mdCell(s.default_transaction_read_only ?? null)}, isolamento ${mdCell(s.isolamento ?? null)}, fuso ${mdCell(s.fuso ?? null)}`,
     `- SQL: \`${report.sql_file}\` (sha256 \`${report.sql_sha256.slice(0, 16)}…\`), durata ${report.duration_ms} ms`,
     '',
-    '> Contiene dati personali (titoli degli eventi, username e nomi dei device delle app-password, nomi delle iscrizioni). Non condividerlo fuori dal progetto; gli IP sono mascherati e i token non vengono mai letti.',
+    '> Nessun testo libero: niente titoli o descrizioni degli eventi, nomi di calendari, iscrizioni o device. Contiene id, slug, username delle app-password (per NON_CANONICAL_APP_PASSWORD) e il solo host degli URL delle iscrizioni; gli IP sono mascherati e i token non vengono mai letti.',
     '',
   ];
   if (report.failed_queries.length) {
@@ -550,6 +555,9 @@ export function writeInventoryReport(report: InventoryReport, outDir: string, op
   const markdown = join(dir, REPORT_FILES.markdown);
   writeFileSync(json, `${JSON.stringify(report, null, 2)}\n`, { mode: 0o600 });
   writeFileSync(markdown, renderInventoryMarkdown(report, opts), { mode: 0o600 });
+  // `mode` vale solo per i file nuovi: un report che esisteva già resta 0600.
+  chmodSync(json, 0o600);
+  chmodSync(markdown, 0o600);
   return { json, markdown };
 }
 

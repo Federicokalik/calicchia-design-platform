@@ -113,6 +113,19 @@
             "custom_questions": [],
             "min_notice_hours": 98,
             "max_advance_days": 365
+          },
+          {
+            "id": "<event-type:asymmetric>",
+            "slug": "<prefix>-buffer-asimmetrici",
+            "title": "<prefix> Buffer asimmetrici",
+            "description": null,
+            "duration_minutes": 30,
+            "location_type": "custom_url",
+            "location_value": null,
+            "color": "#7c3aed",
+            "custom_questions": [],
+            "min_notice_hours": 0,
+            "max_advance_days": 365
           }
         ]
       }
@@ -2043,6 +2056,377 @@
         "code": "BOOKING_CONFLICT"
       }
     },
+    "slots/buffer-asimmetrici": {
+      "request": {
+        "method": "GET",
+        "path": "/api/calendar/event-types/<prefix>-buffer-asimmetrici/slots",
+        "query": {
+          "from": "2027-04-27",
+          "to": "2027-04-27"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "timezone": "Europe/Rome",
+        "duration_minutes": 30,
+        "slots_by_date": {
+          "2027-04-27": [
+            {
+              "start": "2027-04-27T07:00:00.000Z",
+              "end": "2027-04-27T07:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:15:00.000Z",
+              "end": "2027-04-27T07:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:30:00.000Z",
+              "end": "2027-04-27T08:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T07:45:00.000Z",
+              "end": "2027-04-27T08:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T09:45:00.000Z",
+              "end": "2027-04-27T10:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:00:00.000Z",
+              "end": "2027-04-27T10:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:15:00.000Z",
+              "end": "2027-04-27T10:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T10:30:00.000Z",
+              "end": "2027-04-27T11:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:00:00.000Z",
+              "end": "2027-04-27T12:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:15:00.000Z",
+              "end": "2027-04-27T12:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:30:00.000Z",
+              "end": "2027-04-27T13:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T12:45:00.000Z",
+              "end": "2027-04-27T13:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:00:00.000Z",
+              "end": "2027-04-27T13:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:15:00.000Z",
+              "end": "2027-04-27T13:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:30:00.000Z",
+              "end": "2027-04-27T14:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T13:45:00.000Z",
+              "end": "2027-04-27T14:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:00:00.000Z",
+              "end": "2027-04-27T14:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:15:00.000Z",
+              "end": "2027-04-27T14:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:30:00.000Z",
+              "end": "2027-04-27T15:00:00.000Z"
+            },
+            {
+              "start": "2027-04-27T14:45:00.000Z",
+              "end": "2027-04-27T15:15:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:00:00.000Z",
+              "end": "2027-04-27T15:30:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:15:00.000Z",
+              "end": "2027-04-27T15:45:00.000Z"
+            },
+            {
+              "start": "2027-04-27T15:30:00.000Z",
+              "end": "2027-04-27T16:00:00.000Z"
+            }
+          ]
+        },
+        "slots": [
+          {
+            "start": "2027-04-27T07:00:00.000Z",
+            "end": "2027-04-27T07:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:15:00.000Z",
+            "end": "2027-04-27T07:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:30:00.000Z",
+            "end": "2027-04-27T08:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T07:45:00.000Z",
+            "end": "2027-04-27T08:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T09:45:00.000Z",
+            "end": "2027-04-27T10:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:00:00.000Z",
+            "end": "2027-04-27T10:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:15:00.000Z",
+            "end": "2027-04-27T10:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T10:30:00.000Z",
+            "end": "2027-04-27T11:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:00:00.000Z",
+            "end": "2027-04-27T12:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:15:00.000Z",
+            "end": "2027-04-27T12:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:30:00.000Z",
+            "end": "2027-04-27T13:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T12:45:00.000Z",
+            "end": "2027-04-27T13:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:00:00.000Z",
+            "end": "2027-04-27T13:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:15:00.000Z",
+            "end": "2027-04-27T13:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:30:00.000Z",
+            "end": "2027-04-27T14:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T13:45:00.000Z",
+            "end": "2027-04-27T14:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:00:00.000Z",
+            "end": "2027-04-27T14:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:15:00.000Z",
+            "end": "2027-04-27T14:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:30:00.000Z",
+            "end": "2027-04-27T15:00:00.000Z"
+          },
+          {
+            "start": "2027-04-27T14:45:00.000Z",
+            "end": "2027-04-27T15:15:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:00:00.000Z",
+            "end": "2027-04-27T15:30:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:15:00.000Z",
+            "end": "2027-04-27T15:45:00.000Z"
+          },
+          {
+            "start": "2027-04-27T15:30:00.000Z",
+            "end": "2027-04-27T16:00:00.000Z"
+          }
+        ]
+      }
+    },
+    "bookings/409-buffer-asimmetrici-nel-buffer-dopo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T08:00:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/409-buffer-asimmetrici-nel-buffer-prima": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T09:30:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 409,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Orario non più disponibile: scegli uno degli slot proposti",
+        "code": "BOOKING_CONFLICT"
+      }
+    },
+    "bookings/200-buffer-asimmetrici-oltre-buffer-prima": {
+      "request": {
+        "method": "POST",
+        "path": "/api/calendar/bookings",
+        "body": {
+          "event_type_slug": "<prefix>-buffer-asimmetrici",
+          "start": "2027-04-27T09:45:00.000Z",
+          "attendee": {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "timezone": "Europe/Rome",
+            "message": "Vorrei parlare del nuovo sito."
+          },
+          "gdpr_consent": true,
+          "turnstile_token": "token-captcha-di-prova",
+          "source_page": "/prenota/consulenza"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "success": true,
+        "booking": {
+          "uid": "<booking:oltre-buffer>",
+          "status": "confirmed",
+          "start_time": "2027-04-27T09:45:00.000Z",
+          "end_time": "2027-04-27T10:15:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici"
+        }
+      },
+      "effects": {
+        "booking": {
+          "uid": "<booking:oltre-buffer>",
+          "status": "confirmed",
+          "source": "public_page",
+          "attendee_name": "Cliente dal sito",
+          "attendee_email": "<prefix>-sito@test.invalid",
+          "attendee_phone": "+39 351 000 0000",
+          "attendee_company": "Officina Rossi",
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": "Vorrei parlare del nuovo sito.",
+          "custom_responses": {},
+          "start_time": "2027-04-27T09:45:00.000Z",
+          "end_time": "2027-04-27T10:15:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "cancelled_at": null,
+          "rescheduled_from_uid": null,
+          "source_metadata": {
+            "user_agent": null,
+            "source_page": "/prenota/consulenza"
+          },
+          "has_lead": true,
+          "has_consent_ip": true
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "summary": "<prefix> Buffer asimmetrici – Cliente dal sito",
+            "description": "Cliente: Cliente dal sito <<prefix>-sito@test.invalid>\nTel: +39 351 000 0000\nAzienda: Officina Rossi\n\nNote:\nVorrei parlare del nuovo sito.\n\nUID prenotazione: <booking:oltre-buffer>",
+            "location": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "url": "https://meet.caldes.test/<prefix>-buffer-asimmetrici",
+            "start_time": "2027-04-27T09:45:00.000Z",
+            "end_time": "2027-04-27T10:15:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "status": "confirmed"
+          }
+        ],
+        "leads": [
+          {
+            "name": "Cliente dal sito",
+            "email": "<prefix>-sito@test.invalid",
+            "phone": "+39 351 000 0000",
+            "company": "Officina Rossi",
+            "source": "booking_<prefix>-buffer-asimmetrici",
+            "status": "new",
+            "notes": "Vorrei parlare del nuovo sito."
+          }
+        ]
+      }
+    },
     "manage/dettaglio": {
       "request": {
         "method": "GET",
@@ -2837,6 +3221,26 @@
       },
       "body": {
         "error": "Parametro date richiesto (YYYY-MM-DD)"
+      }
+    },
+    "cal-slots/503-tipo-non-disponibile": {
+      "request": {
+        "method": "GET",
+        "path": "/api/contacts/cal-slots",
+        "query": {
+          "date": "2027-03-08"
+        }
+      },
+      "status": 503,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Tipologia di prenotazione non disponibile"
       }
     }
   }

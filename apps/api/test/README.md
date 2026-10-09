@@ -32,8 +32,8 @@ Script della fase F0 collegati ai test (stessa cartella):
 
 | Script | Cosa fa |
 |---|---|
-| `pnpm calendar:inventory -- --out <dir>` | Inventario del calendario in sola lettura contro `DATABASE_URL` (nessun `.env` letto), report JSON e Markdown. |
-| `pnpm calendar:fix-dst` | Dry-run della correzione delle eccezioni DST; `-- --apply --expect-plan <hash>` applica il piano visto. Legge `../../.env` se esiste. |
+| `pnpm calendar:inventory -- --out <dir>` | Inventario del calendario in sola lettura contro `DATABASE_URL` (nessun `.env` letto), report JSON e Markdown (0600, senza titoli né nomi). |
+| `pnpm calendar:fix-dst` | Dry-run della correzione delle eccezioni DST (serie timed e all-day); `-- --apply --expect-plan <hash>` applica il piano visto (`--apply` senza `--expect-plan` è rifiutato). `--out <file>` salva il report JSON con permessi 0600. Legge `../../.env` se esiste. |
 | `pnpm contract:mcp-snapshot` | Rigenera la lista vincolante dei tool MCP di calendario (`__snapshots__/mcp-calendar-tools.schema.json`). |
 | `pnpm contract:mcp-check` | Verifica la lista senza database (exit 1 se diversa). |
 
@@ -47,6 +47,8 @@ pnpm test -- --test-name-pattern=feed          # solo i test con "feed" nel nome
 pnpm test test/smoke/infra.test.ts             # un file
 pnpm test contracts calendar                   # più suite
 ```
+
+In un run filtrato ogni file prepara comunque il database (migrazioni, baseline, scenario) anche se nessun suo test corrisponde al pattern; per non pagarne il tempo, indica anche il file: `pnpm test test/contracts/feed.contract.test.ts -- --test-name-pattern=rotate-token`.
 
 `pnpm test` comprende anche `test/integration`: senza Radicale le suite che lo richiedono vengono saltate con il motivo, mentre il mock di verify-credentials e l'inventario girano comunque.
 

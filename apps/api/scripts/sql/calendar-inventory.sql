@@ -12,7 +12,13 @@
 --    occorrenze oltre il limite di Radicale;
 --  - controllo di BYDAY della query 09 senza il falso positivo sul ';';
 --  - IP delle app-password mascherati (ultimo ottetto o ultimi gruppi IPv6):
---    per l'inventario serve sapere se un device è attivo, non da dove.
+--    per l'inventario serve sapere se un device è attivo, non da dove;
+--  - nessun testo libero: niente titoli degli eventi, nomi dei calendari,
+--    delle iscrizioni o dei device (bastano id e slug). Restano gli username
+--    delle app-password (servono a NON_CANONICAL_APP_PASSWORD) e il solo host
+--    degli URL delle iscrizioni;
+--  - exdates letti con prudenza: un valore non array o un elemento non in
+--    forma ISO non fa fallire le query 02 e 19b, ed è contato nella 19c.
 --
 -- Formato (letto da scripts/calendar-inventory.ts):
 --   -- @query <chiave> | <titolo>
@@ -49,15 +55,16 @@ SELECT current_database() AS database,
 
 -- @query 01_calendari | Calendari e metadati
 -- Slug reali (compreso 'f' delle festività), flag, fuso, feed ICS (solo la
--- lunghezza del token, mai il token).
-SELECT id, slug, name, is_system, is_default, blocks_availability, timezone, ics_feed_enabled, sort_order,
+-- lunghezza del token, mai il token). Senza il nome: basta lo slug.
+SELECT id, slug, is_system, is_default, blocks_availability, timezone, ics_feed_enabled, sort_order,
   length(ics_feed_token) AS token_len, created_at
 FROM calendars
-ORDER BY sort_order, name;
+ORDER BY sort_order, slug;
 
 -- @query 02_eventi_per_calendario | Eventi per calendario e provenienza
 -- Singoli, serie, override modificati e cancellati, master cancellati, all-day
--- ricorrenti, eventi con exdates, tentative e intervallo temporale.
+-- ricorrenti, eventi con exdates (ed exdates che non sono un array JSON),
+-- tentative e intervallo temporale.
 SELECT c.slug, e.source,
   count(*) FILTER (WHERE e.recurrence_master_id IS NULL AND e.rrule IS NULL) AS singoli,
   count(*) FILTER (WHERE e.recurrence_master_id IS NULL AND e.rrule IS NOT NULL) AS serie,
@@ -65,7 +72,10 @@ SELECT c.slug, e.source,
   count(*) FILTER (WHERE e.recurrence_master_id IS NOT NULL AND e.status = 'cancelled') AS override_cancellati,
   count(*) FILTER (WHERE e.recurrence_master_id IS NULL AND e.status = 'cancelled') AS master_o_singoli_cancellati,
   count(*) FILTER (WHERE e.all_day AND e.rrule IS NOT NULL) AS allday_ricorrenti,
-  count(*) FILTER (WHERE jsonb_array_length(e.exdates) > 0) AS con_exdates,
+  -- CASE e non AND: Postgres non garantisce l'ordine delle condizioni, e
+  -- jsonb_array_length su un valore non array è un errore.
+  count(*) FILTER (WHERE CASE WHEN jsonb_typeof(e.exdates) = 'array' THEN jsonb_array_length(e.exdates) > 0 ELSE false END) AS con_exdates,
+  count(*) FILTER (WHERE e.exdates IS NOT NULL AND jsonb_typeof(e.exdates) <> 'array') AS exdates_non_array,
   count(*) FILTER (WHERE e.status = 'tentative') AS tentative,
   min(e.start_time) AS primo,
   max(e.end_time) AS ultimo
@@ -102,7 +112,7 @@ ORDER BY m.id, o.recurrence_id;
 -- @anomaly ALLDAY_UNTIL_DATETIME when=allday_until_datetime
 -- @anomaly UNTIL_BEFORE_DTSTART when=until_prima_di_dtstart
 WITH r AS (
-  SELECT e.id, e.calendar_id, e.summary, e.all_day, e.start_time, e.rrule,
+  SELECT e.id, e.calendar_id, e.all_day, e.start_time, e.rrule,
     CASE
       WHEN e.rrule ~ 'UNTIL=\d{8}T\d{6}' THEN to_timestamp(substring(e.rrule from 'UNTIL=(\d{8}T\d{6})'), 'YYYYMMDD"T"HH24MISS')
       WHEN e.rrule ~ 'UNTIL=\d{8}' THEN to_timestamp(substring(e.rrule from 'UNTIL=(\d{8})'), 'YYYYMMDD')
@@ -110,7 +120,7 @@ WITH r AS (
   FROM calendar_events e
   WHERE e.rrule ~ 'UNTIL='
 )
-SELECT c.slug, r.id, r.summary, r.all_day, r.start_time, r.rrule,
+SELECT c.slug, r.id, r.all_day, r.start_time, r.rrule,
   (r.rrule ~ 'UNTIL=\d{8}T000000Z') AS until_mezzanotte_utc,
   (r.all_day AND r.rrule ~ 'UNTIL=\d{8}T\d{6}') AS allday_until_datetime,
   COALESCE(r.until_ts < r.start_time, false) AS until_prima_di_dtstart
@@ -283,12 +293,14 @@ GROUP BY 1
 ORDER BY 1;
 
 -- @query 14_iscrizioni | Iscrizioni ICS: righe reali, trappola etag/304 e impatto sul busy (180 giorni)
--- Solo l'host dell'URL. trappola_304: etag o last_modified salvati ma nessuna
--- riga importata (il pull risponde 304 e non reimporta mai: design §14).
+-- Dell'URL solo l'host: niente credenziali (user:password@), porta, percorso
+-- né query string, dove possono stare token. Senza il nome dell'iscrizione.
+-- trappola_304: etag o last_modified salvati ma nessuna riga importata (il
+-- pull risponde 304 e non reimporta mai: design §14).
 -- @anomaly ICS_PULL_REFETCH when=trappola_304
 -- @anomaly SUBSCRIPTION_BLOCKING_IMPACT when=con_impatto
 WITH s AS (
-  SELECT s.id, s.name, s.calendar_id, s.ics_url, s.sync_enabled, s.event_count, s.last_error,
+  SELECT s.id, s.calendar_id, s.ics_url, s.sync_enabled, s.event_count, s.last_error,
     s.etag IS NOT NULL AS has_etag, s.last_modified IS NOT NULL AS has_last_modified, s.last_synced_at, s.created_at,
     (SELECT count(*) FROM calendar_events e WHERE e.subscription_id = s.id) AS righe_reali,
     (SELECT round(COALESCE(sum(EXTRACT(EPOCH FROM (LEAST(e.end_time, now() + interval '180 days') - GREATEST(e.start_time, now()))) / 3600), 0)::numeric, 1)
@@ -297,7 +309,8 @@ WITH s AS (
          AND e.end_time > now() AND e.start_time < now() + interval '180 days') AS ore_busy_180g_oggi
   FROM calendar_subscriptions s
 )
-SELECT s.id, s.name, c.slug AS destinazione, c.blocks_availability, substring(s.ics_url from '^https?://[^/]+') AS host,
+SELECT s.id, c.slug AS destinazione, c.blocks_availability,
+  substring(lower(s.ics_url) from '^https?://(?:[^/?#]*@)?([^/:?#@]+)') AS host,
   s.sync_enabled, s.event_count, s.righe_reali, s.last_error, s.has_etag, s.has_last_modified, s.last_synced_at,
   s.ore_busy_180g_oggi,
   ((s.has_etag OR s.has_last_modified) AND s.righe_reali = 0) AS trappola_304,
@@ -308,13 +321,14 @@ ORDER BY s.created_at;
 
 -- @query 15_app_password | App-password CalDAV
 -- Principal canonico 'federico'; gli username caldes-* sono riservati agli
--- utenti di servizio. IP mascherato.
+-- utenti di servizio. IP mascherato; del nome del device solo se c'è.
 -- @anomaly NON_CANONICAL_APP_PASSWORD when=attiva_non_canonica
 SELECT username,
   (username <> 'federico') AS non_canonico,
   (username ILIKE 'caldes-%') AS riservato,
   (username <> 'federico' AND is_active AND revoked_at IS NULL AND (expires_at IS NULL OR expires_at > now())) AS attiva_non_canonica,
-  device_name, is_active, revoked_at IS NOT NULL AS revocata, expires_at, last_used_at,
+  (COALESCE(btrim(device_name), '') <> '') AS con_nome_device,
+  is_active, revoked_at IS NOT NULL AS revocata, expires_at, last_used_at,
   CASE
     WHEN last_used_ip IS NULL THEN NULL
     WHEN last_used_ip ~ '^\d{1,3}(\.\d{1,3}){3}$' THEN regexp_replace(last_used_ip, '\.\d{1,3}$', '.x')
@@ -352,25 +366,75 @@ ORDER BY version;
 
 -- @query 19b_eccezioni_dst | Eccezioni salvate prima del fix DST
 -- Stessa ora UTC del DTSTART ma ora locale di Roma diversa: la firma del codice
--- precedente a d046006. Da riallineare con scripts/fix-dst-exceptions.ts.
+-- precedente a d046006, per le serie timed e all-day (anche l'all-day salvato a
+-- mezzanotte di Roma slitta di un'ora). Da riallineare con
+-- scripts/fix-dst-exceptions.ts, che usa lo stesso criterio. Gli elementi di
+-- exdates non in forma ISO (19c) sono esclusi invece di far fallire la query.
 -- @anomaly DST_SHIFTED_EXCEPTION
+WITH masters AS (
+  SELECT m.id, m.calendar_id, m.start_time, m.exdates, m.updated_at
+  FROM calendar_events m
+  WHERE m.recurrence_master_id IS NULL AND m.rrule IS NOT NULL AND m.rrule <> ''
+), exdate_values AS (
+  -- CASE annidati: il cast avviene solo dopo i controlli di forma e del giorno
+  -- del mese (Postgres non garantisce l'ordine delle condizioni di un AND).
+  SELECT m.id AS master_id, m.calendar_id, m.start_time, m.updated_at,
+    CASE WHEN x.v ~ '^[1-9][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,6})?)?(Z|[+-]([01][0-9]|2[0-3])(:?[0-5][0-9])?)?$'
+      THEN CASE WHEN substring(x.v from 9 for 2)::int
+                  <= EXTRACT(DAY FROM make_date(substring(x.v from 1 for 4)::int, substring(x.v from 6 for 2)::int, 1)
+                       + interval '1 month' - interval '1 day')
+             THEN x.v::timestamptz END
+    END AS valore
+  FROM masters m,
+    LATERAL jsonb_array_elements_text(CASE WHEN jsonb_typeof(m.exdates) = 'array' THEN m.exdates ELSE '[]'::jsonb END) AS x(v)
+)
 SELECT 'override' AS tipo, c.slug, m.id AS master_id, o.id AS eccezione_id, m.start_time AS dtstart,
   o.recurrence_id AS valore, o.created_at
 FROM calendar_events o
-JOIN calendar_events m ON m.id = o.recurrence_master_id
+JOIN masters m ON m.id = o.recurrence_master_id
 JOIN calendars c ON c.id = m.calendar_id
-WHERE m.rrule IS NOT NULL AND NOT m.all_day
-  AND to_char(o.recurrence_id AT TIME ZONE 'UTC', 'HH24:MI') = to_char(m.start_time AT TIME ZONE 'UTC', 'HH24:MI')
+WHERE to_char(o.recurrence_id AT TIME ZONE 'UTC', 'HH24:MI') = to_char(m.start_time AT TIME ZONE 'UTC', 'HH24:MI')
   AND to_char(o.recurrence_id AT TIME ZONE 'Europe/Rome', 'HH24:MI') <> to_char(m.start_time AT TIME ZONE 'Europe/Rome', 'HH24:MI')
 UNION ALL
-SELECT 'exdate', c.slug, m.id, NULL, m.start_time, x.v::timestamptz, m.updated_at
-FROM calendar_events m
-JOIN calendars c ON c.id = m.calendar_id,
-  LATERAL jsonb_array_elements_text(m.exdates) AS x(v)
-WHERE m.rrule IS NOT NULL AND NOT m.all_day
-  AND to_char(x.v::timestamptz AT TIME ZONE 'UTC', 'HH24:MI') = to_char(m.start_time AT TIME ZONE 'UTC', 'HH24:MI')
-  AND to_char(x.v::timestamptz AT TIME ZONE 'Europe/Rome', 'HH24:MI') <> to_char(m.start_time AT TIME ZONE 'Europe/Rome', 'HH24:MI')
+SELECT 'exdate', c.slug, x.master_id, NULL, x.start_time, x.valore, x.updated_at
+FROM exdate_values x
+JOIN calendars c ON c.id = x.calendar_id
+WHERE x.valore IS NOT NULL
+  AND to_char(x.valore AT TIME ZONE 'UTC', 'HH24:MI') = to_char(x.start_time AT TIME ZONE 'UTC', 'HH24:MI')
+  AND to_char(x.valore AT TIME ZONE 'Europe/Rome', 'HH24:MI') <> to_char(x.start_time AT TIME ZONE 'Europe/Rome', 'HH24:MI')
 ORDER BY 2, 3, 6;
+
+-- @query 19c_exdates_non_validi | Exdates non interpretabili
+-- Master con exdates che non è un array JSON, o con elementi che non sono una
+-- data e ora ISO valida: esclusi dalla 19b (stesso controllo).
+-- fix-dst-exceptions.ts salta con INVALID_VALUE quelli che non sono date
+-- nemmeno per Date.parse, che però accetta ad esempio il 30 febbraio come 2
+-- marzo (come listOccurrences). Solo i primi 40 caratteri del valore.
+WITH elementi AS (
+  SELECT m.id AS master_id, m.calendar_id, x.v, x.i,
+    CASE WHEN jsonb_typeof(x.v) = 'string'
+      THEN CASE WHEN (x.v #>> '{}') ~ '^[1-9][0-9]{3}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9](\.[0-9]{1,6})?)?(Z|[+-]([01][0-9]|2[0-3])(:?[0-5][0-9])?)?$'
+        THEN substring(x.v #>> '{}' from 9 for 2)::int
+          <= EXTRACT(DAY FROM make_date(substring(x.v #>> '{}' from 1 for 4)::int, substring(x.v #>> '{}' from 6 for 2)::int, 1)
+               + interval '1 month' - interval '1 day')
+        ELSE false END
+      ELSE false
+    END AS valido
+  FROM calendar_events m,
+    LATERAL jsonb_array_elements(CASE WHEN jsonb_typeof(m.exdates) = 'array' THEN m.exdates ELSE '[]'::jsonb END) WITH ORDINALITY AS x(v, i)
+  WHERE m.recurrence_master_id IS NULL
+)
+SELECT c.slug, m.id AS master_id, 'exdates non array' AS problema, jsonb_typeof(m.exdates) AS tipo_json, NULL::int AS indice,
+  left(m.exdates::text, 40) AS valore
+FROM calendar_events m
+JOIN calendars c ON c.id = m.calendar_id
+WHERE m.recurrence_master_id IS NULL AND m.exdates IS NOT NULL AND jsonb_typeof(m.exdates) <> 'array'
+UNION ALL
+SELECT c.slug, e.master_id, 'elemento non valido', jsonb_typeof(e.v), (e.i - 1)::int, left(e.v #>> '{}', 40)
+FROM elementi e
+JOIN calendars c ON c.id = e.calendar_id
+WHERE NOT e.valido
+ORDER BY 1, 2, 5;
 
 -- @query 20a_audit_attivita_90g | Attività sul calendario negli ultimi 90 giorni (audit_logs)
 SELECT table_name, action, count(*) AS righe, max(created_at) AS ultima

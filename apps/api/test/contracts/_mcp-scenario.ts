@@ -17,11 +17,16 @@
  *    EXDATE e un override salvati con l'ora UTC del DTSTART, come faceva il
  *    codice precedente a d046006;
  *  - serie 'Palestra' settimanale nel calendario non bloccante;
+ *  - fuori dalla settimana, nel calendario non bloccante: una serie oraria
+ *    con più occorrenze del tetto di expandRRule (500 per serie e per query)
+ *    e una serie con location e url il cui override spostato li eredita;
  *  - iscrizione ICS con un evento timed e un all-day a mezzanotte UTC;
  *  - nel calendario 'bookings': la proiezione di una prenotazione confermata
  *    e un evento manuale (decisione 8);
- *  - tipi di prenotazione pubblici, privati e inattivi; prenotazioni
- *    confermata, in attesa e annullata.
+ *  - tipi di prenotazione pubblici (uno con buffer asimmetrici), privati e
+ *    inattivi; prenotazioni confermata, in attesa e annullata, più una in
+ *    attesa e una annullata "oggi" fuori dall'orario d'ufficio (non tolgono
+ *    slot) e una confermata il 15 aprile per il verso dei buffer.
  *
  * I dati dei casi di scrittura (prenotazioni da spostare o annullare, eventi
  * da modificare o eliminare) li crea ogni test nelle settimane successive,
@@ -64,6 +69,11 @@ export const DST_SHIFTED_OVERRIDE_START = '2027-03-29T08:00:00.000Z';
 
 /** UID con forma di UUID (maiuscolo, come quelli generati da Apple Calendar). */
 export const UUID_SHAPED_UID = 'A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D';
+
+/** Occorrenze della serie oraria 'Promemoria orario' (COUNT della RRULE). */
+export const PROMEMORIA_COUNT = 600;
+/** Tetto di occorrenze per serie e per query di expandRRule (default di `limit`). */
+export const PROMEMORIA_LIMIT = 500;
 
 // ─── Alias per gli snapshot ───────────────────────────────
 
@@ -155,17 +165,23 @@ export interface BaseScenario {
   series: {
     standup: SeriesFixture;
     palestra: SeriesFixture;
+    promemoria: SeriesFixture;
+    corso: SeriesFixture;
   };
   eventTypes: {
     consulenza: EventType;
     sopralluogo: EventType;
     privato: EventType;
     archiviato: EventType;
+    asimmetrico: EventType;
   };
   bookings: {
     confermata: BookingFixture;
     inAttesa: BookingFixture;
     annullata: BookingFixture;
+    inAttesaOggi: BookingFixture;
+    annullataOggi: BookingFixture;
+    bufferAsimmetrico: BookingFixture;
   };
 }
 
@@ -208,6 +224,27 @@ export async function createBaseScenario(fx: Fixtures, registry: AliasRegistry):
     start_time: romeIso('2027-03-23', '18:00'),
     end_time: romeIso('2027-03-23', '19:00'),
     rrule: 'FREQ=WEEKLY;BYDAY=TU,TH;COUNT=6',
+  });
+  // Serie oraria da 600 occorrenze dal 7 giugno: una query che le copre tutte
+  // ne restituisce solo PROMEMORIA_LIMIT (tetto di expandRRule, per serie e per query).
+  const promemoria = await fx.series({
+    calendar: personale,
+    summary: 'Promemoria orario',
+    start_time: romeIso('2027-06-07', '00:00'),
+    end_time: romeIso('2027-06-07', '00:05'),
+    rrule: `FREQ=HOURLY;COUNT=${PROMEMORIA_COUNT}`,
+  });
+  // Serie con location e url: l'override spostato (createOccurrenceOverride,
+  // come "solo questa" in admin) li copia dal master.
+  const corso = await fx.series({
+    calendar: personale,
+    summary: 'Corso serale',
+    location: 'Via Garibaldi 5, Frosinone',
+    url: 'https://meet.caldes.test/corso',
+    start_time: romeIso('2027-07-05', '18:00'),
+    end_time: romeIso('2027-07-05', '19:30'),
+    rrule: 'FREQ=WEEKLY;COUNT=3',
+    overrides: [{ originalStart: romeIso('2027-07-12', '18:00'), start: romeIso('2027-07-13', '18:00'), end: romeIso('2027-07-13', '19:30') }],
   });
 
   const riunione = await fx.event({
@@ -276,6 +313,11 @@ export async function createBaseScenario(fx: Fixtures, registry: AliasRegistry):
   });
   const privato = await fx.eventType({ key: 'privato', title: 'Riservato', durationMinutes: 45, slotIncrementMinutes: 15, isPublic: false });
   const archiviato = await fx.eventType({ key: 'archiviato', title: 'Archiviato', isActive: false });
+  // Buffer diversi prima (15) e dopo (45): il verso dei buffer si vede negli slot.
+  const asimmetrico = await fx.eventType({
+    key: 'buffer-asimmetrici', title: 'Buffer asimmetrici', durationMinutes: 30, slotIncrementMinutes: 15,
+    bufferBeforeMinutes: 15, bufferAfterMinutes: 45, schedule,
+  });
 
   const confermata = await fx.booking({
     eventType: consulenza,
@@ -294,21 +336,43 @@ export async function createBaseScenario(fx: Fixtures, registry: AliasRegistry):
     cancelledBy: 'attendee', cancellationReason: 'Cliente indisponibile',
     attendee: { name: 'Paolo Gialli', email: fx.email('paolo') },
   });
+  // Oggi, prima e dopo l'orario d'ufficio (anche con i buffer 30/30 del
+  // sopralluogo non toccano le finestre 09-13 e 14-18): get_calendar_today
+  // mostra la pending ed esclude l'annullata.
+  const inAttesaOggi = await fx.booking({
+    eventType: consulenza, start: romeIso('2027-03-30', '07:00'), status: 'pending',
+    attendee: { name: 'Lucia Bruni', email: fx.email('lucia') },
+  });
+  const annullataOggi = await fx.booking({
+    eventType: consulenza, start: romeIso('2027-03-30', '19:00'), status: 'cancelled',
+    cancelledBy: 'admin', cancellationReason: 'Spostata a voce',
+    attendee: { name: 'Marco Celeste', email: fx.email('marco') },
+  });
+  // Giovedì 15 aprile, 11:00-11:30: ostacolo per gli slot del tipo con buffer asimmetrici.
+  const bufferAsimmetrico = await fx.booking({
+    eventType: asimmetrico, start: romeIso('2027-04-15', '11:00'),
+    attendee: { name: 'Rita Ocra', email: fx.email('rita') },
+  });
 
   const events = { riunione, forse, annullato, trasferta, compleanno, uidUuid, telefonata, ponte, pasqua, pasquetta, webinar, fiera };
   for (const [key, event] of Object.entries(events)) registry.event(key.replace(/[A-Z]/g, (ch) => `-${ch.toLowerCase()}`), event);
   registry.series('standup', standup, ['standup-posticipato', 'standup-annullato', 'standup-orfano']);
   registry.series('palestra', palestra);
+  registry.series('promemoria', promemoria);
+  registry.series('corso', corso, ['corso-spostato']);
   registry.booking('confermata', confermata);
   registry.booking('in-attesa', inAttesa);
   registry.booking('annullata', annullata);
+  registry.booking('in-attesa-oggi', inAttesaOggi);
+  registry.booking('annullata-oggi', annullataOggi);
+  registry.booking('buffer-asimmetrico', bufferAsimmetrico);
 
   return {
     calendars: { lavoro, personale, esterno, festivita, bookings },
     events,
-    series: { standup, palestra },
-    eventTypes: { consulenza, sopralluogo, privato, archiviato },
-    bookings: { confermata, inAttesa, annullata },
+    series: { standup, palestra, promemoria, corso },
+    eventTypes: { consulenza, sopralluogo, privato, archiviato, asimmetrico },
+    bookings: { confermata, inAttesa, annullata, inAttesaOggi, annullataOggi, bufferAsimmetrico },
   };
 }
 

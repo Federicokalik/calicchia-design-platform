@@ -27,7 +27,8 @@
  * Comportamenti attuali congelati qui e da correggere solo dopo F0 (design §14
  * e §12 "Parità prima"), ciascuno commentato nel caso relativo:
  *  - find_free_slots lavora nel fuso del server (UTC), non in Europe/Rome;
- *  - list_events perde le occorrenze di una serie già iniziate prima di `from`;
+ *  - list_events perde le occorrenze di una serie già iniziate prima di `from`
+ *    e ne restituisce al massimo 500 per serie e per query (tetto di expandRRule);
  *  - getEvent scambia un UID con forma di UUID per un id: update_event non lo trova;
  *  - get_events_for_today ignora in silenzio un calendario inesistente;
  *  - routes/mcp.ts scarta il `code` (CONFLICT, VALIDATION) dell'errore del tool;
@@ -75,6 +76,8 @@ import {
   HOLIDAY_NOW,
   NOW,
   overrideRows,
+  PROMEMORIA_COUNT,
+  PROMEMORIA_LIMIT,
   UUID_SHAPED_UID,
   WEEK_FROM,
   WEEK_TO,
@@ -162,17 +165,21 @@ function parseOutput(raw: string): ToolOutput {
  * Esegue il tool come routes/mcp.ts (executeTool: errori lanciati → {error}),
  * normalizza argomenti, output ed effetti con lo stesso normalizzatore (stessi
  * segnaposto) e li confronta con lo snapshot del caso `<tool>/<caso>`.
+ * `select` riduce l'output registrato (es. 500 occorrenze → conteggio, prima e
+ * ultima); il valore restituito resta l'output completo.
  */
 async function runTool(
   caseName: string,
   tool: string,
   args: Record<string, unknown>,
   effects?: (output: ToolOutput) => Promise<unknown>,
+  opts: { select?: (output: ToolOutput) => unknown } = {},
 ): Promise<ToolOutput> {
   const output = parseOutput(await executeTool(tool, args));
   const effect = effects ? await effects(output) : undefined;
   const n = await createScenarioNormalizer(fx, aliases);
-  const entry: Record<string, unknown> = { tool, args: n.normalize(args), output: n.normalize(output) };
+  const recorded = opts.select ? opts.select(output) : output;
+  const entry: Record<string, unknown> = { tool, args: n.normalize(args), output: n.normalize(recorded) };
   if (effect !== undefined) entry.effects = n.normalize(effect);
   store.check(`${tool}/${caseName}`, entry);
   covered.add(tool);
@@ -269,13 +276,20 @@ test('allowed-diffs.json: formato valido e regole di confronto', () => {
 // ─── (b) Output: tool di lettura ───────────────────────────────
 
 test('get_calendar_today: prenotazioni ed eventi di oggi, giorno festivo', async () => {
-  // Oggi (30 marzo): la prenotazione confermata arriva da calendar_bookings
-  // (kind 'booking'), la sua proiezione è esclusa; restano l'override della
-  // serie, l'evento manuale nel calendario 'bookings', l'iscrizione e il
-  // calendario non bloccante. L'override cancellato del 31 non compare.
+  // Oggi (30 marzo): le prenotazioni confermate e in attesa arrivano da
+  // calendar_bookings (kind 'booking'), l'annullata delle 19:00 no; la
+  // proiezione della confermata è esclusa. Restano l'override della serie,
+  // l'evento manuale nel calendario 'bookings', l'iscrizione e il calendario
+  // non bloccante. L'override cancellato del 31 non compare.
   const today = await runTool('oggi', 'get_calendar_today', {});
   assert.equal(today.date, '2027-03-30');
-  assert.deepEqual(today.events.map((e: { kind: string }) => e.kind), ['event', 'event', 'event', 'booking', 'event', 'event']);
+  assert.deepEqual(today.events.map((e: { kind: string }) => e.kind), ['booking', 'event', 'event', 'event', 'booking', 'event', 'event']);
+  const bookings = today.events.filter((e: { kind: string }) => e.kind === 'booking');
+  assert.deepEqual(bookings.map((e: { attendee_name: string; status: string }) => [e.attendee_name, e.status]), [
+    ['Lucia Bruni', 'pending'],
+    ['Mario Rossi', 'confirmed'],
+  ]);
+  assert.equal(base.bookings.annullataOggi.booking.status, 'cancelled');
 
   // Pasquetta: la festività del calendario 'f' (00:00→24:00 di Roma) è un evento come gli altri.
   freezeTime(HOLIDAY_NOW);
@@ -307,6 +321,34 @@ test('list_calendars: calendari seminati e di test, conteggi e feed', async () =
   assert.equal(lavoro.event_count, 7);
   const f = out.calendars.find((c: { slug: string }) => c.slug === 'f');
   assert.equal(f.event_count, 3);
+});
+
+test('list_events: tetto di 500 occorrenze per serie e override che eredita location e url', async () => {
+  // La serie oraria ha 600 occorrenze, tutte nella finestra: expandRRule ne
+  // restituisce le prime 500 (dopo gli exdates, prima degli override). Nello
+  // snapshot solo conteggio, prima e ultima occorrenza.
+  const { promemoria, corso } = base.series;
+  assert.equal(promemoria.master.rrule, `FREQ=HOURLY;COUNT=${PROMEMORIA_COUNT}`);
+  const capped = await runTool('tetto-occorrenze', 'list_events', {
+    calendar: base.calendars.personale.slug, from: romeIso('2027-06-01'), to: romeIso('2027-07-05'),
+  }, undefined, {
+    select: (out: ToolOutput) => ({ count: out.count, first: out.events[0], last: out.events[out.events.length - 1] }),
+  });
+  assert.equal(capped.count, PROMEMORIA_LIMIT);
+  assert.equal(capped.events[0].start_time, romeIso('2027-06-07', '00:00'));
+  // 500ª occorrenza: 499 ore dopo la prima (tutto in ora legale).
+  assert.equal(capped.events[PROMEMORIA_LIMIT - 1].start_time, '2027-06-27T17:00:00.000Z');
+
+  // L'override spostato al martedì 13 copia location e url dal master.
+  const inherited = await runTool('override-eredita-location-url', 'list_events', {
+    calendar: base.calendars.personale.slug, from: romeIso('2027-07-05'), to: romeIso('2027-07-20'),
+  });
+  assert.deepEqual(inherited.events.map((e: { start_time: string; is_override: boolean; location: string; url: string }) =>
+    [e.start_time, e.is_override, e.location, e.url]), [
+    [romeIso('2027-07-05', '18:00'), false, corso.master.location, corso.master.url],
+    [romeIso('2027-07-13', '18:00'), true, corso.master.location, corso.master.url],
+    [romeIso('2027-07-19', '18:00'), false, corso.master.location, corso.master.url],
+  ]);
 });
 
 test('list_events: settimana, f, bookings, serie attraverso il cambio d\'ora, iscrizione, errori', async () => {
@@ -369,11 +411,11 @@ test('find_free_slots: finestre libere nella settimana, orario personalizzato, d
 
 test('list_event_types: pubblici, privati, inattivi e seminati', async () => {
   const out = await runTool('tutti', 'list_event_types', {});
-  assert.equal(out.count, 6);
+  assert.equal(out.count, 7);
 });
 
 test('get_calendar_availability: slot della settimana, buffer, tipo privato, tipo inesistente', async () => {
-  const { consulenza, sopralluogo, privato } = base.eventTypes;
+  const { consulenza, sopralluogo, privato, asimmetrico } = base.eventTypes;
   // Pasquetta e Ponte (calendario 'f') svuotano lunedì e venerdì; martedì
   // mancano gli slot occupati da override, riunione, prenotazione e telefonata.
   const week = await runTool('settimana', 'get_calendar_availability', {
@@ -384,6 +426,16 @@ test('get_calendar_availability: slot della settimana, buffer, tipo privato, tip
   await runTool('buffer', 'get_calendar_availability', {
     event_type_slug: sopralluogo.slug, from_date: '2027-03-30', to_date: '2027-03-30',
   });
+  // Buffer asimmetrici (15 prima, 45 dopo) attorno alla prenotazione 11:00-11:30
+  // del 15 aprile: occupato 10:15-11:45 (inizio - buffer dopo, fine + buffer
+  // prima). Con i buffer invertiti sarebbe 10:45-12:15.
+  const asymmetric = await runTool('buffer-asimmetrici', 'get_calendar_availability', {
+    event_type_slug: asimmetrico.slug, from_date: '2027-04-15', to_date: '2027-04-15',
+  });
+  const morning = asymmetric.slots_by_date['2027-04-15']
+    .map((slot: { start: string }) => slot.start)
+    .filter((start: string) => start < romeIso('2027-04-15', '13:00'));
+  assert.deepEqual(morning, ['09:00', '09:15', '09:30', '09:45', '11:45', '12:00', '12:15', '12:30'].map((t) => romeIso('2027-04-15', t)));
   // onlyPublic=false: anche i tipi non pubblici sono interrogabili (schedule di default).
   await runTool('tipo-privato', 'get_calendar_availability', {
     event_type_slug: privato.slug, from_date: '2027-04-01', to_date: '2027-04-01',
@@ -396,9 +448,9 @@ test('get_calendar_availability: slot della settimana, buffer, tipo privato, tip
 
 test('list_bookings e list_cal_bookings: filtri per stato, date e limite; alias identico', async () => {
   const confirmed = await runTool('default-confermate', 'list_bookings', {});
-  assert.equal(confirmed.count, 1);
+  assert.equal(confirmed.count, 2);
   const all = await runTool('tutte', 'list_bookings', { status: 'all' });
-  assert.equal(all.count, 3);
+  assert.equal(all.count, 6);
   await runTool('in-attesa', 'list_bookings', { status: 'pending' });
   await runTool('intervallo-date', 'list_bookings', { status: 'all', from_date: '2027-03-31', to_date: '2027-03-31' });
   await runTool('limite', 'list_bookings', { status: 'all', limit: 1 });

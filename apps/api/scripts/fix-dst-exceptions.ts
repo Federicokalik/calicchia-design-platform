@@ -14,10 +14,13 @@
  * (orfano più occorrenza della serie). Vale anche al contrario: serie creata
  * d'inverno, eccezione estiva salvata un'ora dopo.
  *
- * Criterio (lo stesso della query 19 di docs/calendar-radicale/inventario-produzione.sql,
+ * Criterio (lo stesso della query 19b di scripts/sql/calendar-inventory.sql,
  * più le verifiche sulla griglia reale):
- *  1. master timed (non all-day) con RRULE; eccezioni = recurrence_id dei suoi
- *     override più gli elementi di exdates;
+ *  1. master con RRULE, timed e all-day; eccezioni = recurrence_id dei suoi
+ *     override più gli elementi di exdates. Un all-day salvato a mezzanotte di
+ *     Roma ha lo stesso difetto (la vecchia griglia ripeteva le 22:00Z o le
+ *     23:00Z del DTSTART, la nuova cade sempre a mezzanotte di Roma) e la
+ *     stessa correzione; i casi che non tornano finiscono fra le saltate;
  *  2. un'eccezione che è già un'occorrenza dell'espansione attuale è allineata
  *     e non viene mai toccata (comprese tutte quelle create dopo il fix);
  *  3. firma DST: stessa ora UTC del DTSTART ma ora locale di Roma diversa (cioè
@@ -52,19 +55,30 @@
  * INSERT/UPDATE/DELETE/EXPORT/IMPORT), request_id = run_id, motivo e valori
  * nei metadata. Il trigger audit_calendar_events aggiunge la sua riga con la
  * riga completa. Con --expect-plan (l'impronta stampata dal dry-run) si rifiuta
- * senza modifiche, exit 3, se il piano è cambiato nel frattempo. Idempotente:
- * dopo l'apply le eccezioni sono allineate e un nuovo run non trova nulla.
+ * senza modifiche, exit 3, se il piano è cambiato nel frattempo. Dalla CLI
+ * --expect-plan è obbligatorio con --apply: si applica solo un piano visto nel
+ * dry-run (con lo stesso filtro --calendar). Idempotente: dopo l'apply le
+ * eccezioni sono allineate e un nuovo run non trova nulla.
  *
- * In produzione l'immagine dell'API non contiene scripts/: copiare il file nel
- * container (docker cp apps/api/scripts/fix-dst-exceptions.ts <api>:/app/apps/api/scripts/)
- * ed eseguire `npx tsx scripts/fix-dst-exceptions.ts` da /app/apps/api, oppure
- * lanciarlo da un checkout con DATABASE_URL verso il database.
+ * Il report JSON di --out contiene titoli e uid delle serie: viene scritto con
+ * permessi 0600, come quello dell'inventario.
  *
- * Exit code: 0 ok, 1 errore, 2 uso errato, 3 piano diverso da --expect-plan.
+ * In produzione l'immagine dell'API contiene già scripts/ (il Dockerfile copia
+ * apps/api/scripts): dopo il deploy di questi commit si esegue nel container,
+ * da /app/apps/api, `pnpm exec tsx scripts/fix-dst-exceptions.ts` (dry-run) e
+ * poi lo stesso comando con --apply --expect-plan <impronta>. Solo con
+ * un'immagine precedente a questi commit va copiato il file (docker cp
+ * apps/api/scripts/fix-dst-exceptions.ts <api>:/app/apps/api/scripts/);
+ * altrimenti si sovrascriverebbe la versione dell'immagine con quella del
+ * proprio checkout. In alternativa, da un checkout con DATABASE_URL verso il
+ * database.
+ *
+ * Exit code: 0 ok, 1 errore, 2 uso errato (anche --apply senza --expect-plan),
+ * 3 piano diverso da --expect-plan.
  */
 
 import { createHash, randomUUID } from 'node:crypto';
-import { writeFileSync } from 'node:fs';
+import { chmodSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -309,8 +323,8 @@ const SKIP_LABELS: Record<SkipReason, string> = {
 };
 
 /**
- * Calcola il piano di correzione per i master (timed, con RRULE) e i loro
- * override. Non legge né scrive il database: dry-run e apply la chiamano
+ * Calcola il piano di correzione per i master con RRULE (timed e all-day) e
+ * i loro override. Non legge né scrive il database: dry-run e apply la chiamano
  * sulle righe lette (in apply, bloccate).
  */
 export function planDstFix(masters: MasterRow[], overrides: OverrideRow[]): DstPlan {
@@ -546,9 +560,9 @@ async function resolveCalendarSlugs(tx: Tx, slugs?: string[]): Promise<string[] 
 }
 
 /**
- * Master timed con RRULE (stesso criterio di listOccurrences: rrule non vuota,
- * nessun recurrence_master_id) e i loro override. Con `lock` le righe restano
- * bloccate fino alla fine della transazione.
+ * Master con RRULE, timed e all-day (stesso criterio di listOccurrences: rrule
+ * non vuota, nessun recurrence_master_id) e i loro override. Con `lock` le
+ * righe restano bloccate fino alla fine della transazione.
  */
 async function loadRows(tx: Tx, calendarSlugs: string[] | null, lock: boolean): Promise<{ masters: MasterRow[]; overrides: OverrideRow[] }> {
   const masters = await tx<MasterRow[]>`
@@ -558,7 +572,6 @@ async function loadRows(tx: Tx, calendarSlugs: string[] | null, lock: boolean): 
     JOIN calendars c ON c.id = e.calendar_id
     WHERE e.recurrence_master_id IS NULL
       AND e.rrule IS NOT NULL AND e.rrule <> ''
-      AND e.all_day = false
       ${calendarSlugs ? tx`AND c.slug = ANY(${calendarSlugs}::text[])` : tx``}
     ORDER BY c.slug, e.start_time, e.id
     ${lock ? tx`FOR UPDATE OF e` : tx``}
@@ -828,7 +841,8 @@ fix DST (d046006). Senza --apply è un dry-run: stampa il report e non scrive nu
 
 Opzioni:
   --apply                 applica le correzioni in una transazione, con audit_logs
-  --expect-plan <hash>    con --apply: rifiuta se il piano è diverso da quello del dry-run
+  --expect-plan <hash>    obbligatoria con --apply: l'impronta stampata dal dry-run;
+                          rifiuta se il piano ricalcolato è diverso
   --calendar <slug>       limita ai calendari indicati (ripetibile)
   --json                  stampa il report in JSON invece della tabella
   --out <file>            salva anche il report JSON nel file
@@ -873,6 +887,16 @@ export async function main(argv: string[]): Promise<number> {
     console.error('--expect-plan va usato insieme ad --apply.');
     return 2;
   }
+  // Si applica solo un piano rivisto: senza impronta un --apply lanciato con
+  // un filtro --calendar diverso da quello del dry-run (o senza dry-run)
+  // modificherebbe righe che nessuno ha visto.
+  if (values.apply && !values['expect-plan']) {
+    console.error(
+      '--apply richiede --expect-plan <impronta>: esegui prima il dry-run (stesse opzioni, senza --apply), ' +
+      'controlla il report e ripeti con --apply --expect-plan <impronta stampata dal dry-run>.',
+    );
+    return 2;
+  }
 
   try {
     const options = { calendarSlugs: values.calendar };
@@ -880,7 +904,13 @@ export async function main(argv: string[]): Promise<number> {
       ? await applyDstFix({ ...options, expectPlan: values['expect-plan'] })
       : await buildDstFixReport(options);
     const json = `${JSON.stringify(report, null, 2)}\n`;
-    if (values.out) writeFileSync(resolve(values.out), json);
+    if (values.out) {
+      // Titoli e uid delle serie: solo il proprietario. `mode` vale solo per un
+      // file nuovo, chmod anche per uno che esisteva già.
+      const out = resolve(values.out);
+      writeFileSync(out, json, { mode: 0o600 });
+      chmodSync(out, 0o600);
+    }
     process.stdout.write(values.json ? json : `${formatDstReport(report)}\n`);
     return 0;
   } catch (err) {
