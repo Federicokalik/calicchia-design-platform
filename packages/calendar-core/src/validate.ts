@@ -735,7 +735,13 @@ function validateComponentTimes(
     if (start.type === 'date' && (duration.hours || duration.minutes || duration.seconds)) {
       push(issues, 'INVALID_VALUE', 'DURATION con ore o minuti su un evento di tutto il giorno', { ...rk, property: 'DURATION' });
     }
-    if (durationToSeconds(duration) <= 0) push(issues, 'END_NOT_AFTER_START', 'La durata deve essere positiva', { ...rk, property: 'DURATION' });
+    const seconds = durationToSeconds(duration);
+    if (seconds <= 0) push(issues, 'END_NOT_AFTER_START', 'La durata deve essere positiva', { ...rk, property: 'DURATION' });
+    else if (seconds > MAX_VALID_DURATION_SECONDS) {
+      push(issues, 'INVALID_VALUE', 'DURATION oltre 10 anni', { ...rk, property: 'DURATION' });
+    } else if (wallSecondsOf(start) + seconds > LAST_VALID_WALL_SECONDS) {
+      push(issues, 'INVALID_VALUE', 'La fine cade oltre il 31/12/9999', { ...rk, property: 'DURATION' });
+    }
   }
 
   // RECURRENCE-ID degli override: stesso tipo del DTSTART del master.
@@ -811,6 +817,23 @@ function validateComponentTimes(
 function isAfter(a: IcsTime, b: IcsTime, ctx: ZoneContext): boolean {
   if (a.type === 'date' && b.type === 'date') return formatTimeValue(a) > formatTimeValue(b);
   return timeToUtcMs(a, ctx) > timeToUtcMs(b, ctx);
+}
+
+/**
+ * Durata massima accettata per ciò che si scrive (10 anni): oltre, l'oggetto
+ * produrrebbe istanti assurdi nell'indice. Il parse legge fino a
+ * model.MAX_DURATION_SECONDS, oltre la durata è illeggibile.
+ */
+export const MAX_VALID_DURATION_SECONDS = 10 * 366 * 86_400;
+
+/** Ora da muro 9999-12-31T23:59:59 in secondi dall'epoca: la fine di un evento non va oltre. */
+const LAST_VALID_WALL_SECONDS = Date.UTC(9999, 11, 31, 23, 59, 59) / 1000;
+
+/** Ora da muro (secondi dall'epoca, senza fuso) di un valore temporale. */
+function wallSecondsOf(t: IcsTime): number {
+  const d = new Date(Date.UTC(2000, 0, 1, t.type === 'date' ? 0 : t.hour, t.type === 'date' ? 0 : t.minute, t.type === 'date' ? 0 : Math.min(t.second, 59)));
+  d.setUTCFullYear(t.year, t.month - 1, t.day);
+  return d.getTime() / 1000;
 }
 
 /** Valori non standard: avvisi, non errori (il componente può arrivare da un device). */

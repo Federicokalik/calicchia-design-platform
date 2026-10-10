@@ -51,7 +51,7 @@ Riferimenti:
 | `config/config` | config di produzione (design §3.2): `caldes_auth`, `caldes_rights`, `multifilesystem` su `/data/collections`, `max_vevent_rrule_occurrence = 50000`, `delay_on_error = 0` |
 | `plugins/caldes_auth.py` | autenticazione: utenti di servizio dal peer, device via `verify-credentials`, cache, revoca con `credential_epoch` |
 | `plugins/caldes_rights.py` | permessi: policy, heartbeat, identità del volume, matrice del contratto §8 |
-| `plugins/caldes_vobject_fix.py`, `plugins/sitecustomize.py` | patch di fedeltà di vobject 0.9.9, attiva all'avvio dell'interprete |
+| `plugins/caldes_vobject_fix.py`, `plugins/sitecustomize.py` | patch di fedeltà di vobject 0.9.9, attiva all'avvio dell'interprete; rifiuta alla PUT (400) le RRULE con valori vietati dalla RFC che dateutil accetta, come INTERVAL=0 |
 | `plugins/caldes_healthcheck.py`, `plugins/caldes_selftest.py` | healthcheck del container; self-test eseguito in build e in CI |
 | `tests/` | suite pytest contro Radicale 3.7.8 reale (auth, rights, fedeltà, layout, identità, immagine, stack completo) |
 

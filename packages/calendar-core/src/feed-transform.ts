@@ -33,6 +33,16 @@
  * - TRANSP assente → TRANSP:OPAQUE esplicito (è il default di RFC 5545 e il
  *   feed legacy lo scrive sempre);
  * - VTIMEZONE deduplicati per TZID (canonici del registro per i TZID IANA);
+ *   se lo stesso TZID non IANA (per esempio "Customized Time Zone" di Outlook)
+ *   compare in due oggetti con definizioni diverse, quello dell'oggetto che
+ *   viene dopo diventa `${tzid} (${hash8})`, sia nei riferimenti dei suoi
+ *   componenti sia nella copia del VTIMEZONE: chi è abbonato legge ogni evento
+ *   con il proprio fuso, come l'indice;
+ * - SUMMARY, DESCRIPTION e LOCATION escono con il solo parametro LANGUAGE:
+ *   ALTREP e simili (per esempio la descrizione HTML di Thunderbird) possono
+ *   contenere dati che il testo non ha più, o che la privacy toglie;
+ * - un oggetto che non si riesce a trasformare o a serializzare (anche per i
+ *   suoi fusi) resta fuori dal feed con onObjectError: gli altri escono;
  * - intestazione come il feed legacy (ics-feed.ts): METHOD:PUBLISH,
  *   CALSCALE:GREGORIAN, X-WR-CALNAME, X-WR-CALDESC (default "Calendario
  *   <nome>"), X-WR-TIMEZONE, X-APPLE-CALENDAR-COLOR, PRODID stabile;
@@ -46,8 +56,8 @@
 
 import { allDayRangeFromIcs, localMidnightUtcMs } from './allday';
 import { type CalendarCoreError, IcsParseError, IcsValueError, TimezoneError, toCoreError } from './errors';
-import { contentSha256 } from './fingerprint';
-import { collectTzidRefs, encodeText, vtimezoneTzid } from './ics-text';
+import { canonicalComponentText, contentSha256 } from './fingerprint';
+import { appendAll, collectTzidRefs, componentLines, encodeText } from './ics-text';
 import {
   addDurationToTime,
   BOOKING_UID_DOMAIN,
@@ -76,11 +86,15 @@ import {
   utcMsToTime,
   type ZoneContext,
 } from './model';
-import { serializeCalendar } from './serialize';
-import { DEFAULT_TZ, ianaZone, msToWall } from './tz-registry';
+import { canonicalTimezonesFor, serializeCalendar } from './serialize';
+import { DEFAULT_TZ, findVtimezone, ianaZone, isIanaTzid, msToWall, resolveTzid } from './tz-registry';
 
-/** Versione della trasformazione: entra nella chiave della cache dell'ETag lato API. */
-export const FEED_TRANSFORM_VERSION = 1;
+/**
+ * Versione della trasformazione: entra nella chiave della cache dell'ETag lato
+ * API. 2: parametri dei campi TEXT ridotti a LANGUAGE, VTIMEZONE personalizzati
+ * in conflitto rinominati, folding senza continuazioni di soli spazi.
+ */
+export const FEED_TRANSFORM_VERSION = 2;
 
 /** Proprietà dei VEVENT che passano nel feed. */
 export const FEED_PROPERTY_WHITELIST = [
@@ -214,6 +228,8 @@ export interface FeedObjectOutput {
 const DAY_MS = 86_400_000;
 const WHITELIST: ReadonlySet<string> = new Set(FEED_PROPERTY_WHITELIST);
 const PRIVATE_DROPPED: ReadonlySet<string> = new Set(['SUMMARY', 'DESCRIPTION', 'LOCATION', 'URL']);
+/** Proprietà TEXT della whitelist: escono con il solo parametro LANGUAGE. */
+const TEXT_PROPERTIES: ReadonlySet<string> = new Set(['SUMMARY', 'DESCRIPTION', 'LOCATION']);
 
 /** UID pubblicato nel feed per un oggetto (regole in testa al modulo). */
 export function feedUid(uid: string, opts: { uidDomain: string; legacyUid?: string | null }): string {
@@ -242,31 +258,48 @@ export function buildFeed(
 ): { body: string; etag: string } {
   try {
     const tz = opts.tz || DEFAULT_TZ;
-    const entries: Array<{ sortStart: number; uid: string; components: IcsComponent[]; timezones: readonly IcsComponent[] }> = [];
+    const entries: Array<{ sortStart: number; uid: string; components: IcsComponent[]; ownTimezones: Map<string, IcsComponent> }> = [];
     for (const input of objects) {
       let out: FeedObjectOutput | null;
+      let ownTimezones: Map<string, IcsComponent>;
       try {
         out = transformObjectForFeed(input, opts);
+        if (!out) continue;
+        // Fusi e righe dell'oggetto verificati qui, dentro il try: un TZID o un
+        // valore che non si serializza esclude solo questo oggetto.
+        ownTimezones = objectOwnTimezones(out.components, input.object.timezones);
+        for (const c of out.components) componentLines(c, []);
+        for (const vtz of ownTimezones.values()) componentLines(vtz, []);
       } catch (err) {
         // Un solo oggetto non porta mai il feed in errore (design §1, fallimento circoscritto).
         opts.onObjectError?.(input, toCoreError(err, 'buildFeed'));
         continue;
       }
-      if (!out) continue;
       const uid = getTextValue(out.components[0], 'UID') ?? '';
-      entries.push({ sortStart: sortStartOf(input, out.components, { tz, timezones: input.object.timezones }), uid, components: out.components, timezones: input.object.timezones });
+      entries.push({ sortStart: sortStartOf(input, out.components, { tz, timezones: input.object.timezones }), uid, components: out.components, ownTimezones });
     }
     entries.sort((a, b) => a.sortStart - b.sortStart || (a.uid < b.uid ? -1 : a.uid > b.uid ? 1 : 0));
 
-    // VTIMEZONE non IANA dagli oggetti, deduplicati per TZID (vince il primo nell'ordine del feed):
-    // per i TZID IANA serializeCalendar usa i canonici del registro.
-    const customTz = new Map<string, IcsComponent>();
+    // VTIMEZONE non IANA dagli oggetti, deduplicati per TZID: a parità di
+    // definizione vince il primo nell'ordine del feed; con definizioni diverse
+    // il TZID dell'oggetto successivo viene rinominato (testa del modulo). Per i
+    // TZID IANA serializeCalendar usa i canonici del registro.
+    const customTz = new Map<string, { vtimezone: IcsComponent; text: string }>();
     for (const e of entries) {
-      for (const tzid of collectTzidRefs(e.components)) {
-        if (customTz.has(tzid)) continue;
-        const own = e.timezones.find((t) => vtimezoneTzid(t) === tzid.trim());
-        if (own) customTz.set(tzid, own);
+      const renames = new Map<string, string>();
+      for (const [tzid, own] of e.ownTimezones) {
+        const text = canonicalComponentText(own);
+        const published = customTz.get(tzid);
+        if (!published) {
+          customTz.set(tzid, { vtimezone: own, text });
+          continue;
+        }
+        if (published.text === text) continue;
+        const renamed = `${tzid.trim()} (${contentSha256(text).slice(0, 8)})`;
+        if (!customTz.has(renamed)) customTz.set(renamed, { vtimezone: withTzid(own, renamed), text });
+        renames.set(tzid, renamed);
       }
+      if (renames.size > 0) renameTzidRefs(e.components, renames);
     }
 
     const header: IcsProperty[] = [
@@ -280,13 +313,56 @@ export function buildFeed(
     const cal: IcsComponent = {
       name: 'VCALENDAR',
       properties: header,
-      components: [...customTz.values(), ...entries.flatMap((e) => e.components)],
+      components: [...[...customTz.values()].map((t) => t.vtimezone), ...entries.flatMap((e) => e.components)],
     };
     const body = serializeCalendar(cal, { prodid: FEED_PRODID, timezones: 'canonical' });
     return { body, etag: `"${contentSha256(body)}"` };
   } catch (err) {
     throw toCoreError(err, 'buildFeed');
   }
+}
+
+/**
+ * VTIMEZONE dell'oggetto che il feed pubblica per i suoi componenti (TZID
+ * referenziati non IANA con un VTIMEZONE nell'oggetto), per TZID come scritto
+ * nei riferimenti. canonicalTimezonesFor verifica che ogni TZID si risolva.
+ */
+function objectOwnTimezones(components: readonly IcsComponent[], timezones: readonly IcsComponent[]): Map<string, IcsComponent> {
+  canonicalTimezonesFor(components, timezones);
+  const own = new Map<string, IcsComponent>();
+  for (const tzid of collectTzidRefs(components)) {
+    if (isIanaTzid(resolveTzid(tzid, timezones))) continue;
+    const vtz = findVtimezone(timezones, tzid);
+    if (vtz) own.set(tzid, vtz);
+  }
+  return own;
+}
+
+/** Copia di un VTIMEZONE con un altro TZID. */
+function withTzid(vtz: IcsComponent, tzid: string): IcsComponent {
+  const copy: IcsComponent = {
+    name: vtz.name,
+    properties: vtz.properties.map((p) => (p.name.toUpperCase() === 'TZID' ? { name: p.name, params: [], value: tzid } : cloneProperty(p))),
+    components: vtz.components.map(function clone(c: IcsComponent): IcsComponent {
+      return { name: c.name, properties: c.properties.map(cloneProperty), components: c.components.map(clone) };
+    }),
+  };
+  return copy;
+}
+
+/** Rinomina in place i parametri TZID dei componenti (sono copie del feed). */
+function renameTzidRefs(components: readonly IcsComponent[], renames: ReadonlyMap<string, string>): void {
+  const walk = (c: IcsComponent): void => {
+    for (const p of c.properties) {
+      for (const param of p.params) {
+        if (param.name.toUpperCase() !== 'TZID' || param.values.length === 0) continue;
+        const to = renames.get(param.values[0]);
+        if (to !== undefined) param.values = [to];
+      }
+    }
+    for (const sub of c.components) walk(sub);
+  };
+  for (const c of components) walk(c);
 }
 
 // ============================================
@@ -310,12 +386,19 @@ function oneLine(s: string | null | undefined): string {
   return (s ?? '').replace(/[\r\n]+/g, ' ').trim();
 }
 
+function isHttpUrl(value: string): boolean {
+  return /^https?:\/\/[^\s]+$/i.test(value);
+}
+
 /**
- * Contenuto di una proiezione per i device e per il feed (decisione 3):
- * SUMMARY «titolo – nome» (come la proiezione legacy), DESCRIPTION con il
- * telefono e il link alla prenotazione nell'admin, LOCATION e URL della
- * riunione. Niente email, azienda, messaggio. Dopo 24 mesi dalla fine (o
- * senza dati) solo "Prenotazione", senza descrizione, luogo e link.
+ * Contenuto di una proiezione per i device e per il feed (decisione 3), lo
+ * stesso che l'API scrive nella risorsa booking-<uid>.ics
+ * (booking-projection.buildBookingProjectionIcs): SUMMARY «titolo – nome»
+ * (come la proiezione legacy), DESCRIPTION con il telefono e la riga
+ * "Prenotazione: <link all'admin>", LOCATION dal luogo della prenotazione o,
+ * in mancanza, dal link della riunione, URL solo per un link http(s). Niente
+ * email, azienda, messaggio. Dopo 24 mesi dalla fine (o senza dati) solo
+ * "Prenotazione", senza descrizione, luogo e link.
  */
 export function bookingProjectionContent(data: BookingProjectionData | null, opts: { now: Date }): BookingProjectionContent {
   if (!data || isBookingProjectionExpired(data.end, opts.now)) {
@@ -328,12 +411,13 @@ export function bookingProjectionContent(data: BookingProjectionData | null, opt
   const phone = oneLine(data.attendeePhone);
   if (phone) lines.push(`Tel: ${phone}`);
   const adminUrl = oneLine(data.adminUrl);
-  if (adminUrl) lines.push(`Prenotazione in admin: ${adminUrl}`);
+  if (adminUrl) lines.push(`Prenotazione: ${adminUrl}`);
+  const meetingUrl = oneLine(data.meetingUrl);
   return {
     summary,
     description: lines.length > 0 ? lines.join('\n') : null,
-    location: oneLine(data.location) || null,
-    url: oneLine(data.meetingUrl) || null,
+    location: oneLine(data.location) || meetingUrl || null,
+    url: meetingUrl && isHttpUrl(meetingUrl) ? meetingUrl : null,
     minimized: false,
   };
 }
@@ -459,7 +543,10 @@ function feedComponent(
   for (const p of c.properties) {
     const name = p.name.toUpperCase();
     if (!WHITELIST.has(name) || name === 'UID' || name === 'DTSTAMP') continue;
-    props.push(cloneProperty(p));
+    const copy = cloneProperty(p);
+    // ALTREP e gli altri parametri dei campi TEXT possono portare dati che il testo non ha (testa del modulo).
+    if (TEXT_PROPERTIES.has(name)) copy.params = copy.params.filter((x) => x.name.toUpperCase() === 'LANGUAGE');
+    props.push(copy);
   }
   const out: IcsComponent = { name: 'VEVENT', properties: props, components: [] };
   if (projection) {
@@ -570,7 +657,7 @@ function transform(input: FeedObjectInput, opts: FeedTransformOptions): FeedObje
         existing.add(k);
         return true;
       });
-      if (fresh.length > 0) m.properties.push(...createTimeListProperties('EXDATE', fresh));
+      if (fresh.length > 0) appendAll(m.properties, createTimeListProperties('EXDATE', fresh));
     }
     components.push(m);
     for (const ov of kept) {

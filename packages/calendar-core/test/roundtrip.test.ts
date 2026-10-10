@@ -6,6 +6,7 @@
  */
 
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { describe, test } from 'node:test';
 import {
   CALDES_PRODID,
@@ -148,6 +149,79 @@ describe('folding UTF-8 a 75 ottetti', () => {
     assert.equal(folded[0].length, 75);
     assert.ok(folded.slice(1).every((l) => l.startsWith(' ') && l.length <= 75));
     assert.equal(folded.map((l, i) => (i === 0 ? l : l.slice(1))).join(''), long);
+  });
+
+  // Spazi bianchi di Python (str.isspace): vobject chiude la riga logica su una
+  // riga fisica con rstrip() vuoto, Radicale cancella le righe di soli spazi e tab.
+  const PY_SPACES = [' ', '\t', '\u00a0', '\u3000', '\u2003', '\u202f', '\u205f', '\u1680', '\u0085', '\u2028'];
+  const PY_BLANK_RE = /^[\t\n\v\f\r\x1c-\x1f \x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]*$/u;
+  const unfold = (folded: string): string => folded.split('\r\n').map((l, i) => (i === 0 ? l : l.slice(1))).join('');
+
+  test('nessuna continuazione fatta di soli spazi bianchi (spazi, NBSP, U+3000...), per ogni allineamento', () => {
+    for (const space of PY_SPACES) {
+      for (const run of [74, 75, 129, 200, 400]) {
+        for (let prefix = 0; prefix < 80; prefix += 1) {
+          const long = `DESCRIPTION:${'a'.repeat(prefix)}${space.repeat(run)}fine`;
+          const folded = foldLine(long);
+          const physical = folded.split('\r\n');
+          for (let i = 1; i < physical.length; i++) {
+            assert.ok(physical[i].startsWith(' '), 'continuazione senza spazio iniziale');
+            assert.ok(!PY_BLANK_RE.test(physical[i]), `continuazione di soli spazi bianchi (${JSON.stringify(space)}, run ${run}, prefisso ${prefix})`);
+          }
+          assert.equal(unfold(folded), long);
+          // Spazi in coda: il tratto finale resta sulla riga precedente.
+          const tail = `DESCRIPTION:x${space.repeat(run)}`;
+          const foldedTail = foldLine(tail);
+          for (const l of foldedTail.split('\r\n').slice(1)) assert.ok(!PY_BLANK_RE.test(l), 'coda di soli spazi bianchi');
+          assert.equal(unfold(foldedTail), tail);
+        }
+      }
+    }
+  });
+
+  test('senza sequenze di spazi bianchi il folding resta a 75 ottetti', () => {
+    const long = `DESCRIPTION:${'parola '.repeat(60)}`;
+    for (const l of foldLine(long).split('\r\n')) assert.ok(new TextEncoder().encode(l).byteLength <= 75);
+  });
+
+  test('round-trip con vobject come in Radicale (read_components), se disponibile', (t) => {
+    const python = process.env.CALDES_PYTHON || 'python3';
+    try {
+      execFileSync(python, ['-c', 'import vobject'], { stdio: 'ignore' });
+    } catch {
+      t.skip(`vobject non disponibile per ${python} (CALDES_PYTHON)`);
+      return;
+    }
+    const values = [
+      `Tabella:${' '.repeat(129)}fine colonna`,
+      `Consulenza – Mario${'\u00a0'.repeat(80)}Rossi`,
+      `x${'\u3000'.repeat(120)}y`,
+      `coda${' '.repeat(150)}`,
+    ];
+    const texts = values.map((v, i) => {
+      const comp = createComponent('VEVENT', [
+        createProperty('UID', `fold-${i}@caldes.test`),
+        createProperty('DTSTAMP', '20261009T080000Z'),
+        createProperty('DTSTART', '20261009T090000Z'),
+        createProperty('SUMMARY', encodeText(v)),
+      ]);
+      return `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//t//IT\r\n${serializeComponent(comp)}END:VCALENDAR\r\n`;
+    });
+    // Stessa pulizia di radicale.item.read_components, poi vobject.readComponents.
+    const script = [
+      'import json, re, sys, vobject',
+      'out = []',
+      'for s in json.loads(sys.stdin.read()):',
+      "    s = re.sub(r'(?m)^[ \\t]*\\r?\\n', '', s)",
+      '    try:',
+      '        comp = list(vobject.readComponents(s, allowQP=True))[0]',
+      '        out.append(comp.vevent.summary.value)',
+      '    except Exception as exc:',
+      "        out.append('ERRORE: %r' % (exc,))",
+      'sys.stdout.write(json.dumps(out))',
+    ].join('\n');
+    const got = JSON.parse(execFileSync(python, ['-I', '-c', script], { input: JSON.stringify(texts) }).toString()) as string[];
+    assert.deepEqual(got, values);
   });
 });
 

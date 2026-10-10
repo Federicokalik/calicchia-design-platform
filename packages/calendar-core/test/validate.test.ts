@@ -15,11 +15,13 @@ import {
   createCalendarObject,
   createComponent,
   expandObject,
+  IcsValueError,
   MAX_INSTANCES_IN_HORIZON,
   MAX_OBJECT_BYTES,
   parseCalendarObjectOrThrow,
   RADICALE_MAX_OCCURRENCES,
   rruleParts,
+  toLegacyEventFields,
   type ValidationCode,
   ValidationError,
   validateObject,
@@ -132,6 +134,26 @@ describe('validateObject: tempi coerenti', () => {
     assert.deepEqual(codes(event([TIMED[0], 'DURATION:PT0S'])), ['END_NOT_AFTER_START']);
     assert.deepEqual(codes(event(['DTSTART;VALUE=DATE:20261012', 'DURATION:PT2H'])), ['INVALID_VALUE']);
     assert.deepEqual(codes(event([...TIMED, 'DURATION:PT1H'])), ['DTEND_AND_DURATION']);
+  });
+
+  test('DURATION assurde: validate ed espansione coerenti (quarantena invalid-value, mai INTERNAL)', () => {
+    const window = { from: Date.UTC(2026, 0, 1), to: Date.UTC(2027, 0, 1), tz: 'Europe/Rome' };
+    for (const d of ['P99999999999999999999D', 'P300000000D', 'PT99999999999999999999S', 'P9007199254740993W']) {
+      const obj = event([TIMED[0], `DURATION:${d}`]);
+      assert.deepEqual(codes(obj), ['INVALID_VALUE'], d);
+      const exp = expandObject(obj, window);
+      assert.equal(exp.health, 'quarantined', d);
+      assert.equal(exp.healthReason, 'invalid-value', d);
+      assert.ok(exp.occurrences.every((o) => Number.isFinite(o.startUtc) && Number.isFinite(o.endUtc)), d);
+      assert.throws(() => toLegacyEventFields(obj.master as never, { tz: 'Europe/Rome' }), (err: unknown) => err instanceof IcsValueError, d);
+    }
+    // Oltre 10 anni: leggibile (l'indice la espande) ma non la si scrive.
+    const long = event([TIMED[0], 'DURATION:P4000D']);
+    assert.deepEqual(codes(long), ['INVALID_VALUE']);
+    assert.equal(expandObject(long, window).health, 'ok');
+    // Fine oltre il 9999.
+    assert.deepEqual(codes(event(['DTSTART:99991231T090000Z', 'DURATION:P2D'])), ['INVALID_VALUE']);
+    assert.deepEqual(codes(event([TIMED[0], 'DURATION:P3650D'])), []);
   });
 
   test('quirk di Thunderbird: DTEND più DURATION:PT0S è solo un avviso', () => {

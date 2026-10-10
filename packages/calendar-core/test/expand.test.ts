@@ -447,6 +447,23 @@ describe('tetto nella finestra, budget di iterazioni e COUNT', () => {
     assert.ok(h.iterations < 2000, `iterazioni sull'orizzonte: ${h.iterations}`);
   });
 
+  test('COUNT con una regola che dopo il DTSTART non produce istanze: ok con il solo DTSTART, come senza COUNT (niente quarantena su tutto l\'orizzonte)', () => {
+    for (const rule of ['FREQ=WEEKLY;BYDAY=SU;BYSETPOS=2;COUNT=5', 'FREQ=DAILY;BYMONTH=4;BYMONTHDAY=31;COUNT=3', 'FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=30;COUNT=2']) {
+      const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20260105T090000', 'DTEND;TZID=Europe/Rome:20260105T100000', `RRULE:${rule}`]));
+      const r = expand(o, horizon.from, horizon.to);
+      assert.equal(r.health, 'ok', rule);
+      assert.equal(r.healthReason, null, rule);
+      assert.deepEqual(locals(r), ['2026-01-05 09:00'], rule);
+      assert.ok(!codes(r).includes('EXPANSION_BUDGET'), rule);
+      assertInvariants(r);
+    }
+    // Una COUNT vera che il budget non raggiunge resta in quarantena (il rifacimento non la copre).
+    const big = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20100104T090000', 'DTEND;TZID=Europe/Rome:20100104T090100', 'RRULE:FREQ=MINUTELY;COUNT=99999999']));
+    const q = expand(big, horizon.from, horizon.to);
+    assert.equal(q.health, 'quarantined');
+    assert.equal(q.healthReason, 'expansion-budget');
+  });
+
   test('HOURLY infinita dal 2010 → materializedUntil senza eccezioni, poi espansione al volo oltre quella data', () => {
     const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20100101T000000', 'DTEND;TZID=Europe/Rome:20100101T001500', 'RRULE:FREQ=HOURLY']));
     const r = expand(o, horizon.from, horizon.to);
@@ -646,6 +663,18 @@ describe('sovrapposizione alla finestra e eventi singoli', () => {
     const r = expand(o, D('2026-10-02'), D('2026-11-01'));
     assert.deepEqual(locals(r), ['2026-10-02 09:00', '2026-10-05 09:00', '2026-10-12 09:00', '2026-10-19 09:00', '2026-10-26 09:00']);
     assert.ok(codes(r).includes('MIXED_BYDAY'));
+  });
+
+  test('BYDAY misto con COUNT: il messaggio non dice più che il legacy non mostra nulla (mostra l\'intersezione, con date diverse)', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20260102T090000', 'DTEND;TZID=Europe/Rome:20260102T100000', 'RRULE:FREQ=MONTHLY;BYDAY=FR,1FR;COUNT=6']));
+    const r = expand(o, D('2026-01-01'), D('2026-07-01'));
+    // Unione RFC: sei venerdì da gennaio; il legacy e dateutil: 02/01, 06/02, 06/03, 03/04, 01/05, 05/06.
+    assert.deepEqual(locals(r), ['2026-01-02 09:00', '2026-01-09 09:00', '2026-01-16 09:00', '2026-01-23 09:00', '2026-01-30 09:00', '2026-02-06 09:00']);
+    const w = r.warnings.find((x) => x.code === 'MIXED_BYDAY');
+    assert.ok(w && /intersezione/.test(w.message) && /date che l'unione non ha/.test(w.message), w?.message);
+    assert.ok(!/non ne mostrano/.test(w.message));
+    const plain = expand(objectOf(vevent(['DTSTART;TZID=Europe/Rome:20261001T090000', 'RRULE:FREQ=MONTHLY;BYDAY=MO,1FR'])), D('2026-10-02'), D('2026-11-01'));
+    assert.ok(!/non ne mostrano/.test(plain.warnings.find((x) => x.code === 'MIXED_BYDAY')?.message ?? ''));
   });
 
   test('DTEND prima di DTSTART: durata nulla con avviso', () => {

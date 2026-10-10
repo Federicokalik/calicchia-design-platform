@@ -19,6 +19,7 @@ import {
   parseIcs,
   parseIcsOrThrow,
   parsePropertyLine,
+  readEvent,
   splitCalendar,
   type IcsParseErrorCode,
 } from '../src/index';
@@ -339,5 +340,59 @@ describe('parse: split dei feed', () => {
     const r = calendarToObject({ name: 'VEVENT', properties: [], components: [] });
     assert.equal(r.ok, false);
     if (!r.ok) assert.equal(r.error.code, 'NOT_ICALENDAR');
+  });
+});
+
+describe('parse: limiti strutturali dell\'oggetto (ObjectLimits)', () => {
+  const head = ['BEGIN:VCALENDAR', 'VERSION:2.0'];
+  const master = ['BEGIN:VEVENT', 'UID:big@x', 'DTSTAMP:20260101T000000Z', 'DTSTART:20200101T090000Z', 'DTEND:20200101T100000Z', 'RRULE:FREQ=DAILY'];
+  const override = (i: number): string[] => {
+    const d = new Date(Date.UTC(2020, 0, 1) + i * 86_400_000).toISOString().slice(0, 10).replace(/-/g, '');
+    return ['BEGIN:VEVENT', 'UID:big@x', 'DTSTAMP:20260101T000000Z', `RECURRENCE-ID:${d}T090000Z`, `DTSTART:${d}T110000Z`, `DTEND:${d}T120000Z`, 'END:VEVENT'];
+  };
+  const tooLarge = (text: string, limit: string): void => {
+    const r = parseCalendarObject(text);
+    assert.equal(r.ok, false, limit);
+    if (r.ok) return;
+    assert.equal(r.error.code, 'TOO_LARGE', limit);
+    assert.equal((r.error.details as { limit?: string }).limit?.startsWith(limit), true, `${limit}: ${r.error.message}`);
+    // Con objectLimits: false lo stesso testo si legge (usi interni e test).
+    assert.equal(parseCalendarObject(text, { objectLimits: false }).ok, true, limit);
+  };
+
+  test('override, VTIMEZONE, valori di EXDATE/RDATE, proprietà e parametri oltre i default → TOO_LARGE tipizzato', () => {
+    tooLarge(ics([...head, ...master, 'END:VEVENT', ...Array.from({ length: 5001 }, (_, i) => override(i)).flat(), 'END:VCALENDAR']), 'override');
+    const tzs = Array.from({ length: 33 }, (_, i) => ['BEGIN:VTIMEZONE', `TZID:Z${i}`, 'BEGIN:STANDARD', 'DTSTART:19700101T000000', 'TZOFFSETFROM:+0100', 'TZOFFSETTO:+0100', 'END:STANDARD', 'END:VTIMEZONE']).flat();
+    tooLarge(ics([...head, ...tzs, ...master, 'END:VEVENT', 'END:VCALENDAR']), 'VTIMEZONE');
+    const exdates = Array.from({ length: 20_001 }, (_, i) => new Date(Date.UTC(2020, 0, 2) + i * 86_400_000).toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z');
+    tooLarge(ics([...head, ...master, `EXDATE:${exdates.join(',')}`, 'END:VEVENT', 'END:VCALENDAR']), 'valori di EXDATE');
+    tooLarge(ics([...head, ...master, ...Array.from({ length: 2001 }, (_, i) => `X-P${i}:v`), 'END:VEVENT', 'END:VCALENDAR']), 'proprietà');
+    tooLarge(ics([...head, ...master, `X-PARAMS;${Array.from({ length: 101 }, (_, i) => `X-A${i}=b`).join(';')}:v`, 'END:VEVENT', 'END:VCALENDAR']), 'parametri');
+    // Al limite: si legge.
+    assert.equal(parseCalendarObject(ics([...head, ...master, 'END:VEVENT', ...Array.from({ length: 5000 }, (_, i) => override(i)).flat(), 'END:VCALENDAR'])).ok, true);
+  });
+
+  test('split di un feed: solo l\'UID oltre i limiti finisce negli errori', () => {
+    const cal = parseIcsOrThrow(ics([
+      ...head,
+      ...master, ...Array.from({ length: 2001 }, (_, i) => `X-P${i}:v`), 'END:VEVENT',
+      'BEGIN:VEVENT', 'UID:ok@x', 'DTSTAMP:20260101T000000Z', 'DTSTART:20200101T090000Z', 'END:VEVENT',
+      'END:VCALENDAR',
+    ]));
+    const split = splitCalendar(cal);
+    assert.deepEqual(split.objects.map((o) => o.uid), ['ok@x']);
+    assert.deepEqual(split.errors.map((e) => [e.uid, e.error.code]), [['big@x', 'TOO_LARGE']]);
+    assert.equal(splitCalendar(cal, { objectLimits: false }).objects.length, 2);
+  });
+
+  test('liste enormi (200k RDATE) senza RangeError: lettura completa senza limiti, TOO_LARGE con i default', () => {
+    const rdates = Array.from({ length: 200_000 }, (_, i) => new Date(Date.UTC(2020, 0, 2) + i * 3_600_000).toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z');
+    const text = ics([...head, 'BEGIN:VEVENT', 'UID:r@x', 'DTSTAMP:20260101T000000Z', 'DTSTART:20200101T090000Z', `RDATE:${rdates.join(',')}`, 'END:VEVENT', 'END:VCALENDAR']);
+    const obj = parseCalendarObject(text, { objectLimits: false });
+    assert.ok(obj.ok);
+    if (!obj.ok) return;
+    assert.equal(readEvent(obj.value.master as never).rdates.length, 200_000);
+    const limited = parseCalendarObject(text);
+    assert.equal(limited.ok ? null : limited.error.code, 'TOO_LARGE');
   });
 });

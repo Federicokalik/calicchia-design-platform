@@ -29,12 +29,17 @@
  *   senza COUNT, non atomico; qui la saga del design con COUNT residuo,
  *   override ed EXDATE spostati nella nuova serie;
  * - "tutta la serie" = oggi spostamento del master di Δ (gli override restavano
- *   agganciati al vecchio orario e diventavano orfani); qui lo stesso Δ si
- *   applica anche a RECURRENCE-ID, EXDATE, RDATE e UNTIL (design §14).
+ *   agganciati al vecchio orario e diventavano orfani); qui RECURRENCE-ID,
+ *   EXDATE, RDATE e UNTIL si spostano con le istanze (design §14): dello
+ *   stesso Δ quando le istanze seguono il DTSTART, della sola parte oraria
+ *   quando la regola fissa i giorni (BYDAY, BYMONTHDAY...). Un valore che
+ *   resterebbe senza istanza, o un DTSTART fuori regola, è un errore
+ *   (shiftSeries, opzione strict).
  */
 
 import { localDateOf } from './allday';
 import { CalendarCoreError, IcsValueError } from './errors';
+import { appendAll } from './ics-text';
 import {
   type CalendarObject,
   cloneCalendarObject,
@@ -245,7 +250,7 @@ function readTimeList(c: IcsComponent, name: string): Array<IcsTime | IcsPeriod>
   const out: Array<IcsTime | IcsPeriod> = [];
   for (const p of getProperties(c, name)) {
     try {
-      out.push(...readTimeListProperty(p));
+      appendAll(out, readTimeListProperty(p));
     } catch {
       /* valore illeggibile: ignorato */
     }
@@ -587,16 +592,43 @@ export function restoreOccurrence(obj: CalendarObject, recurrenceKey: string, ct
   return out;
 }
 
+export interface ShiftSeriesOptions {
+  /**
+   * Default true: uno spostamento che lascerebbe senza istanza un override
+   * abbinato o un'EXDATE che escludeva un'istanza → RecurrenceTargetError
+   * ('RECURRENCE_TARGET_GONE', 409 nell'API); un nuovo DTSTART fuori dalla
+   * regola quando prima ci stava (un'occorrenza in più che il legacy e
+   * Radicale non mostrano) → IcsValueError('INVALID_VALUE', DTSTART). Con
+   * false l'esito li riporta e basta (anteprima).
+   */
+  strict?: boolean;
+}
+
 export interface ShiftSeriesResult {
   object: CalendarObject;
   /** Vecchia recurrence key → nuova, per ri-chiavare cal_object_ids degli override. */
   rekeyed: Map<string, string>;
+  /** Recurrence key (vecchie) degli override abbinati che non trovano un'istanza nella serie spostata: restano dov'erano. */
+  orphanedOverrides: string[];
+  /** Recurrence key (vecchie) delle EXDATE che escludevano un'istanza e non ne escluderebbero più: restano dov'erano. */
+  staleExdates: string[];
+  /** True se il nuovo DTSTART non soddisfa la regola (e il vecchio sì). */
+  dtstartNotInRule: boolean;
 }
 
 /** Valore spostato di `deltaMs` in ora da muro, riportato al tipo e alla zona di `like` (il nuovo DTSTART). */
 function shifted(an: Analysis, v: IcsTime, deltaMs: number, like: IcsTime): IcsTime {
-  const typed = typedLikeStart(v, an.spec.dtstart, an.zctx);
-  const w = msToWall(wallOfTime(typed) + deltaMs);
+  return timeAtWall(oldWallOf(an, v) + deltaMs, like);
+}
+
+/** Ora da muro di un valore nel riferimento del vecchio DTSTART (tipo e zona). */
+function oldWallOf(an: Analysis, v: IcsTime): number {
+  return wallOfTime(typedLikeStart(v, an.spec.dtstart, an.zctx));
+}
+
+/** Valore del tipo e della zona di `like` con l'ora da muro data. */
+function timeAtWall(wall: number, like: IcsTime): IcsTime {
+  const w = msToWall(wall);
   if (like.type === 'date') return { type: 'date', year: w.year, month: w.month, day: w.day };
   return { type: 'date-time', ...w, zone: like.zone };
 }
@@ -609,16 +641,74 @@ function untilFor(t: IcsTime, zctx: ZoneContext): string {
 }
 
 /**
- * "Tutta la serie", spostamento: porta il DTSTART del master a `newStart`
- * (DTEND con la stessa durata) e applica lo stesso Δ, in ora da muro del fuso
- * del DTSTART (giorni nominali più parte oraria), a RECURRENCE-ID degli
- * override, EXDATE, RDATE e UNTIL (così il numero di istanze non cambia;
- * l'UNTIL DATE si sposta degli stessi giorni). Gli orari propri degli
- * override non vengono toccati. `newStart` di tipo diverso (timed ↔ all-day)
- * converte anche RECURRENCE-ID, EXDATE, RDATE e UNTIL al nuovo tipo; la
- * durata diventa di giorni interi (almeno uno) o di 24 ore per giorno.
+ * Ore da muro di `walls` che sono istanze della serie (DTSTART ∪ RRULE ∪
+ * RDATE, EXDATE ignorate), con una sola scansione da min a max; null se il
+ * budget finisce o la regola è rifiutata durante l'iterazione.
  */
-export function shiftSeries(obj: CalendarObject, newStart: IcsTime, ctx: RecurrenceOpContext): ShiftSeriesResult {
+function instanceWallsAmong(series: Series, walls: readonly number[]): Set<number> | null {
+  const found = new Set<number>();
+  if (walls.length === 0) return found;
+  const want = new Set(walls);
+  let min = Number.POSITIVE_INFINITY;
+  let max = Number.NEGATIVE_INFINITY;
+  for (const w of walls) {
+    if (w < min) min = w;
+    if (w > max) max = w;
+  }
+  const margin = scanMarginMs(series.spec);
+  try {
+    for (const inst of series.instances(series.canSeek ? min - margin : null, max + margin)) {
+      if (want.has(inst.wallMs)) found.add(inst.wallMs);
+    }
+    return found;
+  } catch (err) {
+    if (err instanceof ExpansionBudgetError || err instanceof RecurRuleError) return null;
+    throw err;
+  }
+}
+
+/**
+ * Immagine di un valore (EXDATE, RECURRENCE-ID) nella serie spostata: fra
+ * "stessa data, nuova ora" (A = vecchio + Δ orario) e "vecchio + Δ" (B), quelle
+ * che sono istanze della nuova serie; con entrambe, la più vicina al valore di
+ * partenza (a parità A). null se nessuna delle due è un'istanza.
+ */
+function pickShift(oldWall: number, timeDelta: number, deltaMs: number, isInstance: (w: number) => boolean): number | null {
+  const a = oldWall + timeDelta;
+  const b = oldWall + deltaMs;
+  const okA = isInstance(a);
+  const okB = isInstance(b);
+  if (okA && okB) return Math.abs(timeDelta) <= Math.abs(deltaMs) ? timeDelta : deltaMs;
+  if (okA) return timeDelta;
+  if (okB) return deltaMs;
+  return null;
+}
+
+function seriesOf(master: IcsComponent, an: Analysis, budget: ExpansionBudget): Series | null {
+  const read = readMasterSpec(master, an.zctx);
+  return read.ok === true ? new Series(read.spec, an.zctx, budget) : null;
+}
+
+/**
+ * "Tutta la serie", spostamento: porta il DTSTART del master a `newStart`
+ * (DTEND con la stessa durata) e sposta RECURRENCE-ID degli override, EXDATE,
+ * RDATE e UNTIL in modo che restino sulle stesse occorrenze. Il Δ si divide
+ * in giorni (differenza delle date) e orario: quando la regola fissa i giorni
+ * (BYDAY, BYMONTHDAY, BYMONTH...) le istanze non si spostano di giorni e le
+ * eccezioni restano sulla loro data con la nuova ora (A); quando le istanze
+ * seguono il DTSTART (WEEKLY o MONTHLY senza BYxxx) si spostano del Δ intero
+ * (B). Per ogni EXDATE e RECURRENCE-ID vale il candidato che è un'istanza della
+ * nuova serie (con entrambi, il più vicino: un'EXDATE di Natale di una DAILY
+ * spostata di una settimana resta su Natale); RDATE e UNTIL seguono la scelta
+ * prevalente sulle prime istanze. Un valore che non trova istanza resta dov'era
+ * e finisce in orphanedOverrides/staleExdates (con `strict`, default, è un
+ * errore: vedi ShiftSeriesOptions); così come un nuovo DTSTART fuori regola.
+ * Gli orari propri degli override non vengono toccati. `newStart` di tipo
+ * diverso (timed ↔ all-day) converte anche RECURRENCE-ID, EXDATE, RDATE e
+ * UNTIL al nuovo tipo; la durata diventa di giorni interi (almeno uno) o di
+ * 24 ore per giorno.
+ */
+export function shiftSeries(obj: CalendarObject, newStart: IcsTime, ctx: RecurrenceOpContext, opts: ShiftSeriesOptions = {}): ShiftSeriesResult {
   const an = analyze(obj, ctx);
   const spec = an.spec;
   const zctx = an.zctx;
@@ -626,10 +716,13 @@ export function shiftSeries(obj: CalendarObject, newStart: IcsTime, ctx: Recurre
   const out = cloneCalendarObject(obj);
   const master = out.master as IcsComponent;
   const rekeyed = new Map<string, string>();
+  const result: ShiftSeriesResult = { object: out, rekeyed, orphanedOverrides: [], staleExdates: [], dtstartNotInRule: false };
   const deltaMs = wallOfTime(newStart) - wallOfTime(old);
+  const dayDelta = daysFromCivil(newStart.year, newStart.month, newStart.day) - daysFromCivil(old.year, old.month, old.day);
+  const timeDelta = deltaMs - dayDelta * DAY_MS;
   const typeChange = old.type !== newStart.type;
   const zoneChange = !typeChange && old.type === 'date-time' && newStart.type === 'date-time' && JSON.stringify(old.zone) !== JSON.stringify(newStart.zone);
-  if (deltaMs === 0 && !typeChange && !zoneChange) return { object: out, rekeyed };
+  if (deltaMs === 0 && !typeChange && !zoneChange) return result;
   let newStartUtc: number;
   try {
     newStartUtc = timeToUtcMs(newStart, zctx);
@@ -674,24 +767,55 @@ export function shiftSeries(obj: CalendarObject, newStart: IcsTime, ctx: Recurre
     }
   }
 
-  // EXDATE e RDATE: riscritte nel tipo del nuovo DTSTART.
-  for (const name of ['EXDATE', 'RDATE']) {
-    const values = readTimeList(master, name);
-    if (values.length === 0) continue;
+  const budget = budgetOf(ctx);
+
+  // Scelta prevalente (per RDATE e UNTIL) sulle prime istanze della regola
+  // dopo i due DTSTART, contro la regola spostata senza UNTIL né COUNT.
+  let prevalent = deltaMs;
+  if (spec.rule && !typeChange) {
+    const probe = cloneComponent(master);
+    for (const name of ['RDATE', 'EXDATE']) removeProperties(probe, name);
+    const rr = getProperty(probe, 'RRULE');
+    if (rr) rr.value = setRrulePart(setRrulePart(rr.value, 'UNTIL', null), 'COUNT', null);
+    const probeSeries = seriesOf(probe, an, budget);
+    const samples: number[] = [];
+    try {
+      const from = Math.max(spec.dtstartWallMs, wallOfTime(newStart));
+      for (const inst of an.series.instances(an.series.canSeek ? from - an.margin : null, Number.POSITIVE_INFINITY)) {
+        if (inst.rdate >= 0 || inst.wallMs <= from) continue;
+        samples.push(inst.wallMs);
+        if (samples.length >= 3) break;
+      }
+    } catch (err) {
+      if (!(err instanceof ExpansionBudgetError) && !(err instanceof RecurRuleError)) throw err;
+    }
+    const walls = probeSeries ? instanceWallsAmong(probeSeries, samples.flatMap((w) => [w + timeDelta, w + deltaMs])) : null;
+    if (walls && samples.length > 0) {
+      let votesA = 0;
+      for (const w of samples) if (pickShift(w, timeDelta, deltaMs, (x) => walls.has(x)) === timeDelta) votesA++;
+      if (votesA * 2 >= samples.length) prevalent = timeDelta;
+    }
+  }
+
+  // RDATE: scelta prevalente, nel tipo del nuovo DTSTART.
+  const rdates = readTimeList(master, 'RDATE');
+  if (rdates.length > 0) {
     const moved: Array<IcsTime | IcsPeriod> = [];
-    for (const v of values) {
+    for (const v of rdates) {
       if (v.type === 'period') {
-        const start = shifted(an, v.start, deltaMs, newStart);
+        const start = shifted(an, v.start, prevalent, newStart);
         if (start.type === 'date') moved.push(start);
         else moved.push({ type: 'period', start, end: null, duration: v.duration ?? durationBetween(v, zctx) });
       } else {
-        moved.push(shifted(an, v, deltaMs, newStart));
+        moved.push(shifted(an, v, prevalent, newStart));
       }
     }
-    setProperties(master, name, createTimeListProperties(name, moved));
+    setProperties(master, 'RDATE', createTimeListProperties('RDATE', moved));
   }
 
-  // UNTIL: stesso Δ, scritto nel tipo del nuovo DTSTART (DATE, UTC o floating).
+  // UNTIL: con le istanze ferme sulle loro date (scelta A) basta la parte oraria,
+  // e solo se positiva (l'ultima istanza resta inclusa); altrimenti il Δ intero.
+  // Scritto nel tipo del nuovo DTSTART (DATE, UTC o floating).
   if (spec.rule?.until) {
     const u = spec.rule.until;
     let base: IcsTime;
@@ -703,23 +827,88 @@ export function shiftSeries(obj: CalendarObject, newStart: IcsTime, ctx: Recurre
     } else {
       base = u;
     }
+    const untilDelta = prevalent === deltaMs ? deltaMs : Math.max(0, timeDelta);
     const rr = getProperty(master, 'RRULE');
-    if (rr) rr.value = setRrulePart(rr.value, 'UNTIL', untilFor(shifted(an, base, deltaMs, newStart), zctx));
+    if (rr) rr.value = setRrulePart(rr.value, 'UNTIL', untilFor(shifted(an, base, untilDelta, newStart), zctx));
+  }
+
+  // Istanze della serie spostata e di quella vecchia per i candidati di EXDATE e RECURRENCE-ID.
+  const exdates = readTimeList(master, 'EXDATE').filter((v): v is IcsTime => v.type !== 'period');
+  const exOld = exdates.map((v) => oldWallOf(an, v));
+  const ridOld = out.overrides.map((_, index) => {
+    const info = an.set.infos[index];
+    return info.rid ? oldWallOf(an, info.rid) : null;
+  });
+  const candidates: number[] = [];
+  for (const w of [...exOld, ...ridOld]) if (w != null) candidates.push(w + timeDelta, w + deltaMs);
+  const newSeries = seriesOf(master, an, budget);
+  const newWalls = newSeries ? instanceWallsAmong(newSeries, candidates) : null;
+  const oldExWalls = instanceWallsAmong(an.series, exOld);
+  /** Spostamento di un valore: candidato che è un'istanza; senza esito deciso (budget), la scelta prevalente. */
+  const shiftOf = (oldWall: number): number | null => (newWalls ? pickShift(oldWall, timeDelta, deltaMs, (x) => newWalls.has(x)) : prevalent);
+
+  // EXDATE: riscritte nel tipo del nuovo DTSTART.
+  if (exdates.length > 0) {
+    const moved: IcsTime[] = [];
+    exdates.forEach((v, k) => {
+      const delta = shiftOf(exOld[k]);
+      if (delta != null) {
+        moved.push(shifted(an, v, delta, newStart));
+        return;
+      }
+      // Nessuna istanza nella nuova serie: resta dov'era. Se escludeva un'istanza, è una perdita da segnalare.
+      moved.push(shifted(an, v, 0, newStart));
+      if (oldExWalls?.has(exOld[k])) {
+        try {
+          result.staleExdates.push(recurrenceKeyOf(typedLikeStart(v, spec.dtstart, zctx), zctx));
+        } catch {
+          result.staleExdates.push(formatTimeValue(v));
+        }
+      }
+    });
+    setProperties(master, 'EXDATE', createTimeListProperties('EXDATE', moved));
   }
   significant(master, ctx.now);
 
   // Override: RECURRENCE-ID spostati, orari propri invariati.
   out.overrides.forEach((ov, index) => {
     const info = an.set.infos[index];
-    if (!info.rid) return;
+    const oldWall = ridOld[index];
+    if (!info.rid || oldWall == null) return;
     const oldKey = componentKey(obj.overrides[index], zctx);
-    const newRid = shifted(an, info.rid, deltaMs, newStart);
+    const matched = an.resolver.resolution(index).status === 'matched';
+    let delta = shiftOf(oldWall);
+    if (delta == null) {
+      if (matched) result.orphanedOverrides.push(oldKey ?? formatTimeValue(info.rid));
+      // Un orfano di prima segue il Δ intero (come prima della correzione); uno abbinato resta dov'era.
+      delta = matched ? 0 : deltaMs;
+    }
+    const newRid = shifted(an, info.rid, delta, newStart);
     setTimeProperty(ov, 'RECURRENCE-ID', newRid);
     significant(ov, ctx.now);
     const newKey = recurrenceKeyOf(newRid, zctx);
     if (oldKey != null && oldKey !== newKey) rekeyed.set(oldKey, newKey);
   });
-  return { object: out, rekeyed };
+
+  // DTSTART fuori dalla regola: un'occorrenza in più che il legacy (rrule.js) e Radicale (dateutil) non mostrano.
+  if (spec.rule && newSeries) {
+    try {
+      result.dtstartNotInRule = !newSeries.dtstartInRule() && an.series.dtstartInRule();
+    } catch (err) {
+      if (!(err instanceof ExpansionBudgetError) && !(err instanceof RecurRuleError)) throw err;
+    }
+  }
+
+  if (opts.strict !== false) {
+    if (result.dtstartNotInRule) {
+      throw new IcsValueError('INVALID_VALUE', 'Il nuovo inizio non rientra nella regola di ricorrenza: sposta un\'occorrenza o cambia la regola', { property: 'DTSTART' });
+    }
+    const lost = [...result.orphanedOverrides, ...result.staleExdates];
+    if (lost.length > 0) {
+      throw new RecurrenceTargetError('RECURRENCE_TARGET_GONE', 'Lo spostamento della serie lascerebbe occorrenze modificate o eliminate senza la loro istanza', lost[0]);
+    }
+  }
+  return result;
 }
 
 function durationBetween(p: IcsPeriod, zctx: ZoneContext): IcsDuration {
@@ -867,6 +1056,12 @@ interface Cut {
   countBefore: number | null;
   /** True se prima del taglio non resta alcuna occorrenza visibile. */
   first: boolean;
+  /**
+   * True se il taglio cade sul DTSTART o su un'istanza della RRULE: la nuova
+   * serie può partire da lì con la stessa regola. False per un'istanza solo
+   * RDATE o un override orfano (la regola si riallineerebbe al nuovo DTSTART).
+   */
+  ruleInstance: boolean;
 }
 
 function computeCut(an: Analysis, key: string): Cut {
@@ -874,10 +1069,12 @@ function computeCut(an: Analysis, key: string): Cut {
   const look = instanceForKey(an, key);
   let utc: number;
   let wall: number;
+  let ruleInstance = false;
   if (look.instance) {
     if (an.series.isExcluded(look.instance) && ov === undefined) throw gone(key);
     utc = look.instance.utcMs;
     wall = look.instance.wallMs;
+    ruleInstance = look.instance.rdate < 0;
   } else if (ov !== undefined) {
     const s = overrideOriginalStart(an, ov);
     if (!s) throw gone(key);
@@ -887,40 +1084,60 @@ function computeCut(an: Analysis, key: string): Cut {
     const t = targetTime(an, key);
     wall = wallOfTime(t);
     utc = an.series.utcOf(wall);
+    ruleInstance = true;
   } else {
     throw gone(key);
   }
   const series = an.series;
   const spec = an.spec;
-  // Resta qualcosa prima del taglio? DTSTART non escluso basta; altrimenti override precedenti o istanze visibili.
-  let first = wall <= spec.dtstartWallMs;
-  if (!first) {
-    const dtInst: SeriesInstance = { wallMs: spec.dtstartWallMs, utcMs: spec.dtstartUtcMs, rdate: -1 };
-    const dtReplaced = an.resolver.replaced.has(series.idOf(dtInst));
-    if (series.isExcluded(dtInst) && !dtReplaced) {
-      first = true;
-      for (const i of an.set.winners) {
-        const s = overrideOriginalStart(an, i);
-        if (s && s.wall < wall) {
+  // Resta un'occorrenza visibile prima del taglio? Il DTSTART (non escluso, o
+  // sostituito da un override), un override con l'occorrenza originale prima
+  // del taglio, una RDATE non esclusa (anche prima del DTSTART) o un'istanza
+  // della regola non esclusa.
+  const dtInst: SeriesInstance = { wallMs: spec.dtstartWallMs, utcMs: spec.dtstartUtcMs, rdate: -1 };
+  let first = !(spec.dtstartWallMs < wall && (!series.isExcluded(dtInst) || an.resolver.replaced.has(series.idOf(dtInst))));
+  if (first) {
+    for (const i of an.set.winners) {
+      const s = overrideOriginalStart(an, i);
+      if (s && s.wall < wall) {
+        first = false;
+        break;
+      }
+    }
+  }
+  if (first) {
+    for (let index = 0; index < spec.rdates.length; index++) {
+      const r = spec.rdates[index];
+      if (r.wallMs >= wall) continue;
+      if (!series.isExcluded({ wallMs: r.wallMs, utcMs: series.utcOf(r.wallMs), rdate: index })) {
+        first = false;
+        break;
+      }
+    }
+  }
+  if (first && spec.dtstartWallMs < wall) {
+    try {
+      for (const inst of series.instances(null, wall - 1)) {
+        if (inst.wallMs >= wall) break;
+        if (!series.isExcluded(inst)) {
           first = false;
           break;
         }
       }
-      if (first) {
-        try {
-          for (const inst of series.instances(null, wall - 1)) {
-            if (inst.wallMs >= wall) break;
-            if (!series.isExcluded(inst)) {
-              first = false;
-              break;
-            }
-          }
-        } catch (err) {
-          if (!(err instanceof ExpansionBudgetError) && !(err instanceof RecurRuleError)) throw err;
-          first = false;
-        }
-      }
+    } catch (err) {
+      if (!(err instanceof ExpansionBudgetError) && !(err instanceof RecurRuleError)) throw err;
+      first = false;
     }
+  }
+  // Taglio sul DTSTART (o prima) con occorrenze precedenti: il master resta solo
+  // con le RDATE precedenti (applyTruncation); senza RDATE precedenti (solo
+  // override orfani) non c'è un master da tenere.
+  if (!first && wall <= spec.dtstartWallMs && !spec.rdates.some((r) => r.wallMs < wall)) {
+    throw new RecurrenceTargetError(
+      'INVALID_TARGET',
+      'Prima di questa occorrenza restano solo occorrenze modificate fuori dalla serie: elimina la serie intera o le singole occorrenze',
+      key,
+    );
   }
   let countBefore: number | null = null;
   if (spec.rule?.count != null && !first) {
@@ -936,7 +1153,46 @@ function computeCut(an: Analysis, key: string): Cut {
       countBefore = null;
     }
   }
-  return { utc, wall, time: series.timeOf(wall), countBefore, first };
+  return { utc, wall, time: series.timeOf(wall), countBefore, first, ruleInstance };
+}
+
+/**
+ * Taglio sul DTSTART o prima (con RDATE precedenti, computeCut): via RRULE ed
+ * EXRULE, DTSTART (con DTEND alla stessa durata, o alla fine della PERIOD)
+ * sulla prima RDATE, le altre RDATE precedenti restano. Un UNTIL prima del
+ * DTSTART non basterebbe: il DTSTART resta sempre un'istanza (RFC 5545).
+ */
+function truncateBeforeStart(an: Analysis, master: IcsComponent, cut: Cut): void {
+  const spec = an.spec;
+  const series = an.series;
+  let firstIndex = -1;
+  spec.rdates.forEach((r, index) => {
+    if (r.wallMs < cut.wall && (firstIndex < 0 || r.wallMs < spec.rdates[firstIndex].wallMs)) firstIndex = index;
+  });
+  const r = spec.rdates[firstIndex];
+  const inst: SeriesInstance = { wallMs: r.wallMs, utcMs: series.utcOf(r.wallMs), rdate: firstIndex };
+  removeProperties(master, 'RRULE');
+  removeProperties(master, 'EXRULE');
+  const endName = master.name === 'VTODO' ? 'DUE' : 'DTEND';
+  const endProp = getProperty(master, endName);
+  setTimeProperty(master, 'DTSTART', series.timeOf(inst.wallMs));
+  if (endProp) {
+    try {
+      const dtend = readTimeProperty(endProp);
+      setTimeProperty(master, endName, r.periodEndUtc != null && !spec.allDay ? utcMsToTime(r.periodEndUtc, dtend, an.zctx) : instanceEnd(an, { ...inst, rdate: -1 }, dtend));
+    } catch {
+      /* DTEND illeggibile: resta com'è (readMasterSpec l'avrebbe già rifiutato) */
+    }
+  }
+  const wallOf = (v: IcsTime): number | null => {
+    try {
+      return wallOfTime(typedLikeStart(v, spec.dtstart, an.zctx));
+    } catch {
+      return null;
+    }
+  };
+  // La RDATE diventata DTSTART non resta anche come RDATE.
+  removeTimeListValues(master, 'RDATE', (v) => wallOf(v.type === 'period' ? v.start : v) === r.wallMs);
 }
 
 /** Applica il taglio al master e agli override di `out` (copia): UNTIL o COUNT, poi via override, EXDATE e RDATE dal taglio in poi. */
@@ -945,7 +1201,9 @@ function applyTruncation(an: Analysis, out: CalendarObject, cut: Cut, now: Date)
   const spec = an.spec;
   const zctx = an.zctx;
   const rr = getProperty(master, 'RRULE');
-  if (rr && spec.rule) {
+  if (cut.wall <= spec.dtstartWallMs) {
+    truncateBeforeStart(an, master, cut);
+  } else if (rr && spec.rule) {
     if (spec.rule.count != null && cut.countBefore != null) {
       rr.value = setRrulePart(rr.value, 'COUNT', String(Math.max(1, cut.countBefore)));
     } else {
@@ -1041,11 +1299,43 @@ export function splitSeries(
   const now = ctx.now;
   const stamp = utcStamp(now);
   const src = obj.master as IcsComponent;
-  const cutInst: SeriesInstance = { wallMs: cut.wall, utcMs: cut.utc, rdate: -1 };
+  // DTSTART della nuova serie: l'istanza di taglio se è il DTSTART o
+  // un'istanza della RRULE; per un taglio su un'istanza solo RDATE o su un
+  // override orfano, la prima istanza della RRULE dal taglio in poi (anche se
+  // esclusa: resta con la sua EXDATE), così la regola non si riallinea al nuovo
+  // DTSTART (griglia di INTERVAL, giorno e ora di default). Senza istanze della
+  // RRULE dopo il taglio la nuova serie non ha RRULE e parte dalla prima RDATE
+  // (o dall'occorrenza originale dell'orfano).
+  let startWall = cut.wall;
+  let keepRule = Boolean(spec.rule);
+  if (!cut.ruleInstance && spec.rule) {
+    let found: SeriesInstance | null = null;
+    try {
+      for (const inst of an.series.instances(an.series.canSeek ? cut.wall - an.margin : null, Number.POSITIVE_INFINITY)) {
+        if (inst.rdate < 0 && inst.wallMs >= cut.wall) {
+          found = inst;
+          break;
+        }
+      }
+    } catch (err) {
+      if (!(err instanceof ExpansionBudgetError) && !(err instanceof RecurRuleError)) throw err;
+      throw new RecurrenceTargetError('INVALID_TARGET', 'Serie troppo lunga per dividerla da questa occorrenza', recurrenceKey);
+    }
+    if (found) {
+      startWall = found.wallMs;
+    } else {
+      keepRule = false;
+      const nextRdate = spec.rdates.map((r) => r.wallMs).filter((w) => w >= cut.wall).sort((a, b) => a - b)[0];
+      if (nextRdate !== undefined) startWall = nextRdate;
+    }
+  } else if (!cut.ruleInstance) {
+    keepRule = false;
+  }
+  const cutInst: SeriesInstance = { wallMs: startWall, utcMs: an.series.utcOf(startWall), rdate: -1 };
   const tm = masterCopyAt(an, src, cutInst);
   setProperty(tm, { name: 'UID', params: getProperty(src, 'UID')?.params ?? [], value: encodeText(newUid) });
   // RRULE: stessa regola, COUNT residuo.
-  const rr = getProperty(src, 'RRULE');
+  const rr = keepRule ? getProperty(src, 'RRULE') : null;
   if (rr) {
     let value = rr.value;
     if (spec.rule?.count != null) {
@@ -1061,13 +1351,14 @@ export function splitSeries(
       return null;
     }
   };
-  // RDATE ed EXDATE dal taglio in poi.
+  // RDATE ed EXDATE dal taglio in poi (la RDATE diventata DTSTART non resta anche come RDATE).
   for (const name of ['RDATE', 'EXDATE']) {
     const kept: Array<IcsTime | IcsPeriod> = [];
     for (const v of readTimeList(src, name)) {
       const start = v.type === 'period' ? v.start : v;
       const w = typedWall(start);
       if (w == null || w < cut.wall) continue;
+      if (name === 'RDATE' && w === startWall) continue;
       if (name === 'EXDATE') kept.push(typedLikeStart(start, spec.dtstart, zctx));
       else kept.push(v.type === 'period' ? v : typedLikeStart(v, spec.dtstart, zctx));
     }

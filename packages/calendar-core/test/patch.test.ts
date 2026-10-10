@@ -162,6 +162,59 @@ describe('applyPatch: preservazione lossless', () => {
   });
 });
 
+describe('applyPatch: rappresentazioni alternative del testo', () => {
+  const THUNDERBIRD = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'BEGIN:VEVENT',
+    'UID:tb@x',
+    'DTSTAMP:20261001T000000Z',
+    'DTSTART:20261012T090000Z',
+    'DTEND:20261012T100000Z',
+    'SUMMARY;LANGUAGE=it;ALTREP="http://x.test/titolo":Chiamare Mario',
+    'DESCRIPTION;LANGUAGE=it;ALTREP="data:text/html,%3Cp%3EChiamare%20Mario%20al%20333%201234567%3C%2Fp%3E":Chiamare Mario al 333 1234567',
+    'X-ALT-DESC;FMTTYPE=text/html:<p>333 1234567</p>',
+    'LOCATION;ALTREP="http://x.test/mappa":Colosseo',
+    'X-APPLE-STRUCTURED-LOCATION;VALUE=URI;X-TITLE=Colosseo:geo:41.890251,12.492373',
+    'GEO:41.890251;12.492373',
+    'END:VEVENT',
+    'END:VCALENDAR',
+    '',
+  ].join('\r\n');
+
+  test('descrizione e luogo cambiati: via ALTREP, X-ALT-DESC e X-APPLE-STRUCTURED-LOCATION; LANGUAGE e GEO restano', () => {
+    const before = parseCalendarObjectOrThrow(THUNDERBIRD);
+    const res = applyLegacyUpdate(before, MASTER_RECURRENCE_KEY, { description: 'Riunione spostata, niente telefono', location: 'Pantheon' }, CTX);
+    const m = res.object.master as IcsComponent;
+    const text = serializeComponent(m);
+    assert.ok(!text.includes('333'), text);
+    assert.ok(!/ALTREP=.*(mappa|text\/html)/.test(text), text);
+    assert.equal(getProperty(m, 'X-ALT-DESC'), null);
+    assert.equal(getProperty(m, 'X-APPLE-STRUCTURED-LOCATION'), null);
+    assert.deepEqual(getProperty(m, 'DESCRIPTION')?.params, [{ name: 'LANGUAGE', values: ['it'] }]);
+    assert.deepEqual(getProperty(m, 'LOCATION')?.params, []);
+    assert.equal(getTextValue(m, 'LOCATION'), 'Pantheon');
+    assert.ok(getProperty(m, 'GEO'));
+    // Il titolo non toccato conserva i suoi parametri.
+    assert.deepEqual(getProperty(m, 'SUMMARY')?.params.map((p) => p.name), ['LANGUAGE', 'ALTREP']);
+  });
+
+  test('descrizione e luogo rimossi: via anche le proprietà dipendenti; un valore invariato non tocca nulla', () => {
+    const before = parseCalendarObjectOrThrow(THUNDERBIRD);
+    const removed = applyPatch(before, MASTER_RECURRENCE_KEY, [{ op: 'set', field: 'description', value: null }, { op: 'set', field: 'location', value: null }], CTX);
+    const m = removed.object.master as IcsComponent;
+    for (const name of ['DESCRIPTION', 'X-ALT-DESC', 'LOCATION', 'X-APPLE-STRUCTURED-LOCATION']) assert.equal(getProperty(m, name), null, name);
+    const same = applyPatch(before, MASTER_RECURRENCE_KEY, [{ op: 'set', field: 'location', value: 'Colosseo' }], CTX);
+    assert.equal(same.noop, true);
+    assert.ok(getProperty(same.object.master as IcsComponent, 'X-APPLE-STRUCTURED-LOCATION'));
+  });
+
+  test('fixture Apple: nuovo luogo → X-APPLE-STRUCTURED-LOCATION del vecchio luogo tolta', () => {
+    const res = applyPatch(apple(), MASTER_RECURRENCE_KEY, [{ op: 'set', field: 'location', value: 'Pantheon, Roma' }], CTX);
+    assert.equal(getProperty(res.object.master as IcsComponent, 'X-APPLE-STRUCTURED-LOCATION'), null);
+  });
+});
+
 describe('applyPatch: tempi', () => {
   test('nuovo orario: TZID e parametri estranei di DTSTART restano, SEQUENCE+1', () => {
     const before = parseCalendarObjectOrThrow(

@@ -23,7 +23,19 @@ La patch (idempotente, attiva all'import del modulo):
    un carattere letterale invece di separare valori, e alla riserializzazione
    diventano `\\,` come vuole RFC 5545 §3.3.11; i valori con `VALUE=URI` o
    `ENCODING=BASE64` restano verbatim (un URI non ha escape TEXT; vobject 0.9.9
-   decodificherebbe il base64 in bytes e poi fallirebbe a riserializzarli).
+   decodificherebbe il base64 in bytes e poi fallirebbe a riserializzarli);
+3. `RecurringComponent.getrruleset` (e la property `rruleset`) rifiutano con
+   ValueError le RRULE/EXRULE con valori vietati da RFC 5545 §3.3.10 che
+   dateutil accetta senza errore: INTERVAL o COUNT non interi positivi,
+   BYMONTHDAY/BYYEARDAY/BYWEEKNO uguali a 0 o fuori intervallo, BYMONTH fuori
+   da 1..12 (`check_recurrence_rule`). Con INTERVAL=0 dateutil non avanza mai
+   e una REPORT con time-range sulla collezione resterebbe appesa; Radicale
+   chiama `component.rruleset` in `check_and_sanitize_items`, quindi la PUT
+   risponde 400 ("Invalid recurrence rules") e l'oggetto non entra nel volume
+   (contratto dei moduli F2 §14.6). Sono gli stessi valori che calendar-core
+   rifiuta (parseRecurRule): un oggetto così non arriva né ai device né
+   all'indice. Un oggetto già salvato (prima della patch) fa fallire la REPORT
+   con un errore invece di bloccarla.
 
 I valori impostati dal codice (non letti da un file), per esempio la
 X-WR-CALNAME che Radicale aggiunge all'export di una collezione, continuano a
@@ -57,8 +69,10 @@ import vobject.icalendar as _vical
 
 __all__ = [
     "EXPECTED_VOBJECT_VERSION",
+    "InvalidRecurrenceRule",
     "PatchError",
     "apply",
+    "check_recurrence_rule",
     "is_applied",
     "self_test",
     "vobject_version",
@@ -71,6 +85,9 @@ EXPECTED_VOBJECT_VERSION = "0.9.9"
 
 #: Marcatore messo su TextBehavior quando la patch è applicata (idempotenza).
 _PATCH_MARK = "_caldes_fidelity_patch"
+
+#: Marcatore messo su RecurringComponent quando il controllo delle RRULE è attivo.
+_RRULE_PATCH_MARK = "_caldes_rrule_guard"
 
 
 class PatchError(RuntimeError):
@@ -201,6 +218,90 @@ def _text_encode(cls: Any, line: Any) -> None:
         line.value = _EscapedText(line.value)
 
 
+# ─── RRULE vietate dalla RFC che dateutil accetta ─────────────
+
+
+class InvalidRecurrenceRule(ValueError):
+    """RRULE/EXRULE con un valore vietato da RFC 5545 §3.3.10 (rifiutata alla PUT)."""
+
+
+#: Parti numeriche controllate: (minimo, massimo o None, ammette il segno).
+#: Le altre (BYHOUR, BYMINUTE, BYSECOND, BYSETPOS, BYDAY ordinale) dateutil le
+#: rifiuta già con ValueError; FREQ e le parti sconosciute anche.
+_RRULE_NUMERIC_PARTS = {
+    "INTERVAL": (1, None, False),
+    "COUNT": (1, None, False),
+    "BYMONTHDAY": (1, 31, True),
+    "BYYEARDAY": (1, 366, True),
+    "BYWEEKNO": (1, 53, True),
+    "BYMONTH": (1, 12, False),
+}
+
+#: Cifre ammesse per INTERVAL e COUNT (come calendar-core): oltre non sono interi plausibili.
+_RRULE_MAX_DIGITS = {"INTERVAL": 6, "COUNT": 9}
+
+
+def check_recurrence_rule(value: str) -> None:
+    """
+    Lancia InvalidRecurrenceRule se la regola ha un valore vietato da RFC 5545
+    §3.3.10 che dateutil accetterebbe: INTERVAL o COUNT non interi positivi
+    (INTERVAL=0 fa girare dateutil all'infinito), BYMONTHDAY, BYYEARDAY e
+    BYWEEKNO uguali a 0 o fuori intervallo, BYMONTH fuori da 1..12. Il resto
+    della validazione resta a dateutil (stessi valori rifiutati da calendar-core).
+    """
+    if not isinstance(value, str):
+        return
+    # Come vobject.getrruleset: una libreria Ruby escapa i ';' delle RRULE.
+    body = value.replace("\\", "").strip()
+    if body[:6].upper() == "RRULE:":
+        body = body[6:]
+    for raw in body.split(";"):
+        part = raw.strip()
+        if not part or "=" not in part:
+            continue
+        name, _, val = part.partition("=")
+        name = name.strip().upper()
+        spec = _RRULE_NUMERIC_PARTS.get(name)
+        if spec is None:
+            continue
+        low, high, signed = spec
+        items = val.split(",") if name.startswith("BY") else [val]
+        for item in items:
+            text = item.strip()
+            digits = text[1:] if signed and text[:1] in ("+", "-") else text
+            max_digits = _RRULE_MAX_DIGITS.get(name, 3)
+            if not digits.isdigit() or not digits.isascii() or len(digits) > max_digits:
+                raise InvalidRecurrenceRule("RRULE non valida: %s=%r" % (name, val[:20]))
+            number = int(digits)
+            if number < low or (high is not None and number > high):
+                raise InvalidRecurrenceRule("RRULE non valida: %s=%r fuori intervallo" % (name, val[:20]))
+
+
+_ORIGINAL_GETRRULESET = _vical.RecurringComponent.getrruleset
+_ORIGINAL_RRULESET_PROPERTY = _vical.RecurringComponent.__dict__.get("rruleset")
+
+
+def _checked_getrruleset(self: Any, addRDate: bool = False) -> Any:
+    for name in ("rrule", "exrule"):
+        for line in self.contents.get(name, ()):
+            check_recurrence_rule(line.value)
+    return _ORIGINAL_GETRRULESET(self, addRDate)
+
+
+def _apply_rrule_guard() -> None:
+    component = _vical.RecurringComponent
+    if getattr(component, _RRULE_PATCH_MARK, False):
+        return
+    prop = _ORIGINAL_RRULESET_PROPERTY
+    if not isinstance(prop, property) or not callable(_ORIGINAL_GETRRULESET):
+        raise PatchError("vobject %s: RecurringComponent senza getrruleset/rruleset: patch non applicabile"
+                         % (vobject_version() or "?"))
+    component.getrruleset = _checked_getrruleset
+    # La property 'rruleset' tiene il riferimento alla funzione originale.
+    component.rruleset = property(_checked_getrruleset, prop.fset)
+    setattr(component, _RRULE_PATCH_MARK, True)
+
+
 # ─── Applicazione ─────────────────────────────────────────────
 
 
@@ -227,6 +328,8 @@ def is_applied() -> bool:
     """La patch è attiva in questo interprete."""
     if not getattr(_vical.TextBehavior, _PATCH_MARK, False):
         return False
+    if not getattr(_vical.RecurringComponent, _RRULE_PATCH_MARK, False):
+        return False
     behaviors = _component_behaviors()
     return bool(behaviors) and all(b.defaultBehavior is _RawBehavior for b in behaviors)
 
@@ -244,6 +347,7 @@ def apply() -> None:
     behaviors = _component_behaviors()
     if not behaviors:
         raise PatchError("nessun componente iCalendar con defaultBehavior TextBehavior: patch non applicabile")
+    _apply_rrule_guard()
     for behavior in behaviors:
         behavior.defaultBehavior = _RawBehavior
     text.decode = classmethod(_text_decode)
@@ -370,6 +474,20 @@ def self_test() -> None:
                "valore nativo alterato dalla serializzazione", failures)
     except Exception as exc:  # noqa: BLE001
         failures.append("serializzazione di valori nativi fallita: %r" % (exc,))
+
+    # RRULE vietate dalla RFC che dateutil accetta (INTERVAL=0 non termina):
+    # rruleset deve lanciare ValueError, che Radicale traduce in 400 alla PUT.
+    try:
+        bad = vobject.readOne(_SELF_TEST_ICS.replace("RRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=4",
+                                                     "RRULE:FREQ=DAILY;INTERVAL=0"))
+        try:
+            bad.vevent.rruleset
+            failures.append("RRULE con INTERVAL=0 accettata")
+        except InvalidRecurrenceRule:
+            pass
+        _check(calendar.vevent.rruleset is not None, "RRULE valida rifiutata", failures)
+    except Exception as exc:  # noqa: BLE001
+        failures.append("controllo delle RRULE fallito: %r" % (exc,))
 
     # La cache degli item (pickle) non deve dipendere da questo modulo.
     try:

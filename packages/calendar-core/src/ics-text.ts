@@ -11,6 +11,16 @@ import type { IcsComponent, IcsParam, IcsProperty } from './model';
 
 export const CRLF = '\r\n';
 
+/**
+ * Accoda gli elementi di `items` a `target` con un ciclo: `push(...items)`
+ * passa ogni elemento come argomento e oltre circa 120k elementi lancia un
+ * RangeError non tipizzato (liste EXDATE/RDATE o componenti di input grandi).
+ */
+export function appendAll<T>(target: T[], items: Iterable<T>): T[] {
+  for (const item of items) target.push(item);
+  return target;
+}
+
 /** Lunghezza massima di una riga fisica in ottetti, CRLF escluso (RFC 5545 §3.1). */
 export const FOLD_OCTETS = 75;
 
@@ -44,10 +54,27 @@ export function utf8ByteLength(s: string): number {
 }
 
 /**
+ * Spazi bianchi secondo `str.isspace` di Python. vobject (Radicale) chiude la
+ * riga logica su ogni riga fisica con `line.rstrip() == ''`, e Radicale
+ * cancella prima le righe di soli spazi e tab: una continuazione fatta solo di
+ * questi caratteri perde dati in silenzio (spazi) o rende l'oggetto illeggibile
+ * (NBSP, U+3000: la continuazione successiva diventa una riga senza nome).
+ */
+const PY_WHITESPACE_RE = /^[\t\n\v\f\r\x1c-\x1f \x85\xa0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000]$/u;
+
+function isPyWhitespace(ch: string): boolean {
+  return PY_WHITESPACE_RE.test(ch);
+}
+
+/**
  * Folding RFC 5545 §3.1: righe fisiche di al massimo 75 ottetti UTF-8 (CRLF
  * escluso); le continuazioni iniziano con uno spazio, che conta nei 75. Non
- * spezza mai un code point (accentate da 2 ottetti, emoji da 4). Restituisce
- * le righe unite da CRLF, senza CRLF finale.
+ * spezza mai un code point (accentate da 2 ottetti, emoji da 4). Una
+ * continuazione non è mai fatta di soli spazi bianchi (isPyWhitespace): se il
+ * tratto lo sarebbe, si allunga fino al primo carattere che non lo è (una
+ * riga oltre i 75 ottetti, che vobject e gli altri parser leggono), e un
+ * tratto finale di soli spazi resta sulla riga precedente. Restituisce le
+ * righe unite da CRLF, senza CRLF finale.
  */
 export function foldLine(line: string): string {
   // Ogni unità UTF-16 vale al massimo 3 ottetti: le righe corte non vanno misurate.
@@ -55,20 +82,27 @@ export function foldLine(line: string): string {
   const out: string[] = [];
   let buf = '';
   let bufOctets = 0;
+  /** True se `buf` (una continuazione) è fatto di soli spazi bianchi. */
+  let bufBlank = false;
   let limit = FOLD_OCTETS;
   for (const ch of line) {
     const octets = codePointOctets(ch.codePointAt(0) ?? 0);
-    if (bufOctets + octets > limit) {
+    if (bufOctets + octets > limit && !(out.length > 0 && bufBlank)) {
       out.push(out.length === 0 ? buf : ` ${buf}`);
       buf = ch;
       bufOctets = octets;
+      bufBlank = isPyWhitespace(ch);
       limit = FOLD_OCTETS - 1;
     } else {
       buf += ch;
       bufOctets += octets;
+      bufBlank = bufBlank && isPyWhitespace(ch);
     }
   }
-  if (buf.length > 0 || out.length === 0) out.push(out.length === 0 ? buf : ` ${buf}`);
+  if (buf.length > 0 || out.length === 0) {
+    if (out.length > 0 && bufBlank) out[out.length - 1] += buf;
+    else out.push(out.length === 0 ? buf : ` ${buf}`);
+  }
   return out.join(CRLF);
 }
 

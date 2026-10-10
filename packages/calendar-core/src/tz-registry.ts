@@ -293,10 +293,22 @@ function normalizeDisplayName(tzid: string): string | null {
     .join(',');
 }
 
+/**
+ * Valore di una tabella letterale solo per le chiavi proprie: le chiavi
+ * arrivano da TZID scritti da device e feed, e 'constructor', 'toString' o
+ * '__proto__' restituirebbero funzioni e oggetti del prototype.
+ */
+function ownValue(table: Record<string, string>, key: string): string | null {
+  if (!Object.prototype.hasOwnProperty.call(table, key)) return null;
+  const value = table[key];
+  return typeof value === 'string' ? value : null;
+}
+
 /** Nome IANA equivalente a un nome Windows (case-insensitive), o null. */
 export function windowsToIana(name: string): string | null {
+  if (typeof name !== 'string') return null;
   const key = name.trim();
-  const direct = WINDOWS_TO_IANA[key];
+  const direct = ownValue(WINDOWS_TO_IANA, key);
   if (direct) return direct;
   const lower = key.toLowerCase();
   for (const [win, iana] of Object.entries(WINDOWS_TO_IANA)) {
@@ -320,6 +332,7 @@ const ianaCache = new Map<string, string | null>();
  * vengono rifiutate.
  */
 export function ianaName(name: string): string | null {
+  if (typeof name !== 'string') return null;
   const key = name.trim();
   const cached = ianaCache.get(key);
   if (cached !== undefined) return cached;
@@ -352,11 +365,33 @@ function offsetLabelToIana(tzid: string): string | null {
   return `Etc/GMT${m[1] === '+' ? '-' : '+'}${hours}`;
 }
 
+/**
+ * Indice TZID → VTIMEZONE per elenco (il primo per TZID), costruito alla prima
+ * ricerca: resolveTzid gira a ogni conversione e una ricerca lineare costava
+ * O(riferimenti × VTIMEZONE). Gli elenchi del modello non si modificano sul
+ * posto (si sostituiscono): la lunghezza è il controllo di coerenza.
+ */
+const vtimezoneIndex = new WeakMap<readonly IcsComponent[], { length: number; byTzid: Map<string, IcsComponent> }>();
+
 /** VTIMEZONE di `timezones` con il TZID dato (confronto esatto, spazi esclusi). */
 export function findVtimezone(timezones: readonly IcsComponent[] | undefined, tzid: string): IcsComponent | null {
-  if (!timezones) return null;
+  if (!timezones || timezones.length === 0) return null;
   const want = tzid.trim();
-  return timezones.find((tz) => vtimezoneTzid(tz) === want) ?? null;
+  if (timezones.length <= 4) return timezones.find((tz) => vtimezoneTzid(tz) === want) ?? null;
+  let index = vtimezoneIndex.get(timezones);
+  if (!index || index.length !== timezones.length) {
+    const byTzid = new Map<string, IcsComponent>();
+    for (const tz of timezones) {
+      const id = vtimezoneTzid(tz);
+      if (id != null && !byTzid.has(id)) byTzid.set(id, tz);
+    }
+    index = { length: timezones.length, byTzid };
+    vtimezoneIndex.set(timezones, index);
+  }
+  const hit = index.byTzid.get(want) ?? null;
+  // Un VTIMEZONE il cui TZID è cambiato dopo l'indicizzazione: ricerca lineare.
+  if (hit && vtimezoneTzid(hit) !== want) return timezones.find((tz) => vtimezoneTzid(tz) === want) ?? null;
+  return hit;
 }
 
 /**
@@ -388,7 +423,7 @@ export function resolveTzid(tzid: string, timezones?: readonly IcsComponent[]): 
   if (win && ianaName(win)) return { kind: 'iana', tzid, iana: ianaName(win) as string, via: 'windows', vtimezone: own };
   const display = normalizeDisplayName(t);
   if (display) {
-    const winName = DISPLAY_TO_WINDOWS[display];
+    const winName = ownValue(DISPLAY_TO_WINDOWS, display);
     const iana = winName ? windowsToIana(winName) : null;
     if (iana && ianaName(iana)) return { kind: 'iana', tzid, iana: ianaName(iana) as string, via: 'windows-display', vtimezone: own };
   }
@@ -623,6 +658,113 @@ interface CustomZoneState {
 
 const customCache = new Map<string, CustomZoneState>();
 
+// ─── Limiti dei VTIMEZONE non IANA ───
+//
+// ical.js espande le regole di ogni STANDARD/DAYLIGHT dal suo DTSTART fino
+// all'anno richiesto, senza budget: un VTIMEZONE di 340 byte con
+// RRULE:FREQ=DAILY o HOURLY (o DTSTART nel 9999) bloccava la CPU per minuti
+// nel thread dell'API. Si accettano solo VTIMEZONE di forma reale (regole
+// annuali come quelle di Outlook, Apple, Thunderbird e del registro) con un
+// costo stimato limitato, e la copertura si ferma a COVERAGE_YEARS_AHEAD anni da
+// oggi: oltre, l'offset si legge nell'anno equivalente (stesso giorno della
+// settimana del 1° gennaio e stessa bisestilità) dentro la copertura.
+
+/** Sottocomponenti massime di un VTIMEZONE. */
+export const VTIMEZONE_MAX_SUBCOMPONENTS = 64;
+/** Proprietà massime di un VTIMEZONE, sottocomponenti comprese. */
+export const VTIMEZONE_MAX_PROPERTIES = 1000;
+/** Valori di RDATE massimi in tutto il VTIMEZONE. */
+export const VTIMEZONE_MAX_RDATE_VALUES = 500;
+/** Costo massimo stimato delle regole (somma su sottocomponenti di anni da espandere × transizioni per anno). */
+export const VTIMEZONE_MAX_RULE_COST = 6_000;
+/** Anni di copertura oltre l'anno corrente. */
+export const COVERAGE_YEARS_AHEAD = 50;
+
+/** Parti di RRULE vietate nei VTIMEZONE accettati (nessuna regola reale le usa). */
+const VTZ_FORBIDDEN_PARTS = new Set(['BYHOUR', 'BYMINUTE', 'BYSECOND', 'BYYEARDAY', 'BYWEEKNO', 'BYSETPOS']);
+/** Valori massimi per parte (BYMONTHDAY fino a 7: la forma "domenica dopo l'8"). */
+const VTZ_MAX_VALUES: Readonly<Record<string, number>> = { BYMONTH: 2, BYDAY: 7, BYMONTHDAY: 7 };
+
+function coverageCapYear(): number {
+  return new Date().getUTCFullYear() + COVERAGE_YEARS_AHEAD;
+}
+
+function invalidVtimezone(tzid: string, reason: string): TimezoneError {
+  return new TimezoneError('INVALID_VTIMEZONE', `VTIMEZONE "${tzid.slice(0, 60)}" non accettato: ${reason}`, { tzid: tzid.slice(0, 60) });
+}
+
+/** Anno (4 cifre iniziali) di un valore DATE/DATE-TIME, o null. */
+function yearOfValue(value: string): number | null {
+  const m = /^\s*(\d{4})\d{4}/.exec(value);
+  return m ? Number(m[1]) : null;
+}
+
+/**
+ * Verifica la forma di un VTIMEZONE prima di darlo a ical.js (testa della
+ * sezione). Lancia TimezoneError('INVALID_VTIMEZONE'): l'indice mette
+ * l'oggetto in quarantena 'invalid-timezone' con il blocco conservativo.
+ */
+export function checkVtimezoneShape(vtz: IcsComponent, tzid: string): void {
+  const subs = vtz.components;
+  if (subs.length > VTIMEZONE_MAX_SUBCOMPONENTS) throw invalidVtimezone(tzid, `più di ${VTIMEZONE_MAX_SUBCOMPONENTS} sottocomponenti`);
+  let properties = vtz.properties.length;
+  let rdates = 0;
+  let cost = 0;
+  const capYear = coverageCapYear() + 6;
+  for (const sub of subs) {
+    properties += sub.properties.length;
+    if (sub.components.length > 0) throw invalidVtimezone(tzid, 'sottocomponenti annidate');
+    let rrule: string | null = null;
+    let startYear: number | null = null;
+    for (const p of sub.properties) {
+      const name = p.name.toUpperCase();
+      if (name === 'RDATE') rdates += p.value.split(',').length;
+      else if (name === 'DTSTART') startYear = yearOfValue(p.value);
+      else if (name === 'RRULE') {
+        if (rrule != null) throw invalidVtimezone(tzid, 'più RRULE nella stessa sottocomponente');
+        rrule = p.value;
+      }
+    }
+    if (rrule == null) continue;
+    const parts = new Map<string, string>();
+    for (const raw of rrule.replace(/^RRULE:/i, '').split(';')) {
+      const part = raw.trim();
+      if (!part) continue;
+      const eq = part.indexOf('=');
+      const name = (eq < 0 ? part : part.slice(0, eq)).trim().toUpperCase();
+      parts.set(name, eq < 0 ? '' : part.slice(eq + 1).trim());
+    }
+    if ((parts.get('FREQ') ?? '').toUpperCase() !== 'YEARLY') throw invalidVtimezone(tzid, 'RRULE non annuale');
+    const interval = parts.get('INTERVAL');
+    if (interval !== undefined && !/^0*1$/.test(interval)) throw invalidVtimezone(tzid, 'RRULE con INTERVAL diverso da 1');
+    let perYear = 1;
+    for (const [name, value] of parts) {
+      if (VTZ_FORBIDDEN_PARTS.has(name)) throw invalidVtimezone(tzid, `RRULE con ${name}`);
+      const max = VTZ_MAX_VALUES[name];
+      if (max === undefined) continue;
+      const n = value.split(',').length;
+      if (n > max) throw invalidVtimezone(tzid, `RRULE con più di ${max} valori in ${name}`);
+    }
+    const months = parts.has('BYMONTH') ? (parts.get('BYMONTH') as string).split(',').length : 1;
+    const days = parts.has('BYMONTHDAY')
+      ? (parts.get('BYMONTHDAY') as string).split(',').length
+      : parts.has('BYDAY')
+        ? (parts.get('BYDAY') as string).split(',').reduce((sum, d) => sum + (/\d/.test(d) ? 1 : 5), 0)
+        : 1;
+    perYear = months * days;
+    let endYear = capYear;
+    const until = parts.get('UNTIL');
+    const untilYear = until ? yearOfValue(until) : null;
+    if (untilYear != null) endYear = Math.min(endYear, untilYear);
+    const count = parts.get('COUNT');
+    if (count && /^\d{1,9}$/.test(count)) endYear = Math.min(endYear, (startYear ?? capYear) + Number(count));
+    cost += Math.max(0, endYear - (startYear ?? capYear) + 1) * perYear;
+  }
+  if (properties > VTIMEZONE_MAX_PROPERTIES) throw invalidVtimezone(tzid, `più di ${VTIMEZONE_MAX_PROPERTIES} proprietà`);
+  if (rdates > VTIMEZONE_MAX_RDATE_VALUES) throw invalidVtimezone(tzid, `più di ${VTIMEZONE_MAX_RDATE_VALUES} valori di RDATE`);
+  if (cost > VTIMEZONE_MAX_RULE_COST) throw invalidVtimezone(tzid, 'regole troppo costose da espandere');
+}
+
 /** Testo del VTIMEZONE (righe non piegate): ical.js non ha bisogno del folding. */
 function vtimezoneText(vtz: IcsComponent): string {
   return componentLines(vtz, []).join(CRLF);
@@ -633,6 +775,7 @@ function customState(zone: { tzid: string; vtimezone: IcsComponent }): CustomZon
   const key = `${zone.tzid}\u0000${text}`;
   let state = customCache.get(key);
   if (!state) {
+    checkVtimezoneShape(zone.vtimezone, zone.tzid);
     try {
       const comp = new ICAL.Component(ICAL.parse(text) as unknown[]);
       const tz = new ICAL.Timezone({ component: comp, tzid: zone.tzid });
@@ -652,7 +795,8 @@ type IcalChange = { year: number; month: number; day: number; hour: number; minu
 
 function ensureCustomCoverage(state: CustomZoneState, year: number): void {
   if (year <= state.coveredYear) return;
-  const target = Math.max(year, new Date().getUTCFullYear()) + 1;
+  const target = Math.min(Math.max(year, new Date().getUTCFullYear()) + 1, coverageCapYear() + 1);
+  if (target <= state.coveredYear) return;
   try {
     // API interna di ical.js 2.2.1 (versione pinnata esatta): le transizioni
     // calcolate dal VTIMEZONE, in UTC, con offset di arrivo e di partenza.
@@ -674,9 +818,37 @@ function ensureCustomCoverage(state: CustomZoneState, year: number): void {
   }
 }
 
+function isLeapYear(y: number): boolean {
+  return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+}
+
+/** Giorno della settimana del 1° gennaio (0 = domenica). */
+function jan1Weekday(y: number): number {
+  return new Date(wallToMs({ year: y, month: 1, day: 1, hour: 0, minute: 0, second: 0 })).getUTCDay();
+}
+
+/**
+ * Istante con la stessa ora da muro UTC in un anno equivalente (stessa
+ * bisestilità e stesso giorno della settimana del 1° gennaio) non oltre
+ * `capYear`: le regole annuali dei VTIMEZONE ("ultima domenica di marzo")
+ * danno lo stesso offset. Senza un anno equivalente vicino resta l'istante dato.
+ */
+function equivalentInstant(ms: number, capYear: number): number {
+  const w = msToWall(ms);
+  const leap = isLeapYear(w.year);
+  const weekday = jan1Weekday(w.year);
+  for (let y = capYear; y > capYear - 400; y--) {
+    if (isLeapYear(y) === leap && jan1Weekday(y) === weekday) return wallToMs({ ...w, year: y });
+  }
+  return ms;
+}
+
 function customOffset(zone: { tzid: string; vtimezone: IcsComponent }, ms: number): number {
   const state = customState(zone);
-  ensureCustomCoverage(state, new Date(ms).getUTCFullYear());
+  const capYear = coverageCapYear();
+  const year = new Date(ms).getUTCFullYear();
+  if (year > capYear) ms = equivalentInstant(ms, capYear);
+  ensureCustomCoverage(state, Math.min(year, capYear));
   const changes = state.changes;
   if (changes.length === 0) return 0;
   if (ms < changes[0].at) return changes[0].prev;

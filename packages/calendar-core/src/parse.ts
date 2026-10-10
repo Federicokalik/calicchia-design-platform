@@ -20,7 +20,7 @@
  */
 
 import { IcsParseError, type IcsWarning, toCoreError } from './errors';
-import { NAME_RE, collectTzidRefs, decodeText, vtimezoneTzid } from './ics-text';
+import { NAME_RE, appendAll, collectTzidRefs, decodeText, vtimezoneTzid } from './ics-text';
 import type { CalendarObject, IcsComponent, IcsParam, IcsProperty, SchedulableComponentType } from './model';
 
 /** Dimensione massima predefinita dell'input: 10 MiB (un feed ICS reale ne pesa al massimo pochi). */
@@ -28,9 +28,43 @@ export const DEFAULT_MAX_BYTES = 10 * 1024 * 1024;
 /** Profondità massima predefinita (VCALENDAR > VEVENT > VALARM sono 3 livelli). */
 export const DEFAULT_MAX_DEPTH = 16;
 
+/**
+ * Limiti strutturali di un oggetto calendario (una risorsa CalDAV, o un UID di
+ * un feed). Il limite in byte non basta: Radicale accetta risorse fino a 10 MB
+ * e i feed arrivano a 5 MB, e alcune parti dell'elaborazione (abbinamento
+ * degli override, conversioni dei fusi, liste EXDATE/RDATE, albero in memoria)
+ * crescono più che linearmente o moltiplicano la memoria. Oltre un limite il
+ * parse dell'oggetto fallisce con IcsParseError('TOO_LARGE'): l'indice lo
+ * mette in quarantena 'too-large' con il blocco conservativo dal testo
+ * (expand.conservativeRangeFromText), uno split di feed perde solo quell'UID.
+ */
+export interface ObjectLimits {
+  /** Override (componenti con RECURRENCE-ID) per oggetto. */
+  maxOverrides: number;
+  /** VTIMEZONE per oggetto. */
+  maxTimezones: number;
+  /** Valori di EXDATE e RDATE in tutto l'oggetto. */
+  maxRecurrenceValues: number;
+  /** Proprietà per componente (VALARM compresi). */
+  maxPropertiesPerComponent: number;
+  /** Parametri per proprietà. */
+  maxParamsPerProperty: number;
+}
+
+/** Default prudenti per gli oggetti dei device e dei feed (nessun client reale si avvicina). */
+export const DEFAULT_OBJECT_LIMITS: Readonly<ObjectLimits> = Object.freeze({
+  maxOverrides: 5000,
+  maxTimezones: 32,
+  maxRecurrenceValues: 20_000,
+  maxPropertiesPerComponent: 2000,
+  maxParamsPerProperty: 100,
+});
+
 export interface ParseOptions {
   /** Byte UTF-8 massimi dell'input. Default DEFAULT_MAX_BYTES. */
   maxBytes?: number;
+  /** Limiti strutturali dell'oggetto (parseCalendarObject): default DEFAULT_OBJECT_LIMITS, false li disattiva. */
+  objectLimits?: Partial<ObjectLimits> | false;
   /** Annidamento massimo dei componenti. Default DEFAULT_MAX_DEPTH. */
   maxDepth?: number;
   /**
@@ -350,7 +384,7 @@ export function parseIcs(input: string | Uint8Array, opts: ParseOptions = {}): P
         });
       }
       const [first, ...rest] = roots;
-      for (const cal of rest) first.components.push(...cal.components);
+      for (const cal of rest) appendAll(first.components, cal.components);
       warnings.push({ code: 'MERGED_VCALENDAR', message: `${rest.length} VCALENDAR aggiuntivi uniti nel primo` });
     }
     return roots[0];
@@ -405,6 +439,44 @@ function isSchedulable(comp: IcsComponent): boolean {
   return SCHEDULABLE.has(comp.name);
 }
 
+function resolveLimits(limits: Partial<ObjectLimits> | false | undefined): ObjectLimits | null {
+  if (limits === false) return null;
+  return { ...DEFAULT_OBJECT_LIMITS, ...(limits ?? {}) };
+}
+
+function tooLarge(uid: string, what: string, count: number, max: number): IcsParseError {
+  return new IcsParseError('TOO_LARGE', `Oggetto ${uid.slice(0, 60)}: ${what} oltre il limite di ${max}`, {
+    uid,
+    details: { limit: what, count, max },
+  });
+}
+
+/** Verifica i limiti strutturali (ObjectLimits) di un oggetto: lancia IcsParseError('TOO_LARGE'). */
+function checkObjectLimits(uid: string, comps: readonly IcsComponent[], timezones: readonly IcsComponent[], others: readonly IcsComponent[], limits: ObjectLimits): void {
+  const overrides = comps.reduce((n, c) => n + (c.properties.some((p) => p.name === 'RECURRENCE-ID') ? 1 : 0), 0);
+  if (overrides > limits.maxOverrides) throw tooLarge(uid, 'override', overrides, limits.maxOverrides);
+  if (timezones.length > limits.maxTimezones) throw tooLarge(uid, 'VTIMEZONE', timezones.length, limits.maxTimezones);
+  let recurrenceValues = 0;
+  const walk = (c: IcsComponent): void => {
+    if (c.properties.length > limits.maxPropertiesPerComponent) {
+      throw tooLarge(uid, `proprietà di ${c.name}`, c.properties.length, limits.maxPropertiesPerComponent);
+    }
+    for (const p of c.properties) {
+      if (p.params.length > limits.maxParamsPerProperty) throw tooLarge(uid, `parametri di ${p.name}`, p.params.length, limits.maxParamsPerProperty);
+      if (p.name === 'EXDATE' || p.name === 'RDATE') {
+        let n = 1;
+        for (let k = p.value.indexOf(','); k >= 0; k = p.value.indexOf(',', k + 1)) n++;
+        recurrenceValues += n;
+      }
+    }
+    for (const sub of c.components) walk(sub);
+  };
+  for (const c of comps) walk(c);
+  for (const c of timezones) walk(c);
+  for (const c of others) walk(c);
+  if (recurrenceValues > limits.maxRecurrenceValues) throw tooLarge(uid, 'valori di EXDATE e RDATE', recurrenceValues, limits.maxRecurrenceValues);
+}
+
 function buildObject(
   uid: string,
   comps: IcsComponent[],
@@ -413,7 +485,9 @@ function buildObject(
   otherComponents: IcsComponent[],
   warnings: IcsWarning[],
   duplicateMasters: 'error' | 'keep-first',
+  limits: ObjectLimits | null,
 ): CalendarObject {
+  if (limits) checkObjectLimits(uid, comps, timezones, otherComponents, limits);
   const types = new Set(comps.map((c) => c.name));
   if (types.size > 1) {
     throw new IcsParseError('MIXED_COMPONENT_TYPES', `Componenti di tipo diverso (${[...types].join(', ')}) per l'UID ${uid}`, {
@@ -460,10 +534,10 @@ function buildObject(
  * solo UID, più VTIMEZONE e componenti estranei conservati). Non clona: il
  * risultato condivide i nodi dell'albero passato. Errori tipizzati per
  * oggetto: NOT_ICALENDAR, NO_COMPONENT, MIXED_COMPONENT_TYPES, MISSING_UID,
- * MULTIPLE_UIDS, DUPLICATE_MASTER. Override con lo stesso RECURRENCE-ID →
- * avviso DUPLICATE_RECURRENCE_ID (restano entrambi).
+ * MULTIPLE_UIDS, DUPLICATE_MASTER, TOO_LARGE (ObjectLimits). Override con lo
+ * stesso RECURRENCE-ID → avviso DUPLICATE_RECURRENCE_ID (restano entrambi).
  */
-export function calendarToObject(cal: IcsComponent): ParseResult<CalendarObject> {
+export function calendarToObject(cal: IcsComponent, opts: Pick<ParseOptions, 'objectLimits'> = {}): ParseResult<CalendarObject> {
   return run((warnings) => {
     if (cal.name !== 'VCALENDAR') throw new IcsParseError('NOT_ICALENDAR', `Radice ${cal.name} al posto di VCALENDAR`);
     const timezones = cal.components.filter((c) => c.name === 'VTIMEZONE');
@@ -480,7 +554,7 @@ export function calendarToObject(cal: IcsComponent): ParseResult<CalendarObject>
       throw new IcsParseError('MULTIPLE_UIDS', `Una risorsa con ${uids.size} UID diversi`, { details: { count: uids.size } });
     }
     const [uid] = [...uids];
-    return buildObject(uid, comps, cal.properties, timezones, others, warnings, 'error');
+    return buildObject(uid, comps, cal.properties, timezones, others, warnings, 'error', resolveLimits(opts.objectLimits));
   }, 'calendarToObject');
 }
 
@@ -488,7 +562,7 @@ export function calendarToObject(cal: IcsComponent): ParseResult<CalendarObject>
 export function parseCalendarObject(input: string | Uint8Array, opts: ParseOptions = {}): ParseResult<CalendarObject> {
   const cal = parseIcs(input, opts);
   if (!cal.ok) return cal;
-  const obj = calendarToObject(cal.value);
+  const obj = calendarToObject(cal.value, opts);
   return obj.ok
     ? { ok: true, value: obj.value, warnings: [...cal.warnings, ...obj.warnings] }
     : { ok: false, error: obj.error, warnings: [...cal.warnings, ...obj.warnings] };
@@ -504,6 +578,8 @@ export function parseCalendarObjectOrThrow(input: string | Uint8Array, opts: Par
 export interface SplitOptions {
   /** Master duplicati per lo stesso UID: 'error' (default) per quell'UID, o 'keep-first' con avviso. */
   duplicateMasters?: 'error' | 'keep-first';
+  /** Limiti strutturali per oggetto (default DEFAULT_OBJECT_LIMITS, false li disattiva): un UID oltre i limiti finisce in `errors`. */
+  objectLimits?: Partial<ObjectLimits> | false;
 }
 
 export interface SplitError {
@@ -544,6 +620,7 @@ export function splitCalendar(cal: IcsComponent, opts: SplitOptions = {}): Split
       const id = vtimezoneTzid(tz);
       if (id != null && !tzByTzid.has(id)) tzByTzid.set(id, tz);
     }
+    const limits = resolveLimits(opts.objectLimits);
     const groups = new Map<string, { index: number; comps: IcsComponent[] }>();
     cal.components.forEach((c, index) => {
       if (c.name === 'VTIMEZONE') return;
@@ -564,7 +641,7 @@ export function splitCalendar(cal: IcsComponent, opts: SplitOptions = {}): Split
       try {
         const refs = collectTzidRefs(g.comps);
         const ownTz = refs.map((id) => tzByTzid.get(id)).filter((x): x is IcsComponent => x != null);
-        objects.push(buildObject(uid, g.comps, [...cal.properties], ownTz, [], warnings, opts.duplicateMasters ?? 'error'));
+        objects.push(buildObject(uid, g.comps, [...cal.properties], ownTz, [], warnings, opts.duplicateMasters ?? 'error', limits));
       } catch (err) {
         if (!(err instanceof IcsParseError)) throw err;
         errors.push({ uid, index: g.index, error: err });

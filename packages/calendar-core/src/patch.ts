@@ -3,10 +3,13 @@
  *
  * Regole:
  * - si toccano solo le proprietà dei campi nelle ops: VALARM, ATTENDEE, X-*,
- *   parametri sconosciuti (LANGUAGE, ALTREP, X-APPLE-*...) e l'ordine delle
- *   altre proprietà restano invariati; una proprietà modificata conserva i
- *   propri parametri non legati al tipo (per i tempi si riscrivono solo
- *   VALUE e TZID);
+ *   parametri sconosciuti (LANGUAGE, X-APPLE-*...) e l'ordine delle altre
+ *   proprietà restano invariati; una proprietà modificata conserva i propri
+ *   parametri non legati al tipo (per i tempi si riscrivono solo VALUE e
+ *   TZID), tranne SUMMARY, DESCRIPTION e LOCATION: quando il valore cambia
+ *   resta solo LANGUAGE (ALTREP e simili descrivono il valore vecchio) e si
+ *   tolgono le rappresentazioni alternative dello stesso contenuto
+ *   (X-ALT-DESC con DESCRIPTION, X-APPLE-STRUCTURED-LOCATION con LOCATION);
  * - SEQUENCE+1 (partendo da 0 se assente) quando cambiano start, end,
  *   duration, rrule, rdates, exdates, location o status; LAST-MODIFIED e
  *   DTSTAMP a `now` per qualsiasi modifica effettiva; nessuna modifica
@@ -38,6 +41,7 @@
 import { localDateOf, stringToIcsDate } from './allday';
 import { CalendarCoreError, IcsValueError, toCoreError } from './errors';
 import { canonicalComponentText, canonicalDurationText, canonicalPropertyText } from './fingerprint';
+import { appendAll, encodeText } from './ics-text';
 import {
   buildEventFromLegacy,
   type CalendarObject,
@@ -76,7 +80,6 @@ import {
   removeProperties,
   setProperties,
   setProperty,
-  setTextValue,
   splitTextList,
   timeParams,
   timeToUtcMs,
@@ -598,7 +601,7 @@ function readField(c: IcsComponent, field: PatchFieldName): FieldValue | undefin
     }
     case 'categories': {
       const out: string[] = [];
-      for (const p of getProperties(c, 'CATEGORIES')) out.push(...splitTextList(p.value).filter((s) => s !== ''));
+      for (const p of getProperties(c, 'CATEGORIES')) appendAll(out, splitTextList(p.value).filter((s) => s !== ''));
       return out;
     }
     case 'geo': {
@@ -625,7 +628,7 @@ function readField(c: IcsComponent, field: PatchFieldName): FieldValue | undefin
     }
     case 'rdates': {
       const out: Array<IcsTime | IcsPeriod> = [];
-      for (const p of getProperties(c, 'RDATE')) out.push(...readTimeListProperty(p));
+      for (const p of getProperties(c, 'RDATE')) appendAll(out, readTimeListProperty(p));
       return out;
     }
     case 'exdates': {
@@ -818,16 +821,51 @@ function formatGeoNumber(n: number): string {
   return String(Number(n.toFixed(6)));
 }
 
+/**
+ * Proprietà che rappresentano lo stesso contenuto in un'altra forma: quando il
+ * campo cambia diventano false e si tolgono (X-ALT-DESC: descrizione HTML di
+ * Outlook; X-APPLE-STRUCTURED-LOCATION: mappa, pin e tempo di viaggio su iOS e
+ * macOS, che i client Apple rigenerano dalla LOCATION). GEO resta: può non
+ * derivare dalla LOCATION.
+ */
+const TEXT_FIELD_DEPENDENTS: Readonly<Record<'SUMMARY' | 'DESCRIPTION' | 'LOCATION', readonly string[]>> = {
+  SUMMARY: [],
+  DESCRIPTION: ['X-ALT-DESC'],
+  LOCATION: ['X-APPLE-STRUCTURED-LOCATION'],
+};
+
+/**
+ * Scrive un campo TEXT che cambia davvero (writeField è chiamata solo allora):
+ * dei parametri resta solo LANGUAGE. ALTREP (RFC 5545 §3.2.1, per esempio la
+ * descrizione HTML data:text/html di Thunderbird, che i client preferiscono al
+ * testo) e gli altri parametri descrivono il valore vecchio: conservarli
+ * mostrerebbe sui device, e pubblicherebbe nel feed, il contenuto tolto. Le
+ * proprietà dipendenti (TEXT_FIELD_DEPENDENTS) si tolgono, anche quando il
+ * campo viene rimosso.
+ */
+function writeTextField(c: IcsComponent, name: 'SUMMARY' | 'DESCRIPTION' | 'LOCATION', text: string | null): void {
+  for (const dependent of TEXT_FIELD_DEPENDENTS[name]) removeProperties(c, dependent);
+  if (text == null || text === '') {
+    removeProperties(c, name);
+    return;
+  }
+  const existing = getProperty(c, name);
+  const params = existing
+    ? existing.params.filter((x) => x.name.toUpperCase() === 'LANGUAGE').map((x) => ({ name: x.name, values: [...x.values] }))
+    : [];
+  setProperty(c, { name, params, value: encodeText(text) });
+}
+
 function writeField(c: IcsComponent, field: PatchFieldName, value: unknown, changed: Set<string>): void {
   switch (field) {
     case 'summary':
-      setTextValue(c, 'SUMMARY', emptyToNull(value as string | null));
+      writeTextField(c, 'SUMMARY', emptyToNull(value as string | null));
       return;
     case 'description':
-      setTextValue(c, 'DESCRIPTION', emptyToNull(value as string | null));
+      writeTextField(c, 'DESCRIPTION', emptyToNull(value as string | null));
       return;
     case 'location':
-      setTextValue(c, 'LOCATION', emptyToNull(value as string | null));
+      writeTextField(c, 'LOCATION', emptyToNull(value as string | null));
       return;
     case 'url':
       setSimple(c, 'URL', emptyToNull((value as string | null)?.trim() ?? null));
@@ -921,8 +959,7 @@ function writeField(c: IcsComponent, field: PatchFieldName, value: unknown, chan
       const idx = c.components.findIndex((x) => x.name.toUpperCase() === 'VALARM');
       const rest = c.components.filter((x) => x.name.toUpperCase() !== 'VALARM');
       const at = idx < 0 ? rest.length : c.components.slice(0, idx).filter((x) => x.name.toUpperCase() !== 'VALARM').length;
-      rest.splice(at, 0, ...list.map(cloneComponent));
-      c.components = rest;
+      c.components = appendAll(appendAll(rest.slice(0, at), list.map(cloneComponent)), rest.slice(at));
       return;
     }
     case 'organizer': {

@@ -391,13 +391,17 @@ export class OverrideResolver {
 
   /** Dopo una scansione completa di [coverStart, coverEnd]: gli override con il bersaglio lì dentro e senza istanza sono orfani. */
   settleWithin(coverStart: number, coverEnd: number): void {
-    for (const i of [...this.pending]) {
-      const [a, b] = this.target(i);
-      if (a >= coverStart && b <= coverEnd) {
-        this.pending.delete(i);
-        this.remove(i);
-        this.settled.set(i, { status: 'orphan' });
-      }
+    for (const i of [...this.pending]) this.settleIfCovered(i, coverStart, coverEnd);
+  }
+
+  /** Come settleWithin per il solo override `i` (le scansioni mirate di resolvePending: costo lineare, non quadratico). */
+  private settleIfCovered(i: number, coverStart: number, coverEnd: number): void {
+    if (!this.pending.has(i)) return;
+    const [a, b] = this.target(i);
+    if (a >= coverStart && b <= coverEnd) {
+      this.pending.delete(i);
+      this.remove(i);
+      this.settled.set(i, { status: 'orphan' });
     }
   }
 
@@ -424,7 +428,10 @@ export class OverrideResolver {
         const seek = series.wallOf(a) - margin;
         const limit = series.wallOf(b) + margin;
         for (const inst of series.instances(seek, limit)) this.offer(inst, a, b);
-        this.settleWithin(a, b);
+        // Solo l'override cercato: gli altri in sospeso con il bersaglio in [a, b]
+        // si chiudono nella propria scansione (rifare il giro di tutti i pending a
+        // ogni override costava O(n²) con migliaia di orfani).
+        this.settleIfCovered(i, a, b);
       }
       return;
     }

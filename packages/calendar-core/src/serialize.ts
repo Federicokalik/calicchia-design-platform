@@ -24,7 +24,7 @@
  */
 
 import { SerializeError, toCoreError } from './errors';
-import { collectTzidRefs, componentLines, contentLine, CRLF, foldLine, vtimezoneTzid } from './ics-text';
+import { appendAll, collectTzidRefs, componentLines, contentLine, CRLF, foldLine, vtimezoneTzid } from './ics-text';
 import { type CalendarObject, componentRecurrenceKey, type IcsComponent, type IcsProperty, objectComponents } from './model';
 import { canonicalVtimezone, DEFAULT_TZ, findVtimezone, isIanaTzid, resolveTzid } from './tz-registry';
 
@@ -113,7 +113,7 @@ function writeCalendar(header: IcsProperty[], timezones: IcsComponent[], body: I
   const out: string[] = ['BEGIN:VCALENDAR'];
   const wrapper: IcsComponent = { name: 'VCALENDAR', properties: header, components: [] };
   const headerLines = componentLines(wrapper, []);
-  out.push(...headerLines.slice(1, -1));
+  appendAll(out, headerLines.slice(1, -1));
   for (const tz of timezones) componentLines(tz, out);
   for (const c of body) componentLines(c, out);
   out.push('END:VCALENDAR');

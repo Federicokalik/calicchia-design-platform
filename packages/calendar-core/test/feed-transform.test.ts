@@ -298,6 +298,85 @@ describe('privacy e DTSTAMP', () => {
     assert.ok(!body.includes('TZID:Non referenziato'));
     assert.ok(!body.includes('TZID:Pianeta/Marte\r\n'));
   });
+
+  test('TZID uguali ai nomi di Object.prototype: il feed esce, l\'oggetto con quel TZID non lo rompe', () => {
+    const inputs = migratedInputs();
+    const good = buildFeed(CAL_INFO, inputs, OPTS);
+    for (const tzid of ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf', '(UTC+01:00) constructor', '(UTC) __proto__']) {
+      const bad = eventObject([
+        'UID:proto@x',
+        'DTSTAMP:20260101T000000Z',
+        `DTSTART;TZID="${tzid}":20261012T090000`,
+        `DTEND;TZID="${tzid}":20261012T100000`,
+        'RRULE:FREQ=WEEKLY',
+        'SUMMARY:serie',
+      ]);
+      const reported: string[] = [];
+      const res = buildFeed(CAL_INFO, [...inputs, input(bad)], { ...OPTS, onObjectError: (i, err) => reported.push(`${i.object.uid}:${err.code}`) });
+      assert.deepEqual(reported, [], tzid);
+      // Gli altri oggetti escono identici (il TZID sconosciuto non produce VTIMEZONE).
+      for (const obj of splitCalendar(parseIcsOrThrow(good.body)).objects) assert.ok(res.body.includes(`UID:${obj.uid}`), tzid);
+      assert.ok(res.body.includes('UID:proto@x'), tzid);
+    }
+  });
+
+  test('un oggetto che non si serializza resta fuori con onObjectError, gli altri escono', () => {
+    const inputs = migratedInputs();
+    const good = buildFeed(CAL_INFO, inputs, OPTS);
+    // Valore con un a capo non codificato: SerializeError solo per questo oggetto.
+    const broken = eventObject(['UID:rotto@x', 'DTSTAMP:20260101T000000Z', 'DTSTART:20261012T090000Z', 'DTEND:20261012T100000Z', 'SUMMARY:ok']);
+    (getProperty(broken.master as IcsComponent, 'SUMMARY') as { value: string }).value = 'riga\nspezzata';
+    const reported: string[] = [];
+    const res = buildFeed(CAL_INFO, [...inputs, input(broken)], { ...OPTS, onObjectError: (i) => reported.push(i.object.uid) });
+    assert.deepEqual(reported, ['rotto@x']);
+    assert.equal(res.etag, good.etag);
+  });
+
+  test('stesso TZID personalizzato con definizioni diverse: il secondo viene rinominato e il feed coincide con l\'indice', () => {
+    const custom = (uid: string, offset: string): CalendarObject =>
+      eventObject(
+        [`UID:${uid}`, 'DTSTAMP:20260101T000000Z', 'DTSTART;TZID=Customized Time Zone:20261012T090000', 'DTEND;TZID=Customized Time Zone:20261012T100000', 'SUMMARY:x'],
+        ['BEGIN:VTIMEZONE', 'TZID:Customized Time Zone', 'BEGIN:STANDARD', 'DTSTART:16010101T000000', `TZOFFSETFROM:${offset}`, `TZOFFSETTO:${offset}`, 'END:STANDARD', 'END:VTIMEZONE'],
+      );
+    const ny = custom('ny@x', '-0400');
+    const rome = custom('rome@x', '+0200');
+    const ctx = (o: CalendarObject) => ({ tz: TZ, timezones: o.timezones });
+    const indexStart = (o: CalendarObject) => toLegacyEventFields(o.master as IcsComponent, ctx(o)).start_time;
+    const { body } = buildFeed(CAL_INFO, [input(rome), input(ny), input(custom('rome2@x', '+0200'))], OPTS);
+    const parsed = splitCalendar(parseIcsOrThrow(body));
+    assert.equal(parsed.objects.length, 3);
+    for (const obj of parsed.objects) {
+      const original = { 'ny@x': ny, 'rome@x': rome, 'rome2@x': rome }[obj.uid] as CalendarObject;
+      assert.equal(toLegacyEventFields(obj.master as IcsComponent, ctx(obj)).start_time, indexStart(original), obj.uid);
+    }
+    // Due VTIMEZONE: quello condiviso dalle due definizioni uguali e quello rinominato.
+    assert.equal(body.match(/BEGIN:VTIMEZONE/g)?.length, 2);
+    assert.match(body, /TZID:Customized Time Zone \([0-9a-f]{8}\)/);
+    // Stessa definizione due volte: nessuna rinomina.
+    const same = buildFeed(CAL_INFO, [input(rome), input(custom('rome2@x', '+0200'))], OPTS).body;
+    assert.equal(same.match(/BEGIN:VTIMEZONE/g)?.length, 1);
+    assert.ok(!/Customized Time Zone \(/.test(same));
+  });
+
+  test('ALTREP e gli altri parametri dei campi TEXT non escono nel feed (resta LANGUAGE)', () => {
+    const obj = eventObject([
+      'UID:alt@x',
+      'DTSTAMP:20260101T000000Z',
+      'DTSTART:20261012T090000Z',
+      'DTEND:20261012T100000Z',
+      'SUMMARY;LANGUAGE=it;X-FOO=bar:Riunione',
+      'DESCRIPTION;ALTREP="data:text/html,%3Cp%3EChiamare%20Mario%20al%20333%201234567%3C%2Fp%3E":Riunione spostata',
+      'LOCATION;ALTREP="http://x.test/mappa?tel=3331234567":Studio',
+    ]);
+    const { body } = buildFeed(CAL_INFO, [input(obj)], OPTS);
+    assert.ok(!body.includes('ALTREP'), body);
+    assert.ok(!body.includes('333'), body);
+    assert.ok(body.includes('SUMMARY;LANGUAGE=it:Riunione'));
+    assert.ok(!body.includes('X-FOO'));
+    // Anche nel ramo delle proiezioni (il contenuto si ricompone sul componente copiato).
+    const projection = buildFeed(CAL_INFO, [input(obj, { bookingProjection: { data: null } })], OPTS).body;
+    assert.ok(!projection.includes('ALTREP') && !projection.includes('333'), projection);
+  });
 });
 
 describe('proiezioni delle prenotazioni (decisione 3)', () => {
@@ -317,12 +396,15 @@ describe('proiezioni delle prenotazioni (decisione 3)', () => {
     const c = bookingProjectionContent(DATA, { now: NOW });
     assert.deepEqual(c, {
       summary: 'Consulenza gratuita – Rossi, Mario',
-      description: 'Tel: +39 333 1234567\nPrenotazione in admin: https://admin.caldes.test/calendario/prenotazioni?uid=bk7Hq2xLm9Pa',
-      location: null,
+      description: 'Tel: +39 333 1234567\nPrenotazione: https://admin.caldes.test/calendario/prenotazioni?uid=bk7Hq2xLm9Pa',
+      location: 'https://meet.google.com/abc-defg-hij',
       url: 'https://meet.google.com/abc-defg-hij',
       minimized: false,
     });
     assert.equal(bookingProjectionContent({ ...DATA, attendeePhone: null, adminUrl: null }, { now: NOW }).description, null);
+    // Come la risorsa scritta dall'API: luogo della prenotazione se c'è, URL solo per i link http(s).
+    const inPerson = bookingProjectionContent({ ...DATA, location: 'Via Roma 1', meetingUrl: 'tel:+390612345' }, { now: NOW });
+    assert.deepEqual([inPerson.location, inPerson.url], ['Via Roma 1', null]);
   });
 
   test('dopo 24 mesi dalla fine, o senza dati: solo "Prenotazione"', () => {

@@ -30,7 +30,7 @@ export class CalendarCoreError extends Error {
 export type IcsParseErrorCode =
   /** Input vuoto o di soli spazi. */
   | 'EMPTY_INPUT'
-  /** Input oltre `maxBytes`. */
+  /** Input oltre `maxBytes`, o un oggetto oltre i limiti strutturali (parse.ObjectLimits). */
   | 'TOO_LARGE'
   /** Byte non UTF-8 validi (solo con input Uint8Array e `invalidUtf8: 'error'`). */
   | 'INVALID_ENCODING'

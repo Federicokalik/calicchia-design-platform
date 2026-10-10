@@ -173,7 +173,9 @@ export type ExpandWarningCode =
   /**
    * BYDAY con giorni semplici e ordinali in MONTHLY/YEARLY (es. BYDAY=MO,1FR):
    * vale l'unione (RFC 5545, come i device); il legacy (rrule.js) e Radicale
-   * (dateutil) richiedono entrambe le forme e non ne mostrano le occorrenze.
+   * (dateutil) mostrano l'intersezione delle due forme: vuota con giorni
+   * disgiunti, contenuta nell'unione senza COUNT né BYSETPOS, ma con COUNT o
+   * BYSETPOS può contenere date che l'unione non ha (recur.ts, testa).
    */
   | 'MIXED_BYDAY'
   /** DTSTART non soddisfa la regola: resta la prima occorrenza (RFC 5545), dateutil e il legacy la scartano. */
@@ -270,22 +272,43 @@ export function expandObject(obj: CalendarObject, opts: ExpandOptions): Expansio
     warnings.push({ code: 'UNKNOWN_TZID', message: `Fuso del calendario "${String(tz).slice(0, 60)}" sconosciuto: usato ${DEFAULT_TZ}` });
     tz = DEFAULT_TZ;
   }
-  const budget = new ExpansionBudget(Math.max(1, Math.floor(opts.iterationBudget ?? EXPANSION_ITERATION_BUDGET)));
-  const expander = new Expander(obj, {
-    from: opts.from,
-    to: opts.to,
-    ctx: { tz, timezones: obj.timezones },
-    maxOccurrences: Math.max(1, Math.floor(opts.maxOccurrences ?? MAX_OCCURRENCES_PER_OBJECT)),
-    budget,
-    computeRangeEnd: opts.computeRangeEnd !== false,
-    warnings,
-  });
-  try {
-    return expander.run();
-  } catch (err) {
-    if (err instanceof CalendarCoreError && err.code === 'INTERNAL') throw err;
-    throw new CalendarCoreError('INTERNAL', `expandObject: ${err instanceof Error ? err.message : String(err)}`, { context: 'expandObject' });
+  const run = (computeRangeEnd: boolean, list: ExpandWarning[]): ExpansionResult => {
+    const expander = new Expander(obj, {
+      from: opts.from,
+      to: opts.to,
+      ctx: { tz, timezones: obj.timezones },
+      maxOccurrences: Math.max(1, Math.floor(opts.maxOccurrences ?? MAX_OCCURRENCES_PER_OBJECT)),
+      budget: new ExpansionBudget(Math.max(1, Math.floor(opts.iterationBudget ?? EXPANSION_ITERATION_BUDGET))),
+      computeRangeEnd,
+      warnings: list,
+    });
+    try {
+      return expander.run();
+    } catch (err) {
+      if (err instanceof CalendarCoreError && err.code === 'INTERNAL') throw err;
+      throw new CalendarCoreError('INTERNAL', `expandObject: ${err instanceof Error ? err.message : String(err)}`, { context: 'expandObject' });
+    }
+  };
+  const computeRangeEnd = opts.computeRangeEnd !== false;
+  const preWarnings = [...warnings];
+  const first = run(computeRangeEnd, warnings);
+  // Con COUNT il motore itera fino alla fine della serie solo per rangeEnd: una
+  // regola che dopo il DTSTART non produce più istanze esaurisce il budget senza
+  // mai "superare" la finestra, e finirebbe in quarantena con un blocco
+  // conservativo su tutto l'orizzonte (la stessa regola senza COUNT è 'ok').
+  // Si rifà la passata fermandosi alla finestra (budget nuovo): se la copre,
+  // l'esito è 'ok' con rangeEnd ignoto (null, cioè aperto) o il limite UNTIL.
+  if (first.health === 'quarantined' && first.healthReason === 'expansion-budget' && computeRangeEnd && masterRuleHasCount(obj)) {
+    const retry = run(false, [...preWarnings]);
+    if (retry.health === 'ok') return { ...retry, iterations: first.iterations + retry.iterations };
   }
+  return first;
+}
+
+/** True se la prima RRULE del master ha COUNT (niente fast-forward: si conta dal DTSTART). */
+function masterRuleHasCount(obj: CalendarObject): boolean {
+  const rule = obj.master ? getProperty(obj.master, 'RRULE') : null;
+  return rule != null && /(^|;)\s*COUNT\s*=/i.test(rule.value);
 }
 
 interface ExpanderOptions {

@@ -45,11 +45,15 @@
  * - BYDAY misto (giorni semplici e ordinali, es. FREQ=MONTHLY;BYDAY=MO,1FR)
  *   con MONTHLY/YEARLY: unione, come RFC 5545 e come ical.js, libical,
  *   Apple e Google mostrano la serie sui device. dateutil e rrule.js
- *   richiedono che il giorno soddisfi entrambe le forme e la regola non ha
- *   istanze: il busy resterebbe vuoto mentre il telefono mostra l'impegno.
- *   Senza BYSETPOS l'unione contiene l'intersezione, quindi la scelta è
- *   anche quella prudente; avviso MIXED_BYDAY (anomalia per la migrazione,
- *   perché il legacy non mostra quelle occorrenze).
+ *   richiedono che il giorno soddisfi entrambe le forme (intersezione): con
+ *   giorni disgiunti (MO,1FR) la regola non ha istanze e il busy resterebbe
+ *   vuoto mentre il telefono mostra l'impegno; con giorni sovrapposti
+ *   (FR,1FR) l'intersezione sono i primi venerdì. Senza COUNT né BYSETPOS
+ *   l'unione contiene l'intersezione; con COUNT (o BYSETPOS) no: l'unione
+ *   esaurisce il conteggio prima, e date che il legacy e Radicale mostrano
+ *   (FR,1FR;COUNT=6: i primi venerdì da gennaio a giugno) qui non ci sono.
+ *   Avviso MIXED_BYDAY con il messaggio del caso (anomalia per la
+ *   migrazione: il legacy mostra altre occorrenze).
  */
 
 import { addDays, allDayRangeFromIcs, daysBetween, icsDateToString, localDateOf } from './allday';
@@ -1419,7 +1423,8 @@ export function readMasterSpec(master: IcsComponent, ctx: ZoneContext): MasterRe
       return fail('invalid-rrule', 'RRULE oraria su un evento di tutto il giorno', invalidRuleExtent());
     }
     for (const n of parsed.notices) {
-      warnings.push({ code: n === 'MIXED_BYDAY' ? 'MIXED_BYDAY' : 'RRULE_NONSTANDARD', message: RRULE_NOTICE_MESSAGES[n] });
+      const message = n === 'MIXED_BYDAY' && (rule.count != null || rule.bysetpos) ? MIXED_BYDAY_COUNT_MESSAGE : RRULE_NOTICE_MESSAGES[n];
+      warnings.push({ code: n === 'MIXED_BYDAY' ? 'MIXED_BYDAY' : 'RRULE_NONSTANDARD', message });
     }
     if (rule.until) {
       const mismatch = allDay ? rule.until.type === 'date-time' : rule.until.type === 'date';
@@ -1550,8 +1555,12 @@ const RRULE_NOTICE_MESSAGES: Record<RecurNotice, string> = {
   NONSTANDARD_COMBINATION: 'RRULE: combinazione di parti vietata da RFC 5545, applicata come filtro',
   COUNT_AND_UNTIL: 'RRULE: COUNT e UNTIL insieme, valgono entrambi',
   LEAP_SECOND: 'RRULE: BYSECOND=60 trattato come 59',
-  MIXED_BYDAY: 'RRULE: BYDAY con giorni semplici e ordinali, vale l\'unione (RFC 5545); il calendario legacy e dateutil non ne mostrano le occorrenze',
+  MIXED_BYDAY: 'RRULE: BYDAY con giorni semplici e ordinali, vale l\'unione (RFC 5545, come i device); il calendario legacy e dateutil mostrano solo i giorni che soddisfano entrambe le forme (nessuno, se sono disgiunti)',
 };
+
+/** MIXED_BYDAY con COUNT o BYSETPOS: l'intersezione del legacy non è più contenuta nell'unione. */
+const MIXED_BYDAY_COUNT_MESSAGE =
+  'RRULE: BYDAY con giorni semplici e ordinali e COUNT o BYSETPOS, vale l\'unione (RFC 5545, come i device); il calendario legacy e dateutil mostrano l\'intersezione, che con COUNT o BYSETPOS può contenere date che l\'unione non ha';
 
 function dedupeWarnings(list: SeriesWarning[]): SeriesWarning[] {
   const seen = new Set<string>();

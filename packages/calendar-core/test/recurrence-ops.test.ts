@@ -31,6 +31,7 @@ import {
   shiftSeries,
   splitSeries,
   truncateSeries,
+  validateObject,
 } from '../src/index';
 import { iso, localOf, objectFromText, objectOf, propLine, ROME, vevent, wallMs } from './ical-builders';
 
@@ -286,6 +287,102 @@ describe('tutta la serie: shiftSeries', () => {
   });
 });
 
+describe('tutta la serie: shiftSeries con i giorni fissati dalla regola (rec-01)', () => {
+  const rome = (y: number, mo: number, d: number, h = 9, mi = 0) => ({ type: 'date-time' as const, year: y, month: mo, day: d, hour: h, minute: mi, second: 0, zone: { kind: 'tzid' as const, tzid: ROME } });
+  /** Serie di produzione in "c": lun-mar-gio-ven 09:00 dal 06/01/2025, EXDATE gio 15/10/2026, override di lun 12/10 alle 15:00. */
+  const production = (): CalendarObject => objectOf(
+    vevent(['DTSTART;TZID=Europe/Rome:20250106T090000', 'DTEND;TZID=Europe/Rome:20250106T100000', 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,TH,FR', 'EXDATE;TZID=Europe/Rome:20261015T090000']),
+    vevent(['RECURRENCE-ID;TZID=Europe/Rome:20261012T090000', 'DTSTART;TZID=Europe/Rome:20261012T150000', 'DTEND;TZID=Europe/Rome:20261012T160000']),
+  );
+  const week = (o: CalendarObject): string[] => view(expand(o, D('2026-10-12'), D('2026-10-18')));
+  const PRODUCTION_WEEK = ['2026-10-12 15:00 override', '2026-10-13 09:00 event', '2026-10-16 09:00 event'];
+
+  test('premessa: la settimana del 12/10', () => {
+    assert.deepEqual(week(production()), PRODUCTION_WEEK);
+  });
+
+  test('+1 giorno (trascina giovedì → venerdì, "tutta la serie"): EXDATE e override restano sulle loro date', () => {
+    const r = shiftSeries(production(), rome(2025, 1, 7), CTX);
+    assert.equal(propLine(r.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261015T090000');
+    assert.equal(propLine(r.object.overrides[0], 'RECURRENCE-ID'), 'RECURRENCE-ID;TZID=Europe/Rome:20261012T090000');
+    assert.deepEqual(week(r.object), PRODUCTION_WEEK);
+    assert.deepEqual([r.orphanedOverrides, r.staleExdates, r.dtstartNotInRule], [[], [], false]);
+    assert.equal(r.rekeyed.size, 0);
+  });
+
+  test('+7 giorni: nessun cambiamento visibile', () => {
+    const r = shiftSeries(production(), rome(2025, 1, 13), CTX);
+    assert.deepEqual(week(r.object), PRODUCTION_WEEK);
+    assert.equal(propLine(r.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261015T090000');
+  });
+
+  test('+1 giorno e +1 ora: le eccezioni restano sulle loro date con la nuova ora', () => {
+    const r = shiftSeries(production(), rome(2025, 1, 7, 10), CTX);
+    assert.equal(propLine(r.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261015T100000');
+    assert.equal(propLine(r.object.overrides[0], 'RECURRENCE-ID'), 'RECURRENCE-ID;TZID=Europe/Rome:20261012T100000');
+    assert.deepEqual(week(r.object), ['2026-10-12 15:00 override', '2026-10-13 10:00 event', '2026-10-16 10:00 event']);
+  });
+
+  test('+2 giorni (lunedì → mercoledì): DTSTART fuori regola → errore (strict); senza strict lo riporta e le eccezioni restano', () => {
+    assert.throws(() => shiftSeries(production(), rome(2025, 1, 8), CTX), (e: unknown) => e instanceof IcsValueError && e.property === 'DTSTART');
+    const r = shiftSeries(production(), rome(2025, 1, 8), CTX, { strict: false });
+    assert.equal(r.dtstartNotInRule, true);
+    assert.deepEqual(week(r.object), PRODUCTION_WEEK);
+  });
+
+  test('UNTIL con i giorni fissati: solo la parte oraria positiva; l\'ultima istanza resta la stessa', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20261012T090000', 'DTEND;TZID=Europe/Rome:20261012T100000', 'RRULE:FREQ=WEEKLY;BYDAY=MO,TH;UNTIL=20261022T070000Z']));
+    const before = view(expand(o));
+    const later = shiftSeries(o, rome(2026, 10, 15, 11), CTX);
+    assert.equal(getProperty(later.object.master!, 'RRULE')?.value, 'FREQ=WEEKLY;BYDAY=MO,TH;UNTIL=20261022T090000Z');
+    assert.deepEqual(view(expand(later.object)), before.filter((l) => l >= '2026-10-15').map((l) => l.replace(' 09:00 ', ' 11:00 ')));
+    const earlier = shiftSeries(o, rome(2026, 10, 15, 8), CTX);
+    assert.equal(getProperty(earlier.object.master!, 'RRULE')?.value, 'FREQ=WEEKLY;BYDAY=MO,TH;UNTIL=20261022T070000Z');
+    assert.deepEqual(view(expand(earlier.object)), before.filter((l) => l >= '2026-10-15').map((l) => l.replace(' 09:00 ', ' 08:00 ')));
+  });
+
+  test('BYMONTHDAY: +10 giorni dentro la regola, eccezioni ferme; +2 giorni fuori regola → errore', () => {
+    const o = objectOf(
+      vevent(['DTSTART;TZID=Europe/Rome:20260110T090000', 'DTEND;TZID=Europe/Rome:20260110T100000', 'RRULE:FREQ=MONTHLY;BYMONTHDAY=10,20', 'EXDATE;TZID=Europe/Rome:20260320T090000']),
+      vevent(['RECURRENCE-ID;TZID=Europe/Rome:20260410T090000', 'DTSTART;TZID=Europe/Rome:20260411T090000', 'DTEND;TZID=Europe/Rome:20260411T100000']),
+    );
+    const span = (x: CalendarObject) => view(expand(x, D('2026-02-01'), D('2026-06-01')));
+    const r = shiftSeries(o, rome(2026, 1, 20), CTX);
+    assert.deepEqual(span(r.object), span(o));
+    assert.throws(() => shiftSeries(o, rome(2026, 1, 12), CTX), (e: unknown) => e instanceof IcsValueError && e.property === 'DTSTART');
+  });
+
+  test('MONTHLY senza BYxxx +2 giorni: le istanze seguono il DTSTART e le eccezioni anche', () => {
+    const o = objectOf(
+      vevent(['DTSTART;TZID=Europe/Rome:20260110T090000', 'DTEND;TZID=Europe/Rome:20260110T100000', 'RRULE:FREQ=MONTHLY', 'EXDATE;TZID=Europe/Rome:20260310T090000']),
+      vevent(['RECURRENCE-ID;TZID=Europe/Rome:20260410T090000', 'DTSTART;TZID=Europe/Rome:20260415T090000', 'DTEND;TZID=Europe/Rome:20260415T100000']),
+    );
+    const r = shiftSeries(o, rome(2026, 1, 12), CTX);
+    assert.equal(propLine(r.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20260312T090000');
+    assert.equal(propLine(r.object.overrides[0], 'RECURRENCE-ID'), 'RECURRENCE-ID;TZID=Europe/Rome:20260412T090000');
+    assert.deepEqual(view(expand(r.object, D('2026-02-01'), D('2026-06-01'))), ['2026-02-12 09:00 event', '2026-04-15 09:00 override', '2026-05-12 09:00 event']);
+  });
+
+  test('DAILY: +1 giorno lascia le EXDATE sulla loro data; 23:00 → 01:00 del giorno dopo le sposta di 2 ore', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20261010T230000', 'DTEND;TZID=Europe/Rome:20261010T233000', 'RRULE:FREQ=DAILY', 'EXDATE;TZID=Europe/Rome:20261015T230000']));
+    const day = shiftSeries(o, rome(2026, 10, 11, 23), CTX);
+    assert.equal(propLine(day.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261015T230000');
+    const night = shiftSeries(o, rome(2026, 10, 11, 1), CTX);
+    assert.equal(propLine(night.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261016T010000');
+    const occ = view(expand(night.object, D('2026-10-14'), D('2026-10-18')));
+    assert.deepEqual(occ, ['2026-10-14 01:00 event', '2026-10-15 01:00 event', '2026-10-17 01:00 event']);
+  });
+
+  test('un\'EXDATE che non troverebbe più un\'istanza: errore con strict, riportata e lasciata dov\'era senza', () => {
+    // Ogni due settimane lun-mar: +8 giorni sposta la griglia di una settimana; l'EXDATE di mar 27/10 non ha immagine.
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20261012T090000', 'DTEND;TZID=Europe/Rome:20261012T100000', 'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU', 'EXDATE;TZID=Europe/Rome:20261027T090000']));
+    assert.throws(() => shiftSeries(o, rome(2026, 10, 20), CTX), goneError('20261027T080000Z'));
+    const r = shiftSeries(o, rome(2026, 10, 20), CTX, { strict: false });
+    assert.deepEqual(r.staleExdates, ['20261027T080000Z']);
+    assert.equal(propLine(r.object.master!, 'EXDATE'), 'EXDATE;TZID=Europe/Rome:20261027T090000');
+  });
+});
+
 describe('tutta la serie: changeRecurrence', () => {
   test('dryRun: orfani previsti senza modifiche; applicata: EXDATE morte tolte, orfani lasciati', () => {
     const o = weekly();
@@ -396,6 +493,67 @@ describe('questa e le successive: truncateSeries e splitSeries', () => {
     assert.equal(whole.tail, null);
     assert.equal(serializeObject(whole.head), serializeObject(o));
     assert.throws(() => splitSeries(o, '20261010', { newUid: ' ' }, CTX), IcsValueError);
+  });
+});
+
+describe('questa e le successive: tagli su RDATE, orfani e prima del DTSTART (rec-02, rec-06)', () => {
+  const W = { from: D('2025-12-01'), to: D('2026-07-01') };
+  const starts = (o: CalendarObject | null): string[] => (o ? expand(o, W.from, W.to).occurrences.map((x) => localOf(x.startUtc)) : []);
+  const union = (a: CalendarObject | null, b: CalendarObject | null): string[] => [...starts(a), ...starts(b)].sort();
+
+  test('taglio su un override orfano di una MONTHLY: la coda parte dalla prima istanza della regola, l\'unione è quella di prima', () => {
+    const o = objectOf(
+      vevent(['DTSTART;TZID=Europe/Rome:20260110T090000', 'DTEND;TZID=Europe/Rome:20260110T100000', 'RRULE:FREQ=MONTHLY']),
+      vevent(['RECURRENCE-ID;TZID=Europe/Rome:20260312T090000', 'DTSTART;TZID=Europe/Rome:20260312T090000', 'DTEND;TZID=Europe/Rome:20260312T100000']),
+    );
+    const before = starts(o);
+    assert.deepEqual(before, ['2026-01-10 09:00', '2026-02-10 09:00', '2026-03-10 09:00', '2026-03-12 09:00', '2026-04-10 09:00', '2026-05-10 09:00', '2026-06-10 09:00']);
+    const s = splitSeries(o, '20260312T080000Z', { newUid: 'coda@caldes.test' }, CTX);
+    assert.equal(propLine(s.tail!.master!, 'DTSTART'), 'DTSTART;TZID=Europe/Rome:20260410T090000');
+    assert.deepEqual(union(s.head, s.tail), before);
+  });
+
+  test('taglio su una RDATE di una WEEKLY;INTERVAL=2: settimane allineate, la RDATE passa nella coda', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20260105T090000', 'DTEND;TZID=Europe/Rome:20260105T100000', 'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO', 'RDATE;TZID=Europe/Rome:20260114T090000']));
+    const before = starts(o);
+    assert.deepEqual(before.slice(0, 5), ['2026-01-05 09:00', '2026-01-14 09:00', '2026-01-19 09:00', '2026-02-02 09:00', '2026-02-16 09:00']);
+    const s = splitSeries(o, '20260114T080000Z', { newUid: 'coda@caldes.test' }, CTX);
+    assert.equal(propLine(s.tail!.master!, 'DTSTART'), 'DTSTART;TZID=Europe/Rome:20260119T090000');
+    assert.equal(propLine(s.tail!.master!, 'RDATE'), 'RDATE;TZID=Europe/Rome:20260114T090000');
+    assert.deepEqual(union(s.head, s.tail), before);
+    // Controllo: il taglio su un'istanza della regola conserva le occorrenze come prima.
+    const r = splitSeries(o, '20260119T080000Z', { newUid: 'coda2@caldes.test' }, CTX);
+    assert.deepEqual(union(r.head, r.tail), before);
+  });
+
+  test('taglio su una RDATE dopo la fine della regola: la coda non ha RRULE', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20260105T090000', 'DTEND;TZID=Europe/Rome:20260105T100000', 'RRULE:FREQ=WEEKLY;COUNT=2', 'RDATE;TZID=Europe/Rome:20260120T090000,20260127T090000']));
+    const before = starts(o);
+    const s = splitSeries(o, '20260120T080000Z', { newUid: 'coda@caldes.test' }, CTX);
+    assert.equal(getProperty(s.tail!.master!, 'RRULE'), null);
+    assert.equal(propLine(s.tail!.master!, 'DTSTART'), 'DTSTART;TZID=Europe/Rome:20260120T090000');
+    assert.deepEqual(union(s.head, s.tail), before);
+  });
+
+  test('RDATE prima del DTSTART: troncare sul DTSTART conserva la RDATE precedente invece di cancellare la risorsa', () => {
+    const o = objectOf(vevent(['DTSTART;TZID=Europe/Rome:20260110T090000', 'DTEND;TZID=Europe/Rome:20260110T100000', 'RRULE:FREQ=WEEKLY;COUNT=4', 'RDATE;TZID=Europe/Rome:20260105T090000']));
+    const before = starts(o);
+    assert.deepEqual(before, ['2026-01-05 09:00', '2026-01-10 09:00', '2026-01-17 09:00', '2026-01-24 09:00', '2026-01-31 09:00']);
+    const t = truncateSeries(o, '20260110T080000Z', CTX);
+    assert.ok(t, 'la risorsa non va cancellata');
+    assert.deepEqual(starts(t), ['2026-01-05 09:00']);
+    assert.equal(getProperty(t!.master!, 'RRULE'), null);
+    assert.equal(propLine(t!.master!, 'DTEND'), 'DTEND;TZID=Europe/Rome:20260105T100000');
+    assert.deepEqual(validateObject(t!, { tz: ROME, now: NOW }).issues.filter((i) => i.severity === 'error'), []);
+    const s = splitSeries(o, '20260110T080000Z', { newUid: 'coda@caldes.test' }, CTX);
+    assert.equal(s.wholeSeries, false);
+    assert.deepEqual(union(s.head, s.tail), before);
+    // Prima del DTSTART solo un override orfano: nessun master da tenere → errore tipizzato.
+    const orphanOnly = objectOf(
+      vevent(['DTSTART;TZID=Europe/Rome:20260110T090000', 'DTEND;TZID=Europe/Rome:20260110T100000', 'RRULE:FREQ=WEEKLY;COUNT=4']),
+      vevent(['RECURRENCE-ID;TZID=Europe/Rome:20260103T090000', 'DTSTART;TZID=Europe/Rome:20260103T090000', 'DTEND;TZID=Europe/Rome:20260103T100000']),
+    );
+    assert.throws(() => truncateSeries(orphanOnly, '20260110T080000Z', CTX), (e: unknown) => e instanceof RecurrenceTargetError && e.code === 'INVALID_TARGET');
   });
 });
 

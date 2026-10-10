@@ -39,7 +39,7 @@ import {
   stringToIcsDate,
 } from './allday';
 import { IcsValueError, type IcsWarning, toCoreError } from './errors';
-import { decodeParamValue, decodeText, encodeText, splitTextList } from './ics-text';
+import { appendAll, decodeParamValue, decodeText, encodeText, splitTextList } from './ics-text';
 import {
   type ConvertibleZone,
   DEFAULT_TZ,
@@ -152,8 +152,7 @@ export function setProperties(c: IcsComponent, name: string, props: IcsProperty[
   const idx = c.properties.findIndex((p) => p.name === n);
   const rest = c.properties.filter((p) => p.name !== n);
   const at = idx < 0 ? rest.length : c.properties.slice(0, idx).filter((p) => p.name !== n).length;
-  rest.splice(at, 0, ...props);
-  c.properties = rest;
+  c.properties = appendAll(appendAll(rest.slice(0, at), props), rest.slice(at));
 }
 
 /** Imposta una proprietà a occorrenza singola (sostituisce tutte quelle con lo stesso nome). */
@@ -211,7 +210,12 @@ export function getTextValue(c: IcsComponent, name: string): string | null {
   return p ? decodeText(p.value) : null;
 }
 
-/** Imposta una proprietà TEXT (null o stringa vuota la rimuove); conserva i parametri esistenti (LANGUAGE, ALTREP...). */
+/**
+ * Imposta una proprietà TEXT (null o stringa vuota la rimuove); conserva i
+ * parametri esistenti. Per cambiare un contenuto visibile (SUMMARY,
+ * DESCRIPTION, LOCATION) le patch usano invece patch.writeTextField, che
+ * toglie ALTREP e le rappresentazioni alternative del valore vecchio.
+ */
 export function setTextValue(c: IcsComponent, name: string, text: string | null): void {
   if (text == null || text === '') {
     removeProperties(c, name);
@@ -468,13 +472,22 @@ export function zeroDuration(): IcsDuration {
 }
 
 /** Durata RFC 5545 (PnW, PnDTnHnMnS, con segno) → IcsDuration (lancia INVALID_DURATION). */
+/**
+ * Durata nominale massima leggibile (secondi): 1000 anni. Oltre, l'aritmetica
+ * sulle date esce dall'intervallo di Date (zonedToUtc: Invalid time value) o
+ * produce istanti assurdi: la durata è illeggibile (quarantena 'invalid-value'
+ * nell'indice, IcsValueError per i lettori). validate.ts è più severa
+ * (MAX_VALID_DURATION_SECONDS) per ciò che l'API scrive.
+ */
+export const MAX_DURATION_SECONDS = 1000 * 366 * 86_400;
+
 export function parseDurationValue(raw: string, property: string | null = null): IcsDuration {
   const s = raw.trim();
   const m = DURATION_RE.exec(s);
-  if (!m || /T$/i.test(s) || !/\d/.test(s)) {
-    throw new IcsValueError('INVALID_DURATION', `Durata non valida${property ? ` in ${property}` : ''}: "${raw.slice(0, 30)}"`, { property, value: raw });
-  }
-  return {
+  const invalid = (): IcsValueError =>
+    new IcsValueError('INVALID_DURATION', `Durata non valida${property ? ` in ${property}` : ''}: "${raw.slice(0, 30)}"`, { property, value: raw.slice(0, 60) });
+  if (!m || /T$/i.test(s) || !/\d/.test(s)) throw invalid();
+  const d: IcsDuration = {
     negative: m[1] === '-',
     weeks: Number(m[2] ?? 0),
     days: Number(m[3] ?? 0),
@@ -482,6 +495,9 @@ export function parseDurationValue(raw: string, property: string | null = null):
     minutes: Number(m[5] ?? 0),
     seconds: Number(m[6] ?? 0),
   };
+  if (![d.weeks, d.days, d.hours, d.minutes, d.seconds].every((n) => Number.isSafeInteger(n))) throw invalid();
+  if (Math.abs(durationToSeconds(d)) > MAX_DURATION_SECONDS) throw invalid();
+  return d;
 }
 
 /** Forma canonica: PnW se ci sono solo settimane, altrimenti PnDTnHnMnS senza zeri; durata nulla = PT0S. */
@@ -549,9 +565,16 @@ export function timeToUtcMs(t: IcsTime, ctx: ZoneContext): number {
   }
 }
 
+/** True se l'istante è un numero rappresentabile da Date (toISOString non lancia RangeError). */
+function isIsoRepresentable(ms: number): boolean {
+  return Number.isFinite(ms) && Math.abs(ms) <= 8.64e15;
+}
+
 /** ISO UTC (toISOString) di un valore temporale. */
 export function timeToIso(t: IcsTime, ctx: ZoneContext): string {
-  return new Date(timeToUtcMs(t, ctx)).toISOString();
+  const ms = timeToUtcMs(t, ctx);
+  if (!isIsoRepresentable(ms)) throw new IcsValueError('INVALID_VALUE', 'Istante fuori intervallo', {});
+  return new Date(ms).toISOString();
 }
 
 /** Valore dello stesso tipo e della stessa zona di `like` con l'ora da muro data. */
@@ -847,7 +870,7 @@ export function readEvent(c: IcsComponent): EventView {
   const recurrenceId = fatalTime('RECURRENCE-ID');
 
   const rdates: Array<IcsTime | IcsPeriod> = [];
-  for (const p of getProperties(c, 'RDATE')) rdates.push(...readTimeListProperty(p));
+  for (const p of getProperties(c, 'RDATE')) appendAll(rdates, readTimeListProperty(p));
   const exdates: IcsTime[] = [];
   for (const p of getProperties(c, 'EXDATE')) {
     try {
@@ -880,7 +903,7 @@ export function readEvent(c: IcsComponent): EventView {
   };
 
   const categories: string[] = [];
-  for (const p of getProperties(c, 'CATEGORIES')) categories.push(...splitTextList(p.value).filter((s) => s !== ''));
+  for (const p of getProperties(c, 'CATEGORIES')) appendAll(categories, splitTextList(p.value).filter((s) => s !== ''));
 
   const uidText = getTextValue(c, 'UID');
   return {
@@ -1019,6 +1042,9 @@ export function toLegacyEventFields(c: IcsComponent, ctx: LegacyMappingContext):
     if (endMs < startMs) {
       emit({ code: 'END_BEFORE_START', message: 'Fine precedente all\'inizio: durata nulla', property: 'DTEND', uid: view.uid });
       endMs = startMs;
+    }
+    if (!isIsoRepresentable(startMs) || !isIsoRepresentable(endMs)) {
+      throw new IcsValueError('INVALID_VALUE', `${c.name} con un istante fuori intervallo`, { property: view.end ? 'DTEND' : 'DURATION' });
     }
     startIso = new Date(startMs).toISOString();
     endIso = new Date(endMs).toISOString();
@@ -1199,7 +1225,7 @@ export function buildEventFromLegacy(input: LegacyEventInput, ctx: LegacyBuildCo
     if (input.location) props.push({ name: 'LOCATION', params: [], value: encodeText(input.location) });
     if (input.url) props.push({ name: 'URL', params: [], value: input.url.replace(/[\r\n]+/g, '') });
     if (rrule) props.push({ name: 'RRULE', params: [], value: rrule });
-    if (exdateValues.length > 0) props.push(...createTimeListProperties('EXDATE', dedupeTimes(exdateValues)));
+    if (exdateValues.length > 0) appendAll(props, createTimeListProperties('EXDATE', dedupeTimes(exdateValues)));
     props.push({ name: 'STATUS', params: [], value: (input.status ?? 'confirmed').toUpperCase() });
     if (input.source) props.push({ name: X_CALDES.SOURCE, params: [], value: encodeText(input.source) });
     if (input.source_id) props.push({ name: X_CALDES.SOURCE_ID, params: [], value: encodeText(input.source_id) });

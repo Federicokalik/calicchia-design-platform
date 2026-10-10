@@ -22,7 +22,11 @@ import {
   parseCalendarObjectOrThrow,
   resolveTzid,
   resolveZone,
+  semanticFingerprint,
+  serializeObject,
   TimezoneError,
+  toLegacyEventFields,
+  expandObject,
   utcToZoned,
   vtimezoneTzid,
   windowsToIana,
@@ -113,6 +117,27 @@ describe('risoluzione dei TZID', () => {
     assert.deepEqual(resolveZone({ kind: 'floating' }, { tz: 'America/New_York' }), { zone: { kind: 'iana', iana: 'America/New_York' }, fallback: false });
     assert.deepEqual(resolveZone({ kind: 'tzid', tzid: 'Boh' }, { tz: 'Europe/Rome' }), { zone: { kind: 'iana', iana: 'Europe/Rome' }, fallback: true });
     assert.deepEqual(resolveZone({ kind: 'tzid', tzid: 'UTC' }, { tz: 'Europe/Rome' }).zone, { kind: 'utc' });
+  });
+
+  test('TZID uguali ai nomi di Object.prototype: sconosciuti, mai funzioni del prototype', () => {
+    for (const tzid of ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf', 'isPrototypeOf', '(UTC+01:00) constructor', '(UTC) __proto__', '(GMT) toString']) {
+      assert.equal(windowsToIana(tzid), null, tzid);
+      assert.deepEqual(resolveTzid(tzid), { kind: 'unknown', tzid }, tzid);
+      assert.equal(resolveZone({ kind: 'tzid', tzid }, { tz: 'Europe/Rome' }).fallback, true, tzid);
+    }
+    assert.equal(ianaName(undefined as unknown as string), null);
+    assert.equal(windowsToIana(42 as unknown as string), null);
+    // L'oggetto resta leggibile, serializzabile e con un fingerprint; l'espansione usa il fuso del calendario.
+    const obj = parseCalendarObjectOrThrow(
+      ['BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT', 'UID:proto@x', 'DTSTAMP:20260101T000000Z', 'DTSTART;TZID=constructor:20261012T090000', 'DTEND;TZID=constructor:20261012T100000', 'RRULE:FREQ=WEEKLY;COUNT=2', 'SUMMARY:x', 'END:VEVENT', 'END:VCALENDAR', ''].join('\r\n'),
+    );
+    const ctx = { tz: 'Europe/Rome', timezones: obj.timezones };
+    assert.match(semanticFingerprint(obj), /^v\d+:[0-9a-f]{64}$/);
+    assert.match(serializeObject(obj), /DTSTART;TZID=constructor:20261012T090000/);
+    assert.equal(toLegacyEventFields(obj.master as never, ctx).start_time, '2026-10-12T07:00:00.000Z');
+    const exp = expandObject(obj, { from: Date.UTC(2026, 9, 1), to: Date.UTC(2026, 11, 1), tz: 'Europe/Rome' });
+    assert.equal(exp.health, 'ok');
+    assert.equal(exp.occurrences.length, 2);
   });
 
   test('nomi IANA validi e non validi', () => {
@@ -207,6 +232,66 @@ describe('conversioni', () => {
       },
     };
     assert.throws(() => zonedToUtc(wall(2026, 1, 1, 9), broken), (err: unknown) => err instanceof TimezoneError && err.code === 'INVALID_VTIMEZONE');
+  });
+
+  test('VTIMEZONE di forma non reale (regole non annuali, BY* abbondanti, costo eccessivo) → INVALID_VTIMEZONE in poche decine di ms', () => {
+    const bomb = (rules: string[], dtstart = '19700101T000000', subs = 1): ConvertibleZone => ({
+      kind: 'custom',
+      tzid: 'Bomba',
+      vtimezone: {
+        name: 'VTIMEZONE',
+        properties: [{ name: 'TZID', params: [], value: 'Bomba' }],
+        components: Array.from({ length: subs }, () => ({
+          name: 'STANDARD',
+          properties: [
+            { name: 'DTSTART', params: [], value: dtstart },
+            { name: 'TZOFFSETFROM', params: [], value: '+0100' },
+            { name: 'TZOFFSETTO', params: [], value: '+0100' },
+            ...rules.map((r) => ({ name: 'RRULE', params: [], value: r })),
+          ],
+          components: [],
+        })),
+      },
+    });
+    const cases: Array<[string, ConvertibleZone]> = [
+      ['DAILY', bomb(['FREQ=DAILY'])],
+      ['HOURLY', bomb(['FREQ=HOURLY'])],
+      ['MINUTELY', bomb(['FREQ=MINUTELY'])],
+      ['SECONDLY', bomb(['FREQ=SECONDLY'])],
+      ['DAILY 9999', bomb(['FREQ=DAILY'], '99990101T000000')],
+      ['BY* abbondanti', bomb([`FREQ=YEARLY;BYMONTH=${Array.from({ length: 12 }, (_, i) => i + 1).join(',')};BYMONTHDAY=1,2,3;BYHOUR=0,1,2`])],
+      ['BYHOUR', bomb(['FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU;BYHOUR=2'])],
+      ['INTERVAL', bomb(['FREQ=YEARLY;INTERVAL=2;BYMONTH=3;BYDAY=-1SU'])],
+      ['64+ sottocomponenti', bomb(['FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU'], '19700101T000000', 65)],
+      ['costo dal 0001', bomb(['FREQ=YEARLY;BYMONTH=3,10;BYDAY=SU'], '00010101T000000', 4)],
+    ];
+    for (const [label, zone] of cases) {
+      const t = Date.now();
+      assert.throws(() => zonedToUtc(wall(2026, 1, 1, 9), zone), (err: unknown) => err instanceof TimezoneError && err.code === 'INVALID_VTIMEZONE', label);
+      assert.ok(Date.now() - t < 200, `${label}: ${Date.now() - t} ms`);
+    }
+    // Le forme reali passano: Outlook (DTSTART 1601, INTERVAL=1), Thunderbird, il registro.
+    const outlook = bomb(['FREQ=YEARLY;INTERVAL=1;BYDAY=-1SU;BYMONTH=10'], '16010101T030000', 2);
+    assert.equal(offsetAt(Date.UTC(2026, 0, 1), outlook), H);
+  });
+
+  test('istanti oltre la copertura (anno 2150, 9999): anno equivalente, stessi cambi d\'ora del fuso IANA, tempo limitato', () => {
+    const obj = parseCalendarObjectOrThrow(fixture('custom-tz.ics'));
+    const rome = resolveZone({ kind: 'tzid', tzid: 'Ora di Roma (personalizzata)' }, { tz: 'UTC', timezones: obj.timezones }).zone;
+    const lastSunday = (year: number, month: number): number => {
+      const d = new Date(Date.UTC(year, month, 0));
+      return d.getUTCDate() - d.getUTCDay();
+    };
+    for (const year of [2150, 2399, 2400]) {
+      for (const [month, day, hour] of [[1, 15, 9], [7, 1, 9], [3, lastSunday(year, 3), 1], [3, lastSunday(year, 3), 4], [10, lastSunday(year, 10), 0], [10, lastSunday(year, 10), 4]] as const) {
+        const w = wall(year, month, day, hour);
+        assert.equal(zonedToUtc(w, rome), zonedToUtc(w, 'Europe/Rome'), `${year}-${month}-${day} ${hour}`);
+      }
+    }
+    const t = Date.now();
+    assert.equal(iso(zonedToUtc(wall(9999, 7, 1, 9), rome)), '9999-07-01T07:00:00.000Z');
+    assert.equal(iso(zonedToUtc(wall(9999, 1, 15, 9), rome)), '9999-01-15T08:00:00.000Z');
+    assert.ok(Date.now() - t < 200, `${Date.now() - t} ms`);
   });
 
   test('getIcalTimezone per IANA e per VTIMEZONE personalizzati', () => {

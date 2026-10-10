@@ -10,7 +10,9 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 import {
   buildOverrideIndex,
+  expandObject,
   findOrphanOverrides,
+  parseCalendarObjectOrThrow,
   type IcsTime,
   type IcsZone,
   isSameOccurrence,
@@ -176,5 +178,29 @@ describe('findOrphanOverrides', () => {
     const r = findOrphanOverrides(o, ctx);
     assert.deepEqual(r.orphans, []);
     assert.deepEqual(r.shadowed, [0]);
+  });
+});
+
+describe('findOrphanOverrides ed expandObject: costo lineare negli override orfani', () => {
+  test('8000 e 32000 orfani in tempi lineari (prima O(n²): decine di secondi con 32000)', () => {
+    const build = (n: number): string => {
+      const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'BEGIN:VEVENT', 'UID:o@x', 'DTSTAMP:20260101T000000Z', 'DTSTART:20200101T090000Z', 'DTEND:20200101T100000Z', 'RRULE:FREQ=DAILY', 'END:VEVENT'];
+      for (let i = 0; i < n; i++) {
+        const d = new Date(Date.UTC(2020, 0, 1) + i * 86_400_000).toISOString().slice(0, 10).replace(/-/g, '');
+        lines.push('BEGIN:VEVENT', 'UID:o@x', 'DTSTAMP:20260101T000000Z', `RECURRENCE-ID:${d}T093000Z`, `DTSTART:${d}T110000Z`, `DTEND:${d}T120000Z`, 'END:VEVENT');
+      }
+      lines.push('END:VCALENDAR', '');
+      return lines.join('\r\n');
+    };
+    for (const n of [8000, 32_000]) {
+      const obj = parseCalendarObjectOrThrow(build(n), { objectLimits: false });
+      const t = Date.now();
+      const res = findOrphanOverrides(obj, { tz: ROME });
+      const exp = expandObject(obj, { from: Date.UTC(2025, 0, 1), to: Date.UTC(2027, 0, 1), tz: ROME });
+      const ms = Date.now() - t;
+      assert.equal(res.orphans.length, n);
+      assert.equal(exp.health, 'ok');
+      assert.ok(ms < (n === 8000 ? 3000 : 8000), `${n} orfani: ${ms} ms`);
+    }
   });
 });
