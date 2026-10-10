@@ -1,0 +1,42 @@
+{
+  "name": "@calicchia/calendar-core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nucleo iCalendar del calendario su Radicale: modello lossless, parse e serialize canonici, registro dei fusi, all-day, espansione, patch, validazione, fingerprint e trasformazione del feed",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./errors": "./src/errors.ts",
+    "./model": "./src/model.ts",
+    "./parse": "./src/parse.ts",
+    "./serialize": "./src/serialize.ts",
+    "./tz-registry": "./src/tz-registry.ts",
+    "./allday": "./src/allday.ts",
+    "./expand": "./src/expand.ts",
+    "./override-match": "./src/override-match.ts",
+    "./recurrence-ops": "./src/recurrence-ops.ts",
+    "./patch": "./src/patch.ts",
+    "./validate": "./src/validate.ts",
+    "./fingerprint": "./src/fingerprint.ts",
+    "./feed-transform": "./src/feed-transform.ts"
+  },
+  "scripts": {
+    "test": "tsx --test test/*.test.ts",
+    "test:rrule-live": "RRULE_ORACLE_LIVE=1 tsx --test test/recur-engine.test.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "fixtures:rrule-golden": "tsx test/tools/generate-rrule-golden.ts",
+    "fixtures:legacy-parity": "tsx test/tools/capture-legacy-parity.ts"
+  },
+  "dependencies": {
+    "ical.js": "2.2.1",
+    "timezones-ical-library": "2.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
