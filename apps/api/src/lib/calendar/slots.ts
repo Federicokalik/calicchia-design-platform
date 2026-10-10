@@ -5,8 +5,8 @@
  * 1) Carica event_type + schedule + slots ricorrenti + overrides.
  * 2) Espande in finestre di disponibilità UTC (DST-aware via date-fns-tz).
  * 3) Carica bookings esistenti (status confirmed) nel range.
- * 4) Carica busy times Google (se connesso).
- * 5) Per ogni finestra, sottrae intervalli busy (booking + buffer + google) e
+ * 4) Carica i busy del calendario (busy.ts, fail-closed).
+ * 5) Per ogni finestra, sottrae intervalli busy (booking + buffer + calendario) e
  *    genera slot a step `slot_increment_minutes` di durata `duration_minutes`.
  * 6) Filtra slot futuri rispettando `min_notice_hours` (clamp a now+min_notice).
  * 7) Rimuove duplicati e ordina.
@@ -14,6 +14,15 @@
  * Nota buffer: il buffer è considerato come "tempo morto attorno a un booking esistente",
  * quindi blocca slot che cadrebbero entro buffer dal booking. Il buffer NON estende gli
  * slot generati (uno slot ha sempre durata = duration_minutes esatti, non duration+buffer).
+ *
+ * Fase F2 del passaggio a Radicale (design §7, §9; contratto dei moduli
+ * docs/calendar-radicale/contracts/f2-modules.md §7.3): stessa firma di prima
+ * più `opts` in coda. `level` sceglie la garanzia del busy ('display' per le
+ * route pubbliche e i tool MCP, 'decision' dentro createBooking); `db` è la
+ * transazione della prenotazione nelle decisioni: prenotazioni, busy e
+ * capacity si leggono con la stessa connessione (la riprogrammazione vede
+ * l'originale già annullata nella propria tx). Un errore del busy si propaga
+ * (prima diventava un busy vuoto, cioè slot liberi per errore).
  */
 
 import { sql } from '../../db';
@@ -23,8 +32,9 @@ import {
   loadScheduleForEventType,
   getEventType,
 } from './availability';
-import { getLocalBusyRanges } from './local-busy';
+import { type BusyLevel, getBusyRanges } from './busy';
 import { filterSlotsByWeeklyCapacity } from './capacity';
+import type { Db } from './radicale/policy';
 import type { EventType, Slot } from './types';
 
 interface Range {
@@ -107,7 +117,16 @@ export interface ComputeSlotsResult {
   slots: Slot[];
 }
 
-export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<ComputeSlotsResult | null> {
+export interface ComputeSlotsOptions {
+  /** Garanzia del busy (default 'display'; 'decision' dentro la sezione critica di una prenotazione). */
+  level?: BusyLevel;
+  /** Connessione o transazione del chiamante (default pool principale). */
+  db?: Db;
+}
+
+export async function computeAvailableSlots(input: ComputeSlotsInput, opts: ComputeSlotsOptions = {}): Promise<ComputeSlotsResult | null> {
+  const db = opts.db ?? sql;
+  const level: BusyLevel = opts.level ?? 'display';
   const eventType = await getEventType(input.eventTypeIdOrSlug, { onlyPublic: input.onlyPublic === true });
   if (!eventType) return null;
 
@@ -135,20 +154,22 @@ export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<C
 
   // 2. Bookings esistenti — i pending (in attesa di approvazione) bloccano
   //    lo slot come i confirmed, coerentemente con la EXCLUDE constraint.
-  const bookings = await sql<{ start_time: string; end_time: string }[]>`
+  const bookings = await db<{ start_time: string; end_time: string }[]>`
     SELECT start_time, end_time FROM calendar_bookings
     WHERE status IN ('confirmed', 'pending')
       AND end_time   > ${new Date(overallStart).toISOString()}
       AND start_time < ${new Date(overallEnd).toISOString()}
   `;
 
-  // 3. Busy locali da calendar_events (sostituisce Google Calendar)
-  //    NB: quando un booking viene confermato, viene auto-creato anche un calendar_event
-  //    nel calendario 'bookings' — quindi i busy includono già automaticamente i bookings.
-  //    Li teniamo separati anche per applicare buffer_before/after specifici dell'event type.
+  // 3. Busy del calendario (busy.ts, fail-closed: un errore si propaga).
+  //    NB: con lo store legacy quando un booking viene confermato viene
+  //    auto-creato anche un calendar_event nel calendario 'bookings', che
+  //    compare fra i busy; con lo store Radicale le proiezioni booking-* ne
+  //    escono (design §9). Le prenotazioni restano separate per applicare
+  //    buffer_before/after specifici dell'event type.
   const localBusy = input.includeGoogleBusy === false
     ? []
-    : await getLocalBusyRanges(new Date(overallStart).toISOString(), new Date(overallEnd).toISOString());
+    : await getBusyRanges(new Date(overallStart).toISOString(), new Date(overallEnd).toISOString(), { level, db });
 
   // 4. Costruisci array busy con buffer applicato ai bookings
   const bufBeforeMs = eventType.buffer_before_minutes * 60_000;
@@ -201,7 +222,7 @@ export async function computeAvailableSlots(input: ComputeSlotsInput): Promise<C
   const slotsList: Slot[] = finalSlots
     .map((r) => ({ start: fromMs(r.start), end: fromMs(r.end) }))
     .sort((a, b) => a.start.localeCompare(b.start));
-  const capacityFilteredSlots = await filterSlotsByWeeklyCapacity(slotsList, eventType.duration_minutes);
+  const capacityFilteredSlots = await filterSlotsByWeeklyCapacity(slotsList, eventType.duration_minutes, { db, level });
 
   // Raggruppa per data nel timezone
   const tz = sched.schedule.timezone;

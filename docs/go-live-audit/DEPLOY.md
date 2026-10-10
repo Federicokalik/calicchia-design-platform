@@ -13,7 +13,7 @@ Guida operativa creata nella **Wave 7** dell'audit go-live. Target: VPS con **Do
 | `.dockerignore` | Riduce il build context |
 | `docker-compose.prod.yml` | Stack di produzione Dokploy-compatibile (Traefik labels, volumi) |
 | `.github/workflows/ci.yml` | CI: typecheck + lint + build di tutti i workspace + smoke e2e API |
-| `scripts/backup-db.sh` / `restore-db.sh` | Backup/restore Postgres con retention |
+| `scripts/backup-db.sh` / `restore-db.sh` | Backup/restore Postgres con retention. Dalla fase F1 del calendario `backup-db.sh` delega a `scripts/backup-calendar-stack.sh` (vedi "Backup DB off-site" sotto) |
 | `.env.prod.example` | Template env di produzione |
 | `apps/sito-v3/next.config.ts` | Patch: aggiunto `output: 'standalone'` |
 
@@ -36,6 +36,9 @@ Guida operativa creata nella **Wave 7** dell'audit go-live. Target: VPS con **Do
    `DATABASE_URL` impostata, `pnpm --filter @caldes/api migrate`.
 8. **Backup:** aggiungi un cron sul VPS — `0 3 * * * cd /repo && ./scripts/backup-db.sh`.
    Con le env `S4_*` impostate il backup viene anche copiato off-site su MEGA S4.
+   Dalla fase F1 del calendario il backup è quello coordinato di
+   `scripts/backup-calendar-stack.sh` (database più volume di Radicale, ogni 6 h):
+   cron, variabili e alert in `docs/portainer-cloudpanel.md` §10.
 
 ## Object storage (MEGA S4)
 
@@ -46,9 +49,20 @@ Provider S3-compatible unico del progetto. Configurato via le env `S4_*`
   (`aws s3 cp pricing_knowledge_base.md s3://$S4_BUCKET/kb/ --endpoint-url $S4_ENDPOINT`).
   Al boot `kb-bootstrap.ts` li scarica in `/data/kb` (`KB_DIR`) prima di
   `assertKBsValid()`. Senza `S4_*` l'API legge i KB da disco (solo dev).
-- **Backup DB off-site.** `backup-db.sh`, con `S4_*` impostate, carica il dump su
-  `s3://$S4_BUCKET/db/`. Restore: `./scripts/restore-db.sh s3://$S4_BUCKET/db/<file>`.
-- **Backup immagini off-site.** `backup-db.sh` sincronizza `UPLOAD_DIR` su
+- **Backup DB off-site.** Dalla fase F1 del calendario `backup-db.sh` delega a
+  `scripts/backup-calendar-stack.sh`: ogni run è una cartella
+  `$BACKUP_DIR/calendar-stack/<id>/` con `caldes-db.sql.gz` (lo stesso SQL plain
+  compresso di prima), lo snapshot del volume di Radicale se c'è e `manifest.json`,
+  copiata su `s3://$S4_BUCKET/calendar-stack/<id>/` (retention 30 giorni, anche su S4).
+  - Restore coordinato (database e volume, con verifica di checksum e identità):
+    `./scripts/restore-calendar-stack.sh --only db|volume|all <run | latest | s3://$S4_BUCKET/calendar-stack/<id>/>`
+    (procedura in `apps/radicale/README.md`, "Restore coordinato").
+  - Solo il database, come prima:
+    `./scripts/restore-db.sh s3://$S4_BUCKET/calendar-stack/<id>/caldes-db.sql.gz`.
+  - **Attenzione:** `s3://$S4_BUCKET/db/` contiene solo i dump precedenti alla F1 e non
+    riceve più nulla (né retention): il dump più recente sta sempre in
+    `calendar-stack/`. Non ripristinare da `db/` senza aver controllato la data.
+- **Backup immagini off-site.** `backup-db.sh` (e `backup-calendar-stack.sh`) sincronizza `UPLOAD_DIR` su
   `s3://$S4_BUCKET/uploads/`. Poiché in produzione gli upload sono nel volume Docker
   `uploads_data`, lo script di backup deve poter leggere quei file: o si esegue da un
   container che monta `uploads_data`, oppure si imposta `UPLOAD_DIR` sul path host del

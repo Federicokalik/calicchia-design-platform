@@ -18,6 +18,14 @@ import { SEED_CALENDAR_SLUGS, SEED_EVENT_TYPE_SLUGS, sql } from '../helpers/db';
 import type { BookingFixture, SeriesFixture } from '../helpers/fixtures';
 import { createNormalizer, type SnapshotNormalizer } from '../helpers/normalize';
 import type { CalendarEvent } from '../../src/lib/calendar/types';
+import { isRadicaleBackend } from '../helpers/calendar-backend';
+import {
+  storeCalendarEventRows,
+  storeEventRows,
+  storeOverrideRows,
+  storeProjectionRows,
+  storeSubscriptionEventRows,
+} from '../helpers/calendar-rows';
 
 // ─── Alias ───────────────────────────────
 
@@ -41,10 +49,18 @@ export class AdminAliases {
     this.add(event.uid, `uid:${key}`);
   }
 
-  /** Serie: master più override con le chiavi indicate (nello stesso ordine). */
+  /**
+   * Serie: master più override con le chiavi indicate (nello stesso ordine).
+   * Con lo store Radicale un override ha l'UID del master (RFC 5545, design
+   * §12 differenza ammessa 1): il suo uid resta con l'alias del master.
+   */
   series(key: string, series: SeriesFixture, overrideKeys: string[] = []): void {
     this.event(key, series.master);
-    series.overrides.forEach((ov, i) => this.event(overrideKeys[i] ?? `${key}-override-${i + 1}`, ov));
+    series.overrides.forEach((ov, i) => {
+      const overrideKey = overrideKeys[i] ?? `${key}-override-${i + 1}`;
+      if (ov.uid === series.master.uid) this.add(ov.id, `ev:${overrideKey}`);
+      else this.event(overrideKey, ov);
+    });
   }
 
   /** Prenotazione: id → `bk-id:<key>`, uid pubblico → `bk:<key>`, più la proiezione se c'è. */
@@ -108,6 +124,10 @@ type Row = Record<string, unknown>;
 
 /** Righe di calendar_events (colonne che decidono il comportamento), nell'ordine degli id; le assenti come `{ id, deleted: true }`. */
 export async function eventRows(ids: string[]): Promise<Row[]> {
+  if (isRadicaleBackend()) {
+    return storeEventRows(ids, ['calendar', 'id', 'uid', 'summary', 'description', 'location', 'url', 'start_time', 'end_time',
+      'all_day', 'rrule', 'exdates', 'recurrence_id', 'recurrence_master_id', 'source', 'source_id', 'status']);
+  }
   const rows = await sql<Row[]>`
     SELECT c.slug AS calendar, e.id, e.uid, e.summary, e.description, e.location, e.url,
            e.start_time, e.end_time, e.all_day, e.rrule, e.exdates, e.recurrence_id,
@@ -122,6 +142,10 @@ export async function eventRows(ids: string[]): Promise<Row[]> {
 
 /** Tutte le righe di un calendario (master, singoli e override), in ordine stabile. */
 export async function calendarEventRows(calendarId: string): Promise<Row[]> {
+  if (isRadicaleBackend()) {
+    return storeCalendarEventRows(calendarId, ['id', 'uid', 'summary', 'start_time', 'end_time', 'all_day', 'rrule', 'exdates',
+      'recurrence_id', 'recurrence_master_id', 'source', 'source_id', 'status']);
+  }
   return [...await sql<Row[]>`
     SELECT id, uid, summary, start_time, end_time, all_day, rrule, exdates, recurrence_id,
            recurrence_master_id, source, source_id, status
@@ -133,6 +157,7 @@ export async function calendarEventRows(calendarId: string): Promise<Row[]> {
 
 /** Override di una serie, ordinati per recurrence_id. */
 export async function overrideRows(masterId: string): Promise<Row[]> {
+  if (isRadicaleBackend()) return storeOverrideRows(masterId, ['id', 'calendar_id', 'summary', 'start_time', 'end_time', 'recurrence_id', 'status']);
   return [...await sql<Row[]>`
     SELECT id, calendar_id, summary, start_time, end_time, recurrence_id, status
     FROM calendar_events
@@ -143,6 +168,10 @@ export async function overrideRows(masterId: string): Promise<Row[]> {
 
 /** Proiezioni (calendar_events con source 'booking') delle prenotazioni indicate, per uid. */
 export async function projectionRows(bookingUids: string[]): Promise<Row[]> {
+  if (isRadicaleBackend()) {
+    return storeProjectionRows(bookingUids, ['calendar', 'id', 'summary', 'description', 'location', 'url', 'start_time', 'end_time',
+      'source', 'source_id', 'status']);
+  }
   return [...await sql<Row[]>`
     SELECT c.slug AS calendar, e.id, e.summary, e.description, e.location, e.url,
            e.start_time, e.end_time, e.source, e.source_id, e.status
@@ -192,6 +221,10 @@ export async function subscriptionRow(id: string): Promise<Row | null> {
 
 /** Eventi importati da un'iscrizione (source ics_pull), in ordine stabile. */
 export async function subscriptionEventRows(subscriptionId: string): Promise<Row[]> {
+  if (isRadicaleBackend()) {
+    return storeSubscriptionEventRows(subscriptionId, ['summary', 'start_time', 'end_time', 'all_day', 'rrule', 'exdates',
+      'recurrence_id', 'source', 'source_id', 'status']);
+  }
   return [...await sql<Row[]>`
     SELECT summary, start_time, end_time, all_day, rrule, exdates, recurrence_id, source, source_id, status
     FROM calendar_events

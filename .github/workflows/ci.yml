@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck — api
         run: pnpm --filter @calicchia/api typecheck
 
+      - name: Typecheck — calendar-core
+        run: pnpm --filter @calicchia/calendar-core typecheck
+
       - name: Typecheck — mcp
         run: pnpm --filter @calicchia/mcp typecheck
 
@@ -98,7 +101,8 @@ jobs:
   # Test dell'API (node:test eseguito da tsx, vedi apps/api/test/README.md)
   # contro un Postgres 17 effimero: smoke dell'infrastruttura, contratti e casi
   # del calendario. Qui le suite che richiedono Radicale vengono saltate (con il
-  # motivo): girano nel job calendar-integration.
+  # motivo): girano nel job calendar-integration. Prima, senza servizi, i test
+  # di @calicchia/calendar-core (parse, serialize, espansione, patch, feed).
   api-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -114,7 +118,7 @@ jobs:
           --health-cmd "pg_isready -U caldes -d caldes_test"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f0'.
+      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f<N>'.
       TEST_DATABASE_URL: postgresql://caldes:caldes@localhost:5432/caldes_test
     steps:
       - uses: actions/checkout@v4
@@ -124,6 +128,10 @@ jobs:
           node-version: 22.12.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Senza database né Radicale (circa 6 s): l'oracolo dateutil è
+      # precalcolato in test/fixtures/rrule-golden.json.
+      - name: Test di @calicchia/calendar-core
+        run: pnpm --filter @calicchia/calendar-core test
       # Senza database: segnala subito una modifica alla lista vincolante dei
       # tool MCP di calendario (il test di contratto la confronta comunque).
       - name: Contratto MCP (schema dei tool di calendario)
@@ -138,12 +146,18 @@ jobs:
 
   # Integrazione del calendario con un Radicale 3.7.8 reale (pin del design
   # §3.1, harness F0 in apps/api/test/helpers/radicale.ts): smoke CalDAV,
-  # limitazioni di vobject, plugin di autenticazione contro il mock di
-  # verify-credentials e inventario in sola lettura. In F2 diventa la matrice
-  # CALENDAR_BACKEND=postgres|radicale del design §15.
+  # limitazioni di vobject, plugin caldes_auth e caldes_rights del repository
+  # (pytest e lato API), client di servizio e control-plane, end-to-end del
+  # criterio di uscita della F1 (config di produzione, verify-credentials
+  # dell'API vera), inventario in sola lettura e i moduli della F2 contro
+  # Radicale reale (sync, rebuild dell'indice, RadicaleStore, decisioni di
+  # prenotazione, consumatori, specchio delle iscrizioni). In più la matrice
+  # CALENDAR_BACKEND=radicale dei contratti F0 (design §15): le stesse suite
+  # del job api-tests (che le esegue su PgLegacyStore) girano su RadicaleStore
+  # con Radicale reale; le differenze ammesse sono in allowed-diffs.json.
   calendar-integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17-alpine
@@ -156,7 +170,7 @@ jobs:
           --health-cmd "pg_isready -U caldes -d caldes_test"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f0'.
+      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f<N>'.
       TEST_DATABASE_URL: postgresql://caldes:caldes@localhost:5432/caldes_test
       # Senza Radicale i test falliscono invece di essere saltati.
       RADICALE_REQUIRED: '1'
@@ -171,18 +185,32 @@ jobs:
         with:
           python-version: '3.13'
       # Venv fuori dal repository; il mock di verify-credentials usa il python
-      # dello stesso venv (RADICALE_PYTHON non serve). Il peer 127.0.0.2 dei test
-      # di F1 funziona sul loopback /8 del runner, senza reti Docker dedicate.
+      # dello stesso venv (RADICALE_PYTHON non serve). I peer 127.0.0.2 e
+      # 127.0.0.3 dei test di F1 funzionano sul loopback /8 del runner, senza
+      # reti Docker dedicate. pytest serve ai test dei plugin.
       - name: Radicale 3.7.8 (venv)
         run: |
           python -m venv "$RUNNER_TEMP/radicale-venv"
-          "$RUNNER_TEMP/radicale-venv/bin/pip" install --disable-pip-version-check --no-input 'radicale==3.7.8' 'vobject==0.9.9'
+          "$RUNNER_TEMP/radicale-venv/bin/pip" install --disable-pip-version-check --no-input 'radicale==3.7.8' 'vobject==0.9.9' 'pytest==9.1.1'
           test "$("$RUNNER_TEMP/radicale-venv/bin/radicale" --version)" = "3.7.8"
           echo "RADICALE_BIN=$RUNNER_TEMP/radicale-venv/bin/radicale" >> "$GITHUB_ENV"
+          echo "RADICALE_VENV=$RUNNER_TEMP/radicale-venv" >> "$GITHUB_ENV"
+      # Gli stessi test del workflow dell'immagine (build-radicale-image.yml),
+      # qui anche sulle PR che toccano solo l'API: il contratto del
+      # control-plane e il mock di verify-credentials sono condivisi.
+      - name: Test dei plugin di Radicale (pytest)
+        env:
+          PYTHONPATH: ${{ github.workspace }}/apps/radicale/plugins
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          "$RADICALE_VENV/bin/python" apps/radicale/plugins/caldes_selftest.py apps/radicale/config/config
+          "$RADICALE_VENV/bin/pytest" -p no:cacheprovider -ra apps/radicale/tests
       - run: pnpm install --frozen-lockfile
       - name: Migrazioni
         run: pnpm --filter @calicchia/api test:migrate
       - name: Typecheck dei test
         run: pnpm --filter @calicchia/api typecheck:test
-      - name: Test di integrazione (Radicale reale, mock di verify-credentials, inventario)
+      - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2)
         run: pnpm --filter @calicchia/api test:integration
+      - name: Contratti F0 su RadicaleStore (matrice CALENDAR_BACKEND=radicale)
+        run: pnpm --filter @calicchia/api test:contracts:radicale

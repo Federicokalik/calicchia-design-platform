@@ -1,10 +1,11 @@
 {
   "$comment": [
     "Differenze ammesse fra la baseline dei contratti F0 (PgLegacyStore, codice attuale) e gli store successivi (RadicaleStore da F2).",
-    "In F0 l'elenco attivo 'diffs' è vuoto: ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione.",
+    "Ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione. Dalla F2 'diffs' contiene le correzioni comuni ai due store (voci senza 'stores': agenda del device sul giorno di Roma con le serie espanse) e le differenze del solo RadicaleStore previste dal design (stores: ['radicale']), provate con CALENDAR_BACKEND=radicale.",
     "Letto e validato da test/contracts/_json-contract.ts (loadAllowedDiffs): un campo sconosciuto o mancante fa fallire i test, invece di ammettere differenze per errore.",
     "Una voce copre una differenza se coincidono contract, case (glob sull'id del caso: '*' non attraversa '/', '**' sì), path (JSON Pointer con '*' per un segmento e '**' per zero o più), kind se indicato e lo store corrente (CALENDAR_BACKEND, default 'postgres') se 'stores' è indicato.",
-    "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste."
+    "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste.",
+    "La voce prevista 'descrizione-proiezioni-ricomposta' (design §12, differenze ammesse, punto 4; decisione 3) è implementata (lib/calendar/projection-descriptions.ts: list_events e update_event dell'MCP; elenco, dettaglio, modifica e duplicazione dell'admin) e non è più in 'planned': con lo store Radicale admin e MCP ricompongono la descrizione delle proiezioni dai dati correnti di calendar_bookings con il template di booking.ts, che sui casi dei contratti coincide con il testo legacy scritto alla prenotazione. Non c'è quindi una voce in 'diffs': servirebbe solo per un caso che cambi i dati del cliente dopo la proiezione (lì il legacy mostra il testo vecchio)."
   ],
   "version": 1,
   "format": {
@@ -18,37 +19,604 @@
     "design_ref": "riferimento al design, es. 'design.md §12, differenze ammesse, punto 1'",
     "added_in": "opzionale: fase in cui è stata introdotta, es. 'F2'"
   },
-  "planned": [
+  "planned": [],
+  "diffs": [
     {
-      "id": "override-uid-del-master",
-      "contract": "mcp-calendar-tools",
-      "summary": "Gli override espongono l'UID del master (RFC 5545) invece di un uid proprio.",
-      "design_ref": "design.md §12, differenze ammesse, punto 1"
+      "id": "agenda-device-eventi-espansi-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/events/**",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: l'elenco degli eventi.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'; contratto f2-modules §9",
+      "added_in": "F2"
     },
     {
-      "id": "allday-iscrizioni-mezzanotte-roma",
-      "contract": "mcp-calendar-tools",
-      "summary": "Gli all-day delle iscrizioni passano dalla mezzanotte UTC alla mezzanotte di Roma.",
-      "design_ref": "design.md §12, differenze ammesse, punto 2"
+      "id": "agenda-device-next-event-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/next_event/**",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: next_event, primo evento timed non finito dell'elenco corretto.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
     },
     {
-      "id": "iscrizioni-insieme-completo",
-      "contract": "mcp-calendar-tools",
-      "summary": "Le iscrizioni mostrano l'insieme completo degli eventi (fix di parseIcs) invece del sottoinsieme bacato.",
-      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'"
+      "id": "agenda-device-last-event-end-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/last_event_end",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: last_event_end, fine dell'ultimo evento timed dell'elenco corretto.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
     },
     {
-      "id": "descrizione-proiezioni-ricomposta",
-      "contract": "mcp-calendar-tools",
-      "summary": "La descrizione delle proiezioni delle prenotazioni si ricompone dai dati correnti di calendar_bookings.",
-      "design_ref": "design.md §12, differenze ammesse, punto 4; decisione 3"
+      "id": "agenda-device-data-di-default-roma",
+      "contract": "device-agenda",
+      "case": "agenda/data-di-default",
+      "path": "/body/date",
+      "kind": "changed",
+      "reason": "Senza il parametro date l'agenda mostra oggi nel fuso di Europe/Rome invece della data UTC: alle 00:30 di Roma dell'11 marzo è l'11, non il 10.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-annullata-rimossa",
+      "contract": "public-calendar",
+      "case": "manage/*",
+      "path": "/effects/**/projections/*",
+      "kind": "removed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale la proiezione di una prenotazione è la risorsa booking-<uid>.ics della collezione Prenotazioni, scritta dal job project_booking con lo stato desiderato calcolato da calendar_bookings: per una prenotazione annullata (o riprogrammata) la risorsa viene tolta. Lo store legacy lasciava invece la riga di calendar_events con status 'cancelled'. Nessun effetto per i client: le occorrenze cancellate non compaiono comunque in elenchi, busy e feed.",
+      "design_ref": "design.md §9 'Proiezione delle prenotazioni' (cancellazione e riprogrammazione: DELETE della vecchia risorsa); contratto f2-modules §7.4",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-riprogrammata-url-ricalcolato",
+      "contract": "public-calendar",
+      "case": "manage/reschedule",
+      "path": "/effects/riprogrammata/projections/*/url",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il job project_booking ricalcola sempre il link della riunione (resolveLocationForBooking), quindi la proiezione della prenotazione riprogrammata ha l'URL della riunione. Lo store legacy lo perdeva (url null), bug noto. La correzione vale solo per lo store Radicale, cioè dopo il cutover.",
+      "design_ref": "design.md §14 'meetingUrl null in riprogrammazione e approvazione → Ricalcolo sempre'; §9 'Proiezione delle prenotazioni'",
+      "added_in": "F2"
+    },
+    {
+      "id": "riprogrammazione-sovrapposta-accettata",
+      "contract": "public-calendar",
+      "case": "manage/reschedule-409-sovrapposta-originale",
+      "path": "/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale la riprogrammazione su uno slot sovrapposto all'originale è accettata (200 con la nuova prenotazione, originale annullata e senza proiezione): la decisione legge busy e capacity con db: tx, dove l'originale è già annullata, e le proiezioni booking-* sono fuori dal busy. Lo store legacy rispondeva 409 (bug noto). Il test verifica sullo store Radicale stato, prenotazioni e proiezioni del nuovo comportamento.",
+      "design_ref": "design.md §9 'Proiezioni fuori dal busy'; §14 'Riprogrammazione che legge fuori dalla transazione e resta bloccata dalla vecchia proiezione'; §15 'Prenotazioni'; piano F2 'Test'",
+      "added_in": "F2"
+    },
+    {
+      "id": "feed-etag-dal-corpo",
+      "contract": "feed",
+      "case": "feed/*",
+      "path": "/headers/etag",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il feed ha l'ETag = sha256 del corpo generato, con 304 su If-None-Match (la cache è per index_version della collezione, versione del sidecar e data di Roma). Lo store legacy non mandava ETag. Il valore cambia con il contenuto: nello snapshot resta null, il test ne verifica la forma e il 304.",
+      "design_ref": "design.md §10 'Feed', ETag; §14 'Feed'; piano F2 'Test: Feed'",
+      "added_in": "F2"
+    },
+    {
+      "id": "feed-dall-indice-della-collezione",
+      "contract": "feed",
+      "case": "feed/*",
+      "path": "/ics/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il feed si genera dagli oggetti iCalendar dell'indice della collezione invece che dalle righe di calendar_events, con le correzioni del design: override nella risorsa del master con lo stesso UID (subito dopo il master), occorrenze cancellate come EXDATE, override di un master cancellato esclusi, DTSTAMP stabile (LAST-MODIFIED o first_seen_at), proprietà dell'oggetto della whitelist (CREATED, LAST-MODIFIED, SEQUENCE) nell'ordine dell'oggetto, timed nel fuso dell'oggetto (il fuso del calendario per gli eventi creati dall'API) con il suo VTIMEZONE, UID deterministici delle festività (it-holiday-YYYY-MM-DD@caldes.it) e delle proiezioni (<uid>@caldes.it), descrizione delle proiezioni secondo la decisione 3 (telefono e link all'admin, niente email). Le righe cambiano posizione, quindi la voce copre il corpo: ogni punto è verificato dal ramo Radicale del caso nel test.",
+      "design_ref": "design.md §10 'Feed' (generazione, filtri, UID, DTSTAMP, privacy); §5 'UID e href' e 'Fusi'; §14 'Feed: override cancellati che ricompaiono, UID degli override diversi'; decisione 3",
+      "added_in": "F2"
     },
     {
       "id": "eccezioni-dst-riallineate",
       "contract": "mcp-calendar-tools",
-      "summary": "Le occorrenze delle eccezioni riallineate da DST_SHIFTED_EXCEPTION (EXDATE e override con l'ora UTC del DTSTART) non ricompaiono più.",
-      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2"
+      "case": "get_calendar_today/giorno-festivo",
+      "path": "/output/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: gli eventi di Pasquetta.",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "eccezioni-dst-riallineate-elenco",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/se*",
+      "path": "/output/events/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: list_events della settimana e della serie attraverso il cambio d'ora (il caso 'serie-dst-per-id' ne verifica le occorrenze). Nello stesso elenco cambiano anche l'UID dell'override 'Standup posticipato' (voce override-uid-del-master), l'all-day dell'iscrizione (voce allday-iscrizioni-mezzanotte-roma) e l'uid degli eventi dell'iscrizione (UID remoto).",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "eccezioni-dst-riallineate-elenco-conteggio",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/se*",
+      "path": "/output/count",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: list_events della settimana e della serie attraverso il cambio d'ora (il caso 'serie-dst-per-id' ne verifica le occorrenze). Nello stesso elenco cambiano anche l'UID dell'override 'Standup posticipato' (voce override-uid-del-master), l'all-day dell'iscrizione (voce allday-iscrizioni-mezzanotte-roma) e l'uid degli eventi dell'iscrizione (UID remoto).",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2",
+      "kind": "changed"
+    },
+    {
+      "id": "eccezioni-dst-riallineate-finestre-libere",
+      "contract": "mcp-calendar-tools",
+      "case": "find_free_slots/*",
+      "path": "/output/free_slots/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: la finestra libera del 1° aprile parte alle 07:00Z invece che alle 07:15Z.",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "eccezioni-dst-riallineate-disponibilita",
+      "contract": "mcp-calendar-tools",
+      "case": "get_calendar_availability/*",
+      "path": "/output/slots_by_date/2027-04-01/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: lo slot del 1° aprile alle 07:00Z torna libero (per il tipo pubblico e per quello privato).",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "eccezioni-dst-riallineate-disponibilita-conteggio",
+      "contract": "mcp-calendar-tools",
+      "case": "get_calendar_availability/*",
+      "path": "/output/slots_count",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le eccezioni della serie 'Standup' sono quelle riallineate sulla griglia della serie, come le scrive la migrazione con l'anomalia DST_SHIFTED_EXCEPTION (riallineamento attivo di default; RadicaleStore rifiuta un override fuori regola con 409): l'EXDATE del 1° aprile toglie l'occorrenza delle 07:00Z e l'override del 29 marzo sostituisce l'occorrenza regolare invece di comparirle accanto come orfano. Cambiano quindi gli eventi del 29 marzo e del 1° aprile e ciò che ne deriva (conteggi, finestre libere, slot). Qui: lo slot del 1° aprile alle 07:00Z torna libero (per il tipo pubblico e per quello privato).",
+      "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2",
+      "added_in": "F2",
+      "kind": "changed"
+    },
+    {
+      "id": "override-uid-del-master",
+      "contract": "mcp-calendar-tools",
+      "case": "update_event/override",
+      "path": "/output/event/uid",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale un override sta nella risorsa del master e ne ha l'UID con RECURRENCE-ID (RFC 5545), invece di un uid proprio: il DTO dell'override espone l'UID del master.",
+      "design_ref": "design.md §12, differenze ammesse, punto 1",
+      "added_in": "F2"
+    },
+    {
+      "id": "list-events-serie-intera-nell-orizzonte",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/tetto-occorrenze",
+      "path": "/output/count",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale le occorrenze vengono dall'indice, che materializza fino a 5000 occorrenze per oggetto nell'orizzonte (budget di 200k iterazioni): la serie oraria da 600 occorrenze arriva intera. Lo store legacy si fermava a 500 per serie e per query (tetto di expandRRule).",
+      "design_ref": "design.md §6.4 'tetto contato nell'orizzonte'; §7 'query per sovrapposizione'; §14 'expandRRule.between perde gli eventi in corso'",
+      "added_in": "F2"
+    },
+    {
+      "id": "list-events-serie-intera-nell-orizzonte-ultima",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/tetto-occorrenze",
+      "path": "/output/last/**",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Stessa causa della voce list-events-serie-intera-nell-orizzonte: l'ultima occorrenza restituita è la 600ª (1° luglio 21:00Z) invece della 500ª.",
+      "design_ref": "design.md §6.4; §14",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-annullata-rimossa-mcp",
+      "contract": "mcp-calendar-tools",
+      "case": "*_booking/*",
+      "path": "/effects/**/projections/*",
+      "kind": "removed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale la proiezione di una prenotazione annullata o riprogrammata viene tolta (risorsa booking-<uid>.ics assente, stato desiderato calcolato dal job project_booking); la riga legacy restava con status 'cancelled'. Vedi la voce proiezione-annullata-rimossa del contratto del sito.",
+      "design_ref": "design.md §9 'Proiezione delle prenotazioni'; contratto f2-modules §7.4",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-annullata-rimossa-mcp-alias",
+      "contract": "mcp-calendar-tools",
+      "case": "*_cal_booking/*",
+      "path": "/effects/**/projections/*",
+      "kind": "removed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come proiezione-annullata-rimossa-mcp, per gli alias update_cal_booking e cancel_cal_booking.",
+      "design_ref": "design.md §9 'Proiezione delle prenotazioni'",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-riprogrammata-url-ricalcolato-mcp",
+      "contract": "mcp-calendar-tools",
+      "case": "*/*",
+      "path": "/effects/*/projections/*/url",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il job project_booking ricalcola il link della riunione anche per la prenotazione riprogrammata; lo store legacy lo perdeva (url null, bug noto). Vedi la voce proiezione-riprogrammata-url-ricalcolato del contratto del sito.",
+      "design_ref": "design.md §14 'meetingUrl null in riprogrammazione e approvazione → Ricalcolo sempre'",
+      "added_in": "F2"
+    },
+    {
+      "id": "elimina-questa-come-exdate-mcp",
+      "contract": "mcp-calendar-tools",
+      "case": "delete_event/override",
+      "path": "/effects/0/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale 'elimina questa' su un override è un EXDATE del master più la rimozione dell'override dalla risorsa: la posizione dell'override non esiste più ({deleted: true}). Lo store legacy lo lasciava come riga con status 'cancelled'. L'occorrenza resta soppressa in entrambi i casi.",
+      "design_ref": "design.md §8 'Ricorrenze: Elimina questa'; §14 'Feed: override cancellati che ricompaiono'",
+      "added_in": "F2"
+    },
+    {
+      "id": "override-uid-del-master-elenco",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/override-eredita-location-url",
+      "path": "/output/events/*/uid",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come override-uid-del-master: in list_events l'override spostato del 'Corso serale' espone l'UID del master.",
+      "design_ref": "design.md §12, differenze ammesse, punto 1",
+      "added_in": "F2"
+    },
+    {
+      "id": "allday-iscrizioni-mezzanotte-roma",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/iscrizione",
+      "path": "/output/events/*/start_time",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale un all-day di un'iscrizione è VALUE=DATE nell'indice e nei JSON legacy esce alla mezzanotte di Europe/Rome con all_day=true, come tutti gli all-day; lo store legacy lo salvava alla mezzanotte UTC (parseIcs).",
+      "design_ref": "design.md §12, differenze ammesse, punto 2; §5 'All-day'",
+      "added_in": "F2"
+    },
+    {
+      "id": "allday-iscrizioni-mezzanotte-roma-fine",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/iscrizione",
+      "path": "/output/events/*/end_time",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come allday-iscrizioni-mezzanotte-roma, per la fine esclusiva dell'all-day.",
+      "design_ref": "design.md §12, differenze ammesse, punto 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "getevent-uid-con-forma-di-uuid",
+      "contract": "mcp-calendar-tools",
+      "case": "update_event/uid-con-forma-di-uuid",
+      "path": "/output/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale getEvent usa il resolver in quattro passi (id, UID esatto, legacy_uid, UID con o senza @dominio): un UID con la forma di un UUID che non è un id si trova per UID, quindi update_event lo modifica. Lo store legacy lo cercava solo come id e rispondeva 'Evento non trovato' (bug noto).",
+      "design_ref": "design.md §5 'getEvent(id_or_uid)'; §14 'getEvent scambia un UID con forma di UUID per un id'",
+      "added_in": "F2"
+    },
+    {
+      "id": "list-events-occorrenza-in-corso",
+      "contract": "mcp-calendar-tools",
+      "case": "list_events/occorrenza-in-corso",
+      "path": "/output/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale list_events interroga l'indice per sovrapposizione su span: l'occorrenza della 'Palestra' già iniziata prima di `from` (16:00-17:00Z, finestra dalle 16:30Z) è restituita. Lo store legacy la perdeva perché l'espansione partiva da `from` (bug noto).",
+      "design_ref": "design.md §7 'query per sovrapposizione'; §14 'expandRRule.between perde gli eventi in corso'",
+      "added_in": "F2"
+    },
+    {
+      "id": "override-uid-del-master-admin",
+      "contract": "admin-calendar-v1",
+      "case": "events/*",
+      "path": "/body/event/uid",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale un override sta nella risorsa del master e ne ha l'UID con RECURRENCE-ID (RFC 5545): il DTO dell'override (dettaglio, eccezione) espone l'UID del master invece di un uid proprio.",
+      "design_ref": "design.md §12, differenze ammesse, punto 1; §5 'Override migrati'",
+      "added_in": "F2"
+    },
+    {
+      "id": "override-uid-del-master-admin-elenco",
+      "contract": "admin-calendar-v1",
+      "case": "events/list-*",
+      "path": "/body/events/*/uid",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come override-uid-del-master-admin, per le occorrenze override nell'elenco GET /events.",
+      "design_ref": "design.md §12, differenze ammesse, punto 1",
+      "added_in": "F2"
+    },
+    {
+      "id": "sposta-serie-con-i-suoi-override",
+      "contract": "admin-calendar-v1",
+      "case": "events/update-calendario",
+      "path": "/effects/override/*/calendar_id",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il cambio di calendario di una serie è un MOVE della risorsa, che contiene anche gli override: l'override segue il master nel calendario di destinazione. Lo store legacy lo lasciava orfano nel calendario di partenza (bug noto).",
+      "design_ref": "design.md §8 'Sposta: MOVE'; §14 'Override orfani'",
+      "added_in": "F2"
+    },
+    {
+      "id": "elimina-questa-come-exdate-admin",
+      "contract": "admin-calendar-v1",
+      "case": "events/delete-override",
+      "path": "/effects/override/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale 'elimina questa' su un override è un EXDATE del master più la rimozione dell'override dalla risorsa: la posizione dell'override non esiste più ({deleted: true}). Lo store legacy lo lasciava come riga con status 'cancelled'. L'occorrenza resta soppressa (effetto 'occorrenze' del caso, invariato).",
+      "design_ref": "design.md §8 'Ricorrenze: Elimina questa'; §14 'Feed: override cancellati che ricompaiono'",
+      "added_in": "F2"
+    },
+    {
+      "id": "closures-senza-creazione-implicita",
+      "contract": "admin-calendar-v1",
+      "case": "closures/get-crea-calendario",
+      "path": "/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale GET /closures non crea più il calendario festività come effetto collaterale di una lettura: senza la collezione con role=holidays (che nasce solo dall'inizializzazione del volume) risponde 503 CALENDAR_UNAVAILABLE e nessun calendario viene creato. Lo store legacy lo creava con lo slug 'festivita' (bug noto).",
+      "design_ref": "design.md §7 '/closures'; §14 'GET /closures crea il calendario → Rimosso'; invariante 7",
+      "added_in": "F2"
+    },
+    {
+      "id": "source-dal-client-whitelist",
+      "contract": "admin-calendar-v1",
+      "case": "events/create-source-ics-pull",
+      "path": "/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale la source di un evento creato dal client è ammessa solo in {admin, manual, mcp, agent}: 'ics_pull' risponde 400 e l'evento non nasce (il caso successivo, la modifica di quell'evento, non è applicabile). Lo store legacy accettava qualsiasi source del CHECK e l'evento diventava di sola lettura (bug noto).",
+      "design_ref": "design.md §8 'Guardie applicative'; §14 'POST con source arbitraria → Whitelist'",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-url-ricalcolato-admin",
+      "contract": "admin-calendar-v1",
+      "case": "bookings/*",
+      "path": "/effects/proiezioni/*/url",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il job project_booking ricalcola sempre il link della riunione (resolveLocationForBooking), anche dopo approvazione e riprogrammazione; lo store legacy proiettava con url null (bug noto).",
+      "design_ref": "design.md §14 'meetingUrl null in riprogrammazione e approvazione → Ricalcolo sempre'",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-annullata-rimossa-admin",
+      "contract": "admin-calendar-v1",
+      "case": "bookings/*",
+      "path": "/effects/proiezioni/*",
+      "kind": "removed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale la proiezione di una prenotazione annullata o riprogrammata viene tolta (risorsa booking-<uid>.ics assente, stato desiderato calcolato dal job project_booking); la riga legacy restava con status 'cancelled'.",
+      "design_ref": "design.md §9 'Proiezione delle prenotazioni'; contratto f2-modules §7.4",
+      "added_in": "F2"
+    },
+    {
+      "id": "sposta-serie-con-i-suoi-override-rrule-rimossa",
+      "contract": "admin-calendar-v1",
+      "case": "events/update-rrule-rimossa",
+      "path": "/effects/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Conseguenza di sposta-serie-con-i-suoi-override: dopo il MOVE l'override sta nel calendario di destinazione insieme al master, quindi dopo la rimozione della rrule compare fra le occorrenze della destinazione e non più fra quelle dell'origine.",
+      "design_ref": "design.md §8 'Sposta: MOVE'; §14 'Override orfani'",
+      "added_in": "F2"
+    },
+    {
+      "id": "eccezione-fuori-regola-409",
+      "contract": "admin-calendar-v1",
+      "case": "events/exception-fuori-regola",
+      "path": "/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale un'eccezione su un'occorrenza che non appartiene alla regola risponde 409 CALENDAR_CONFLICT e non crea un override orfano; lo store legacy lo accettava (anomalia ORPHAN_OVERRIDE_NOT_IN_RULE, gestita dalla migrazione).",
+      "design_ref": "design.md §8 'Validatori aggiuntivi: target recurrence_key → 409'; §13.4; §14 'Override orfani'",
+      "added_in": "F2"
+    },
+    {
+      "id": "getevent-uid-con-forma-di-uuid-admin",
+      "contract": "admin-calendar-v1",
+      "case": "events/get-uid-forma-uuid",
+      "path": "/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale GET /events/:id usa il resolver in quattro passi: un UID con forma di UUID che non è un id si trova per UID esatto (200 con l'evento). Lo store legacy lo cercava solo come id (404, bug noto).",
+      "design_ref": "design.md §5 'getEvent(id_or_uid)'; §14 'getEvent scambia un UID con forma di UUID per un id'",
+      "added_in": "F2"
+    },
+    {
+      "id": "elenco-occorrenza-in-corso-admin",
+      "contract": "admin-calendar-v1",
+      "case": "events/list-evento-in-corso",
+      "path": "/body/events/*",
+      "kind": "added",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale GET /events interroga l'indice per sovrapposizione su span: l'occorrenza della serie già iniziata prima di `from` è restituita. Lo store legacy la perdeva (bug noto).",
+      "design_ref": "design.md §7 'query per sovrapposizione'; §14 'expandRRule.between perde gli eventi in corso'",
+      "added_in": "F2"
+    },
+    {
+      "id": "allday-iscrizioni-mezzanotte-roma-admin",
+      "contract": "admin-calendar-v1",
+      "case": "events/list-iscrizione",
+      "path": "/body/events/*/start_time",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale un all-day di un'iscrizione è VALUE=DATE nell'indice e nei JSON legacy esce alla mezzanotte di Europe/Rome con all_day=true, come tutti gli all-day; lo store legacy lo salvava alla mezzanotte UTC (parseIcs).",
+      "design_ref": "design.md §12, differenze ammesse, punto 2; §5 'All-day'",
+      "added_in": "F2"
+    },
+    {
+      "id": "allday-iscrizioni-mezzanotte-roma-admin-fine",
+      "contract": "admin-calendar-v1",
+      "case": "events/list-iscrizione",
+      "path": "/body/events/*/end_time",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come allday-iscrizioni-mezzanotte-roma-admin, per la fine esclusiva dell'all-day.",
+      "design_ref": "design.md §12, differenze ammesse, punto 2; §5 'All-day'",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/**/event_count",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il sync di un'iscrizione è il pull verso l'indice: ics-split (ical.js) legge il feed per intero, mentre il parser legacy scartava tutti i VEVENT di un VCALENDAR valido; il 304 si riconosce prima dei redirect (niente più 'Redirect 304 senza Location'). Quindi cambiano gli eventi importati (anche i titoli e gli all-day alla mezzanotte di Roma), i conteggi (event_count, inserted, removed), gli esiti del sync (notModified, error) e last_error, e l'anti-wipe non scatta su un feed che non è vuoto. Qui: event_count dell'iscrizione.",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'; §6.6",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo-esito",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/body/sync/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il sync di un'iscrizione è il pull verso l'indice: ics-split (ical.js) legge il feed per intero, mentre il parser legacy scartava tutti i VEVENT di un VCALENDAR valido; il 304 si riconosce prima dei redirect (niente più 'Redirect 304 senza Location'). Quindi cambiano gli eventi importati (anche i titoli e gli all-day alla mezzanotte di Roma), i conteggi (event_count, inserted, removed), gli esiti del sync (notModified, error) e last_error, e l'anti-wipe non scatta su un feed che non è vuoto. Qui: l'esito del sync (inserted, removed, notModified, error).",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'; §14 'trappola del 304'",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo-ultimo-errore",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/**/last_error",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il sync di un'iscrizione è il pull verso l'indice: ics-split (ical.js) legge il feed per intero, mentre il parser legacy scartava tutti i VEVENT di un VCALENDAR valido; il 304 si riconosce prima dei redirect (niente più 'Redirect 304 senza Location'). Quindi cambiano gli eventi importati (anche i titoli e gli all-day alla mezzanotte di Roma), i conteggi (event_count, inserted, removed), gli esiti del sync (notModified, error) e last_error, e l'anti-wipe non scatta su un feed che non è vuoto. Qui: last_error dell'iscrizione dopo un sync riuscito (304 o feed letto per intero).",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'; §14 'trappola del 304'",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo-eventi",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/effects/eventi_importati/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il sync di un'iscrizione è il pull verso l'indice: ics-split (ical.js) legge il feed per intero, mentre il parser legacy scartava tutti i VEVENT di un VCALENDAR valido; il 304 si riconosce prima dei redirect (niente più 'Redirect 304 senza Location'). Quindi cambiano gli eventi importati (anche i titoli e gli all-day alla mezzanotte di Roma), i conteggi (event_count, inserted, removed), gli esiti del sync (notModified, error) e last_error, e l'anti-wipe non scatta su un feed che non è vuoto. Qui: gli eventi importati.",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'; §12 punto 2",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-insieme-completo-calendario",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/sync-force-svuota",
+      "path": "/effects/eventi_del_calendario/**",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il sync di un'iscrizione è il pull verso l'indice: ics-split (ical.js) legge il feed per intero, mentre il parser legacy scartava tutti i VEVENT di un VCALENDAR valido; il 304 si riconosce prima dei redirect (niente più 'Redirect 304 senza Location'). Quindi cambiano gli eventi importati (anche i titoli e gli all-day alla mezzanotte di Roma), i conteggi (event_count, inserted, removed), gli esiti del sync (notModified, error) e last_error, e l'anti-wipe non scatta su un feed che non è vuoto. Qui: dopo il sync con force il calendario contiene ancora gli eventi dell'iscrizione (il feed non è vuoto); con lo store Radicale le righe del calendario sono le posizioni dell'indice della collezione, che non comprendono il sidecar dell'iscrizione.",
+      "design_ref": "design.md §12, differenze ammesse, punto 3; §14 'parseIcs rotto'",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-validatori-del-pull-etag",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/**/etag",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Con lo store Radicale il pull usa validatori HTTP propri (ETag e Last-Modified tenuti in memoria e validi solo con l'indice del sidecar invariato) e non scrive mai etag e last_modified di calendar_subscriptions, che sono la cache del pull legacy (azzerata alla migrazione per la trappola del 304): restano null.",
+      "design_ref": "design.md §6.6 'Pull: etag e last-modified azzerati alla migrazione'; contratto f2-modules §8 (SUBS, fetch con validatori propri dell'indice)",
+      "added_in": "F2"
+    },
+    {
+      "id": "iscrizioni-validatori-del-pull-last-modified",
+      "contract": "admin-calendar-v1",
+      "case": "subscriptions/*",
+      "path": "/**/last_modified",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Come iscrizioni-validatori-del-pull-etag, per last_modified.",
+      "design_ref": "design.md §6.6; contratto f2-modules §8 (SUBS)",
+      "added_in": "F2"
+    },
+    {
+      "id": "proiezione-annullata-numerazione-admin",
+      "contract": "admin-calendar-v1",
+      "case": "bookings/reschedule",
+      "path": "/effects/proiezioni/*/id",
+      "kind": "changed",
+      "stores": [
+        "radicale"
+      ],
+      "reason": "Conseguenza di proiezione-annullata-rimossa-admin: i segnaposto degli id si numerano in ordine di apparizione, e senza la proiezione dell'originale (tolta) quella della prenotazione riprogrammata prende il numero precedente.",
+      "design_ref": "design.md §9 'Proiezione delle prenotazioni'",
+      "added_in": "F2"
     }
-  ],
-  "diffs": []
+  ]
 }

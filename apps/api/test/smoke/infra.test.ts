@@ -39,7 +39,8 @@ test('env: protezione del database e ambiente ermetico', async () => {
   refuses(undefined, /TEST_DATABASE_URL non impostata/);
   refuses('postgresql://caldes:caldes@db.example.com:5432/caldes_test', /non è localhost/);
   refuses('postgresql://caldes:caldes@localhost,db.example.com/caldes_test', /non è localhost/);
-  refuses('postgresql://caldes:caldes@localhost:5432/caldes', /non contiene 'test' né 'caldes_f0'/);
+  refuses('postgresql://caldes:caldes@localhost:5432/caldes', /non contiene 'test' né 'caldes_f<N>'/);
+  refuses('postgresql://caldes:caldes@localhost:5432/caldes_fx', /non contiene 'test' né 'caldes_f<N>'/);
   refuses('postgresql://caldes:caldes@localhost:5432/caldes_test?database=caldes', /parametro "database" non ammesso/);
   refuses('mysql://caldes:caldes@localhost:3306/caldes_test', /protocollo non supportato/);
   // La password non finisce mai nel messaggio d'errore.
@@ -50,6 +51,7 @@ test('env: protezione del database e ambiente ermetico', async () => {
 
   const accepted = parseTestDatabaseUrl('postgresql://caldes:caldes@127.0.0.1:5432/caldes_f0_x');
   assert.equal(accepted.database, 'caldes_f0_x');
+  assert.equal(parseTestDatabaseUrl('postgresql://caldes:caldes@localhost/caldes_f1_found').database, 'caldes_f1_found');
   assert.match(accepted.url, /[?&]TimeZone=UTC/);
 
   assert.equal(process.env.DATABASE_URL, TEST_DATABASE.url);
@@ -274,7 +276,8 @@ test('fixture: app-password, iscrizioni, token MCP e device', async () => {
   });
   const ok = await verify(password);
   assert.equal(ok.status, 200);
-  assert.deepEqual(ok.json, { ok: true, principal: 'federico' });
+  // F1 (contratto control-plane §9.4): principal canonico ed expires_at (null: nessuna scadenza).
+  assert.deepEqual(ok.json, { ok: true, principal: 'federico', expires_at: null });
   assert.equal((await verify('password-sbagliata')).status, 401);
   assert.equal((await verify(password, false)).status, 401);
 

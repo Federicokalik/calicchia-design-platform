@@ -1,6 +1,17 @@
 /**
  * Admin booking API — CRUD event types, schedule, bookings management.
  * Tutte le route richiedono authMiddleware (mountato in app.ts).
+ *
+ * Fase F2 del passaggio a Radicale (design §7, §12; contratto f2-modules §9):
+ * le letture del calendario passano dalla facade e quindi dallo store scelto
+ * dal modo del backend (PgLegacyStore in mode postgres, comportamento di
+ * oggi): event_count da countEventsByCalendar(), GET /closures da
+ * listClosures(). Con lo store Radicale la descrizione delle proiezioni delle
+ * prenotazioni si ricompone da calendar_bookings (stesso testo di oggi).
+ * Errori nuovi (onError del router): CalendarUnavailableError → 503
+ * {error, code}; conflitti di ricorrenza e CAS per campo → 409
+ * {error, code, conflicts?}. Gli altri errori proseguono verso l'handler
+ * globale di app.ts.
  */
 
 import { Hono } from 'hono';
@@ -35,11 +46,19 @@ import {
   rotateFeedToken,
   buildFeedUrl,
   getOrCreateFestivitaCalendar,
+  countEventsByCalendar,
+  listClosures,
   CalendarValidationError,
   CalendarConflictError,
   CalendarSystemError,
   isValidTimeZone,
 } from '../../lib/calendar/calendars';
+import {
+  CalendarFieldConflictError,
+  CalendarRecurrenceConflictError,
+  isCalendarUnavailable,
+} from '../../lib/calendar/errors';
+import { withProjectionDescription, withProjectionDescriptions } from '../../lib/calendar/projection-descriptions';
 import {
   listOccurrences,
   getEvent,
@@ -70,6 +89,28 @@ import { logger } from '../../lib/logger';
 const log = logger.child({ scope: 'calendar-admin' });
 
 export const calendarAdmin = new Hono();
+
+/**
+ * Errori del calendario introdotti dalla F2 (contratto f2-modules §1.4): 503
+ * {error, code} per l'indisponibilità (transizione, freeze, identità del
+ * volume, collezione non sincronizzabile, store non disponibile), 409
+ * {error, code, conflicts?} per il target di ricorrenza sparito e il CAS per
+ * campo. Tutto il resto si rilancia all'handler globale di app.ts (mappatura
+ * degli errori del database, 500).
+ */
+calendarAdmin.onError((err, c) => {
+  if (isCalendarUnavailable(err)) {
+    log.warn({ reason: err.reason, detail: err.detail, url: c.req.url, method: c.req.method }, 'calendario non disponibile: 503');
+    return c.json({ error: err.message, code: err.code }, 503);
+  }
+  if (err instanceof CalendarFieldConflictError) {
+    return c.json({ error: err.message, code: err.code, conflicts: err.conflicts }, 409);
+  }
+  if (err instanceof CalendarRecurrenceConflictError) {
+    return c.json({ error: err.message, code: err.code }, 409);
+  }
+  throw err;
+});
 
 const isValidTime = (s: string) => /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(s);
 const isValidDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -376,17 +417,11 @@ calendarAdmin.delete('/schedule/overrides/:id', async (c) => {
 // ============================================
 
 calendarAdmin.get('/closures', async (c) => {
-  const cal = await getOrCreateFestivitaCalendar();
-  // source != 'system' separa le chiusure manuali dalle festività auto (cron).
-  const closures = await sql`
-    SELECT id, summary, start_time, end_time, source, status
-    FROM calendar_events
-    WHERE calendar_id = ${cal.id}::uuid
-      AND source != 'system'
-      AND end_time > NOW() - interval '30 days'
-    ORDER BY start_time ASC
-  `;
-  return c.json({ closures, calendar: { id: cal.id, name: cal.name, timezone: cal.timezone } });
+  // Chiusure manuali (source != 'system', cioè non le festività del cron) con
+  // fine negli ultimi 30 giorni o dopo. Lo store legacy crea il calendario
+  // festività se manca, come prima; lo store Radicale legge la collezione
+  // role=holidays tranne it-holiday-* senza crearla (design §7, §14).
+  return c.json(await listClosures());
 });
 
 calendarAdmin.post('/closures', async (c) => {
@@ -682,14 +717,9 @@ calendarAdmin.get('/event-types/:idOrSlug/schedule', async (c) => {
 
 calendarAdmin.get('/calendars', async (c) => {
   const calendars = await listCalendars();
-  // Conteggio eventi attivi per ogni calendario
-  const counts = await sql<{ calendar_id: string; n: number }[]>`
-    SELECT calendar_id, COUNT(*)::int AS n
-    FROM calendar_events
-    WHERE status != 'cancelled'
-    GROUP BY calendar_id
-  `;
-  const countMap = new Map(counts.map((r) => [r.calendar_id, r.n]));
+  // Conteggio eventi attivi per ogni calendario (semantica legacy di event_count: non cancellati,
+  // override compresi; con lo store Radicale le iscrizioni contano nel calendario di destinazione).
+  const countMap = await countEventsByCalendar();
   return c.json({
     calendars: calendars.map((cal) => ({
       ...cal,
@@ -725,6 +755,8 @@ calendarAdmin.post('/calendars', async (c) => {
     if (err instanceof SyntaxError) return c.json({ error: 'JSON non valido' }, 400);
     if (err instanceof CalendarConflictError) return c.json({ error: err.message }, 409);
     if ((err as { code?: string }).code === '23505') return c.json({ error: 'Slug già usato' }, 409);
+    // Indisponibilità del calendario: 503 {error, code} dall'onError del router.
+    if (isCalendarUnavailable(err)) throw err;
     log.error({ err }, 'calendar create failed');
     const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
       || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
@@ -792,8 +824,10 @@ calendarAdmin.get('/events', async (c) => {
       includeCancelled,
     });
 
-    return c.json({ events: occurrences });
+    return c.json({ events: await withProjectionDescriptions(occurrences) });
   } catch (err) {
+    // Indisponibilità del calendario: 503 {error, code} dall'onError del router.
+    if (isCalendarUnavailable(err)) throw err;
     log.error({ err }, 'calendar events list failed');
     const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
       || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
@@ -805,7 +839,7 @@ calendarAdmin.get('/events', async (c) => {
 });
 
 calendarAdmin.get('/events/:id', async (c) => {
-  const ev = await getEvent(c.req.param('id'));
+  const ev = await withProjectionDescription(await getEvent(c.req.param('id')));
   if (!ev) return c.json({ error: 'Evento non trovato' }, 404);
   return c.json({ event: ev });
 });
@@ -838,7 +872,9 @@ calendarAdmin.post('/events', async (c) => {
 calendarAdmin.put('/events/:id', async (c) => {
   const body = await c.req.json();
   try {
-    const ev = await updateEvent(c.req.param('id'), body);
+    const updated = await updateEvent(c.req.param('id'), body);
+    // Descrizione delle proiezioni ricomposta solo se la richiesta non ne ha scritta una propria.
+    const ev = body && typeof body === 'object' && 'description' in body ? updated : await withProjectionDescription(updated);
     if (!ev) return c.json({ error: 'Evento non trovato' }, 404);
     return c.json({ event: ev });
   } catch (err) {
@@ -873,7 +909,9 @@ calendarAdmin.delete('/events/:id', async (c) => {
  * Un nuovo uid viene generato automaticamente da createEvent().
  */
 calendarAdmin.post('/events/:id/duplicate', async (c) => {
-  const original = await getEvent(c.req.param('id'));
+  // Proiezione di una prenotazione con lo store Radicale: la copia riceve la
+  // descrizione completa ricomposta da calendar_bookings, come oggi (decisione 3).
+  const original = await withProjectionDescription(await getEvent(c.req.param('id')));
   if (!original) return c.json({ error: 'Evento non trovato' }, 404);
 
   const body = await c.req.json().catch(() => ({} as Record<string, unknown>));

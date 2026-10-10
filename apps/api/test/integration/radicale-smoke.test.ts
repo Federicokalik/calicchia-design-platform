@@ -10,8 +10,9 @@
  * attraverso il cambio dell'ora legale, calendar-multiget, sync-collection
  * iniziale e delta, DELETE con If-Match; poi il contratto del mock di
  * verify-credentials, un plugin di prova che lo usa (principal canonico,
- * X-Forwarded-For, peer TCP da 127.0.0.2, guasti del backend → 500) e il
- * plugin caldes_auth attuale (comportamento congelato: bug di design §14).
+ * X-Forwarded-For, peer TCP da 127.0.0.2, guasti del backend → 500) e uno
+ * smoke del plugin caldes_auth di F1 (la suite completa è pytest:
+ * apps/radicale/tests/test_auth.py).
  *
  * Altri comportamenti asseriti che il design dà per scontati: ETag forte
  * (sha256), If-None-Match: * e If-Match → 412, DELETE della collezione e
@@ -57,9 +58,10 @@
 
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname } from 'node:path';
-import { before, describe, test } from 'node:test';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { after, before, describe, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   CalDavClient,
@@ -945,37 +947,104 @@ describe('Radicale reale con plugin di autenticazione di prova e mock di verify-
   });
 });
 
-// ─── Plugin caldes_auth attuale (comportamento congelato) ───────────────────────────────
+// ─── Plugin caldes_auth di F1 ───────────────────────────────
 
-describe('Radicale reale con il plugin caldes_auth attuale (comportamento congelato)', { skip: radicale.skip || python.skip }, () => {
+// In F0 qui era congelato il bug del plugin con la firma vecchia di login()
+// (500 a ogni richiesta autenticata, design §14). In F1 il plugin è riscritto
+// (_login_ext, contratto control-plane §9): la suite completa è pytest
+// (apps/radicale/tests/test_auth.py, unità e Radicale reale); qui resta uno
+// smoke dal harness Node con il mock in modalità 'username' (l'API di oggi),
+// per provare che il principal lo decide il plugin e non il backend.
+describe('Radicale reale con il plugin caldes_auth di F1', { skip: radicale.skip || python.skip }, () => {
   const IPHONE = { username: 'iphone', password: 'test-only-app-password-iphone' };
-  const verify = useMockVerify({ users: [IPHONE], principalMode: 'username' });
+  const MAC = { username: 'mac', password: 'test-only-app-password-mac' };
+  const SVC_PASSWORD = 'test-only-svc-password';
+  const PROBE_PASSWORD = 'test-only-probe-password';
+  // Policy (credential_epoch) e cache persistita in una directory propria. Il
+  // before è registrato prima di quelli del mock e di Radicale: gira per primo.
+  let controlDir = '';
+  before(() => {
+    controlDir = mkdtempSync(join(tmpdir(), 'caldes-auth-f1-'));
+    writeFileSync(join(controlDir, 'policy.json'), `${JSON.stringify({
+      schema: 1,
+      version: 1,
+      generated_at: new Date().toISOString(),
+      backend_mode: 'postgres',
+      mode: 'shadow',
+      reasons: [],
+      principal: TEST_PRINCIPAL,
+      volume_id: null,
+      epoch: 0,
+      credential_epoch: 0,
+      readonly: ['bookings', 'scadenze'],
+      hidden: ['_canary'],
+    }, null, 2)}\n`);
+  });
+  after(() => {
+    if (controlDir) rmSync(controlDir, { recursive: true, force: true });
+  });
+
+  const verify = useMockVerify({ users: [IPHONE, MAC], principalMode: 'username' });
   const rad = useRadicale(() => ({
-    label: 'caldes-auth-attuale',
+    label: 'caldes-auth-f1',
     auth: {
       type: 'plugin',
       module: 'caldes_auth',
       pythonPath: [RADICALE_PLUGINS_DIR],
-      env: { CALDAV_BACKEND_URL: verify.mock.backendUrl, CALDAV_SERVICE_TOKEN: verify.mock.token },
+      env: {
+        RADICALE_PRINCIPAL: TEST_PRINCIPAL,
+        CALDAV_BACKEND_URL: verify.mock.backendUrl,
+        CALDAV_SERVICE_TOKEN: verify.mock.token,
+        // 127.0.0.2 fa da rete interna caldav-int; 127.0.0.1 e 127.0.0.3 da gateway.
+        CALDES_SVC_CIDR: '127.0.0.2/32',
+        CALDES_SVC_PASSWORD_SHA256: sha256(SVC_PASSWORD),
+        CALDES_PROBE_PASSWORD_SHA256: sha256(PROBE_PASSWORD),
+        CALDES_AUTHCACHE_KEY: 'test-only-authcache-key-0123456789abcdef',
+        CALDES_AUTHCACHE_DIR: join(controlDir, 'authcache'),
+        CALDES_POLICY_FILE: join(controlDir, 'policy.json'),
+      },
     },
   }));
 
-  // BUG NOTO (design §14 "caldes_auth con firma sbagliata"; README del
-  // calendario: oggi nessun device sincronizza). apps/radicale/plugins/
-  // caldes_auth.py sovrascrive login(login, password) ma Radicale 3.7 chiama
-  // login(login, password, context): ogni richiesta autenticata va in
-  // TypeError e risponde 500, senza mai chiamare verify-credentials. È la
-  // stessa riga dei log di produzione ('takes 3 positional arguments').
-  // NON corretto in F0: il plugin viene riscritto in F1 (_login_ext), e questo
-  // test va sostituito dalla suite pytest dell'immagine.
-  test('ogni richiesta autenticata risponde 500 per la firma di login() e il backend non viene mai chiamato', async () => {
-    await verify.mock.clearCalls();
-    const mark = rad.server.logMark();
-    const res = await rad.server.client(IPHONE.username, IPHONE.password).propfind(`/${IPHONE.username}/`);
-    assert.equal(res.status, 500);
-    assert.match(rad.server.logsSince(mark), /Auth\.login\(\) takes 3 positional arguments but 4 were given/);
-    assert.equal((await verify.mock.calls()).length, 0);
-    // Le richieste anonime restano 401 (il plugin non viene invocato senza credenziali).
-    assert.equal((await rad.server.anonymous().propfind(`/${IPHONE.username}/`)).status, 401);
+  test('app-password con username non canonico → utente federico anche se il backend risponde con lo username', async () => {
+    const { mock } = verify;
+    await mock.setState({ mode: 'ok' });
+    await mock.clearCalls();
+    const client = rad.server.client(IPHONE.username, IPHONE.password).withHeaders({ 'X-Remote-Addr': '203.0.113.10' });
+    const root = (await client.propfind('/', { props: [DAV_PROPS.currentUserPrincipal] })).multistatus();
+    const href = root.responses[0].element(DAV_PROPS.currentUserPrincipal);
+    assert.equal(href && xmlChild(href, NS.DAV, 'href')?.text, `/${TEST_PRINCIPAL}/`);
+    assert.equal((await client.propfind(`/${TEST_PRINCIPAL}/`)).status, 207);
+    assert.equal((await client.propfind(`/${IPHONE.username}/`)).status, 403, 'nessun principal per lo username del device');
+    const calls = await mock.calls();
+    assert.equal(calls.length, 1, 'le richieste successive usano la cache di 60 s');
+    assert.equal(calls[0].x_forwarded_for, '203.0.113.10');
+    assert.match(rad.server.logs(), /Successful login: 'iphone' -> 'federico'/);
+    assert.ok(!rad.server.logs().includes(IPHONE.password));
+  });
+
+  test('caldes-svc solo dal peer interno; username riservati mai inoltrati a verify-credentials', async (t) => {
+    if (!(await canBindLocalAddress('127.0.0.2')) || !(await canBindLocalAddress('127.0.0.3'))) {
+      t.skip('127.0.0.2/127.0.0.3 non utilizzabili come indirizzi sorgente su questo sistema');
+      return;
+    }
+    const { mock } = verify;
+    await mock.clearCalls();
+    const svc = rad.server.client('caldes-svc', SVC_PASSWORD);
+    assert.equal((await svc.fromAddress('127.0.0.2').propfind('/')).status, 207);
+    assert.equal((await svc.fromAddress('127.0.0.3').propfind('/')).status, 401);
+    assert.equal((await svc.propfind('/')).status, 401, '127.0.0.1 vale solo per il probe');
+    assert.equal((await rad.server.client('caldes-probe', PROBE_PASSWORD).propfind('/')).status, 207, 'healthcheck da 127.0.0.1');
+    assert.equal((await mock.calls()).length, 0);
+  });
+
+  test('backend giù senza credenziali in cache → 500, mai 401', async () => {
+    const { mock } = verify;
+    for (const mode of ['unavailable', 'drop'] as const) {
+      await mock.setState({ mode });
+      assert.equal((await rad.server.client(MAC.username, MAC.password).propfind(`/${TEST_PRINCIPAL}/`)).status, 500, mode);
+    }
+    await mock.setState({ mode: 'ok' });
+    assert.equal((await rad.server.client(MAC.username, MAC.password).propfind(`/${TEST_PRINCIPAL}/`)).status, 207);
   });
 });
