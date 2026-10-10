@@ -110,6 +110,8 @@ async function resetBackendState(): Promise<void> {
     WHERE (mode, write_freeze, volume_id, epoch, restore_guard_until, rebuild_required)
           IS DISTINCT FROM ('postgres', false, NULL::uuid, 0, NULL::timestamptz, false)
   `;
+  // Il rebuild richiesto dall'import precedente (nessun worker nei test).
+  await sql`DELETE FROM cal_jobs WHERE kind = 'index_rebuild'`;
 }
 
 onDatabaseReady(async () => {
@@ -241,13 +243,32 @@ const F2_STATE_TABLES = [
   'public.cal_occurrences',
 ];
 
+/**
+ * Unica scrittura ammessa sulle tabelle F2 del gruppo S: la richiesta di
+ * rebuild dell'indice nella transazione dell'import (requestIndexRebuild,
+ * contratto f2-modules §5.3): sync_token e dir_mtime_ns azzerati in
+ * cal_collection_state (UPDATE) e il job index_rebuild accodato (INSERT, o
+ * UPDATE del pending con la stessa chiave). Nessuna riga del backup entra mai.
+ */
+const F2_REBUILD_REQUEST_EVENTS: Readonly<Record<string, string>> = {
+  'public.cal_collection_state': 'TRUNCATE OR INSERT OR DELETE',
+  'public.cal_jobs': 'TRUNCATE OR DELETE',
+};
+
 /** Trappole del gruppo S e di calendars, valide in ogni modalità. */
 const PROTECTED_ALWAYS = [
   { table: 'public.calendars', events: 'TRUNCATE OR DELETE' },
   { table: 'public.calendar_backend_state', events: 'TRUNCATE OR INSERT OR DELETE' },
   { table: PROBE, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' },
-  ...F2_STATE_TABLES.map((table) => ({ table, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
+  ...F2_STATE_TABLES.map((table) => ({ table, events: F2_REBUILD_REQUEST_EVENTS[table] ?? 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
 ];
+
+/** Job index_rebuild accodati dagli import (requestIndexRebuild). */
+async function rebuildJobs(): Promise<Array<{ status: string; payload: Row }>> {
+  return Array.from(await sql<Array<{ status: string; payload: Row }>>`
+    SELECT status, payload FROM cal_jobs WHERE kind = 'index_rebuild' AND key = 'all' ORDER BY id
+  `, (r) => ({ ...r }));
+}
 
 interface StateRow {
   mode: string;
@@ -636,6 +657,8 @@ describe('import del backup JSON', () => {
     await assertRestoreGuard(stateAfter);
     assert.equal(res.json.calendar.rebuild_required, true);
     assert.equal(res.json.calendar.restore_guard_until, stateAfter.restore_guard_until!.toISOString());
+    // Rebuild richiesto nella stessa transazione (contratto f2-modules §5.3), non solo il flag per l'auditor delle 4.
+    assert.deepEqual((await rebuildJobs()).map((j) => [j.status, j.payload.reason]), [['pending', 'backup-import']]);
     assert.deepEqual(await probeRows(), probeBefore);
     assert.deepEqual(await probeSequence(), seqBefore);
     const [{ n: ledger162 }] = await sql<Array<{ n: number }>>`
@@ -863,6 +886,13 @@ describe('import del backup JSON', () => {
         assert.equal(added[0].action, 'IMPORT');
         assert.equal(added[0].table_name, 'backup');
         assert.deepEqual(multiset(b.filter((row) => row !== added[0])), before);
+        continue;
+      }
+      if (key === 'public.cal_jobs') {
+        // L'import accoda il rebuild dell'indice (requestIndexRebuild): l'unica riga nuova.
+        const added = b.filter((row) => !multiset(a).includes(canonical(row)));
+        assert.deepEqual(added.map((row) => [row.kind, row.key, row.status]), [['index_rebuild', 'all', 'pending']]);
+        assert.deepEqual(multiset(b.filter((row) => !added.includes(row))), multiset(a));
         continue;
       }
       if (key === 'public.calendar_backend_state') {

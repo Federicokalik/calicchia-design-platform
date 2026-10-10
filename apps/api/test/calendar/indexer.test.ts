@@ -753,6 +753,31 @@ describe('preparazione in worker_threads', () => {
     assert.deepEqual(inWorker.items, inThread.items);
     assert.equal(inWorker.items[0].health, 'ok');
   });
+
+  test('timeout del change set nel worker: risorse una per una nel worker, mai nel thread principale', async () => {
+    const { context } = await makeCalendar('worker-timeout');
+    const upserts = [item('a.ics', ics(weeklySeries('wt-1'))), item('b.ics', ics(weeklySeries('wt-2')))];
+    const base = input(context, { upserts });
+    const inThread = await prepareCollectionChanges(base, { worker: false });
+    // Worker fermo: il solo avvio supera 1 ms, quindi il change set va in timeout.
+    await stopIndexWorker();
+    const retried = await prepareCollectionChanges(base, { worker: true, timeoutMs: 1, itemTimeoutMs: 60_000 });
+    assert.deepEqual(retried.items, inThread.items, 'una per una nel worker: stesso risultato');
+
+    // Anche la singola risorsa oltre il tempo: quarantena index-error con il blocco conservativo dal testo.
+    await stopIndexWorker();
+    const timedOut = await prepareCollectionChanges(base, { worker: true, timeoutMs: 1, itemTimeoutMs: 1 });
+    assert.equal(timedOut.items.length, 2);
+    for (const [i, prepared] of timedOut.items.entries()) {
+      assert.equal(prepared.href, upserts[i].href);
+      assert.equal(prepared.health, 'quarantined');
+      assert.equal(prepared.healthReason, 'index-error');
+      assert.deepEqual(prepared.warnings, ['INDEX_TIMEOUT']);
+      assert.equal(prepared.preferLastGood, true);
+      assert.ok(prepared.occurrences.length === 1 && prepared.occurrences[0].kind === 'conservative' && prepared.occurrences[0].blocks, 'blocco conservativo');
+    }
+    await stopIndexWorker();
+  });
 });
 
 // ─── Orizzonte ───────────────────────────────

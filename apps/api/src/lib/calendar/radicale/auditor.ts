@@ -43,7 +43,7 @@ import type { Logger } from 'pino';
 import { calSql, sql } from '../../../db';
 import { logger as rootLogger } from '../../logger';
 import { storeKindForMode } from '../backend-mode';
-import { CAL_JOB_KINDS, CAL_JOB_PRIORITY, enqueueCalendarJob, purgeFinishedCalendarJobs } from '../jobs';
+import { CAL_JOB_KINDS, CAL_JOB_PRIORITY, enqueueCalendarJob, purgeFinishedCalendarJobs, retryDeadCalendarJob } from '../jobs';
 import { requiredHorizonEnd } from '../index-model';
 import { collectionPath, isValidObjectName, objectPath, type RadicaleClient, radicaleClientFromEnv } from './client';
 import { DAV_PROPS, type Multistatus } from './dav-xml';
@@ -55,7 +55,7 @@ import { assertHorizonCovers, ensureHorizon, maxAdvanceDays } from './horizon';
 import { checkVolumeIdentity, NO_IDENTITY_SOURCE, resolveIdentitySource } from './identity';
 import { quarantineIndexedObject } from './indexer';
 import { controlPlaneConfigFromEnv, type ControlPlaneConfig, readBackendState, readPolicyFile, readPolicyInputs, RADICALE_DATA_DIR_DEFAULT } from './policy';
-import { syncCollection } from './sync';
+import { mountUntrusted, syncCollection } from './sync';
 import {
   type CalendarBackendState,
   DEFAULT_PRINCIPAL,
@@ -85,6 +85,8 @@ export interface AuditReport {
   held: string[];
   versionsPurged: number;
   jobsPurged: number;
+  /** Saghe recurrence_split e controlli booking_conflict_check riaccodati dalla dead letter. */
+  jobsRevived: number;
   alerts: string[];
 }
 
@@ -151,8 +153,10 @@ export async function runCalendarAudit(opts: { signal?: AbortSignal; now?: Date 
     // ─── 1. Identità ───
     let identity: IdentityStatus = state.epoch === 0 ? 'uninitialized' : 'unverified';
     try {
+      // Mount smentito dal canary (copia stantia o assente): con `auto` l'identità si legge da Radicale.
+      const setting = config?.identitySource ?? 'auto';
       const source = isValidPrincipal(principal)
-        ? await resolveIdentitySource(config?.identitySource ?? 'auto', dataDir, client)
+        ? await resolveIdentitySource(setting === 'auto' && client && mountUntrusted() ? 'remote' : setting, dataDir, client)
         : NO_IDENTITY_SOURCE;
       identity = (await checkVolumeIdentity(state, source, principal, now)).status;
     } catch (err) {
@@ -231,6 +235,15 @@ export async function runCalendarAudit(opts: { signal?: AbortSignal; now?: Date 
       }
     }
 
+    // ─── 7b. Job morti per indisponibilità prolungata ───
+    let jobsRevived = 0;
+    try {
+      jobsRevived = await reviveDeadCalendarJobs();
+      if (jobsRevived > 0) log.info({ jobsRevived }, 'job del calendario riaccodati dalla dead letter');
+    } catch (err) {
+      log.warn({ err }, 'riaccodamento dei job morti non riuscito');
+    }
+
     // ─── 8. Retention ───
     let versionsPurged = 0;
     let jobsPurged = 0;
@@ -264,6 +277,7 @@ export async function runCalendarAudit(opts: { signal?: AbortSignal; now?: Date 
       held,
       versionsPurged,
       jobsPurged,
+      jobsRevived,
       alerts,
     };
     log.info(
@@ -428,8 +442,9 @@ async function auditCollections(
       entry.etagMismatches = mismatches;
 
       // File sul mount che Radicale non elenca: item rotti saltati da skip_broken_item.
+      // Mai da un mount che il canary ha smentito (non è il volume vivo).
       const dir = join(dataDir, RADICALE_COLLECTION_ROOT, principal, target.collection_name);
-      const onDisk = await listDiskItems(dir);
+      const onDisk = mountUntrusted() ? null : await listDiskItems(dir);
       for (const name of onDisk ?? []) {
         if (listing.has(name)) continue;
         const row = byHref.get(name);
@@ -553,6 +568,43 @@ async function auditBookings(
   }
 
   return { missingProjections, orphanProjections, drift };
+}
+
+// ─── Job morti ───────────────────────────────
+
+/** Età massima di un job morto che l'auditor riaccoda (una notte dopo l'altra). */
+const REVIVE_MAX_AGE_DAYS = 7;
+
+/**
+ * Riaccoda dalla dead letter le saghe "questa e le successive" non concluse
+ * (phase ≠ done) e i controlli delle sovrapposizioni di prenotazioni ancora
+ * future e attive, morti per un errore non definitivo (indisponibilità oltre
+ * le 48 h di attesa, lease scaduti): senza, una saga interrotta lascia serie
+ * originale e nuova entrambe intere (occorrenze doppie) finché non interviene
+ * qualcuno. Gli handler rileggono lo stato all'esecuzione (convergenti), una
+ * riga per (tipo, chiave), solo i job creati negli ultimi 7 giorni.
+ */
+export async function reviveDeadCalendarJobs(): Promise<number> {
+  const rows = await calSql<Array<{ id: string }>>`
+    SELECT DISTINCT ON (j.kind, j.key) j.id
+    FROM cal_jobs j
+    WHERE j.status = 'dead'
+      AND j.kind = ANY(${[CAL_JOB_KINDS.recurrenceSplit, CAL_JOB_KINDS.bookingConflictCheck]}::text[])
+      AND j.created_at > now() - ${REVIVE_MAX_AGE_DAYS} * INTERVAL '1 day'
+      AND (j.last_error IS NULL OR j.last_error NOT LIKE 'CalendarJobPermanentError:%')
+      AND (j.kind <> ${CAL_JOB_KINDS.recurrenceSplit} OR COALESCE(j.payload->>'phase', '') <> 'done')
+      AND (j.kind <> ${CAL_JOB_KINDS.bookingConflictCheck} OR EXISTS (
+        SELECT 1 FROM calendar_bookings b WHERE b.uid = j.key AND b.status IN ('pending', 'confirmed') AND b.end_time > now()
+      ))
+      AND NOT EXISTS (
+        SELECT 1 FROM cal_jobs o WHERE o.kind = j.kind AND o.key = j.key AND o.status IN ('pending', 'running')
+      )
+    ORDER BY j.kind, j.key, j.created_at DESC
+    LIMIT 200
+  `;
+  let revived = 0;
+  for (const row of rows) if (await retryDeadCalendarJob(String(row.id))) revived++;
+  return revived;
 }
 
 // ─── Orizzonte ───────────────────────────────

@@ -21,7 +21,11 @@
  *    risulta 'superseded' se nel frattempo è nato un pending con la stessa
  *    chiave);
  *  - fail con backoff esponenziale e jitter; dead letter ('dead') per errori
- *    non ripetibili (CalendarJobPermanentError) o tentativi esauriti.
+ *    non ripetibili (CalendarJobPermanentError) o tentativi esauriti. Le
+ *    indisponibilità del calendario (isCalendarJobWaitError: Radicale giù,
+ *    transizione, freeze, identità, sync fallita per Radicale) non consumano
+ *    tentativi: il job attende con una pausa fino a 15 minuti e va in dead
+ *    letter solo dopo 48 h dalla creazione.
  *
  * Gli handler sono convergenti e idempotenti: lo stato desiderato si calcola
  * al momento dell'esecuzione (es. project_booking legge calendar_bookings),
@@ -38,7 +42,9 @@ import type { Logger } from 'pino';
 import { calSql, sql } from '../../db';
 import { captureException } from '../bugsink';
 import { logger as rootLogger } from '../logger';
+import { CalendarUnavailableError } from './errors';
 import { CAL_CHANNELS } from './index-model';
+import { isRadicaleError } from './radicale/errors';
 import type { Db } from './radicale/policy';
 
 const log: Logger = rootLogger.child({ scope: 'calendar-jobs' });
@@ -95,6 +101,14 @@ export const CAL_JOB_DEFAULTS = Object.freeze({
   /** Retention dei job chiusi (done, superseded) e della dead letter. */
   finishedRetentionDays: 14,
   deadRetentionDays: 90,
+  /**
+   * Indisponibilità del calendario (Radicale giù, transizione F3/F4, freeze,
+   * identità non verificata): il job attende senza consumare tentativi, con
+   * una pausa che cresce con l'età del job fino a questo tetto.
+   */
+  unavailableBackoffMaxMs: 15 * 60_000,
+  /** Tetto di tempo dell'attesa per indisponibilità, da created_at: oltre, dead letter. */
+  unavailableMaxAgeMs: 48 * 3_600_000,
 });
 
 // ─── Errori ───────────────────────────────
@@ -328,7 +342,15 @@ export type CalendarJobCloseOutcome = 'done' | 'requeued' | 'superseded' | 'dead
 async function requeueOrSupersede(
   db: Db,
   job: Pick<CalendarJob, 'id' | 'leaseToken'>,
-  set: { runAfterMs: number; resetAttempts: boolean; sourceVersion?: string | null; lastError?: string | null; onlyIfExpired?: boolean },
+  set: {
+    runAfterMs: number;
+    resetAttempts: boolean;
+    /** Restituisce il tentativo preso dal claim (attesa per indisponibilità). */
+    refundAttempt?: boolean;
+    sourceVersion?: string | null;
+    lastError?: string | null;
+    onlyIfExpired?: boolean;
+  },
 ): Promise<CalendarJobCloseOutcome> {
   const hasSv = set.sourceVersion !== undefined;
   const expiredOnly = set.onlyIfExpired === true;
@@ -352,7 +374,9 @@ async function requeueOrSupersede(
           finished_at    = CASE WHEN t.has_pending THEN now() ELSE NULL END,
           run_after      = CASE WHEN t.has_pending THEN j.run_after
                                 ELSE now() + ${set.runAfterMs} * INTERVAL '1 millisecond' END,
-          attempts       = CASE WHEN NOT t.has_pending AND ${set.resetAttempts} THEN 0 ELSE j.attempts END,
+          attempts       = CASE WHEN NOT t.has_pending AND ${set.resetAttempts} THEN 0
+                                WHEN NOT t.has_pending AND ${set.refundAttempt === true} THEN GREATEST(j.attempts - 1, 0)
+                                ELSE j.attempts END,
           source_version = CASE WHEN NOT t.has_pending AND ${hasSv} THEN ${set.sourceVersion ?? null} ELSE j.source_version END,
           last_error     = COALESCE(${set.lastError ?? null}, j.last_error),
           lease_token    = NULL,
@@ -418,19 +442,64 @@ export interface FailCalendarJobOptions {
   db?: Db;
 }
 
+/** Codici di CollectionSyncError (radicale/sync.ts) che sono indisponibilità, non errori del job. */
+const WAITING_SYNC_CODES: ReadonlySet<string> = new Set(['identity', 'not_configured', 'radicale', 'cas_exhausted', 'lock_timeout', 'timeout']);
+
+/**
+ * true se l'errore è un'indisponibilità del calendario e non un errore del
+ * lavoro: calendario non verificabile o non scrivibile adesso
+ * (CalendarUnavailableError: Radicale giù, transizione, write_freeze,
+ * identità, freshness), errore transitorio o dall'esito ignoto di Radicale,
+ * sync fallita per Radicale o lock, rebuild in corso. Il job attende senza
+ * consumare tentativi (failCalendarJob).
+ */
+export function isCalendarJobWaitError(err: unknown): boolean {
+  if (err instanceof CalendarJobPermanentError) return false;
+  if (err instanceof CalendarUnavailableError) return true;
+  if (isRadicaleError(err)) return err.transient || err.outcomeUnknown;
+  const e = err as { name?: unknown; code?: unknown } | null;
+  if (e?.name === 'CollectionSyncError') return typeof e.code === 'string' && WAITING_SYNC_CODES.has(e.code);
+  if (e?.name === 'IndexRebuildBusyError') return true;
+  return false;
+}
+
+/**
+ * Pausa dell'attesa per indisponibilità: cresce con l'età del job (metà
+ * dell'età, da 5 s a 15 minuti) senza un contatore dedicato, perché il
+ * tentativo non viene consumato.
+ */
+export function computeCalendarJobWaitMs(ageMs: number, random: () => number = Math.random): number {
+  const base = Math.min(CAL_JOB_DEFAULTS.unavailableBackoffMaxMs, Math.max(CAL_JOB_DEFAULTS.backoffBaseMs, Math.max(0, ageMs) / 2));
+  const jitter = 1 + (random() * 0.4 - 0.2);
+  return Math.min(CAL_JOB_DEFAULTS.unavailableBackoffMaxMs, Math.max(1_000, Math.round(base * jitter)));
+}
+
 /**
  * Registra il fallimento di un job in lease: nuovo tentativo dopo il backoff,
  * oppure dead letter se l'errore non è ripetibile o i tentativi sono finiti.
+ * Un'indisponibilità del calendario (isCalendarJobWaitError) non consuma il
+ * tentativo: il job si riaccoda con la pausa dell'attesa finché l'età non
+ * supera unavailableMaxAgeMs (48 h), poi va in dead letter. Così un fermo di
+ * Radicale o una transizione più lunghi di qualche minuto non uccidono le
+ * proiezioni, i controlli delle prenotazioni degradate e le saghe, che
+ * ripartono da soli quando il calendario torna disponibile.
  */
 export async function failCalendarJob(
-  job: Pick<CalendarJob, 'id' | 'leaseToken' | 'attempts' | 'maxAttempts'>,
+  job: Pick<CalendarJob, 'id' | 'leaseToken' | 'attempts' | 'maxAttempts'> & { createdAt?: Date },
   error: unknown,
   opts: FailCalendarJobOptions = {},
 ): Promise<CalendarJobCloseOutcome> {
   const db = opts.db ?? calSql;
   const text = errorText(error);
   const retryable = opts.retryable ?? !(error instanceof CalendarJobPermanentError);
-  if (!retryable || job.attempts >= job.maxAttempts) {
+  if (retryable && isCalendarJobWaitError(error)) {
+    const ageMs = job.createdAt ? Date.now() - job.createdAt.getTime() : 0;
+    if (ageMs < CAL_JOB_DEFAULTS.unavailableMaxAgeMs) {
+      const delay = opts.retryAfterMs ?? computeCalendarJobWaitMs(ageMs);
+      return requeueOrSupersede(db, job, { runAfterMs: Math.max(0, delay), resetAttempts: false, refundAttempt: true, lastError: text });
+    }
+  }
+  if (!retryable || job.attempts >= job.maxAttempts || isCalendarJobWaitError(error)) {
     const rows = await db`
       UPDATE cal_jobs SET
         status = 'dead', finished_at = now(), last_error = ${text},
@@ -704,6 +773,8 @@ async function executeJob(job: CalendarJob, entry: RegisteredHandler, db: Db, ou
     if (outcome === 'dead') {
       jobLog.error({ err }, 'job del calendario in dead letter');
       captureException(err instanceof Error ? err : new Error(String(err)), { scope: 'calendar-jobs', kind: job.kind, jobId: job.id });
+    } else if (isCalendarJobWaitError(err)) {
+      jobLog.info({ err: (err as Error)?.message ?? String(err), outcome }, 'calendario non disponibile: job in attesa (tentativo non consumato)');
     } else {
       jobLog.warn({ err, outcome }, 'job del calendario fallito');
     }

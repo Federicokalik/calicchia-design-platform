@@ -118,6 +118,13 @@ export interface ChangeSetInput {
   horizon: { start: Date; end: Date };
   /** 'sync' | 'write-through:<actor>' | 'rebuild' | 'subscription-pull' | ... */
   actor: string;
+  /**
+   * Attore della versione 'delete' per singolo href (default `actor`). La sync
+   * distingue così le cancellazioni fatte dall'API (write-through:<attore>) da
+   * quelle osservate su Radicale ('sync', 'rebuild'), che l'interruttore
+   * anti-cancellazione conta su una finestra di 15 minuti.
+   */
+  deleteActors?: Readonly<Record<string, string>>;
   idStrategy?: 'random' | 'deterministic';
 }
 
@@ -762,6 +769,27 @@ export function prepareItem(item: RawItem, origin: PreparedItem['origin'], pc: P
 }
 
 /**
+ * Item in quarantena 'index-error' per una risorsa la cui preparazione nel
+ * worker ha superato il tempo massimo (indexer.ts, preparazione una per una
+ * dopo il timeout del change set). Nessun parse né espansione, che potrebbero
+ * bloccare anche il thread principale: solo il blocco conservativo dal testo
+ * (conservativeRangeFromText, scansione tollerante e lineare).
+ */
+export function timedOutItem(item: RawItem, origin: PreparedItem['origin'], pc: PrepareContext): PreparedItem {
+  const raw = item.raw;
+  const base = {
+    href: item.href,
+    etag: item.etag,
+    raw: raw === null ? null : pgText(raw),
+    sha256: raw === null ? null : sha256Hex(raw),
+    sizeBytes: raw === null ? null : Buffer.byteLength(raw, 'utf8'),
+  };
+  const out = unparseableItem(item, origin, 'index-error', pc, base);
+  out.warnings = ['INDEX_TIMEOUT'];
+  return out;
+}
+
+/**
  * Fingerprint semantico di un testo già indicizzato (stesso calcolo di
  * prepareItem); null se il testo non si parsa o il fingerprint non si calcola.
  * Serve al confronto "invariato" delle iscrizioni in quarantena, il cui
@@ -832,16 +860,34 @@ export interface OnTheFlyOccurrence {
 }
 
 /**
+ * Tetti dell'espansione al volo di UN oggetto su una finestra: occorrenze
+ * totali e iterazioni del motore sommate su tutti i blocchi. Oltre, la coda
+ * della finestra diventa un blocco conservativo (mai tempo libero per errore).
+ */
+export const ON_THE_FLY_LIMITS = Object.freeze({
+  maxOccurrences: 50_000,
+  iterationBudget: 1_000_000,
+});
+
+/**
  * Espande il testo di un oggetto indicizzato sulla finestra [from, to).
  * Non lancia: testo illeggibile o espansione in quarantena → blocco
  * conservativo della sola finestra (intersecata con l'intervallo estratto dal
  * testo, se c'è), `conservative: true`.
+ *
+ * Serie dense (es. HOURLY con molti BYMINUTE, scritte da un client: l'API le
+ * rifiuta): l'espansione si tronca a MAX_OCCURRENCES_PER_OBJECT e dichiara
+ * materializedUntil. Si riprende allora da lì, a blocchi, fino alla fine della
+ * finestra; superati i tetti (ON_THE_FLY_LIMITS) il resto [ultimo
+ * materializedUntil, to) è un'occorrenza conservativa, bloccante come le
+ * occorrenze della serie, e l'esito è `conservative: true`.
  */
 export function expandRawOnTheFly(
   raw: string | null,
   href: string,
   context: CollectionContext,
   window: { from: number; to: number },
+  limits: { maxOccurrences: number; iterationBudget: number } = ON_THE_FLY_LIMITS,
 ): { occurrences: OnTheFlyOccurrence[]; conservative: boolean } {
   const pc: PrepareContext = { context, from: window.from, to: window.to };
   const conservativeWindow = (componentType: ObjectComponent): { occurrences: OnTheFlyOccurrence[]; conservative: boolean } => {
@@ -868,16 +914,58 @@ export function expandRawOnTheFly(
     if (!parsed.ok) return conservativeWindow(looseComponent(raw));
     const obj = parsed.value;
     const tz = safeTimezone(context.timezone);
-    const expansion = expandObject(obj, { from: window.from, to: window.to, tz, computeRangeEnd: false });
-    if (expansion.health !== 'ok' && expansion.occurrences.length === 0) return conservativeWindow(obj.componentType);
-    const occurrences = expansion.occurrences.map((occ) => {
-      const row = occurrenceRow(occ, null, obj.componentType, href, pc.context);
-      return { recurrenceKey: row.recurrenceKey, start: new Date(occ.startUtc), end: new Date(Math.max(occ.endUtc, occ.startUtc)), allDay: occ.allDay, kind: row.kind, blocks: row.blocks };
-    });
-    return { occurrences, conservative: expansion.health !== 'ok' };
+    const occurrences: OnTheFlyOccurrence[] = [];
+    const keys = new Set<string>();
+    let conservative = false;
+    let iterations = 0;
+    let from = window.from;
+    for (let chunk = 0; ; chunk++) {
+      const expansion = expandObject(obj, { from, to: window.to, tz, computeRangeEnd: false });
+      iterations += expansion.iterations;
+      if (expansion.health !== 'ok' && expansion.occurrences.length === 0) {
+        if (chunk === 0) return conservativeWindow(obj.componentType);
+        // Blocco successivo in quarantena senza occorrenze: il resto della finestra resta conservativo.
+        conservative = true;
+        occurrences.push(conservativeTail(from, window.to, occurrences, href, context));
+        break;
+      }
+      // Un'occorrenza a cavallo del punto di ripresa compare in due blocchi: vale la prima (chiave unica per oggetto).
+      for (const occ of expansion.occurrences) {
+        if (keys.has(occ.recurrenceKey)) continue;
+        keys.add(occ.recurrenceKey);
+        const row = occurrenceRow(occ, null, obj.componentType, href, pc.context);
+        occurrences.push({ recurrenceKey: row.recurrenceKey, start: new Date(occ.startUtc), end: new Date(Math.max(occ.endUtc, occ.startUtc)), allDay: occ.allDay, kind: row.kind, blocks: row.blocks });
+      }
+      if (expansion.health !== 'ok') {
+        conservative = true;
+        break;
+      }
+      const until = expansion.materializedUntil;
+      if (until === null || until >= window.to) break;
+      if (until <= from || occurrences.length >= limits.maxOccurrences || iterations >= limits.iterationBudget) {
+        // Tetti superati (o nessun progresso): il resto della finestra blocca in modo conservativo.
+        conservative = true;
+        occurrences.push(conservativeTail(Math.max(from, until), window.to, occurrences, href, context));
+        break;
+      }
+      from = until;
+    }
+    return { occurrences, conservative };
   } catch {
     return conservativeWindow(looseComponent(raw));
   }
+}
+
+/**
+ * Coda conservativa [start, end) di un'espansione al volo troncata dai tetti:
+ * blocca se blocca almeno una delle occorrenze già espanse della serie (una
+ * serie TRANSP:TRANSPARENT o annullata resta libera), oppure, senza
+ * occorrenze, con la regola della quarantena (tutto tranne le proiezioni).
+ */
+function conservativeTail(start: number, end: number, collected: readonly OnTheFlyOccurrence[], href: string, context: CollectionContext): OnTheFlyOccurrence {
+  const kind = classifyOccurrenceKind(context.role, href, 'conservative');
+  const blocks = kind !== 'booking_projection' && (collected.length === 0 || collected.some((o) => o.blocks));
+  return { recurrenceKey: CONSERVATIVE_RECURRENCE_KEY, start: new Date(start), end: new Date(Math.max(start, end)), allDay: false, kind, blocks };
 }
 
 // ─── Worker thread ───────────────────────────────

@@ -74,6 +74,7 @@ import {
   type CalendarRole,
   canonicalVtimezone,
   checkBase,
+  cloneCalendarObject,
   componentRecurrenceKey,
   conservativeRangeFromText,
   createCalendarObject,
@@ -103,6 +104,7 @@ import {
   readTimeProperty,
   recurrenceKeyOf,
   RecurrenceTargetError,
+  removeProperties,
   serializeCalendar,
   serializeObject,
   shiftSeries,
@@ -122,7 +124,8 @@ import postgres from 'postgres';
 import { jsonb, sql } from '../../../db';
 import { logger as rootLogger } from '../../logger';
 import { isoOrNull, toLegacyCalendar, toLegacyEvent, toLegacyOccurrence } from '../adapters';
-import { indexBusyRanges } from '../busy';
+import { assertReadyOrDegraded, indexBusyRanges } from '../busy';
+import { PROJECTED_BOOKING_STATUSES } from '../booking-projection';
 import {
   CalendarConflictError,
   CalendarFieldConflictError,
@@ -166,9 +169,10 @@ import { CALENDAR_SLUG_REGEX, isValidTimeZone } from '../validation';
 import { collectionPath, isValidObjectName, objectPath, type RadicaleClient } from './client';
 import { clark, DAV_PROPS, type DavPropName, type DavPropValue } from './dav-xml';
 import { isRadicaleError, type RadicaleError } from './errors';
+import { assertDisplayReady } from './freshness';
 import { reserveObjectId, resolveEventRef } from './ids';
 import type { Db } from './policy';
-import { radicaleRuntime, syncCollection, verifyVolumeIdentity } from './sync';
+import { expectCollectionDeletion, forgetCollectionDeletion, radicaleRuntime, syncCollection, verifyVolumeIdentity } from './sync';
 import { type CalendarBackendState, isValidCollectionName } from './types';
 import { withCalendarWriteGate, type WriteGateContext } from './write-gate';
 
@@ -428,6 +432,11 @@ function coreError(err: unknown): Error | null {
         return new EventValidationError('L\'evento non è ricorrente');
       case 'NO_MASTER':
         return new EventValidationError('Evento senza evento principale: indica l\'occorrenza da modificare');
+      case 'INVALID_TARGET':
+        // Chiave malformata: messaggio generico. Taglio impossibile (computeCut
+        // con soli override orfani prima dell'occorrenza, serie troppo lunga):
+        // il messaggio di calendar-core, già scritto per l'utente.
+        return new EventValidationError(/^Recurrence key non valida/.test(err.message) ? 'Occorrenza non valida' : err.message);
       default:
         return new EventValidationError('Occorrenza non valida');
     }
@@ -545,12 +554,20 @@ async function writeObject(req: ObjectWriteRequest): Promise<WriteOutcome> {
       }
       if (plan.action === 'delete') {
         if (!current) return { action: 'none', created: false, etagBefore: null, etagAfter: null, raw: null, object: null, changed: [] };
+        // Annunciata alla sync prima della richiesta: non è una cancellazione "osservata" (interruttore, guardia del ripristino).
+        expectCollectionDeletion(req.calendar.id, req.href);
         try {
           await client.delete(path, { ifMatch: current.etag ?? '*' });
         } catch (err) {
-          if (isRadicaleError(err, 'precondition_failed') && attempt < req.maxAttempts) continue;
+          if (isRadicaleError(err, 'precondition_failed') && attempt < req.maxAttempts) {
+            forgetCollectionDeletion(req.calendar.id, req.href);
+            continue;
+          }
           // Già sparito: lo stato voluto è raggiunto.
-          if (!isRadicaleError(err, 'not_found')) throw domainError(err, req.what);
+          if (!isRadicaleError(err, 'not_found')) {
+            if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(req.calendar.id, req.href);
+            throw domainError(err, req.what);
+          }
         }
         return { action: 'delete', created: false, etagBefore: current.etag, etagAfter: null, raw: null, object: null, changed: [] };
       }
@@ -690,6 +707,22 @@ function componentFor(obj: CalendarObject, key: string, tz: string): IcsComponen
   if (key === MASTER_RECURRENCE_KEY) return obj.master ?? obj.overrides[0] ?? null;
   const ctx: ZoneContext = { tz, timezones: obj.timezones };
   return obj.overrides.find((c) => keyOf(c, ctx) === key) ?? null;
+}
+
+/**
+ * true se `key` è un'istanza della regola esclusa da un'EXDATE (senza
+ * override): esiste togliendo le EXDATE del master, non esiste con.
+ */
+function isExcludedInstance(obj: CalendarObject, key: string, tz: string, now: Date): boolean {
+  if (!obj.master) return false;
+  try {
+    if (occurrenceExists(obj, key, { tz, now })) return false;
+    const clone = cloneCalendarObject(obj);
+    if (!clone.master || removeProperties(clone.master, 'EXDATE') === 0) return false;
+    return occurrenceExists(clone, key, { tz, now });
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -1015,6 +1048,13 @@ async function onTheFlyOccurrences(
         log.warn({ err, objectId: row.id }, 'espansione al volo non riuscita: oggetto escluso dalla visualizzazione');
         continue;
       }
+      if (expansion.materializedUntil !== null && expansion.materializedUntil < w1) {
+        // Solo vista (il busy riprende a blocchi e chiude con una coda conservativa: expandRawOnTheFly).
+        log.warn(
+          { objectId: row.id, calendarId: row.calendar_id, materializedUntil: new Date(expansion.materializedUntil).toISOString(), windowEnd: new Date(w1).toISOString() },
+          'vista: serie oltre il tetto di occorrenze per oggetto, elenco troncato',
+        );
+      }
       for (const occ of expansion.occurrences) {
         const key = `${row.id}|${occ.recurrenceKey}`;
         if (seen.has(key)) continue;
@@ -1058,6 +1098,31 @@ async function onTheFlyOccurrences(
     }
   }
   return out;
+}
+
+/**
+ * Intervalli delle prenotazioni che hanno una proiezione (confermate,
+ * concluse, no-show) sovrapposte a [fromIso, toIso), se il calendario
+ * Prenotazioni blocca: la stessa semantica della proiezione legacy (evento
+ * confermato del calendario bookings), letta da calendar_bookings invece che
+ * dall'indice, dove la proiezione arriva solo dopo il job project_booking.
+ */
+async function projectedBookingRanges(fromIso: string, toIso: string): Promise<BusyRange[]> {
+  const from = Date.parse(fromIso);
+  const to = Date.parse(toIso);
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from >= to) return [];
+  const rows = await sql<Array<{ start_time: Date; end_time: Date }>>`
+    SELECT b.start_time, b.end_time
+    FROM calendar_bookings b
+    WHERE b.status = ANY(${[...PROJECTED_BOOKING_STATUSES]}::text[])
+      AND b.start_time < ${new Date(to).toISOString()}::timestamptz
+      AND b.end_time > ${new Date(from).toISOString()}::timestamptz
+      AND EXISTS (
+        SELECT 1 FROM calendars c WHERE c.role = 'bookings' AND c.lifecycle = 'active' AND c.blocks_availability
+      )
+    ORDER BY b.start_time, b.end_time
+  `;
+  return rows.map((r) => ({ start: r.start_time.toISOString(), end: r.end_time.toISOString() }));
 }
 
 /** listOccurrences dall'indice (design §7) più l'espansione al volo fuori orizzonte. */
@@ -1524,7 +1589,28 @@ class RadicaleStore implements CalendarStore {
     // per chi legge solo il calendario (find_free_slots). Slot e decisioni
     // usano busy.getBusyRanges, che le esclude perché leggono anche
     // calendar_bookings (design §9).
-    return indexBusyRanges(sql, fromIso, toIso, { includeBookingProjections: true });
+    // Livello display (design §7): campanello fermo, identità non ok o
+    // collezione bloccante non sincronizzabile → 503 (o modalità degradata).
+    await assertReadyOrDegraded(sql, () => assertDisplayReady(sql), 'display');
+    const [indexed, bookings] = await Promise.all([
+      indexBusyRanges(sql, fromIso, toIso, { includeBookingProjections: true }),
+      projectedBookingRanges(fromIso, toIso),
+    ]);
+    if (!bookings.length) return indexed;
+    // Le proiezioni nascono in modo asincrono (job project_booking): le
+    // prenotazioni che le proiettano si leggono anche da calendar_bookings,
+    // così una confermata non risulta libera con il job in coda o in dead
+    // letter. Un'annullata la cui proiezione non è ancora stata tolta resta al
+    // più occupata (verso sicuro).
+    const seen = new Set<string>();
+    return [...indexed, ...bookings]
+      .filter((r) => {
+        const key = `${r.start}|${r.end}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .sort((a, b) => a.start.localeCompare(b.start) || a.end.localeCompare(b.end));
   }
 
   async listEventsForCollection(calendarId: string): Promise<CalendarEvent[]> {
@@ -1763,9 +1849,12 @@ class RadicaleStore implements CalendarStore {
       if (expectedEtag && current.etag && current.etag !== expectedEtag) {
         throw new CalendarConflictError('L\'evento è stato modificato nel frattempo: ricarica e riprova');
       }
+      // L'origine sparisce per mano dell'API: per la sync non è una cancellazione osservata.
+      expectCollectionDeletion(from.id, href);
       try {
         await client.move(src, dst, { overwrite: false });
       } catch (err) {
+        if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(from.id, href);
         if (isRadicaleError(err, 'precondition_failed')) throw new EventValidationError('Esiste già un evento con lo stesso nome nel calendario di destinazione');
         if (isRadicaleError(err, 'uid_conflict')) throw new EventValidationError('UID già presente nel calendario di destinazione');
         throw domainError(err, 'lo spostamento dell\'evento');
@@ -1783,21 +1872,35 @@ class RadicaleStore implements CalendarStore {
     requireRadicale();
     const tz = safeTz(ref.calendar.timezone);
     const isOverride = ref.recurrenceKey !== MASTER_RECURRENCE_KEY;
+    let alreadyExcluded = false;
     const outcome = await writeObject({
       calendar: ref.calendar,
       href: ref.href,
       what: 'l\'evento',
       maxAttempts: MAX_WRITE_ATTEMPTS,
       plan: (current) => {
+        alreadyExcluded = false;
         if (!current) return { action: 'none' };
         if (!isOverride) return { action: 'delete' };
         // "Elimina questa": EXDATE tipizzato più rimozione dell'override (design §8).
         if (!current.object) throw new EventReadOnlyError(UNREADABLE_EVENT_MESSAGE);
-        const object = excludeOccurrence(current.object, ref.recurrenceKey, { tz, now: new Date() });
-        return { action: 'put', object, previous: current.object, changed: ['exdates'] };
+        try {
+          const object = excludeOccurrence(current.object, ref.recurrenceKey, { tz, now: new Date() });
+          return { action: 'put', object, previous: current.object, changed: ['exdates'] };
+        } catch (err) {
+          // Occorrenza già esclusa (o non più nella serie) e senza override:
+          // lo stato voluto c'è già. Successo idempotente come il legacy, dove
+          // ripetere "elimina questa" rimarca 'cancelled' la stessa riga
+          // (decisione 2, parità), invece di un 409.
+          if (err instanceof RecurrenceTargetError && err.code === 'RECURRENCE_TARGET_GONE') {
+            alreadyExcluded = true;
+            return { action: 'none' };
+          }
+          throw err;
+        }
       },
     });
-    if (outcome.action === 'none') return false;
+    if (outcome.action === 'none') return alreadyExcluded;
     const actor = 'api';
     await writeThrough([ref.calendar.id], actor);
     await audit({
@@ -1830,18 +1933,28 @@ class RadicaleStore implements CalendarStore {
     let key = '';
     let casOps: PatchOp[] = [];
     let base: PatchBase | undefined;
+    let alreadyExcluded = false;
     const outcome = await writeObject({
       calendar: ref.calendar,
       href: ref.href,
       what: 'l\'occorrenza',
       maxAttempts: V1_WRITE_ATTEMPTS,
       plan: (current, attempt) => {
+        alreadyExcluded = false;
         if (!current) throw new EventValidationError('Master event non trovato');
         if (!current.object) throw new EventReadOnlyError(UNREADABLE_EVENT_MESSAGE);
         const obj = current.object;
         if (!obj.master || !isRecurringMaster(obj)) throw new EventValidationError('L\'evento non è ricorrente');
         const now = new Date();
         key = recurrenceKeyForIso(obj, new Date(originalMs).toISOString(), tz);
+        // "Elimina questa" (eccezione con status cancelled) su un'istanza già
+        // esclusa con EXDATE (da un device o da un "elimina questa"
+        // precedente): lo stato voluto c'è già. Successo idempotente come il
+        // legacy (upsert della riga cancellata, decisione 2), nessuna scrittura.
+        if (opts.status === 'cancelled' && isExcludedInstance(obj, key, tz, now)) {
+          alreadyExcluded = true;
+          return { action: 'none' };
+        }
         if (attempt > 1) assertBaseUnchanged(obj, key, tz, now, casOps, base);
         // Semantica di createOccurrenceOverride legacy: orari dell'istanza (o nuovi) con la durata del
         // master, titolo nuovo o del master, descrizione nuova o del master, stato (default confirmed).
@@ -1895,6 +2008,28 @@ class RadicaleStore implements CalendarStore {
       });
     }
     const meta = await eventMeta(ref.calendar, ref.href, ref.objectId);
+    if (alreadyExcluded) {
+      // Nessun override da restituire (l'istanza è un'EXDATE): la stessa forma
+      // della riga cancellata che il legacy restituiva, dai campi del master.
+      const master = eventFromObject(written, MASTER_RECURRENCE_KEY, ref.objectId, meta);
+      if (master) {
+        const duration = Date.parse(master.end_time) - Date.parse(master.start_time);
+        const originalIso = new Date(originalMs).toISOString();
+        return {
+          ...master,
+          id,
+          summary: opts.newSummary || master.summary,
+          description: opts.newDescription !== undefined ? opts.newDescription || null : master.description,
+          start_time: originalIso,
+          end_time: new Date(originalMs + Math.max(0, duration)).toISOString(),
+          rrule: null,
+          exdates: [],
+          recurrence_id: originalIso,
+          recurrence_master_id: ref.objectId || null,
+          status: 'cancelled',
+        };
+      }
+    }
     const dto = eventFromObject(written, key, id, meta);
     if (!dto) throw new CalendarRecurrenceConflictError(key);
     return dto;
@@ -2384,8 +2519,14 @@ interface SplitJobPayload extends Record<string, unknown> {
   newUid: string;
   recurrenceKey: string;
   baseEtag: string | null;
-  /** started (prima della PUT della nuova serie), tail-written, done. */
-  phase: 'started' | 'tail-written' | 'done';
+  /**
+   * started (prima della PUT della nuova serie), tail-written, done;
+   * compensate: il taglio (b) è fallito in modo definitivo e la DELETE
+   * compensativa della nuova serie non è riuscita: il job la ripete.
+   */
+  phase: 'started' | 'tail-written' | 'compensate' | 'done';
+  /** Fase compensate: ETag della nuova serie scritta dalla saga (If-Match della DELETE). */
+  tailEtag?: string | null;
 }
 
 async function enqueueSplitJob(masterUid: string, payload: SplitJobPayload, delayMs: number): Promise<void> {
@@ -2507,10 +2648,26 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
           // Esito ignoto o Radicale giù: la saga resta registrata e il job la completa.
           throw new CalendarUnavailableError('radicale_unreachable', 'divisione della serie in corso: verrà completata automaticamente', { cause: err });
         }
-        // Compensazione: via la nuova serie, la vecchia resta com'era.
-        await client.delete(tailPath, { ifMatch: tailEtag ?? '*' }).catch((e: unknown) =>
-          log.error({ err: e, uid: obj.uid, newHref }, 'compensazione della saga non riuscita: la completerà il job'));
-        await enqueueSplitJob(obj.uid, { ...payload, phase: 'done' }, 0).catch(() => undefined);
+        // Compensazione: via la nuova serie, la vecchia resta com'era. Se la
+        // DELETE non riesce, la saga passa alla fase 'compensate' e il job la
+        // ripete (mai 'done' con la nuova serie ancora accanto al vecchio
+        // master non troncato: occorrenze doppie).
+        expectCollectionDeletion(cal.id, newHref);
+        let compensated = true;
+        try {
+          await client.delete(tailPath, { ifMatch: tailEtag ?? '*' });
+        } catch (e) {
+          if (!isRadicaleError(e, 'not_found')) {
+            compensated = false;
+            if (!(isRadicaleError(e) && e.outcomeUnknown)) forgetCollectionDeletion(cal.id, newHref);
+            log.error({ err: e, uid: obj.uid, newHref }, 'compensazione della saga non riuscita: la completerà il job');
+          }
+        }
+        await enqueueSplitJob(
+          obj.uid,
+          compensated ? { ...payload, phase: 'done' } : { ...payload, phase: 'compensate', tailEtag },
+          0,
+        ).catch((e: unknown) => log.error({ err: e, uid: obj.uid, newHref }, 'aggiornamento del job della saga non riuscito'));
         if (retry || isRadicaleError(err, 'precondition_failed')) throw new CalendarRecurrenceConflictError(key);
         throw domainError(err, 'la serie');
       }
@@ -2557,10 +2714,31 @@ export async function runRecurrenceSplitJob(job: CalendarJob): Promise<{ result:
   const collection = collectionNameOf(cal);
   const masterPath = objectPath(principal, collection, p.href);
   const tailPath = objectPath(principal, collection, p.newHref);
+  const newHref = p.newHref;
   const result = await withCalendarWriteGate(async (ctx) => {
     await assertVolumeIdentity(ctx.state);
     const tail = await fetchCurrent(client, tailPath, 'la nuova serie');
     if (!tail) return 'aborted';
+    if (p.phase === 'compensate') {
+      // Il taglio era fallito in modo definitivo e l'utente ha ricevuto
+      // l'errore: la nuova serie scritta dalla saga va tolta. Se nel frattempo
+      // qualcuno l'ha modificata (ETag diverso) è sua: resta.
+      if (p.tailEtag && tail.etag && tail.etag !== p.tailEtag) {
+        log.warn({ calendarId: cal.id, newHref }, 'saga "questa e le successive": nuova serie modificata dopo il fallimento, compensazione saltata');
+        return 'tail-modified';
+      }
+      expectCollectionDeletion(cal.id, newHref, 'recurrence-split');
+      try {
+        await client.delete(tailPath, { ifMatch: tail.etag ?? '*' });
+      } catch (err) {
+        if (isRadicaleError(err, 'not_found')) return 'aborted';
+        if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(cal.id, newHref);
+        if (isRadicaleError(err, 'precondition_failed')) return 'tail-modified';
+        throw err;
+      }
+      log.warn({ calendarId: cal.id, href: p.href, newHref }, 'saga "questa e le successive" compensata dal job dopo il fallimento del taglio');
+      return 'compensated';
+    }
     const master = await fetchCurrent(client, masterPath, 'la serie');
     if (!master) return 'master-gone';
     if (!master.object) return 'master-unreadable';
@@ -2579,7 +2757,13 @@ export async function runRecurrenceSplitJob(job: CalendarJob): Promise<{ result:
         return 'truncated';
       }
     }
-    await client.delete(tailPath, { ifMatch: tail.etag ?? '*' });
+    expectCollectionDeletion(cal.id, newHref, 'recurrence-split');
+    try {
+      await client.delete(tailPath, { ifMatch: tail.etag ?? '*' });
+    } catch (err) {
+      if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(cal.id, newHref);
+      throw err;
+    }
     log.warn({ calendarId: cal.id, href: p.href, newHref: p.newHref }, 'saga "questa e le successive" compensata: la serie era cambiata prima del taglio');
     return 'compensated';
   }, { expect: 'radicale' });

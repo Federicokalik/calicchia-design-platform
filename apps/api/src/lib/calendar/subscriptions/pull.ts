@@ -220,7 +220,8 @@ export function resetSubscriptionPullCache(subscriptionId?: string): void {
 
 interface FeedFetchResult {
   notModified: boolean;
-  body: string | null;
+  /** Corpo scaricato (byte) o passato dal chiamante (testo); null con il 304. */
+  body: string | Uint8Array | null;
   etag: string | null;
   lastModified: string | null;
   contentType: string | null;
@@ -234,7 +235,7 @@ async function discardBody(res: Response): Promise<void> {
   }
 }
 
-async function readLimitedBody(res: Response): Promise<string> {
+async function readLimitedBody(res: Response): Promise<Uint8Array> {
   const declared = Number(res.headers.get('content-length'));
   if (Number.isFinite(declared) && declared > FEED_MAX_BYTES) {
     await discardBody(res);
@@ -261,8 +262,9 @@ async function readLimitedBody(res: Response): Promise<string> {
     bytes.set(c, offset);
     offset += c.byteLength;
   }
-  // Decodifica tollerante come il legacy (U+FFFD per i byte non UTF-8); il BOM si toglie.
-  return new TextDecoder('utf-8').decode(bytes);
+  // Byte: la decodifica (tollerante come il legacy, U+FFFD e BOM tolto) la fa
+  // il parser dopo l'unfolding, che così ricompone i caratteri spezzati.
+  return bytes;
 }
 
 /**
@@ -358,8 +360,9 @@ function hasVcalendarLine(body: string): boolean {
 }
 
 /** Corpo senza VCALENDAR (vuoto, HTML) → rifiutato; poi lo split (IcsFeedError → rifiutato). */
-function splitBody(body: string): SplitFeedResult {
-  if (!hasVcalendarLine(body)) throw new FeedRejectedError(NOT_VCALENDAR_MESSAGE);
+function splitBody(body: string | Uint8Array): SplitFeedResult {
+  const text = typeof body === 'string' ? body : new TextDecoder('utf-8').decode(body);
+  if (!hasVcalendarLine(text)) throw new FeedRejectedError(NOT_VCALENDAR_MESSAGE);
   try {
     return splitIcsFeed(body);
   } catch (err) {

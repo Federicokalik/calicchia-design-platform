@@ -1080,6 +1080,14 @@ backup.post('/import', async (c) => {
                     restore_guard_until, rebuild_required
         `;
         if (appPasswords) appPasswords = { ...appPasswords, credential_epoch_bumped: credentialsRemoved && updated.length === 1 };
+        // Rebuild richiesto come da contratto (f2-modules §5.3, design §6.7):
+        // sync_token e dir_mtime_ns azzerati e job index_rebuild accodato nella
+        // stessa transazione (esiste solo dopo la COMMIT), non solo il flag che
+        // l'auditor delle 4 trasformerebbe in job.
+        if (updated.length === 1) {
+          const { requestIndexRebuild } = await import('../lib/calendar/radicale/rebuild');
+          await requestIndexRebuild(tx, { reason: 'backup-import', actor: 'admin:backup-import' });
+        }
         if (updated.length === 1) {
           try {
             backend = summarizeBackend({ kind: 'ok', state: normalizeBackendState(updated[0] as Record<string, unknown>) });

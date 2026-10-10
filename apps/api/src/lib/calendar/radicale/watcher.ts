@@ -105,6 +105,15 @@ const MAX_RETRY_DELAY_MS = 60_000;
 /** Pausa massima fra due discovery fallite. */
 const MAX_DISCOVERY_DELAY_MS = 60_000;
 
+/**
+ * Orologio monotono per gli intervalli interni (giro, pause dei tentativi,
+ * rilettura dell'elenco, discovery, poll remoto): un salto dell'ora di sistema
+ * (NTP all'indietro, o l'orologio fermo dei test) non deve sospendere i
+ * tentativi né la scoperta delle collezioni nuove. Le date (ultimo giro,
+ * ultimo cambio, dirty_since) restano sull'ora di sistema.
+ */
+const mono = (): number => performance.now();
+
 const w = {
   running: false,
   timer: null as NodeJS.Timeout | null,
@@ -112,16 +121,18 @@ const w = {
   remotePollMs: INDEX_TIMING.remotePrincipalPollMs as number,
   ticking: null as Promise<void> | null,
   lastTickAt: null as Date | null,
+  /** Istante monotono dell'ultimo giro (watcherAlive). */
+  lastTickMono: 0,
   lastChangeAt: null as Date | null,
   consecutiveErrors: 0,
   entries: new Map<string, Entry>(),
-  entriesLoadedAt: 0,
+  entriesLoadedAt: Number.NEGATIVE_INFINITY,
   entriesStale: true,
   principalDir: undefined as bigint | null | undefined,
   principalProps: undefined as bigint | null | undefined,
   identity: null as IdentityStatus | null,
   paused: null as string | null,
-  lastRemotePollAt: 0,
+  lastRemotePollAt: Number.NEGATIVE_INFINITY,
   discovering: null as Promise<void> | null,
   discoveryFailures: 0,
   nextDiscoveryAt: 0,
@@ -189,27 +200,29 @@ function schedule(delay: number): void {
 
 async function tick(): Promise<void> {
   if (!w.running) return;
-  const started = Date.now();
+  const started = mono();
   try {
     const mode = currentWatchMode().mode;
     if (mode === 'mount') await mountTick();
-    else if (mode === 'remote' && Date.now() - w.lastRemotePollAt >= w.remotePollMs) {
-      w.lastRemotePollAt = Date.now();
+    else if (mode === 'remote' && mono() - w.lastRemotePollAt >= w.remotePollMs) {
+      w.lastRemotePollAt = mono();
       await remoteTick();
     }
     w.lastTickAt = new Date();
+    w.lastTickMono = mono();
     if (w.consecutiveErrors > 0) log.info({ errors: w.consecutiveErrors }, 'campanello del calendario di nuovo regolare');
     w.consecutiveErrors = 0;
   } catch (err) {
     w.consecutiveErrors++;
     w.lastTickAt = new Date();
+    w.lastTickMono = mono();
     if (w.consecutiveErrors === 1) {
       raiseIndexAlert('watcher-error', `Campanello del calendario in errore: ${(err as Error)?.message ?? String(err)}`, { key: (err as NodeJS.ErrnoException)?.code ?? 'error' });
     } else {
       log.debug({ err, errors: w.consecutiveErrors }, 'giro del campanello non riuscito');
     }
   } finally {
-    schedule(w.intervalMs - (Date.now() - started));
+    schedule(w.intervalMs - (mono() - started));
   }
 }
 
@@ -250,7 +263,7 @@ async function mountTick(): Promise<void> {
 async function checkEntry(entry: Entry): Promise<void> {
   const dir = collectionDirPath(entry.name);
   const m = await statMtimeNs(dir);
-  const now = Date.now();
+  const now = mono();
   if (m !== entry.observed) {
     if (entry.observed !== undefined) w.lastChangeAt = new Date();
     entry.observed = m;
@@ -279,7 +292,8 @@ async function checkEntry(entry: Entry): Promise<void> {
   if (!entry.dirtyMarked) {
     entry.dirtyMarked = true;
     entry.dirtySince ??= new Date();
-    void markCollectionDirty(sql, entry.calendarId, new Date()).catch((err: unknown) => log.warn({ err, calendarId: entry.calendarId }, 'markCollectionDirty non riuscita'));
+    // Con la mtime osservata: se nel frattempo una sync l'ha già salvata (segno tardivo) non sporca nulla.
+    void markCollectionDirty(sql, entry.calendarId, new Date(), { mtimeNs: m }).catch((err: unknown) => log.warn({ err, calendarId: entry.calendarId }, 'markCollectionDirty non riuscita'));
   }
   if (!entry.inFlight && (entry.triggered !== m || now >= entry.nextRetryAt)) {
     trigger(entry, m, entry.triggered === undefined ? 'startup' : 'watcher');
@@ -299,7 +313,7 @@ function trigger(entry: Entry, mtime: bigint | null, reason: 'watcher' | 'startu
     })
     .catch((err: { code?: string }) => {
       entry.failures++;
-      entry.nextRetryAt = Date.now() + Math.min(MAX_RETRY_DELAY_MS, 1_000 * 2 ** Math.min(entry.failures - 1, 6));
+      entry.nextRetryAt = mono() + Math.min(MAX_RETRY_DELAY_MS, 1_000 * 2 ** Math.min(entry.failures - 1, 6));
       if (err?.code === 'identity') w.principalProps = undefined; // forza il controllo d'identità
     })
     .finally(() => {
@@ -308,7 +322,7 @@ function trigger(entry: Entry, mtime: bigint | null, reason: 'watcher' | 'startu
 }
 
 function requestDiscovery(): void {
-  if (w.discovering || Date.now() < w.nextDiscoveryAt) return;
+  if (w.discovering || mono() < w.nextDiscoveryAt) return;
   w.discovering = discoverCollections()
     .then((res) => {
       w.discoveryFailures = 0;
@@ -317,7 +331,7 @@ function requestDiscovery(): void {
     })
     .catch((err: unknown) => {
       w.discoveryFailures++;
-      w.nextDiscoveryAt = Date.now() + Math.min(MAX_DISCOVERY_DELAY_MS, 1_000 * 2 ** Math.min(w.discoveryFailures - 1, 6));
+      w.nextDiscoveryAt = mono() + Math.min(MAX_DISCOVERY_DELAY_MS, 1_000 * 2 ** Math.min(w.discoveryFailures - 1, 6));
       if (w.discoveryFailures === 1) log.warn({ err }, 'discovery delle collezioni non riuscita');
     })
     .finally(() => {
@@ -333,7 +347,7 @@ interface EntryRow {
 }
 
 async function refreshEntries(force = false): Promise<void> {
-  if (!force && !w.entriesStale && Date.now() - w.entriesLoadedAt < ENTRIES_REFRESH_MS) return;
+  if (!force && !w.entriesStale && mono() - w.entriesLoadedAt < ENTRIES_REFRESH_MS) return;
   const rows: EntryRow[] = await sql`
     SELECT c.id, c.collection_name, s.dir_mtime_ns::text AS dir_mtime_ns, s.dirty_since
     FROM calendars c
@@ -373,7 +387,7 @@ async function refreshEntries(force = false): Promise<void> {
     if (row.dirty_since) entry.dirtySince = row.dirty_since;
   }
   for (const id of [...w.entries.keys()]) if (!seen.has(id)) w.entries.delete(id);
-  w.entriesLoadedAt = Date.now();
+  w.entriesLoadedAt = mono();
   w.entriesStale = false;
 }
 
@@ -400,7 +414,7 @@ async function remoteTick(): Promise<void> {
     const st = byId.get(entry.calendarId);
     if (token === undefined) {
       // Collezione sparita: una sync per episodio (hold), ripetuta con la pausa crescente se fallisce.
-      if (entry.remoteToken !== null || (entry.failures > 0 && Date.now() >= entry.nextRetryAt)) {
+      if (entry.remoteToken !== null || (entry.failures > 0 && mono() >= entry.nextRetryAt)) {
         entry.remoteToken = null;
         trigger(entry, null, 'remote-poll');
       }
@@ -409,7 +423,7 @@ async function remoteTick(): Promise<void> {
     if (token !== entry.remoteToken && entry.remoteToken !== undefined) w.lastChangeAt = new Date();
     entry.remoteToken = token;
     // Dopo un fallimento si rispetta la pausa crescente anche in remote mode.
-    if (entry.failures > 0 && Date.now() < entry.nextRetryAt) continue;
+    if (entry.failures > 0 && mono() < entry.nextRetryAt) continue;
     // Token diverso da quello salvato, oppure oggetti in pending_404 da riconfermare.
     if (!st || st.sync_token !== token || st.pending404 > 0) trigger(entry, null, 'remote-poll');
   }
@@ -467,7 +481,7 @@ export async function startCalendarWatcher(opts: { intervalMs?: number; dataDir?
   w.entriesStale = true;
   w.principalDir = undefined;
   w.principalProps = undefined;
-  w.lastRemotePollAt = 0;
+  w.lastRemotePollAt = Number.NEGATIVE_INFINITY;
   w.consecutiveErrors = 0;
   w.unsubscribe.push(
     onSyncSettled((event) => {
@@ -475,11 +489,15 @@ export async function startCalendarWatcher(opts: { intervalMs?: number; dataDir?
       if (!entry || !event.result || event.result.status === 'skipped') return;
       entry.synced = event.result.dirMtimeNs === null ? null : BigInt(event.result.dirMtimeNs);
       if (event.result.syncToken) entry.remoteToken = event.result.syncToken;
+      // La sync ha azzerato dirty_since fino alla propria stat: se la directory
+      // è ancora diversa (modifica arrivata dopo il REPORT) il prossimo giro la
+      // segna di nuovo, così un fallimento successivo la porta a unsyncable.
+      entry.dirtyMarked = false;
     }),
     onWatchModeChange((state, previous) => {
       if (state.mode === previous.mode) return;
       // Cambio di modalità: si ricontrolla tutto da capo.
-      w.lastRemotePollAt = 0;
+      w.lastRemotePollAt = Number.NEGATIVE_INFINITY;
       w.principalProps = undefined;
       w.entriesStale = true;
       for (const entry of w.entries.values()) {
@@ -528,8 +546,14 @@ export function getWatcherStatus(): WatcherStatus {
   };
 }
 
-/** true se il campanello gira e ha fatto un giro di recente (per il livello display). */
-export function watcherAlive(now: number = Date.now()): boolean {
+/**
+ * true se il campanello gira e ha fatto un giro di recente (per il livello
+ * display). Senza `now` l'età dell'ultimo giro è misurata con l'orologio
+ * monotono (immune ai salti dell'ora di sistema); con `now` (ms epoch, pagina
+ * della salute) dall'ora dell'ultimo giro.
+ */
+export function watcherAlive(now?: number): boolean {
   if (!w.running || !w.lastTickAt) return false;
-  return now - w.lastTickAt.getTime() <= Math.max(10_000, w.intervalMs * 10);
+  const age = now === undefined ? mono() - w.lastTickMono : now - w.lastTickAt.getTime();
+  return age <= Math.max(10_000, w.intervalMs * 10);
 }

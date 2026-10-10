@@ -101,6 +101,24 @@ export async function requestIndexRebuild(db: Db, opts: { reason: string; actor:
   log.warn({ reason: opts.reason, actor: opts.actor }, 'rebuild dell\'indice richiesto: decisioni con sync forzata fino alla fine');
 }
 
+/**
+ * Rebuild richiesto (rebuild_required) senza un job index_rebuild attivo:
+ * lo richiede con requestIndexRebuild (token e dir_mtime_ns azzerati, job
+ * accodato). Serve all'avvio dell'API dopo restore-calendar-stack.sh o un
+ * UPDATE manuale dello stato, che impostano solo il flag: senza, il rebuild
+ * partirebbe solo con l'auditor notturno. true se l'ha richiesto.
+ */
+export async function ensureRequestedRebuild(db: Db = sql, opts: { reason?: string; actor?: string } = {}): Promise<boolean> {
+  const [row] = await db<Array<{ required: boolean; active: boolean }>>`
+    SELECT s.rebuild_required AS required,
+           EXISTS (SELECT 1 FROM cal_jobs j WHERE j.kind = ${CAL_JOB_KINDS.indexRebuild} AND j.status IN ('pending', 'running')) AS active
+    FROM calendar_backend_state s WHERE s.id = true
+  `;
+  if (!row?.required || row.active) return false;
+  await requestIndexRebuild(db, { reason: opts.reason ?? 'startup', actor: opts.actor ?? 'startup' });
+  return true;
+}
+
 export interface RebuildReport {
   startedAt: Date;
   finishedAt: Date;

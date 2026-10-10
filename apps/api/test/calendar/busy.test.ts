@@ -670,7 +670,8 @@ test('sovrapposizioni: registrate una sola volta, escluse quelle già viste nell
     .map((o) => `${o.objectId}|${o.recurrenceKey}|${o.start.getTime()}|${o.end.getTime()}`);
   assert.equal(await recordBookingConflicts(sql, other.booking, new Set(seen), 'post_commit'), 0);
 
-  // Job di controllo con lo store Radicale e Radicale non configurato: errore ripetibile, nuovo tentativo.
+  // Job di controllo con lo store Radicale e Radicale non configurato: indisponibilità, nuovo tentativo
+  // senza consumare il tentativo (jobs-01: un fermo lungo non manda il controllo in dead letter).
   await sql`DELETE FROM cal_jobs`;
   registerBookingJobs();
   await sql`INSERT INTO cal_jobs (kind, key, payload) VALUES (${CAL_JOB_KINDS.bookingConflictCheck}, ${other.booking.uid}, ${sql.json({ preexisting: seen })})`;
@@ -680,7 +681,7 @@ test('sovrapposizioni: registrate una sola volta, escluse quelle già viste nell
   });
   const [job] = await jobsFor(other.booking.uid);
   assert.equal(job.status, 'pending');
-  assert.equal(job.attempts, 1);
+  assert.equal(job.attempts, 0, 'tentativo restituito: Radicale non verificabile non è un errore del controllo');
   assert.match(job.last_error ?? '', /radicale_unreachable/);
 });
 

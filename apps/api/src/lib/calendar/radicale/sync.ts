@@ -222,6 +222,24 @@ export function onWatchModeChange(listener: (state: Readonly<WatchState>, previo
   return () => watchListeners.delete(listener);
 }
 
+/**
+ * Motivi del canary per cui il mount NON è il volume vivo, o non c'è: la
+ * mtime della PUT del canary non si è vista (copia stantia, mount in ritardo)
+ * oppure la cartella manca.
+ */
+const UNTRUSTED_MOUNT_REASONS: ReadonlySet<string> = new Set(['mtime_not_observed', 'mount_missing']);
+
+/**
+ * true se il canary ha provato che il mount non riflette il volume vivo. Il
+ * disco allora non decide nulla: niente classificazione dei 404 dal mount
+ * (pending_404 a due passi, come la remote mode del design §6.1) e identità
+ * dalla PROPFIND del principal anche con CALDES_IDENTITY_SOURCE=auto (un
+ * volume senza identità verificata non è mai fidato).
+ */
+export function mountUntrusted(state: { mode: WatchMode; reason: string | null } = watchState): boolean {
+  return state.mode === 'remote' && state.reason !== null && UNTRUSTED_MOUNT_REASONS.has(state.reason);
+}
+
 // ─── Mount in sola lettura ─────────────────────
 
 /** Magic number di statfs dei filesystem locali ammessi (design §6.1). */
@@ -352,6 +370,17 @@ async function listDiskItems(dir: string): Promise<string[]> {
   return entries.filter((e) => e.isFile() && !e.name.startsWith('.') && isValidObjectName(e.name)).map((e) => e.name);
 }
 
+/** Come listDiskItems, ma una cartella assente (collezione sparita: la dirà il REPORT) è vuota. */
+async function listDiskItemsOrEmpty(dir: string): Promise<string[]> {
+  try {
+    return await listDiskItems(dir);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === 'ENOENT' || code === 'ENOTDIR') return [];
+    throw err;
+  }
+}
+
 // ─── Identità del volume ─────────────────────
 
 export interface VerifiedIdentity {
@@ -380,7 +409,9 @@ const IDENTITY_REMOTE_TIMEOUT_MS = 2_000;
  * dentro il budget di 2,5 s delle decisioni.
  */
 async function identitySource(rt: RadicaleRuntime): Promise<IdentitySource> {
-  const source = await resolveIdentitySource(rt.identitySource, rt.dataDir, rt.client);
+  // Mount provato non vivo dal canary: con `auto` il file non vale, si legge il marker da Radicale.
+  const setting = rt.identitySource === 'auto' && rt.client && mountUntrusted() ? 'remote' : rt.identitySource;
+  const source = await resolveIdentitySource(setting, rt.dataDir, rt.client);
   if (source.kind !== 'remote' || !rt.client) return source;
   const client = rt.client;
   return {
@@ -576,7 +607,16 @@ export const HOLD_REASONS = Object.freeze({
   collectionEmpty: 'collection-empty',
   /** La collezione intera non esiste più su Radicale (404 sul REPORT). */
   collectionMissing: 'collection-missing',
+  /**
+   * Cancellazioni osservate durante la guardia post-ripristino
+   * (calendar_backend_state.restore_guard_until, design §16.2-§16.3): nessuna
+   * cancellazione automatica, qualunque sia la soglia.
+   */
+  restoreGuard: 'restore-guard',
 });
+
+/** Finestra dell'interruttore cumulativo: cancellazioni osservate negli ultimi 15 minuti. */
+const MASS_DELETE_WINDOW_MINUTES = 15;
 
 /** Tentativi della sync quando il CAS sul token fallisce (design §6.2 passo 8). */
 const MAX_CAS_ATTEMPTS = 3;
@@ -761,6 +801,31 @@ export function inFlightSyncs(): string[] {
 }
 
 /**
+ * Attende che non restino sync in corso o accodate, al massimo `timeoutMs`,
+ * SENZA interromperle (a differenza di drainSyncs, che serve allo spegnimento:
+ * una sync interrotta lascia la collezione come prima, e se era la sua prima
+ * sync senza stato né orizzonte). Restituisce false allo scadere.
+ */
+export async function waitForSyncsIdle(timeoutMs = 30_000): Promise<boolean> {
+  const deadline = performance.now() + timeoutMs;
+  while (flights.size > 0) {
+    const pending = [...flights.values()].flatMap((f) => [f.running?.promise, f.queued?.promise]).filter(Boolean) as Promise<unknown>[];
+    const remaining = deadline - performance.now();
+    if (remaining <= 0) return false;
+    let timer: NodeJS.Timeout | null = null;
+    await Promise.race([
+      Promise.allSettled(pending),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, remaining);
+        timer.unref?.();
+      }),
+    ]);
+    if (timer) clearTimeout(timer);
+  }
+  return true;
+}
+
+/**
  * Attende la fine delle sync in corso e accodate (spegnimento), al massimo
  * `timeoutMs`; poi interrompe quelle ancora attive.
  */
@@ -772,6 +837,79 @@ export async function drainSyncs(timeoutMs = 5_000): Promise<void> {
   shutdown.abort();
   await Promise.allSettled(pending);
   shutdown = new AbortController();
+}
+
+// ─── Cancellazioni fatte dall'API ─────────────────────
+
+/** Validità di una cancellazione annunciata dall'API (la sync che la osserva arriva entro pochi secondi). */
+const EXPECTED_DELETION_TTL_MS = 15 * 60_000;
+/** Tetto delle cancellazioni annunciate in memoria (oltre, si scartano le più vecchie). */
+const EXPECTED_DELETION_MAX = 10_000;
+
+const expectedDeletions = new Map<string, Map<string, { at: number; actor: string }>>();
+let expectedDeletionCount = 0;
+
+function pruneExpectedDeletions(now: number): void {
+  for (const [calendarId, byHref] of expectedDeletions) {
+    for (const [href, entry] of byHref) {
+      if (now - entry.at > EXPECTED_DELETION_TTL_MS) {
+        byHref.delete(href);
+        expectedDeletionCount--;
+      }
+    }
+    if (byHref.size === 0) expectedDeletions.delete(calendarId);
+  }
+}
+
+/**
+ * Annuncia una cancellazione che l'API fa su Radicale (DELETE di una risorsa,
+ * origine di una MOVE, compensazione della saga), PRIMA della richiesta. La
+ * sync che la osserva (write-through, campanello o freshness, qualunque arrivi
+ * prima) la applica sempre e la registra con l'attore `write-through:<actor>`:
+ * non conta per l'interruttore anti-cancellazione né per la guardia del
+ * ripristino, che riguardano le cancellazioni che l'API non ha fatto (device,
+ * client esterni, volume ripristinato). Vale 15 minuti, nel solo processo che
+ * scrive (l'API); se la richiesta fallisce il chiamante la ritira con
+ * forgetCollectionDeletion.
+ */
+export function expectCollectionDeletion(calendarId: string, href: string, actor = 'api'): void {
+  const id = String(calendarId).toLowerCase();
+  const now = Date.now();
+  if (expectedDeletionCount >= EXPECTED_DELETION_MAX) pruneExpectedDeletions(now);
+  if (expectedDeletionCount >= EXPECTED_DELETION_MAX) {
+    expectedDeletions.clear();
+    expectedDeletionCount = 0;
+  }
+  let byHref = expectedDeletions.get(id);
+  if (!byHref) {
+    byHref = new Map();
+    expectedDeletions.set(id, byHref);
+  }
+  if (!byHref.has(href)) expectedDeletionCount++;
+  byHref.set(href, { at: now, actor });
+}
+
+/** Ritira una cancellazione annunciata (la DELETE non è avvenuta). */
+export function forgetCollectionDeletion(calendarId: string, href: string): void {
+  const id = String(calendarId).toLowerCase();
+  const byHref = expectedDeletions.get(id);
+  if (byHref?.delete(href)) expectedDeletionCount--;
+  if (byHref && byHref.size === 0) expectedDeletions.delete(id);
+}
+
+/** Cancellazioni annunciate e ancora valide di una collezione (href → attore). */
+function expectedDeletionsOf(calendarId: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const byHref = expectedDeletions.get(calendarId);
+  if (!byHref) return out;
+  const now = Date.now();
+  for (const [href, entry] of byHref) if (now - entry.at <= EXPECTED_DELETION_TTL_MS) out.set(href, entry.actor);
+  return out;
+}
+
+/** Dopo un apply riuscito: le cancellazioni annunciate e applicate escono dal registro. */
+function consumeExpectedDeletions(calendarId: string, hrefs: readonly string[]): void {
+  for (const href of hrefs) forgetCollectionDeletion(calendarId, href);
 }
 
 // ─── Esecuzione ─────────────────────
@@ -972,11 +1110,31 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     m0 = await statMtimeNs(dir);
     observedMs = Date.now();
   }
+  // Il disco classifica i 404 (item saltati da Radicale) solo se il mount è
+  // affidabile: mount mode, oppure filesystem locale e mount non smentito dal
+  // canary (mountUntrusted: copia stantia o assente → nessuna fiducia).
+  const diskUsable = mount || (!mountUntrusted() && (await isDirectory(dir)) && (await mountIsLocal(rt.dataDir)).local);
 
   // 3. REPORT sync-collection; token scaduto → listing completo.
   const startToken = state?.sync_token ?? null;
   const fetchAll = run.full;
   let full = fetchAll || startToken === null;
+  // Item su disco letti PRIMA del REPORT (anche incrementale: a ogni cambio
+  // della directory, una readdir costa pochi millisecondi). Un file nato dopo
+  // (PUT legittima fra REPORT e readdir) non è un item saltato da Radicale;
+  // uno sparito nel frattempo risulta assente in readDiskItem e resta una
+  // cancellazione.
+  let diskItems: string[] | null = null;
+  if (diskUsable) {
+    try {
+      diskItems = await listDiskItemsOrEmpty(dir);
+    } catch (err) {
+      // Sync completa: il confronto con il disco serve (fallimento registrato,
+      // come prima). Incrementale: il controllo dei file rotti salta un giro.
+      if (full) throw err;
+      log.warn({ err, calendarId: id, collection }, 'lettura della directory della collezione non riuscita: controllo dei file rotti rimandato');
+    }
+  }
   const path = collectionPath(rt.principal, collection);
   run.reportStarted = true;
   throwIfAborted(signal, id);
@@ -987,6 +1145,7 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     if (!full && isRadicaleError(err, 'invalid_sync_token')) {
       log.info({ calendarId: id, collection }, 'sync-token scaduto o sconosciuto: full resync');
       full = true;
+      if (diskUsable && diskItems === null) diskItems = await listDiskItemsOrEmpty(dir);
       report = await client.syncCollection(path, { syncToken: '', timeoutMs: requestTimeout(deadline, id) });
     } else if (isRadicaleError(err, 'not_found')) {
       return holdMissingCollection({ ...args, state, index, horizon, actor, startToken });
@@ -1008,18 +1167,25 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     const row = indexed.get(name);
     if (fetchAll || !row || row.etag !== etag || row.health !== 'ok') toFetch.add(name);
   }
-  const diskUsable = mount || ((await isDirectory(dir)) && (await mountIsLocal(rt.dataDir)).local);
   // Senza un mount affidabile i pending_404 si riverificano a ogni sync: il
   // token non li ripresenta, e il secondo 404 consecutivo li cancella.
   if (!mount) for (const row of index) if (row.health === 'pending_404' && !listing.has(row.href)) toFetch.add(row.href);
+  // Sync incrementale: un file su disco mai indicizzato e assente dal REPORT
+  // è un item che Radicale salta (skip_broken_item), oppure un oggetto valido
+  // che l'indice non ha. Si chiede a Radicale (multiget): servito → upsert,
+  // 404 → quarantena radicale-skip con il blocco conservativo, subito invece
+  // che alla prossima sync completa o all'auditor notturno.
+  if (!full && diskItems) {
+    for (const name of diskItems) if (!indexed.has(name) && !listing.has(name) && !removed.has(name)) toFetch.add(name);
+  }
 
   const candidates404 = new Set<string>();
   if (full) for (const row of index) if (!listing.has(row.href)) candidates404.add(row.href);
   for (const name of removed) if (!listing.has(name)) candidates404.add(name);
   // Item rotti che il listing completo non riporta (skip_broken_item: né fra
-  // gli oggetti né fra i 404): file su disco assenti dal listing.
-  if (full && diskUsable) {
-    for (const name of await listDiskItems(dir)) if (!listing.has(name)) candidates404.add(name);
+  // gli oggetti né fra i 404): file su disco (letti prima del REPORT) assenti dal listing.
+  if (full && diskItems) {
+    for (const name of diskItems) if (!listing.has(name)) candidates404.add(name);
   }
 
   const upserts: RawItem[] = [];
@@ -1073,10 +1239,20 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     log.warn({ calendarId: id, collection, hrefs: radicaleSkipped.map((r) => r.href) }, 'item saltati da Radicale (file presente su disco): quarantena radicale-skip');
   }
 
-  // 6. Interruttore anti-cancellazione di massa.
+  // 6. Interruttore anti-cancellazione di massa. Le cancellazioni annunciate
+  // dall'API (expectCollectionDeletion) si applicano sempre; le altre passano
+  // dall'interruttore cumulativo e dalla guardia post-ripristino.
+  const expected = expectedDeletionsOf(id);
+  const apiDeletions = deletions.filter((h) => expected.has(h));
+  const observedDeletions = deletions.filter((h) => !expected.has(h));
+  const guard = observedDeletions.length > 0 ? await restoreGuard(conn as unknown as Db) : null;
+  const recentDeletions = observedDeletions.length > 0 ? await recentObservedDeletions(conn as unknown as Db, id) : 0;
   const present = new Set([...listing.keys(), ...fetched, ...radicaleSkipped.map((r) => r.href)]);
-  const hold = massDeleteBreaker({ calendarId: id, collection, state, total: index.length, deletions, present });
-  const deletes = hold ? [] : deletions;
+  const hold = massDeleteBreaker({ calendarId: id, collection, state, total: index.length, deletions: observedDeletions, recent: recentDeletions, guardUntil: guard, present });
+  const deletes = hold ? apiDeletions : deletions;
+  const observedActor = run.opts.reason === 'rebuild' ? 'rebuild' : 'sync';
+  const deleteActors: Record<string, string> = {};
+  for (const h of deletes) deleteActors[h] = expected.has(h) ? `write-through:${expected.get(h)}` : observedActor;
   // replaceAll (rebuild): ogni risorsa si riscrive; le cancellazioni restano
   // esplicite in `deletes`, quindi passano comunque dall'interruttore.
   const replaceAll = run.opts.reason === 'rebuild' && fetchAll && !hold && pending404.length === 0;
@@ -1094,6 +1270,7 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     full: coversAll,
     horizon,
     actor,
+    deleteActors,
     idStrategy: run.opts.idStrategy,
   };
   requestTimeout(deadline, id);
@@ -1110,16 +1287,56 @@ async function syncUnderLock(args: UnderLockArgs): Promise<SyncCollectionResult>
     hold,
     replaceAll,
     syncedAt: new Date(),
+    // dirty_since si azzera solo per le modifiche segnate entro la stat di m0.
+    observedAt: mount ? new Date(observedMs) : undefined,
   });
+  consumeExpectedDeletions(id, apiDeletions);
   return buildResult({ id, startedAt, applied, full, syncToken: report.syncToken, dirMtimeNs, hold: !!hold, radicaleSkipped: radicaleSkipped.length, pending404: pending404.length });
 }
 
 /**
- * Interruttore anti-cancellazione (design §6.2 passo 6): restituisce la
- * sospensione da passare all'apply, oppure null se le cancellazioni si
- * applicano. Una collezione già in hold accumula le nuove cancellazioni
- * finché l'admin non sceglie; le sospese che ricompaiono escono dall'elenco,
- * e quando non ne resta nessuna la sospensione si toglie da sola.
+ * Guardia post-ripristino (design §16.2): restore_guard_until nel futuro
+ * secondo l'orologio del database. Restituisce la scadenza, o null.
+ */
+async function restoreGuard(conn: Db): Promise<Date | null> {
+  const [row]: Array<{ until: Date | null; active: boolean }> = await conn`
+    SELECT restore_guard_until AS until, (restore_guard_until IS NOT NULL AND restore_guard_until > now()) AS active
+    FROM calendar_backend_state WHERE id = true
+  `;
+  return row?.active ? row.until : null;
+}
+
+/**
+ * Cancellazioni osservate su Radicale e già applicate negli ultimi 15 minuti
+ * (versioni 'delete' con attore 'sync' o 'rebuild'; mai quelle fatte
+ * dall'API, registrate come write-through:<attore>, né le scelte dell'admin).
+ */
+async function recentObservedDeletions(conn: Db, calendarId: string): Promise<number> {
+  const [row]: Array<{ n: number }> = await conn`
+    SELECT count(*)::int AS n FROM cal_object_versions
+    WHERE calendar_id = ${calendarId} AND change_kind = 'delete' AND actor IN ('sync', 'rebuild')
+      AND created_at > now() - ${MASS_DELETE_WINDOW_MINUTES} * INTERVAL '1 minute'
+  `;
+  return row?.n ?? 0;
+}
+
+/**
+ * Interruttore anti-cancellazione (design §6.2 passo 6, §16.2): restituisce
+ * la sospensione da passare all'apply, oppure null se le cancellazioni si
+ * applicano. `deletions` sono le sole cancellazioni osservate (non fatte
+ * dall'API). Scatta:
+ *  - con la guardia post-ripristino attiva, per qualsiasi cancellazione
+ *    (motivo 'restore-guard': lo snapshot ripristinato non toglie in silenzio
+ *    gli eventi della finestra RPO);
+ *  - quando le cancellazioni osservate negli ultimi 15 minuti (`recent`, già
+ *    applicate) più queste superano max(50, 20%) della collezione all'inizio
+ *    della finestra: CalDAV cancella una risorsa per volta e il campanello
+ *    sincronizza ogni secondo, quindi la soglia di una sola sync non basta;
+ *  - quando una sola sync svuota una collezione di almeno 2 oggetti.
+ * Oltre la soglia vanno in sospeso le sole cancellazioni nuove. Una
+ * collezione già in hold accumula le nuove cancellazioni finché l'admin non
+ * sceglie; le sospese che ricompaiono escono dall'elenco, e quando non ne
+ * resta nessuna la sospensione si toglie da sola.
  */
 function massDeleteBreaker(input: {
   calendarId: string;
@@ -1127,15 +1344,24 @@ function massDeleteBreaker(input: {
   state: StateRow | undefined;
   total: number;
   deletions: string[];
+  recent: number;
+  guardUntil: Date | null;
   present: ReadonlySet<string>;
 }): { reason: string; pendingDeletions: string[] } | null {
-  const { state, total, deletions, present } = input;
+  const { state, total, deletions, recent, present } = input;
   const alreadyHold = state?.health === 'hold';
   const previous = (state?.pending_deletions ?? []).filter((h) => !present.has(h));
-  const threshold = Math.max(INDEX_LIMITS.massDeleteMinObjects, total * INDEX_LIMITS.massDeleteRatio);
-  const mass = deletions.length > threshold;
+  const windowTotal = total + recent;
+  const windowDeletions = deletions.length + recent;
+  const threshold = Math.max(INDEX_LIMITS.massDeleteMinObjects, windowTotal * INDEX_LIMITS.massDeleteRatio);
+  const guarded = input.guardUntil !== null && deletions.length > 0;
+  const mass = deletions.length > 0 && windowDeletions > threshold;
+  // Collezione svuotata in UNA sync (da 2 oggetti in su), come prima: estesa
+  // alla finestra sospenderebbe anche chi toglie dal telefono gli ultimi due
+  // eventi di un calendario piccolo, e contro uno svuotamento lento
+  // proteggerebbe solo l'ultimo oggetto.
   const emptied = total >= EMPTY_COLLECTION_MIN_OBJECTS && deletions.length >= total;
-  if (!alreadyHold && !mass && !emptied) return null;
+  if (!alreadyHold && !guarded && !mass && !emptied) return null;
   const pending = [...new Set([...previous, ...deletions])].sort();
   if (alreadyHold) {
     if (!pending.length) {
@@ -1144,10 +1370,10 @@ function massDeleteBreaker(input: {
     }
     return { reason: state?.hold_reason ?? HOLD_REASONS.massDelete, pendingDeletions: pending };
   }
-  const reason = emptied ? HOLD_REASONS.collectionEmpty : HOLD_REASONS.massDelete;
+  const reason = guarded ? HOLD_REASONS.restoreGuard : emptied ? HOLD_REASONS.collectionEmpty : HOLD_REASONS.massDelete;
   // L'alert 'collection-hold' lo emette l'indicizzatore alla COMMIT della sospensione.
   log.warn(
-    { calendarId: input.calendarId, collection: input.collection, reason, deletions: deletions.length, total },
+    { calendarId: input.calendarId, collection: input.collection, reason, deletions: deletions.length, recent, total, guardUntil: input.guardUntil?.toISOString() },
     'interruttore anti-cancellazione: cancellazioni sospese, le occorrenze esistenti continuano a bloccare',
   );
   return { reason, pendingDeletions: pending };

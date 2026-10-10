@@ -278,9 +278,12 @@ export async function getIndexHealth(db: Db = sql): Promise<IndexHealthSummary> 
  * (watcher, freshness): dirty_since resta il primo istante osservato. Se la
  * collezione aveva già sync fallite, da adesso è unsyncable (health_since =
  * observedAt). Crea la riga di stato se manca (collezione mai sincronizzata);
- * non fa nulla se il calendario non esiste.
+ * non fa nulla se il calendario non esiste. Con `mtimeNs` (la mtime osservata)
+ * non fa nulla se una sync l'ha già salvata in dir_mtime_ns: un segno arrivato
+ * dopo la COMMIT di quella sync non lascia una collezione falsamente 'stale'.
  */
-export async function markCollectionDirty(db: Db, calendarId: string, observedAt: Date): Promise<void> {
+export async function markCollectionDirty(db: Db, calendarId: string, observedAt: Date, opts: { mtimeNs?: bigint | null } = {}): Promise<void> {
+  const mtime = opts.mtimeNs === undefined || opts.mtimeNs === null ? null : opts.mtimeNs.toString();
   await db`
     INSERT INTO cal_collection_state (calendar_id, origin_store, dirty_since, health, health_since)
     SELECT c.id, CASE WHEN c.role = 'subscription' THEN 'remote' ELSE 'radicale' END, ${observedAt}, 'stale', ${observedAt}
@@ -296,6 +299,7 @@ export async function markCollectionDirty(db: Db, calendarId: string, observedAt
              AND cal_collection_state.dirty_since IS NULL THEN EXCLUDED.dirty_since
         ELSE cal_collection_state.health_since END,
       dirty_since = COALESCE(cal_collection_state.dirty_since, EXCLUDED.dirty_since)
+    WHERE ${mtime}::bigint IS NULL OR cal_collection_state.dir_mtime_ns IS DISTINCT FROM ${mtime}::bigint
   `;
 }
 
@@ -410,6 +414,13 @@ export type IndexAlertCode =
 export function raiseIndexAlert(code: IndexAlertCode, message: string, details: Record<string, unknown> = {}): void {
   try {
     log.warn({ alert: code, ...details }, message);
+    for (const listener of alertListeners) {
+      try {
+        listener(code, details);
+      } catch {
+        /* un ascoltatore non ferma mai l'avviso */
+      }
+    }
     const key = `${code}|${String(details.key ?? '')}|${String(details.calendarId ?? '')}|${String(details.href ?? '')}`;
     const now = Date.now();
     const last = lastAlertAt.get(key);
@@ -437,4 +448,15 @@ export function raiseIndexAlert(code: IndexAlertCode, message: string, details: 
 /** Solo test: dimentica gli avvisi già inviati (deduplicazione). */
 export function resetIndexAlertsForTests(): void {
   lastAlertAt.clear();
+}
+
+const alertListeners = new Set<(code: IndexAlertCode, details: Readonly<Record<string, unknown>>) => void>();
+
+/**
+ * Ascolta ogni avviso dell'indice (prima della deduplicazione), per metriche
+ * e test; restituisce la funzione che smette di ascoltare.
+ */
+export function onIndexAlert(listener: (code: IndexAlertCode, details: Readonly<Record<string, unknown>>) => void): () => void {
+  alertListeners.add(listener);
+  return () => alertListeners.delete(listener);
 }

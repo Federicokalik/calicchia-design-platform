@@ -26,6 +26,7 @@
 import type { Logger } from 'pino';
 import { sql } from '../../../db';
 import { logger as rootLogger } from '../../logger';
+import { readBackendStateFresh, storeKindForMode, storeKindOverride } from '../backend-mode';
 import { CalendarUnavailableError } from '../errors';
 import { requiredHorizonEnd, targetHorizon } from '../index-model';
 import { raiseIndexAlert } from './health';
@@ -100,7 +101,12 @@ export async function ensureHorizon(opts: { now?: Date; signal?: AbortSignal } =
   }
 
   // Garanzia statica per le decisioni (design §6.9): avviso se non regge.
+  // Conta solo con lo store Radicale, come nell'auditor e nella salute: in
+  // mode postgres (indice in shadow, volume forse non inizializzato fino alla
+  // F3) le collezioni senza stato sarebbero un falso allarme ogni notte.
   try {
+    const state = await readBackendStateFresh(sql);
+    if ((storeKindOverride() ?? storeKindForMode(state.mode)) !== 'radicale') return { extended, failed };
     const required = requiredHorizonEnd(now, await maxAdvanceDays(sql));
     const short = await collectionsShortOf(sql, required);
     if (short.length > 0) {
@@ -126,6 +132,11 @@ interface CoverageRow {
  * Collezioni bloccanti (stesse regole della query di busy, design §7) con
  * l'orizzonte assente o più corto di `until`. Le collezioni Radicale sparite
  * (missing_since) e mai indicizzate non hanno nulla da coprire e non contano.
+ * Le iscrizioni (role 'subscription', fonte remota) non contano mai: nelle
+ * decisioni vale l'ultimo pull completato (design §6.6) e "mai scaricata"
+ * equivale a "nessun evento"; un sidecar con oggetti e orizzonte corto o
+ * assente lo copre l'espansione al volo del busy. Il guasto di un feed
+ * esterno non porta mai le prenotazioni in 503.
  */
 async function collectionsShortOf(db: Db, until: Date, calendarIds?: readonly string[]): Promise<CoverageRow[]> {
   const ids = calendarIds ? [...calendarIds] : null;
@@ -133,17 +144,13 @@ async function collectionsShortOf(db: Db, until: Date, calendarIds?: readonly st
     SELECT c.id AS calendar_id, st.horizon_end, (st.calendar_id IS NOT NULL) AS has_state
     FROM calendars c
     LEFT JOIN cal_collection_state st ON st.calendar_id = c.id
-    LEFT JOIN calendars p ON p.id = c.parent_calendar_id
-    LEFT JOIN calendar_subscriptions s ON s.collection_calendar_id = c.id
     WHERE c.lifecycle = 'active'
+      AND c.role <> 'subscription'
       AND (${ids === null} OR c.id = ANY(${ids ?? []}::uuid[]))
-      AND CASE WHEN c.role = 'subscription'
-               THEN COALESCE(s.blocks_availability, false) AND COALESCE(p.blocks_availability, false)
-               ELSE c.blocks_availability END
+      AND c.blocks_availability
       AND (
         st.calendar_id IS NOT NULL
-        OR (c.role <> 'subscription' AND c.missing_since IS NULL
-            AND c.collection_name IS NOT NULL AND c.collection_name NOT LIKE '\\_%')
+        OR (c.missing_since IS NULL AND c.collection_name IS NOT NULL AND c.collection_name NOT LIKE '\\_%')
       )
       AND (st.horizon_end IS NULL OR st.horizon_end < ${until})
   `;

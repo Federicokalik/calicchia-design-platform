@@ -49,6 +49,7 @@ import {
   syncAllCollections,
   syncCollection,
   updateWatchMode,
+  waitForSyncsIdle,
 } from '../../src/lib/calendar/radicale/sync';
 import { startCalendarWatcher, stopCalendarWatcher, watcherAlive } from '../../src/lib/calendar/radicale/watcher';
 import { overrideCalendarStore } from '../../src/lib/calendar/store';
@@ -156,9 +157,19 @@ export async function settleCalendar(): Promise<void> {
     const summary = await runCalendarJobsOnce({ limit: 50, workerId: 'test-matrix' });
     if (summary.claimed === 0) break;
   }
-  await drainSyncs(5_000).catch(() => undefined);
+  // Attesa SENZA interruzione: drainSyncs (spegnimento) dopo 5 s interrompe le
+  // sync in corso, e una prima sync interrotta lascia la collezione senza stato
+  // né orizzonte (decisioni e livello display in 503 horizon_insufficient: era
+  // il "Errore esecuzione tool" intermittente di get_calendar_availability sul
+  // contratto MCP, quando la macchina carica rallentava una sync oltre i 5 s).
+  if (!(await waitForSyncsIdle(SETTLE_SYNC_TIMEOUT_MS))) {
+    console.warn(`[matrice radicale] sync ancora in corso dopo ${SETTLE_SYNC_TIMEOUT_MS} ms: si prosegue senza interromperle`);
+  }
   await reportUnsyncableCollections();
 }
+
+/** Attesa massima delle sync in corso in settleCalendar (macchina dei test condivisa e carica). */
+const SETTLE_SYNC_TIMEOUT_MS = 60_000;
 
 /** Collezioni già segnalate come non sincronizzabili (una riga per episodio). */
 const reportedUnsyncable = new Set<string>();
@@ -249,7 +260,7 @@ export async function pruneRadicaleData(prefix: string, trackedEventIds: Iterabl
       if (!isRadicaleError(err, 'not_found')) throw err;
     }
   }
-  if (stale.length) await drainSyncs(5_000).catch(() => undefined);
+  if (stale.length) await waitForSyncsIdle(SETTLE_SYNC_TIMEOUT_MS);
 }
 
 /**

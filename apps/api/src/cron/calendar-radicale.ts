@@ -49,7 +49,7 @@ import { runCalendarAudit } from '../lib/calendar/radicale/auditor';
 import { startCanarySchedule, stopCanarySchedule } from '../lib/calendar/radicale/canary';
 import { ensureHorizon } from '../lib/calendar/radicale/horizon';
 import { stopIndexWorker } from '../lib/calendar/radicale/indexer';
-import { registerIndexRebuildJob } from '../lib/calendar/radicale/rebuild';
+import { ensureRequestedRebuild, registerIndexRebuildJob } from '../lib/calendar/radicale/rebuild';
 import { registerStoreJobs } from '../lib/calendar/radicale/store';
 import { radicaleRuntime } from '../lib/calendar/radicale/sync';
 import { startCalendarWatcher, stopCalendarWatcher } from '../lib/calendar/radicale/watcher';
@@ -125,6 +125,15 @@ async function startComponents(): Promise<void> {
     await startCalendarJobWorker();
   } catch (err) {
     log.error({ err }, 'worker dei job del calendario non avviato');
+  }
+  if (stopping) return;
+
+  // 3b. Rebuild richiesto senza job (restore-calendar-stack.sh, UPDATE manuale
+  // dello stato): accodato subito invece che all'auditor delle 4.
+  try {
+    if (await ensureRequestedRebuild()) log.warn('rebuild dell\'indice richiesto dallo stato del backend: accodato all\'avvio');
+  } catch (err) {
+    log.warn({ err }, 'verifica del rebuild richiesto all\'avvio non riuscita: lo riaccoda l\'auditor notturno');
   }
   if (stopping) return;
 

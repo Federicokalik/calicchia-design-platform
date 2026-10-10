@@ -75,11 +75,13 @@ import {
   type PreparedOccurrence,
   prepareContextOf,
   prepareForcedQuarantine,
+  prepareItem,
   prepareItems,
   prepareLastGood,
   type RawItem,
   safeTimezone,
   semanticFingerprintOfRaw,
+  timedOutItem,
 } from './index-worker';
 import type { Db } from './policy';
 import { CALENDAR_ROLES, type CalendarRole } from './types';
@@ -187,8 +189,18 @@ export interface PreparedChangeSet {
  * INDEX_LIMITS.workerThreadsThreshold risorse (o con worker: true) gira in un
  * worker_thread; se il worker non è disponibile si ripiega sul thread
  * principale (stesso risultato).
+ *
+ * Un change set che nel worker supera il tempo massimo NON si ripete nel
+ * thread principale (lo stesso testo lo bloccherebbe, e con lui
+ * verify-credentials): le risorse si ripreparano una per una nel worker, con
+ * un tempo massimo per risorsa, e quella che lo supera va in quarantena
+ * 'index-error' con il blocco conservativo dal testo (timedOutItem).
+ * `timeoutMs` e `itemTimeoutMs` servono ai test.
  */
-export async function prepareCollectionChanges(input: ChangeSetInput, opts: { worker?: boolean | 'auto' } = {}): Promise<PreparedChangeSet> {
+export async function prepareCollectionChanges(
+  input: ChangeSetInput,
+  opts: { worker?: boolean | 'auto'; timeoutMs?: number; itemTimeoutMs?: number } = {},
+): Promise<PreparedChangeSet> {
   prepareContextOf(input); // orizzonte valido, prima di qualsiasi lavoro
   const count = input.upserts.length + input.radicaleSkipped.length;
   const mode = opts.worker ?? 'auto';
@@ -196,13 +208,55 @@ export async function prepareCollectionChanges(input: ChangeSetInput, opts: { wo
   let items: PreparedItem[] | null = null;
   if (useWorker) {
     try {
-      items = await indexWorkerPool.prepare({ context: input.context, horizon: input.horizon, upserts: input.upserts, radicaleSkipped: input.radicaleSkipped });
+      items = await indexWorkerPool.prepare(
+        { context: input.context, horizon: input.horizon, upserts: input.upserts, radicaleSkipped: input.radicaleSkipped },
+        opts.timeoutMs ?? WORKER_REQUEST_TIMEOUT_MS,
+      );
     } catch (err) {
-      log.warn({ err, calendarId: input.context.calendarId, count }, 'worker dell\'indicizzatore non disponibile: preparazione nel thread principale');
+      if (err instanceof IndexWorkerTimeoutError) {
+        log.warn({ calendarId: input.context.calendarId, count }, 'preparazione nel worker oltre il tempo massimo: risorse ripreparate una per una nel worker');
+        items = await prepareItemsOneByOne(input, opts.itemTimeoutMs ?? WORKER_ITEM_TIMEOUT_MS);
+      } else {
+        log.warn({ err, calendarId: input.context.calendarId, count }, 'worker dell\'indicizzatore non disponibile: preparazione nel thread principale');
+      }
     }
   }
   items ??= prepareItems(input);
   return { input, items, preparedAt: new Date() };
+}
+
+/**
+ * Dopo il timeout di un change set: ogni risorsa si prepara da sola nel
+ * worker (riavviato dopo il timeout) con `itemTimeoutMs`. Oltre, quarantena
+ * 'index-error' con il blocco conservativo dal testo; con il worker non
+ * disponibile la singola risorsa si prepara nel thread principale (i limiti
+ * strutturali di calendar-core lo proteggono già).
+ */
+async function prepareItemsOneByOne(input: ChangeSetInput, itemTimeoutMs: number): Promise<PreparedItem[]> {
+  const pc = prepareContextOf(input);
+  const entries: Array<[RawItem, PreparedItem['origin']]> = [
+    ...input.upserts.map((i): [RawItem, PreparedItem['origin']] => [i, 'upsert']),
+    ...input.radicaleSkipped.map((i): [RawItem, PreparedItem['origin']] => [i, 'radicale-skip']),
+  ];
+  const out: PreparedItem[] = [];
+  for (const [item, origin] of entries) {
+    try {
+      const [prepared] = await indexWorkerPool.prepare(
+        { context: input.context, horizon: input.horizon, upserts: origin === 'upsert' ? [item] : [], radicaleSkipped: origin === 'radicale-skip' ? [item] : [] },
+        itemTimeoutMs,
+      );
+      if (!prepared) throw new Error('risposta vuota del worker dell\'indicizzatore');
+      out.push(prepared);
+    } catch (err) {
+      if (err instanceof IndexWorkerTimeoutError) {
+        log.error({ calendarId: input.context.calendarId, href: item.href }, 'risorsa oltre il tempo massimo di preparazione: quarantena index-error con il blocco conservativo dal testo');
+        out.push(timedOutItem(item, origin, pc));
+      } else {
+        out.push(prepareItem(item, origin, pc));
+      }
+    }
+  }
+  return out;
 }
 
 // ─── Worker thread ───────────────────────────────
@@ -227,8 +281,18 @@ const { parentPort, workerData } = require('node:worker_threads');
 });
 `;
 
-/** Tempo massimo di una preparazione nel worker prima di ripiegare sul thread principale. */
+/** Tempo massimo di una preparazione nel worker (change set intero); oltre, risorse una per una. */
 const WORKER_REQUEST_TIMEOUT_MS = 120_000;
+/** Tempo massimo della preparazione di UNA risorsa nel worker dopo il timeout del change set. */
+const WORKER_ITEM_TIMEOUT_MS = 15_000;
+
+/** Preparazione nel worker oltre il tempo massimo (il worker viene riavviato). */
+class IndexWorkerTimeoutError extends Error {
+  constructor() {
+    super('preparazione nel worker oltre il tempo massimo');
+    this.name = 'IndexWorkerTimeoutError';
+  }
+}
 /** Il worker inattivo si chiude dopo questo tempo. */
 const WORKER_IDLE_MS = 60_000;
 
@@ -304,7 +368,7 @@ class IndexWorkerPool {
     this.idleTimer.unref();
   }
 
-  prepare(input: IndexWorkerRequest['input']): Promise<PreparedItem[]> {
+  prepare(input: IndexWorkerRequest['input'], timeoutMs = WORKER_REQUEST_TIMEOUT_MS): Promise<PreparedItem[]> {
     const worker = this.start();
     if (this.idleTimer) {
       clearTimeout(this.idleTimer);
@@ -315,9 +379,9 @@ class IndexWorkerPool {
     return new Promise<PreparedItem[]>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error('preparazione nel worker oltre il tempo massimo'));
+        reject(new IndexWorkerTimeoutError());
         this.fail(worker, new Error('worker dell\'indicizzatore bloccato: riavviato'));
-      }, WORKER_REQUEST_TIMEOUT_MS);
+      }, Math.max(1, timeoutMs));
       this.pending.set(id, { resolve, reject, timer });
       worker.postMessage({ id, input } satisfies IndexWorkerRequest);
     });
@@ -538,6 +602,13 @@ export interface ApplyOptions {
   /** Rebuild: tutte le risorse del change set si riscrivono (niente scorciatoia "invariato"), nella stessa tx. */
   replaceAll?: boolean;
   syncedAt: Date;
+  /**
+   * Istante della stat di dir_mtime_ns (prima del REPORT). dirty_since si
+   * azzera solo se il primo cambio segnato non è successivo: una modifica
+   * osservata dopo la stat (quindi forse dopo il REPORT) resta pendente.
+   * Default syncedAt.
+   */
+  observedAt?: Date;
 }
 
 export interface ApplyResult {
@@ -1002,11 +1073,13 @@ async function applyInTx(
   const deleteHrefs = deletes.filter((h) => existing.has(h));
   if (deleteHrefs.length > 0) {
     if (context.versions) {
+      const deleteActors = deleteHrefs.map((h) => input.deleteActors?.[h] ?? input.actor);
       await tx`
         INSERT INTO cal_object_versions (object_id, calendar_id, href, etag, raw_ics, content_sha256, semantic_fp, change_kind, valid, actor)
-        SELECT o.id, o.calendar_id, o.href, o.etag, o.raw_ics, o.content_sha256, o.semantic_fp, 'delete', false, ${input.actor}
+        SELECT o.id, o.calendar_id, o.href, o.etag, o.raw_ics, o.content_sha256, o.semantic_fp, 'delete', false, d.actor
         FROM cal_objects o
-        WHERE o.calendar_id = ${calendarId} AND o.href = ANY(${deleteHrefs}::text[])
+        JOIN unnest(${deleteHrefs}::text[], ${deleteActors}::text[]) AS d(href, actor) ON d.href = o.href
+        WHERE o.calendar_id = ${calendarId}
       `;
     }
     await tx`DELETE FROM cal_objects WHERE calendar_id = ${calendarId} AND href = ANY(${deleteHrefs}::text[])`;
@@ -1014,7 +1087,12 @@ async function applyInTx(
   if (deletes.length > 0) await retireObjectIds(tx, calendarId, deletes, now);
 
   // Interruttore anti-cancellazione: le cancellazioni sospese restano finché l'admin non sceglie.
-  const reappeared = new Set([...seen, ...deletes]);
+  // Una sospesa "ricompare" solo se una sync l'ha vista su Radicale: la
+  // rimaterializzazione e la quarantena forzata riscrivono le righe dal testo
+  // dell'indice (comprese le sospese), quindi non dicono nulla su Radicale e
+  // l'hold resta com'è (motivo, inizio, elenco).
+  const sync = internal.bookkeeping === 'sync';
+  const reappeared = new Set(sync ? [...seen, ...deletes] : deletes);
   const candidatePending = [...new Set([...(state.pending_deletions ?? []), ...(opts.hold?.pendingDeletions ?? [])])].filter((h) => !reappeared.has(h));
   const stillPending = candidatePending.length === 0 ? [] : (await tx<Array<{ href: string }>>`
     SELECT href FROM cal_objects WHERE calendar_id = ${calendarId} AND href = ANY(${candidatePending}::text[]) ORDER BY href
@@ -1049,7 +1127,6 @@ async function applyInTx(
   }
 
   const anyChange = writes.length > 0 || deleteHrefs.length > 0;
-  const sync = internal.bookkeeping === 'sync';
   // Una sync è completa se elenca tutta la collezione (full) o parte da un token
   // nullo (REPORT sync-collection iniziale: restituisce tutti i membri); una
   // incrementale su una collezione mai sincronizzata lascia 'stale'.
@@ -1070,7 +1147,7 @@ async function applyInTx(
       last_error = CASE WHEN ${sync} THEN NULL ELSE last_error END,
       health_since = CASE WHEN health IS DISTINCT FROM ${nextHealth} THEN ${now} ELSE health_since END,
       health = ${nextHealth},
-      dirty_since = CASE WHEN ${clearDirty} AND (dirty_since IS NULL OR dirty_since <= ${opts.syncedAt}) THEN NULL ELSE dirty_since END,
+      dirty_since = CASE WHEN ${clearDirty} AND (dirty_since IS NULL OR dirty_since <= ${opts.observedAt ?? opts.syncedAt}) THEN NULL ELSE dirty_since END,
       pending_deletions = ${stillPending}::text[],
       hold_reason = ${holdReason},
       hold_since = ${holdSince},

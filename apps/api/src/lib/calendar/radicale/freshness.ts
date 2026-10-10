@@ -217,6 +217,8 @@ export async function verifyFreshness(opts: { db: Db; budgetMs?: number; signal?
     : [];
 
   const toSync: string[] = [];
+  /** mtime osservata delle collezioni da sincronizzare (mount mode). */
+  const observedMtime = new Map<string, bigint>();
   if (mode === 'mount') {
     for (const row of rows) {
       let m: bigint | null;
@@ -230,7 +232,10 @@ export async function verifyFreshness(opts: { db: Db; budgetMs?: number; signal?
         if (row.health !== 'hold') toSync.push(row.id);
         continue;
       }
-      if (row.dir_mtime_ns === null || BigInt(row.dir_mtime_ns) !== m) toSync.push(row.id);
+      if (row.dir_mtime_ns === null || BigInt(row.dir_mtime_ns) !== m) {
+        toSync.push(row.id);
+        observedMtime.set(row.id, m);
+      }
     }
   } else {
     const estimate = rows.reduce((acc, r) => acc + REMOTE_BASE_COST_MS + ((r.object_count ?? 0) / 5_000) * REMOTE_COST_PER_5000_MS, 0);
@@ -262,10 +267,18 @@ export async function verifyFreshness(opts: { db: Db; budgetMs?: number; signal?
   if (toSync.length) {
     const observedAt = new Date();
     // dirty_since prima della sync: se fallisce la collezione è unsyncable
-    // (pool calendario, autocommit: mai righe di stato bloccate nella tx della prenotazione).
-    await Promise.all(toSync.map((id) => markCollectionDirty(calSql, id, observedAt).catch((err: unknown) => {
+    // (pool calendario, autocommit: mai righe di stato bloccate nella tx della
+    // prenotazione). Entro il budget: l'UPSERT può attendere una connessione
+    // del pool calendario o il FOR UPDATE di un apply lungo mentre la
+    // prenotazione tiene il lock cal-week. Allo scadere si prosegue (le sync
+    // falliscono da sole entro la scadenza) e il segno finisce in background:
+    // un segno arrivato dopo un fallimento porta comunque a 'unsyncable'.
+    const marks = Promise.all(toSync.map((id) => markCollectionDirty(calSql, id, observedAt, { mtimeNs: observedMtime.get(id) ?? null }).catch((err: unknown) => {
       log.warn({ err, calendarId: id }, 'markCollectionDirty non riuscita');
     })));
+    await withinDeadline(marks, deadline, 'marcatura delle modifiche').catch((err: unknown) => {
+      log.warn({ err: (err as Error)?.message }, 'marcatura delle modifiche oltre il budget: si prosegue con le sync');
+    });
     const results = await Promise.allSettled(toSync.map((id) => syncCollection(id, { reason: 'freshness', deadline, signal })));
     const failures = results
       .map((r, i) => (r.status === 'rejected' ? { id: toSync[i], error: syncFailure(r.reason, state) } : null))

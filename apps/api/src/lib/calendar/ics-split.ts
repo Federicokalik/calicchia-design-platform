@@ -224,9 +224,15 @@ function brokenResourceText(cal: IcsComponent, uid: string): string | null {
  * non è utilizzabile (vuoto, non iCalendar, BEGIN/END sbilanciati o troncato,
  * oltre 10 MiB): in quel caso il pull lo rifiuta senza toccare l'indice. Gli
  * errori dei singoli UID vanno in `errors` e non fermano gli altri.
+ *
+ * Il corpo scaricato va passato come byte: l'unfolding avviene prima della
+ * decodifica UTF-8, così un carattere multibyte spezzato da un folding a 75
+ * caratteri (invece che a 75 ottetti, generatori esterni) si ricompone; i
+ * byte non UTF-8 diventano U+FFFD come con la decodifica tollerante di oggi
+ * (BOM tolto in entrambi i casi).
  */
-export function splitIcsFeed(body: string): SplitFeedResult {
-  const parsed = parseIcs(body, { malformedLines: 'skip', multipleCalendars: 'merge' });
+export function splitIcsFeed(body: string | Uint8Array): SplitFeedResult {
+  const parsed = parseIcs(body, { malformedLines: 'skip', multipleCalendars: 'merge', invalidUtf8: 'replace' });
   if (!parsed.ok) throw new IcsFeedError(parsed.error.code, parsed.error.message);
   const cal = parsed.value;
   let warnings = parsed.warnings.length;

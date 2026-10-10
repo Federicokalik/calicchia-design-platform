@@ -95,13 +95,15 @@ test/
                          (indexer, index-health), RadicaleStore e gate delle scritture (radicale-store, write-gate),
                          busy fail-closed (busy), split e pull delle iscrizioni (ics-split, subscriptions-pull),
                          feed dall'indice e consumatori (feed-builder, consumers), salute del calendario
-                         (calendar-health); senza Radicale)
+                         (calendar-health), correzioni della revisione F2 su indice, job, busy e pull
+                         (f2-hardening); senza Radicale)
   integration/           Radicale reale: smoke CalDAV, plugin del repository, client di servizio e control-plane,
                          caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario;
                          F2: sync, watcher, canary, discovery e freshness (radicale-sync), rebuild dell'indice
                          (index-rebuild), RadicaleStore (radicale-store), decisioni di prenotazione (booking-decision),
                          consumatori (consumers), specchio delle iscrizioni (subscription-mirror), criterio di
-                         uscita della F2 (radicale-f2-exit)
+                         uscita della F2 (radicale-f2-exit), correzioni della revisione F2 su sync, guardia
+                         post-ripristino, interruttore cumulativo, saga e store (radicale-f2-hardening)
 ```
 
 Fuori da `apps/api/test`, il pacchetto `@calicchia/calendar-core` ha i propri test (node:test via tsx, senza database né Radicale): `pnpm --filter @calicchia/calendar-core test` e `typecheck`; vedi `packages/calendar-core/README.md`.
@@ -259,7 +261,7 @@ Con `CALENDAR_BACKEND=radicale`, per ogni file:
 
 - parte un Radicale 3.7.8 reale (storage multifilesystem in una directory temporanea, htpasswd con il solo `caldes-svc` e la matrice di `caldes-svc` del contratto control-plane §8); il volume si inizializza come in F1 (`initializeVolume`: principal, marker volume-id/epoch, una collezione per ogni calendario del sidecar e `_canary`) e il runtime della sync punta allo storage come al mount di produzione;
 - la facade è forzata su RadicaleStore (`overrideCalendarStore('radicale')`, che vale anche per busy, prenotazioni e gate delle scritture); fixture e route scrivono oggetti iCalendar su Radicale e le letture passano da sync, campanello (100 ms) e indice reali. Le fixture che scrivevano righe legacy usano il percorso di produzione: `projectBooking` accoda il job `project_booking` (o scrive la risorsa con lo stesso ICS per gli stati non proiettati), `subscription` fa il pull verso l'indice con il corpo ICS;
-- i job del calendario (proiezioni, saghe, specchi) vengono eseguiti dopo ogni richiesta (`onAfterRequest`) e da `settleCalendar()`; prima di ogni richiesta e di ogni tool MCP `alignCalendarHorizon()` attende un giro del campanello dopo un salto dell'orologio fermo e allunga l'orizzonte dell'indice (in produzione lo fa il cron giornaliero);
+- i job del calendario (proiezioni, saghe, specchi) vengono eseguiti dopo ogni richiesta (`onAfterRequest`) e da `settleCalendar()`, che poi attende le sync in corso SENZA interromperle (`waitForSyncsIdle`, al più 60 s): `drainSyncs` è dello spegnimento e interrompe dopo 5 s, e una prima sync interrotta lasciava una collezione senza stato né orizzonte (503 `horizon_insufficient` intermittente su `get_calendar_availability/settimana` quando la macchina carica rallentava una sync); prima di ogni richiesta e di ogni tool MCP `alignCalendarHorizon()` attende un giro del campanello dopo un salto dell'orologio fermo e allunga l'orizzonte dell'indice (in produzione lo fa il cron giornaliero). Il campanello misura i propri intervalli (giro, pause dei tentativi, rilettura dell'elenco delle collezioni) con l'orologio monotono, quindi l'orologio fermo dei test non sospende più i tentativi né la scoperta delle collezioni create durante il file;
 - un trigger di prova su `calendar_events` fa fallire ogni INSERT o UPDATE: con lo store Radicale nessun percorso deve scrivere la tabella legacy (si spegne da solo dopo un'ora e lo tolgono l'arresto della matrice e `resetCalendarBaseline()`);
 - se una collezione diventa `unsyncable` (una sync fallita), `settleCalendar()` stampa su stderr la causa registrata (`[matrice radicale] ...`): con l'orologio fermo la tolleranza di 10 minuti del livello display risulta già scaduta e il test successivo riceverebbe un 503 o un errore generico senza spiegazione;
 - la pulizia delle fixture toglie anche gli oggetti del gruppo su Radicale (applicando le cancellazioni sospese dall'interruttore anti-cancellazione) e le collezioni rimaste senza calendario (`pruneRadicaleData`).
