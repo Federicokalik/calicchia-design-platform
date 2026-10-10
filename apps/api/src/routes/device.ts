@@ -4,13 +4,39 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
+import { fromZonedTime } from 'date-fns-tz';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
+import { isCalendarUnavailable } from '../lib/calendar/errors';
+import { listOccurrences } from '../lib/calendar/events';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'device' });
 
 const isValidDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
+
+/** Fuso del giorno dell'agenda (design §12 e §14: giorno di Roma, non UTC). */
+const AGENDA_TZ = 'Europe/Rome';
+
+/** Data di oggi (YYYY-MM-DD) nel fuso dell'agenda. */
+function agendaToday(now: Date = new Date()): string {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: AGENDA_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+}
+
+/**
+ * Finestra [fromIso, toIso) del giorno `date` in Europe/Rome (DST-safe: 23 o
+ * 25 ore nei giorni del cambio d'ora). null se la data non esiste (es. 2027-02-30).
+ */
+function agendaDayWindow(date: string): { fromIso: string; toIso: string } | null {
+  const [y, m, d] = date.split('-').map(Number);
+  const day = new Date(Date.UTC(y, m - 1, d));
+  if (day.getUTCFullYear() !== y || day.getUTCMonth() !== m - 1 || day.getUTCDate() !== d) return null;
+  const next = new Date(day.getTime() + 86_400_000).toISOString().slice(0, 10);
+  return {
+    fromIso: fromZonedTime(`${date}T00:00:00`, AGENDA_TZ).toISOString(),
+    toIso: fromZonedTime(`${next}T00:00:00`, AGENDA_TZ).toISOString(),
+  };
+}
 
 type DeviceEnv = {
   Variables: {
@@ -137,25 +163,37 @@ device.use('/*', deviceAuth);
 // GET /api/device/ping — keepalive/health with token
 device.get('/ping', (c) => c.json({ ok: true, now: new Date().toISOString() }));
 
-// GET /api/device/agenda?date=YYYY-MM-DD — events overlapping the day
-// (all sources already aggregated in calendar_events: google, caldav,
-// bookings, festività) + next_event / last_event_end per la lock adattiva
-// e i contatori per l'avatar.
+// GET /api/device/agenda?date=YYYY-MM-DD — occorrenze che si sovrappongono al
+// giorno di Roma, di tutti i calendari (iscrizioni, proiezioni delle
+// prenotazioni e festività comprese, cancellati esclusi), con le ricorrenze
+// espanse dallo store del calendario (facade listOccurrences: PgLegacyStore in
+// mode postgres, indice di Radicale dopo il cutover) + next_event /
+// last_event_end per la lock adattiva e i contatori per l'avatar. Data di
+// default: oggi a Roma. Fase F2 (design §12 "Agenda device", §14): prima
+// dell'F2 il giorno era quello UTC e le serie comparivano solo nel giorno del
+// DTSTART del master; la forma JSON non cambia.
 device.get('/agenda', async (c) => {
-  const date = c.req.query('date') || new Date().toISOString().slice(0, 10);
-  if (!isValidDate(date)) {
+  const date = c.req.query('date') || agendaToday();
+  const dayWindow = isValidDate(date) ? agendaDayWindow(date) : null;
+  if (!dayWindow) {
     return c.json({ error: 'date non valida (YYYY-MM-DD)' }, 400);
   }
-  const fromIso = `${date}T00:00:00Z`;
-  const toIso = `${date}T23:59:59Z`;
-  const events = await sql<Array<AgendaEventRow>>`
-    SELECT summary, start_time, end_time, all_day, source, status
-    FROM calendar_events
-    WHERE status != 'cancelled'
-      AND start_time < ${toIso}::timestamptz
-      AND end_time   > ${fromIso}::timestamptz
-    ORDER BY start_time ASC
-  `;
+  let events: AgendaEventRow[];
+  try {
+    const occurrences = await listOccurrences({ fromIso: dayWindow.fromIso, toIso: dayWindow.toIso });
+    events = occurrences.map((o) => ({
+      summary: o.summary,
+      start_time: o.start_time,
+      end_time: o.end_time,
+      all_day: o.all_day,
+      source: o.source,
+      status: o.status,
+    }));
+  } catch (err) {
+    if (!isCalendarUnavailable(err)) throw err;
+    log.warn({ reason: err.reason, detail: err.detail }, 'agenda del device non disponibile: calendario non verificabile');
+    return c.json(err.toPublicBody(), 503);
+  }
 
   const [counts] = await sql<Array<{ pending_tasks: number; pending_notes: number }>>`
     SELECT

@@ -55,6 +55,7 @@ import { calendarPublic } from './routes/calendar/public';
 import { calendarAdmin } from './routes/calendar/admin';
 import { calendarFeed } from './routes/calendar/feed';
 import { caldavBackend } from './routes/calendar/caldav-backend';
+import { calendarHealth } from './routes/calendar/health';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -233,6 +234,8 @@ app.use('/api/assets/*', serveStatic({ root: './assets', rewriteRequestPath: (pa
 
 // Health check (no auth required)
 app.route('/api/health', health);
+// Salute del calendario (F2, design §16.5): stato pubblico, dettaglio con JWT admin.
+app.route('/api/health/calendar', calendarHealth);
 
 // Private files (SEC-10): quote PDFs / receipts / WhatsApp media. Public route —
 // access is gated by the signed URL, not by a session. Must stay OUT of the

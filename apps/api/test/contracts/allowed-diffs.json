@@ -1,7 +1,7 @@
 {
   "$comment": [
     "Differenze ammesse fra la baseline dei contratti F0 (PgLegacyStore, codice attuale) e gli store successivi (RadicaleStore da F2).",
-    "In F0 l'elenco attivo 'diffs' è vuoto: ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione.",
+    "Ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione. Dalla F2 'diffs' contiene le correzioni comuni ai due store (voci senza 'stores': agenda del device sul giorno di Roma con le serie espanse).",
     "Letto e validato da test/contracts/_json-contract.ts (loadAllowedDiffs): un campo sconosciuto o mancante fa fallire i test, invece di ammettere differenze per errore.",
     "Una voce copre una differenza se coincidono contract, case (glob sull'id del caso: '*' non attraversa '/', '**' sì), path (JSON Pointer con '*' per un segmento e '**' per zero o più), kind se indicato e lo store corrente (CALENDAR_BACKEND, default 'postgres') se 'stores' è indicato.",
     "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste."
@@ -50,5 +50,43 @@
       "design_ref": "design.md §12, differenze ammesse, punto 5; §13.4; piano F0 attività 2"
     }
   ],
-  "diffs": []
+  "diffs": [
+    {
+      "id": "agenda-device-eventi-espansi-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/events/**",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: l'elenco degli eventi.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'; contratto f2-modules §9",
+      "added_in": "F2"
+    },
+    {
+      "id": "agenda-device-next-event-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/next_event/**",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: next_event, primo evento timed non finito dell'elenco corretto.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
+    },
+    {
+      "id": "agenda-device-last-event-end-giorno-roma",
+      "contract": "device-agenda",
+      "case": "agenda/*",
+      "path": "/body/last_event_end",
+      "reason": "Dalla F2 l'agenda del device usa store.listOccurrences sulla finestra del giorno di Europe/Rome, su entrambi gli store: le serie sono espanse (ogni giorno ha la sua occorrenza, l'override spostato sostituisce quella del master) e il giorno non è più quello UTC (gli eventi dopo la mezzanotte di Roma, gli all-day e le festività timed 00:00→24:00 non compaiono nel giorno precedente). La forma JSON non cambia: cambiano solo gli eventi del giorno e i valori che ne derivano. Qui: last_event_end, fine dell'ultimo evento timed dell'elenco corretto.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
+    },
+    {
+      "id": "agenda-device-data-di-default-roma",
+      "contract": "device-agenda",
+      "case": "agenda/data-di-default",
+      "path": "/body/date",
+      "kind": "changed",
+      "reason": "Senza il parametro date l'agenda mostra oggi nel fuso di Europe/Rome invece della data UTC: alle 00:30 di Roma dell'11 marzo è l'11, non il 10.",
+      "design_ref": "design.md §12 'Agenda device'; §14 'Agenda device senza espansione e con giorno UTC'",
+      "added_in": "F2"
+    }
+  ]
 }

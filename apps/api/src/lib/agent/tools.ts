@@ -1584,13 +1584,10 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
     parameters: { type: 'object', properties: {} },
     riskLevel: 'low',
     execute: async () => {
-      const { listCalendars, buildFeedUrl } = await import('../calendar/calendars');
+      const { listCalendars, buildFeedUrl, countEventsByCalendar } = await import('../calendar/calendars');
       const calendars = await listCalendars();
-      const counts = await sql`
-        SELECT calendar_id, COUNT(*)::int AS n FROM calendar_events
-        WHERE status != 'cancelled' GROUP BY calendar_id
-      `;
-      const countMap = new Map(counts.map((r) => [r.calendar_id, r.n]));
+      // event_count con la semantica legacy (non cancellati, override compresi) dallo store del calendario.
+      const countMap = await countEventsByCalendar();
       return JSON.stringify({
         count: calendars.length,
         calendars: calendars.map((c) => ({
@@ -1634,7 +1631,10 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
         fromIso: args.from as string,
         toIso: args.to as string,
       });
-      return JSON.stringify({ count: occurrences.length, events: occurrences });
+      // Store Radicale: descrizione delle proiezioni ricomposta da calendar_bookings (stesso testo di oggi).
+      const { withProjectionDescriptions } = await import('../calendar/projection-descriptions');
+      const events = await withProjectionDescriptions(occurrences);
+      return JSON.stringify({ count: events.length, events });
     },
   },
   {
@@ -1858,7 +1858,7 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       try {
         const existing = await getEvent(args.id_or_uid as string);
         if (!existing) return JSON.stringify({ error: 'Evento non trovato' });
-        const ev = await updateEvent(existing.id, {
+        const updated = await updateEvent(existing.id, {
           summary: args.summary as string | undefined,
           description: args.description as string | null | undefined,
           location: args.location as string | null | undefined,
@@ -1868,6 +1868,9 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
           rrule: args.rrule === undefined ? undefined : (args.rrule as string | null),
           status: args.status as 'confirmed' | 'tentative' | 'cancelled' | undefined,
         });
+        // Proiezioni con lo store Radicale: descrizione ricomposta, salvo che la chiamata ne abbia scritta una.
+        const { withProjectionDescription } = await import('../calendar/projection-descriptions');
+        const ev = args.description === undefined ? await withProjectionDescription(updated) : updated;
         return JSON.stringify({ success: true, event: ev });
       } catch (err) {
         if (err instanceof EventValidationError) return JSON.stringify({ error: err.message });

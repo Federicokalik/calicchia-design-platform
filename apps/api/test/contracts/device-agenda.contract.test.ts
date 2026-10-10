@@ -1,6 +1,6 @@
 /**
- * Contratto dell'agenda del device ePaper (F0, design §12 "Agenda device" e §15):
- * GET /api/device/agenda?date=YYYY-MM-DD con Bearer dvt_<32 hex>.
+ * Contratto dell'agenda del device ePaper (F0, design §12 "Agenda device" e §15;
+ * corretto in F2): GET /api/device/agenda?date=YYYY-MM-DD con Bearer dvt_<32 hex>.
  *
  * Si congelano: autenticazione propria del device (token dvt_ attivo, non
  * revocato, non scaduto; JWT admin e token MCP rifiutati), contatore d'uso,
@@ -17,19 +17,20 @@
  * stessa, con righe del prefisso (cliente, progetto, task e note) ripulite a
  * fine file.
  *
- * Gli snapshot sono in __snapshots__/device-agenda.contract.json. In F2
- * l'agenda passa a store.listOccurrences con la stessa forma JSON (design §12):
- * le differenze dovute ai bug sotto entreranno in allowed-diffs.json.
- *
- * Comportamenti attuali congelati qui e da correggere dopo F0 (design §14,
- * "Agenda device senza espansione e con giorno UTC"), commentati nei casi:
- *  - le serie non vengono espanse: compare solo la riga del master nel giorno
- *    del suo DTSTART, e gli override modificati come eventi a sé;
- *  - il giorno è quello UTC (00:00Z-23:59:59Z), non quello di Roma: un evento
- *    alle 00:15 di Roma finisce nel giorno prima, un all-day compare anche il
- *    giorno precedente, e la data di default è quella UTC;
- *  - le iscrizioni ICS compaiono sempre (decisione 5: in futuro solo quelle
- *    "visibili sui device").
+ * Gli snapshot sono in __snapshots__/device-agenda.contract.json e restano la
+ * baseline F0 (PgLegacyStore con il codice di prima). Dalla F2 l'agenda passa a
+ * store.listOccurrences sulla finestra del giorno di Roma, con la stessa forma
+ * JSON, su entrambi gli store (design §12 "Agenda device", §14 "Agenda device
+ * senza espansione e con giorno UTC"): le differenze rispetto alla baseline sono
+ * le voci "agenda-device-*" di allowed-diffs.json. Correzioni verificate qui:
+ *  - le serie sono espanse: ogni giorno mostra la propria occorrenza, e un
+ *    override spostato sostituisce l'occorrenza del master;
+ *  - il giorno è quello di Roma (mezzanotte-mezzanotte, DST compreso): un evento
+ *    alle 00:15 di Roma sta nel suo giorno, un all-day e una festività timed
+ *    00:00→24:00 non compaiono più nel giorno precedente, e la data di default
+ *    è quella di Roma.
+ * Resta com'è (decisione 5, da rivedere quando esisterà il flag per singola
+ * iscrizione): le iscrizioni ICS compaiono sempre.
  */
 
 import assert from 'node:assert/strict';
@@ -324,6 +325,8 @@ test('agenda: giorno con eventi di tutti i calendari, next_event e last_event_en
     // All-day del 10 (dalla mezzanotte di Roma = 23:00Z del 9).
     ['00:00', 'Trasferta Milano', true, 'manual', 'confirmed'],
     ['08:00', 'Colazione di lavoro', false, 'manual', 'confirmed'],
+    // Serie espansa (F2): l'occorrenza del 10 dello Standup.
+    ['09:15', 'Standup', false, 'manual', 'confirmed'],
     ['11:00', 'Call con il cliente', false, 'manual', 'confirmed'],
     // Iscrizione ICS: compare sempre, anche se il calendario non blocca.
     ['12:30', 'Pranzo (Google)', false, 'ics_pull', 'confirmed'],
@@ -331,21 +334,20 @@ test('agenda: giorno con eventi di tutti i calendari, next_event e last_event_en
     ['14:00', 'Consulenza – Mario Rossi', false, 'booking', 'confirmed'],
     ['15:00', 'Dentista', false, 'manual', 'confirmed'],
     ['18:30', 'Forse aperitivo', false, 'manual', 'tentative'],
-    // BUG ATTUALE (giorno UTC): giovedì 11 alle 00:15 di Roma è il 10 in UTC.
-    ['00:15', 'Notturno', false, 'manual', 'confirmed'],
   ]);
-  // BUG ATTUALE (serie non espanse): lo Standup del 10 (09:15) manca; la
-  // serie compare solo il 9, giorno del DTSTART del master.
-  assert.ok(!res.json.events.some((e: { summary: string }) => e.summary.endsWith('Standup')));
+  // Giorno di Roma (F2): il "Notturno" di giovedì 11 alle 00:15 di Roma (23:15Z
+  // del 10) non è più in questo giorno, e "Annullato" resta escluso.
+  assert.ok(!res.json.events.some((e: { summary: string }) => e.summary.endsWith('Notturno') || e.summary.endsWith('Annullato')));
 
-  // next_event: primo evento timed non ancora finito alle 10:30; gli all-day
-  // non contano. last_event_end: fine dell'ultimo timed della lista.
+  // next_event: primo evento timed non ancora finito alle 10:30 (lo Standup
+  // 09:15-09:30 è già finito); gli all-day non contano. last_event_end: fine
+  // dell'ultimo timed della lista.
   assert.deepEqual(res.json.next_event, {
     summary: `${fx.prefix} Call con il cliente`,
     start_time: romeIso('2027-03-10', '11:00'),
     end_time: romeIso('2027-03-10', '12:00'),
   });
-  assert.equal(res.json.last_event_end, romeIso('2027-03-11', '00:45'));
+  assert.equal(res.json.last_event_end, romeIso('2027-03-10', '19:00'));
   // I valori dipendono da tabelle globali: qui solo il tipo, i filtri nel test dedicato.
   assert.ok(Number.isInteger(res.json.pending_tasks) && res.json.pending_tasks >= 0);
   assert.ok(Number.isInteger(res.json.pending_notes) && res.json.pending_notes >= 0);
@@ -355,14 +357,13 @@ test('agenda: giorno con eventi di tutti i calendari, next_event e last_event_en
   });
 });
 
-test('agenda: giorni adiacenti mostrano serie non espanse e giorno UTC (bug design §14)', async () => {
-  // Martedì 9: il master dello Standup (giorno del suo DTSTART) e l'all-day
-  // del 10, che in UTC inizia alle 23:00 del 9.
+test('agenda: giorni adiacenti con le serie espanse e il giorno di Roma (design §12, §14)', async () => {
+  // Martedì 9: la prima occorrenza dello Standup. L'all-day del 10, che in UTC
+  // inizia alle 23:00 del 9, non compare più (giorno di Roma).
   const tuesday = await agenda('2027-03-09');
   assert.equal(tuesday.status, 200);
   assert.deepEqual(eventsSummary(tuesday.json), [
     ['09:15', 'Standup', false, 'manual', 'confirmed'],
-    ['00:00', 'Trasferta Milano', true, 'manual', 'confirmed'],
   ]);
   // Il device è "a fine giornata": nessun evento timed ancora da iniziare.
   assert.equal(tuesday.json.next_event, null);
@@ -370,16 +371,19 @@ test('agenda: giorni adiacenti mostrano serie non espanse e giorno UTC (bug desi
     select: agendaBody,
   });
 
-  // Giovedì 11: manca il "Notturno" (finito nel 10) e manca lo Standup.
+  // Giovedì 11: il "Notturno" delle 00:15 di Roma sta nel suo giorno e lo
+  // Standup compare con la sua occorrenza.
   const thursday = await agenda('2027-03-11');
   assert.deepEqual(eventsSummary(thursday.json), [
+    ['00:15', 'Notturno', false, 'manual', 'confirmed'],
+    ['09:15', 'Standup', false, 'manual', 'confirmed'],
     ['10:00', 'Revisione del giovedì', false, 'manual', 'confirmed'],
   ]);
   record('agenda/2027-03-11', thursday, { method: 'GET', path: '/api/device/agenda', query: { date: '2027-03-11' }, auth: 'device' }, {
     select: agendaBody,
   });
 
-  // Venerdì 12: l'override spostato compare come evento a sé.
+  // Venerdì 12: l'override spostato alle 10:00 sostituisce l'occorrenza delle 09:15.
   const friday = await agenda('2027-03-12');
   assert.deepEqual(eventsSummary(friday.json), [
     ['10:00', 'Standup', false, 'manual', 'confirmed'],
@@ -389,22 +393,30 @@ test('agenda: giorni adiacenti mostrano serie non espanse e giorno UTC (bug desi
   });
 });
 
-test("agenda: festività nel calendario 'f' come evento timed, anche nel giorno UTC precedente", async () => {
-  for (const date of ['2027-06-01', '2027-06-02']) {
-    const res = await agenda(date);
-    assert.equal(res.status, 200);
-    // 2 giugno 00:00→24:00 di Roma = 1 giugno 22:00Z → 2 giugno 22:00Z.
-    assert.deepEqual(res.json.events.map((e: { summary: string; start_time: string; end_time: string; all_day: boolean; source: string }) =>
-      [e.summary, e.start_time, e.end_time, e.all_day, e.source]), [
-      ['Festa della Repubblica', '2027-06-01T22:00:00.000Z', '2027-06-02T22:00:00.000Z', false, 'system'],
-    ], date);
-    // La festività è timed: è next_event e last_event_end del giorno.
-    assert.equal(res.json.next_event?.summary, 'Festa della Repubblica');
-    assert.equal(res.json.last_event_end, '2027-06-02T22:00:00.000Z');
-    record(`agenda/festivita-${date}`, res, { method: 'GET', path: '/api/device/agenda', query: { date }, auth: 'device' }, {
-      select: agendaBody,
-    });
-  }
+test("agenda: festività nel calendario 'f' come evento timed solo nel suo giorno di Roma", async () => {
+  // 2 giugno 00:00→24:00 di Roma = 1 giugno 22:00Z → 2 giugno 22:00Z: con il
+  // giorno di Roma (F2) il 1° giugno non la mostra più.
+  const before = await agenda('2027-06-01');
+  assert.equal(before.status, 200);
+  assert.deepEqual(before.json.events, []);
+  assert.equal(before.json.next_event, null);
+  assert.equal(before.json.last_event_end, null);
+  record('agenda/festivita-2027-06-01', before, { method: 'GET', path: '/api/device/agenda', query: { date: '2027-06-01' }, auth: 'device' }, {
+    select: agendaBody,
+  });
+
+  const res = await agenda('2027-06-02');
+  assert.equal(res.status, 200);
+  assert.deepEqual(res.json.events.map((e: { summary: string; start_time: string; end_time: string; all_day: boolean; source: string }) =>
+    [e.summary, e.start_time, e.end_time, e.all_day, e.source]), [
+    ['Festa della Repubblica', '2027-06-01T22:00:00.000Z', '2027-06-02T22:00:00.000Z', false, 'system'],
+  ]);
+  // La festività è timed: è next_event e last_event_end del giorno.
+  assert.equal(res.json.next_event?.summary, 'Festa della Repubblica');
+  assert.equal(res.json.last_event_end, '2027-06-02T22:00:00.000Z');
+  record('agenda/festivita-2027-06-02', res, { method: 'GET', path: '/api/device/agenda', query: { date: '2027-06-02' }, auth: 'device' }, {
+    select: agendaBody,
+  });
 });
 
 test("agenda: pending_tasks conta i task 'todo', pending_notes le note 'pending' e 'transcribing'", async () => {
@@ -439,20 +451,26 @@ test("agenda: pending_tasks conta i task 'todo', pending_notes le note 'pending'
   );
 });
 
-test('agenda: data di default = oggi in UTC; 400 per una data non valida', async () => {
+test('agenda: data di default = oggi a Roma; 400 per una data non valida', async () => {
   // Giovedì 11 alle 00:30 di Roma è ancora il 10 in UTC: senza `date`
-  // l'agenda mostra il 10 (BUG ATTUALE, giorno UTC).
+  // l'agenda mostra l'11, il giorno di Roma (F2; prima era il 10 UTC).
   freezeTime('2027-03-10T23:30:00.000Z');
   try {
     const res = await agenda();
     assert.equal(res.status, 200);
-    assert.equal(res.json.date, '2027-03-10');
+    assert.equal(res.json.date, '2027-03-11');
+    assert.deepEqual(eventsSummary(res.json).map((e) => (e as unknown[])[1]), ['Notturno', 'Standup', 'Revisione del giovedì']);
     // Alle 00:30 di Roma il "Notturno" (00:15-00:45) è in corso: è next_event.
     assert.equal(res.json.next_event?.summary, `${fx.prefix} Notturno`);
     record('agenda/data-di-default', res, { method: 'GET', path: '/api/device/agenda', auth: 'device' }, { select: agendaBody });
   } finally {
     freezeTime(NOW);
   }
+
+  // Una data con il formato giusto ma inesistente non è più un errore del database.
+  const impossible = await agenda('2027-02-30');
+  assert.equal(impossible.status, 400);
+  assert.deepEqual(impossible.json, { error: 'date non valida (YYYY-MM-DD)' });
 
   for (const [name, date] of [['formato', '10/03/2027'], ['testo', 'oggi']] as const) {
     const res = await agenda(date);
@@ -462,8 +480,28 @@ test('agenda: data di default = oggi in UTC; 400 per una data non valida', async
   }
 });
 
-test.todo('agenda: ricorrenze espanse (anche le occorrenze modificate al posto giusto) con la stessa forma JSON (design §12, F2)');
-test.todo('agenda: giorno e data di default in Europe/Rome invece che in UTC (design §14, F2)');
+test("agenda: giorno del cambio d'ora (23 ore) con la serie espansa all'ora di Roma", async () => {
+  // Domenica 28 marzo 2027: le 02:00 diventano 03:00, il giorno di Roma dura 23
+  // ore (27 marzo 23:00Z → 28 marzo 22:00Z). Una serie giornaliera alle 01:30 e
+  // alle 23:30 di Roma resta nel giorno giusto prima e dopo il cambio.
+  const cal = await fx.calendar({ key: 'agenda-dst', name: 'Agenda DST', blocks_availability: false });
+  await fx.series({
+    calendar: cal, summary: 'Notturna DST',
+    start_time: romeIso('2027-03-27', '01:30'), end_time: romeIso('2027-03-27', '01:45'),
+    rrule: 'FREQ=DAILY;COUNT=3',
+  });
+  await fx.event({ calendar: cal, summary: 'Tarda sera DST', start_time: romeIso('2027-03-28', '23:30'), end_time: romeIso('2027-03-28', '23:45') });
+  const res = await agenda('2027-03-28');
+  assert.equal(res.status, 200, res.text);
+  const mine = res.json.events.filter((e: { summary: string }) => e.summary.includes('DST'));
+  assert.deepEqual(mine.map((e: { summary: string; start_time: string }) => [e.summary.replace(`${fx.prefix} `, ''), e.start_time]), [
+    ['Notturna DST', romeIso('2027-03-28', '01:30')],
+    ['Tarda sera DST', romeIso('2027-03-28', '23:30')],
+  ]);
+  assert.equal(romeIso('2027-03-28', '01:30'), '2027-03-28T00:30:00.000Z', 'prima del cambio: UTC+1');
+  assert.equal(romeIso('2027-03-28', '23:30'), '2027-03-28T21:30:00.000Z', 'dopo il cambio: UTC+2');
+});
+
 test.todo('agenda: iscrizioni ICS solo se "visibili sui device" (decisione 5)');
 
 // ─── Copertura ───────────────────────────────
