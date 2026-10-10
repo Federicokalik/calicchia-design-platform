@@ -226,11 +226,27 @@ async function withTripwires<T>(specs: Array<{ table: string; events: string }>,
   }
 }
 
+/**
+ * Tabelle del gruppo S nate con l'indice e la coda dei lavori della F2
+ * (migrazioni 163 e 164): esportate, mai ripristinate né toccate dall'import.
+ */
+const F2_STATE_TABLES = [
+  'public.cal_booking_conflicts',
+  'public.cal_collection_state',
+  'public.cal_components',
+  'public.cal_jobs',
+  'public.cal_object_ids',
+  'public.cal_object_versions',
+  'public.cal_objects',
+  'public.cal_occurrences',
+];
+
 /** Trappole del gruppo S e di calendars, valide in ogni modalità. */
 const PROTECTED_ALWAYS = [
   { table: 'public.calendars', events: 'TRUNCATE OR DELETE' },
   { table: 'public.calendar_backend_state', events: 'TRUNCATE OR INSERT OR DELETE' },
   { table: PROBE, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' },
+  ...F2_STATE_TABLES.map((table) => ({ table, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
 ];
 
 interface StateRow {
@@ -665,7 +681,7 @@ describe('import del backup JSON', () => {
 
     const res = await withTripwires(PROTECTED_ALWAYS, () => importBackup(file));
     assert.equal(res.status, 200, res.text);
-    assert.deepEqual(res.json.skipped.state, ['public.calendar_backend_state', PROBE, 'public.schema_migrations'].sort());
+    assert.deepEqual(res.json.skipped.state, ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES].sort());
     assert.deepEqual(res.json.calendar.kept, []);
 
     const stateAfter = await readState();

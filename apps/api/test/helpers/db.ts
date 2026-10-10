@@ -22,8 +22,9 @@
 
 import './env';
 import { after, before } from 'node:test';
-import { sql } from '../../src/db';
+import { closeCalendarPool, sql } from '../../src/db';
 import { runPendingMigrations } from '../../src/lib/db-migrate';
+import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
 import { TEST_DATABASE } from './env';
 
 export { sql };
@@ -71,11 +72,16 @@ export function migrateTestDatabase(): Promise<void> {
 
 let closed = false;
 
-/** Chiude il pool attendendo le query in corso (anche quelle fire-and-forget). */
+/**
+ * Chiude il pool attendendo le query in corso (anche quelle fire-and-forget).
+ * Chiude anche il pool calendario della F2 (src/db/index.ts, calSql): se un
+ * test lo ha usato (indice, job, sync), le sue connessioni terrebbero vivo il
+ * processo fino all'idle timeout.
+ */
 export async function closeTestDatabase(): Promise<void> {
   if (closed) return;
   closed = true;
-  await sql.end({ timeout: 5 });
+  await Promise.all([sql.end({ timeout: 5 }), closeCalendarPool(5)]);
 }
 
 type Task = () => Promise<unknown>;
@@ -402,7 +408,8 @@ export const SEED_EVENT_TYPE_SLUGS = ['consulenza-gratuita-30min', 'sopralluogo-
  * - ripristina gli slot dello schedule di default (lun-ven 09-13 e 14-18,
  *   migrazione 068) e 'lavoro' come calendario di default;
  * - riporta calendar_backend_state (162) a mode postgres, volume non
- *   inizializzato, senza freeze, restore guard né rebuild.
+ *   inizializzato, senza freeze, restore guard né rebuild;
+ * - svuota indice, id, versioni, job e conflitti del calendario (163-164).
  *
  * Non tocca le righe seminate di calendari e tipi di prenotazione (i test non
  * devono modificarle: si creano le proprie con le fixture) né le altre aree
@@ -436,6 +443,26 @@ export async function resetCalendarBaseline(): Promise<void> {
     // appena migrato: mode postgres, volume non inizializzato, nessuna guardia.
     // credential_epoch e policy_version restano: sono monotoni per contratto
     // (docs/calendar-radicale/contracts/control-plane.md §2).
+    // Indice derivato, id, versioni, job e conflitti (163-164): via i residui
+    // dei calendari seminati e i job di altri file. Le righe dei calendari
+    // cancellati sopra sono già sparite in cascata.
+    const [{ hasIndex, hasJobs }]: Array<{ hasIndex: boolean; hasJobs: boolean }> = await tx`
+      SELECT to_regclass('public.cal_object_ids') IS NOT NULL AS "hasIndex",
+             to_regclass('public.cal_jobs') IS NOT NULL AS "hasJobs"
+    `;
+    if (hasIndex) {
+      await tx`DELETE FROM cal_occurrences`;
+      await tx`DELETE FROM cal_components`;
+      await tx`DELETE FROM cal_objects`;
+      await tx`DELETE FROM cal_collection_state`;
+      await tx`DELETE FROM cal_object_versions`;
+      await tx`DELETE FROM cal_object_ids`;
+    }
+    if (hasJobs) {
+      await tx`DELETE FROM cal_jobs`;
+      await tx`DELETE FROM cal_booking_conflicts`;
+    }
+
     const [{ hasState }]: Array<{ hasState: boolean }> = await tx`
       SELECT to_regclass('public.calendar_backend_state') IS NOT NULL AS "hasState"
     `;
@@ -472,4 +499,7 @@ export async function resetCalendarBaseline(): Promise<void> {
     await tx`DELETE FROM mcp_tokens WHERE label LIKE ${likePrefix(`${TEST_DATA_ROOT}-`)}`;
     await tx`DELETE FROM device_tokens WHERE label LIKE ${likePrefix(`${TEST_DATA_ROOT}-`)}`;
   });
+  // Il modo del backend è appena tornato a postgres: la facade non deve usare
+  // quello in cache (backend-mode.ts, 2 s).
+  invalidateBackendModeCache();
 }
