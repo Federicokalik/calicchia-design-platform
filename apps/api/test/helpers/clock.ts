@@ -18,6 +18,27 @@ import { mock } from 'node:test';
 
 let frozen = false;
 
+type ClockListener = () => void;
+const listeners: ClockListener[] = [];
+
+/**
+ * Registra una funzione chiamata dopo ogni cambio dell'orologio (freezeTime,
+ * advanceTime, restoreTime). La usa la matrice CALENDAR_BACKEND=radicale per
+ * riallineare l'orizzonte dell'indice al nuovo "oggi", come farebbe il cron
+ * giornaliero (helpers/calendar-backend.ts).
+ */
+export function onClockChange(listener: ClockListener): () => void {
+  listeners.push(listener);
+  return () => {
+    const i = listeners.indexOf(listener);
+    if (i >= 0) listeners.splice(i, 1);
+  };
+}
+
+function notifyClockChange(): void {
+  for (const listener of listeners) listener();
+}
+
 /** Ferma Date all'istante indicato (ISO con fuso, es. '2027-01-04T08:00:00Z'). */
 export function freezeTime(iso: string): void {
   const now = new Date(iso);
@@ -25,12 +46,14 @@ export function freezeTime(iso: string): void {
   if (frozen) mock.timers.reset();
   mock.timers.enable({ apis: ['Date'], now });
   frozen = true;
+  notifyClockChange();
 }
 
 /** Sposta in avanti l'orologio fermo di `ms` millisecondi. */
 export function advanceTime(ms: number): void {
   if (!frozen) throw new Error('advanceTime richiede freezeTime');
   mock.timers.tick(ms);
+  notifyClockChange();
 }
 
 /** Ripristina l'orologio reale. Idempotente. */
@@ -38,6 +61,7 @@ export function restoreTime(): void {
   if (!frozen) return;
   mock.timers.reset();
   frozen = false;
+  notifyClockChange();
 }
 
 /** Esegue `fn` con l'orologio fermo e lo ripristina sempre dopo. */

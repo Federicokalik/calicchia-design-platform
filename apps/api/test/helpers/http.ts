@@ -166,9 +166,46 @@ function buildPath(path: string, query?: TestRequestOptions['query']): string {
   return `${path}${path.includes('?') ? '&' : '?'}${qs}`;
 }
 
+type RequestHook = () => Promise<unknown>;
+const beforeRequestHooks: RequestHook[] = [];
+const afterRequestHooks: RequestHook[] = [];
+
+function removeFrom(list: RequestHook[], hook: RequestHook): () => void {
+  return () => {
+    const i = list.indexOf(hook);
+    if (i >= 0) list.splice(i, 1);
+  };
+}
+
+/**
+ * Registra un'operazione da eseguire prima di ogni richiesta. La usa la
+ * matrice CALENDAR_BACKEND=radicale per riallineare l'orizzonte dell'indice
+ * dopo un cambio dell'orologio fermo (helpers/calendar-backend.ts).
+ * Restituisce la funzione che la toglie.
+ */
+export function onBeforeRequest(hook: RequestHook): () => void {
+  beforeRequestHooks.push(hook);
+  return removeFrom(beforeRequestHooks, hook);
+}
+
+/**
+ * Registra un'operazione da eseguire dopo ogni richiesta, prima di restituire
+ * la risposta al test. La usa la matrice CALENDAR_BACKEND=radicale
+ * (helpers/calendar-backend.ts) per completare i job del calendario accodati
+ * dalla richiesta (per esempio la proiezione di una prenotazione): in
+ * produzione li esegue il worker in pochi millisecondi, nei test li si
+ * esegue subito per avere effetti deterministici. Restituisce la funzione che
+ * la toglie.
+ */
+export function onAfterRequest(hook: RequestHook): () => void {
+  afterRequestHooks.push(hook);
+  return removeFrom(afterRequestHooks, hook);
+}
+
 /** Esegue una richiesta in-process contro l'app reale. */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- vedi TestResponse
 export async function request<T = any>(method: string, path: string, opts: TestRequestOptions = {}): Promise<TestResponse<T>> {
+  for (const hook of beforeRequestHooks) await hook();
   const headers = new Headers(opts.headers);
   if (!headers.has('x-forwarded-for')) headers.set('x-forwarded-for', opts.ip ?? nextClientIp());
 
@@ -195,6 +232,7 @@ export async function request<T = any>(method: string, path: string, opts: TestR
 
   const res = await app.request(buildPath(path, opts.query), { method, headers, body });
   const text = await res.text();
+  for (const hook of afterRequestHooks) await hook();
   const contentType = res.headers.get('content-type');
   let json: T = undefined as T;
   if (contentType?.includes('json') && text) {

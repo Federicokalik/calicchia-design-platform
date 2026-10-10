@@ -27,6 +27,7 @@ Da `apps/api`, oppure dalla radice con `pnpm --filter @calicchia/api <script>`:
 | `pnpm test:calendar` | Esegue i casi del calendario (`test/calendar`). |
 | `pnpm test:integration` | Esegue i test di integrazione (`test/integration`): Radicale reale, mock di verify-credentials, inventario. |
 | `pnpm typecheck:test` | Typecheck di `src`, `test` e degli script F0 e F1 (`tsconfig.test.json`). |
+| `CALENDAR_BACKEND=radicale pnpm test:contracts` | I contratti F0 sullo store Radicale (matrice del design §15): richiede `RADICALE_BIN`; vedi "Matrice CALENDAR_BACKEND". |
 
 Script della fase F0 collegati ai test (stessa cartella):
 
@@ -73,6 +74,8 @@ test/
     fixtures.ts          dati del dominio calendario
     normalize.ts         normalizzazione per gli snapshot
     clock.ts             orologio fisso (Date)
+    calendar-backend.ts  matrice CALENDAR_BACKEND=postgres|radicale (Radicale per file, job, orizzonte, pulizia)
+    calendar-rows.ts     effetti "righe di calendar_events" ricostruiti dalla facade per lo store Radicale
     radicale.ts          Radicale reale su porta effimera e mock di verify-credentials
     caldav.ts            client CalDAV minimale, parser XML e utilità iCalendar
     mock_verify.py       mock di POST /api/caldav-backend/verify-credentials (stdlib)
@@ -86,10 +89,22 @@ test/
     allowed-diffs.json   differenze ammesse fra la baseline F0 e gli store successivi
     __snapshots__/       snapshot JSON committati, uno per contratto
   calendar/              casi del calendario (verify-calendar*, correzione DST, migrazione 162, policy dallo stato,
-                         control-plane di Radicale, partizione S/D/B del backup JSON)
+                         control-plane di Radicale, partizione S/D/B del backup JSON; F2: migrazioni 163-164 dell'indice
+                         e dei job, modello dell'indice, coda cal_jobs, facade a due store, id persistenti
+                         (radicale-ids), runtime della sync (radicale-sync-runtime), indicizzatore e salute
+                         (indexer, index-health), RadicaleStore e gate delle scritture (radicale-store, write-gate),
+                         busy fail-closed (busy), split e pull delle iscrizioni (ics-split, subscriptions-pull),
+                         feed dall'indice e consumatori (feed-builder, consumers), salute del calendario
+                         (calendar-health); senza Radicale)
   integration/           Radicale reale: smoke CalDAV, plugin del repository, client di servizio e control-plane,
-                         caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario
+                         caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario;
+                         F2: sync, watcher, canary, discovery e freshness (radicale-sync), rebuild dell'indice
+                         (index-rebuild), RadicaleStore (radicale-store), decisioni di prenotazione (booking-decision),
+                         consumatori (consumers), specchio delle iscrizioni (subscription-mirror), criterio di
+                         uscita della F2 (radicale-f2-exit)
 ```
+
+Fuori da `apps/api/test`, il pacchetto `@calicchia/calendar-core` ha i propri test (node:test via tsx, senza database né Radicale): `pnpm --filter @calicchia/calendar-core test` e `typecheck`; vedi `packages/calendar-core/README.md`.
 
 ## Ambiente (`helpers/env.ts`)
 
@@ -103,9 +118,10 @@ Molti moduli leggono `process.env` al momento dell'import: `src/db/index.ts` cre
 
 ## Database (`helpers/db.ts`)
 
-- **`useTestDatabase({ resetBaseline? })`**: va chiamata in cima al file ed è idempotente. Applica le migrazioni prima del primo test e chiude il pool dopo l'ultimo; senza la chiusura il processo resterebbe appeso. Con `resetBaseline: true` riporta prima il dominio calendario alla baseline.
+- **`useTestDatabase({ resetBaseline? })`**: va chiamata in cima al file ed è idempotente. Applica le migrazioni prima del primo test e chiude il pool dopo l'ultimo (anche il pool calendario `calSql` della F2); senza la chiusura il processo resterebbe appeso. Con `resetBaseline: true` riporta prima il dominio calendario alla baseline.
+- **`onDatabaseClosing(task)`**: eseguito per ultimo, dopo i task di `onBeforeDatabaseClose` e subito prima della chiusura del pool (anche se il `before` è fallito); serve a fermare i componenti di processo che usano il database (campanello, worker), come fa la matrice `CALENDAR_BACKEND=radicale`.
 - **`onDatabaseReady(task)` / `onBeforeDatabaseClose(task)`**: eseguono `task` dentro il `before` di `useTestDatabase` (dopo migrazioni, baseline e pre-pulizia delle fixture) e nel suo `after` (prima della chiusura del pool). Lo scenario condiviso di un file va costruito qui e **non** con un `before()` di primo livello: con `node --test` i `before()` di primo livello partono subito e in parallelo fra loro, quindi la creazione dei dati finirebbe in gara con migrazioni e `resetCalendarBaseline()` (fino al deadlock). Gli `after()` di primo livello vanno bene per ciò che non usa il database (orologio, flush degli snapshot).
-- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, lo schedule di default con lun-ven 09-13 e 14-18 e lo stato del backend calendario (`calendar_backend_state`, migrazione 162) in `mode=postgres` con il volume non inizializzato. Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
+- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, lo schedule di default con lun-ven 09-13 e 14-18 e lo stato del backend calendario (`calendar_backend_state`, migrazione 162) in `mode=postgres` con il volume non inizializzato. Svuota anche indice, id, versioni, job e conflitti della F2 (migrazioni 163-164) e invalida la cache del modo della facade (`backend-mode.ts`). Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
 - **`testPrefix(label)`**: genera un prefisso `tst-<etichetta>`, deterministico e quindi stabile negli snapshot. Con `{ random: true }` aggiunge un suffisso casuale. Rifiuta un prefisso che ne contiene un altro già usato nel processo, o che è contenuto in uno già usato.
 - **`cleanupTestData(prefix, tracked)`**: cancella in ordine di foreign key tutto ciò che porta il prefisso (slug, nomi, titoli, email, label) o è registrato per id. Copre prenotazioni con proiezioni e lead, tipi di prenotazione, schedule, calendari con le cascate, eventi, iscrizioni, app-password, token MCP e device, e le righe di `audit_logs` scritte dai trigger.
 - **`databaseNow()` / `cleanupCalendarAudit({ since, prefixes, ids })`**: per le righe di `audit_logs` che la pulizia per prefisso non riconosce (eventi cancellati dalle route o dal sync delle iscrizioni, aggiornamenti dei calendari seminati). `since` si legge con `databaseNow()` in `onDatabaseReady`, perché i trigger usano `NOW()` del server e non l'orologio fermo.
@@ -138,6 +154,7 @@ Utility esportate: `romeIso('2027-03-15', '09:30')`, `utcMidnightIso`, `addDays`
   - `'admin'` usa un JWT firmato con lo stesso `signToken` del login, per un admin di test creato in `users` e `profiles` con id fisso (`TEST_ADMIN`);
   - `{ bearer }` invia un token MCP, device o un JWT costruito con `signTestToken({ role, authAt })`, utile per i casi 401 e 403;
   - `{ caldavService: true }` usa il token di servizio del backend CalDAV.
+- **`onBeforeRequest(hook)` / `onAfterRequest(hook)`**: operazioni eseguite prima di ogni richiesta e dopo la lettura del corpo, prima di restituire la risposta; restituiscono la funzione che le toglie. La matrice `CALENDAR_BACKEND=radicale` le usa per riallineare l'orizzonte dell'indice dopo un salto dell'orologio fermo e per eseguire subito i job del calendario accodati dalla richiesta (proiezioni delle prenotazioni).
 - **Rate limit**: ogni richiesta riceve un IP diverso in `X-Forwarded-For` (blocco 198.18.0.0/15), quindi i limiter in memoria non scattano. Per provarli si passa lo stesso `ip` a più richieste.
 - **Token di gestione**:
   - `bookingManageToken(uid)` genera il token delle email;
@@ -148,6 +165,8 @@ Utility esportate: `romeIso('2027-03-15', '09:30')`, `utcMidnightIso`, `addDays`
 ## Orologio (`helpers/clock.ts`)
 
 `freezeTime('2027-01-04T07:00:00Z')` / `restoreTime()` / `withFrozenTime()` fermano `Date` (MockTimers di node:test). `setTimeout` e `setInterval` restano reali. Servono per slot (min_notice e max_advance), `createBooking`, la finestra del feed ICS e i token. Usare date fisse nel futuro, ad esempio nel 2027, e fermare l'orologio a un istante precedente.
+
+`onClockChange(listener)` avvisa a ogni `freezeTime`, `advanceTime` e `restoreTime` (lo usa la matrice per attendere un giro del campanello con il nuovo "adesso").
 
 Limite: `NOW()` nelle query SQL usa l'orologio reale di Postgres. Ad esempio `GET /closures` filtra con `end_time > NOW() - 30 giorni`, e `cancelled_at` e `approved_at` sono `NOW()`.
 
@@ -164,7 +183,11 @@ pnpm test -- --test-update-snapshots                                # equivalent
 
 In un run filtrato (`--test-name-pattern`) gli altri casi del file restano invariati; in un run completo i casi non più eseguiti vengono rimossi, e il test di copertura di ogni contratto fallisce se nello snapshot ne restano. Prima di rigenerare va verificato che il cambiamento sia voluto.
 
-`contracts/allowed-diffs.json` elenca le differenze ammesse fra la baseline F0 e gli store successivi (`diffs`, filtrate per `contract`, glob sull'id del caso, JSON Pointer con `*` e `**` e `stores`, scelto con `CALENDAR_BACKEND`). Oggi `diffs` è vuoto; `planned` documenta quelle previste dal design §12, da spostare in `diffs` quando esiste il codice che le produce.
+`contracts/allowed-diffs.json` elenca le differenze ammesse fra la baseline F0 e gli store successivi (`diffs`, filtrate per `contract`, glob sull'id del caso, JSON Pointer con `*` e `**` e `stores`, scelto con `CALENDAR_BACKEND`). Ogni voce ha `reason` (con la sezione del design che la prevede), `kind` facoltativo e `added_in`. Le voci senza `stores` valgono per entrambi gli store e sono le correzioni della F2 comuni (l'agenda del device espansa sul giorno di Roma); quelle con `stores: ["radicale"]` sono le differenze dello store Radicale previste dal design (override con l'UID del master, all-day delle iscrizioni a mezzanotte di Roma, feed dall'indice con ETag, "elimina questa" come EXDATE, nessuna creazione implicita di collezioni, eccezioni DST riallineate...). `planned` documenta quelle previste ma non ancora prodotte dal codice.
+
+Nel confronto gli array sono allineati per contenuto (sottosequenza comune più lunga, poi accoppiamento per somiglianza delle chiavi), così un elemento in più o in meno non sposta gli indici di tutti i successivi: un elemento accoppiato si confronta campo per campo, gli altri risultano aggiunti (indice reale) o rimossi (indice atteso).
+
+`store.notApplicable(caseId, reason)` dichiara un caso che non esiste su uno store diverso da PgLegacyStore (per esempio `source: 'ics_pull'` scritto dall'admin, che RadicaleStore rifiuta con 400): il caso resta nello snapshot, non conta come caso non eseguito e la motivazione è nel test. Con lo store Postgres è un errore.
 
 ### Normalizzazione (`helpers/normalize.ts`)
 
@@ -228,6 +251,37 @@ Regole:
 - Un'etichetta diversa per ogni file. I dati creati via HTTP portano il prefisso (`fx.name()`, `fx.email()`, `fx.slug()`) oppure vengono registrati con `fx.track()`.
 - Nella fase F0 non si modifica il codice in `src/`. Se un test rivela un bug, si documenta con `test.todo` oppure con un'asserzione del comportamento attuale e un commento, e si segnala.
 
+## Matrice CALENDAR_BACKEND (`helpers/calendar-backend.ts`)
+
+I contratti F0 girano su entrambi gli store del design §15: `CALENDAR_BACKEND=postgres` (default, PgLegacyStore: nessun cambiamento di comportamento) e `CALENDAR_BACKEND=radicale` (RadicaleStore). Ogni file di contratto chiama `useCalendarBackend()` subito dopo `useFixtures()`; con lo store Postgres non fa nulla.
+
+Con `CALENDAR_BACKEND=radicale`, per ogni file:
+
+- parte un Radicale 3.7.8 reale (storage multifilesystem in una directory temporanea, htpasswd con il solo `caldes-svc` e la matrice di `caldes-svc` del contratto control-plane §8); il volume si inizializza come in F1 (`initializeVolume`: principal, marker volume-id/epoch, una collezione per ogni calendario del sidecar e `_canary`) e il runtime della sync punta allo storage come al mount di produzione;
+- la facade è forzata su RadicaleStore (`overrideCalendarStore('radicale')`, che vale anche per busy, prenotazioni e gate delle scritture); fixture e route scrivono oggetti iCalendar su Radicale e le letture passano da sync, campanello (100 ms) e indice reali. Le fixture che scrivevano righe legacy usano il percorso di produzione: `projectBooking` accoda il job `project_booking` (o scrive la risorsa con lo stesso ICS per gli stati non proiettati), `subscription` fa il pull verso l'indice con il corpo ICS;
+- i job del calendario (proiezioni, saghe, specchi) vengono eseguiti dopo ogni richiesta (`onAfterRequest`) e da `settleCalendar()`; prima di ogni richiesta e di ogni tool MCP `alignCalendarHorizon()` attende un giro del campanello dopo un salto dell'orologio fermo e allunga l'orizzonte dell'indice (in produzione lo fa il cron giornaliero);
+- un trigger di prova su `calendar_events` fa fallire ogni INSERT o UPDATE: con lo store Radicale nessun percorso deve scrivere la tabella legacy (si spegne da solo dopo un'ora e lo tolgono l'arresto della matrice e `resetCalendarBaseline()`);
+- se una collezione diventa `unsyncable` (una sync fallita), `settleCalendar()` stampa su stderr la causa registrata (`[matrice radicale] ...`): con l'orologio fermo la tolleranza di 10 minuti del livello display risulta già scaduta e il test successivo riceverebbe un 503 o un errore generico senza spiegazione;
+- la pulizia delle fixture toglie anche gli oggetti del gruppo su Radicale (applicando le cancellazioni sospese dall'interruttore anti-cancellazione) e le collezioni rimaste senza calendario (`pruneRadicaleData`).
+
+Gli effetti sul database registrati negli snapshot ("righe di calendar_events") con lo store Radicale si ricostruiscono dalla facade (`helpers/calendar-rows.ts`: getEvent, getEventOverrides, getEventBySource, con le stesse chiavi della SELECT legacy e lo slug del calendario); una posizione che non esiste più è assente come una riga cancellata. Con Radicale non disponibile il file fallisce invece di passare saltando i test.
+
+```sh
+RADICALE_BIN=/percorso/del/venv/bin/radicale CALENDAR_BACKEND=radicale pnpm test:contracts
+```
+
+## Criterio di uscita della F2 (`integration/radicale-f2-exit.test.ts`)
+
+Da capo a fondo contro Radicale 3.7.8 reale e l'app HTTP, con il campanello all'intervallo di produzione (1 s) e un utente device (il principal canonico, con i permessi del contratto control-plane §8) che scrive direttamente su Radicale:
+
+- lag fra la scrittura del device (PUT nuove, PUT di modifica e DELETE) e l'indice sotto 2 s al p95;
+- agenda del device: una serie scritta dal device (VTIMEZONE, EXDATE, override spostato) espansa giorno per giorno, con la stessa forma JSON della baseline F0 (letta dallo snapshot del contratto device-agenda);
+- fail-closed circoscritto: una RRULE non valida in una collezione bloccante e un file scritto a metà sul volume (trovato dall'auditor) vanno in quarantena con il loro busy conservativo; `/slots` risponde 200 e perde esattamente gli slot di quegli intervalli, la prenotazione fuori riesce e dentro riceve 409, la salute non va a `down`;
+- prestazioni con 5000 oggetti in Radicale (scritti come file nel volume, indicizzati dalla sync reale): busy su 60 giorni sotto 20 ms (mediana) e `GET /slots` sotto 200 ms al p95, su 30 e 60 giorni (capacità settimanale alzata a 168 h durante la misura, altrimenti il carico la esaurirebbe e gli slot sarebbero vuoti);
+- indice ricostruito da zero (righe derivate cancellate, rebuild completo) con gli stessi id, le stesse quarantene, gli stessi slot e la stessa agenda.
+
+Le date sono relative a oggi (l'orologio non si ferma, per misurare il campanello come in produzione); le misure sono stampate come diagnostica del test, con il load average (fino a tre giri per misura, vale il migliore: un picco di un altro processo sulla macchina condivisa non fa fallire, una regressione resta in tutti i giri). Dura circa 75 s.
+
 ## Comportamenti attuali congelati
 
 In F0 i bug non si correggono in `src/`: i test asseriscono il comportamento attuale con un commento, oppure lo descrivono con `test.todo`. I principali, utili da sapere quando si scrivono nuovi test:
@@ -248,7 +302,7 @@ Il criterio di uscita della fase in locale, con tutti i pezzi reali: Radicale 3.
 
 Due job di `.github/workflows/ci.yml` girano su ogni PR verso `main`, entrambi con un Postgres 17 come service (database `caldes_test`) e Node 22.12:
 
-- `api-tests`: `contract:mcp-check` (senza database), `test:migrate`, `typecheck:test` e `test`. Le suite che richiedono Radicale vengono saltate.
-- `calendar-integration`: installa Radicale 3.7.8, vobject 0.9.9 e pytest in un venv, imposta `RADICALE_BIN` e `RADICALE_REQUIRED=1`, esegue il selftest e i pytest dei plugin (`apps/radicale/tests`), poi `test:migrate`, `typecheck:test` e `test:integration`. In F2 diventerà la matrice `CALENDAR_BACKEND=postgres|radicale` del design §15.
+- `api-tests`: test di `@calicchia/calendar-core` e `contract:mcp-check` (senza database), poi `test:migrate`, `typecheck:test` e `test`. Le suite che richiedono Radicale vengono saltate. Il job `quality` esegue anche il typecheck di `@calicchia/calendar-core`.
+- `calendar-integration`: installa Radicale 3.7.8, vobject 0.9.9 e pytest in un venv, imposta `RADICALE_BIN` e `RADICALE_REQUIRED=1`, esegue il selftest e i pytest dei plugin (`apps/radicale/tests`), poi `test:migrate`, `typecheck:test` e `test:integration` (compresi i moduli della F2 contro Radicale reale). La matrice `CALENDAR_BACKEND=postgres|radicale` dei contratti F0 del design §15 è pronta (vedi sopra): il passo `CALENDAR_BACKEND=radicale` dei contratti nel job `calendar-integration` va aggiunto al workflow.
 
 Il workflow `build-radicale-image.yml` esegue anche lui selftest e pytest dei plugin (con Python 3.14 come l'immagine) prima di buildare l'immagine.

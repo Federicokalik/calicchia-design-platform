@@ -87,6 +87,7 @@ export async function closeTestDatabase(): Promise<void> {
 type Task = () => Promise<unknown>;
 const readyTasks: Task[] = [];
 const teardownTasks: Task[] = [];
+const closingTasks: Task[] = [];
 let hooksRegistered = false;
 let resetRequested = false;
 
@@ -98,6 +99,17 @@ export function onDatabaseReady(task: Task): void {
 /** Registra un'operazione da eseguire dopo l'ultimo test, prima della chiusura del pool. */
 export function onBeforeDatabaseClose(task: Task): void {
   teardownTasks.push(task);
+}
+
+/**
+ * Registra un'operazione da eseguire per ultima, dopo tutti i task di
+ * `onBeforeDatabaseClose` e subito prima della chiusura del pool (anche se il
+ * `before` è fallito): serve a fermare i componenti di processo che usano il
+ * database (campanello, worker dei job) quando la pulizia dei dati è finita.
+ * Un errore viene riportato ma non salta la chiusura del pool.
+ */
+export function onDatabaseClosing(task: Task): void {
+  closingTasks.push(task);
 }
 
 /**
@@ -143,7 +155,11 @@ export function useTestDatabase(opts: { resetBaseline?: boolean } = {}): void {
       await setup.catch(() => {});
       for (const task of [...teardownTasks].reverse()) await task();
     } finally {
-      await closeTestDatabase();
+      try {
+        for (const task of closingTasks) await task();
+      } finally {
+        await closeTestDatabase();
+      }
     }
   });
 }
@@ -422,6 +438,10 @@ export async function resetCalendarBaseline(): Promise<void> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia della matrice CALENDAR_BACKEND=radicale rimasta da un run
+    // interrotto (helpers/calendar-backend.ts): la baseline non la conserva mai.
+    await tx`DROP TRIGGER IF EXISTS caldes_test_matrix_guard ON calendar_events`;
+    await tx`DROP FUNCTION IF EXISTS caldes_test_matrix_guard()`;
     const leads = await tx`DELETE FROM calendar_bookings RETURNING lead_id, uid`;
     await tx`
       DELETE FROM leads

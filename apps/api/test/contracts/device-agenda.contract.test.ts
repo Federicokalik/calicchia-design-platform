@@ -40,6 +40,7 @@ import { api, signTestToken, type TestResponse } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
 import { createNormalizer, type SnapshotNormalizer } from '../helpers/normalize';
 import { freezeTime, restoreTime } from '../helpers/clock';
+import { useCalendarBackend } from '../helpers/calendar-backend';
 import type { Calendar } from '../../src/lib/calendar/types';
 import {
   contractCoverageTest,
@@ -51,6 +52,7 @@ import {
 } from './_http-contract';
 
 const fx = useFixtures('contratto-agenda', { resetBaseline: true });
+useCalendarBackend();
 
 const store = httpContractStore(
   'device-agenda',
