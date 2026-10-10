@@ -24,6 +24,7 @@
     "test:migrate": "tsx --import ./test/helpers/preload.mjs scripts/migrate.ts",
     "test:smoke": "tsx test/run.ts smoke",
     "test:contracts": "tsx test/run.ts contracts",
+    "test:contracts:radicale": "CALENDAR_BACKEND=radicale tsx test/run.ts contracts",
     "test:calendar": "tsx test/run.ts calendar",
     "test:integration": "tsx test/run.ts integration"
   },

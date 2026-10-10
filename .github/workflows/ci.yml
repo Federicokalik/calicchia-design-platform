@@ -151,12 +151,13 @@ jobs:
   # criterio di uscita della F1 (config di produzione, verify-credentials
   # dell'API vera), inventario in sola lettura e i moduli della F2 contro
   # Radicale reale (sync, rebuild dell'indice, RadicaleStore, decisioni di
-  # prenotazione, consumatori, specchio delle iscrizioni). La matrice
-  # CALENDAR_BACKEND=postgres|radicale dei contratti F0 (design §15) è ancora
-  # da preparare: oggi i contratti girano solo su PgLegacyStore (job api-tests).
+  # prenotazione, consumatori, specchio delle iscrizioni). In più la matrice
+  # CALENDAR_BACKEND=radicale dei contratti F0 (design §15): le stesse suite
+  # del job api-tests (che le esegue su PgLegacyStore) girano su RadicaleStore
+  # con Radicale reale; le differenze ammesse sono in allowed-diffs.json.
   calendar-integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17-alpine
@@ -211,3 +212,5 @@ jobs:
         run: pnpm --filter @calicchia/api typecheck:test
       - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2)
         run: pnpm --filter @calicchia/api test:integration
+      - name: Contratti F0 su RadicaleStore (matrice CALENDAR_BACKEND=radicale)
+        run: pnpm --filter @calicchia/api test:contracts:radicale

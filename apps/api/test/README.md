@@ -27,7 +27,7 @@ Da `apps/api`, oppure dalla radice con `pnpm --filter @calicchia/api <script>`:
 | `pnpm test:calendar` | Esegue i casi del calendario (`test/calendar`). |
 | `pnpm test:integration` | Esegue i test di integrazione (`test/integration`): Radicale reale, mock di verify-credentials, inventario. |
 | `pnpm typecheck:test` | Typecheck di `src`, `test` e degli script F0 e F1 (`tsconfig.test.json`). |
-| `CALENDAR_BACKEND=radicale pnpm test:contracts` | I contratti F0 sullo store Radicale (matrice del design §15): richiede `RADICALE_BIN`; vedi "Matrice CALENDAR_BACKEND". |
+| `pnpm test:contracts:radicale` | I contratti F0 sullo store Radicale (equivale a `CALENDAR_BACKEND=radicale pnpm test:contracts`, è il passo del job calendar-integration in CI) (matrice del design §15): richiede `RADICALE_BIN`; vedi "Matrice CALENDAR_BACKEND". |
 
 Script della fase F0 collegati ai test (stessa cartella):
 
