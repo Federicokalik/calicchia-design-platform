@@ -8,6 +8,8 @@
  * Casi del piano F2 (voce "Test", gruppo CONSUMERS): ETag diverso al cambio di
  * data (la finestra scorre e un evento entra a +365 giorni), STATUS:CANCELLED
  * escluso (anche scritto dai device), UID legacy delle proiezioni migrate. Più:
+ * proiezioni ricomposte da calendar_bookings con la decisione 3 (anche dopo
+ * un'erasure), UID legacy degli oggetti migrati senza legacy_uid,
  * corpo ed ETag identici per tutto il giorno e fra processi (DTSTAMP stabile,
  * cache svuotata), override nella risorsa del master con le cancellazioni come
  * EXDATE, whitelist e CLASS:PRIVATE → "Occupato", suffisso del dominio degli
@@ -22,10 +24,11 @@ import { randomBytes } from 'node:crypto';
 import { describe, test } from 'node:test';
 import { CalendarUnavailableError } from '../../src/lib/calendar/errors';
 import { buildCalendarFeed } from '../../src/lib/calendar/events';
-import { buildIndexFeed, clearIndexFeedCache, feedUidDomain, feedWindowAnchor } from '../../src/lib/calendar/feed-builder';
+import { bookingAdminUrl } from '../../src/lib/calendar/booking-projection';
+import { buildIndexFeed, clearIndexFeedCache, feedBookingAdminUrl, feedUidDomain, feedWindowAnchor } from '../../src/lib/calendar/feed-builder';
 import { applyCollectionChanges, loadCollectionContext, type RawItem, stopIndexWorker } from '../../src/lib/calendar/radicale/indexer';
 import { overrideCalendarStore } from '../../src/lib/calendar/store';
-import type { Calendar } from '../../src/lib/calendar/types';
+import type { Calendar, EventType } from '../../src/lib/calendar/types';
 import { icsEvents, icsProp, unfoldIcs } from '../contracts/_http-contract';
 import { onBeforeDatabaseClose, onDatabaseReady, sql, useTestDatabase } from '../helpers/db';
 import { api } from '../helpers/http';
@@ -97,6 +100,8 @@ interface Scenario {
   disabled: Calendar;
   projectionUid: string;
   plainProjectionUid: string;
+  goneProjectionUid: string;
+  eventType: EventType;
 }
 
 let sc: Scenario;
@@ -155,12 +160,29 @@ onDatabaseReady(async () => {
   const sidecar = await sidecarCalendar(cal, 'iscrizione');
   await indexItems(sidecar, [{ href: 'r-remoto.ics', raw: TEXTS.remote }], { remote: true, full: true });
 
-  // Proiezioni: una migrata (legacy_uid in cal_object_ids), una nuova.
-  const projectionUid = 'prenmigr01ab';
-  const plainProjectionUid = 'prennuova02c';
+  // Proiezioni: una migrata (legacy_uid in cal_object_ids) con il testo legacy
+  // (email, azienda e note nella DESCRIPTION), una nuova, una la cui
+  // prenotazione non c'è più (erasure). Le prenotazioni esistono in
+  // calendar_bookings senza proiezione legacy (project: false).
+  const eventType = await fx.eventType({ key: 'consulenza', title: 'Consulenza', durationMinutes: 30 });
+  const migrated = await fx.booking({
+    eventType, start: '2027-01-12T10:00:00Z', project: false,
+    attendee: { name: 'Mario Rossi', phone: '+39 06 1234567', company: 'Rossi SRL', message: 'Vorrei un preventivo' },
+  });
+  const plain = await fx.booking({ eventType, start: '2027-01-13T10:00:00Z', project: false, attendee: { name: 'Anna Neri' } });
+  const projectionUid = migrated.booking.uid;
+  const plainProjectionUid = plain.booking.uid;
+  const goneProjectionUid = 'prensparita9z';
   await indexItems(bookings.id, [
-    { href: `booking-${projectionUid}.ics`, raw: ics(vevent([`UID:${projectionUid}@caldes.it`, 'DTSTART:20270112T100000Z', 'DTEND:20270112T103000Z', 'SUMMARY:Consulenza – Mario Rossi'])) },
+    { href: `booking-${projectionUid}.ics`, raw: ics(vevent([
+      `UID:${projectionUid}@caldes.it`, 'DTSTART:20270112T100000Z', 'DTEND:20270112T103000Z', 'SUMMARY:Consulenza – Mario Rossi',
+      `DESCRIPTION:Cliente: Mario Rossi <${migrated.booking.attendee_email}>\\nTel: +39 06 1234567\\nAzienda: Rossi SRL\\n\\nNote:\\nVorrei un preventivo`,
+    ])) },
     { href: `booking-${plainProjectionUid}.ics`, raw: ics(vevent([`UID:${plainProjectionUid}@caldes.it`, 'DTSTART:20270113T100000Z', 'DTEND:20270113T103000Z', 'SUMMARY:Consulenza – Anna Neri'])) },
+    { href: `booking-${goneProjectionUid}.ics`, raw: ics(vevent([
+      `UID:${goneProjectionUid}@caldes.it`, 'DTSTART:20270114T100000Z', 'DTEND:20270114T103000Z', 'SUMMARY:Consulenza – Luca Verdi',
+      'DESCRIPTION:Tel: +39 333 9999999',
+    ])) },
   ], { full: true });
   await sql`
     UPDATE cal_object_ids SET legacy_uid = 'uid-legacy-proiezione'
@@ -170,7 +192,7 @@ onDatabaseReady(async () => {
   await indexItems(disabled.id, [{ href: 'singolo.ics', raw: TEXTS.good }], { full: true });
   await sql`UPDATE calendars SET ics_feed_enabled = false WHERE id = ${disabled.id}`;
 
-  sc = { cal, bookings, neverIndexed, disabled, projectionUid, plainProjectionUid };
+  sc = { cal, bookings, neverIndexed, disabled, projectionUid, plainProjectionUid, goneProjectionUid, eventType };
 });
 
 onBeforeDatabaseClose(async () => {
@@ -270,8 +292,39 @@ describe('feed dall\'indice: contenuto (design §10)', () => {
 
   test('UID legacy delle proiezioni migrate (legacy_uid@CAL_FEED_UID_DOMAIN), le nuove con <uid>@caldes.it', async () => {
     const { body } = await feedAt(sc.bookings, DAY1);
-    assert.equal(icsProp(eventBy(body, 'Consulenza – Mario Rossi'), 'UID'), `uid-legacy-proiezione@${UID_DOMAIN}`);
-    assert.equal(icsProp(eventBy(body, 'Consulenza – Anna Neri'), 'UID'), `${sc.plainProjectionUid}@caldes.it`);
+    assert.equal(icsProp(eventBy(body, `${sc.eventType.title} – Mario Rossi`), 'UID'), `uid-legacy-proiezione@${UID_DOMAIN}`);
+    assert.equal(icsProp(eventBy(body, `${sc.eventType.title} – Anna Neri`), 'UID'), `${sc.plainProjectionUid}@caldes.it`);
+  });
+
+  test('proiezioni: contenuto della decisione 3 ricomposto da calendar_bookings al momento del feed, qualunque sia il testo in Radicale', async () => {
+    const { body } = await feedAt(sc.bookings, DAY1);
+    // Migrata con email, azienda e note nella DESCRIPTION: il feed pubblica solo titolo con il nome, telefono e link all'admin.
+    const migrated = eventBy(body, `${sc.eventType.title} – Mario Rossi`);
+    assert.equal(icsProp(migrated, 'DESCRIPTION'), `Tel: +39 06 1234567\\nPrenotazione: ${feedBookingAdminUrl(sc.projectionUid)}`);
+    assert.ok(!/@test\.invalid|Rossi SRL|preventivo|Cliente:/.test(body), 'niente email, azienda né messaggio nel feed');
+    // Luogo e link della riunione come la risorsa scritta dall'API (event type custom_url).
+    assert.equal(icsProp(migrated, 'URL'), sc.eventType.location_value);
+    // Prenotazione sparita (erasure): solo "Prenotazione", senza descrizione né telefono.
+    const gone = icsEvents(body).find((e) => icsProp(e, 'UID') === `${sc.goneProjectionUid}@caldes.it`);
+    assert.ok(gone, 'la proiezione senza prenotazione resta nel feed come "Prenotazione"');
+    assert.equal(icsProp(gone, 'SUMMARY'), 'Prenotazione');
+    assert.equal(icsProp(gone, 'DESCRIPTION'), undefined);
+    assert.ok(!body.includes('Luca Verdi') && !body.includes('9999999'));
+    // Stesso link della risorsa dei device (booking-projection.bookingAdminUrl).
+    assert.equal(feedBookingAdminUrl(sc.projectionUid), bookingAdminUrl(sc.projectionUid));
+  });
+
+  test('oggetto migrato senza legacy_uid: UID legacy con il dominio anche se contiene @ (come il feed legacy)', async () => {
+    await indexItems(sc.cal.id, [{ href: 'migrato-device.ics', raw: ics(vevent(['UID:ABC-123@icloud.com', 'DTSTART:20270121T100000Z', 'DTEND:20270121T110000Z', 'SUMMARY:Migrato da iCloud'])) }]);
+    await sql`
+      UPDATE cal_object_ids SET legacy_event_id = '11111111-2222-4333-8444-555555555555'
+      WHERE calendar_id = ${sc.cal.id} AND href = 'migrato-device.ics' AND recurrence_key = ''
+    `;
+    clearIndexFeedCache();
+    const { body } = await feedAt(sc.cal, DAY1);
+    assert.equal(icsProp(eventBy(body, 'Migrato da iCloud'), 'UID'), `ABC-123@icloud.com@${UID_DOMAIN}`);
+    // Un UID con '@' di un oggetto non migrato resta invariato.
+    assert.equal(icsProp(eventBy(body, 'Occupato'), 'UID'), 'privato-feed@test.invalid');
   });
 
   test('iscrizioni mai nel feed del calendario di destinazione', async () => {

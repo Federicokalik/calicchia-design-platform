@@ -8,8 +8,10 @@
  * Casi: senza JWT admin solo { status } (anche con un JWT di un altro ruolo);
  * mode postgres senza Radicale → 'ok' con i componenti 'not_configured'; job
  * morti e conflitti aperti → 'degraded' (HTTP 200); oggetti in quarantena in
- * shadow (mode postgres) → nessun effetto sullo stato; store Radicale con
- * Radicale non configurato → 'down' (HTTP 503) senza dettagli per il pubblico.
+ * shadow (mode postgres) → nessun effetto sullo stato; iscrizione bloccante
+ * mai scaricata → nel dettaglio, 'degraded' solo con lo store Radicale; store
+ * Radicale con Radicale non configurato → 'down' (HTTP 503) senza dettagli
+ * per il pubblico.
  */
 
 import assert from 'node:assert/strict';
@@ -75,7 +77,7 @@ describe('GET /api/health/calendar', () => {
     assert.equal(r.rebuild.required, false);
     assert.equal(r.degraded_booking_mode.active, false);
     for (const key of ['status', 'reasons', 'generated_at', 'mode', 'radicale', 'control_plane', 'identity', 'heartbeat', 'watcher',
-      'canary', 'collections', 'quarantined', 'hold', 'horizon', 'jobs', 'conflicts', 'rebuild', 'degraded_booking_mode']) {
+      'canary', 'collections', 'quarantined', 'hold', 'horizon', 'jobs', 'conflicts', 'rebuild', 'subscriptions', 'degraded_booking_mode']) {
       assert.ok(key in r, `sezione ${key}`);
     }
   });
@@ -132,6 +134,31 @@ describe('GET /api/health/calendar', () => {
     assert.equal(view.quarantined, 1);
     assert.equal(typeof view.lag_seconds, 'number');
     assert.equal(view.blocks_display, false);
+  });
+
+  test('iscrizione bloccante mai scaricata: nel dettaglio sempre, motivo degraded solo con lo store Radicale', async () => {
+    const cal = await fx.calendar({ key: 'iscr-dest', blocks_availability: true });
+    const [sub] = await sql<Array<{ id: string }>>`
+      INSERT INTO calendar_subscriptions (calendar_id, name, ics_url, sync_enabled, blocks_availability)
+      VALUES (${cal.id}, ${`${fx.prefix} iscrizione`}, 'https://example.invalid/feed.ics', true, true)
+      RETURNING id::text
+    `;
+    try {
+      const shadow = await health('admin');
+      assert.equal(shadow.json.status, 'ok', JSON.stringify(shadow.json.reasons));
+      assert.ok(shadow.json.subscriptions.blocking_never_pulled >= 1);
+      assert.ok(shadow.json.subscriptions.items.some((i: { subscription_id: string }) => i.subscription_id === sub.id));
+
+      await sql`UPDATE calendar_backend_state SET mode = 'radicale', volume_id = ${randomUUID()}, epoch = 1 WHERE id = true`;
+      invalidateBackendModeCache();
+      const radicale = await health('admin');
+      assert.ok(codes(radicale.json).includes('subscription_never_pulled'), JSON.stringify(radicale.json.reasons));
+      assert.equal(radicale.json.reasons.find((r: { code: string }) => r.code === 'subscription_never_pulled').severity, 'degraded');
+    } finally {
+      await sql`UPDATE calendar_backend_state SET mode = 'postgres', volume_id = NULL, epoch = 0 WHERE id = true`;
+      invalidateBackendModeCache();
+      await sql`DELETE FROM calendar_subscriptions WHERE id = ${sub.id}::uuid`;
+    }
   });
 
   test('store Radicale con Radicale non configurato: down (HTTP 503), al pubblico solo lo stato', async () => {

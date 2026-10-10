@@ -909,7 +909,9 @@ calendarAdmin.delete('/events/:id', async (c) => {
  * Un nuovo uid viene generato automaticamente da createEvent().
  */
 calendarAdmin.post('/events/:id/duplicate', async (c) => {
-  const original = await getEvent(c.req.param('id'));
+  // Proiezione di una prenotazione con lo store Radicale: la copia riceve la
+  // descrizione completa ricomposta da calendar_bookings, come oggi (decisione 3).
+  const original = await withProjectionDescription(await getEvent(c.req.param('id')));
   if (!original) return c.json({ error: 'Evento non trovato' }, 404);
 
   const body = await c.req.json().catch(() => ({} as Record<string, unknown>));

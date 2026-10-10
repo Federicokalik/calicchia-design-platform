@@ -281,7 +281,8 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 
 *Cosa fa la patch:*
 - le proprietà sconosciute (X-*, CONFERENCE...) passano a `_RawBehavior` verbatim;
-- in `TextBehavior.decode`, VALUE=URI resta verbatim e le virgole non escapate restano letterali, poi riserializzate come `\,`.
+- in `TextBehavior.decode`, VALUE=URI resta verbatim e le virgole non escapate restano letterali, poi riserializzate come `\,`;
+- `RecurringComponent.getrruleset` rifiuta le RRULE/EXRULE con valori vietati da RFC 5545 che dateutil accetta (INTERVAL o COUNT < 1, BYMONTHDAY/BYYEARDAY/BYWEEKNO = 0 o fuori intervallo, BYMONTH fuori da 1..12): la PUT risponde 400, invece di salvare un oggetto con cui una REPORT con time-range resterebbe appesa (INTERVAL=0; contratto dei moduli F2 §14.6).
 
 *Senza patch:*
 - "SUMMARY:Pranzo, cena" diventa "Pranzo";
@@ -480,17 +481,20 @@ Una X-prop non può mai promuovere un evento a booking o system. Gli item non-pr
 
 Passi:
 1. Controllo d'identità (props del principal in cache, aggiornate a ogni cambio di mtime). Se l'identità non coincide, stop e `CalendarUnavailableError`.
-2. Si annotano la mtime m0 e l'istante di osservazione prima del REPORT.
+2. Si annotano la mtime m0 e l'istante di osservazione prima del REPORT, e (mount affidabile: mount mode, oppure filesystem locale che il canary non ha smentito) si elencano i file della collezione, anche nelle sync incrementali. `dirty_since` si azzera solo per i cambi segnati entro quell'istante.
 3. REPORT sync-collection dal token salvato. Un 403 valid-sync-token porta al full resync (PROPFIND getetag e diff).
 4. Multiget a blocchi di 100 href.
 5. Per ogni 404:
    - file ancora presente su disco → item saltato da Radicale: l'oggetto resta, va in quarantena con `health_reason='radicale-skip'` e parte un alert;
-   - file assente → cancellazione candidata.
+   - file assente → cancellazione candidata;
+   - mount non affidabile (remote mode, o copia stantia smentita dal canary) → `pending_404`, cancellazione al secondo 404 consecutivo.
+   Nelle sync incrementali un file elencato al passo 2, mai indicizzato e assente dal REPORT, si chiede a Radicale: servito → upsert, 404 → item saltato (quarantena `radicale-skip`).
 6. **Interruttore anti-cancellazione di massa.**
-   - Scatta se le cancellazioni candidate superano max(50 oggetti, 20%) della collezione, oppure se la collezione intera risulta sparita o vuota.
-   - In quel caso non si applica nulla: la collezione passa in `hold`, le occorrenze esistenti continuano a bloccare e parte un alert.
+   - Conta solo le cancellazioni osservate: quelle fatte dall'API (DELETE, origine di una MOVE, compensazione della saga) sono annunciate alla sync prima della richiesta, si applicano sempre e restano nelle versioni con l'attore `write-through:<attore>`.
+   - Scatta se le cancellazioni osservate negli ultimi 15 minuti (già applicate, più quelle nuove) superano max(50 oggetti, 20%) della collezione: CalDAV cancella una risorsa per volta e il campanello sincronizza ogni secondo, quindi la soglia di una sola sync non basterebbe. Scatta anche se la collezione intera risulta sparita, o se una sola sync la svuota (da 2 oggetti in su), e con la guardia post-ripristino attiva (§16.2) per qualsiasi cancellazione (motivo `restore-guard`).
+   - In quel caso le cancellazioni nuove non si applicano: la collezione passa in `hold`, le occorrenze esistenti continuano a bloccare e parte un alert.
    - Nella pagina sync-state l'admin sceglie fra "applica cancellazioni" e "ricostruisci in Radicale dall'indice" (§16.3).
-7. Parse ed espansione con ical.js fuori dalla transazione. Oltre i 200 oggetti si usano `worker_threads`, per non bloccare l'event loop che serve `verify-credentials`.
+7. Parse ed espansione con ical.js fuori dalla transazione. Oltre i 200 oggetti si usano `worker_threads`, per non bloccare l'event loop che serve `verify-credentials`. Un change set oltre il tempo massimo non si ripete nel thread principale: le risorse si ripreparano una per una nel worker, e quella che supera il proprio tempo va in quarantena (`index-error`) con il blocco conservativo dal testo.
 8. `BEGIN … SELECT sync_token FOR UPDATE`; se il token non è più quello di partenza, rollback (CAS).
 9. Upsert, versioni (testo delle cancellazioni compreso), rigenerazione delle occorrenze.
 10. Aggiornamento di `sync_token` e `dir_mtime_ns = m0`. m0 si salva solo se è più vecchio di 50 ms rispetto all'osservazione, altrimenti NULL (finestra "racy").
@@ -529,7 +533,7 @@ Passi:
   - l'oggetto va in quarantena (`expansion-budget`);
   - riceve un'occorrenza `conservative` su [max(DTSTART, inizio orizzonte), min(UNTIL, fine orizzonte)), bloccante solo se il master bloccherebbe;
   - parte un alert.
-- Oltre le 5000 occorrenze nell'orizzonte: `materialized_until`. Le decisioni oltre quella data espandono al volo solo quell'oggetto, su finestra; se fallisce, blocco conservativo della sola finestra richiesta per quel solo oggetto.
+- Oltre le 5000 occorrenze nell'orizzonte: `materialized_until`. Le decisioni oltre quella data espandono al volo solo quell'oggetto, su finestra (a blocchi da 5000, fino a 50 000 occorrenze o 1M di iterazioni per finestra, poi una coda conservativa fino alla fine della finestra); se fallisce, blocco conservativo della sola finestra richiesta per quel solo oggetto.
 
 ### 6.5 Salute per oggetto e per collezione
 
@@ -553,7 +557,8 @@ Un feed esterno con una RRULE invalida, o una serie MINUTELY creata da device, l
   - diff con l'indice e un'unica transazione di upsert e delete sugli oggetti `origin_store='remote'` del sidecar dell'iscrizione, con `index_version++`;
   - nessuna versione;
   - anti-wipe come oggi (body vuoto o HTML rifiutato, force esplicito).
-- Nelle decisioni le iscrizioni usano l'indice dell'ultimo pull completato: non stanno nel set di freschezza e la loro sync non interferisce con le prenotazioni.
+- Nelle decisioni le iscrizioni usano l'indice dell'ultimo pull completato: non stanno nel set di freschezza, la loro sync non interferisce con le prenotazioni e non contano nella garanzia dell'orizzonte (§6.9). Un'iscrizione bloccante mai scaricata vale come "nessun evento": il guasto di un feed esterno non porta mai le prenotazioni in 503, e la salute la segnala ('degraded', `subscription_never_pulled`).
+- Il corpo del feed si passa al parser come byte: l'unfolding avviene prima della decodifica UTF-8, che resta tollerante come oggi (U+FFFD per i byte non UTF-8).
 - **Specchio** su Radicale solo per `device_visible`: job a bassa priorità, PUT solo per i fingerprint cambiati (ledger per href), al massimo 5 PUT/s. La collezione `sub-<id8>` è in sola lettura per i device e il watcher la ignora, perché Radicale non è la sua fonte.
 - **Prima del cutover:** il pull legacy verso `calendar_events` resta invariato, compreso il sottoinsieme bacato (parità). Da F3 il nuovo pull popola l'indice in parallelo, in shadow.
 
@@ -573,7 +578,7 @@ Durante il rebuild le decisioni trovano `dir_mtime` NULL e forzano la sync compl
 
 ### 6.9 Orizzonte
 - `cal_occurrences` copre [oggi − 400 g, oggi + 800 g].
-- Garanzia statica: `horizon_end ≥ oggi + max(max_advance_days) + 14 g`. Se non regge, le decisioni falliscono chiuse.
+- Garanzia statica: `horizon_end ≥ oggi + max(max_advance_days) + 14 g`. Se non regge, le decisioni falliscono chiuse. Vale per le collezioni bloccanti di Radicale e solo con lo store Radicale; le iscrizioni non contano (§6.6).
 - Fuori orizzonte (admin nel 2030, export) l'espansione avviene al volo da `cal_objects`.
 
 ## 7. Percorso di lettura
@@ -632,7 +637,7 @@ Per MCP e admin v1 la `base` è implicita (i valori letti al passo 3), con un so
 - **Solo questa:** override con RECURRENCE-ID dello stesso tipo e TZID di DTSTART.
 - **Elimina questa:** EXDATE tipizzato più la rimozione dell'eventuale override.
 - **Tutta la serie:**
-  - uno spostamento di Δ si applica anche a RECURRENCE-ID ed EXDATE;
+  - uno spostamento di Δ porta con sé RECURRENCE-ID, EXDATE, RDATE e UNTIL perché restino sulle stesse occorrenze: dello stesso Δ quando le istanze seguono il DTSTART, della sola parte oraria quando la regola fissa i giorni (BYDAY, BYMONTHDAY...); un valore che resterebbe senza istanza, o un DTSTART fuori regola, è un errore (409/400) invece di un orfano silenzioso (recurrence-ops.shiftSeries);
   - un cambio di RRULE con `dryRun` restituisce `orphanedOverrides`.
 - **Questa e le successive:** saga in `cal_jobs`.
   - (a) nuova serie con UID nuovo, `RELATED-TO;RELTYPE=SIBLING`, gli override ed EXDATE successivi al taglio e il COUNT residuo;
@@ -1171,8 +1176,8 @@ Precisazioni dell'implementazione (F1, `apps/api/src/routes/backup.ts`):
 
 **Dopo ogni import**
 - `calendar_sidecar_reconcile()`;
-- `rebuild_required=true`;
-- `restore_guard_until = now() + 48 h`: nessuna cancellazione automatica e policy frozen finché la verifica post-ripristino (riconciliazione, rebuild, auditor) non è verde;
+- `rebuild_required=true`, con `sync_token` e `dir_mtime_ns` azzerati e il job `index_rebuild` accodato nella stessa transazione (`requestIndexRebuild`); all'avvio l'API accoda il rebuild anche quando trova solo il flag (`restore-calendar-stack.sh`, UPDATE manuale);
+- `restore_guard_until = now() + 48 h`: nessuna cancellazione automatica e policy frozen finché la verifica post-ripristino (riconciliazione, rebuild, auditor) non è verde. Nella sync ogni cancellazione osservata in quel periodo va in hold (motivo `restore-guard`), a qualsiasi soglia e anche nel rebuild; le cancellazioni fatte dall'API si applicano; l'unica uscita è "applica cancellazioni" dell'admin;
 - con lo shadow attivo, ledger rivalidato con un plan dry-run: le differenze diventano conflitti, mai sovrascritture;
 - un ripristino di `calendar_bookings` avvia la riconciliazione delle proiezioni in sola lettura.
 
@@ -1187,7 +1192,7 @@ Precisazioni dell'implementazione (F1, `apps/api/src/routes/backup.ts`):
 ### 16.3 Restore coordinato e recupero
 **Scenario A: volume perso o corrotto, DB intatto**
 1. Fermare radicale e ripristinare lo snapshot.
-2. All'avvio l'identità coincide ma l'indice è più recente: il full resync incontra l'interruttore anti-cancellazione e mette le collezioni in hold.
+2. All'avvio l'identità coincide ma l'indice è più recente: il full resync incontra l'interruttore anti-cancellazione (o la guardia post-ripristino, se attiva) e mette le collezioni in hold; le cancellazioni sospese continuano a bloccare.
 3. "Ricostruisci Radicale dall'indice" rigioca le versioni più recenti dello snapshot (diff per href, If-Match, anteprima).
 4. Si riaprono i device.
 

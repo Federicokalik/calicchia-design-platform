@@ -278,7 +278,10 @@ export interface CalendarJob<P = Record<string, unknown>> { id; kind; key; paylo
 export function enqueueCalendarJob(kind: string, key: string, payload?: object, opts?: { sourceVersion?: string | null; runAfter?: Date; delayMs?: number; priority?: number; maxAttempts?: number; db?: Db }): Promise<{ id: string; coalesced: boolean }>;
 export function claimCalendarJobs(opts?: { kinds?: readonly string[]; limit?: number; leaseMs?: number; workerId?: string; db?: Db }): Promise<CalendarJob[]>;
 export function completeCalendarJob(job, opts?: { result?: unknown; currentSourceVersion?: string | null; db?: Db }): Promise<'done' | 'requeued' | 'superseded' | 'lost'>;
-export function failCalendarJob(job, error: unknown, opts?: { retryable?: boolean; retryAfterMs?: number; db?: Db }): Promise<'requeued' | 'superseded' | 'dead' | 'lost'>;
+export function failCalendarJob(job /* con createdAt */, error: unknown, opts?: { retryable?: boolean; retryAfterMs?: number; db?: Db }): Promise<'requeued' | 'superseded' | 'dead' | 'lost'>;
+/** Indisponibilità del calendario, non errore del lavoro: CalendarUnavailableError, RadicaleError transient o outcomeUnknown, CollectionSyncError identity/not_configured/radicale/cas_exhausted/lock_timeout/timeout, IndexRebuildBusyError. */
+export function isCalendarJobWaitError(err: unknown): boolean;
+export function computeCalendarJobWaitMs(ageMs: number, random?: () => number): number; // metà dell'età del job, da 5 s a 15 minuti, jitter ±20%
 export function extendCalendarJobLease(job, leaseMs: number, db?: Db): Promise<boolean>;
 export function recoverExpiredCalendarJobLeases(db?: Db, limit?: number): Promise<{ requeued: number; superseded: number; dead: number }>;
 export function retryDeadCalendarJob(id: string, db?: Db): Promise<boolean>;
@@ -290,14 +293,14 @@ export function startCalendarJobWorker(opts?: { intervalMs?: number; workerId?: 
 export function stopCalendarJobWorker(): Promise<void>;
 ```
 
-Semantica (test `jobs.test.ts`): coalescenza solo sui pending (payload e `source_version` nuovi, `run_after` e priorità più urgenti, `attempts = 0`); un job running con la stessa chiave non assorbe il nuovo accodamento; accodato nella transazione del chiamante esiste solo dopo la COMMIT (outbox); claim con `FOR UPDATE SKIP LOCKED` e lease (`lease_token`); `completeCalendarJob` con una `currentSourceVersion` diversa da quella del job lo riaccoda subito (o `superseded` se c'è già un pending con la stessa chiave); `failCalendarJob`: backoff esponenziale 5 s → 1 h con jitter ±20%, dead letter a tentativi finiti (default 8) o con `CalendarJobPermanentError`; lease scaduto → di nuovo pending (il tentativo conta), `superseded` o `dead`. Un tipo senza handler registrato resta pending.
+Semantica (test `jobs.test.ts`): coalescenza solo sui pending (payload e `source_version` nuovi, `run_after` e priorità più urgenti, `attempts = 0`); un job running con la stessa chiave non assorbe il nuovo accodamento; accodato nella transazione del chiamante esiste solo dopo la COMMIT (outbox); claim con `FOR UPDATE SKIP LOCKED` e lease (`lease_token`); `completeCalendarJob` con una `currentSourceVersion` diversa da quella del job lo riaccoda subito (o `superseded` se c'è già un pending con la stessa chiave); `failCalendarJob`: backoff esponenziale 5 s → 1 h con jitter ±20%, dead letter a tentativi finiti (default 8) o con `CalendarJobPermanentError`; un errore di attesa (`isCalendarJobWaitError`: Radicale giù, transizione, freeze, identità, sync fallita per Radicale o lock, rebuild in corso) riaccoda il job restituendo il tentativo preso dal claim, con la pausa di `computeCalendarJobWaitMs`, e va in dead letter solo dopo 48 h da `created_at` (`CAL_JOB_DEFAULTS.unavailableBackoffMaxMs` e `unavailableMaxAgeMs`): un fermo di Radicale non uccide proiezioni, controlli e saghe, che ripartono da soli; l'auditor notturno riaccoda dalla dead letter le saghe `recurrence_split` non concluse e i `booking_conflict_check` di prenotazioni ancora future e attive morti per errori non definitivi negli ultimi 7 giorni (`reviveDeadCalendarJobs`, §5.4); lease scaduto → di nuovo pending (il tentativo conta), `superseded` o `dead`. Un tipo senza handler registrato resta pending.
 
 | Tipo | Proprietario dell'handler | Chiave | `source_version` | Quando |
 |---|---|---|---|---|
 | `project_booking` | BUSY (`booking.ts`) | uid della prenotazione | `calendar_bookings.updated_at` ISO | solo store Radicale, nella tx della prenotazione, cancellazione, riprogrammazione, approvazione |
 | `booking_conflict_check` | BUSY | uid della prenotazione | `index_version` max delle collezioni bloccanti | facoltativo: se il controllo post-commit non riesce in linea |
 | `subscription_mirror` | SUBS (`mirror.ts`) | id dell'iscrizione | `index_version` del sidecar | dopo un pull con cambi, solo `device_visible`; priorità `low` |
-| `recurrence_split` | STORE | uid della serie | etag del master | saga "questa e le successive" |
+| `recurrence_split` | STORE | uid della serie | etag del master | saga "questa e le successive": fasi `started`, `tail-written`, `done`; `compensate` (con `tailEtag`) quando il taglio è fallito in modo definitivo e la DELETE compensativa della nuova serie non è riuscita: il job la ripete con If-Match e lascia la nuova serie se nel frattempo è stata modificata (`tail-modified`) |
 | `calendar_lifecycle` | STORE | calendar_id | `lifecycle` | recupero di `creating`/`deleting` rimasti a metà |
 | `index_rebuild` | INDEX (`rebuild.ts`) | `all` o calendar_id | — | dopo `requestIndexRebuild` |
 | `shadow_mirror`, `reverse_projection` | F3, F4 | — | — | riservati |
@@ -325,6 +328,8 @@ export function statCollectionDir(collectionName: string): Promise<bigint | null
 export function statPrincipal(): Promise<{ dirMtimeNs: bigint | null; propsMtimeNs: bigint | null }>;
 ```
 
+Intervalli interni (giro, pause dei tentativi, rilettura dell'elenco ogni 10 s, discovery, poll remoto) sull'orologio monotono (`performance.now()`): un salto dell'ora di sistema (NTP, l'orologio fermo dei test) non sospende i tentativi né la scoperta delle collezioni nuove. `watcherAlive()` senza argomenti misura l'età dell'ultimo giro con lo stesso orologio (livello display); `watcherAlive(now)` la misura dall'ora di sistema (pagina della salute). Il segno passa la mtime osservata (`markCollectionDirty(…, { mtimeNs })`, §5.2) e si riarma dopo ogni sync riuscita (`onSyncSettled`): una directory ancora diversa dopo la sync viene risegnata, così un fallimento successivo porta la collezione a `unsyncable`.
+
 Errori: mai lanciati dal ciclo (registrati, contati in `consecutiveErrors`, alert al primo di una serie). Lock: nessuno proprio (le sync prendono il lock della collezione). Mode postgres: attivo se Radicale è configurato e l'identità è `ok` (indice in shadow); `off` con `CALDES_WATCH=off`, senza `RADICALE_URL` o con identità diversa da `ok` (riprova a ogni cambio delle props).
 
 ### 4.2 `radicale/canary.ts`
@@ -343,7 +348,7 @@ export function startCanarySchedule(): void; export function stopCanarySchedule(
 
 ### 4.3 `radicale/sync.ts`
 
-Responsabilità: unico canale dati Radicale → indice (design §6.2). Passi: identità `ok` (altrimenti errore e stop) → m0 e istante di osservazione → `REPORT sync-collection` dal token salvato (403 `valid-sync-token` → full resync con PROPFIND `getetag` e diff) → multiget a blocchi di 100 → classificazione dei 404 (file su disco → `radicaleSkipped`; assente → cancellazione candidata; remote mode → `pending404` al primo, cancellazione al secondo) → interruttore anti-cancellazione (max(50, 20%) della collezione, o collezione sparita/vuota → `hold`) → `indexer.applyCollectionChanges()` con CAS sul token → `dir_mtime_ns = m0` solo se più vecchia di 50 ms.
+Responsabilità: unico canale dati Radicale → indice (design §6.2). Passi: identità `ok` (altrimenti errore e stop) → m0 e istante di osservazione → elenco dei file della collezione sul mount (se affidabile, anche nelle sync incrementali) → `REPORT sync-collection` dal token salvato (403 `valid-sync-token` → full resync con PROPFIND `getetag` e diff) → multiget a blocchi di 100 → classificazione dei 404 (file su disco → `radicaleSkipped`; assente → cancellazione candidata; mount non affidabile → `pending404` al primo, cancellazione al secondo) → interruttore anti-cancellazione (guardia post-ripristino, finestra cumulativa di 15 minuti con max(50, 20%), collezione sparita o svuotata da una sync → `hold`) → `indexer.applyCollectionChanges()` con CAS sul token → `dir_mtime_ns = m0` solo se più vecchia di 50 ms.
 
 ```ts
 export type SyncReason = 'watcher' | 'freshness' | 'write-through' | 'remote-poll' | 'auditor' | 'rebuild' | 'manual' | 'startup';
@@ -360,12 +365,25 @@ export function syncCollection(calendarId: string, opts: SyncCollectionOptions):
 export function syncAllCollections(opts: Omit<SyncCollectionOptions, 'full'> & { full?: boolean }): Promise<Array<SyncCollectionResult | CollectionSyncError>>;
 export function applyHeldDeletions(calendarId: string, opts: { actor: string; hrefs?: string[] }): Promise<SyncCollectionResult>; // "applica cancellazioni" dell'admin
 export function inFlightSyncs(): string[];
+export const HOLD_REASONS: { massDelete: 'mass-delete'; collectionEmpty: 'collection-empty'; collectionMissing: 'collection-missing'; restoreGuard: 'restore-guard' };
+/** true se il canary ha provato che il mount non è il volume vivo (remote mode per mtime_not_observed o mount_missing). */
+export function mountUntrusted(state?: { mode: WatchMode; reason: string | null }): boolean;
+/** Cancellazione che l'API sta per fare su Radicale (DELETE, origine di una MOVE, compensazione della saga), annunciata PRIMA della richiesta; ritirata se la richiesta fallisce in modo certo. */
+export function expectCollectionDeletion(calendarId: string, href: string, actor?: string): void;
+export function forgetCollectionDeletion(calendarId: string, href: string): void;
+/** Attende la fine delle sync in corso e accodate senza interromperle (false allo scadere); drainSyncs le interrompe ed è solo per lo spegnimento. */
+export function waitForSyncsIdle(timeoutMs?: number): Promise<boolean>;
+export function drainSyncs(timeoutMs?: number): Promise<void>;
 ```
 
 - Single-flight in memoria per `calendarId`: chi arriva durante una sync in corso ne riceve l'esito (senza tenere connessioni); una richiesta con `full: true` arrivata durante una sync incrementale ne accoda una completa.
 - Lock: `withCollectionWriteLock` (INDEX) dal REPORT alla COMMIT. CAS: se il token in DB non è più quello di partenza (`CollectionCasError`), si riparte dal REPORT, al massimo 3 volte (`cas_exhausted`).
 - Parse ed espansione fuori dalla transazione (`prepareCollectionChanges`, worker_threads oltre 200 oggetti).
 - Fallimento: `health.recordSyncFailure()` (INDEX) e rilancio di `CollectionSyncError`; la freshness la converte in `CalendarUnavailableError`.
+- Elenco dei file prima del REPORT: un file nato dopo (PUT legittima fra REPORT e lettura) non passa mai per un item saltato da Radicale. Nelle sync incrementali un file mai indicizzato, assente dal REPORT e dai `removed`, si chiede a Radicale con il multiget: servito → upsert, 404 → quarantena `radicale-skip` con il blocco conservativo, alla prima sync dopo il cambio della directory invece che alla prossima completa o all'auditor. Se la lettura fallisce, la sync incrementale salta il controllo per un giro, quella completa fallisce.
+- Il disco decide solo se affidabile: mount mode, oppure filesystem locale non smentito dal canary. Con `mountUntrusted()` (copia stantia o mount assente) i 404 passano da `pending_404` a due passi, l'identità con `CALDES_IDENTITY_SOURCE=auto` si legge da Radicale (PROPFIND del principal) e l'auditor salta il controllo dei file su disco.
+- Interruttore (design §6.2 passo 6, §16.2): conta solo le cancellazioni osservate. Quelle che l'API annuncia con `expectCollectionDeletion` (valide 15 minuti, nel solo processo dell'API) si applicano sempre e vanno nelle versioni con l'attore `write-through:<attore>` (`ChangeSetInput.deleteActors`, §5.1); le osservate con `sync` o `rebuild`. Con `restore_guard_until` nel futuro (letto sotto il lock con l'ora del database) ogni cancellazione osservata va in hold con `HOLD_REASONS.restoreGuard`, a qualsiasi soglia e anche nel rebuild. Altrimenti l'hold scatta quando le cancellazioni osservate e applicate negli ultimi 15 minuti (versioni `delete` con attore `sync` o `rebuild`) più le nuove superano max(50, 20% × (oggetti + recenti)), e sospende solo le nuove; la regola "collezione svuotata" (da 2 oggetti) resta per singola sync. L'unica uscita da un hold resta `applyHeldDeletions` (o la ricomparsa delle sospese).
+- `dirty_since` si azzera solo per i segni non successivi alla stat di m0 (`ApplyOptions.observedAt`, §5.1): una modifica arrivata dopo il REPORT resta pendente.
 - Il ruolo `subscription` restituisce `status: 'skipped'` (fonte remota, §8).
 - Mode postgres: ammessa con identità `ok` (indice in shadow, letto solo da salute e test).
 
@@ -396,7 +414,7 @@ export function verifyFreshness(opts: { db: Db; budgetMs?: number /* 2500 */; si
 export function assertDisplayReady(db: Db): Promise<void>;
 ```
 
-`verifyFreshness`: per ogni collezione del set `stat(dir) == dir_mtime_ns` (non NULL, non racy) → ok senza HTTP; principal cambiato → discovery; directory cambiata o `dir_mtime_ns` NULL (rebuild) → `syncCollection(id, { reason: 'freshness', deadline })` (se già in corso se ne attende l'esito); remote mode → PROPFIND Depth:0 con budget (`INDEX_TIMING.remoteDecisionBudgetMs`); timeout, errore, collezione bloccante `unsyncable`, identità diversa → `CalendarUnavailableError` con il motivo corrispondente. Legge lo stato con il `db` del chiamante (la tx della prenotazione). Mode postgres: non chiamata (le decisioni usano il busy legacy).
+`verifyFreshness`: per ogni collezione del set `stat(dir) == dir_mtime_ns` (non NULL, non racy) → ok senza HTTP; principal cambiato → discovery; directory cambiata o `dir_mtime_ns` NULL (rebuild) → `syncCollection(id, { reason: 'freshness', deadline })` (se già in corso se ne attende l'esito); remote mode → PROPFIND Depth:0 con budget (`INDEX_TIMING.remoteDecisionBudgetMs`); timeout, errore, collezione bloccante `unsyncable`, identità diversa → `CalendarUnavailableError` con il motivo corrispondente. Legge lo stato con il `db` del chiamante (la tx della prenotazione). Il segno delle collezioni da sincronizzare (`markCollectionDirty` sul pool calendario, con la mtime osservata) sta dentro la scadenza: allo scadere si prosegue con le sync e il segno finisce in background, così un `FOR UPDATE` lungo sullo stato non trattiene la prenotazione oltre il budget. Mode postgres: non chiamata (le decisioni usano il busy legacy).
 
 ### 4.6 `radicale/ids.ts`
 
@@ -445,11 +463,12 @@ export interface ChangeSetInput {
   full: boolean;                // upserts ∪ radicaleSkipped = collezione intera
   horizon: { start: Date; end: Date };
   actor: string;                // 'sync' | 'write-through:<actor>' | 'rebuild' | 'subscription-pull' | ...
+  deleteActors?: Readonly<Record<string, string>>; // attore della versione 'delete' per href (default actor): API contro osservate
   idStrategy?: 'random' | 'deterministic';
 }
 export interface PreparedChangeSet { readonly input: ChangeSetInput; readonly items: readonly PreparedItem[]; readonly preparedAt: Date }
 /** Solo CPU (calendar-core: parseCalendarObject, expandObject, semanticFingerprint, deriveProvenance, classifyOccurrenceKind, computeBlocks); worker_threads oltre 200 item; nessun I/O. */
-export function prepareCollectionChanges(input: ChangeSetInput, opts?: { worker?: boolean | 'auto' }): Promise<PreparedChangeSet>;
+export function prepareCollectionChanges(input: ChangeSetInput, opts?: { worker?: boolean | 'auto'; timeoutMs?: number; itemTimeoutMs?: number }): Promise<PreparedChangeSet>;
 
 export interface ApplyOptions {
   expectedSyncToken?: string | null;   // CAS (§6.2 passo 8); undefined = nessun CAS
@@ -458,6 +477,7 @@ export interface ApplyOptions {
   hold?: { reason: string; pendingDeletions: string[] } | null;
   replaceAll?: boolean;                // rebuild: delete e insert della collezione nella stessa tx
   syncedAt: Date;
+  observedAt?: Date;                   // stat di m0: dirty_since si azzera solo se ≤ observedAt (default syncedAt)
 }
 export interface ApplyResult { indexVersion: string; upserted: number; unchanged: number; deleted: number; quarantined: number; held: boolean; objectIds: ReadonlyMap<string, string> }
 export class CollectionCasError extends Error {}
@@ -481,7 +501,9 @@ export function expandIndexedObject(row: Pick<CalObjectRow, 'id' | 'calendar_id'
   { occurrences: Array<{ recurrenceKey: string; start: Date; end: Date; allDay: boolean; kind: OccurrenceKind; blocks: boolean }>; conservative: boolean };
 ```
 
-Regole dell'apply (tutte nella stessa transazione): `ensureCollectionState`; CAS con `SELECT … FOR UPDATE` su `cal_collection_state`; id con `ids.allocateObjectIds`/`retire*`; upsert degli oggetti cambiati (stesso etag e sha → `unchanged`, nessuna scrittura); componenti e occorrenze sostituiti per oggetto; quarantena come §2.5; versioni con `versions.recordVersion` (create, update, delete col testo cancellato) solo se `context.versions`; cancellazioni non applicate con `hold` (vanno in `pending_deletions`, `health='hold'`; un href in `pending_deletions` che ricompare ne esce); `object_count`, `quarantined_count`, `horizon_start/end`, `last_synced_at`, `last_full_sync_at` (se `full`), `consecutive_failures=0`, `health` (`healthy` salvo hold), `dirty_since` azzerato solo con una `dir_mtime_ns` non NULL; `index_version + 1` se è cambiato qualcosa. Errori di parse non fanno mai fallire la transazione: fanno quarantena.
+Regole dell'apply (tutte nella stessa transazione): `ensureCollectionState`; CAS con `SELECT … FOR UPDATE` su `cal_collection_state`; id con `ids.allocateObjectIds`/`retire*`; upsert degli oggetti cambiati (stesso etag e sha → `unchanged`, nessuna scrittura); componenti e occorrenze sostituiti per oggetto; quarantena come §2.5; versioni con `versions.recordVersion` (create, update, delete col testo cancellato) solo se `context.versions`; cancellazioni non applicate con `hold` (vanno in `pending_deletions`, `health='hold'`; un href in `pending_deletions` che ricompare ne esce); `object_count`, `quarantined_count`, `horizon_start/end`, `last_synced_at`, `last_full_sync_at` (se `full`), `consecutive_failures=0`, `health` (`healthy` salvo hold), `dirty_since` azzerato solo con una `dir_mtime_ns` non NULL; `index_version + 1` se è cambiato qualcosa. Errori di parse non fanno mai fallire la transazione: fanno quarantena. Una sospesa "ricompare" (ed esce da `pending_deletions`) solo con una sync che l'ha vista su Radicale: rimaterializzazione e quarantena forzata (bookkeeping `none`) riscrivono le righe dal testo dell'indice e conservano `hold`, motivo, inizio ed elenco.
+
+Preparazione nel worker: un change set oltre il tempo massimo (120 s) non si ripete nel thread principale, dove lo stesso testo bloccherebbe anche `verify-credentials`; le risorse si ripreparano una per una nel worker riavviato, con 15 s per risorsa, e quella che lo supera va in quarantena `index-error` con il blocco conservativo dal testo (avviso `INDEX_TIMEOUT`). Il thread principale resta il ripiego solo per un worker non disponibile (i limiti strutturali e dei VTIMEZONE di calendar-core lo proteggono).
 
 Mode postgres: chiamato solo dalle sync in shadow e dal pull delle iscrizioni con sidecar.
 
@@ -503,7 +525,10 @@ export function getIndexHealth(db?: Db): Promise<IndexHealthSummary>;
 export function deriveCollectionHealth(state: Pick<CalCollectionStateRow, 'health' | 'consecutive_failures' | 'dirty_since' | 'hold_since'>, now: Date): CollectionHealth; // pura
 /** 503? (design §6.5, §7): decisione subito se bloccante unsyncable; display dopo 10 minuti. */
 export function blocksDecisions(view: CollectionHealthView, level: 'display' | 'decision', now: Date): boolean;
-export function markCollectionDirty(db: Db, calendarId: string, observedAt: Date): Promise<void>;
+/** Con mtimeNs: nessun effetto se una sync ha già salvato quella mtime in dir_mtime_ns (segno tardivo). */
+export function markCollectionDirty(db: Db, calendarId: string, observedAt: Date, opts?: { mtimeNs?: bigint | null }): Promise<void>;
+/** Ascolta ogni avviso dell'indice prima della deduplicazione (metriche, test). */
+export function onIndexAlert(listener: (code: IndexAlertCode, details: Readonly<Record<string, unknown>>) => void): () => void;
 export function recordSyncFailure(db: Db, calendarId: string, error: unknown, at: Date): Promise<CollectionHealth>;
 ```
 
@@ -514,7 +539,11 @@ export function requestIndexRebuild(db: Db, opts: { reason: string; actor: strin
 export interface RebuildReport { startedAt: Date; finishedAt: Date; collections: Array<{ calendarId: string; ok: boolean; error?: string }>; cleared: boolean }
 export function runIndexRebuild(opts?: { signal?: AbortSignal; extendLease?: () => Promise<boolean> }): Promise<RebuildReport>;
 export function registerIndexRebuildJob(): void;
+/** rebuild_required senza un index_rebuild pending o running → requestIndexRebuild; all'avvio dell'API, dopo il worker dei job. */
+export function ensureRequestedRebuild(db?: Db, opts?: { reason?: string; actor?: string }): Promise<boolean>;
 ```
+
+L'import del backup JSON (`routes/backup.ts`) chiama `requestIndexRebuild(tx, { reason: 'backup-import' })` nella sua transazione, subito dopo la guardia: token e `dir_mtime_ns` azzerati e job accodato insieme al flag. `ensureRequestedRebuild()` copre i casi che impostano solo il flag (`restore-calendar-stack.sh`, UPDATE manuale) all'avvio invece che all'auditor delle 4.
 
 Ogni collezione si ricostruisce con `syncCollection(id, { reason: 'rebuild', full: true })` e `replaceAll` (delete e insert atomici); gli id restano (`cal_object_ids`). `rebuild_required=false` solo se tutte le collezioni Radicale-backed sono riuscite con identità `ok`; con `epoch = 0` (volume non inizializzato, mode postgres) non c'è nulla da ricostruire e si azzera subito; senza Radicale raggiungibile resta `true` (policy frozen: in mode postgres stessi permessi di shadow). Durante il rebuild le decisioni trovano `dir_mtime_ns` NULL e forzano la sync, altrimenti 503 (`rebuild_in_progress`): mai busy su righe vecchie che sembrano fresche.
 
@@ -525,12 +554,14 @@ export interface AuditReport {
   startedAt: Date; finishedAt: Date; identity: IdentityStatus; policyCoherent: boolean; reconciled: number;
   collections: Array<{ calendarId: string; etagMismatches: number; resynced: boolean; brokenFiles: string[] }>;
   bookings: { missingProjections: string[]; orphanProjections: string[]; drift: string[] } | null; // null in mode postgres
-  horizonOk: boolean; quarantined: number; held: string[]; versionsPurged: number; jobsPurged: number; alerts: string[];
+  horizonOk: boolean; quarantined: number; held: string[]; versionsPurged: number; jobsPurged: number; jobsRevived: number; alerts: string[];
 }
 export function runCalendarAudit(opts?: { signal?: AbortSignal; now?: Date }): Promise<AuditReport>; // notturno
+/** Riaccoda dalla dead letter (una riga per tipo e chiave, al massimo 200) le saghe recurrence_split con phase ≠ done e i booking_conflict_check di prenotazioni future e attive, morti per errori non definitivi e creati negli ultimi 7 giorni. */
+export function reviveDeadCalendarJobs(): Promise<number>;
 ```
 
-(href, etag) di Radicale contro l'indice (differenza → `syncCollection(full)` attraverso l'interruttore, alert); file `.ics` su disco assenti dal listing (item rotti); prenotazioni contro collezione bookings in sola lettura (solo store Radicale: proiezioni mancanti → `enqueueCalendarJob('project_booking')`, orfane marcate e mai cancellate, `BOOKING_DRIFT`); coerenza fra identità, epoch, heartbeat e policy (`policyFromState`); `calendar_sidecar_reconcile()`; orizzonte; `versions.purgeExpiredVersions()`; `purgeFinishedCalendarJobs()`; conflitti aperti.
+(href, etag) di Radicale contro l'indice (differenza → `syncCollection(full)` attraverso l'interruttore, alert); file `.ics` su disco assenti dal listing (item rotti); prenotazioni contro collezione bookings in sola lettura (solo store Radicale: proiezioni mancanti → `enqueueCalendarJob('project_booking')`, orfane marcate e mai cancellate, `BOOKING_DRIFT`); coerenza fra identità, epoch, heartbeat e policy (`policyFromState`); `calendar_sidecar_reconcile()`; orizzonte; `reviveDeadCalendarJobs()`; `versions.purgeExpiredVersions()`; `purgeFinishedCalendarJobs()`; conflitti aperti. Con il mount smentito dal canary (`mountUntrusted()`) niente controllo dei file su disco e identità letta da Radicale.
 
 ### 5.5 `radicale/horizon.ts`
 
@@ -540,7 +571,7 @@ export function maxAdvanceDays(db: Db): Promise<number>;                      //
 export function assertHorizonCovers(db: Db, until: Date, calendarIds?: string[]): Promise<void>; // CalendarUnavailableError('horizon_insufficient')
 ```
 
-Per ogni collezione con `horizon_end` più vicino di un giorno all'obiettivo (o `horizon_start` da avanzare): `rematerializeCollection(id, { reason: 'horizon', horizon: targetHorizon(now) })`.
+Per ogni collezione con `horizon_end` più vicino di un giorno all'obiettivo (o `horizon_start` da avanzare): `rematerializeCollection(id, { reason: 'horizon', horizon: targetHorizon(now) })` (anche in shadow). La garanzia statica e l'avviso `horizon-insufficient` valgono solo con lo store Radicale (`storeKindOverride() ?? storeKindForMode(mode)`): in mode postgres le collezioni senza stato di un volume vuoto sarebbero un falso allarme. Le iscrizioni (role `subscription`) non contano mai nella garanzia: nelle decisioni vale l'ultimo pull completato e "mai scaricata" equivale a "nessun evento" (la salute lo segnala, §9); un sidecar con oggetti e orizzonte corto lo copre l'espansione al volo del busy.
 
 ### 5.6 `radicale/versions.ts`
 
@@ -572,9 +603,10 @@ Una sola connessione riservata di `calSql` per processo tiene il lock condiviso 
 
 Sostituisce lo stub con la stessa esportazione `getRadicaleStore(): CalendarStore`.
 
-- **Letture** dall'indice (pool principale): `listOccurrences` per sovrapposizione su `span` (`cal_occurrences ⋈ cal_components ⋈ calendars`), `blockingOnly` con i flag dei calendari come la query di busy, cancellati esclusi salvo `includeCancelled`, iscrizioni con il calendario di destinazione come `calendar_id` nei DTO (design §1); finestre oltre l'orizzonte con `expandIndexedObject`; `getEvent` con `ids.resolveEventRef` più GET diretto su Radicale (fallback sull'indice in sola lettura con Radicale giù; `ambiguous` → `EventValidationError` con i candidati); `listCalendars` dal sidecar senza le `sub-*` e senza `lifecycle ≠ active`; `countEventsByCalendar` con la semantica legacy (VEVENT non CANCELLED, override compresi, sommando le iscrizioni con quel padre); `listClosures` dalla collezione `role='holidays'` tranne `it-holiday-*` con fine > oggi − 30 g, senza creare il calendario; `getBusyRanges` = `busy.indexBusyRanges` (BUSY); `buildCalendarFeed` = `feedBuilder.buildIndexFeed` (CONSUMERS); `listEventsForCollection`/`getEventOverrides` dall'indice (solo compatibilità).
+- **Letture** dall'indice (pool principale): `listOccurrences` per sovrapposizione su `span` (`cal_occurrences ⋈ cal_components ⋈ calendars`), `blockingOnly` con i flag dei calendari come la query di busy, cancellati esclusi salvo `includeCancelled`, iscrizioni con il calendario di destinazione come `calendar_id` nei DTO (design §1); finestre oltre l'orizzonte con `expandIndexedObject`; `getEvent` con `ids.resolveEventRef` più GET diretto su Radicale (fallback sull'indice in sola lettura con Radicale giù; `ambiguous` → `EventValidationError` con i candidati); `listCalendars` dal sidecar senza le `sub-*` e senza `lifecycle ≠ active`; `countEventsByCalendar` con la semantica legacy (VEVENT non CANCELLED, override compresi, sommando le iscrizioni con quel padre); `listClosures` dalla collezione `role='holidays'` tranne `it-holiday-*` con fine > oggi − 30 g, senza creare il calendario; `getBusyRanges` (find_free_slots) = livello display (`assertReadyOrDegraded` con `assertDisplayReady`: 503 o modalità degradata come gli slot) più `busy.indexBusyRanges` con le proiezioni, unito senza duplicati agli intervalli di `calendar_bookings` con status in `PROJECTED_BOOKING_STATUSES` se la collezione Prenotazioni blocca (una confermata non risulta libera con il job `project_booking` in coda); `buildCalendarFeed` = `feedBuilder.buildIndexFeed` (CONSUMERS); `listEventsForCollection`/`getEventOverrides` dall'indice (solo compatibilità).
 - **Scritture** (pipeline del design §8): guardie API identiche a oggi (stessi errori e messaggi: iscrizione → testo di `assertWritable`; proiezione `booking-*` di una prenotazione pending/confirmed → `EventReadOnlyError('Evento di una prenotazione attiva: annullala da Calendario → Prenotazioni.')`; calendario `is_system` non eliminabile; `source` dal client solo in {admin, manual, mcp, agent}); `validateObject` di calendar-core; `withCalendarWriteGate` → GET (testo ed ETag) → CAS per campo (`checkBase`; per admin v1 e MCP la base è implicita, un solo retry) → patch (`opsFromLegacyUpdate`/`applyPatch`) → PUT con `If-Match` (creazione `If-None-Match: *`; su 412 da capo, al massimo 3 volte) → rilascio del gate → write-through `syncCollection(id, { reason: 'write-through' })` → `audit_logs` (`table_name='cal_objects'`, `record_id` = id, `old_data`/`new_data` = `{collection, href, etag}`, mai il testo). Se il write-through fallisce dopo una PUT riuscita, la scrittura resta valida: il DTO si costruisce dal testo scritto e il watcher indicizzerà.
-- Target `{recurrence_key}` non più nell'insieme corrente → `CalendarRecurrenceConflictError` (409). "Solo questa", "elimina questa", "tutta la serie", MOVE, duplica: `recurrence-ops` di calendar-core. "Questa e le successive": saga `recurrence_split` (§3).
+- Target `{recurrence_key}` non più nell'insieme corrente → `CalendarRecurrenceConflictError` (409); `RecurrenceTargetError('INVALID_TARGET')` → 400 con il messaggio di calendar-core quando è scritto per l'utente (taglio con soli override orfani prima dell'occorrenza, serie troppo lunga), "Occorrenza non valida" per una chiave malformata. Idempotenza come il legacy (decisione 2): "elimina questa" su un'istanza già esclusa da EXDATE (anche da un device, con l'indice non ancora sincronizzato) restituisce `true` senza scrivere; `createOccurrenceOverride` con `status: 'cancelled'` su un'istanza già esclusa restituisce il DTO della riga cancellata, senza scrittura né 409 (un'istanza fuori regola resta 409, come da allowed-diffs).
+- Ogni DELETE dell'API su Radicale (risorsa, origine della MOVE, compensazione della saga) è annunciata alla sync con `expectCollectionDeletion` prima della richiesta e ritirata con `forgetCollectionDeletion` se fallisce con esito certo (§4.3). "Solo questa", "elimina questa", "tutta la serie", MOVE, duplica: `recurrence-ops` di calendar-core. "Questa e le successive": saga `recurrence_split` (§3).
 - **Calendari**: crea (riga `lifecycle='creating'` che prenota `collection_name` → MKCALENDAR con dead prop `calendar-id` e `role` → `active`; MKCALENDAR fallita → riga cancellata; 409/405 → stesso messaggio di oggi), modifica (PROPPATCH più sidecar), elimina (guardie → `deleting` → DELETE della collezione → delete della riga in una tx con `SET LOCAL caldes.reverse_sync='on'`); recupero dei `creating`/`deleting` con il job `calendar_lifecycle`.
 - **Iscrizioni**: CRUD su `calendar_subscriptions` come oggi; `syncSubscription`/`syncAllSubscriptions` → `subscriptions/pull.ts` (SUBS); `replaceSubscriptionEvents` → `CalendarStoreUnavailableError` (solo legacy).
 - Radicale non configurato o irraggiungibile: letture dall'indice; scritture → `CalendarUnavailableError('radicale_unreachable')`.
@@ -605,7 +637,7 @@ export function indexBusyRanges(db: Db, fromIso: string, toIso: string): Promise
 
 - Mode postgres (`readStoreKind`, o `readBackendStateFresh(db)` a livello decision): stesso insieme di oggi (`legacy/events-pg.getBusyRanges`: occorrenze confermate, timed, dei calendari bloccanti) ma l'errore si propaga (design §9: local-busy fail-open eliminato, "busy.ts solleva sempre l'errore, anche sullo store legacy"). Le proiezioni `booking-*` escono dal busy (design §9) se BUSY applica il filtro `source='booking'` anche al ramo legacy: differenza da motivare in `allowed-diffs.json` se un contratto la vede (riprogrammazione sovrapposta, test.todo del contratto pubblico).
 - Store Radicale, livello display: `assertDisplayReady(db)` poi `indexBusyRanges`; livello decision: il chiamante ha già fatto `verifyFreshness` nella stessa tx, qui solo `assertHorizonCovers` e la query con `db: tx`.
-- Fail-closed circoscritto: oggetti in quarantena contano col loro intervallo (occorrenze stale o conservative già nell'indice); oltre `materialized_until` si espande al volo il solo oggetto sulla finestra, e se fallisce lo si blocca in modo conservativo sulla finestra; mai un 503 per un singolo oggetto.
+- Fail-closed circoscritto: oggetti in quarantena contano col loro intervallo (occorrenze stale o conservative già nell'indice); oltre `materialized_until` si espande al volo il solo oggetto sulla finestra, e se fallisce lo si blocca in modo conservativo sulla finestra; mai un 503 per un singolo oggetto. L'espansione al volo (`expandRawOnTheFly` di index-worker) riprende a blocchi da `materializedUntil` quando una serie densa supera le 5000 occorrenze, scartando i duplicati per recurrence key, fino ai tetti `ON_THE_FLY_LIMITS` (50 000 occorrenze, 1 000 000 di iterazioni per oggetto e finestra); oltre, la coda [ultimo `materializedUntil`, fine finestra) è un'occorrenza conservativa, bloccante se blocca almeno una delle occorrenze già espanse (senza occorrenze, con la regola della quarantena). La vista dell'admin resta troncata con un avviso.
 
 ### 7.2 `lib/calendar/capacity.ts`
 
@@ -645,7 +677,7 @@ post (mode postgres): projectBookingEvent legacy, sincrono, come oggi
 ```ts
 export interface SplitFeedObject { uid: string; href: string /* r-<base32(sha256(UID))[0..26]>.ics */; raw: string; semanticFp: string }
 export interface SplitFeedResult { objects: SplitFeedObject[]; errors: Array<{ uid: string | null; message: string }>; warnings: number }
-export function splitIcsFeed(body: string): SplitFeedResult; // parseIcs + splitCalendar + serialize + semanticFingerprint di calendar-core; malformedLines 'skip'
+export function splitIcsFeed(body: string | Uint8Array): SplitFeedResult; // parseIcs + splitCalendar + serialize + semanticFingerprint di calendar-core; malformedLines 'skip', invalidUtf8 'replace'
 export function remoteHref(uid: string): string;
 ```
 
@@ -659,6 +691,7 @@ export function enableSubscriptionIndex(subscriptionId: string): Promise<string>
 ```
 
 - Solo le iscrizioni con un sidecar (`collection_calendar_id`); senza → `skipped`. In mode postgres non crea sidecar (§1.5): in produzione il pull verso l'indice resta inerte fino alla F3, i test creano il sidecar esplicitamente.
+- Il corpo scaricato passa allo split come byte (`readLimitedBody` → `Uint8Array`): l'unfolding avviene prima della decodifica UTF-8 e ricompone i caratteri multibyte spezzati dai generatori che piegano a 75 caratteri invece che a 75 ottetti; i byte non UTF-8 diventano U+FFFD come con la decodifica tollerante di oggi. Il controllo `BEGIN:VCALENDAR` usa la stessa decodifica tollerante.
 - Fetch con etag e last-modified propri dell'indice (mai quelli del pull legacy, che restano invariati: la trappola del 304 è del legacy); `body` già scaricato PUÒ essere passato per non scaricare due volte. Anti-wipe come oggi (body vuoto o HTML rifiutato; `force` esplicito).
 - `splitIcsFeed` → diff per `semanticFp` con gli oggetti `origin_store='remote'` del sidecar → `indexer.applyCollectionChanges` con `context.versions=false`, senza CAS né sync-token: zero scritture e zero versioni se nulla è cambiato (anche con DTSTAMP sempre nuovo).
 - Oggetto rotto → quarantena del solo oggetto (RRULE invalida inclusa), mai un errore del pull; nelle decisioni le iscrizioni usano l'ultimo pull completato (fuori dal set di freschezza).
@@ -676,12 +709,12 @@ Solo `device_visible = true` (iscrizione non visibile → nessuna PUT, nemmeno u
 
 ## 9. CONSUMERS: feed, agenda, chiusure, conteggi, MCP, salute
 
-- **`lib/calendar/feed-builder.ts`**: `buildIndexFeed(db: Db, calendar: Calendar, opts: CalendarFeedOptions): Promise<CalendarFeedResult>` (lo chiama `RadicaleStore.buildCalendarFeed`). Dall'indice della collezione: serie sempre, singoli da −90 a +365 giorni, niente iscrizioni né CANCELLED (anche scritti dai device), override nella risorsa del master, cancellazioni come EXDATE, VTIMEZONE deduplicati, whitelist delle proprietà e `CLASS:PRIVATE/CONFIDENTIAL` → "Occupato" (feed-transform di calendar-core), UID legacy per le proiezioni migrate (`legacy_uid@CAL_FEED_UID_DOMAIN`), suffisso per gli UID senza `@`, DTSTAMP stabile (LAST-MODIFIED o `first_seen_at`), ETag = sha256 del corpo con cache in memoria per (index_version, `calendars.updated_at`, versione della trasformazione, data Europe/Rome). `CAL_FEED_UID_DOMAIN` (valore congelato) ha come default l'host di `publicApiUrl()`, cioè il dominio del feed legacy.
+- **`lib/calendar/feed-builder.ts`**: `buildIndexFeed(db: Db, calendar: Calendar, opts: CalendarFeedOptions): Promise<CalendarFeedResult>` (lo chiama `RadicaleStore.buildCalendarFeed`). Dall'indice della collezione: serie sempre, singoli da −90 a +365 giorni, niente iscrizioni né CANCELLED (anche scritti dai device), override nella risorsa del master, cancellazioni come EXDATE, VTIMEZONE deduplicati, whitelist delle proprietà e `CLASS:PRIVATE/CONFIDENTIAL` → "Occupato" (feed-transform di calendar-core), UID legacy per gli oggetti migrati (`legacy_uid@CAL_FEED_UID_DOMAIN`; senza legacy_uid ma con `legacy_event_id`, l'UID dell'oggetto con il dominio anche se contiene `@`, come il feed legacy), suffisso per gli UID senza `@`, proiezioni delle prenotazioni (source `booking`) ricomposte al momento del feed da calendar_bookings e calendar_event_types con la decisione 3 (`bookingProjection` di feed-transform: lo stesso testo della risorsa scritta per i device, "Prenotazione" dopo 24 mesi dalla fine o se la prenotazione non c'è più), DTSTAMP stabile (LAST-MODIFIED o `first_seen_at`), ETag = sha256 del corpo con cache in memoria per (index_version, `calendars.updated_at`, versione della trasformazione, data Europe/Rome). `CAL_FEED_UID_DOMAIN` (valore congelato) ha come default l'host di `publicApiUrl()`, cioè il dominio del feed legacy.
 - **`routes/calendar/feed.ts`**: `buildCalendarFeed(calendar, { now: new Date(), uidDomain })` dalla facade; header di oggi; `ETag` e 304 su `If-None-Match` solo se `etag` non è null (in mode postgres gli header restano quelli di oggi).
 - **`routes/calendar/admin.ts`**: `event_count` da `countEventsByCalendar()`; `GET /closures` da `listClosures()`; 503 `{error, code}` per `CalendarUnavailableError`, 409 per i conflitti nuovi.
 - **`routes/device.ts`**: agenda da `listOccurrences` con la finestra del giorno Europe/Rome (design §12 e §14: ricorrenze espanse e giorno di Roma già in F2, su entrambi gli store, stessa forma JSON); la differenza sui contratti `device-agenda` va in `allowed-diffs.json` (motivata dal design §12).
-- **`lib/agent/tools.ts`**: `list_calendars` con `countEventsByCalendar()`; descrizione delle proiezioni (`kind=booking_projection`, solo store Radicale) ricomposta con `adapters.projectionDescription`; errori sul ramo `{error}` esistente; nessun nome di tool, schema o forma nuovi (contratto `mcp-calendar-tools`).
-- **`routes/calendar/health.ts`**: `GET /api/health/calendar`. Senza JWT admin: `{ status: 'ok' | 'degraded' | 'down' }` (200, oppure 503 se `down`). Con JWT admin, il dettaglio: modo e store, control-plane (`getCalendarControlPlane()?.status()`), identità, watcher, canary, collezioni (`getIndexHealth`), quarantene, hold, orizzonte, job (`calendarJobStats`), conflitti aperti, rebuild. Componenti Radicale non configurati → `not_configured`, mai un errore. Montaggio in `src/app.ts` (unica riga ammessa).
+- **`lib/agent/tools.ts`**: `list_calendars` con `countEventsByCalendar()`; descrizione delle proiezioni (`kind=booking_projection`, solo store Radicale) ricomposta con `adapters.projectionDescription` in `list_events` e `update_event` (lo stesso fanno elenco, dettaglio, modifica e duplicazione dell'admin: voce `descrizione-proiezioni-ricomposta`, implementata e fuori da `planned` di allowed-diffs); errori sul ramo `{error}` esistente; nessun nome di tool, schema o forma nuovi (contratto `mcp-calendar-tools`).
+- **`routes/calendar/health.ts`**: `GET /api/health/calendar`. Senza JWT admin: `{ status: 'ok' | 'degraded' | 'down' }` (200, oppure 503 se `down`). Con JWT admin, il dettaglio: modo e store, control-plane (`getCalendarControlPlane()?.status()`), identità, watcher, canary, collezioni (`getIndexHealth`), quarantene, hold, orizzonte, job (`calendarJobStats`), conflitti aperti, rebuild, iscrizioni (`subscriptions.blocking_never_pulled`: iscrizioni attive e bloccanti, con il calendario di destinazione bloccante, senza un pull verso l'indice riuscito; con lo store Radicale motivo `subscription_never_pulled`, 'degraded'). Componenti Radicale non configurati → `not_configured`, mai un errore. Montaggio in `src/app.ts` (unica riga ammessa).
 
 ## 10. Grafo delle chiamate e regole d'import
 
@@ -718,6 +751,7 @@ Collegati dall'integrazione in `apps/api/src/cron/calendar-radicale.ts`: `startC
 |---|---|---|
 | boot | `startBackendModeListener()` | fondazione |
 | boot | `registerBookingJobs()`, `registerSubscriptionMirrorJob()`, `registerIndexRebuildJob()`, `registerStoreJobs()` (`recurrence_split`, `calendar_lifecycle`), poi `startCalendarJobWorker()` | BUSY, SUBS, INDEX, STORE, fondazione |
+| boot | `ensureRequestedRebuild()` dopo il worker dei job (solo con Radicale configurato) | INDEX |
 | boot | `startCalendarWatcher()`, `startCanarySchedule()` (solo con Radicale configurato) | SYNC |
 | shutdown | `stopCanarySchedule()`, `stopCalendarWatcher()`, `stopCalendarJobWorker()`, `stopIndexWorker()`, unlisten del modo, `closeCalendarPool()` | SYNC, INDEX, fondazione |
 | cron 15 min (`calendar-subscriptions-index`) | `pullAllSubscriptionsToIndex()` accanto a `runIcsPull`, solo con lo store postgres | SUBS |
@@ -752,5 +786,5 @@ Collegati dall'integrazione in `apps/api/src/cron/calendar-radicale.ts`: `startC
 2. **`_canary`** (SYNC, §4.2): il volume inizializzato in F1 non ha `_canary`, quindi fino alla sua creazione il campanello resta in remote mode. `calendar:radicale-init -- --apply` la crea anche sui volumi F1 già inizializzati: va eseguito una volta dopo il deploy della F2.
 3. ~~**Shutdown** (integrazione)~~ **Chiusa**: bootstrap e shutdown collegati in `src/cron/calendar-radicale.ts` (§12).
 4. **Contratto del control-plane §2**: elenca `horizon_start/end` fra le colonne della 165; da allineare alla precisazione 1 quando si scrive la 165.
-5. **Matrice `CALENDAR_BACKEND=radicale` dei contratti F0** (§11): da preparare (Radicale reale inizializzato, worker dei job per le proiezioni, fixture delle iscrizioni senza `replaceSubscriptionEvents`, che RadicaleStore non espone). Oggi i contratti girano su PgLegacyStore e RadicaleStore è coperto dai test di modulo e d'integrazione.
-6. **INTERVAL=0 in Radicale** (F1, `apps/radicale`): una PUT con `FREQ=DAILY;INTERVAL=0` viene accettata e una REPORT calendar-query con time-range su quella collezione resta appesa (dateutil). Lato API nessun rischio (calendar-core rifiuta la regola, l'indice mette l'oggetto in quarantena); il plugin `caldes_vobject_fix` dovrebbe rifiutare alla PUT le RRULE con `INTERVAL<1` e le altre combinazioni vietate dalla RFC che dateutil accetta.
+5. ~~**Matrice `CALENDAR_BACKEND=radicale` dei contratti F0** (§11)~~ **Chiusa**: `test:contracts:radicale` (helpers/calendar-backend.ts) fa girare i contratti F0 su RadicaleStore con Radicale reale inizializzato, job eseguiti dopo ogni richiesta e iscrizioni dal pull verso l'indice; le differenze sono in `allowed-diffs.json` (README dei test, "Matrice CALENDAR_BACKEND"). È un passo del job calendar-integration della CI.
+6. ~~**INTERVAL=0 in Radicale** (F1, `apps/radicale`)~~ **Chiusa**: una PUT con `FREQ=DAILY;INTERVAL=0` veniva accettata e una REPORT calendar-query con time-range su quella collezione restava appesa (dateutil non avanza). Il plugin `caldes_vobject_fix` controlla ora le RRULE e le EXRULE in `RecurringComponent.getrruleset` (e nella property `rruleset`), che Radicale chiama in `check_and_sanitize_items`: INTERVAL o COUNT non interi positivi, BYMONTHDAY/BYYEARDAY/BYWEEKNO uguali a 0 o fuori intervallo e BYMONTH fuori da 1..12 (gli stessi valori che rifiuta `parseRecurRule` di calendar-core) fanno rispondere 400 alla PUT, senza scrivere nulla nel volume; i valori che dateutil rifiuta già (BYHOUR, BYMINUTE, BYSECOND, BYSETPOS, ordinali di BYDAY, parti sconosciute) davano già 400. Un file già presente nel volume con una regola così viene saltato da Radicale come "broken item" anche in lettura, quindi la REPORT risponde. `self_test()` verifica il controllo, e `caldes_rights` non fa partire Radicale se manca. Test: `apps/radicale/tests/test_rrule_guard.py`. Restano lente (secondi per valutazione, non infinite) in dateutil le regole RFC-valide ma senza istanze con FREQ sub-giornaliera (es. `FREQ=MINUTELY;BYMONTH=2;BYMONTHDAY=30`): non arrivano dalle UI dei device, e calendar-core le espande con il proprio budget.

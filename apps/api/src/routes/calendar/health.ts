@@ -23,7 +23,9 @@
  *    remote mode, collezioni stale/hold/unsyncable entro la tolleranza,
  *    oggetti in quarantena, rebuild richiesto, freeze o transizione, job
  *    morti o in ritardo, conflitti aperti, control-plane che fallisce,
- *    identità non 'ok' in shadow, modalità degradata accesa;
+ *    identità non 'ok' in shadow, modalità degradata accesa; con lo store
+ *    Radicale anche un'iscrizione bloccante mai scaricata (nelle decisioni
+ *    vale come "nessun evento" finché il primo pull non riesce, design §6.6);
  *  - in mode postgres (produzione dopo il deploy della F2) i componenti di
  *    Radicale lavorano in shadow: sono riportati ma non portano mai a 'down',
  *    e un Radicale non configurato è dichiarato 'not_configured' senza
@@ -106,6 +108,20 @@ interface RebuildSummary {
   running_jobs: number;
 }
 
+/** Iscrizioni bloccanti elencate nel dettaglio (il conteggio resta completo). */
+const SUBSCRIPTION_DETAIL_LIMIT = 100;
+
+interface SubscriptionsSummary {
+  /**
+   * Iscrizioni attive e bloccanti (iscrizione e calendario di destinazione)
+   * senza un pull verso l'indice riuscito: con lo store Radicale le decisioni
+   * le contano come "nessun evento" (un feed esterno guasto non porta mai le
+   * prenotazioni in 503), quindi vanno guardate.
+   */
+  blocking_never_pulled: number;
+  items: Array<{ subscription_id: string; name: string; collection_calendar_id: string | null; last_error: string | null }>;
+}
+
 export interface CalendarHealthReport {
   status: CalendarHealthStatus;
   /** Codici stabili dei motivi (per gli alert), nell'ordine di gravità. */
@@ -142,6 +158,7 @@ export interface CalendarHealthReport {
   jobs: CalendarJobStats | { error: string };
   conflicts: ConflictSummary | { error: string };
   rebuild: RebuildSummary | { error: string };
+  subscriptions: SubscriptionsSummary | { error: string };
   degraded_booking_mode: Awaited<ReturnType<typeof getDegradedBookingMode>> | { error: string };
 }
 
@@ -156,7 +173,7 @@ export async function computeCalendarHealth(now: Date = new Date()): Promise<Cal
   const down = (code: string, message: string) => reasons.push({ code, severity: 'down', message });
   const degraded = (code: string, message: string) => reasons.push({ code, severity: 'degraded', message });
 
-  const [stateS, indexS, jobsS, conflictsS, rebuildJobsS, advanceS, degradedS] = await Promise.all([
+  const [stateS, indexS, jobsS, conflictsS, rebuildJobsS, advanceS, degradedS, subscriptionsS] = await Promise.all([
     section('state', () => readBackendStateFresh(sql)),
     section('index', () => getIndexHealth(sql)),
     section('jobs', () => calendarJobStats(sql)),
@@ -177,6 +194,23 @@ export async function computeCalendarHealth(now: Date = new Date()): Promise<Cal
     }),
     section('horizon', () => maxAdvanceDays(sql)),
     section('degraded_mode', () => getDegradedBookingMode(sql, now)),
+    section('subscriptions', async () => {
+      const rows = await sql<Array<{ id: string; name: string; collection_calendar_id: string | null; last_error: string | null; total: number }>>`
+        SELECT s.id::text AS id, s.name, s.collection_calendar_id::text AS collection_calendar_id,
+               COALESCE(st.last_error, s.last_error) AS last_error, count(*) OVER ()::int AS total
+        FROM calendar_subscriptions s
+        JOIN calendars p ON p.id = s.calendar_id
+        LEFT JOIN cal_collection_state st ON st.calendar_id = s.collection_calendar_id
+        WHERE s.sync_enabled AND s.blocks_availability AND p.blocks_availability AND p.lifecycle = 'active'
+          AND st.last_synced_at IS NULL
+        ORDER BY s.name, s.id
+        LIMIT ${SUBSCRIPTION_DETAIL_LIMIT}
+      `;
+      return {
+        blocking_never_pulled: rows[0]?.total ?? 0,
+        items: rows.map((r) => ({ subscription_id: r.id, name: r.name, collection_calendar_id: r.collection_calendar_id, last_error: r.last_error })),
+      } satisfies SubscriptionsSummary;
+    }),
   ]);
 
   // ── Modo e store ──
@@ -335,6 +369,15 @@ export async function computeCalendarHealth(now: Date = new Date()): Promise<Cal
   const rebuild: CalendarHealthReport['rebuild'] = rebuildJobsS.ok
     ? { required: isState(mode) ? mode.rebuild_required : false, pending_jobs: rebuildJobsS.value.pending, running_jobs: rebuildJobsS.value.running }
     : { error: rebuildJobsS.error };
+  let subscriptions: CalendarHealthReport['subscriptions'];
+  if (subscriptionsS.ok) {
+    subscriptions = subscriptionsS.value;
+    if (radicaleStore && subscriptions.blocking_never_pulled > 0) {
+      degraded('subscription_never_pulled', `${subscriptions.blocking_never_pulled} iscrizioni bloccanti mai scaricate: nelle decisioni non bloccano nulla finché il primo pull non riesce`);
+    }
+  } else {
+    subscriptions = { error: subscriptionsS.error };
+  }
   let degradedMode: CalendarHealthReport['degraded_booking_mode'];
   if (degradedS.ok) {
     degradedMode = degradedS.value;
@@ -365,6 +408,7 @@ export async function computeCalendarHealth(now: Date = new Date()): Promise<Cal
     jobs,
     conflicts,
     rebuild,
+    subscriptions,
     degraded_booking_mode: degradedMode,
   };
 }

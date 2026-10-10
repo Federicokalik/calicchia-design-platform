@@ -21,8 +21,21 @@
  *    CLASS:PRIVATE/CONFIDENTIAL → "Occupato";
  *  - UID: `legacy_uid@CAL_FEED_UID_DOMAIN` per gli oggetti migrati
  *    (cal_object_ids.legacy_uid, l'UID che gli abbonati vedono oggi, anche
- *    per le proiezioni delle prenotazioni), suffisso `@CAL_FEED_UID_DOMAIN`
- *    per gli UID senza '@', gli altri invariati;
+ *    per le proiezioni delle prenotazioni); un oggetto migrato senza
+ *    legacy_uid (legacy_event_id valorizzato) usa il proprio UID con il
+ *    dominio, sempre, come il feed legacy (`${uid}@dominio` anche per gli UID
+ *    con '@'): gli abbonati non vedono duplicati dopo il cutover. Gli altri
+ *    oggetti: suffisso `@CAL_FEED_UID_DOMAIN` per gli UID senza '@', gli
+ *    altri invariati;
+ *  - proiezioni delle prenotazioni (risorse booking-<uid>.ics, source
+ *    'booking'): il contenuto si ricompone al momento del feed dai dati
+ *    correnti di calendar_bookings e calendar_event_types con la decisione 3
+ *    (feed-transform.bookingProjectionContent, lo stesso testo che l'API
+ *    scrive per i device): titolo con il nome, telefono e link all'admin,
+ *    "Prenotazione" dopo 24 mesi dalla fine o se la prenotazione non c'è più
+ *    (erasure). Qualunque testo ci sia in Radicale (una proiezione migrata
+ *    con l'email, una scritta prima della scadenza dei 24 mesi), il feed non
+ *    pubblica più di così;
  *  - DTSTAMP stabile (LAST-MODIFIED o first_seen_at): due letture senza
  *    modifiche danno lo stesso corpo.
  *
@@ -40,7 +53,9 @@
  * entra a +365 giorni arriva agli abbonati di `f`), o quando cambia l'indice.
  * Cache in memoria per (index_version della collezione, calendars.updated_at,
  * campi del calendario, FEED_TRANSFORM_VERSION, data di Roma, dominio degli
- * UID), con single-flight per chiave.
+ * UID), con single-flight per chiave. I dati delle prenotazioni non sono
+ * nella chiave: una modifica di calendar_bookings arriva al feed al più dopo
+ * FEED_CACHE_TTL_MS (la proiezione stessa la aggiorna il suo job).
  *
  * Collezione mai indicizzata (nessuna sync riuscita): CalendarUnavailableError
  * invece di un feed vuoto, così i client degli abbonati conservano la copia
@@ -51,6 +66,7 @@
  */
 
 import {
+  type BookingProjectionData,
   buildFeed,
   type CalendarObject,
   FEED_FUTURE_DAYS,
@@ -64,8 +80,9 @@ import type { Logger } from 'pino';
 import { logger as rootLogger } from '../logger';
 import { publicApiUrl } from '../public-url';
 import { CalendarUnavailableError } from './errors';
+import { resolveLocationForBooking } from './meeting-url';
 import type { Db } from './radicale/policy';
-import type { Calendar, CalendarFeedOptions, CalendarFeedResult } from './types';
+import type { Booking, Calendar, CalendarFeedOptions, CalendarFeedResult, EventType } from './types';
 import { isValidTimeZone } from './validation';
 
 const log: Logger = rootLogger.child({ scope: 'calendar-feed-builder' });
@@ -177,7 +194,10 @@ interface FeedObjectRow {
   raw_ics: string | null;
   health: string;
   first_seen_at: Date;
+  source: string | null;
+  source_id: string | null;
   legacy_uid: string | null;
+  legacy_event_id: string | null;
   last_good_raw: string | null;
 }
 
@@ -204,8 +224,8 @@ async function readFeedObjects(db: Db, calendarId: string, from: Date, to: Date)
   const fromSlack = new Date(from.getTime() - 2 * DAY_MS);
   const toSlack = new Date(to.getTime() + 2 * DAY_MS);
   return db<FeedObjectRow[]>`
-    SELECT o.id, o.href, o.raw_ics, o.health, o.first_seen_at,
-           ids.legacy_uid,
+    SELECT o.id, o.href, o.raw_ics, o.health, o.first_seen_at, o.source, o.source_id,
+           ids.legacy_uid, ids.legacy_event_id::text AS legacy_event_id,
            CASE WHEN o.health <> 'ok' THEN v.raw_ics END AS last_good_raw
     FROM cal_objects o
     LEFT JOIN cal_object_ids ids ON ids.id = o.id
@@ -223,6 +243,86 @@ async function readFeedObjects(db: Db, calendarId: string, from: Date, to: Date)
       )
     ORDER BY o.href
   `;
+}
+
+// ─── Proiezioni delle prenotazioni (decisione 3) ───────────────────────────────
+
+/** Prenotazioni lette per volta (ANY di un array: una query anche per molte proiezioni). */
+const MAX_BOOKINGS_PER_QUERY = 1_000;
+
+/**
+ * Link alla prenotazione nell'admin: lo stesso di
+ * booking-projection.bookingAdminUrl (ADMIN_URL), che scrive le risorse dei
+ * device; ricalcolato qui per non importare il job delle proiezioni nel feed.
+ */
+export function feedBookingAdminUrl(uid: string, env: NodeJS.ProcessEnv = process.env): string {
+  const base = (env.ADMIN_URL || 'http://localhost:5173').replace(/\/+$/, '');
+  return `${base}/calendario/prenotazioni?uid=${encodeURIComponent(uid)}`;
+}
+
+interface ProjectionBookingRow {
+  uid: string;
+  attendee_name: string | null;
+  attendee_email: string | null;
+  attendee_phone: string | null;
+  start_time: Date | string;
+  end_time: Date | string;
+  location_value: string | null;
+  event_title: string | null;
+  event_location_type: EventType['location_type'] | null;
+  event_location_value: string | null;
+}
+
+/** True se l'oggetto è la proiezione di una prenotazione (collezione Prenotazioni, href booking-<uid>.ics). */
+function projectionUid(row: FeedObjectRow): string | null {
+  return row.source === 'booking' && typeof row.source_id === 'string' && row.source_id !== '' ? row.source_id : null;
+}
+
+/**
+ * Dati della decisione 3 per le prenotazioni date, da calendar_bookings e
+ * calendar_event_types (le assenti, per esempio dopo un'erasure, non sono nella mappa:
+ * il feed le riduce a "Prenotazione"). Mai email, azienda né messaggio.
+ */
+export async function readBookingProjectionData(db: Db, uids: readonly string[]): Promise<Map<string, BookingProjectionData>> {
+  const out = new Map<string, BookingProjectionData>();
+  const unique = [...new Set(uids)];
+  for (let i = 0; i < unique.length; i += MAX_BOOKINGS_PER_QUERY) {
+    const chunk = unique.slice(i, i + MAX_BOOKINGS_PER_QUERY);
+    const rows = await db<ProjectionBookingRow[]>`
+      SELECT b.uid, b.attendee_name, b.attendee_email, b.attendee_phone, b.start_time, b.end_time, b.location_value,
+             et.title AS event_title, et.location_type AS event_location_type, et.location_value AS event_location_value
+      FROM calendar_bookings b
+      LEFT JOIN calendar_event_types et ON et.id = b.event_type_id
+      WHERE b.uid = ANY(${chunk}::text[])
+    `;
+    for (const row of rows) {
+      // Stesso link della riunione della risorsa scritta dall'API (resolveLocationForBooking).
+      const resolved = row.event_location_type
+        ? await resolveLocationForBooking({
+          eventType: { location_type: row.event_location_type, location_value: row.event_location_value } as EventType,
+          booking: {
+            uid: row.uid,
+            start_time: String(row.start_time),
+            end_time: String(row.end_time),
+            attendee_name: row.attendee_name ?? '',
+            attendee_email: row.attendee_email ?? '',
+          } as Pick<Booking, 'uid' | 'start_time' | 'end_time' | 'attendee_name' | 'attendee_email'>,
+        })
+        : null;
+      out.set(row.uid, {
+        bookingUid: row.uid,
+        title: row.event_title ?? 'Prenotazione',
+        attendeeName: row.attendee_name ?? '',
+        attendeePhone: row.attendee_phone,
+        adminUrl: feedBookingAdminUrl(row.uid),
+        start: row.start_time instanceof Date ? row.start_time : String(row.start_time),
+        end: row.end_time instanceof Date ? row.end_time : String(row.end_time),
+        location: row.location_value,
+        meetingUrl: resolved?.meetingUrl ?? null,
+      });
+    }
+  }
+  return out;
 }
 
 /** Testo pubblicabile di un oggetto: corrente se si legge, altrimenti l'ultima versione buona. */
@@ -282,11 +382,20 @@ export async function buildIndexFeed(db: Db, calendar: Calendar, opts: CalendarF
     const rows = subscription
       ? []
       : await readFeedObjects(db, calendar.id, new Date(anchor.getTime() - FEED_PAST_DAYS * DAY_MS), new Date(anchor.getTime() + (FEED_FUTURE_DAYS + 1) * DAY_MS));
+    const projectionUids = rows.map(projectionUid).filter((uid): uid is string => uid !== null);
+    const bookings = projectionUids.length > 0 ? await readBookingProjectionData(db, projectionUids) : new Map<string, BookingProjectionData>();
     const inputs: FeedObjectInput[] = [];
     for (const row of rows) {
       const object = objectForFeed(row, calendar.id);
       if (!object) continue;
-      inputs.push({ object, firstSeenAt: row.first_seen_at, legacyUid: row.legacy_uid });
+      const bookingUid = projectionUid(row);
+      inputs.push({
+        object,
+        firstSeenAt: row.first_seen_at,
+        // Oggetto migrato senza legacy_uid: l'UID di oggi con il dominio, come il feed legacy.
+        legacyUid: row.legacy_uid ?? (row.legacy_event_id ? object.uid : null),
+        bookingProjection: bookingUid ? { data: bookings.get(bookingUid) ?? null } : null,
+      });
     }
     const feed = buildFeed(
       { name: calendar.name, description: calendar.description ?? null, timezone: tz, color: calendar.color },

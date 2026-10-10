@@ -4,7 +4,8 @@
     "Ogni differenza nei test di contratto è una regressione finché non viene aggiunta qui con motivazione. Dalla F2 'diffs' contiene le correzioni comuni ai due store (voci senza 'stores': agenda del device sul giorno di Roma con le serie espanse) e le differenze del solo RadicaleStore previste dal design (stores: ['radicale']), provate con CALENDAR_BACKEND=radicale.",
     "Letto e validato da test/contracts/_json-contract.ts (loadAllowedDiffs): un campo sconosciuto o mancante fa fallire i test, invece di ammettere differenze per errore.",
     "Una voce copre una differenza se coincidono contract, case (glob sull'id del caso: '*' non attraversa '/', '**' sì), path (JSON Pointer con '*' per un segmento e '**' per zero o più), kind se indicato e lo store corrente (CALENDAR_BACKEND, default 'postgres') se 'stores' è indicato.",
-    "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste."
+    "Ogni voce va motivata ('reason') e collegata al design ('design_ref'); 'planned' elenca le differenze già previste dal design §12, documentate ma NON attive: si spostano in 'diffs' solo quando il codice che le produce esiste.",
+    "La voce prevista 'descrizione-proiezioni-ricomposta' (design §12, differenze ammesse, punto 4; decisione 3) è implementata (lib/calendar/projection-descriptions.ts: list_events e update_event dell'MCP; elenco, dettaglio, modifica e duplicazione dell'admin) e non è più in 'planned': con lo store Radicale admin e MCP ricompongono la descrizione delle proiezioni dai dati correnti di calendar_bookings con il template di booking.ts, che sui casi dei contratti coincide con il testo legacy scritto alla prenotazione. Non c'è quindi una voce in 'diffs': servirebbe solo per un caso che cambi i dati del cliente dopo la proiezione (lì il legacy mostra il testo vecchio)."
   ],
   "version": 1,
   "format": {
@@ -18,14 +19,7 @@
     "design_ref": "riferimento al design, es. 'design.md §12, differenze ammesse, punto 1'",
     "added_in": "opzionale: fase in cui è stata introdotta, es. 'F2'"
   },
-  "planned": [
-    {
-      "id": "descrizione-proiezioni-ricomposta",
-      "contract": "mcp-calendar-tools",
-      "summary": "La descrizione delle proiezioni delle prenotazioni si ricompone dai dati correnti di calendar_bookings.",
-      "design_ref": "design.md §12, differenze ammesse, punto 4; decisione 3"
-    }
-  ],
+  "planned": [],
   "diffs": [
     {
       "id": "agenda-device-eventi-espansi-giorno-roma",

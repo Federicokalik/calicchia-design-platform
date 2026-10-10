@@ -18,8 +18,8 @@
  *    entrambi gli store;
  *  - admin: CalendarUnavailableError → 503 {error, code}, conflitti nuovi → 409
  *    {error, code, conflicts?}, gli altri errori all'handler globale (500);
- *    descrizione delle proiezioni ricomposta in GET /events con lo store
- *    Radicale.
+ *    descrizione delle proiezioni ricomposta in GET /events e nella
+ *    duplicazione con lo store Radicale.
  */
 
 import assert from 'node:assert/strict';
@@ -33,6 +33,7 @@ import {
   CalendarStoreUnavailableError,
 } from '../../src/lib/calendar/errors';
 import { applyCollectionChanges, loadCollectionContext, type RawItem, stopIndexWorker } from '../../src/lib/calendar/radicale/indexer';
+import { getRadicaleStore } from '../../src/lib/calendar/radicale/store';
 import { type CalendarStore, getPgLegacyStore, overrideCalendarStore } from '../../src/lib/calendar/store';
 import type { Booking, Calendar, EventType } from '../../src/lib/calendar/types';
 import { freezeTime, restoreTime } from '../helpers/clock';
@@ -263,5 +264,26 @@ describe('route admin: errori nuovi e proiezioni (contratto f2-modules §1.4)', 
     assert.equal(res.status, 200, res.text);
     assert.equal(res.json.events.length, 1);
     assert.equal(res.json.events[0].description, projectionDescription(sc.booking));
+  });
+
+  test('POST /events/:id/duplicate di una proiezione con lo store Radicale: la copia riceve la descrizione completa di oggi', async () => {
+    const list = await withStore('radicale', () => api.get('/api/admin/calendar/events', {
+      auth: 'admin', query: { calendar_id: sc.bookings.id, from: '2027-01-12T00:00:00Z', to: '2027-01-13T00:00:00Z' },
+    }));
+    const projectionId = list.json.events[0].id as string;
+    // RadicaleStore con la sola createEvent sostituita (Radicale non è configurato nei test).
+    let captured: Record<string, unknown> | null = null;
+    const store = Object.create(getRadicaleStore()) as CalendarStore;
+    Object.defineProperty(store, 'createEvent', {
+      value: async (input: Record<string, unknown>) => {
+        captured = input;
+        return { id: '00000000-0000-4000-8000-0000000000dd', uid: 'copia', ...input };
+      },
+    });
+    const res = await withStore(store, () => api.post(`/api/admin/calendar/events/${projectionId}/duplicate`, { auth: 'admin', body: {} }));
+    assert.equal(res.status, 200, res.text);
+    assert.ok(captured, 'createEvent non chiamata');
+    assert.equal((captured as Record<string, unknown>).description, projectionDescription(sc.booking));
+    assert.match(String((captured as Record<string, unknown>).description), /<.+@test\.invalid>/, 'descrizione completa, non quella dei device');
   });
 });
