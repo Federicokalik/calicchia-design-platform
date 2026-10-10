@@ -97,6 +97,7 @@ const { serve } = await import('@hono/node-server');
 const { app } = await import('./app');
 const { startCronEngine, stopCronEngine } = await import('./cron');
 const { startCalendarControlPlane, stopCalendarControlPlane } = await import('./lib/calendar/radicale/heartbeat');
+const { startCalendarBackground, stopCalendarBackground } = await import('./cron/calendar-radicale');
 const { assertKBsValid } = await import('./lib/quotes/generate');
 const { sql } = await import('./db');
 
@@ -133,6 +134,15 @@ startCalendarControlPlane().catch((err) => {
   console.error(`⚠️  Calendar control-plane not started: ${(err as Error).message}`);
 });
 
+// Calendario su Radicale (F2, docs/calendar-radicale/contracts/f2-modules.md
+// §12): listener del modo, handler e worker dei job, campanello e canary.
+// Senza RADICALE_URL worker, campanello e canary restano spenti e la salute
+// (/api/health/calendar) lo dichiara; in mode postgres lavorano in shadow.
+// Non blocca il boot e i suoi errori non fermano l'API.
+startCalendarBackground().catch((err) => {
+  console.error(`⚠️  Calendar background not started: ${(err as Error).message}`);
+});
+
 console.log(`✅ API server running at http://localhost:${port}`);
 
 // Graceful shutdown
@@ -142,8 +152,12 @@ function shutdown(signal: string) {
   // Ferma timer e LISTEN del control-plane e attende il giro in corso prima di
   // chiudere il pool (il giro usa il database).
   const controlPlaneStopped = stopCalendarControlPlane().catch(() => {});
+  // Canary, campanello (con le sync in corso), worker dei job e
+  // dell'indicizzatore, listener del modo; per ultimo il pool calendario.
+  const calendarStopped = stopCalendarBackground().catch(() => {});
   server.close(async () => {
     await controlPlaneStopped;
+    await calendarStopped;
     // Drain the Postgres pool so in-flight queries finish before exit (DBX-01).
     await sql.end({ timeout: 5 }).catch(() => {});
     console.log('Server closed.');
