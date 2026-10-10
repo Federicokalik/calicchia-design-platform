@@ -20,9 +20,11 @@
  * malformato o è diverso, `ok` se coincide.
  *
  * Creazione esplicita (design §6.3): nessun componente crea collezioni in
- * modo implicito. initializeVolume() e createMissingCollections() sono il
- * passo "Inizializza Radicale" del contratto §4.4 (in F1 a mano o dai test,
- * dalla F3 dal wizard) e partono solo su richiesta, con precondizioni rigide:
+ * modo implicito. initializeVolume(), createMissingCollections() ed
+ * ensureCanaryCollection() (la collezione di sistema `_canary` del campanello,
+ * aggiunta in F2) sono il passo "Inizializza Radicale" del contratto §4.4 (in
+ * F1 a mano o dai test, dalla F3 dal wizard) e partono solo su richiesta, con
+ * precondizioni rigide:
  * un volume non vuoto senza marker, o con un marker diverso, non viene mai
  * inizializzato né adottato.
  */
@@ -35,6 +37,7 @@ import { isRadicaleError } from './errors';
 import { type Db, readBackendState } from './policy';
 import {
   type CalendarBackendState,
+  CANARY_COLLECTION,
   identityStatus,
   type IdentityStatus,
   isCanonicalUuid,
@@ -245,7 +248,15 @@ export interface InitializeVolumeResult {
   volumeId: string;
   epoch: 1;
   collections: CollectionProvisioning[];
+  /** Esito della creazione di `_canary` (F2: canary del campanello); 'skipped' con createCollections false. */
+  canary: CanaryProvisioning;
 }
+
+/**
+ * Esito di ensureCanaryCollection(): created (MKCALENDAR eseguita), exists
+ * (c'era già), skipped (non richiesta).
+ */
+export type CanaryProvisioning = 'created' | 'exists' | 'skipped';
 
 /**
  * "Inizializza Radicale" (contratto §4.4), solo su richiesta esplicita:
@@ -296,7 +307,38 @@ export async function initializeVolume(opts: InitializeVolumeOptions): Promise<I
   }
 
   const collections = opts.createCollections === false ? [] : await createMissingCollections({ db, client, principal });
-  return { volumeId, epoch: 1, collections };
+  const canary = opts.createCollections === false ? 'skipped' : await ensureCanaryCollection({ db, client, principal });
+  return { volumeId, epoch: 1, collections, canary };
+}
+
+/**
+ * Collezione `_canary` del campanello (contratto control-plane §4.4 passo 5;
+ * f2-modules §4.2): MKCALENDAR come caldes-svc, nascosta ai device dalla
+ * policy (sempre in `hidden`), mai indicizzata. Fa parte dell'inizializzazione
+ * esplicita: solo su richiesta e solo con l'identità del volume verificata
+ * (ok) via client, come le collezioni del sidecar. Il canary non la crea mai
+ * da solo: senza `_canary` il campanello resta in remote mode (dichiarata).
+ */
+export async function ensureCanaryCollection(opts: { db: Db; client: RadicaleClient; principal: string }): Promise<CanaryProvisioning> {
+  const { db, client, principal } = opts;
+  const state = await readBackendState(db);
+  const identity = await checkVolumeIdentity(state, remoteIdentitySource(client), principal);
+  if (identity.status !== 'ok') {
+    throw new VolumeInitError('identity_not_ok', `identità del volume non verificata (${identity.status}${identity.detail ? `: ${identity.detail}` : ''}): ${CANARY_COLLECTION} non creata`);
+  }
+  const path = collectionPath(principal, CANARY_COLLECTION);
+  if ((await client.readProps(path, [DAV_PROPS.resourcetype])) !== null) return 'exists';
+  try {
+    await client.mkcalendar(path, {
+      displayName: 'caldes canary',
+      description: 'Collezione di sistema del campanello del calendario (canary): non modificare',
+      components: ['VEVENT'],
+    });
+    return 'created';
+  } catch (err) {
+    if (isRadicaleError(err, 'conflict') || (isRadicaleError(err) && err.status === 405)) return 'exists';
+    throw err;
+  }
 }
 
 /**

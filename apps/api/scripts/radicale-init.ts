@@ -9,12 +9,15 @@
  * principal su Radicale come caldes-svc, verifica l'identità e stampa che cosa
  * farebbe. Con --apply esegue:
  *  - volume mai inizializzato (mode postgres, epoch 0, principal assente):
- *    MKCOL del principal, marker volume-id/epoch 1, UPDATE dello stato e
+ *    MKCOL del principal, marker volume-id/epoch 1, UPDATE dello stato,
  *    MKCALENDAR delle collezioni del sidecar (con le dead prop calendar-id e
- *    role). Il NOTIFY dello stato fa riscrivere subito policy.json al
+ *    role) e della collezione di sistema `_canary` (canary del campanello,
+ *    F2). Il NOTIFY dello stato fa riscrivere subito policy.json al
  *    control-plane dell'API in esecuzione;
  *  - volume già inizializzato con identità ok: solo le collezioni del sidecar
- *    che mancano su Radicale (es. un calendario creato dall'admin dopo);
+ *    che mancano su Radicale (es. un calendario creato dall'admin dopo) e
+ *    `_canary` se manca (i volumi inizializzati in F1 non ce l'hanno: senza,
+ *    il campanello della F2 resta in remote mode);
  *  - in ogni altro caso rifiuta (exit 3): un volume non vuoto senza marker, o
  *    con un marker diverso da PG, non viene mai inizializzato né adottato.
  *
@@ -41,9 +44,11 @@ import { parseArgs } from 'node:util';
 import { principalPath, type RadicaleClient, radicaleClientFromEnv } from '../src/lib/calendar/radicale/client';
 import { DAV_PROPS } from '../src/lib/calendar/radicale/dav-xml';
 import {
+  type CanaryProvisioning,
   type CollectionProvisioning,
   checkVolumeIdentity,
   createMissingCollections,
+  ensureCanaryCollection,
   initializeVolume,
   remoteIdentitySource,
   VolumeInitError,
@@ -76,7 +81,7 @@ export interface RadicaleInitReport {
   action: RadicaleInitAction;
   refused: { code: VolumeInitErrorCode; message: string } | null;
   /** Esito dell'esecuzione (solo con apply e azione eseguibile). */
-  result: { volume_id: string | null; epoch: number | null; collections: CollectionProvisioning[] } | null;
+  result: { volume_id: string | null; epoch: number | null; collections: CollectionProvisioning[]; canary: CanaryProvisioning } | null;
 }
 
 /**
@@ -132,10 +137,11 @@ export async function runRadicaleInit(opts: { db: Db; client: RadicaleClient; pr
   try {
     if (report.action === 'initialize') {
       const result = await initializeVolume({ db, client, principal });
-      report.result = { volume_id: result.volumeId, epoch: result.epoch, collections: result.collections };
+      report.result = { volume_id: result.volumeId, epoch: result.epoch, collections: result.collections, canary: result.canary };
     } else {
       const created = await createMissingCollections({ db, client, principal });
-      report.result = { volume_id: state.volume_id, epoch: state.epoch, collections: created };
+      const canary = await ensureCanaryCollection({ db, client, principal });
+      report.result = { volume_id: state.volume_id, epoch: state.epoch, collections: created, canary };
     }
   } catch (err) {
     // Lo stato è cambiato fra la prova e l'esecuzione (es. un'altra istanza).
@@ -160,12 +166,13 @@ export function summarizeRadicaleInit(report: RadicaleInitReport): string {
     lines.push(`RIFIUTATO (${report.refused.code}): ${report.refused.message}`);
   } else if (!report.apply) {
     lines.push(report.action === 'initialize'
-      ? 'Prova a vuoto: con --apply verrebbero creati principal, marker (epoch 1) e collezioni.'
-      : 'Prova a vuoto: con --apply verrebbero create solo le collezioni mancanti.');
+      ? 'Prova a vuoto: con --apply verrebbero creati principal, marker (epoch 1), collezioni e _canary.'
+      : 'Prova a vuoto: con --apply verrebbero create solo le collezioni mancanti (e _canary, se manca).');
   } else if (report.result) {
     const byStatus = (status: CollectionProvisioning['status']) => report.result!.collections.filter((c) => c.status === status).map((c) => c.collectionName);
     lines.push(`Eseguito: volume ${report.result.volume_id}, epoch ${report.result.epoch}.`);
     lines.push(`Collezioni create: ${byStatus('created').join(', ') || 'nessuna'}; già presenti: ${byStatus('exists').join(', ') || 'nessuna'}.`);
+    lines.push(`Collezione _canary del campanello: ${report.result.canary === 'created' ? 'creata' : report.result.canary === 'exists' ? 'già presente' : 'non richiesta'}.`);
     const conflicts = report.result.collections.filter((c) => c.status === 'conflict');
     if (conflicts.length) lines.push(`CONFLITTI (non toccati): ${conflicts.map((c) => `${c.collectionName}: ${c.detail ?? ''}`).join('; ')}`);
   }
