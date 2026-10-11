@@ -76,7 +76,7 @@ Versione 1 del contratto fra l'API (TypeScript), i plugin di Radicale (`caldes_a
 
 Riga singleton (`id = true`) creata dalla 162. La policy dei device DEVE derivare solo da questa riga e dal sidecar (§6); non esiste un'impostazione della policy a sé.
 
-**Anticipata rispetto al design.** Il §4 del design colloca la tabella nella 165. In F1 servono però già l'identità del volume (§4), `credential_epoch` (revoca delle app-password, §9.6), `restore_guard_until` e `rebuild_required` (import dei backup, §16.2): la 162 crea la tabella con le sole colonne di F1. La 165 NON la ricrea: aggiunge con `ALTER TABLE … ADD COLUMN IF NOT EXISTS` le colonne `shadow_enabled`, `cutover_at`, `cutover_by`, `rollback_until`, `finalized_at`, `api_min_version`, `horizon_start`, `horizon_end`, e le tabelle della migrazione (`cal_migration_runs`, `_ledger`, `_items`).
+**Anticipata rispetto al design.** Il §4 del design colloca la tabella nella 165. In F1 servono però già l'identità del volume (§4), `credential_epoch` (revoca delle app-password, §9.6), `restore_guard_until` e `rebuild_required` (import dei backup, §16.2): la 162 crea la tabella con le sole colonne di F1. La 165 NON la ricrea: aggiunge con `ALTER TABLE … ADD COLUMN IF NOT EXISTS` le colonne della tabella sotto (shadow, cutover, rollback, finalize, versione minima dell'API, ultimo backup coordinato, dichiarazioni del wizard) e le tabelle della migrazione (`cal_migration_runs`, `_ledger`, `_items`; contratto [f3-modules](f3-modules.md) §3). NON aggiunge `horizon_start` e `horizon_end`: l'orizzonte materializzato è per collezione in `cal_collection_state` (163, contratto [f2-modules](f2-modules.md) §2.6 e §13.1).
 
 | Colonna | Tipo | Default | Significato e scrittori |
 |---|---|---|---|
@@ -90,6 +90,19 @@ Riga singleton (`id = true`) creata dalla 162. La policy dei device DEVE derivar
 | `restore_guard_until` | timestamptz | `NULL` | Dopo un import di backup: `now() + 48 h` (§16.2). Finché è nel futuro la policy è frozen |
 | `rebuild_required` | boolean | `false` | Dopo un import di backup: `true` finché indice e verifica non sono verdi (in F1 non c'è indice: lo azzera la verifica post-ripristino o l'admin) |
 | `updated_at` | timestamptz | `now()` | Gestito dal trigger |
+
+Colonne aggiunte dalla 165 (fase F3). Nessuna entra in `policyFromState()`: il trigger della 162 non incrementa `policy_version` quando cambiano, e `readBackendState()` (policy e heartbeat) continua a leggere solo le colonne sopra. Le legge `normalizeMigrationState()` di `apps/api/src/lib/calendar/migration/types.ts`.
+
+| Colonna | Tipo | Default | Significato e scrittori |
+|---|---|---|---|
+| `shadow_enabled` | boolean | `false` | Shadow mirror PG→Radicale (design §13.8): con `mode = postgres` i trigger della 165 su `calendar_events` e `calendar_bookings` accodano `shadow_mirror`. Lo scrive solo `POST /api/admin/calendar/migration/shadow` |
+| `shadow_since` | timestamptz | `NULL` | Ultima attivazione dello shadow; `NULL` ⇔ spento (`CHECK`). Base dei 7 giorni di parità verde |
+| `cutover_at`, `cutover_by` | timestamptz, text | `NULL` | Cutover confermato (F4); valorizzati insieme (`CHECK`) |
+| `rollback_until` | timestamptz | `NULL` | Fine della finestra di rollback (F4) |
+| `finalized_at` | timestamptz | `NULL` | Finalize (F4/F7) |
+| `api_min_version` | integer | `0` | Livello minimo del protocollo calendario dell'API (`CALENDAR_API_LEVEL`) ammesso su questo database (design §16.6). `0` = nessun vincolo; lo alza il cutover (F4), che introduce anche il controllo all'avvio |
+| `last_stack_backup` | jsonb | `NULL` | Ultimo backup coordinato registrato da `scripts/backup-calendar-stack.sh` (`{id, at, complete, volume_id, epoch, manifest_sha256}`), per il controllo `BACKUP_RECENT` del preflight |
+| `migration_declarations` | jsonb | `{}` | Dichiarazioni esplicite del wizard (`{chiave: {value, at, by}}`, contratto f3-modules §8) |
 
 Vincoli: `mode` fuori da `postgres` richiede `volume_id`; `(volume_id IS NULL) = (epoch = 0)`; DELETE e TRUNCATE della riga sono vietati da trigger.
 
@@ -541,7 +554,7 @@ Gli eventi che un client può provocare a piacere hanno un limite, così nessuno
 
 ## 13. Precisazioni rispetto al design
 
-1. `calendar_backend_state` nasce nella 162 con le colonne di F1, non nella 165 (§2).
+1. `calendar_backend_state` nasce nella 162 con le colonne di F1, non nella 165 (§2). La 165 aggiunge le colonne di shadow, transizioni, versione minima, backup registrato e dichiarazioni, ma non `horizon_start/end` (orizzonte per collezione, 163).
 2. La policy ha i campi informativi `schema`, `generated_at`, `backend_mode` e `reasons` oltre a quelli del §3.3 del design; `version` è `policy_version` dello stato.
 3. Il heartbeat non è firmato (il design non lo prevede); con policy `live` il suo `mode` deve essere `radicale` o `finalized`, controllo di coerenza in più.
 4. Con policy invalida i rights usano l'identità dell'ultima policy valida vista dal processo; all'avvio senza alcuna policy valida i device non hanno permessi sotto il principal.

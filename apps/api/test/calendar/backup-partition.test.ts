@@ -13,6 +13,9 @@
  * - Mode diverso da postgres: dominio calendario saltato (ripristino
  *   limitato), gruppo B ripristinato.
  * - Tabella protetta che referenzia una tabella da svuotare: 409, nulla cambia.
+ * - Ledger, run e righe dello strumento di migrazione (165): mai ripristinati,
+ *   ledger marcato da rivalidare dopo l'import (design §16.2, contratto
+ *   f3-modules §4.5).
  * - Round-trip export → import → export identico.
  *
  * Come la verifica manuale fatta su una copia del database, qui l'import gira
@@ -255,12 +258,29 @@ const F2_REBUILD_REQUEST_EVENTS: Readonly<Record<string, string>> = {
   'public.cal_jobs': 'TRUNCATE OR DELETE',
 };
 
+/**
+ * Tabelle del gruppo S dello strumento di migrazione (migrazione 165):
+ * esportate, mai ripristinate. L'unica scrittura ammessa durante l'import è
+ * l'UPDATE del ledger che lo marca da rivalidare
+ * (cal_migration_ledger_require_revalidation).
+ */
+const F3_STATE_TABLES = [
+  'public.cal_migration_items',
+  'public.cal_migration_ledger',
+  'public.cal_migration_runs',
+];
+
+const F3_REVALIDATION_EVENTS: Readonly<Record<string, string>> = {
+  'public.cal_migration_ledger': 'TRUNCATE OR INSERT OR DELETE',
+};
+
 /** Trappole del gruppo S e di calendars, valide in ogni modalità. */
 const PROTECTED_ALWAYS = [
   { table: 'public.calendars', events: 'TRUNCATE OR DELETE' },
   { table: 'public.calendar_backend_state', events: 'TRUNCATE OR INSERT OR DELETE' },
   { table: PROBE, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' },
   ...F2_STATE_TABLES.map((table) => ({ table, events: F2_REBUILD_REQUEST_EVENTS[table] ?? 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
+  ...F3_STATE_TABLES.map((table) => ({ table, events: F3_REVALIDATION_EVENTS[table] ?? 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
 ];
 
 /** Job index_rebuild accodati dagli import (requestIndexRebuild). */
@@ -704,7 +724,10 @@ describe('import del backup JSON', () => {
 
     const res = await withTripwires(PROTECTED_ALWAYS, () => importBackup(file));
     assert.equal(res.status, 200, res.text);
-    assert.deepEqual(res.json.skipped.state, ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES].sort());
+    assert.deepEqual(
+      res.json.skipped.state,
+      ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES, ...F3_STATE_TABLES].sort(),
+    );
     assert.deepEqual(res.json.calendar.kept, []);
 
     const stateAfter = await readState();
@@ -795,6 +818,80 @@ describe('import del backup JSON', () => {
       assert.deepEqual(await readState(), stateBefore);
     } finally {
       await sql.unsafe(`DROP TABLE IF EXISTS ${BLOCKER}`);
+    }
+  });
+
+  test('ledger, run e righe della migrazione (165): mai ripristinati, ledger marcato da rivalidare', async () => {
+    await resetBackendState();
+    const [run] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, requested_by, started_at, finished_at, summary)
+      VALUES ('apply', 'succeeded', 'admin:test', now(), now(), '{"zero_writes": false}'::jsonb)
+      RETURNING id::text AS id
+    `;
+    try {
+      await sql`
+        INSERT INTO cal_migration_items (run_id, seq, item_type, calendar_id, collection_name, href, legacy_key, action, outcome)
+        VALUES (${run.id}::uuid, 0, 'object', ${scenario.work.id}::uuid, ${scenario.work.slug}, 'riunione.ics',
+                ${`event:${scenario.workEventIds[0]}`}, 'create', 'done')
+      `;
+      const insertLedger = (href: string, key: string, deleted: boolean) => sql`
+        INSERT INTO cal_migration_ledger (
+          calendar_id, collection_name, href, kind, legacy_key, legacy_event_id, uid,
+          legacy_snapshot, legacy_hash, written_etag, written_fingerprint, written_at, last_run_id, deleted_at
+        ) VALUES (
+          ${scenario.work.id}::uuid, ${scenario.work.slug}, ${href}, 'event', ${key}, ${key.slice('event:'.length)}::uuid, ${href},
+          ${deleted ? null : sql.json({ v: 1, kind: 'event' })}, ${deleted ? null : `s1:${'a'.repeat(64)}`},
+          ${deleted ? null : '"etag-1"'}, ${deleted ? null : `v1:${'b'.repeat(64)}`}, ${deleted ? null : sql`now()`},
+          ${run.id}::uuid, ${deleted ? sql`now()` : null}
+        )
+      `;
+      await insertLedger('riunione.ics', `event:${scenario.workEventIds[0]}`, false);
+      // Riga ritirata (risorsa già cancellata): non si rivalida.
+      await insertLedger('sopralluogo.ics', `event:${scenario.workEventIds[1]}`, true);
+
+      const ledgerRows = async () => Array.from(await sql<Row[]>`
+        SELECT href, legacy_hash, written_etag, revalidate_reason, deleted_at IS NOT NULL AS deleted
+        FROM cal_migration_ledger WHERE calendar_id = ${scenario.work.id}::uuid ORDER BY href
+      `, (r) => ({ ...r }));
+      const runsBefore = Array.from(await sql<Row[]>`SELECT to_jsonb(r)::text AS j FROM cal_migration_runs r ORDER BY id`, (r) => r.j);
+      const itemsBefore = Array.from(await sql<Row[]>`SELECT to_jsonb(i)::text AS j FROM cal_migration_items i ORDER BY id`, (r) => r.j);
+
+      // Il backup porta un ledger e dei run diversi: non entrano mai.
+      const file = clone(await exportBackup());
+      assert.equal(file.tables['public.cal_migration_ledger'].length, 2);
+      for (const row of file.tables['public.cal_migration_ledger']) row.written_etag = '"etag-dal-backup"';
+      file.tables['public.cal_migration_runs'].push({ ...file.tables['public.cal_migration_runs'][0], id: '00000000-0000-4000-8000-000000000165' });
+      file.tables['public.cal_migration_items'] = [];
+
+      const res = await withTripwires(PROTECTED_ALWAYS, () => importBackup(file));
+      assert.equal(res.status, 200, res.text);
+      for (const table of F3_STATE_TABLES) assert.ok(res.json.skipped.state.includes(table), table);
+      assert.equal(res.json.calendar.ledger_revalidation, 1);
+      const migrationWarnings = (res.json.warnings as string[]).filter((w) => w.startsWith('Strumento di migrazione:'));
+      assert.equal(migrationWarnings.length, 1);
+      assert.match(migrationWarnings[0], /un oggetto già scritto su Radicale è da rivalidare/);
+
+      // Ledger: stesso contenuto di prima, la riga viva marcata e quella ritirata no.
+      assert.deepEqual(await ledgerRows(), [
+        { href: 'riunione.ics', legacy_hash: `s1:${'a'.repeat(64)}`, written_etag: '"etag-1"', revalidate_reason: 'backup-import', deleted: false },
+        { href: 'sopralluogo.ics', legacy_hash: null, written_etag: null, revalidate_reason: null, deleted: true },
+      ]);
+      assert.deepEqual(Array.from(await sql<Row[]>`SELECT to_jsonb(r)::text AS j FROM cal_migration_runs r ORDER BY id`, (r) => r.j), runsBefore);
+      assert.deepEqual(Array.from(await sql<Row[]>`SELECT to_jsonb(i)::text AS j FROM cal_migration_items i ORDER BY id`, (r) => r.j), itemsBefore);
+      const [audit] = await sql<Array<{ metadata: Row }>>`
+        SELECT metadata FROM audit_logs WHERE table_name = 'backup' AND action = 'IMPORT'
+        ORDER BY created_at DESC LIMIT 1
+      `;
+      assert.equal(audit.metadata.calendar.ledger_revalidation, 1);
+
+      // Un secondo import non marca nulla di nuovo: la riga è già da rivalidare.
+      const again = await importBackup(file);
+      assert.equal(again.status, 200, again.text);
+      assert.equal(again.json.calendar.ledger_revalidation, 0);
+    } finally {
+      await sql`DELETE FROM cal_migration_ledger WHERE calendar_id = ${scenario.work.id}::uuid`;
+      await sql`DELETE FROM cal_migration_runs WHERE id = ${run.id}::uuid`;
+      await resetBackendState();
     }
   });
 

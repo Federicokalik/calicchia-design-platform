@@ -482,6 +482,16 @@ export async function resetCalendarBaseline(): Promise<void> {
       await tx`DELETE FROM cal_jobs`;
       await tx`DELETE FROM cal_booking_conflicts`;
     }
+    // Strumento di migrazione (165): run (le righe spariscono in cascata) e
+    // ledger, che non ha FK verso calendars e sopravvivrebbe ai calendari
+    // cancellati sopra.
+    const [{ hasMigration }]: Array<{ hasMigration: boolean }> = await tx`
+      SELECT to_regclass('public.cal_migration_runs') IS NOT NULL AS "hasMigration"
+    `;
+    if (hasMigration) {
+      await tx`DELETE FROM cal_migration_ledger`;
+      await tx`DELETE FROM cal_migration_runs`;
+    }
 
     const [{ hasState }]: Array<{ hasState: boolean }> = await tx`
       SELECT to_regclass('public.calendar_backend_state') IS NOT NULL AS "hasState"
@@ -494,6 +504,20 @@ export async function resetCalendarBaseline(): Promise<void> {
         WHERE (mode, write_freeze, volume_id, epoch, restore_guard_until, rebuild_required)
               IS DISTINCT FROM ('postgres', false, NULL::uuid, 0, NULL::timestamptz, false)
       `;
+      if (hasMigration) {
+        // Colonne della 165 ai default: shadow spento, nessuna transizione,
+        // nessuna dichiarazione del wizard né backup registrato.
+        await tx`
+          UPDATE calendar_backend_state
+          SET shadow_enabled = false, shadow_since = NULL, cutover_at = NULL, cutover_by = NULL,
+              rollback_until = NULL, finalized_at = NULL, api_min_version = 0,
+              last_stack_backup = NULL, migration_declarations = '{}'::jsonb
+          WHERE (shadow_enabled, shadow_since, cutover_at, cutover_by, rollback_until, finalized_at,
+                 api_min_version, last_stack_backup, migration_declarations)
+                IS DISTINCT FROM (false, NULL::timestamptz, NULL::timestamptz, NULL::text, NULL::timestamptz,
+                                  NULL::timestamptz, 0, NULL::jsonb, '{}'::jsonb)
+        `;
+      }
     }
 
     const [defaultSchedule]: Array<{ id: string }> = await tx`

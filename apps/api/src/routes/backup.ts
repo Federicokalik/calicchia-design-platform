@@ -86,9 +86,17 @@ const STATE_TABLES: ReadonlySet<string> = new Set([
   'public.cal_booking_conflicts',
   'public.cal_object_ids',
   'public.cal_object_versions',
+  // Strumento di migrazione (165, contratto f3-modules §3): run, righe dei
+  // run e ledger a tre vie. Il ledger descrive cosa lo strumento ha scritto
+  // nel volume: ripristinarlo da un backup lo scollerebbe dal volume (che il
+  // backup JSON non contiene) e l'apply sovrascriverebbe o cancellerebbe
+  // oggetti veri. Dopo l'import si marca da rivalidare (sotto).
+  'public.cal_migration_runs',
+  'public.cal_migration_items',
+  'public.cal_migration_ledger',
 ]);
 
-/** cal_migration_runs, cal_migration_ledger, cal_migration_items (165) e successive. */
+/** Prefisso del gruppo S per le tabelle dello strumento di migrazione nate dopo la 165. */
 const STATE_TABLE_PREFIXES: readonly string[] = ['public.cal_migration_'];
 
 const CALENDARS_KEY = 'public.calendars';
@@ -953,6 +961,8 @@ backup.post('/import', async (c) => {
     calendars: CalendarRestoreReport | null;
     reconciled: Array<{ calendar_id: string; field: string; old_value: string | null; new_value: string | null }>;
     appPasswords: AppPasswordsRestoreReport | null;
+    /** Righe del ledger della migrazione marcate da rivalidare (cal_migration_ledger_require_revalidation). */
+    ledgerRevalidation: number;
   };
 
   try {
@@ -1048,6 +1058,7 @@ backup.post('/import', async (c) => {
         : null;
 
       let reconciled: Array<{ calendar_id: string; field: string; old_value: string | null; new_value: string | null }> = [];
+      let ledgerRevalidation = 0;
       let backend = summarizeBackend(backendRead);
       if (backendRead.kind !== 'absent') {
         if (restoreCalendar) {
@@ -1064,9 +1075,6 @@ backup.post('/import', async (c) => {
         }
         // Guardia post-ripristino in ogni modalità: indice e verifica da
         // rifare, nessuna cancellazione automatica e policy frozen per 48 h.
-        // Con lo shadow attivo (F3) qui va anche il plan dry-run del ledger, e
-        // un ripristino di calendar_bookings avvia la riconciliazione delle
-        // proiezioni in sola lettura (F3).
         const updated = await tx`
           UPDATE public.calendar_backend_state
           SET rebuild_required = true,
@@ -1088,6 +1096,18 @@ backup.post('/import', async (c) => {
           const { requestIndexRebuild } = await import('../lib/calendar/radicale/rebuild');
           await requestIndexRebuild(tx, { reason: 'backup-import', actor: 'admin:backup-import' });
         }
+        // Ledger della migrazione rivalidato (design §16.2, contratto
+        // f3-modules §4.5): le righe vive descrivono scritture fatte da un PG
+        // che il ripristino ha appena sostituito. Il piano successivo (shadow,
+        // apply, cron notturno) trasforma ogni scrittura necessaria su quelle
+        // righe in un conflitto REVALIDATION_REQUIRED invece di eseguirla: un
+        // evento creato dopo il backup e quindi assente dal ripristino non
+        // viene cancellato dal volume senza una conferma ("forza"). Nessun
+        // effetto con il ledger vuoto (prima dello strumento di migrazione).
+        const [revalidation] = await tx`
+          SELECT public.cal_migration_ledger_require_revalidation('backup-import') AS n
+        `;
+        ledgerRevalidation = Number((revalidation as { n: number | string } | undefined)?.n ?? 0);
         if (updated.length === 1) {
           try {
             backend = summarizeBackend({ kind: 'ok', state: normalizeBackendState(updated[0] as Record<string, unknown>) });
@@ -1097,7 +1117,7 @@ backup.post('/import', async (c) => {
         }
       }
 
-      return { plan, backend, calendars, reconciled, appPasswords };
+      return { plan, backend, calendars, reconciled, appPasswords, ledgerRevalidation };
     });
   } catch (err) {
     if (err instanceof RestorePlanError) {
@@ -1114,7 +1134,7 @@ backup.post('/import', async (c) => {
     }, 500);
   }
 
-  const { plan, backend, calendars, reconciled, appPasswords } = result;
+  const { plan, backend, calendars, reconciled, appPasswords, ledgerRevalidation } = result;
   const warnings: string[] = [];
   if (plan.skippedCalendar.length > 0) {
     warnings.push(
@@ -1136,6 +1156,12 @@ backup.post('/import', async (c) => {
 
   const appPasswordsNote = appPasswords ? appPasswordsWarning(appPasswords) : null;
   if (appPasswordsNote) warnings.push(appPasswordsNote);
+  if (ledgerRevalidation > 0) {
+    warnings.push(
+      `Strumento di migrazione: ${ledgerRevalidation === 1 ? "un oggetto già scritto su Radicale è da rivalidare" : `${ledgerRevalidation} oggetti già scritti su Radicale sono da rivalidare`}. ` +
+        "Shadow e apply non li modificano né li cancellano finché l'anteprima in Calendario → Migrazione non viene rivista e le differenze confermate.",
+    );
+  }
 
   const calendarReport = {
     ...backend,
@@ -1144,6 +1170,8 @@ backup.post('/import', async (c) => {
     updated: calendars?.updated ?? 0,
     kept: calendars?.kept ?? [],
     reconciled,
+    /** Righe del ledger della migrazione marcate da rivalidare (contratto f3-modules §4.5). */
+    ledger_revalidation: ledgerRevalidation,
   };
   const skipped = { state: plan.skippedState, calendar: plan.skippedCalendar };
 
@@ -1169,6 +1197,7 @@ backup.post('/import', async (c) => {
           kept: calendarReport.kept,
           reconciled: calendarReport.reconciled.length,
           restore_guard_until: calendarReport.restore_guard_until,
+          ledger_revalidation: calendarReport.ledger_revalidation,
         },
         appPasswords,
       })}
