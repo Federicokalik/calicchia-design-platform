@@ -151,7 +151,10 @@ jobs:
   # criterio di uscita della F1 (config di produzione, verify-credentials
   # dell'API vera), inventario in sola lettura e i moduli della F2 contro
   # Radicale reale (sync, rebuild dell'indice, RadicaleStore, decisioni di
-  # prenotazione, consumatori, specchio delle iscrizioni). In più la matrice
+  # prenotazione, consumatori, specchio delle iscrizioni), lo strumento di
+  # migrazione della F3 (init, piano, apply e verifica, shadow mirror, GDPR,
+  # route del wizard), radicale-maint.sh e l'emulazione dei device con la
+  # config di produzione. In più la matrice
   # CALENDAR_BACKEND=radicale dei contratti F0 (design §15): le stesse suite
   # del job api-tests (che le esegue su PgLegacyStore) girano su RadicaleStore
   # con Radicale reale; le differenze ammesse sono in allowed-diffs.json.
@@ -210,7 +213,7 @@ jobs:
         run: pnpm --filter @calicchia/api test:migrate
       - name: Typecheck dei test
         run: pnpm --filter @calicchia/api typecheck:test
-      - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2)
+      - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2, strumento di migrazione F3)
         run: pnpm --filter @calicchia/api test:integration
       - name: Contratti F0 su RadicaleStore (matrice CALENDAR_BACKEND=radicale)
         run: pnpm --filter @calicchia/api test:contracts:radicale

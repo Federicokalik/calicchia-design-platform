@@ -66,7 +66,8 @@ Nel `.env` dello stack Dockhand (modello: [.env.prod.example](../../.env.prod.ex
 | `CALDAV_SERVICE_TOKEN` | api, radicale | Bearer di `verify-credentials` (`openssl rand -hex 32`) |
 | `RADICALE_SVC_PASSWORD` | api | password in chiaro di `caldes-svc` |
 | `CALDES_SVC_PASSWORD_SHA256` | radicale | sha256 esadecimale minuscolo di `RADICALE_SVC_PASSWORD` |
-| `CALDES_PROBE_PASSWORD` | radicale (healthcheck), api | password in chiaro di `caldes-probe` |
+| `CALDES_PROBE_PASSWORD` | radicale (healthcheck), api (come `RADICALE_PROBE_PASSWORD`) | password in chiaro di `caldes-probe`; all'API serve per il canary e per i controlli del probe nel preflight della migrazione (F3) |
+| `RADICALE_PUBLIC_URL` | api | origin pubblica di Radicale (`https://dav.calicchia.design`) per il controllo `SERVICE_PUBLIC_401` del preflight (F3) |
 | `CALDES_PROBE_PASSWORD_SHA256` | radicale | sha256 di `CALDES_PROBE_PASSWORD` |
 | `CALDES_AUTHCACHE_KEY` | radicale | chiave HMAC della cache persistita, almeno 32 caratteri |
 

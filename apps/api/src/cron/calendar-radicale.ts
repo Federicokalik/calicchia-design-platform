@@ -9,7 +9,8 @@
  *    senza la cache scade comunque in 2 s;
  *  - handler dei job (project_booking, booking_conflict_check,
  *    subscription_mirror, index_rebuild, recurrence_split,
- *    calendar_lifecycle): solo registrazione in memoria;
+ *    calendar_lifecycle, migration_run, shadow_mirror): solo registrazione in
+ *    memoria;
  *  - worker dei job, campanello (watcher) e canary: SOLO con Radicale
  *    configurato (RADICALE_URL). Senza, restano spenti e la salute
  *    (/api/health/calendar) li dichiara 'not_configured'/'off': l'API parte e
@@ -29,11 +30,20 @@
  *  - runCalendarNightlyAudit (notturno): runCalendarAudit (volume contro
  *    indice, identità, policy, sidecar, prenotazioni, orizzonte, retention di
  *    versioni e job). Spento senza Radicale configurato;
- *  - runSubscriptionIndexPull (ogni 15 minuti, accanto a ics-pull): pull delle
- *    iscrizioni verso l'indice in shadow, solo con lo store postgres. Con lo
- *    store Radicale lo fa già la facade (syncAllSubscriptions → pull.ts) nel
- *    cron ics-pull, e un secondo giro scaricherebbe i feed due volte. In mode
- *    postgres nessuno crea sidecar (fino alla F3) e il giro resta vuoto.
+ *  - runCalendarMigrationReaper (ogni 5 minuti, F3): chiude come
+ *    `interrupted` i run dello strumento di migrazione rimasti senza
+ *    esecutore (reapInterruptedRuns). Spento senza Radicale configurato.
+ *
+ * Il pull delle iscrizioni verso l'indice con lo store postgres (cron
+ * calendar-subscriptions-index della F2) è ora dentro il cron ics-pull
+ * (contratto f3-modules §6.4): un secondo giro scaricherebbe i feed due volte.
+ * I giri dello shadow mirror (runShadowNightly, runShadowHourlyParity) sono
+ * registrati in cron/index.ts direttamente da lib/calendar/migration/shadow.
+ *
+ * Strumento di migrazione (F3, contratto f3-modules §15): gli handler dei job
+ * `migration_run` (runs.ts) e `shadow_mirror` (shadow.ts) si registrano con
+ * gli altri prima del worker; all'avvio, con Radicale configurato, un giro del
+ * reaper chiude i run interrotti da un arresto senza ripresa possibile.
  *
  * L'arresto (stopCalendarBackground) ferma prima i produttori di lavoro
  * (canary, campanello con le sync in corso, worker dei job), poi il
@@ -42,7 +52,7 @@
  */
 
 import { closeCalendarPool } from '../db';
-import { readStoreKind, startBackendModeListener } from '../lib/calendar/backend-mode';
+import { startBackendModeListener } from '../lib/calendar/backend-mode';
 import { registerBookingJobs } from '../lib/calendar/booking';
 import { startCalendarJobWorker, stopCalendarJobWorker } from '../lib/calendar/jobs';
 import { runCalendarAudit } from '../lib/calendar/radicale/auditor';
@@ -54,7 +64,8 @@ import { registerStoreJobs } from '../lib/calendar/radicale/store';
 import { radicaleRuntime } from '../lib/calendar/radicale/sync';
 import { startCalendarWatcher, stopCalendarWatcher } from '../lib/calendar/radicale/watcher';
 import { registerSubscriptionMirrorJob } from '../lib/calendar/subscriptions/mirror';
-import { pullAllSubscriptionsToIndex } from '../lib/calendar/subscriptions/pull';
+import { reapInterruptedRuns, registerMigrationRunJob } from '../lib/calendar/migration/runs';
+import { registerShadowMirrorJob } from '../lib/calendar/migration/shadow';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'calendar-radicale' });
@@ -108,6 +119,9 @@ async function startComponents(): Promise<void> {
     registerSubscriptionMirrorJob();
     registerIndexRebuildJob();
     registerStoreJobs();
+    // Strumento di migrazione (F3): run asincroni e shadow mirror.
+    registerMigrationRunJob();
+    registerShadowMirrorJob();
   } catch (err) {
     log.error({ err }, 'registrazione degli handler dei job del calendario non riuscita');
   }
@@ -134,6 +148,18 @@ async function startComponents(): Promise<void> {
     if (await ensureRequestedRebuild()) log.warn('rebuild dell\'indice richiesto dallo stato del backend: accodato all\'avvio');
   } catch (err) {
     log.warn({ err }, 'verifica del rebuild richiesto all\'avvio non riuscita: lo riaccoda l\'auditor notturno');
+  }
+  if (stopping) return;
+
+  // 3c. Run dello strumento di migrazione rimasti senza esecutore (arresto
+  // durante un run il cui job è morto o sparito): chiusi come `interrupted`
+  // invece di aspettare il primo giro del reaper. Un run con il job ancora in
+  // coda o in lease riprende da solo col worker appena avviato.
+  try {
+    const reaped = await reapInterruptedRuns();
+    if (reaped > 0) log.warn({ reaped }, 'run dello strumento di migrazione interrotti chiusi all\'avvio');
+  } catch (err) {
+    log.warn({ err }, 'controllo dei run di migrazione interrotti all\'avvio non riuscito: lo ripete il reaper ogni 5 minuti');
   }
   if (stopping) return;
 
@@ -221,12 +247,13 @@ export async function runCalendarNightlyAudit(): Promise<void> {
 }
 
 /**
- * Cron ogni 15 minuti: pull delle iscrizioni verso l'indice in shadow (design
- * §6.6), solo con lo store postgres (con lo store Radicale lo fa già il cron
- * ics-pull attraverso la facade). Non lancia per un feed rotto: l'esito di
- * ogni iscrizione è nel risultato.
+ * Cron ogni 5 minuti: run dello strumento di migrazione rimasti senza
+ * esecutore (contratto f3-modules §5.2 e §15). Senza Radicale configurato non
+ * fa nulla: il worker dei job è spento e nessun run può partire. Lancia solo
+ * se il database non risponde, e il motore cron lo registra.
  */
-export async function runSubscriptionIndexPull(): Promise<void> {
-  if ((await readStoreKind()) !== 'postgres') return;
-  await pullAllSubscriptionsToIndex();
+export async function runCalendarMigrationReaper(): Promise<void> {
+  if (!calendarRadicaleConfigured()) return;
+  const reaped = await reapInterruptedRuns();
+  if (reaped > 0) log.warn({ reaped }, 'run dello strumento di migrazione interrotti chiusi dal reaper');
 }

@@ -17,7 +17,8 @@ import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintena
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
-import { runCalendarHorizon, runCalendarNightlyAudit, runSubscriptionIndexPull } from './calendar-radicale';
+import { runCalendarHorizon, runCalendarMigrationReaper, runCalendarNightlyAudit } from './calendar-radicale';
+import { runShadowHourlyParity, runShadowNightly } from '../lib/calendar/migration/shadow';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
 import { runQuoteScheduledSend } from './quote-scheduled-send';
@@ -137,18 +138,12 @@ const jobs: CronJob[] = [
     run: runDunningEngine,
   },
   {
+    // Iscrizioni ICS: pull legacy e, con lo store postgres, pull verso
+    // l'indice delle iscrizioni con sidecar (F3: sostituisce il cron
+    // calendar-subscriptions-index della F2).
     name: 'ics-pull',
     intervalMs: 15 * 60 * 1000,
     run: runIcsPull,
-  },
-  {
-    // Calendario su Radicale (F2): pull delle iscrizioni verso l'indice in
-    // shadow, solo con lo store postgres (con lo store Radicale lo fa già
-    // ics-pull attraverso la facade). Senza sidecar d'iscrizione (fino alla F3)
-    // è un giro vuoto.
-    name: 'calendar-subscriptions-index',
-    intervalMs: 15 * 60 * 1000,
-    run: runSubscriptionIndexPull,
   },
   {
     // Calendario su Radicale (F2, design §6.9): estensione giornaliera
@@ -167,6 +162,30 @@ const jobs: CronJob[] = [
     intervalMs: 24 * 60 * 60 * 1000,
     runAtHour: 4,
     run: runCalendarNightlyAudit,
+  },
+  {
+    // Strumento di migrazione del calendario (F3, contratto f3-modules §5.2):
+    // run rimasti senza esecutore chiusi come `interrupted`. Spento senza
+    // RADICALE_URL.
+    name: 'calendar-migration-reaper',
+    intervalMs: 5 * 60 * 1000,
+    run: runCalendarMigrationReaper,
+  },
+  {
+    // Shadow mirror (F3, design §13.8, contratto f3-modules §9.5): apply
+    // completo con verifica V1-V5 dalle opzioni dell'ultima anteprima. Salta
+    // con lo shadow spento, senza Radicale o con un run in corso.
+    name: 'calendar-shadow-nightly',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 3,
+    run: runShadowNightly,
+  },
+  {
+    // Shadow mirror (F3): giro orario della parità, verifica V4 sui prossimi
+    // 14 giorni. Stesse condizioni del giro notturno.
+    name: 'calendar-shadow-parity',
+    intervalMs: 60 * 60 * 1000,
+    run: runShadowHourlyParity,
   },
   {
     name: 'whatsapp-media-fetch',

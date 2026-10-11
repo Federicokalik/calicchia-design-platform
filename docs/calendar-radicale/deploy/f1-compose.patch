@@ -22,7 +22,7 @@ tag sha pinnato, config dentro l'immagine e healthcheck del probe.
 
 --- a/docker-compose.portainer.yml
 +++ b/docker-compose.portainer.yml
-@@ -101,8 +101,52 @@
+@@ -101,8 +101,56 @@
        TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY}
        BUGSINK_DSN: ${BUGSINK_DSN}
        CRON_SECRET: ${CRON_SECRET}
@@ -50,6 +50,10 @@ tag sha pinnato, config dentro l'immagine e healthcheck del probe.
 +      # Password del probe (canary su _canary dalla F2/F3): la stessa
 +      # CALDES_PROBE_PASSWORD dell'healthcheck di Radicale.
 +      RADICALE_PROBE_PASSWORD: ${CALDES_PROBE_PASSWORD}
++      # Origin pubblica di Radicale per il controllo SERVICE_PUBLIC_401 del
++      # preflight dello strumento di migrazione (F3, contratto f3-modules §15):
++      # caldes-svc e caldes-probe devono ricevere 401 da internet.
++      RADICALE_PUBLIC_URL: ${RADICALE_PUBLIC_URL:-https://dav.calicchia.design}
 +      # Principal canonico: deve coincidere con RADICALE_PRINCIPAL di Radicale.
 +      RADICALE_PRINCIPAL: federico
 +      # Collezioni montate in sola lettura (identità del volume, campanello
@@ -76,7 +80,7 @@ tag sha pinnato, config dentro l'immagine e healthcheck del probe.
        ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
        MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY}
        BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
-@@ -181,13 +225,32 @@
+@@ -181,13 +229,32 @@
        - uploads_data:/data/uploads
        - private_data:/data/private
        - kb_data:/data/kb
@@ -110,7 +114,7 @@ tag sha pinnato, config dentro l'immagine e healthcheck del probe.
      # Solo su loopback: CloudPanel proxa da `http://127.0.0.1:3001`.
      ports:
        - "127.0.0.1:3001:3001"
-@@ -316,42 +379,125 @@
+@@ -316,42 +383,125 @@
      ports:
        - "127.0.0.1:3010:3000"
  
@@ -256,7 +260,7 @@ tag sha pinnato, config dentro l'immagine e healthcheck del probe.
      ports:
        - "127.0.0.1:3011:5232"
  
-@@ -414,7 +560,45 @@
+@@ -414,7 +564,45 @@
    kb_data:
    valkey_data:
    profiles_data:

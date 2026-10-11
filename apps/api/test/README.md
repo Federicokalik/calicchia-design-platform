@@ -96,14 +96,27 @@ test/
                          busy fail-closed (busy), split e pull delle iscrizioni (ics-split, subscriptions-pull),
                          feed dall'indice e consumatori (feed-builder, consumers), salute del calendario
                          (calendar-health), correzioni della revisione F2 su indice, job, busy e pull
-                         (f2-hardening); senza Radicale)
+                         (f2-hardening); F3: migrazione 165 dello strumento di migrazione, ledger e
+                         trigger dello shadow mirror (migration-165), preflight, inizializzazione, archivio e
+                         inventario (migration-init, con _migration-init-shared.ts), serializer (migration-serialize),
+                         piano puro (migration-plan), apply, verifica e report (migration-apply, con
+                         _migration-apply-shared.ts), shadow mirror, parità e flag delle iscrizioni (migration-shadow),
+                         erasure GDPR e retention (calendar-gdpr), esecutore dei run, route e stato del wizard
+                         (migration-routes); senza Radicale)
   integration/           Radicale reale: smoke CalDAV, plugin del repository, client di servizio e control-plane,
                          caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario;
                          F2: sync, watcher, canary, discovery e freshness (radicale-sync), rebuild dell'indice
                          (index-rebuild), RadicaleStore (radicale-store), decisioni di prenotazione (booking-decision),
                          consumatori (consumers), specchio delle iscrizioni (subscription-mirror), criterio di
                          uscita della F2 (radicale-f2-exit), correzioni della revisione F2 su sync, guardia
-                         post-ripristino, interruttore cumulativo, saga e store (radicale-f2-hardening)
+                         post-ripristino, interruttore cumulativo, saga e store (radicale-f2-hardening);
+                         F3: inizializzazione, preflight, archivio della Fase 0 e riassegnazione d'identità
+                         (migration-init), anteprima e piano (migration-plan), apply, verifica V1-V5 e report
+                         (migration-apply), shadow mirror, proiezioni ed erasure GDPR (migration-shadow), percorso
+                         del wizard dalle route (migration-routes), radicale-maint.sh (radicale-maint), emulazione
+                         dei device con la config di produzione (device-emulation), criterio di uscita della F3 su
+                         una copia sintetica della produzione: kill a metà apply, shadow con VALARM e parità, feed
+                         identici fra i due store, erasure GDPR (migration-f3-e2e)
 ```
 
 Fuori da `apps/api/test`, il pacchetto `@calicchia/calendar-core` ha i propri test (node:test via tsx, senza database né Radicale): `pnpm --filter @calicchia/calendar-core test` e `typecheck`; vedi `packages/calendar-core/README.md`.
@@ -123,7 +136,7 @@ Molti moduli leggono `process.env` al momento dell'import: `src/db/index.ts` cre
 - **`useTestDatabase({ resetBaseline? })`**: va chiamata in cima al file ed è idempotente. Applica le migrazioni prima del primo test e chiude il pool dopo l'ultimo (anche il pool calendario `calSql` della F2); senza la chiusura il processo resterebbe appeso. Con `resetBaseline: true` riporta prima il dominio calendario alla baseline.
 - **`onDatabaseClosing(task)`**: eseguito per ultimo, dopo i task di `onBeforeDatabaseClose` e subito prima della chiusura del pool (anche se il `before` è fallito); serve a fermare i componenti di processo che usano il database (campanello, worker), come fa la matrice `CALENDAR_BACKEND=radicale`.
 - **`onDatabaseReady(task)` / `onBeforeDatabaseClose(task)`**: eseguono `task` dentro il `before` di `useTestDatabase` (dopo migrazioni, baseline e pre-pulizia delle fixture) e nel suo `after` (prima della chiusura del pool). Lo scenario condiviso di un file va costruito qui e **non** con un `before()` di primo livello: con `node --test` i `before()` di primo livello partono subito e in parallelo fra loro, quindi la creazione dei dati finirebbe in gara con migrazioni e `resetCalendarBaseline()` (fino al deadlock). Gli `after()` di primo livello vanno bene per ciò che non usa il database (orologio, flush degli snapshot).
-- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, lo schedule di default con lun-ven 09-13 e 14-18 e lo stato del backend calendario (`calendar_backend_state`, migrazione 162) in `mode=postgres` con il volume non inizializzato. Svuota anche indice, id, versioni, job e conflitti della F2 (migrazioni 163-164) e invalida la cache del modo della facade (`backend-mode.ts`). Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
+- **`resetCalendarBaseline()`**: porta il dominio calendario allo stato di un database appena migrato. Restano solo i calendari seminati (`lavoro`, `personale`, `bookings`, `scadenze`), nessun evento, prenotazione, iscrizione o app-password, lo schedule di default con lun-ven 09-13 e 14-18 e lo stato del backend calendario (`calendar_backend_state`, migrazione 162) in `mode=postgres` con il volume non inizializzato. Svuota anche indice, id, versioni, job e conflitti della F2 (migrazioni 163-164) e run, righe e ledger dello strumento di migrazione della F3 (165), riporta ai default le colonne della 165 di `calendar_backend_state` (shadow spento, nessuna dichiarazione del wizard) e invalida la cache del modo della facade (`backend-mode.ts`). Rimuove anche i residui di run interrotti e i dati del template, ad esempio il calendario `festivita` con le festività create dal cron. È distruttiva, quindi è ammessa solo sul database dei test. Le righe seminate non vanno modificate: per ogni scenario si creano dati propri.
 - **`testPrefix(label)`**: genera un prefisso `tst-<etichetta>`, deterministico e quindi stabile negli snapshot. Con `{ random: true }` aggiunge un suffisso casuale. Rifiuta un prefisso che ne contiene un altro già usato nel processo, o che è contenuto in uno già usato.
 - **`cleanupTestData(prefix, tracked)`**: cancella in ordine di foreign key tutto ciò che porta il prefisso (slug, nomi, titoli, email, label) o è registrato per id. Copre prenotazioni con proiezioni e lead, tipi di prenotazione, schedule, calendari con le cascate, eventi, iscrizioni, app-password, token MCP e device, e le righe di `audit_logs` scritte dai trigger.
 - **`databaseNow()` / `cleanupCalendarAudit({ since, prefixes, ids })`**: per le righe di `audit_logs` che la pulizia per prefisso non riconosce (eventi cancellati dalle route o dal sync delle iscrizioni, aggiornamenti dei calendari seminati). `since` si legge con `databaseNow()` in `onDatabaseReady`, perché i trigger usano `NOW()` del server e non l'orologio fermo.
