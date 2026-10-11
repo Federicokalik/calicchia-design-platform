@@ -1,25 +1,34 @@
 /**
- * Inizializzazione del volume di Radicale, a mano, in F1 (piano F1; contratto
- * docs/calendar-radicale/contracts/control-plane.md §4.4; design §6.3 e
- * §13.3). Dalla F3 lo stesso passo lo esegue il wizard della migrazione: qui
- * c'è solo un involucro di riga di comando attorno a initializeVolume() e
- * createMissingCollections() di src/lib/calendar/radicale/identity.ts.
+ * Inizializzazione del volume di Radicale da riga di comando (piano F1;
+ * contratto docs/calendar-radicale/contracts/control-plane.md §4.4; design
+ * §6.3 e §13.3). Dalla F3 lo stesso passo lo esegue il wizard della
+ * migrazione (passo 1, POST /api/admin/calendar/migration/init): questo
+ * script è solo un involucro di riga di comando attorno a planInitialization()
+ * ed executeInitialization() di src/lib/calendar/migration/init.ts, l'unico
+ * punto del codice che fa MKCOL e MKCALENDAR. Precondizioni, collezioni del
+ * piano e creazione sono quelle del wizard, senza logica duplicata.
  *
  * Senza opzioni è una prova a vuoto: legge lo stato in PG, controlla il
  * principal su Radicale come caldes-svc, verifica l'identità e stampa che cosa
  * farebbe. Con --apply esegue:
  *  - volume mai inizializzato (mode postgres, epoch 0, principal assente):
  *    MKCOL del principal, marker volume-id/epoch 1, UPDATE dello stato,
- *    MKCALENDAR delle collezioni del sidecar (con le dead prop calendar-id e
- *    role) e della collezione di sistema `_canary` (canary del campanello,
- *    F2). Il NOTIFY dello stato fa riscrivere subito policy.json al
- *    control-plane dell'API in esecuzione;
- *  - volume già inizializzato con identità ok: solo le collezioni del sidecar
+ *    MKCALENDAR delle collezioni del piano (calendari attivi con il nome di
+ *    collezione valido, sub-* delle iscrizioni visibili ai device, archivio
+ *    della Fase 0 se la riga esiste; con le dead prop calendar-id e role) e
+ *    della collezione di sistema `_canary` (canary del campanello, F2). Il
+ *    NOTIFY dello stato fa riscrivere subito policy.json al control-plane
+ *    dell'API in esecuzione;
+ *  - volume già inizializzato con identità ok: solo le collezioni del piano
  *    che mancano su Radicale (es. un calendario creato dall'admin dopo) e
  *    `_canary` se manca (i volumi inizializzati in F1 non ce l'hanno: senza,
  *    il campanello della F2 resta in remote mode);
  *  - in ogni altro caso rifiuta (exit 3): un volume non vuoto senza marker, o
- *    con un marker diverso da PG, non viene mai inizializzato né adottato.
+ *    con un marker diverso da PG, non viene mai inizializzato né adottato (la
+ *    riassegnazione d'identità confermata è nel wizard).
+ * Lo script non ha il journal del run del wizard: se si interrompe fra la
+ * MKCOL e l'aggiornamento dello stato, la ripresa si fa dal wizard
+ * (riassegnazione d'identità volume_to_pg).
  *
  * Uso (da apps/api; nessun .env letto: le variabili sono quelle del container):
  *   pnpm calendar:radicale-init              prova a vuoto
@@ -41,21 +50,10 @@
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
-import { principalPath, type RadicaleClient, radicaleClientFromEnv } from '../src/lib/calendar/radicale/client';
-import { DAV_PROPS } from '../src/lib/calendar/radicale/dav-xml';
-import {
-  type CanaryProvisioning,
-  type CollectionProvisioning,
-  checkVolumeIdentity,
-  createMissingCollections,
-  ensureCanaryCollection,
-  initializeVolume,
-  remoteIdentitySource,
-  VolumeInitError,
-  type VolumeInitErrorCode,
-} from '../src/lib/calendar/radicale/identity';
-import { type Db, readBackendState, readSidecarCollections } from '../src/lib/calendar/radicale/policy';
-import { DEFAULT_PRINCIPAL, isValidCollectionName, isValidPrincipal } from '../src/lib/calendar/radicale/types';
+import { type RadicaleClient, radicaleClientFromEnv } from '../src/lib/calendar/radicale/client';
+import type { CanaryProvisioning, CollectionProvisioning, VolumeInitErrorCode } from '../src/lib/calendar/radicale/identity';
+import type { Db } from '../src/lib/calendar/radicale/policy';
+import { DEFAULT_PRINCIPAL, isValidPrincipal } from '../src/lib/calendar/radicale/types';
 
 /** Versione del formato del report. */
 export const REPORT_SCHEMA = 'caldes.radicale-init/v1';
@@ -76,7 +74,7 @@ export interface RadicaleInitReport {
   state: { mode: string; epoch: number; volume_id: string | null };
   principal_exists: boolean;
   identity: { status: string; detail: string | null };
-  /** Collezioni del sidecar attive con collection_name valido (quelle che l'inizializzazione crea). */
+  /** Collezioni del piano (quelle che l'inizializzazione crea o verifica), senza `_canary`. */
   collections: Array<{ collection_name: string; role: string }>;
   action: RadicaleInitAction;
   refused: { code: VolumeInitErrorCode; message: string } | null;
@@ -90,64 +88,42 @@ export interface RadicaleInitReport {
  */
 export async function runRadicaleInit(opts: { db: Db; client: RadicaleClient; principal: string; apply: boolean }): Promise<RadicaleInitReport> {
   const { db, client, principal, apply } = opts;
-  const state = await readBackendState(db);
-  const props = await client.readProps(principalPath(principal), [DAV_PROPS.resourcetype]);
-  const principalExists = props !== null;
-  const identity = await checkVolumeIdentity(state, remoteIdentitySource(client), principal);
-  const collections = (await readSidecarCollections(db))
-    .filter((c) => c.lifecycle === 'active' && isValidCollectionName(c.collection_name))
-    .map((c) => ({ collection_name: c.collection_name as string, role: c.role }));
+  // Import dinamico: migration/init carica il pool del database, che nasce solo dopo i controlli dell'ambiente.
+  const { executeInitialization, planInitialization } = await import('../src/lib/calendar/migration/init');
+  const { MigrationError } = await import('../src/lib/calendar/migration/types');
+  const { VolumeInitError } = await import('../src/lib/calendar/radicale/identity');
 
+  const plan = await planInitialization({ db, client, principal });
   const report: RadicaleInitReport = {
     schema: REPORT_SCHEMA,
     apply,
     principal,
-    state: { mode: state.mode, epoch: state.epoch, volume_id: state.volume_id },
-    principal_exists: principalExists,
-    identity: { status: identity.status, detail: identity.detail },
-    collections,
-    action: 'refuse',
-    refused: null,
+    state: { mode: plan.state.mode, epoch: plan.state.epoch, volume_id: plan.state.volume_id },
+    principal_exists: plan.principal_exists,
+    identity: { status: plan.identity.status, detail: plan.identity.detail },
+    collections: plan.collections
+      .filter((c) => c.kind !== 'system')
+      .map((c) => ({ collection_name: c.collection_name, role: c.role ?? 'user' })),
+    action: plan.action === 'create_missing' ? 'create_missing_collections' : plan.action,
+    refused: plan.refused,
     result: null,
   };
-
-  // Stesse precondizioni di initializeVolume(), valutate qui per la prova a vuoto.
-  if (state.mode !== 'postgres') {
-    report.refused = { code: 'state_not_postgres', message: `inizializzazione ammessa solo in mode postgres (ora ${state.mode})` };
-  } else if (state.epoch === 0) {
-    if (principalExists) {
-      report.refused = {
-        code: 'principal_exists',
-        message: `il principal /${principal}/ esiste già su Radicale ma PG non registra alcun volume: un volume non vuoto non viene mai adottato (serve la riassegnazione d'identità, F3)`,
-      };
-    } else {
-      report.action = 'initialize';
-    }
-  } else if (identity.status === 'ok') {
-    report.action = 'create_missing_collections';
-  } else {
-    report.refused = {
-      code: 'identity_not_ok',
-      message: `volume già registrato in PG (epoch ${state.epoch}) ma identità ${identity.status}${identity.detail ? ` (${identity.detail})` : ''}: nessuna modifica`,
-    };
-  }
-
-  if (!apply || report.action === 'refuse') return report;
+  if (!apply || plan.action === 'refuse') return report;
 
   try {
-    if (report.action === 'initialize') {
-      const result = await initializeVolume({ db, client, principal });
-      report.result = { volume_id: result.volumeId, epoch: result.epoch, collections: result.collections, canary: result.canary };
-    } else {
-      const created = await createMissingCollections({ db, client, principal });
-      const canary = await ensureCanaryCollection({ db, client, principal });
-      report.result = { volume_id: state.volume_id, epoch: state.epoch, collections: created, canary };
-    }
+    const result = await executeInitialization({ db, client, principal, action: plan.action });
+    report.result = { volume_id: result.volume_id, epoch: result.epoch, collections: result.collections, canary: result.canary };
   } catch (err) {
-    // Lo stato è cambiato fra la prova e l'esecuzione (es. un'altra istanza).
+    // Lo stato è cambiato fra la prova e l'esecuzione (es. un'altra istanza o il wizard).
     if (err instanceof VolumeInitError) {
       report.action = 'refuse';
       report.refused = { code: err.code, message: err.message };
+      return report;
+    }
+    if (err instanceof MigrationError && err.code === 'PRECONDITION_FAILED') {
+      const reasons = Array.isArray(err.details?.reasons) ? (err.details?.reasons as string[]) : [];
+      report.action = 'refuse';
+      report.refused = { code: reasons.includes('MODE_NOT_POSTGRES') ? 'state_not_postgres' : 'identity_not_ok', message: err.message };
       return report;
     }
     throw err;
@@ -160,7 +136,7 @@ export function summarizeRadicaleInit(report: RadicaleInitReport): string {
   const lines = [
     `Stato in PG: mode ${report.state.mode}, epoch ${report.state.epoch}, volume ${report.state.volume_id ?? '(nessuno)'}.`,
     `Principal /${report.principal}/ su Radicale: ${report.principal_exists ? 'presente' : 'assente'}; identità ${report.identity.status}${report.identity.detail ? ` (${report.identity.detail})` : ''}.`,
-    `Collezioni del sidecar: ${report.collections.map((c) => `${c.collection_name} (${c.role})`).join(', ') || 'nessuna'}.`,
+    `Collezioni del piano: ${report.collections.map((c) => `${c.collection_name} (${c.role})`).join(', ') || 'nessuna'}.`,
   ];
   if (report.refused) {
     lines.push(`RIFIUTATO (${report.refused.code}): ${report.refused.message}`);
