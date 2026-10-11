@@ -16,7 +16,12 @@
 #      dimensioni dei file, stato del backend, inventario del volume
 #      (collezioni, item, token di contenuto, marker volume-id/epoch) e
 #      l'esito del confronto d'identità DB ↔ volume;
-#   4. retention locale, copia off-site su MEGA S4 (come scripts/backup-db.sh)
+#   4. registrazione del run in calendar_backend_state.last_stack_backup
+#      (F3, contratto docs/calendar-radicale/contracts/f3-modules.md §14.3:
+#      {id, at, complete, volume_id, epoch, manifest_sha256}, letta dal
+#      controllo BACKUP_RECENT del preflight della migrazione), in best effort:
+#      un errore si registra e non cambia l'exit del backup;
+#   5. retention locale, copia off-site su MEGA S4 (come scripts/backup-db.sh)
 #      e retention su S4.
 # Il dump viene PRIMA dello snapshot: il volume non è mai più vecchio del
 # database, quindi dopo un ripristino coordinato l'indice si riallinea solo per
@@ -197,6 +202,38 @@ pg_dump_version() {
     pg_dump --version
   fi
 }
+# Registra il run pubblicato in calendar_backend_state.last_stack_backup
+# (contratto f3-modules §14.3). Best effort: ogni problema diventa un avviso e
+# non cambia l'exit del backup (il backup c'è comunque). La riga JSON passa come
+# variabile di psql (:'rec', quotata da psql) letta da stdin: mai interpolata
+# nel testo SQL. last_stack_backup non entra nella policy dei device: l'UPDATE
+# non incrementa policy_version (trigger della 162).
+register_last_backup() {
+  local manifest="$1" record exists sql
+  if ! record="$(python3 "$TOOL" stack-backup-record --file "$manifest")"; then
+    warn "last_stack_backup non registrato: manifest non leggibile"
+    return 0
+  fi
+  if ! exists="$(db_query "SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'calendar_backend_state' AND column_name = 'last_stack_backup')")"; then
+    warn "last_stack_backup non registrato: database non raggiungibile"
+    return 0
+  fi
+  if [ "$exists" != "t" ]; then
+    log "last_stack_backup non registrato: database precedente alla migrazione 165"
+    return 0
+  fi
+  sql="UPDATE calendar_backend_state SET last_stack_backup = :'rec'::jsonb WHERE id"
+  if [ "$DB_MODE" = docker ]; then
+    printf '%s\n' "$sql" | docker exec -i "$PG_CONTAINER" psql -X -q -v ON_ERROR_STOP=1 -v rec="$record" -U "$DB_USER" -d "$DB_NAME" -f - >/dev/null
+  else
+    printf '%s\n' "$sql" | psql "$DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -v rec="$record" -f - >/dev/null
+  fi || {
+    warn "last_stack_backup non registrato: UPDATE di calendar_backend_state fallito (il backup resta valido)"
+    return 0
+  }
+  log "registrato in calendar_backend_state.last_stack_backup: $record"
+}
+
 # Stato del backend come JSON (null prima della migrazione 162).
 backend_state_json() {
   local exists
@@ -413,7 +450,12 @@ case "$IDENTITY" in
     fi ;;
 esac
 
-# ─── 4. Retention locale ──────────────────────────────────────
+# ─── 4. Registrazione nello stato del backend (F3) ────────────
+
+# Completo o incompleto: il preflight distingue con il campo complete.
+register_last_backup "$ROOT/$ID/manifest.json"
+
+# ─── 5. Retention locale ──────────────────────────────────────
 
 mapfile -t local_ids < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -E '^[0-9]{8}T[0-9]{6}Z$' || true)
 if [ "${#local_ids[@]}" -gt 0 ]; then
@@ -429,7 +471,7 @@ find "$ROOT" -mindepth 1 -maxdepth 1 -type d -name '.partial-*' -mtime +0 -exec 
 legacy_deleted="$(find "${BACKUP_DIR%/}" -maxdepth 1 -name 'caldes-*.sql.gz' -type f -mtime +"${RETENTION_DAYS}" -print -delete | wc -l)"
 [ "$legacy_deleted" -gt 0 ] && log "retention: rimossi ${legacy_deleted} dump del vecchio backup-db.sh"
 
-# ─── 5. Copia off-site su MEGA S4 ─────────────────────────────
+# ─── 6. Copia off-site su MEGA S4 ─────────────────────────────
 
 if [ "$NO_UPLOAD" = 1 ] || [ "$S4_UPLOAD" = never ]; then
   log "copia su S4 disattivata (--no-upload o S4_UPLOAD=never)"
