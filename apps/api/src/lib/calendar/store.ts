@@ -21,6 +21,7 @@
  * Override per i test: overrideCalendarStore('radicale' | 'postgres' | store).
  */
 
+import { sql } from '../../db';
 import {
   type CalendarStoreKind,
   overrideStoreKind,
@@ -151,9 +152,40 @@ export const CALENDAR_STORE_WRITE_OPERATIONS: ReadonlySet<CalendarStoreOperation
 // ─── PgLegacyStore ───────────────────────────────
 
 /**
+ * Righe di calendars create dallo strumento di migrazione della F3 che i
+ * percorsi legacy non devono vedere (contratto f3-modules §1.3): i sidecar
+ * delle iscrizioni (`role = 'subscription'`) e l'archivio della Fase 0
+ * (`origin = 'migration'`). In mode postgres comparirebbero nell'admin e in
+ * list_calendars come calendari vuoti, e create_event potrebbe scriverci righe
+ * legacy. Query a parte, senza toccare legacy/*: su dati senza queste righe
+ * (produzione prima della F3, test dei contratti) il risultato è vuoto e le
+ * letture restano quelle di oggi.
+ */
+async function migrationOnlyCalendarIds(): Promise<Set<string>> {
+  const rows = await sql<Array<{ id: string }>>`
+    SELECT id FROM calendars WHERE role = 'subscription' OR origin = 'migration'
+  `;
+  return new Set(rows.map((r) => String(r.id).toLowerCase()));
+}
+
+/** null se il calendario è una riga dello strumento (contratto f3 §1.3), altrimenti il calendario. */
+async function visibleToLegacy(cal: Calendar | null): Promise<Calendar | null> {
+  if (!cal) return null;
+  const hidden = await migrationOnlyCalendarIds();
+  return hidden.has(String(cal.id).toLowerCase()) ? null : cal;
+}
+
+/**
  * Store legacy su calendar_events: delega al codice spostato in legacy/
  * senza modifiche. Nessuna logica propria, così il comportamento in mode
- * postgres resta quello della baseline F0.
+ * postgres resta quello della baseline F0, con un'unica eccezione dichiarata
+ * nel contratto f3-modules §1.3: listCalendars, getCalendar,
+ * getCalendarByFeedToken, getDefaultCalendar e countEventsByCalendar
+ * escludono le righe create dallo strumento di migrazione (sidecar delle
+ * iscrizioni e archivio della Fase 0). getBookingsCalendar (slug 'bookings') e
+ * getOrCreateFestivitaCalendar (calendario più vecchio con lo slug o il nome
+ * delle festività, creato molto prima di qualsiasi sidecar) non possono
+ * restituirle e restano invariate.
  */
 export class PgLegacyStore implements CalendarStore {
   readonly kind = 'postgres' as const;
@@ -170,17 +202,28 @@ export class PgLegacyStore implements CalendarStore {
   getEventOverrides(masterId: string) { return eventsPg.getEventOverrides(masterId); }
   buildCalendarFeed(calendar: Calendar, opts: CalendarFeedOptions) { return eventsPg.buildCalendarFeed(calendar, opts); }
 
-  listCalendars() { return calendarsPg.listCalendars(); }
-  getCalendar(idOrSlug: string) { return calendarsPg.getCalendar(idOrSlug); }
-  getCalendarByFeedToken(token: string) { return calendarsPg.getCalendarByFeedToken(token); }
-  getDefaultCalendar() { return calendarsPg.getDefaultCalendar(); }
+  async listCalendars() {
+    const calendars = await calendarsPg.listCalendars();
+    if (calendars.length === 0) return calendars;
+    const hidden = await migrationOnlyCalendarIds();
+    return hidden.size === 0 ? calendars : calendars.filter((c) => !hidden.has(String(c.id).toLowerCase()));
+  }
+  async getCalendar(idOrSlug: string) { return visibleToLegacy(await calendarsPg.getCalendar(idOrSlug)); }
+  async getCalendarByFeedToken(token: string) { return visibleToLegacy(await calendarsPg.getCalendarByFeedToken(token)); }
+  async getDefaultCalendar() { return visibleToLegacy(await calendarsPg.getDefaultCalendar()); }
   getBookingsCalendar() { return calendarsPg.getBookingsCalendar(); }
   getOrCreateFestivitaCalendar() { return calendarsPg.getOrCreateFestivitaCalendar(); }
   createCalendar(input: CreateCalendarInput) { return calendarsPg.createCalendar(input); }
   updateCalendar(id: string, input: UpdateCalendarInput) { return calendarsPg.updateCalendar(id, input); }
   deleteCalendar(id: string) { return calendarsPg.deleteCalendar(id); }
   rotateFeedToken(id: string) { return calendarsPg.rotateFeedToken(id); }
-  countEventsByCalendar() { return calendarsPg.countEventsByCalendar(); }
+  async countEventsByCalendar() {
+    const counts = await calendarsPg.countEventsByCalendar();
+    if (counts.size === 0) return counts;
+    const hidden = await migrationOnlyCalendarIds();
+    for (const id of [...counts.keys()]) if (hidden.has(String(id).toLowerCase())) counts.delete(id);
+    return counts;
+  }
   listClosures() { return calendarsPg.listClosures(); }
 
   listSubscriptions() { return subscriptionsPg.listSubscriptions(); }
