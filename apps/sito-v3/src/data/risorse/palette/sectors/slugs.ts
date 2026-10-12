@@ -87,9 +87,21 @@ export const SECTOR_SLUGS: readonly string[] = [
   "elettrauto",
   "autolavaggi",
   "soccorso-stradale",
+  "ristoranti",
+  "hotel",
+  "b-b",
   "pizzerie",
   "agriturismi",
+  "catering",
+  "bar",
+  "case-vacanza",
+  "pasticcerie",
+  "panifici",
   "gelaterie",
+  "pub",
+  "stabilimenti-balneari",
+  "wine-bar",
+  "enoteche",
   "fotografi"
 ];
 
