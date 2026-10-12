@@ -280,6 +280,27 @@ function validateSector(s, slug) {
   return errs;
 }
 
+/** Ricerche Unsplash identiche in settori diversi: stesse foto, stessa palette. */
+function queryCollisions(sectors) {
+  const owners = new Map();
+  for (const s of sectors) {
+    for (const q of s.queriesEn ?? []) {
+      const key = q.trim().toLowerCase();
+      if (!owners.has(key)) owners.set(key, new Set());
+      owners.get(key).add(s.slug);
+    }
+  }
+  const out = new Map();
+  for (const [q, slugs] of owners) {
+    if (slugs.size < 2) continue;
+    for (const slug of slugs) {
+      if (!out.has(slug)) out.set(slug, []);
+      out.get(slug).push(`"${q}" (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+    }
+  }
+  return out;
+}
+
 /** Radici condivise con altri settori (il matching del testo libero diventa ambiguo). */
 function aliasCollisions(sectors) {
   const owners = new Map();
@@ -442,7 +463,7 @@ function sortByProfession(sectors, order) {
 }
 
 // ─── Brief ────────────────────────────────────────────────────────
-function buildPrompt(prof, labelEn, example, siblings, takenAliases) {
+function buildPrompt(prof, labelEn, example, siblings, takenAliases, takenQueries) {
   const cat = CATEGORIES[prof.categoryId];
   const presets = Object.entries(PRESETS)
     .map(([k, d]) => `  - ${k}: ${d}`)
@@ -465,8 +486,9 @@ VOCE (vale per tutti i testi, IT ed EN):
 CAMPI:
 - preset: uno fra
 ${presets}
-- queriesEn: 3 ricerche Unsplash in inglese, 2-5 parole, concrete e visive (luoghi, oggetti, materiali, luce tipici del settore). Niente parole astratte ("success", "professional", "business").
-- aliases.it / aliases.en: 3-8 radici per riconoscere il settore nel testo libero del visitatore. Una parola sola ciascuna, minuscolo, senza accenti né spazi (solo a-z, 0-9, &). Una parola del visitatore combacia se è uguale alla radice o, con radici di 4+ caratteri, se inizia con essa: evita radici che siano l'inizio di parole di altri settori (es. "foto" prende anche "fotovoltaico"). Solo radici di QUESTA professione.${takenAliases.length ? `\n  Radici già usate da altri settori, da non ripetere: ${takenAliases.join(', ')}` : ''}
+- queriesEn: 3 ricerche Unsplash in inglese, 2-4 parole, concrete e visive (luoghi, oggetti, materiali, luce tipici del settore), abbastanza comuni da avere decine di risultati: niente combinazioni troppo specifiche. Qui usa le grafie americane, più frequenti nei titoli Unsplash ("center", "color"). Niente parole astratte ("success", "professional", "business").${takenQueries.length ? `
+  Ricerche già usate da altri settori, da non ripetere uguali: ${takenQueries.join(' | ')}` : ''}
+- aliases.it / aliases.en: 3-8 radici per riconoscere il settore nel testo libero del visitatore. Una parola sola ciascuna, minuscolo, senza accenti né spazi (solo a-z, 0-9, &). Una parola del visitatore combacia se è uguale alla radice o, con radici di 4+ caratteri, se inizia con essa: evita radici che siano l'inizio di parole di altri settori (es. "foto" prende anche "fotovoltaico"). Il confronto è parola per parola: non unire più parole ("medicodibase", "personaltrainer" non combaciano mai); per i nomi di più parole scegli la parola più distintiva o un termine colloquiale ("mutua", "trainer"). Niente varianti già coperte da una radice più corta ("logopedia" se c'è già "logoped"). Solo radici di QUESTA professione.${takenAliases.length ? `\n  Radici già usate da altri settori, da non ripetere: ${takenAliases.join(', ')}` : ''}
 - copy.it / copy.en: attività inventata ma plausibile in Italia, senza nominare città o quartieri reali (l'anteprima la vede chiunque); orari, numeri e prezzi realistici. Prezzi IT "7,50 €", "Da 45 €"; EN "€7.50", "From €45". Orari IT "19:00"; EN "7pm", "11.30pm". Il nome dell'attività può restare uguale o adattarsi in EN.
   Lunghezze massime: name ${LIMITS.name}, nav ${LIMITS.nav} (voce del bottone in navigazione), eyebrow ${LIMITS.eyebrow}, h1 ${LIMITS.h1}, lead ${LIMITS.lead}, btn1/btn2 ${LIMITS.btn1}, cards[].title ${LIMITS.title}, cards[].description ${LIMITS.description}, cards[].meta ${LIMITS.meta} (prezzo, orario o nota breve), banner ${LIMITS.banner}. Esattamente 3 cards.
 - intro.it / intro.en: 2-3 paragrafi separati da una riga vuota ("\\n\\n"), ${INTRO_WORDS.min}-${INTRO_WORDS.max} parole per lingua. Cosa cerca il cliente di questo settore, quali toni funzionano e perché, cosa evitare, dove finiscono i colori fuori dallo schermo (insegna, stampa, divise, packaging...), un consiglio pratico sul contrasto. Niente prezzi, niente "preventivo".
@@ -573,12 +595,17 @@ async function pool(items, worker, concurrency) {
 async function lintAll(byCategory, order) {
   const all = Object.values(byCategory).flat();
   const collisions = aliasCollisions(all);
+  const sameQueries = queryCollisions(all);
   let errors = 0;
   let warned = 0;
   for (const s of all) {
     const errs = validateSector(s, null);
     if (!order.has(s.slug)) errs.push('slug non presente in seo-professions.ts');
-    const warns = [...voiceLint(s), ...(collisions.get(s.slug) ?? []).map((c) => `radice condivisa ${c}`)];
+    const warns = [
+      ...voiceLint(s),
+      ...(collisions.get(s.slug) ?? []).map((c) => `radice condivisa ${c}`),
+      ...(sameQueries.get(s.slug) ?? []).map((q) => `ricerca ripetuta ${q}`),
+    ];
     if (errs.length) {
       errors++;
       console.error(`[FAIL] ${s.slug} — ${errs.join('; ')}`);
@@ -663,7 +690,8 @@ async function main() {
       ),
     ].sort();
     const labelEn = labelsEn[prof.slug] ?? prof.label;
-    return { prof, prompt: buildPrompt(prof, labelEn, example, siblings, taken) };
+    const takenQueries = [...new Set(allSectors.filter((s) => s.slug !== prof.slug).flatMap((s) => s.queriesEn ?? []))].sort();
+    return { prof, prompt: buildPrompt(prof, labelEn, example, siblings, taken, takenQueries) };
   });
 
   console.log(`Plan: ${jobs.length} settori, concurrency=${CONCURRENCY}, dryRun=${DRY_RUN}, force=${FORCE}`);
