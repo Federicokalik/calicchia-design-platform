@@ -1,6 +1,6 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
@@ -31,6 +31,12 @@ import { useRuntimeConfig } from '@/lib/runtime-config';
 import { reportEvent } from '@/instrumentation-client';
 // Audit C-013/C-014: contact email via useSiteConfig().
 import { useSiteConfig } from '@/lib/use-site-config';
+import {
+  decodeSharedPalette,
+  PRESETS,
+  type BrandPalette,
+  type SharedPalette,
+} from '@calicchia/shared/palette';
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -49,13 +55,32 @@ function humanizeSlug(s: string) {
   return s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function buildPrefillMessage(params: URLSearchParams, t: FormTranslate): string {
+/**
+ * Palette dal link del tool "Palette di settore": `?palette=` contiene la
+ * querystring di encodeSharedPalette() codificata con encodeURIComponent
+ * (searchParams.get la decodifica già). Null se assente o non valida.
+ */
+function readSharedPalette(params: URLSearchParams): SharedPalette | null {
+  const raw = params.get('palette');
+  if (!raw || raw.length > 300) return null;
+  try {
+    return decodeSharedPalette(new URLSearchParams(raw));
+  } catch {
+    return null;
+  }
+}
+
+function buildPrefillMessage(
+  params: URLSearchParams,
+  t: FormTranslate,
+  palette: SharedPalette | null
+): string {
   const service = params.get('service');
   const plan = params.get('plan');
   const profession = params.get('profession');
   const city = params.get('city');
 
-  if (!service && !plan && !profession && !city) return '';
+  if (!service && !plan && !profession && !city && !palette) return '';
 
   const parts: string[] = [t('prefill.greeting')];
   if (service && plan) {
@@ -69,6 +94,10 @@ function buildPrefillMessage(params: URLSearchParams, t: FormTranslate): string 
     parts.push(t('prefill.service', { service: humanizeSlug(service) }));
   } else if (plan) {
     parts.push(t('prefill.plan', { plan: humanizeSlug(plan) }));
+  }
+  // Da sola supera i 20 caratteri minimi del messaggio.
+  if (palette) {
+    parts.push(t('prefill.palette', { colors: palette.colors.join(', ') }));
   }
   if (profession || city) {
     const ctxBits: string[] = [];
@@ -93,15 +122,33 @@ function buildPrefillMessage(params: URLSearchParams, t: FormTranslate): string 
  */
 export function ContactFormClient() {
   const t = useTranslations('contatti.form');
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const leadSource = useLeadSource();
   const SITE = useSiteConfig();
   const auditService = isServiceOption(leadSource.service)
     ? leadSource.service
     : null;
+  const sharedPalette = useMemo(
+    () => readSharedPalette(new URLSearchParams(searchParams.toString())),
+    [searchParams]
+  );
+  // Sul lead si salva anche la lingua: decide la lingua della sequenza email.
+  const brandPalette = useMemo<BrandPalette | undefined>(
+    () =>
+      sharedPalette
+        ? { ...sharedPalette, locale: locale === 'en' ? 'en' : 'it' }
+        : undefined,
+    [sharedPalette, locale]
+  );
   const prefillMessage = useMemo(
-    () => buildPrefillMessage(new URLSearchParams(searchParams.toString()), t as FormTranslate),
-    [searchParams, t]
+    () =>
+      buildPrefillMessage(
+        new URLSearchParams(searchParams.toString()),
+        t as FormTranslate,
+        sharedPalette
+      ),
+    [searchParams, t, sharedPalette]
   );
   const validationMessages = useMemo(
     () =>
@@ -162,6 +209,7 @@ export function ContactFormClient() {
       lead_source: leadSource.source ?? '',
       meet_slot: '',
       turnstile_token: '',
+      brand_palette: brandPalette,
     },
   });
 
@@ -186,6 +234,10 @@ export function ContactFormClient() {
       setValue('source_service', auditService, { shouldValidate: false });
     }
   }, [auditService, leadSource.isAudit, leadSource.source, setValue]);
+
+  useEffect(() => {
+    setValue('brand_palette', brandPalette, { shouldValidate: false });
+  }, [brandPalette, setValue]);
 
   const messageValue = watch('message') ?? '';
 
@@ -369,6 +421,25 @@ export function ContactFormClient() {
           ))}
         </div>
       </Field>
+
+      {brandPalette ? (
+        <Field className="mt-8">
+          <FieldLabel>{t('labels.palette')}</FieldLabel>
+          <div
+            className="mt-3 flex h-12 overflow-hidden border"
+            style={{ borderColor: 'var(--color-border)' }}
+            role="img"
+            aria-label={`${t('labels.palette')}: ${brandPalette.colors.join(', ')}`}
+          >
+            {brandPalette.colors.map((hex, i) => (
+              <span key={`${hex}-${i}`} className="flex-1" style={{ background: hex }} />
+            ))}
+          </div>
+          <MonoLabel as="p" className="mt-2">
+            {PRESETS[brandPalette.preset].name[brandPalette.locale]} · {brandPalette.colors.join(' · ')}
+          </MonoLabel>
+        </Field>
+      ) : null}
 
       <Field className="mt-8">
         <FieldLabel htmlFor="contact-message" required>
