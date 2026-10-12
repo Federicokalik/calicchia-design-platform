@@ -180,15 +180,16 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     "slug": "estetiste",
     "preset": "morbido",
     "queriesEn": [
-      "beautician treatment room",
-      "facial treatment towels",
-      "waxing studio interior"
+      "facial treatment",
+      "skincare products on shelf",
+      "beauty treatment bed"
     ],
     "aliases": {
       "it": [
         "estetist",
-        "beautician",
-        "beautytherapist"
+        "ceretta",
+        "epilazion",
+        "beautician"
       ],
       "en": [
         "beautician",
@@ -263,22 +264,20 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     "slug": "centri-estetici",
     "preset": "morbido",
     "queriesEn": [
-      "beauty centre interior",
-      "facial treatment room",
+      "beauty center interior",
+      "spa treatment room",
       "spa towels skincare bottles"
     ],
     "aliases": {
       "it": [
-        "centroestetic",
-        "centriestetic",
-        "istitutobellezza",
-        "istitutodibellezza"
+        "estetic",
+        "benessere",
+        "spa"
       ],
       "en": [
-        "beautycentre",
-        "beautycenter",
-        "beautyspa",
-        "skincarecentre"
+        "spa",
+        "wellness",
+        "medispa"
       ]
     },
     "copy": {
@@ -442,12 +441,10 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     ],
     "aliases": {
       "it": [
-        "personaltrainer",
         "trainer",
         "pt"
       ],
       "en": [
-        "personaltrainer",
         "trainer",
         "pt"
       ]
@@ -524,14 +521,12 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     ],
     "aliases": {
       "it": [
-        "salonedibellezza",
-        "salonidibellezza",
-        "salonbellezza"
+        "bellezza",
+        "beauty"
       ],
       "en": [
-        "beautysalon",
-        "beautysalons",
-        "beautylounge"
+        "beauty",
+        "salon"
       ]
     },
     "copy": {
@@ -693,17 +688,13 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
         "onicotecn",
         "ungh",
         "manicur",
-        "nailtech",
-        "nailart",
-        "nailartist"
+        "pedicur",
+        "nail"
       ],
       "en": [
         "nail",
-        "nails",
         "manicur",
-        "nailtech",
-        "nailart",
-        "nailartist"
+        "pedicur"
       ]
     },
     "copy": {
@@ -1029,15 +1020,17 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     ],
     "aliases": {
       "it": [
-        "centrosportiv",
         "polisportiv",
-        "multisport"
+        "multisport",
+        "padel",
+        "tennis",
+        "calcetto"
       ],
       "en": [
-        "sportscentre",
-        "sportscenter",
-        "leisurecentre",
-        "multisport"
+        "multisport",
+        "leisure",
+        "padel",
+        "tennis"
       ]
     },
     "copy": {
@@ -1194,18 +1187,12 @@ export const BEAUTY_WELLNESS_SECTORS: PaletteSectorContent[] = [
     ],
     "aliases": {
       "it": [
-        "scuolacalcio",
-        "accademiacalcio",
-        "minicalcio",
-        "primicalci",
-        "calcio"
+        "calcio",
+        "minicalcio"
       ],
       "en": [
-        "footballschool",
-        "footballacademy",
-        "soccerschool",
-        "socceracademy",
-        "football"
+        "football",
+        "soccer"
       ]
     },
     "copy": {
