@@ -9,6 +9,8 @@
  * (voice rules + contesto del settore + un settore già scritto come esempio),
  * estrae il JSON dall'output, valida la forma ed esegue il linter della voce.
  * I file di categoria vengono riscritti in forma canonica (JSON indentato).
+ * Insieme a loro si aggiorna sectors/slugs.ts (solo gli slug presenti, per chi
+ * deve sapere se un settore esiste senza importarne i testi).
  *
  * Regole di scrittura:
  *  - le voci con `reviewed: true` non vengono mai riscritte, nemmeno con --force;
@@ -396,15 +398,43 @@ export const ${constName(catId)}: PaletteSectorContent[] = ${JSON.stringify(sect
 `;
 }
 
+function renderSlugs(slugs) {
+  return `// Generato da scripts/generate-palette-sectors.mjs: non modificare a mano.
+// Slug dei settori presenti in questa cartella, senza testi: lo importa chi
+// deve solo sapere se un settore esiste (es. il box nelle landing della matrice).
+
+export const SECTOR_SLUGS: readonly string[] = ${JSON.stringify(slugs, null, 2)};
+
+const SECTOR_SLUG_SET = new Set(SECTOR_SLUGS);
+
+export function hasPaletteSector(slug: string): boolean {
+  return SECTOR_SLUG_SET.has(slug);
+}
+`;
+}
+
+const SLUGS_FILE = resolve(OUT_DIR, 'slugs.ts');
+
 /** Scrive il file solo se cambia. Ritorna true se ha scritto. */
-async function writeCategory(catId, sectors) {
-  const file = categoryFile(catId);
-  const next = renderCategory(catId, sectors);
+async function writeIfChanged(file, next) {
   // Il checkout su Windows può avere CRLF: si confronta il contenuto, non i fine riga.
   const prev = await readFile(file, 'utf8').catch(() => null);
   if (prev?.replace(/\r\n/g, '\n') === next) return false;
   await writeFile(file, next, 'utf8');
   return true;
+}
+
+const writeCategory = (catId, sectors) => writeIfChanged(categoryFile(catId), renderCategory(catId, sectors));
+
+/** slugs.ts atteso, dai file di categoria come sono ora su disco. */
+async function expectedSlugs(order) {
+  const all = [];
+  for (const catId of Object.keys(CATEGORIES)) all.push(...(await loadCategory(catId)));
+  return renderSlugs(sortByProfession(all, order).map((s) => s.slug));
+}
+
+async function syncSlugs(order) {
+  if (await writeIfChanged(SLUGS_FILE, await expectedSlugs(order))) console.log(`[wrote] ${SLUGS_FILE}`);
 }
 
 function sortByProfession(sectors, order) {
@@ -540,10 +570,11 @@ async function pool(items, worker, concurrency) {
 }
 
 // ─── Modalità senza codex ─────────────────────────────────────────
-function lintAll(byCategory, order) {
+async function lintAll(byCategory, order) {
   const all = Object.values(byCategory).flat();
   const collisions = aliasCollisions(all);
   let errors = 0;
+  let warned = 0;
   for (const s of all) {
     const errs = validateSector(s, null);
     if (!order.has(s.slug)) errs.push('slug non presente in seo-professions.ts');
@@ -552,10 +583,23 @@ function lintAll(byCategory, order) {
       errors++;
       console.error(`[FAIL] ${s.slug} — ${errs.join('; ')}`);
     }
-    if (warns.length) console.warn(`[warn] ${s.slug} — ${warns.join(', ')}`);
+    if (warns.length) {
+      warned++;
+      console.warn(`[warn] ${s.slug} — ${warns.join(', ')}`);
+    }
     if (!errs.length && !warns.length) console.log(`[ok]   ${s.slug}${s.reviewed ? ' (rivisto)' : ''}`);
   }
-  console.log(`\n${all.length} settori, ${errors} con errori di forma.`);
+  const dupes = all.length - new Set(all.map((s) => s.slug)).size;
+  if (dupes) {
+    errors++;
+    console.error(`[FAIL] ${dupes} slug duplicati fra i file di categoria`);
+  }
+  const prevSlugs = await readFile(SLUGS_FILE, 'utf8').catch(() => null);
+  if (prevSlugs?.replace(/\r\n/g, '\n') !== (await expectedSlugs(order))) {
+    errors++;
+    console.error('[FAIL] slugs.ts non allineato ai file di categoria: lancia --format');
+  }
+  console.log(`\n${all.length} settori, ${errors} errori di forma, ${warned} con avvisi del linter.`);
   if (errors) process.exitCode = 1;
 }
 
@@ -564,6 +608,7 @@ async function formatAll(byCategory, order) {
     const wrote = await writeCategory(catId, sortByProfession(list.map(canonical), order));
     console.log(`${wrote ? '[wrote]' : '[same] '} ${catId}.ts (${list.length})`);
   }
+  await syncSlugs(order);
 }
 
 // ─── Main ─────────────────────────────────────────────────────────
@@ -646,6 +691,7 @@ async function main() {
       const list = sortByProfession([...merged.values()].map(canonical), order);
       if (await writeCategory(catId, list)) console.log(`[wrote] ${categoryFile(catId)}`);
     }
+    await syncSlugs(order);
 
     const collisions = aliasCollisions([...existing.values(), ...generated.map((r) => r.content)]);
     for (const r of generated) {
