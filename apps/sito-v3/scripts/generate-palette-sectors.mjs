@@ -279,7 +279,37 @@ function validateSector(s, slug) {
     }
   }
   if (typeof s.reviewed !== 'boolean') errs.push('reviewed non booleano');
+  textHygiene(s, errs);
   return errs;
+}
+
+/**
+ * Niente a capo né sequenze "\n" o "/n" visibili nei testi. Unica eccezione:
+ * nell'intro i paragrafi si separano con una riga vuota (PageHero la divide
+ * in <p>), quindi lì sono ammessi solo a capo doppi fra un paragrafo e l'altro.
+ * "b/n" (bianco e nero) resta valido.
+ */
+function textHygiene(s, errs) {
+  const check = (value, path, isIntro) => {
+    if (typeof value === 'string') {
+      if (value.includes('\\')) errs.push(`${path}: backslash letterale`);
+      if (/\/n\b/i.test(value.replace(/\bb\/n\b/gi, ''))) errs.push(`${path}: "/n" nel testo`);
+      if (isIntro) {
+        const paras = value.split(/\n\s*\n/);
+        if (paras.some((p) => p.includes('\n'))) errs.push(`${path}: a capo singolo dentro un paragrafo`);
+      } else if (/[\r\n]/.test(value)) {
+        errs.push(`${path}: a capo nel testo`);
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((v, i) => check(v, `${path}[${i}]`, isIntro));
+    } else if (value && typeof value === 'object') {
+      for (const [k, v] of Object.entries(value)) check(v, `${path}.${k}`, isIntro);
+    }
+  };
+  check(s.copy, 'copy', false);
+  check(s.aliases, 'aliases', false);
+  check(s.queriesEn, 'queriesEn', false);
+  check(s.intro, 'intro', true);
 }
 
 /** Ricerche Unsplash identiche in settori diversi: stesse foto, stessa palette. */
