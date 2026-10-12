@@ -44,8 +44,8 @@ const COLORS = {
 
 /** Wordmark intrinsic ratio (w/h) from the original viewBox. */
 const LOGO_RATIO = VIEWBOX_FULL[2] / VIEWBOX_FULL[3]; // ≈ 2.43
-const LOGO_HEIGHT = 56;
-const LOGO_WIDTH = Math.round(LOGO_HEIGHT * LOGO_RATIO);
+export const LOGO_HEIGHT = 56;
+export const LOGO_WIDTH = Math.round(LOGO_HEIGHT * LOGO_RATIO);
 
 /**
  * The wordmark as an `<img>` SVG data-URI. Satori renders inline `<svg><path>`
@@ -53,7 +53,7 @@ const LOGO_WIDTH = Math.round(LOGO_HEIGHT * LOGO_RATIO);
  * but handles `<img>` with an SVG data-URI cleanly. Reuses the path data from
  * Logo.paths.ts: letters in ink, the anchor tilde in the brand accent.
  */
-const LOGO_DATA_URI = (() => {
+export const LOGO_DATA_URI = (() => {
   const letters = [...CALICCHIA_PATHS, ...DESIGN_PATHS]
     .map((d) => `<path d="${d}" fill="${COLORS.fg}"/>`)
     .join('');

@@ -435,6 +435,42 @@ export function collectionPageSchema(args: CollectionPageArgs) {
 }
 
 /* ------------------------------------------------------------------ */
+/* WebApplication (strumenti gratuiti nel browser)                     */
+/* ------------------------------------------------------------------ */
+export interface WebApplicationArgs {
+  name: string;
+  description: string;
+  url: string;
+  /** schema.org applicationCategory, es. "DesignApplication". */
+  category: string;
+  /** Funzioni principali, una per voce. */
+  features?: string[];
+  locale?: Locale;
+}
+
+export function webApplicationSchema(args: WebApplicationArgs) {
+  const url = args.url.startsWith('http') ? args.url : `${SITE.url}${args.url}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${url}#app`,
+    name: args.name,
+    description: args.description,
+    url,
+    applicationCategory: args.category,
+    operatingSystem: 'Any',
+    browserRequirements: 'Requires JavaScript',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    ...(args.features && args.features.length > 0 ? { featureList: args.features } : {}),
+    creator: { '@id': PERSON_ID },
+    publisher: { '@id': BUSINESS_ID },
+    isPartOf: { '@id': WEBSITE_ID },
+    inLanguage: bcp47(args.locale ?? 'it'),
+  } as const;
+}
+
+/* ------------------------------------------------------------------ */
 /* DefinedTermSet (glossari)                                           */
 /* ------------------------------------------------------------------ */
 export interface DefinedTermArgs {

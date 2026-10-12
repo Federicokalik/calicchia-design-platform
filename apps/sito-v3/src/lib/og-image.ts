@@ -41,6 +41,22 @@ export function buildOgImage(title: string, locale: Locale = DEFAULT_LOCALE): Og
   ];
 }
 
+/**
+ * Card OG della "Palette di settore": fasce colore + nome del settore,
+ * renderizzata da `app/og/palette/route.tsx`. `shareQuery` è la querystring
+ * del link condiviso (`encodeSharedPalette`), validata dalla route.
+ */
+export function buildPaletteOgImage(shareQuery: string, alt: string, locale: Locale = DEFAULT_LOCALE): OgImageDescriptor[] {
+  return [
+    {
+      url: `${SITE.url}/og/palette?l=${locale}&${shareQuery}`,
+      width: OG_SIZE.width,
+      height: OG_SIZE.height,
+      alt,
+    },
+  ];
+}
+
 /** X/Twitter handle for card attribution — mirrors the root layout. */
 const TWITTER_CREATOR = '@calicchiadesign';
 
