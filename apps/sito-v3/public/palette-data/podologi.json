@@ -1,12 +1,228 @@
 {
   "slug": "podologi",
   "queries": [
-    "podiatry clinic interior",
-    "foot examination room",
+    "orthopedic shoes",
+    "feet massage treatment",
     "podiatry instruments tray"
   ],
-  "generatedAt": "2026-10-12T21:03:01.202Z",
+  "generatedAt": "2026-10-12T21:11:36.085Z",
   "photos": [
+    {
+      "id": "YJ7o40W4dg4",
+      "small": "https://images.unsplash.com/photo-1678289993735-ad16c87e4e89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1678289993735-ad16c87e4e89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6960,
+      "height": 4640,
+      "blurHash": "LKE_~yt7IUM|4:NGt7R*0Lxut7s:",
+      "color": "#262626",
+      "alt": "a close up of a bunch of shoes",
+      "author": "Jacob Gunther",
+      "authorUrl": "https://unsplash.com/@jacobgunther?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-shoes-YJ7o40W4dg4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#534743",
+          "w": 0.3878
+        },
+        {
+          "hex": "#1E1613",
+          "w": 0.3573
+        },
+        {
+          "hex": "#897065",
+          "w": 0.2549
+        }
+      ]
+    },
+    {
+      "id": "pdMdtiIi4M0",
+      "small": "https://images.unsplash.com/photo-1789845137216-5e2dcf981759?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789845137216-5e2dcf981759?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LLHAzu0#9IkR=to}9It5TIr?NIo0",
+      "color": "#8c7359",
+      "alt": "A polished brown leather ankle boot with red laces and metal eyelets",
+      "author": "Barney Goodman",
+      "authorUrl": "https://unsplash.com/@bgoodpic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-leather-ankle-boot-with-laces-pdMdtiIi4M0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AA7654",
+          "w": 0.3719
+        },
+        {
+          "hex": "#824A33",
+          "w": 0.3527
+        },
+        {
+          "hex": "#492115",
+          "w": 0.2754
+        }
+      ]
+    },
+    {
+      "id": "i_EwOv7_3uY",
+      "small": "https://images.unsplash.com/photo-1763908189432-1a992461522c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763908189432-1a992461522c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3264,
+      "blurHash": "LDFs77?FTLsk0=xDtmaJKSNIM{a#",
+      "color": "#8c8c8c",
+      "alt": "Person wearing sandals with a walking cane",
+      "author": "Sylvia Carvalho",
+      "authorUrl": "https://unsplash.com/@sylvianeta?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-sandals-with-a-walking-cane-i_EwOv7_3uY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#999996",
+          "w": 0.5974
+        },
+        {
+          "hex": "#5A90B9",
+          "w": 0.2338
+        },
+        {
+          "hex": "#796664",
+          "w": 0.1688
+        }
+      ]
+    },
+    {
+      "id": "nxf5v94uHDk",
+      "small": "https://images.unsplash.com/photo-1641805716701-eb9e21ed8e42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1641805716701-eb9e21ed8e42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvcnRob3BlZGljJTIwc2hvZXN8ZW58MXwwfHx8MTc5MTgzOTQ5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LDA109%ND$kD4?kC$|jZ01IVslad",
+      "color": "#262626",
+      "alt": "a close up of a person's feet on some steps",
+      "author": "Lino",
+      "authorUrl": "https://unsplash.com/@linsartistry?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-persons-feet-on-some-steps-nxf5v94uHDk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#13171B",
+          "w": 0.3774
+        },
+        {
+          "hex": "#2A3740",
+          "w": 0.3402
+        },
+        {
+          "hex": "#3E5D77",
+          "w": 0.2824
+        }
+      ]
+    },
+    {
+      "id": "qeuJczNo54w",
+      "small": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1519415510236-718bdfcd89c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6201,
+      "height": 4138,
+      "blurHash": "LHMO.?_21zFyITIA$1ROK7EQxHo}",
+      "color": "#d9a68c",
+      "alt": "person's feet with flowers",
+      "author": "Rune Enstad",
+      "authorUrl": "https://unsplash.com/@runejohs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/persons-feet-with-flowers-qeuJczNo54w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A66847",
+          "w": 0.3548
+        },
+        {
+          "hex": "#DD8F65",
+          "w": 0.342
+        },
+        {
+          "hex": "#F5B789",
+          "w": 0.3033
+        }
+      ]
+    },
+    {
+      "id": "x_3gyC42btc",
+      "small": "https://images.unsplash.com/photo-1627903634010-cacbe106fad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627903634010-cacbe106fad2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5464,
+      "blurHash": "LWFqRI0zNG-VbcNHR*-UIpxaxZR*",
+      "color": "#262626",
+      "alt": "persons feet on brown textile",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/persons-feet-on-brown-textile-x_3gyC42btc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#332B26",
+          "w": 0.5118
+        },
+        {
+          "hex": "#773E23",
+          "w": 0.2907
+        },
+        {
+          "hex": "#D9AB8D",
+          "w": 0.1975
+        }
+      ]
+    },
+    {
+      "id": "UrFkjQkLs6I",
+      "small": "https://images.unsplash.com/photo-1678396618095-7be9f0fa49b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1678396618095-7be9f0fa49b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5030,
+      "height": 4024,
+      "blurHash": "L98p.L0L56^*E1-oRkWC4:%MxtIU",
+      "color": "#260c0c",
+      "alt": "a close up of a person's bare feet",
+      "author": "Philippe Murray-Pietsch",
+      "authorUrl": "https://unsplash.com/@pmpietsch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-persons-bare-feet-UrFkjQkLs6I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#020201",
+          "w": 0.4825
+        },
+        {
+          "hex": "#231202",
+          "w": 0.2722
+        },
+        {
+          "hex": "#56402C",
+          "w": 0.2453
+        }
+      ]
+    },
+    {
+      "id": "UOYv29Mn9aM",
+      "small": "https://images.unsplash.com/photo-1633526543913-d30e3c230d1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633526543913-d30e3c230d1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmZWV0JTIwbWFzc2FnZSUyMHRyZWF0bWVudHxlbnwxfDB8fHwxNzkxODM5NDkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4592,
+      "height": 3064,
+      "blurHash": "LfI#u:xupJt68^aeRjogbcWBMxe.",
+      "color": "#c0d9d9",
+      "alt": "a person with a bottle on their foot on a bed",
+      "author": "Towfiqu barbhuiya",
+      "authorUrl": "https://unsplash.com/@towfiqu999999?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-with-a-bottle-on-their-foot-on-a-bed-UOYv29Mn9aM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CAD2D6",
+          "w": 0.4093
+        },
+        {
+          "hex": "#765B49",
+          "w": 0.3326
+        },
+        {
+          "hex": "#A5988D",
+          "w": 0.2581
+        }
+      ]
+    },
     {
       "id": "AR1cMqsbqt4",
       "small": "https://images.unsplash.com/photo-1727830968495-ea2798aaee35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
