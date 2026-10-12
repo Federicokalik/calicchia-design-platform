@@ -1,0 +1,327 @@
+{
+  "slug": "dentisti",
+  "queries": [
+    "dental clinic interior",
+    "dentist chair",
+    "toothbrush mint green"
+  ],
+  "generatedAt": "2026-10-12T18:42:16.972Z",
+  "photos": [
+    {
+      "id": "Fdku_oMrDvk",
+      "small": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6147,
+      "height": 4098,
+      "blurHash": "LUNd5cxvxuof_4M{aeIUIAWVt7fk",
+      "color": "#d9d9d9",
+      "alt": "a dental room with a desk and chairs",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dental-room-with-a-desk-and-chairs-Fdku_oMrDvk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD7D4",
+          "w": 0.6936
+        },
+        {
+          "hex": "#B9A692",
+          "w": 0.1844
+        },
+        {
+          "hex": "#88755F",
+          "w": 0.122
+        }
+      ]
+    },
+    {
+      "id": "yJsMOVwazRU",
+      "small": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6013,
+      "height": 4009,
+      "blurHash": "LULz:Lf,00IU~qRit7WBM_NGt7oJ",
+      "color": "#d9d9d9",
+      "alt": "a hospital room with medical equipment in it",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hospital-room-with-medical-equipment-in-it-yJsMOVwazRU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD5D2",
+          "w": 0.6133
+        },
+        {
+          "hex": "#B2A89E",
+          "w": 0.2103
+        },
+        {
+          "hex": "#84735F",
+          "w": 0.1764
+        }
+      ]
+    },
+    {
+      "id": "SU6EGDd-ySQ",
+      "small": "https://images.unsplash.com/photo-1777793389944-f7165259a05c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777793389944-f7165259a05c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2880,
+      "height": 2160,
+      "blurHash": "LQIYqp}%E,-otnw[nht61RjE;[R.",
+      "color": "#c0c0c0",
+      "alt": "Dentist showing a model of a damaged tooth",
+      "author": "Harold Hisona",
+      "authorUrl": "https://unsplash.com/@harold_angus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dentist-showing-a-model-of-a-damaged-tooth-SU6EGDd-ySQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3CFCD",
+          "w": 0.3838
+        },
+        {
+          "hex": "#52A4E3",
+          "w": 0.3822
+        },
+        {
+          "hex": "#B0A9A2",
+          "w": 0.234
+        }
+      ]
+    },
+    {
+      "id": "I_tiqvkfVq8",
+      "small": "https://images.unsplash.com/photo-1758812821349-1d2a4a96eecd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758812821349-1d2a4a96eecd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50YWwlMjBjbGluaWMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTMwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3264,
+      "height": 1836,
+      "blurHash": "L7H-_Y?vB:DiBrIp~VO[$|9aoNn3",
+      "color": "#8c8c8c",
+      "alt": "Vintage dental clinic interior with old equipment",
+      "author": "Sergio Guardiola Herrador",
+      "authorUrl": "https://unsplash.com/@guardiola86?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/vintage-dental-clinic-interior-with-old-equipment-I_tiqvkfVq8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5958C",
+          "w": 0.4769
+        },
+        {
+          "hex": "#766B66",
+          "w": 0.3118
+        },
+        {
+          "hex": "#D3C6C0",
+          "w": 0.2113
+        }
+      ]
+    },
+    {
+      "id": "MCSmR0mw1CU",
+      "small": "https://images.unsplash.com/photo-1722586663955-2f96a4c1f255?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1722586663955-2f96a4c1f255?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4080,
+      "height": 3072,
+      "blurHash": "LLDurkOs0},pTy%2$4IoAX$*-UNa",
+      "color": "#0c2626",
+      "alt": "A dental room with a chair and lights",
+      "author": "note thanun",
+      "authorUrl": "https://unsplash.com/@notethanun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dental-room-with-a-chair-and-lights-MCSmR0mw1CU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3D474F",
+          "w": 0.4535
+        },
+        {
+          "hex": "#152027",
+          "w": 0.2957
+        },
+        {
+          "hex": "#78717B",
+          "w": 0.2508
+        }
+      ]
+    },
+    {
+      "id": "4SUyx4KQ5Ik",
+      "small": "https://images.unsplash.com/photo-1609207825181-52d3214556dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1609207825181-52d3214556dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LTLz{n8^8_-:-;oft3jb9Et8R.bJ",
+      "color": "#d9d9d9",
+      "alt": "man in blue dress shirt and blue denim jeans standing near black flat screen computer monitor",
+      "author": "Jose Vazquez",
+      "authorUrl": "https://unsplash.com/@jess33mx?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-blue-dress-shirt-and-blue-denim-jeans-standing-near-black-flat-screen-computer-monitor-4SUyx4KQ5Ik?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4E5E7",
+          "w": 0.3918
+        },
+        {
+          "hex": "#C0BDB9",
+          "w": 0.3843
+        },
+        {
+          "hex": "#938E86",
+          "w": 0.224
+        }
+      ]
+    },
+    {
+      "id": "RR9Le91W98w",
+      "small": "https://images.unsplash.com/photo-1619236233405-bb5d430f0620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1619236233405-bb5d430f0620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3456,
+      "height": 2304,
+      "blurHash": "LQKJYq0NEO%e=xs.?Foz?Z%1IpjG",
+      "color": "#c0a673",
+      "alt": "woman in black long sleeve shirt holding baby in pink long sleeve shirt",
+      "author": "Mufid Majnun",
+      "authorUrl": "https://unsplash.com/@mufidpwt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-black-long-sleeve-shirt-holding-baby-in-pink-long-sleeve-shirt-RR9Le91W98w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9B37A",
+          "w": 0.4643
+        },
+        {
+          "hex": "#BD7C4A",
+          "w": 0.2965
+        },
+        {
+          "hex": "#371C11",
+          "w": 0.2392
+        }
+      ]
+    },
+    {
+      "id": "I-kDEBUMAaQ",
+      "small": "https://images.unsplash.com/photo-1616391182219-e080b4d1043a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1616391182219-e080b4d1043a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxkZW50aXN0JTIwY2hhaXJ8ZW58MXwwfHx8MTc5MTgzMDUzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4208,
+      "height": 3120,
+      "blurHash": "LGG+K?_N?wM|%Kbcj]xut5RjIUWV",
+      "color": "#a6a6a6",
+      "alt": "red and white leather padded chair",
+      "author": "Sam Moghadam",
+      "authorUrl": "https://unsplash.com/@sammoghadam?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-white-leather-padded-chair-I-kDEBUMAaQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#999487",
+          "w": 0.4256
+        },
+        {
+          "hex": "#BABAB4",
+          "w": 0.3454
+        },
+        {
+          "hex": "#62564A",
+          "w": 0.229
+        }
+      ]
+    },
+    {
+      "id": "BgJG-u4xLWA",
+      "small": "https://images.unsplash.com/photo-1782916769006-6002159f27b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782916769006-6002159f27b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4320,
+      "height": 2880,
+      "blurHash": "LBM8HHTd=zyD8wZ$rsWUE|J7=|%2",
+      "color": "#c0c0c0",
+      "alt": "Transparent ring with siemens logo and geometric shapes",
+      "author": "Brecht Corbeel",
+      "authorUrl": "https://unsplash.com/@brechtcorbeel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/transparent-ring-with-siemens-logo-and-geometric-shapes-BgJG-u4xLWA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BFC9C9",
+          "w": 0.5484
+        },
+        {
+          "hex": "#CEDEDE",
+          "w": 0.3292
+        },
+        {
+          "hex": "#9ABEBB",
+          "w": 0.1224
+        }
+      ]
+    },
+    {
+      "id": "HfORd8lwmPQ",
+      "small": "https://images.unsplash.com/photo-1782712340142-c6846d2dfd89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782712340142-c6846d2dfd89?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4320,
+      "height": 2880,
+      "blurHash": "LBLrCzQo=#?I#s-CM{X5}Kgf9?NG",
+      "color": "#c0c0c0",
+      "alt": "A transparent green propeller-like object with geometric shapes",
+      "author": "Brecht Corbeel",
+      "authorUrl": "https://unsplash.com/@brechtcorbeel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-transparent-green-propeller-like-object-with-geometric-shapes-HfORd8lwmPQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3CAC8",
+          "w": 0.5407
+        },
+        {
+          "hex": "#C4E3D4",
+          "w": 0.3181
+        },
+        {
+          "hex": "#9EC4B0",
+          "w": 0.1412
+        }
+      ]
+    },
+    {
+      "id": "TfeMPOghY3w",
+      "small": "https://images.unsplash.com/photo-1782443574268-33a4f4bc713f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782443574268-33a4f4bc713f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 1843,
+      "blurHash": "LENBP*Ro}IX9DP$+D%J}9FROInxu",
+      "color": "#d9f3f3",
+      "alt": "Green tube with wires and a blue element inside",
+      "author": "Brecht Corbeel",
+      "authorUrl": "https://unsplash.com/@brechtcorbeel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-tube-with-wires-and-a-blue-element-inside-TfeMPOghY3w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6E9EC",
+          "w": 0.5325
+        },
+        {
+          "hex": "#ACD0CD",
+          "w": 0.3831
+        },
+        {
+          "hex": "#79B1A8",
+          "w": 0.0844
+        }
+      ]
+    },
+    {
+      "id": "sC8gBbVoG_g",
+      "small": "https://images.unsplash.com/photo-1783594581634-80200aa6d401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783594581634-80200aa6d401?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b290aGJydXNoJTIwbWludCUyMGdyZWVufGVufDF8MHx8fDE3OTE4MzA1MzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8000,
+      "height": 6000,
+      "blurHash": "L1Gf2DyWMfyW*Gfif7fRMKf7fkf7",
+      "color": "#8cf3c0",
+      "alt": "A solid light green background",
+      "author": "Simple Wallpapers",
+      "authorUrl": "https://unsplash.com/@simple_wallpapers?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-solid-light-green-background-sC8gBbVoG_g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8DE8B3",
+          "w": 1
+        }
+      ]
+    }
+  ]
+}

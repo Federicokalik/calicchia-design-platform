@@ -1,0 +1,335 @@
+{
+  "slug": "fotografi",
+  "queries": [
+    "photographer with film camera",
+    "golden hour couple",
+    "linen and flowers"
+  ],
+  "generatedAt": "2026-10-12T18:43:09.138Z",
+  "photos": [
+    {
+      "id": "DQPP9rVLYGQ",
+      "small": "https://images.unsplash.com/photo-1493863641943-9b68992a8d07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1493863641943-9b68992a8d07?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5674,
+      "height": 3840,
+      "blurHash": "LEFFsj?a0e4.^+M{4noz%hozR4jF",
+      "color": "#262626",
+      "alt": "shallow focus photography of man using a DSLR camera",
+      "author": "Jakob Owens",
+      "authorUrl": "https://unsplash.com/@jakobowens1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shallow-focus-photography-of-man-using-a-dslr-camera-DQPP9rVLYGQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#88897D",
+          "w": 0.4345
+        },
+        {
+          "hex": "#BCBAB0",
+          "w": 0.3172
+        },
+        {
+          "hex": "#565549",
+          "w": 0.2483
+        }
+      ]
+    },
+    {
+      "id": "hfk6xOjQlFk",
+      "small": "https://images.unsplash.com/photo-1520390138845-fd2d229dd553?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1520390138845-fd2d229dd553?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2385,
+      "blurHash": "LKCGAQ0JNF-;%MM{Rks-4:-pM{Rj",
+      "color": "#262626",
+      "alt": "person holding Canon DSLR camera",
+      "author": "William Bayreuther",
+      "authorUrl": "https://unsplash.com/@wbayreuther?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-canon-dslr-camera-hfk6xOjQlFk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#262126",
+          "w": 0.4355
+        },
+        {
+          "hex": "#4E4751",
+          "w": 0.2835
+        },
+        {
+          "hex": "#807B92",
+          "w": 0.281
+        }
+      ]
+    },
+    {
+      "id": "jz0xIgcwyL0",
+      "small": "https://images.unsplash.com/photo-1499343245400-cddc78a01317?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1499343245400-cddc78a01317?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "L15r0%WB~qRj%MRjoft700-;D%Rj",
+      "color": "#404040",
+      "alt": "grayscale photography of camera",
+      "author": "Miss Zhang",
+      "authorUrl": "https://unsplash.com/@lzhang?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photography-of-camera-jz0xIgcwyL0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3F3F3F",
+          "w": 0.4553
+        },
+        {
+          "hex": "#050505",
+          "w": 0.3324
+        },
+        {
+          "hex": "#1F1F1F",
+          "w": 0.2123
+        }
+      ]
+    },
+    {
+      "id": "jTS0DAiaqC4",
+      "small": "https://images.unsplash.com/photo-1588200618450-3a5b1d3b9aa5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1588200618450-3a5b1d3b9aa5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaG90b2dyYXBoZXIlMjB3aXRoJTIwZmlsbSUyMGNhbWVyYXxlbnwxfDB8fHwxNzkxODMwNTgxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKFZf[M|00jGNt%2-VVsV@s.VsR*",
+      "color": "#73a6a6",
+      "alt": "man in white crew neck t-shirt holding black dslr camera",
+      "author": "Ben Eaton",
+      "authorUrl": "https://unsplash.com/@beneaton7?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-white-crew-neck-t-shirt-holding-black-dslr-camera-jTS0DAiaqC4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#98BEB9",
+          "w": 0.45
+        },
+        {
+          "hex": "#759890",
+          "w": 0.4063
+        },
+        {
+          "hex": "#635C53",
+          "w": 0.1437
+        }
+      ]
+    },
+    {
+      "id": "L8-0SAy-aoQ",
+      "small": "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1494774157365-9e04c6720e47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LREeGnR+WXs.?coLR*bH13soRjWV",
+      "color": "#8c738c",
+      "alt": "silhouette of hugging couple",
+      "author": "Oziel Gómez",
+      "authorUrl": "https://unsplash.com/@ozgomz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/silhouette-of-hugging-couple-L8-0SAy-aoQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#15080B",
+          "w": 0.4743
+        },
+        {
+          "hex": "#A68083",
+          "w": 0.2647
+        },
+        {
+          "hex": "#7B6682",
+          "w": 0.2611
+        }
+      ]
+    },
+    {
+      "id": "OcxlTBbb6SY",
+      "small": "https://images.unsplash.com/photo-1496602910407-bacda74a0fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1496602910407-bacda74a0fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2500,
+      "height": 1786,
+      "blurHash": "L|OyX+V@nNxu~Ujse.R+E1ozSiRj",
+      "color": "#f3d9a6",
+      "alt": "couple sitting near trees during golden hour",
+      "author": "Khamkéo",
+      "authorUrl": "https://unsplash.com/@mahkeo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/couple-sitting-near-trees-during-golden-hour-OcxlTBbb6SY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#FFE3B2",
+          "w": 0.6825
+        },
+        {
+          "hex": "#291B1A",
+          "w": 0.1813
+        },
+        {
+          "hex": "#673F30",
+          "w": 0.1362
+        }
+      ]
+    },
+    {
+      "id": "bNG7iuCv63g",
+      "small": "https://images.unsplash.com/photo-1706081259792-0043def9192b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706081259792-0043def9192b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4935,
+      "height": 3290,
+      "blurHash": "LyIXdGt6%1ae~Wfkt7RkNyR*RkWB",
+      "color": "#262626",
+      "alt": "a man and a woman standing in front of a sunset",
+      "author": "Klara Kulikova",
+      "authorUrl": "https://unsplash.com/@kkalerry?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-a-woman-standing-in-front-of-a-sunset-bNG7iuCv63g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#211C1E",
+          "w": 0.5564
+        },
+        {
+          "hex": "#E0BEA8",
+          "w": 0.2336
+        },
+        {
+          "hex": "#EED8CA",
+          "w": 0.21
+        }
+      ]
+    },
+    {
+      "id": "9hgDf95TNO8",
+      "small": "https://images.unsplash.com/photo-1617788472008-1e524a74cf25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1617788472008-1e524a74cf25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnb2xkZW4lMjBob3VyJTIwY291cGxlfGVufDF8MHx8fDE3OTE4MzA1ODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4124,
+      "height": 3187,
+      "blurHash": "LlLD#;WD-:xu~qt7M|kC.8oMt6f8",
+      "color": "#f3d9d9",
+      "alt": "man and woman standing on brown field during daytime",
+      "author": "Mindy Sabiston",
+      "authorUrl": "https://unsplash.com/@copperheadphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-and-woman-standing-on-brown-field-during-daytime-9hgDf95TNO8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E6DED4",
+          "w": 0.4177
+        },
+        {
+          "hex": "#402018",
+          "w": 0.3217
+        },
+        {
+          "hex": "#D3BCA0",
+          "w": 0.2606
+        }
+      ]
+    },
+    {
+      "id": "sWx1i527n7k",
+      "small": "https://images.unsplash.com/photo-1721415234719-296d89d904e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721415234719-296d89d904e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUI}*I_ND*xvIVWBjYWBIVM_WBfk",
+      "color": "#c0c0c0",
+      "alt": "A close up of a flower on a cloth",
+      "author": "Rita K",
+      "authorUrl": "https://unsplash.com/@margarita30?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-flower-on-a-cloth-sWx1i527n7k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5A2A2",
+          "w": 0.4443
+        },
+        {
+          "hex": "#C6C8C9",
+          "w": 0.3838
+        },
+        {
+          "hex": "#7C7874",
+          "w": 0.1719
+        }
+      ]
+    },
+    {
+      "id": "oRtVHO8u2z4",
+      "small": "https://images.unsplash.com/photo-1721415227327-0a8549ab8e69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721415227327-0a8549ab8e69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHGI$NF40L.94;jYR4xbDhMcMcxa",
+      "color": "#8c8c8c",
+      "alt": "A bunch of flowers that are sitting on a pillow",
+      "author": "Rita K",
+      "authorUrl": "https://unsplash.com/@margarita30?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-flowers-that-are-sitting-on-a-pillow-oRtVHO8u2z4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#919393",
+          "w": 0.429
+        },
+        {
+          "hex": "#B6BAC0",
+          "w": 0.3626
+        },
+        {
+          "hex": "#626665",
+          "w": 0.2084
+        }
+      ]
+    },
+    {
+      "id": "nEJaya-mIMU",
+      "small": "https://images.unsplash.com/photo-1721415271440-5bc415fffb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721415271440-5bc415fffb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKH2sGyEH;xwE057M_n2EMR+s+M{",
+      "color": "#c0c0c0",
+      "alt": "A spool of thread sitting on top of a table",
+      "author": "Rita K",
+      "authorUrl": "https://unsplash.com/@margarita30?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-spool-of-thread-sitting-on-top-of-a-table-nEJaya-mIMU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBC0C6",
+          "w": 0.3646
+        },
+        {
+          "hex": "#95A0AA",
+          "w": 0.3438
+        },
+        {
+          "hex": "#707271",
+          "w": 0.2916
+        }
+      ]
+    },
+    {
+      "id": "etUjoCyRaaw",
+      "small": "https://images.unsplash.com/photo-1721415243674-017910b77a44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721415243674-017910b77a44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMGFuZCUyMGZsb3dlcnN8ZW58MXwwfHx8MTc5MTgzMDU4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJJb25?cax%N0KWBofWBRjRiIUM_",
+      "color": "#c0c0c0",
+      "alt": "A bunch of flowers that are on a table",
+      "author": "Rita K",
+      "authorUrl": "https://unsplash.com/@margarita30?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-flowers-that-are-on-a-table-etUjoCyRaaw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BFBFC0",
+          "w": 0.457
+        },
+        {
+          "hex": "#A4A4A3",
+          "w": 0.3633
+        },
+        {
+          "hex": "#7F7F7D",
+          "w": 0.1797
+        }
+      ]
+    }
+  ]
+}
