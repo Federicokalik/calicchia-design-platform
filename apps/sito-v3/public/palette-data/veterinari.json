@@ -1,0 +1,119 @@
+{
+  "slug": "veterinari",
+  "queries": [
+    "veterinary clinic interior",
+    "veterinarian examining dog",
+    "cat carrier waiting room"
+  ],
+  "generatedAt": "2026-10-12T19:51:27.454Z",
+  "photos": [
+    {
+      "id": "P1Ku27zZJDs",
+      "small": "https://images.unsplash.com/photo-1700665537604-412e89a285c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700665537604-412e89a285c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5392,
+      "height": 3588,
+      "blurHash": "LLFYW40MpIskpc-pNGt8%KaeR-Rk",
+      "color": "#a6a6a6",
+      "alt": "a man and a woman holding a dog in a room",
+      "author": "Jonatan Bustos",
+      "authorUrl": "https://unsplash.com/@jonatanbustos25?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-a-woman-holding-a-dog-in-a-room-P1Ku27zZJDs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F857F",
+          "w": 0.3811
+        },
+        {
+          "hex": "#B7AAA1",
+          "w": 0.3168
+        },
+        {
+          "hex": "#282E47",
+          "w": 0.302
+        }
+      ]
+    },
+    {
+      "id": "uy5l-VJ8dRM",
+      "small": "https://images.unsplash.com/photo-1630359486912-4b085e38f1e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630359486912-4b085e38f1e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LbMQn$t8?cRj~qofWBt7tRRjMxof",
+      "color": "#d9d9d9",
+      "alt": "white french bulldog wearing blue and white polka dot shirt",
+      "author": "Karsten Winegeart",
+      "authorUrl": "https://unsplash.com/@_karsten?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-french-bulldog-wearing-blue-and-white-polka-dot-shirt-uy5l-VJ8dRM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDDADD",
+          "w": 0.5283
+        },
+        {
+          "hex": "#BBB5B5",
+          "w": 0.2652
+        },
+        {
+          "hex": "#91847C",
+          "w": 0.2065
+        }
+      ]
+    },
+    {
+      "id": "F57xLufncj8",
+      "small": "https://images.unsplash.com/photo-1625321171045-1fea4ac688e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625321171045-1fea4ac688e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6326,
+      "height": 4217,
+      "blurHash": "LHJj;*000Kt7GIE1IoIB.8oeD%RP",
+      "color": "#d9d9d9",
+      "alt": "woman in white robe holding hair blower",
+      "author": "J. Balla Photography",
+      "authorUrl": "https://unsplash.com/@jballa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-white-robe-holding-hair-blower-F57xLufncj8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4C8C3",
+          "w": 0.408
+        },
+        {
+          "hex": "#BC9072",
+          "w": 0.3584
+        },
+        {
+          "hex": "#8B6142",
+          "w": 0.2336
+        }
+      ]
+    },
+    {
+      "id": "Vuhnfwl38qg",
+      "small": "https://images.unsplash.com/photo-1614509689507-5ededae510a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614509689507-5ededae510a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2ZXRlcmluYXJpYW4lMjBleGFtaW5pbmclMjBkb2d8ZW58MXwwfHx8MTc5MTgzNDY4NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LtKBBp$z_NEMMy%MadV@NGX8aKs:",
+      "color": "#d9d9d9",
+      "alt": "brown short coated dog lying on blue textile",
+      "author": "cal gao",
+      "authorUrl": "https://unsplash.com/@ginnta?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-short-coated-dog-lying-on-blue-textile-Vuhnfwl38qg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDDAD1",
+          "w": 0.4905
+        },
+        {
+          "hex": "#1E1515",
+          "w": 0.2841
+        },
+        {
+          "hex": "#AF8A6E",
+          "w": 0.2254
+        }
+      ]
+    }
+  ]
+}

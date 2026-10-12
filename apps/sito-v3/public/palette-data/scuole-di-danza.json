@@ -1,0 +1,227 @@
+{
+  "slug": "scuole-di-danza",
+  "queries": [
+    "dance studio wooden floor",
+    "ballet barre mirror",
+    "dance class rehearsal"
+  ],
+  "generatedAt": "2026-10-12T19:50:57.215Z",
+  "photos": [
+    {
+      "id": "VkGwS2-niaU",
+      "small": "https://images.unsplash.com/photo-1659549450821-bd7d6776b1e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659549450821-bd7d6776b1e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3948,
+      "height": 2576,
+      "blurHash": "LFK_E~4n9FIUof9F4nIU00xuWBRj",
+      "color": "#d9d9d9",
+      "alt": "a group of women dancing",
+      "author": "Jill Marv",
+      "authorUrl": "https://unsplash.com/@shop12girl?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-women-dancing-VkGwS2-niaU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DADADA",
+          "w": 0.5368
+        },
+        {
+          "hex": "#A2A2A2",
+          "w": 0.3368
+        },
+        {
+          "hex": "#585858",
+          "w": 0.1264
+        }
+      ]
+    },
+    {
+      "id": "V4vnLpzAcAw",
+      "small": "https://images.unsplash.com/photo-1758671914469-1aa30cc38d1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758671914469-1aa30cc38d1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5452,
+      "height": 3634,
+      "blurHash": "LLCP@d00xu%MIUWBWBRj9F-;WBt7",
+      "color": "#262626",
+      "alt": "Ballerinas practice at a barre in a theater",
+      "author": "Kazuo ota",
+      "authorUrl": "https://unsplash.com/@kazuo513?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ballerinas-practice-at-a-barre-in-a-theater-V4vnLpzAcAw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#333332",
+          "w": 0.3959
+        },
+        {
+          "hex": "#020202",
+          "w": 0.3331
+        },
+        {
+          "hex": "#787876",
+          "w": 0.271
+        }
+      ]
+    },
+    {
+      "id": "fX3wydpPPt0",
+      "small": "https://images.unsplash.com/photo-1758671914408-1516b73dc088?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758671914408-1516b73dc088?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5434,
+      "height": 3622,
+      "blurHash": "LHAwF;00xu%MfRM{ayRk4n-;WBt6",
+      "color": "#262626",
+      "alt": "Ballerinas practice on a dimly lit stage",
+      "author": "Kazuo ota",
+      "authorUrl": "https://unsplash.com/@kazuo513?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ballerinas-practice-on-a-dimly-lit-stage-fX3wydpPPt0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#020201",
+          "w": 0.4221
+        },
+        {
+          "hex": "#2A2A29",
+          "w": 0.3516
+        },
+        {
+          "hex": "#727271",
+          "w": 0.2264
+        }
+      ]
+    },
+    {
+      "id": "2x8o7ZdoB70",
+      "small": "https://images.unsplash.com/photo-1758671916868-b853bc18d031?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758671916868-b853bc18d031?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYWxsZXQlMjBiYXJyZSUyMG1pcnJvcnxlbnwxfDB8fHwxNzkxODM0NjUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8093,
+      "height": 5400,
+      "blurHash": "L368EW00j[4n4n_3IUM{9FRj-;Rk",
+      "color": "#262626",
+      "alt": "Ballet dancers practicing at a barre in a studio",
+      "author": "Kazuo ota",
+      "authorUrl": "https://unsplash.com/@kazuo513?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ballet-dancers-practicing-at-a-barre-in-a-studio-2x8o7ZdoB70?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#000000",
+          "w": 0.4858
+        },
+        {
+          "hex": "#171716",
+          "w": 0.3528
+        },
+        {
+          "hex": "#4F4F4D",
+          "w": 0.1614
+        }
+      ]
+    },
+    {
+      "id": "hFTcxZFsG6g",
+      "small": "https://images.unsplash.com/photo-1550026593-cb89847b168d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1550026593-cb89847b168d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L78B{CSgniwd|uWpbHsnE#fQX7bH",
+      "color": "#590c0c",
+      "alt": "group of people performing on stage",
+      "author": "Samantha Weisburg",
+      "authorUrl": "https://unsplash.com/@samiweisburg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/group-of-people-performing-on-stage-hFTcxZFsG6g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#541100",
+          "w": 0.5656
+        },
+        {
+          "hex": "#270600",
+          "w": 0.2288
+        },
+        {
+          "hex": "#0E0000",
+          "w": 0.2056
+        }
+      ]
+    },
+    {
+      "id": "3ckWUnaCxzc",
+      "small": "https://images.unsplash.com/photo-1524594152303-9fd13543fe6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1524594152303-9fd13543fe6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "LRLDV,DhD~IoPqbXInn#?DW=Rmod",
+      "color": "#f3f3f3",
+      "alt": "women dancing near mirror",
+      "author": "Danielle Cerullo",
+      "authorUrl": "https://unsplash.com/@dncerullo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/women-dancing-near-mirror-3ckWUnaCxzc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C99558",
+          "w": 0.5068
+        },
+        {
+          "hex": "#946838",
+          "w": 0.2482
+        },
+        {
+          "hex": "#EBE7E2",
+          "w": 0.245
+        }
+      ]
+    },
+    {
+      "id": "Nwc-Z3_aEvw",
+      "small": "https://images.unsplash.com/photo-1604954055722-7f80571fbfc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604954055722-7f80571fbfc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LAB{=e?bIpRjysXSadRP?bWBV?ae",
+      "color": "#737373",
+      "alt": "group of women in black and white crew neck t-shirts",
+      "author": "Miguel Ángel Hernández",
+      "authorUrl": "https://unsplash.com/@miguelherc96?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/group-of-women-in-black-and-white-crew-neck-t-shirts-Nwc-Z3_aEvw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#736363",
+          "w": 0.3802
+        },
+        {
+          "hex": "#878286",
+          "w": 0.3412
+        },
+        {
+          "hex": "#4D3C3B",
+          "w": 0.2787
+        }
+      ]
+    },
+    {
+      "id": "n-g7dgwNZg4",
+      "small": "https://images.unsplash.com/photo-1522642888367-8d98750c243c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1522642888367-8d98750c243c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYW5jZSUyMGNsYXNzJTIwcmVoZWFyc2FsfGVufDF8MHx8fDE3OTE4MzQ2NTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L68XFBxu4nxu00Rjt7WB9Fxu%MIU",
+      "color": "#262626",
+      "alt": "four women dancing grayscale photography",
+      "author": "ketan rajput",
+      "authorUrl": "https://unsplash.com/@ketan_rajput?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/four-women-dancing-grayscale-photography-n-g7dgwNZg4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0B0B0B",
+          "w": 0.4855
+        },
+        {
+          "hex": "#3A3A3A",
+          "w": 0.2875
+        },
+        {
+          "hex": "#676767",
+          "w": 0.227
+        }
+      ]
+    }
+  ]
+}

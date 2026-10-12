@@ -264,9 +264,9 @@ export const SANITA_SALUTE_SECTORS: PaletteSectorContent[] = [
     "slug": "veterinari",
     "preset": "netto",
     "queriesEn": [
-      "veterinary clinic interior",
-      "veterinarian examining dog",
-      "cat carrier waiting room"
+      "veterinarian with dog",
+      "vet clinic",
+      "cat at veterinarian"
     ],
     "aliases": {
       "it": [

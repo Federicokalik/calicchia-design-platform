@@ -1,0 +1,335 @@
+{
+  "slug": "centri-estetici",
+  "queries": [
+    "beauty center interior",
+    "spa treatment room",
+    "spa towels skincare bottles"
+  ],
+  "generatedAt": "2026-10-12T19:50:30.294Z",
+  "photos": [
+    {
+      "id": "GLJR-5XZtq4",
+      "small": "https://images.unsplash.com/photo-1767181874726-3b904b0f0547?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1767181874726-3b904b0f0547?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4092,
+      "height": 3072,
+      "blurHash": "LPL|x}IB_NtPDOM|x]oc?uWE9GjY",
+      "color": "#d9d9c0",
+      "alt": "Close-up of a white hibiscus flower stamen and pistil",
+      "author": "sai pixels",
+      "authorUrl": "https://unsplash.com/@saipixels?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-white-hibiscus-flower-stamen-and-pistil-GLJR-5XZtq4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D0C2",
+          "w": 0.7139
+        },
+        {
+          "hex": "#B88C84",
+          "w": 0.1656
+        },
+        {
+          "hex": "#8D3142",
+          "w": 0.1206
+        }
+      ]
+    },
+    {
+      "id": "xnTxOnbrWDc",
+      "small": "https://images.unsplash.com/photo-1774516534130-d67eb3c98798?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774516534130-d67eb3c98798?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 3072,
+      "blurHash": "LYGbq|%gD%WW00M{t7axIVaet7of",
+      "color": "#c0c0c0",
+      "alt": "Two people relax inside a modern building overlooking a lake",
+      "author": "Neon Wang",
+      "authorUrl": "https://unsplash.com/@neonwangphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-people-relax-inside-a-modern-building-overlooking-a-lake-xnTxOnbrWDc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2E2B26",
+          "w": 0.4566
+        },
+        {
+          "hex": "#ADACA9",
+          "w": 0.285
+        },
+        {
+          "hex": "#D1D1CF",
+          "w": 0.2585
+        }
+      ]
+    },
+    {
+      "id": "M272adrf59U",
+      "small": "https://images.unsplash.com/photo-1771228567644-51b24bb5c87b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771228567644-51b24bb5c87b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5895,
+      "height": 3191,
+      "blurHash": "LTDc2Fa|Iqozaej[kCay0Lj[xFV@",
+      "color": "#262626",
+      "alt": "A person walks past a courtyard with trees",
+      "author": "Aoi",
+      "authorUrl": "https://unsplash.com/@seele1306?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-walks-past-a-courtyard-with-trees-M272adrf59U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#201C15",
+          "w": 0.422
+        },
+        {
+          "hex": "#C4AD85",
+          "w": 0.3135
+        },
+        {
+          "hex": "#4F483A",
+          "w": 0.2644
+        }
+      ]
+    },
+    {
+      "id": "eKuZgX_hIk0",
+      "small": "https://images.unsplash.com/photo-1774516534266-f8e1c84d9783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774516534266-f8e1c84d9783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjBjZW50ZXIlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM0NjI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 3072,
+      "blurHash": "LWHeRX~qV[WVEO%3%Lj[w^%MtRad",
+      "color": "#262626",
+      "alt": "Modern building with large windows overlooking autumn landscape",
+      "author": "Neon Wang",
+      "authorUrl": "https://unsplash.com/@neonwangphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-building-with-large-windows-overlooking-autumn-landscape-eKuZgX_hIk0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#97846A",
+          "w": 0.4022
+        },
+        {
+          "hex": "#CECBC5",
+          "w": 0.3586
+        },
+        {
+          "hex": "#5D4C39",
+          "w": 0.2392
+        }
+      ]
+    },
+    {
+      "id": "ZhIkUYK5Y6k",
+      "small": "https://images.unsplash.com/photo-1788516382644-fd27b0f36ab5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788516382644-fd27b0f36ab5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9447,
+      "height": 5904,
+      "blurHash": "LFIoe1~pqD?a5qoztQkDEgn%V[n%",
+      "color": "#730c0c",
+      "alt": "A circular wooden sauna interior with red ambient lighting and a central stone heater",
+      "author": "Auroom Wellness",
+      "authorUrl": "https://unsplash.com/@auroom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/circular-wooden-sauna-with-red-lighting-ZhIkUYK5Y6k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C53D10",
+          "w": 0.3461
+        },
+        {
+          "hex": "#961303",
+          "w": 0.3284
+        },
+        {
+          "hex": "#640002",
+          "w": 0.3255
+        }
+      ]
+    },
+    {
+      "id": "SlpmIhUd860",
+      "small": "https://images.unsplash.com/photo-1759214630580-7b2e97e2c29b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759214630580-7b2e97e2c29b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2500,
+      "height": 2000,
+      "blurHash": "LbH-fE?vE201IVNGs.t6R.WVaKnh",
+      "color": "#8c5940",
+      "alt": "Woman wrapped in towels in a sauna",
+      "author": "Wco Global",
+      "authorUrl": "https://unsplash.com/@wcoglobal?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-wrapped-in-towels-in-a-sauna-SlpmIhUd860?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8C5D39",
+          "w": 0.4268
+        },
+        {
+          "hex": "#2E160C",
+          "w": 0.3562
+        },
+        {
+          "hex": "#E5DFDA",
+          "w": 0.217
+        }
+      ]
+    },
+    {
+      "id": "Xb8wke_iumU",
+      "small": "https://images.unsplash.com/photo-1790776576372-de6b92aa1e5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790776576372-de6b92aa1e5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 2731,
+      "blurHash": "L4A08j9G9t?FXn?E56J9xs$$~AV@",
+      "color": "#260c0c",
+      "alt": "A person pressing a bundle of birch leaves onto another person in a sauna",
+      "author": "La Villa Banya",
+      "authorUrl": "https://unsplash.com/@la_villa_banya?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/birch-leaf-sauna-treatment-Xb8wke_iumU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#341A07",
+          "w": 0.3718
+        },
+        {
+          "hex": "#0D0302",
+          "w": 0.365
+        },
+        {
+          "hex": "#6B4A31",
+          "w": 0.2632
+        }
+      ]
+    },
+    {
+      "id": "7SCaTXl2r2U",
+      "small": "https://images.unsplash.com/photo-1788516382605-45e1cb7e26d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788516382605-45e1cb7e26d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGElMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzQ2Mjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9278,
+      "height": 5799,
+      "blurHash": "LNJqD[71bvg3$$snEhn%|?#l1Ien",
+      "color": "#590c0c",
+      "alt": "A circular wooden sauna heater with dark stones in a warm orange glow",
+      "author": "Auroom Wellness",
+      "authorUrl": "https://unsplash.com/@auroom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/circular-wooden-sauna-heater-with-stones-7SCaTXl2r2U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#620103",
+          "w": 0.3625
+        },
+        {
+          "hex": "#F76B24",
+          "w": 0.3215
+        },
+        {
+          "hex": "#CC2200",
+          "w": 0.316
+        }
+      ]
+    },
+    {
+      "id": "mo7VksgvBrY",
+      "small": "https://images.unsplash.com/photo-1731336479468-8ca7011da4f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1731336479468-8ca7011da4f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5718,
+      "height": 3812,
+      "blurHash": "LBF5$^?H0Lof?Zs:IUaexrt7kBM{",
+      "color": "#8c8c73",
+      "alt": "A shelf with towels and other items on it",
+      "author": "Antonio Araujo",
+      "authorUrl": "https://unsplash.com/@antonioaaaraujo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-with-towels-and-other-items-on-it-mo7VksgvBrY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#908777",
+          "w": 0.4053
+        },
+        {
+          "hex": "#7A6F55",
+          "w": 0.3688
+        },
+        {
+          "hex": "#5A4F31",
+          "w": 0.2259
+        }
+      ]
+    },
+    {
+      "id": "0Qv4fUvlSrI",
+      "small": "https://images.unsplash.com/photo-1787168295699-03aed18d17d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787168295699-03aed18d17d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5237,
+      "height": 3500,
+      "blurHash": "LMEM5n4.00?a9G-pbIWBIAX9%fIA",
+      "color": "#737373",
+      "alt": "A stack of six white rolled towels on a wooden deck",
+      "author": "iridial",
+      "authorUrl": "https://unsplash.com/@iridial_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-white-rolled-towels-0Qv4fUvlSrI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#241B13",
+          "w": 0.4319
+        },
+        {
+          "hex": "#685E55",
+          "w": 0.3096
+        },
+        {
+          "hex": "#C6C7C0",
+          "w": 0.2585
+        }
+      ]
+    },
+    {
+      "id": "JysmtN0YPHM",
+      "small": "https://images.unsplash.com/photo-1760434100079-91428953cbe9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760434100079-91428953cbe9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LPJHXNxvD*n+_NR*NIbGE1t7oyj]",
+      "color": "#a6a6a6",
+      "alt": "Spa items including towels, bottles, and cups",
+      "author": "A.Rahmat MN",
+      "authorUrl": "https://unsplash.com/@alir4hmatmn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/spa-items-including-towels-bottles-and-cups-JysmtN0YPHM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ACA4A2",
+          "w": 0.4856
+        },
+        {
+          "hex": "#9A7C73",
+          "w": 0.3117
+        },
+        {
+          "hex": "#6B493C",
+          "w": 0.2028
+        }
+      ]
+    },
+    {
+      "id": "nxxjtC1sLvE",
+      "small": "https://images.unsplash.com/photo-1781736363509-a2327b675a03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781736363509-a2327b675a03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGElMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzNDYyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2984,
+      "blurHash": "LHHL3q^+KPrr^+~qaeIU0z%M+]4.",
+      "color": "#404040",
+      "alt": "Luxurious spa bathtub filled with flower petals and spa products",
+      "author": "Sokhna Khoudia Saliou MBACKE",
+      "authorUrl": "https://unsplash.com/@snx_khoudja?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/luxurious-spa-bathtub-filled-with-flower-petals-and-spa-products-nxxjtC1sLvE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#544A40",
+          "w": 0.4855
+        },
+        {
+          "hex": "#D6CCCC",
+          "w": 0.3
+        },
+        {
+          "hex": "#B18574",
+          "w": 0.2144
+        }
+      ]
+    }
+  ]
+}

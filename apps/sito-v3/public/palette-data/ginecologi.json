@@ -1,0 +1,227 @@
+{
+  "slug": "ginecologi",
+  "queries": [
+    "gynecology clinic interior",
+    "ultrasound examination room",
+    "pregnancy ultrasound scan"
+  ],
+  "generatedAt": "2026-10-12T19:51:46.839Z",
+  "photos": [
+    {
+      "id": "-i6kaig732w",
+      "small": "https://images.unsplash.com/photo-1665231795856-769fb08a90bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1665231795856-769fb08a90bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5999,
+      "height": 3991,
+      "blurHash": "LKHw*~D%?ur=~VR+jcbG0LxuNGR+",
+      "color": "#a68c73",
+      "alt": "a room with a desk and a chair",
+      "author": "Marios Gkortsilas",
+      "authorUrl": "https://unsplash.com/@mr_mgk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-desk-and-a-chair--i6kaig732w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A502F",
+          "w": 0.4005
+        },
+        {
+          "hex": "#B18E6E",
+          "w": 0.3145
+        },
+        {
+          "hex": "#321A07",
+          "w": 0.285
+        }
+      ]
+    },
+    {
+      "id": "yJsMOVwazRU",
+      "small": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6013,
+      "height": 4009,
+      "blurHash": "LULz:Lf,00IU~qRit7WBM_NGt7oJ",
+      "color": "#d9d9d9",
+      "alt": "a hospital room with medical equipment in it",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hospital-room-with-medical-equipment-in-it-yJsMOVwazRU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD5D2",
+          "w": 0.6133
+        },
+        {
+          "hex": "#B2A89E",
+          "w": 0.2103
+        },
+        {
+          "hex": "#84735F",
+          "w": 0.1764
+        }
+      ]
+    },
+    {
+      "id": "Pk-KuizxQv8",
+      "small": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5552,
+      "height": 4164,
+      "blurHash": "LALhG79ZDjR*4TxuxGa#v{RjDit7",
+      "color": "#c0c0c0",
+      "alt": "Empty hospital corridor with benches and doors",
+      "author": "Tasha Kostyuk",
+      "authorUrl": "https://unsplash.com/@tashakostyuk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-hospital-corridor-with-benches-and-doors-Pk-KuizxQv8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3B9B7",
+          "w": 0.4878
+        },
+        {
+          "hex": "#CED4D6",
+          "w": 0.4287
+        },
+        {
+          "hex": "#8B9695",
+          "w": 0.0835
+        }
+      ]
+    },
+    {
+      "id": "KnvVNQ1bAl4",
+      "small": "https://images.unsplash.com/photo-1759987383760-327efaf5522a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759987383760-327efaf5522a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxneW5lY29sb2d5JTIwY2xpbmljJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzNDcwM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3085,
+      "height": 2044,
+      "blurHash": "LIGIu~01VrRiDh-;W?s.%MRjM{WE",
+      "color": "#8c8c8c",
+      "alt": "Sunlight streams into an empty waiting room with chairs",
+      "author": "Jun Ren",
+      "authorUrl": "https://unsplash.com/@renjunn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-streams-into-an-empty-waiting-room-with-chairs-KnvVNQ1bAl4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#91938C",
+          "w": 0.4536
+        },
+        {
+          "hex": "#73716A",
+          "w": 0.3257
+        },
+        {
+          "hex": "#B6BEC2",
+          "w": 0.2208
+        }
+      ]
+    },
+    {
+      "id": "IE8KfewAp-w",
+      "small": "https://images.unsplash.com/photo-1528218635780-5952720c9729?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1528218635780-5952720c9729?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 1987,
+      "blurHash": "LXF=Ez9[0f-B9Zs9tRkWELxajYWA",
+      "color": "#0c4040",
+      "alt": "man kissing woman's forehead white holding ultrasound photo",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-kissing-womans-forehead-white-holding-ultrasound-photo-IE8KfewAp-w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#083644",
+          "w": 0.4329
+        },
+        {
+          "hex": "#D8A7A3",
+          "w": 0.4015
+        },
+        {
+          "hex": "#926657",
+          "w": 0.1656
+        }
+      ]
+    },
+    {
+      "id": "87ev1NvhDsU",
+      "small": "https://images.unsplash.com/photo-1654931800911-7a9cfb3b7c17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1654931800911-7a9cfb3b7c17?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LoHxB1NG~V-pofazkCWVNGR*j]of",
+      "color": "#c0a6a6",
+      "alt": "A pregnant person in a black dress holding an ultrasound scan",
+      "author": "Volodymyr Hryshchenko",
+      "authorUrl": "https://unsplash.com/@lunarts?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pregnant-person-holding-ultrasound-scan-87ev1NvhDsU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#090407",
+          "w": 0.4659
+        },
+        {
+          "hex": "#D0B7A8",
+          "w": 0.4187
+        },
+        {
+          "hex": "#9B7876",
+          "w": 0.1153
+        }
+      ]
+    },
+    {
+      "id": "-25Yf5DvSKs",
+      "small": "https://images.unsplash.com/photo-1596213281525-7811bbc7c1c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596213281525-7811bbc7c1c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LjIz|?NcD*t6_NM{ROW=?vV@M{oL",
+      "color": "#f3f3f3",
+      "alt": "person holding a photo of a man and woman",
+      "author": "Omar Lopez",
+      "authorUrl": "https://unsplash.com/@omarlopez1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-a-photo-of-a-man-and-woman--25Yf5DvSKs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AE8A6C",
+          "w": 0.413
+        },
+        {
+          "hex": "#8E5A36",
+          "w": 0.3507
+        },
+        {
+          "hex": "#5C2B10",
+          "w": 0.2363
+        }
+      ]
+    },
+    {
+      "id": "pqfyq0Iur-U",
+      "small": "https://images.unsplash.com/photo-1637425622118-9ef04e721734?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1637425622118-9ef04e721734?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmVnbmFuY3klMjB1bHRyYXNvdW5kJTIwc2NhbnxlbnwxfDB8fHwxNzkxODM0NzA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5916,
+      "height": 3329,
+      "blurHash": "LB8D-7%20KIo~CxaD%M|RPj[tRjZ",
+      "color": "#0c2626",
+      "alt": "a pregnant woman holding a camera in her hands",
+      "author": "Raymart Arniño",
+      "authorUrl": "https://unsplash.com/@raymart772?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pregnant-woman-holding-a-camera-in-her-hands-pqfyq0Iur-U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#17181B",
+          "w": 0.7402
+        },
+        {
+          "hex": "#453530",
+          "w": 0.1306
+        },
+        {
+          "hex": "#AE9C9A",
+          "w": 0.1291
+        }
+      ]
+    }
+  ]
+}
