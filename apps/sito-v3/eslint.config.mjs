@@ -72,6 +72,11 @@ export default [
       'src/components/providers/ViewTransitionsBootstrap.tsx',
       'src/components/layout/LanguageSwitcher.tsx',
       'src/components/layout/AvailabilityTopbar.tsx',
+      // Come AvailabilityTopbar: legge il pathname grezzo (con /en) per
+      // riconoscere i documenti standalone, non naviga.
+      'src/components/layout/LanguagePromptBanner.tsx',
+      // portalLoginRedirect: redirect server grezzo voluto (vedi commento nel file).
+      'src/lib/portal-format.ts',
       'src/components/analytics/**',
       'src/proxy.ts',
       'src/app/error.tsx',
