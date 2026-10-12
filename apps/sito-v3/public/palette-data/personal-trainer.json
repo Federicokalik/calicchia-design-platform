@@ -1,0 +1,308 @@
+{
+  "slug": "personal-trainer",
+  "queries": [
+    "trainer guiding exercise",
+    "dumbbells in training studio",
+    "resistance bands on mat"
+  ],
+  "generatedAt": "2026-10-12T18:56:17.455Z",
+  "photos": [
+    {
+      "id": "wSUlQl8HPYc",
+      "small": "https://images.unsplash.com/photo-1648542036561-e1d66a5ae2b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1648542036561-e1d66a5ae2b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7900,
+      "height": 5267,
+      "blurHash": "L98W,8%g0fD%-:%MX8IoEMxu-UIo",
+      "color": "#262626",
+      "alt": "a man and woman exercising",
+      "author": "maxhome fitness",
+      "authorUrl": "https://unsplash.com/@maxhomefitness_9252382_sink?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-woman-exercising-wSUlQl8HPYc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#131210",
+          "w": 0.6655
+        },
+        {
+          "hex": "#413B36",
+          "w": 0.2112
+        },
+        {
+          "hex": "#96816F",
+          "w": 0.1233
+        }
+      ]
+    },
+    {
+      "id": "nlZTjUZX2qo",
+      "small": "https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1519311965067-36d3e5f33d39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4769,
+      "height": 3179,
+      "blurHash": "LIDcgl0KxvIV~WNaj]adkWozaKxa",
+      "color": "#264040",
+      "alt": "man fist bump to man laying on ground",
+      "author": "Victor Freitas",
+      "authorUrl": "https://unsplash.com/@victorfreitas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-fist-bump-to-man-laying-on-ground-nlZTjUZX2qo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#495854",
+          "w": 0.4184
+        },
+        {
+          "hex": "#818781",
+          "w": 0.3377
+        },
+        {
+          "hex": "#1F2A27",
+          "w": 0.244
+        }
+      ]
+    },
+    {
+      "id": "HHXdPG_eTIQ",
+      "small": "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1518459031867-a89b944bffe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5709,
+      "height": 3938,
+      "blurHash": "LWKwqa%hS|oa?u%LIAxv?w-=t6NG",
+      "color": "#f3f3f3",
+      "alt": "woman sitting on yoga mat with in front of girl during daytime",
+      "author": "bruce mars",
+      "authorUrl": "https://unsplash.com/@brucemars?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-sitting-on-yoga-mat-with-in-front-of-girl-during-daytime-HHXdPG_eTIQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BA9B8F",
+          "w": 0.4259
+        },
+        {
+          "hex": "#E6E5E5",
+          "w": 0.3238
+        },
+        {
+          "hex": "#936C65",
+          "w": 0.2503
+        }
+      ]
+    },
+    {
+      "id": "G6svDyPVRrc",
+      "small": "https://images.unsplash.com/photo-1738523686534-7055df5858d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1738523686534-7055df5858d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmVyJTIwZ3VpZGluZyUyMGV4ZXJjaXNlfGVufDF8MHx8fDE3OTE4MzEzNzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6450,
+      "height": 4300,
+      "blurHash": "L88g$]x_4n4T.8t7IoIo4oi]%3yE",
+      "color": "#262626",
+      "alt": "A man and a woman working out in a gym",
+      "author": "Sergio Kian",
+      "authorUrl": "https://unsplash.com/@sergiokian?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-a-woman-working-out-in-a-gym-G6svDyPVRrc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#191E22",
+          "w": 0.5375
+        },
+        {
+          "hex": "#363C3E",
+          "w": 0.3014
+        },
+        {
+          "hex": "#6F695A",
+          "w": 0.1611
+        }
+      ]
+    },
+    {
+      "id": "8DcwvlVXIVw",
+      "small": "https://images.unsplash.com/photo-1603077492579-39ff927823db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603077492579-39ff927823db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LjIE;G00-;%M~qRjt7%Mt7xtt7j]",
+      "color": "#f3f3f3",
+      "alt": "black and gray dumbbells on floor",
+      "author": "Greg Rosenke",
+      "authorUrl": "https://unsplash.com/@greg_rosenke?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-dumbbells-on-floor-8DcwvlVXIVw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E2DFDC",
+          "w": 0.4171
+        },
+        {
+          "hex": "#0D0B0B",
+          "w": 0.3505
+        },
+        {
+          "hex": "#403E3D",
+          "w": 0.2324
+        }
+      ]
+    },
+    {
+      "id": "19627jBVBq8",
+      "small": "https://images.unsplash.com/photo-1781807801198-ae3f1e737166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781807801198-ae3f1e737166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LTNJ@Rxt?JIBaxofofWA?KRkISx@",
+      "color": "#d9c0f3",
+      "alt": "Two green dumbbells and black push-up bars on purple background",
+      "author": "Moment InFocus",
+      "authorUrl": "https://unsplash.com/@momentinfocus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-green-dumbbells-and-black-push-up-bars-on-purple-background-19627jBVBq8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D5CBF1",
+          "w": 0.8588
+        },
+        {
+          "hex": "#1D182A",
+          "w": 0.0872
+        },
+        {
+          "hex": "#C6DDAF",
+          "w": 0.054
+        }
+      ]
+    },
+    {
+      "id": "6Qy5rb7hw6o",
+      "small": "https://images.unsplash.com/photo-1758526387723-075751b1bcda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758526387723-075751b1bcda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkdW1iYmVsbHMlMjBpbiUyMHRyYWluaW5nJTIwc3R1ZGlvfGVufDF8MHx8fDE3OTE4MzEzNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LPNvb#0LpfM_-oW=IV%1oJj@WCae",
+      "color": "#c0a6a6",
+      "alt": "Young girl in black leotard performs yoga pose",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/young-girl-in-black-leotard-performs-yoga-pose-6Qy5rb7hw6o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBC99C",
+          "w": 0.4234
+        },
+        {
+          "hex": "#B19E92",
+          "w": 0.3338
+        },
+        {
+          "hex": "#D9AF79",
+          "w": 0.2428
+        }
+      ]
+    },
+    {
+      "id": "IZOAOjvwhaM",
+      "small": "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5180,
+      "height": 3453,
+      "blurHash": "L6Ex-B4TD%%g1KMx-VxaJCMx9ax]",
+      "color": "#8c7373",
+      "alt": "Two black dumbbells and an orange resistance band on a rustic wooden surface",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dumbbells-and-resistance-band-workout-IZOAOjvwhaM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A69081",
+          "w": 0.4354
+        },
+        {
+          "hex": "#82695B",
+          "w": 0.3966
+        },
+        {
+          "hex": "#543F32",
+          "w": 0.168
+        }
+      ]
+    },
+    {
+      "id": "oLStrTTMz2s",
+      "small": "https://images.unsplash.com/photo-1518609571773-39b7d303a87b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1518609571773-39b7d303a87b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6100,
+      "height": 4067,
+      "blurHash": "LJI#ZBoN?^o#XO.8VY%M9FjFWBR+",
+      "color": "#f3f3f3",
+      "alt": "group of women doing yoga",
+      "author": "bruce mars",
+      "authorUrl": "https://unsplash.com/@brucemars?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/group-of-women-doing-yoga-oLStrTTMz2s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#80756D",
+          "w": 0.5758
+        },
+        {
+          "hex": "#B2A9A6",
+          "w": 0.2435
+        },
+        {
+          "hex": "#553D39",
+          "w": 0.1807
+        }
+      ]
+    },
+    {
+      "id": "rWBBDErPXcY",
+      "small": "https://images.unsplash.com/photo-1515775538093-d2d95c5ee4f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1515775538093-d2d95c5ee4f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "L897CQ~Bw[M{%#RiRjJ9i_D%s:xa",
+      "color": "#404040",
+      "alt": "shallow focus photography of yellow and black stretch rope",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shallow-focus-photography-of-yellow-and-black-stretch-rope-rWBBDErPXcY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#101212",
+          "w": 0.4629
+        },
+        {
+          "hex": "#40322B",
+          "w": 0.3515
+        },
+        {
+          "hex": "#5F5F5D",
+          "w": 0.1856
+        }
+      ]
+    },
+    {
+      "id": "0Z-r591z3DI",
+      "small": "https://images.unsplash.com/photo-1517637382994-f02da38c6728?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1517637382994-f02da38c6728?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpc3RhbmNlJTIwYmFuZHMlMjBvbiUyMG1hdHxlbnwxfDB8fHwxNzkxODMxMzc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LKEL?K%f0fn4Ot%2-nJ64Tbb%M%1",
+      "color": "#0c2626",
+      "alt": "woman holding green rope at her back",
+      "author": "Geert Pieters",
+      "authorUrl": "https://unsplash.com/@shotsbywolf?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-holding-green-rope-at-her-back-0Z-r591z3DI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A202A",
+          "w": 0.4763
+        },
+        {
+          "hex": "#554A53",
+          "w": 0.276
+        },
+        {
+          "hex": "#97888D",
+          "w": 0.2477
+        }
+      ]
+    }
+  ]
+}

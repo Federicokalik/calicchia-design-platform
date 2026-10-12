@@ -1,0 +1,254 @@
+{
+  "slug": "saloni-di-bellezza",
+  "queries": [
+    "beauty salon reception",
+    "facial treatment room",
+    "folded towels skincare bottles"
+  ],
+  "generatedAt": "2026-10-12T18:56:21.770Z",
+  "photos": [
+    {
+      "id": "PtOfbGkU3uI",
+      "small": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4038,
+      "height": 2692,
+      "blurHash": "LbK1tH?bIUs:~qt7t7oftRbHWBay",
+      "color": "#d9d9d9",
+      "alt": "Three maroon salon chairs facing a long white counter with a large mirror",
+      "author": "Guilherme Petri",
+      "authorUrl": "https://unsplash.com/@guipetri?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/salon-chairs-at-white-vanity-PtOfbGkU3uI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4D3D3",
+          "w": 0.4643
+        },
+        {
+          "hex": "#ABA7A8",
+          "w": 0.3397
+        },
+        {
+          "hex": "#817577",
+          "w": 0.196
+        }
+      ]
+    },
+    {
+      "id": "g2u8gq5XcwE",
+      "small": "https://images.unsplash.com/photo-1706629504952-ab5e50f5c179?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706629504952-ab5e50f5c179?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6144,
+      "height": 4098,
+      "blurHash": "LFJRN$_2IB^+-:M{xuM{?wxtRjx]",
+      "color": "#c0c0a6",
+      "alt": "a room with a bunch of chairs and mirrors",
+      "author": "Tile Merchant Ireland",
+      "authorUrl": "https://unsplash.com/@tilemerchant?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-bunch-of-chairs-and-mirrors-g2u8gq5XcwE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B2AB9F",
+          "w": 0.463
+        },
+        {
+          "hex": "#8E8375",
+          "w": 0.2976
+        },
+        {
+          "hex": "#D8D4CE",
+          "w": 0.2394
+        }
+      ]
+    },
+    {
+      "id": "dDhWJLXEZ5I",
+      "small": "https://images.unsplash.com/photo-1633681926019-03bd9325ec20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633681926019-03bd9325ec20?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LNI5Y%IU00-;?bWURjs.MxaetRRj",
+      "color": "#a6a6a6",
+      "alt": "a room filled with furniture and vase of flowers on a table",
+      "author": "Benyamin Bohlouli",
+      "authorUrl": "https://unsplash.com/@benyamin_bohlouli?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-filled-with-furniture-and-vase-of-flowers-on-a-table-dDhWJLXEZ5I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C4C4C1",
+          "w": 0.3867
+        },
+        {
+          "hex": "#A4A09A",
+          "w": 0.3825
+        },
+        {
+          "hex": "#73716A",
+          "w": 0.2308
+        }
+      ]
+    },
+    {
+      "id": "LZLdLR7vuHg",
+      "small": "https://images.unsplash.com/photo-1633681926053-9074b76e21a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633681926053-9074b76e21a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjBzYWxvbiUyMHJlY2VwdGlvbnxlbnwxfDB8fHwxNzkxODMxMzc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4002,
+      "blurHash": "LOHLuN4TR+oy?aozaxoJsltRa{t7",
+      "color": "#a6a6a6",
+      "alt": "a kitchen with a sink and a window",
+      "author": "Benyamin Bohlouli",
+      "authorUrl": "https://unsplash.com/@benyamin_bohlouli?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-with-a-sink-and-a-window-LZLdLR7vuHg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F9F9C",
+          "w": 0.4921
+        },
+        {
+          "hex": "#C0C3C2",
+          "w": 0.2555
+        },
+        {
+          "hex": "#676662",
+          "w": 0.2523
+        }
+      ]
+    },
+    {
+      "id": "mXqdq1rzzz0",
+      "small": "https://images.unsplash.com/photo-1778740328240-02f75398d9a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzEzNjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778740328240-02f75398d9a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnQlMjByb29tfGVufDF8MHx8fDE3OTE4MzEzNjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3440,
+      "height": 2293,
+      "blurHash": "LTI56]ITI@aK_NxuMxof-;f5ogWV",
+      "color": "#c0c0c0",
+      "alt": "Woman with face mask looking in mirror",
+      "author": "Margo Evardson",
+      "authorUrl": "https://unsplash.com/@stadinstudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-with-face-mask-looking-in-mirror-mXqdq1rzzz0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BCB9B7",
+          "w": 0.5554
+        },
+        {
+          "hex": "#73422C",
+          "w": 0.2232
+        },
+        {
+          "hex": "#A08175",
+          "w": 0.2214
+        }
+      ]
+    },
+    {
+      "id": "hZ7wSMMWGMA",
+      "small": "https://images.unsplash.com/photo-1629380108599-ea06489d66f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1629380108599-ea06489d66f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LBK1H@#g=z~9I{VDNz8_DNDi.9Mw",
+      "color": "#d9d9d9",
+      "alt": "assorted plastic bottles on brown woven basket",
+      "author": "Poko Skincare",
+      "authorUrl": "https://unsplash.com/@pokoskincare?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-plastic-bottles-on-brown-woven-basket-hZ7wSMMWGMA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9CFC9",
+          "w": 0.3635
+        },
+        {
+          "hex": "#94704F",
+          "w": 0.3194
+        },
+        {
+          "hex": "#BC9F80",
+          "w": 0.3171
+        }
+      ]
+    },
+    {
+      "id": "VxAwTeiqDao",
+      "small": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "LPLW^ll84Trs9DVZV@bu.8xax]of",
+      "color": "#d9d9d9",
+      "alt": "white plastic pump bottle beside pink tulips and gray towel",
+      "author": "Camille Brodard",
+      "authorUrl": "https://unsplash.com/@kmile_ch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-pump-bottle-beside-pink-tulips-and-gray-towel-VxAwTeiqDao?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A29D",
+          "w": 0.3846
+        },
+        {
+          "hex": "#DDDDE0",
+          "w": 0.3446
+        },
+        {
+          "hex": "#978581",
+          "w": 0.2709
+        }
+      ]
+    },
+    {
+      "id": "HT7mTAjNxR0",
+      "small": "https://images.unsplash.com/photo-1630398777076-9b262a08c211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630398777076-9b262a08c211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LgIE;BM|01D%9ERj%MxuIUxuocWC",
+      "color": "#737359",
+      "alt": "white and yellow plastic bottle on white textile",
+      "author": "Poko Skincare",
+      "authorUrl": "https://unsplash.com/@pokoskincare?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-yellow-plastic-bottle-on-white-textile-HT7mTAjNxR0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E6754",
+          "w": 0.4149
+        },
+        {
+          "hex": "#E9E6E1",
+          "w": 0.3426
+        },
+        {
+          "hex": "#28241E",
+          "w": 0.2426
+        }
+      ]
+    },
+    {
+      "id": "mo7VksgvBrY",
+      "small": "https://images.unsplash.com/photo-1731336479468-8ca7011da4f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1731336479468-8ca7011da4f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb2xkZWQlMjB0b3dlbHMlMjBza2luY2FyZSUyMGJvdHRsZXN8ZW58MXwwfHx8MTc5MTgzMTM4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5718,
+      "height": 3812,
+      "blurHash": "LBF5$^?H0Lof?Zs:IUaexrt7kBM{",
+      "color": "#8c8c73",
+      "alt": "A shelf with towels and other items on it",
+      "author": "Antonio Araujo",
+      "authorUrl": "https://unsplash.com/@antonioaaaraujo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-with-towels-and-other-items-on-it-mo7VksgvBrY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#908777",
+          "w": 0.4053
+        },
+        {
+          "hex": "#7A6F55",
+          "w": 0.3688
+        },
+        {
+          "hex": "#5A4F31",
+          "w": 0.2259
+        }
+      ]
+    }
+  ]
+}
