@@ -46,6 +46,7 @@ const OUT_DIR = resolve(DATA_DIR, 'risorse/palette/sectors');
 const COMPANION = 'C:/Users/calicchiadesign/.claude/plugins/cache/openai-codex/codex/1.0.4/scripts/codex-companion.mjs';
 
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? '3');
+const MAX_ATTEMPTS = 2;
 const DRY_RUN = process.env.DRY_RUN === '1';
 
 // ─── CLI args ─────────────────────────────────────────────────────
@@ -184,7 +185,8 @@ const US_SPELLING = [
   /\bgray\b/i,
   /\b(organiz|personaliz|customiz|optimiz|realiz|recogniz|prioritiz|minimiz|apologiz)/i,
   /\bjewelry\b/i,
-  /\btires?\b/i,
+  // "tire" come verbo ("tire the eye") va bene: si segnala solo lo pneumatico.
+  /\b(car|spare|flat|winter|summer|new|worn|four)\s+tires?\b|\btires?\s+(pressure|change|changes|shop|fitting|storage)\b/i,
   /\bcheckup\b/i,
   /\bcatalog\b/i,
 ];
@@ -314,11 +316,31 @@ function aliasCollisions(sectors) {
     }
   }
   const out = new Map();
+  const add = (slug, msg) => {
+    if (!out.has(slug)) out.set(slug, []);
+    out.get(slug).push(msg);
+  };
   for (const [key, slugs] of owners) {
     if (slugs.size < 2) continue;
-    for (const slug of slugs) {
-      if (!out.has(slug)) out.set(slug, []);
-      out.get(slug).push(`${key} (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+    for (const slug of slugs) add(slug, `${key} (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+  }
+  // Una radice di 4+ caratteri combacia anche con le parole che la estendono:
+  // "matton" prende "mattonelle", quindi pesta i piedi a "mattonell".
+  const entries = [...owners.keys()].map((key) => {
+    const [loc, root] = key.split(':');
+    return { loc, root, slugs: owners.get(key) };
+  });
+  for (const a of entries) {
+    if (a.root.length < 4) continue;
+    for (const b of entries) {
+      if (a === b || a.loc !== b.loc || !b.root.startsWith(a.root)) continue;
+      for (const sa of a.slugs) {
+        for (const sb of b.slugs) {
+          if (sa === sb) continue;
+          add(sa, `${a.loc}:${a.root} copre ${b.root} di ${sb}`);
+          add(sb, `${b.loc}:${b.root} coperta da ${a.root} di ${sa}`);
+        }
+      }
     }
   }
   return out;
@@ -560,15 +582,23 @@ async function generateSector(job) {
   console.log(`[run] ${tag} — invio a codex…`);
   const t0 = Date.now();
   let content;
-  try {
-    const raw = extractJson(await runCodex(prompt));
-    const candidate = { ...raw, slug: raw.slug ?? prof.slug, reviewed: false };
-    const errs = validateSector(candidate, prof.slug);
-    if (errs.length) throw new Error(`forma: ${errs.join('; ')}`);
-    content = canonical(candidate);
-  } catch (e) {
-    console.error(`[FAIL] ${tag} — ${e.message}`);
-    return { prof, ok: false, error: e.message };
+  let feedback = '';
+  // Un secondo tentativo, con gli errori del primo nel brief.
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS && !content; attempt++) {
+    try {
+      const raw = extractJson(await runCodex(prompt + feedback));
+      const candidate = { ...raw, slug: raw.slug ?? prof.slug, reviewed: false };
+      const errs = validateSector(candidate, prof.slug);
+      if (errs.length) throw new Error(`forma: ${errs.join('; ')}`);
+      content = canonical(candidate);
+    } catch (e) {
+      if (attempt === MAX_ATTEMPTS) {
+        console.error(`[FAIL] ${tag} — ${e.message}`);
+        return { prof, ok: false, error: e.message };
+      }
+      console.warn(`[retry] ${tag} — ${e.message}`);
+      feedback = `\n\nIL TENTATIVO PRECEDENTE ERA DA SCARTARE (${e.message}). Rispetta le lunghezze massime e la forma richiesta.`;
+    }
   }
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
   const lintHits = voiceLint(content);
