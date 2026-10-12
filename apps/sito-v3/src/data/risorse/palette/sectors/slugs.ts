@@ -120,7 +120,18 @@ export const SECTOR_SLUGS: readonly string[] = [
   "tipografie",
   "ricamifici",
   "mercerie",
-  "fotografi"
+  "fotografi",
+  "wedding-planner",
+  "videomaker",
+  "organizzatori-eventi",
+  "agenzie-viaggi",
+  "scuole-private",
+  "asili-nido",
+  "tipografi",
+  "centri-di-formazione",
+  "musicisti",
+  "dj",
+  "imprese-funebri"
 ];
 
 const SECTOR_SLUG_SET = new Set(SECTOR_SLUGS);
