@@ -9,6 +9,7 @@ import {
   getProfessionSlugForLocale,
 } from '@/data/seo-service-matrix';
 import { LOCALES, localizedPath, type Locale } from '@/lib/i18n';
+import { isIndexable, listSectorPageSlugs } from '@/data/risorse/palette';
 
 // La sitemap include progetti e articoli letti dall'API. La build salta quel
 // fetch (l'API non è raggiungibile in CI), quindi senza questo la sitemap
@@ -42,6 +43,8 @@ const STATIC_PATHS = [
   // Risorse — hub bilingue + white paper standalone (stesso slug nei due locale)
   '/risorse',
   '/risorse/dalla-seo-alla-geo',
+  // Strumento gratuito "Palette di settore" (stesso slug nei due locale)
+  '/risorse/palette-di-settore',
   '/faq',
   '/risorse/glossario-web-design',
   '/web-design-freelance',
@@ -387,6 +390,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         });
       }
     }
+  }
+
+  // Pagine settore della Palette di settore: solo quelle indicizzabili
+  // (tier 1-2 con testi rivisti). Le tier 3 sono noindex e restano fuori.
+  for (const slug of listSectorPageSlugs().filter(isIndexable)) {
+    entries.push(
+      ...localizedEntries(`/risorse/palette-di-settore/${slug}`, now, {
+        priority: 0.6,
+        changeFrequency: 'monthly',
+      }),
+    );
   }
 
   const [projects, posts] = await Promise.all([fetchProjects(), fetchBlogPosts()]);

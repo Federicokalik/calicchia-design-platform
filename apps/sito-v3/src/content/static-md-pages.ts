@@ -117,6 +117,16 @@ export const STATIC_PAGES: Record<string, StaticPageMeta> = {
       { name: 'Glossario SEO', path: '/risorse/glossario-seo' },
     ],
   },
+  '/risorse/palette-di-settore': {
+    title: 'Palette di settore — Strumento gratuito',
+    description:
+      'Strumento gratuito: estrae i colori dominanti da foto del settore (k-means in OKLab), propone uno stile, verifica i contrasti WCAG 2.2 ed esporta token CSS, Tailwind v4, JSON (DTCG) e Canva.',
+    related: [
+      { name: 'Risorse', path: '/risorse' },
+      { name: 'Glossario Web Design', path: '/risorse/glossario-web-design' },
+      { name: 'Contatti', path: '/contatti' },
+    ],
+  },
   '/risorse/glossario-seo': {
     title: 'Glossario SEO',
     description:

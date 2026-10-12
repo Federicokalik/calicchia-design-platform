@@ -43,6 +43,7 @@ const FOOTER_NAV: FooterLink[] = [
   { label: 'Zone servite', href: '/zone/frosinone' },
   { label: 'Blog', href: '/blog' },
   { label: 'Risorse', href: '/risorse' },
+  { label: 'Palette di settore', href: '/risorse/palette-di-settore' },
   { label: 'Contatti', href: '/contatti' },
 ];
 
@@ -96,6 +97,7 @@ export function SiteFooter() {
       '/zone/frosinone': tNav('nav.zoneServite'),
       '/blog': tNav('nav.blog'),
       '/risorse': tNav('nav.risorse'),
+      '/risorse/palette-di-settore': tNav('nav.paletteDiSettore'),
       '/contatti': tNav('nav.contatti'),
     })[href] ?? fallback;
   const legalLabel = (href: string, fallback: string) =>
