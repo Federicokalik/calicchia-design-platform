@@ -1,0 +1,335 @@
+{
+  "slug": "farmacie",
+  "queries": [
+    "pharmacy shelves interior",
+    "pharmacy counter daylight",
+    "medicine bottles shelves"
+  ],
+  "generatedAt": "2026-10-12T21:02:31.172Z",
+  "photos": [
+    {
+      "id": "QXlPa21okgQ",
+      "small": "https://images.unsplash.com/photo-1788487638290-b93e4e9333a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788487638290-b93e4e9333a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGD]G0aI0Kog_4RjIUWXI^j=RjWB",
+      "color": "#402626",
+      "alt": "An old pharmacy interior with shelves of glass bottles and a central wooden counter",
+      "author": "Ángel Nava",
+      "authorUrl": "https://unsplash.com/@asnava?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pharmacy-interior-with-glass-bottles-QXlPa21okgQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#60493E",
+          "w": 0.3914
+        },
+        {
+          "hex": "#837671",
+          "w": 0.3692
+        },
+        {
+          "hex": "#BAB1AD",
+          "w": 0.2394
+        }
+      ]
+    },
+    {
+      "id": "Vnbj3IKirSQ",
+      "small": "https://images.unsplash.com/photo-1681418290255-a5355089dc6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1681418290255-a5355089dc6d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 10221,
+      "height": 7747,
+      "blurHash": "LHD9#O~qM{Rjt7ayM{t7D%IUM{of",
+      "color": "#595959",
+      "alt": "Interior of a vintage general store with shelves of goods",
+      "author": "Museum of New Zealand Te Papa Tongarewa",
+      "authorUrl": "https://unsplash.com/@tepapa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/interior-of-a-vintage-general-store-with-shelves-of-goods-Vnbj3IKirSQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#555555",
+          "w": 0.4611
+        },
+        {
+          "hex": "#2C2C2C",
+          "w": 0.274
+        },
+        {
+          "hex": "#858585",
+          "w": 0.2649
+        }
+      ]
+    },
+    {
+      "id": "hVCTMv2M1I0",
+      "small": "https://images.unsplash.com/photo-1735448213929-91564c7af651?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1735448213929-91564c7af651?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LIHy8*.A4naxxvogRkof-=aeIAt7",
+      "color": "#a6a6c0",
+      "alt": "A very long narrow room with shelves full of food",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-very-long-narrow-room-with-shelves-full-of-food-hVCTMv2M1I0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A6B5CC",
+          "w": 0.4753
+        },
+        {
+          "hex": "#8E96A0",
+          "w": 0.3668
+        },
+        {
+          "hex": "#707374",
+          "w": 0.1579
+        }
+      ]
+    },
+    {
+      "id": "au7Xjr-6AlI",
+      "small": "https://images.unsplash.com/photo-1785637485018-56f22cf2d5e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785637485018-56f22cf2d5e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaGFybWFjeSUyMHNoZWx2ZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3130,
+      "height": 2075,
+      "blurHash": "LLBMSls.0#R+ENj[xZWCENay-Ts.",
+      "color": "#0c2626",
+      "alt": "A tall bookshelf filled with numerous books under ceiling lights",
+      "author": "Lei Hwang",
+      "authorUrl": "https://unsplash.com/@blackbird_ii?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tall-bookshelf-filled-with-numerous-books-under-ceiling-lights-au7Xjr-6AlI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F2D2F",
+          "w": 0.5508
+        },
+        {
+          "hex": "#4E4339",
+          "w": 0.2558
+        },
+        {
+          "hex": "#866347",
+          "w": 0.1933
+        }
+      ]
+    },
+    {
+      "id": "747NDboAWNY",
+      "small": "https://images.unsplash.com/photo-1576602976047-174e57a47881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1576602976047-174e57a47881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5969,
+      "height": 3985,
+      "blurHash": "LCMtEgI94;9G9Et7%gt68^oeRPRP",
+      "color": "#d9d9d9",
+      "alt": "A bright stationery store interior with shelves of greeting cards and office supplies",
+      "author": "Nathaniel Yeo",
+      "authorUrl": "https://unsplash.com/@nathanielyeo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stationery-store-interior-with-greeting-cards-747NDboAWNY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD4CD",
+          "w": 0.432
+        },
+        {
+          "hex": "#C5BCB2",
+          "w": 0.3705
+        },
+        {
+          "hex": "#ACA193",
+          "w": 0.1975
+        }
+      ]
+    },
+    {
+      "id": "gUZo-UA0VGQ",
+      "small": "https://images.unsplash.com/photo-1576602975754-efdf313b9342?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1576602975754-efdf313b9342?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LCKBH.Mb9FX90K$*%fWAIA9Z-pRP",
+      "color": "#c0c0c0",
+      "alt": "assorted book on display in book store",
+      "author": "Nathaniel Yeo",
+      "authorUrl": "https://unsplash.com/@nathanielyeo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-book-on-display-in-book-store-gUZo-UA0VGQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADAAA3",
+          "w": 0.4235
+        },
+        {
+          "hex": "#CDCCC9",
+          "w": 0.3136
+        },
+        {
+          "hex": "#8B857B",
+          "w": 0.2629
+        }
+      ]
+    },
+    {
+      "id": "QHa2BO6AlAg",
+      "small": "https://images.unsplash.com/photo-1648824572347-6edd9a108e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1648824572347-6edd9a108e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3600,
+      "height": 2294,
+      "blurHash": "LPKm;54mE3peK-Mw?E-;-:obNei_",
+      "color": "#8c7359",
+      "alt": "a woman standing at a counter in a store",
+      "author": "Cova Software",
+      "authorUrl": "https://unsplash.com/@covasoftware?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-standing-at-a-counter-in-a-store-QHa2BO6AlAg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBA27E",
+          "w": 0.3472
+        },
+        {
+          "hex": "#DCD3CB",
+          "w": 0.3369
+        },
+        {
+          "hex": "#8E694A",
+          "w": 0.3159
+        }
+      ]
+    },
+    {
+      "id": "iirbrh939yc",
+      "small": "https://images.unsplash.com/photo-1585980205396-b0680dbe2ded?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585980205396-b0680dbe2ded?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaGFybWFjeSUyMGNvdW50ZXIlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkxODM4OTQ3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LcMQ-LV=RiIB~qIUWAxtRjxuWBxu",
+      "color": "#d9d9d9",
+      "alt": "woman in gray sweater holding pen",
+      "author": "Adam Winger",
+      "authorUrl": "https://unsplash.com/@awcreativeut?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-gray-sweater-holding-pen-iirbrh939yc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E7E8E5",
+          "w": 0.4889
+        },
+        {
+          "hex": "#BAB9AE",
+          "w": 0.384
+        },
+        {
+          "hex": "#221E1A",
+          "w": 0.127
+        }
+      ]
+    },
+    {
+      "id": "0-HAIyTj7Xw",
+      "small": "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1586015555751-63bb77f4322a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LIL;dH?v?w.8E0t7x]t8RkafRjoe",
+      "color": "#d9d9d9",
+      "alt": "white and red labeled bottles",
+      "author": "freestocks",
+      "authorUrl": "https://unsplash.com/@freestocks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-red-labeled-bottles-0-HAIyTj7Xw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3ADAC",
+          "w": 0.5159
+        },
+        {
+          "hex": "#D4D2D3",
+          "w": 0.3801
+        },
+        {
+          "hex": "#8C8380",
+          "w": 0.104
+        }
+      ]
+    },
+    {
+      "id": "FLntgQJNjD0",
+      "small": "https://images.unsplash.com/photo-1696861308115-54a5e5a134b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1696861308115-54a5e5a134b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3600,
+      "height": 2400,
+      "blurHash": "LNHVCs-=M~M{4nIUoet601xat7oz",
+      "color": "#737359",
+      "alt": "a shelf filled with lots of different types of medicine",
+      "author": "David Trinks",
+      "authorUrl": "https://unsplash.com/@dtrinksrph?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-filled-with-lots-of-different-types-of-medicine-FLntgQJNjD0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E6F60",
+          "w": 0.4585
+        },
+        {
+          "hex": "#A4A396",
+          "w": 0.2841
+        },
+        {
+          "hex": "#CCCDC2",
+          "w": 0.2574
+        }
+      ]
+    },
+    {
+      "id": "THdmJFIBEI8",
+      "small": "https://images.unsplash.com/photo-1528272252360-5efd274e36fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1528272252360-5efd274e36fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3651,
+      "height": 3283,
+      "blurHash": "L3EMO1o}Mv9H4VMz%gaK4nx?M|of",
+      "color": "#404040",
+      "alt": "assorted labeled bottle on display shelf",
+      "author": "Angel Sinigersky",
+      "authorUrl": "https://unsplash.com/@sinigersky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-labeled-bottle-on-display-shelf-THdmJFIBEI8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5B5D49",
+          "w": 0.3629
+        },
+        {
+          "hex": "#81826B",
+          "w": 0.3537
+        },
+        {
+          "hex": "#B2B198",
+          "w": 0.2834
+        }
+      ]
+    },
+    {
+      "id": "ZWXBPqf0rlI",
+      "small": "https://images.unsplash.com/photo-1611072965169-e1534f6f300c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611072965169-e1534f6f300c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWRpY2luZSUyMGJvdHRsZXMlMjBzaGVsdmVzfGVufDF8MHx8fDE3OTE4Mzg5NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 1996,
+      "blurHash": "LLGS4HtRNG%M00RP-pt7MvIURla#",
+      "color": "#594026",
+      "alt": "white plastic bottles on brown wooden shelf",
+      "author": "THLT LCX",
+      "authorUrl": "https://unsplash.com/@thlt_lcx?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-bottles-on-brown-wooden-shelf-ZWXBPqf0rlI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4E3B22",
+          "w": 0.4211
+        },
+        {
+          "hex": "#C7C3C6",
+          "w": 0.3079
+        },
+        {
+          "hex": "#9C9898",
+          "w": 0.271
+        }
+      ]
+    }
+  ]
+}

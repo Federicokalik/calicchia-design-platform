@@ -1,0 +1,335 @@
+{
+  "slug": "architetti",
+  "queries": [
+    "architectural model desk",
+    "building facade sunlight",
+    "concrete staircase"
+  ],
+  "generatedAt": "2026-10-12T21:03:33.806Z",
+  "photos": [
+    {
+      "id": "Mb32AJpqd-g",
+      "small": "https://images.unsplash.com/photo-1624066969616-69b0b0301d4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624066969616-69b0b0301d4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "L7IX]a-=RN-n?c%MI^x^*0RiDhxu",
+      "color": "#a6a6a6",
+      "alt": "white and brown building miniature",
+      "author": "Zhouxing Lu",
+      "authorUrl": "https://unsplash.com/@lorem_ipsuman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-building-miniature-Mb32AJpqd-g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A39E97",
+          "w": 0.3953
+        },
+        {
+          "hex": "#B1B1B1",
+          "w": 0.3385
+        },
+        {
+          "hex": "#958C7D",
+          "w": 0.2662
+        }
+      ]
+    },
+    {
+      "id": "hoIkcgbU2R8",
+      "small": "https://images.unsplash.com/photo-1631454965644-00510875561f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631454965644-00510875561f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LIA0ad%L0LE1ShbHsTo04:M|-pxu",
+      "color": "#262626",
+      "alt": "white wooden 3 layer shelf",
+      "author": "Marsumilae",
+      "authorUrl": "https://unsplash.com/@marsumilae?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-wooden-3-layer-shelf-hoIkcgbU2R8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#020102",
+          "w": 0.5108
+        },
+        {
+          "hex": "#201B1B",
+          "w": 0.2737
+        },
+        {
+          "hex": "#80634C",
+          "w": 0.2156
+        }
+      ]
+    },
+    {
+      "id": "xOszZJGtKeA",
+      "small": "https://images.unsplash.com/photo-1624066969649-fb75b5a7cc97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624066969649-fb75b5a7cc97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LKJkWExWRi%N.TRQWBM{%#R*tRV@",
+      "color": "#c0c0c0",
+      "alt": "white and brown miniature house",
+      "author": "Zhouxing Lu",
+      "authorUrl": "https://unsplash.com/@lorem_ipsuman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-miniature-house-xOszZJGtKeA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3AEA7",
+          "w": 0.3691
+        },
+        {
+          "hex": "#A3907C",
+          "w": 0.3318
+        },
+        {
+          "hex": "#C0C4C3",
+          "w": 0.2991
+        }
+      ]
+    },
+    {
+      "id": "oD7Da13jles",
+      "small": "https://images.unsplash.com/photo-1582057811341-a22d524c6a4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1582057811341-a22d524c6a4c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcmNoaXRlY3R1cmFsJTIwbW9kZWwlMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKD0Go%M9Fof~qxuIURjayt7RjRj",
+      "color": "#737373",
+      "alt": "grayscale photo of chair and table",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@t0nn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-chair-and-table-oD7Da13jles?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A7A7A",
+          "w": 0.467
+        },
+        {
+          "hex": "#474747",
+          "w": 0.286
+        },
+        {
+          "hex": "#1D1D1D",
+          "w": 0.247
+        }
+      ]
+    },
+    {
+      "id": "FY7t5i2OnCA",
+      "small": "https://images.unsplash.com/photo-1764072779195-029553f217fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1764072779195-029553f217fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3024,
+      "height": 2005,
+      "blurHash": "LIFh^kob?Es+IB~T-pIp9GD%E2%M",
+      "color": "#262626",
+      "alt": "Yellow building facade with open shutters on window",
+      "author": "Khanh Do",
+      "authorUrl": "https://unsplash.com/@donguyenkhanhs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-building-facade-with-open-shutters-on-window-FY7t5i2OnCA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4B453A",
+          "w": 0.3881
+        },
+        {
+          "hex": "#191920",
+          "w": 0.3521
+        },
+        {
+          "hex": "#E9D9B5",
+          "w": 0.2598
+        }
+      ]
+    },
+    {
+      "id": "ZbeMRaCz5NE",
+      "small": "https://images.unsplash.com/photo-1776168118041-7cee7cf466ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1776168118041-7cee7cf466ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LXI|mJ8~wdS3~RrsNHkBE4baoft5",
+      "color": "#d9c059",
+      "alt": "Warm brick building with a green bush in front",
+      "author": "sunny",
+      "authorUrl": "https://unsplash.com/@sunnyx999?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/warm-brick-building-with-a-green-bush-in-front-ZbeMRaCz5NE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2B74A",
+          "w": 0.4145
+        },
+        {
+          "hex": "#B26F0C",
+          "w": 0.3964
+        },
+        {
+          "hex": "#080602",
+          "w": 0.1892
+        }
+      ]
+    },
+    {
+      "id": "Q8z51xkbYao",
+      "small": "https://images.unsplash.com/photo-1737256358758-fd231dd6a6e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1737256358758-fd231dd6a6e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "L99i;:-p0f-U%2SfR*sU5RNa-Vay",
+      "color": "#402626",
+      "alt": "A tall building with red and black windows",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tall-building-with-red-and-black-windows-Q8z51xkbYao?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3C181B",
+          "w": 0.4597
+        },
+        {
+          "hex": "#0B0A0D",
+          "w": 0.4155
+        },
+        {
+          "hex": "#6D3131",
+          "w": 0.1248
+        }
+      ]
+    },
+    {
+      "id": "0Ls7-3ot9u0",
+      "small": "https://images.unsplash.com/photo-1768268958096-96ec77907596?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768268958096-96ec77907596?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidWlsZGluZyUyMGZhY2FkZSUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzkwMDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5792,
+      "height": 3861,
+      "blurHash": "L.HC4c00-;Rij[WAj[ofWBjsj[fQ",
+      "color": "#f3f3f3",
+      "alt": "Modern building facade with geometric patterns and reflections",
+      "author": "Shengnan Gao",
+      "authorUrl": "https://unsplash.com/@sgao?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-building-facade-with-geometric-patterns-and-reflections-0Ls7-3ot9u0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2C3D53",
+          "w": 0.4311
+        },
+        {
+          "hex": "#E9E8E7",
+          "w": 0.3326
+        },
+        {
+          "hex": "#0C0D0F",
+          "w": 0.2363
+        }
+      ]
+    },
+    {
+      "id": "NRLnzGXtoE4",
+      "small": "https://images.unsplash.com/photo-1586871608370-4adee64d1794?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1586871608370-4adee64d1794?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8639,
+      "height": 5671,
+      "blurHash": "LnK_E^MxR%Rj~qogRPt6IVtQofj[",
+      "color": "#d9d9d9",
+      "alt": "white concrete wall during daytime",
+      "author": "Dorsa Masghati",
+      "authorUrl": "https://unsplash.com/@dorsamasghati?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-concrete-wall-during-daytime-NRLnzGXtoE4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9DAD8",
+          "w": 0.4333
+        },
+        {
+          "hex": "#C6C5C1",
+          "w": 0.3392
+        },
+        {
+          "hex": "#70685C",
+          "w": 0.2275
+        }
+      ]
+    },
+    {
+      "id": "JemurGvknSc",
+      "small": "https://images.unsplash.com/photo-1725544029886-f740b6e28596?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725544029886-f740b6e28596?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LYK^y$9a0K?HE1j[V@xaRkxaNGs:",
+      "color": "#f3d9d9",
+      "alt": "A man riding a skateboard down a set of stairs",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-riding-a-skateboard-down-a-set-of-stairs-JemurGvknSc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4D2C9",
+          "w": 0.4082
+        },
+        {
+          "hex": "#AFA5A1",
+          "w": 0.3553
+        },
+        {
+          "hex": "#737376",
+          "w": 0.2365
+        }
+      ]
+    },
+    {
+      "id": "tXxyqjaXvRs",
+      "small": "https://images.unsplash.com/photo-1569271836752-ed9351b75521?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1569271836752-ed9351b75521?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4555,
+      "height": 3040,
+      "blurHash": "LDE:b]0KoLayOF%N-;Rit7t7MxIU",
+      "color": "#8ca6a6",
+      "alt": "white stairs",
+      "author": "Stéphane Mingot",
+      "authorUrl": "https://unsplash.com/@smingot?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-stairs-tXxyqjaXvRs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#969FAB",
+          "w": 0.4116
+        },
+        {
+          "hex": "#72879A",
+          "w": 0.3936
+        },
+        {
+          "hex": "#435668",
+          "w": 0.1948
+        }
+      ]
+    },
+    {
+      "id": "HU9CjnRWEMM",
+      "small": "https://images.unsplash.com/photo-1529926279675-c72f1da4eb2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1529926279675-c72f1da4eb2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jcmV0ZSUyMHN0YWlyY2FzZXxlbnwxfDB8fHwxNzkxODM5MDEwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2842,
+      "height": 1920,
+      "blurHash": "LXG8y7WBRkof0Ls:azay9FWBofa{",
+      "color": "#262626",
+      "alt": "gray concrete stair during daytime",
+      "author": "Bogdan Karlenko",
+      "authorUrl": "https://unsplash.com/@bogdan_karlenko?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-concrete-stair-during-daytime-HU9CjnRWEMM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B1C17",
+          "w": 0.4778
+        },
+        {
+          "hex": "#DECDB6",
+          "w": 0.3165
+        },
+        {
+          "hex": "#575445",
+          "w": 0.2057
+        }
+      ]
+    }
+  ]
+}

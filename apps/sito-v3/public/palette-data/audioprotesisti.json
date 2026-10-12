@@ -1,0 +1,223 @@
+{
+  "slug": "audioprotesisti",
+  "queries": [
+    "hearing aid close up",
+    "hearing clinic interior",
+    "hearing aid case"
+  ],
+  "generatedAt": "2026-10-12T21:03:17.963Z",
+  "photos": [
+    {
+      "id": "bmzkW_nN0pQ",
+      "small": "https://images.unsplash.com/photo-1596088728260-08a654466a00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596088728260-08a654466a00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3670,
+      "height": 2752,
+      "blurHash": "LRHm_s0yXmoytlt6NGoKXSsnjZWC",
+      "color": "#734040",
+      "alt": "person wearing silver framed eyeglasses",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-silver-framed-eyeglasses-bmzkW_nN0pQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C89583",
+          "w": 0.3609
+        },
+        {
+          "hex": "#7B4C3F",
+          "w": 0.354
+        },
+        {
+          "hex": "#957263",
+          "w": 0.2852
+        }
+      ]
+    },
+    {
+      "id": "zQlHjxx3vSU",
+      "small": "https://images.unsplash.com/photo-1667581278300-a4035a2a5cd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1667581278300-a4035a2a5cd8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "LWFrO%%MJ7-:~V%MS1s.RkxZjFM{",
+      "color": "#404040",
+      "alt": "a man with his hands on his face",
+      "author": "Anthony Camerlo",
+      "authorUrl": "https://unsplash.com/@anthonycamerlo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-with-his-hands-on-his-face-zQlHjxx3vSU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4E452F",
+          "w": 0.4665
+        },
+        {
+          "hex": "#D8BBA2",
+          "w": 0.2811
+        },
+        {
+          "hex": "#12100E",
+          "w": 0.2524
+        }
+      ]
+    },
+    {
+      "id": "QpOxts03rps",
+      "small": "https://images.unsplash.com/photo-1596088869451-491e167efabb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596088869451-491e167efabb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4441,
+      "height": 2690,
+      "blurHash": "LWIzq~0fXSj?XmoKV[oLt7oLaeR+",
+      "color": "#c0a68c",
+      "alt": "person wearing white and black sunglasses",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-white-and-black-sunglasses-QpOxts03rps?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CD9F8C",
+          "w": 0.3898
+        },
+        {
+          "hex": "#A17B68",
+          "w": 0.376
+        },
+        {
+          "hex": "#806254",
+          "w": 0.2342
+        }
+      ]
+    },
+    {
+      "id": "YVvBYS3AMXY",
+      "small": "https://images.unsplash.com/photo-1692160756286-577a79b17e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1692160756286-577a79b17e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoZWFyaW5nJTIwYWlkJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkxODM4OTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3269,
+      "height": 2913,
+      "blurHash": "LDH1[3~C-V%L5+4.NGf*x]xaM{NG",
+      "color": "#8c8c73",
+      "alt": "a person holding a fake banana in their hand",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-fake-banana-in-their-hand-YVvBYS3AMXY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#91877A",
+          "w": 0.4446
+        },
+        {
+          "hex": "#756A5D",
+          "w": 0.3
+        },
+        {
+          "hex": "#C6A497",
+          "w": 0.2555
+        }
+      ]
+    },
+    {
+      "id": "T4llNlZrLzc",
+      "small": "https://images.unsplash.com/photo-1603336540413-009bd9dc5133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603336540413-009bd9dc5133?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LHJ%tM~V?F-qpH-;%2Vt57IUn,-:",
+      "color": "#d9c0a6",
+      "alt": "woman wearing blue stud earring",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-wearing-blue-stud-earring-T4llNlZrLzc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AB886B",
+          "w": 0.3736
+        },
+        {
+          "hex": "#D3B49B",
+          "w": 0.371
+        },
+        {
+          "hex": "#8B6144",
+          "w": 0.2554
+        }
+      ]
+    },
+    {
+      "id": "RNue9Vxx2sc",
+      "small": "https://images.unsplash.com/photo-1603336540535-c661f8f23fd5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603336540535-c661f8f23fd5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LIKT6_cs%}XS?^t7I;J7EMnPMxMy",
+      "color": "#a67359",
+      "alt": "person wearing black framed eyeglasses",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-black-framed-eyeglasses-RNue9Vxx2sc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CAAB9C",
+          "w": 0.3947
+        },
+        {
+          "hex": "#BC7D6C",
+          "w": 0.3443
+        },
+        {
+          "hex": "#9D594A",
+          "w": 0.2609
+        }
+      ]
+    },
+    {
+      "id": "8Kw_tx1NDP4",
+      "small": "https://images.unsplash.com/photo-1596088895058-907b2b6d0320?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596088895058-907b2b6d0320?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4564,
+      "height": 3225,
+      "blurHash": "LUG8y89ZNt$%%fIVWBof0fs:aeWB",
+      "color": "#c0a68c",
+      "alt": "person holding silver nail cutter",
+      "author": "Mark Paton",
+      "authorUrl": "https://unsplash.com/@mark0polo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-silver-nail-cutter-8Kw_tx1NDP4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6B39A",
+          "w": 0.4058
+        },
+        {
+          "hex": "#918167",
+          "w": 0.3171
+        },
+        {
+          "hex": "#3A4744",
+          "w": 0.277
+        }
+      ]
+    },
+    {
+      "id": "TuR7BUyD5ZU",
+      "small": "https://images.unsplash.com/photo-1673290690953-0fc8a6ce46ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1673290690953-0fc8a6ce46ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxoZWFyaW5nJTIwYWlkJTIwY2FzZXxlbnwxfDB8fHwxNzkxODM4OTk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LF7-ZvWB4nxuRjoft7Rj00of_2Rj",
+      "color": "#f3f3f3",
+      "alt": "a pair of earbuds in a case on a black surface",
+      "author": "Fortas Nour El Islem Yaakoub",
+      "authorUrl": "https://unsplash.com/@j_acoub?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pair-of-earbuds-in-a-case-on-a-black-surface-TuR7BUyD5ZU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#050707",
+          "w": 0.9145
+        },
+        {
+          "hex": "#D7D5D3",
+          "w": 0.0855
+        }
+      ]
+    }
+  ]
+}

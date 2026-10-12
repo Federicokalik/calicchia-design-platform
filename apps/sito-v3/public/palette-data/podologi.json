@@ -1,0 +1,119 @@
+{
+  "slug": "podologi",
+  "queries": [
+    "podiatry clinic interior",
+    "foot examination room",
+    "podiatry instruments tray"
+  ],
+  "generatedAt": "2026-10-12T21:03:01.202Z",
+  "photos": [
+    {
+      "id": "AR1cMqsbqt4",
+      "small": "https://images.unsplash.com/photo-1727830968495-ea2798aaee35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1727830968495-ea2798aaee35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4249,
+      "height": 2834,
+      "blurHash": "LIJ*rL~WIAs,-oIAxYxZ9GsmV?W=",
+      "color": "#c0c0d9",
+      "alt": "A hospital bed with surgical equipment on top of it",
+      "author": "Jonathan Borba",
+      "authorUrl": "https://unsplash.com/@jonathanborba?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hospital-bed-with-surgical-equipment-on-top-of-it-AR1cMqsbqt4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C0BFD1",
+          "w": 0.6075
+        },
+        {
+          "hex": "#A1A0BB",
+          "w": 0.2779
+        },
+        {
+          "hex": "#7B7695",
+          "w": 0.1147
+        }
+      ]
+    },
+    {
+      "id": "G-1T9ECL5ic",
+      "small": "https://images.unsplash.com/photo-1690306815542-3c0e7b85e996?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1690306815542-3c0e7b85e996?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUM7u?4otRx]?d%NkCxu?bofWAfO",
+      "color": "#f3f3f3",
+      "alt": "a metal tray with scissors and other medical supplies",
+      "author": "Mateo Hernandez Reyes",
+      "authorUrl": "https://unsplash.com/@mattreyes7?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-metal-tray-with-scissors-and-other-medical-supplies-G-1T9ECL5ic?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2C0C2",
+          "w": 0.4212
+        },
+        {
+          "hex": "#ECECED",
+          "w": 0.3393
+        },
+        {
+          "hex": "#939094",
+          "w": 0.2395
+        }
+      ]
+    },
+    {
+      "id": "y8fWicGsv4g",
+      "small": "https://images.unsplash.com/photo-1619988252418-a1e6ee10b122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1619988252418-a1e6ee10b122?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDNU9k8_4n?at-4TR:IU4mDiI9%M",
+      "color": "#f3f3f3",
+      "alt": "stainless steel fork and bread knife on white ceramic plate",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stainless-steel-fork-and-bread-knife-on-white-ceramic-plate-y8fWicGsv4g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E5EDF8",
+          "w": 0.6072
+        },
+        {
+          "hex": "#B8C5DB",
+          "w": 0.2468
+        },
+        {
+          "hex": "#7494BD",
+          "w": 0.146
+        }
+      ]
+    },
+    {
+      "id": "Z6sbbTdPJTY",
+      "small": "https://images.unsplash.com/photo-1688565631957-0306970fdd74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1688565631957-0306970fdd74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb2RpYXRyeSUyMGluc3RydW1lbnRzJTIwdHJheXxlbnwxfDB8fHwxNzkxODM4OTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LKH2[[^i8^t7WFVCogo#E2$zkXI[",
+      "color": "#a6c0c0",
+      "alt": "a tray with surgical instruments on top of it",
+      "author": "César Badilla Miranda",
+      "authorUrl": "https://unsplash.com/@xbmpro?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tray-with-surgical-instruments-on-top-of-it-Z6sbbTdPJTY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A7B8C2",
+          "w": 0.546
+        },
+        {
+          "hex": "#94999D",
+          "w": 0.3621
+        },
+        {
+          "hex": "#46697F",
+          "w": 0.0919
+        }
+      ]
+    }
+  ]
+}

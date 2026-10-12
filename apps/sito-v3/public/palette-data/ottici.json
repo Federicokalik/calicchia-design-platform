@@ -1,0 +1,254 @@
+{
+  "slug": "ottici",
+  "queries": [
+    "optician shop interior",
+    "eyeglass frames display",
+    "spectacles on wooden counter"
+  ],
+  "generatedAt": "2026-10-12T21:03:13.731Z",
+  "photos": [
+    {
+      "id": "rOC-_ssUw2o",
+      "small": "https://images.unsplash.com/photo-1786801076712-2e5b9641a4af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcHRpY2lhbiUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTg3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786801076712-2e5b9641a4af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcHRpY2lhbiUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM4OTg3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3082,
+      "height": 2043,
+      "blurHash": "LG9@-P9ZI;?u?uS$X8%f4U%gx[Rk",
+      "color": "#0c2626",
+      "alt": "A person standing in the doorway of an optician shop at night",
+      "author": "Isaac Owens",
+      "authorUrl": "https://unsplash.com/@isaacowens?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-doorway-of-optician-shop-rOC-_ssUw2o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C1222",
+          "w": 0.611
+        },
+        {
+          "hex": "#233D48",
+          "w": 0.2235
+        },
+        {
+          "hex": "#708E87",
+          "w": 0.1655
+        }
+      ]
+    },
+    {
+      "id": "Zt99Ho5Hq3s",
+      "small": "https://images.unsplash.com/photo-1611222777277-61319d63ca94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611222777277-61319d63ca94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3986,
+      "blurHash": "L4OgKSxr-nr=_NIUkVNbxW%gbJkX",
+      "color": "#f3f3f3",
+      "alt": "black framed sunglasses on white surface",
+      "author": "omid armin",
+      "authorUrl": "https://unsplash.com/@itsomidarmin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-framed-sunglasses-on-white-surface-Zt99Ho5Hq3s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EAECF1",
+          "w": 0.531
+        },
+        {
+          "hex": "#C5C3C9",
+          "w": 0.4023
+        },
+        {
+          "hex": "#A89993",
+          "w": 0.0667
+        }
+      ]
+    },
+    {
+      "id": "G8ioIHUDfNc",
+      "small": "https://images.unsplash.com/photo-1534078477103-9f6a18b3a5e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1534078477103-9f6a18b3a5e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "L5Fr|u9F00V?R4ozI;WAD$MxV?R.",
+      "color": "#c0c0c0",
+      "alt": "eyeglasses lot",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/eyeglasses-lot-G8ioIHUDfNc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#878988",
+          "w": 0.402
+        },
+        {
+          "hex": "#AFB1B0",
+          "w": 0.3582
+        },
+        {
+          "hex": "#5E5F5D",
+          "w": 0.2398
+        }
+      ]
+    },
+    {
+      "id": "oqlEKLMmTNg",
+      "small": "https://images.unsplash.com/photo-1608539733377-5557e02926b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1608539733377-5557e02926b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4058,
+      "height": 3044,
+      "blurHash": "LGKKydRONGoy4mMxs:V@DhMwX9oz",
+      "color": "#d9d9d9",
+      "alt": "brown and black framed eyeglasses",
+      "author": "wu yi",
+      "authorUrl": "https://unsplash.com/@takeshi2?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-black-framed-eyeglasses-oqlEKLMmTNg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D0CECF",
+          "w": 0.456
+        },
+        {
+          "hex": "#A8A1A0",
+          "w": 0.2888
+        },
+        {
+          "hex": "#85756C",
+          "w": 0.2552
+        }
+      ]
+    },
+    {
+      "id": "UsALNdok2m4",
+      "small": "https://images.unsplash.com/photo-1486250944723-86bca2b15b06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1486250944723-86bca2b15b06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxleWVnbGFzcyUyMGZyYW1lcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MTgzODk4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 2730,
+      "blurHash": "LjLXD9~qt7RjR*a|ayaejGoLbHbH",
+      "color": "#d9d9d9",
+      "alt": "arranged assorted-color eyeglasses on rack",
+      "author": "Scott Van Daalen",
+      "authorUrl": "https://unsplash.com/@scottvd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/arranged-assorted-color-eyeglasses-on-rack-UsALNdok2m4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9C928C",
+          "w": 0.3895
+        },
+        {
+          "hex": "#C1BAB6",
+          "w": 0.3129
+        },
+        {
+          "hex": "#E5E3E0",
+          "w": 0.2976
+        }
+      ]
+    },
+    {
+      "id": "y_dKn7bsPQk",
+      "small": "https://images.unsplash.com/photo-1766431066346-5dd7bcab22a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766431066346-5dd7bcab22a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8040,
+      "height": 6026,
+      "blurHash": "LSFrt;?c-=%M?bxut7t700M{M{Rj",
+      "color": "#f3f3f3",
+      "alt": "Kitchen counter with cooking utensils and bottles",
+      "author": "Annie Spratt",
+      "authorUrl": "https://unsplash.com/@anniespratt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/kitchen-counter-with-cooking-utensils-and-bottles-y_dKn7bsPQk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D5248",
+          "w": 0.3779
+        },
+        {
+          "hex": "#979189",
+          "w": 0.3707
+        },
+        {
+          "hex": "#221811",
+          "w": 0.2514
+        }
+      ]
+    },
+    {
+      "id": "FW6rGAoEjr4",
+      "small": "https://images.unsplash.com/photo-1766431066919-9c11fbb6d3da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766431066919-9c11fbb6d3da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8023,
+      "height": 6025,
+      "blurHash": "LUG+K[~q%NRj?bt7t7of4oWUWBt7",
+      "color": "#f3f3f3",
+      "alt": "Kitchen counter with cooking utensils and stove",
+      "author": "Annie Spratt",
+      "authorUrl": "https://unsplash.com/@anniespratt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/kitchen-counter-with-cooking-utensils-and-stove-FW6rGAoEjr4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#989589",
+          "w": 0.3772
+        },
+        {
+          "hex": "#5A563F",
+          "w": 0.3616
+        },
+        {
+          "hex": "#17160A",
+          "w": 0.2612
+        }
+      ]
+    },
+    {
+      "id": "E0pgh5Yg2LA",
+      "small": "https://images.unsplash.com/photo-1759801345051-0d5d3713efb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759801345051-0d5d3713efb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5932,
+      "height": 3955,
+      "blurHash": "L27,#+M|5SoL~8r?IoWV0$%0aLjY",
+      "color": "#40260c",
+      "alt": "Stack of square wooden bowls on a shelf",
+      "author": "Jay Sekhar",
+      "authorUrl": "https://unsplash.com/@js5928?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-square-wooden-bowls-on-a-shelf-E0pgh5Yg2LA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4D3926",
+          "w": 0.3939
+        },
+        {
+          "hex": "#392211",
+          "w": 0.3749
+        },
+        {
+          "hex": "#231107",
+          "w": 0.2313
+        }
+      ]
+    },
+    {
+      "id": "9V4WE9WOl1I",
+      "small": "https://images.unsplash.com/photo-1783181588408-2f6ec06715ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783181588408-2f6ec06715ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcGVjdGFjbGVzJTIwb24lMjB3b29kZW4lMjBjb3VudGVyfGVufDF8MHx8fDE3OTE4Mzg5OTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LCB.[kJ74:rr~WS2D*WBIon%Nbbv",
+      "color": "#260c0c",
+      "alt": "Decorative wooden barrel dispenser, glasses, and plant on a table",
+      "author": "Tanja Tepavac",
+      "authorUrl": "https://unsplash.com/@ttepavac?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/decorative-wooden-barrel-dispenser-glasses-and-plant-on-a-table-9V4WE9WOl1I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#311A08",
+          "w": 0.4909
+        },
+        {
+          "hex": "#5E341C",
+          "w": 0.2608
+        },
+        {
+          "hex": "#8F6144",
+          "w": 0.2484
+        }
+      ]
+    }
+  ]
+}
