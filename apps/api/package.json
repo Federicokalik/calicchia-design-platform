@@ -24,7 +24,8 @@
     "test:smoke": "tsx test/run.ts smoke",
     "test:contracts": "tsx test/run.ts contracts",
     "test:calendar": "tsx test/run.ts calendar",
-    "test:integration": "tsx test/run.ts integration"
+    "test:integration": "tsx test/run.ts integration",
+    "test:palette": "tsx test/run.ts palette"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
