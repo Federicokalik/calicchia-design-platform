@@ -66,7 +66,7 @@ export async function HeroNarrative() {
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               href={localizedPath('/contatti', locale)}
-              className="inline-flex min-h-[44px] items-center gap-3 border border-[var(--color-ink)] bg-[var(--color-ink)] px-5 py-3 text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-bg)] transition-colors hover:border-[var(--color-accent-deep)] hover:bg-[var(--color-accent-deep)]"
+              className="inline-flex min-h-[44px] items-center gap-3 border border-[var(--color-ink)] bg-[var(--color-ink)] px-5 py-3 text-xs font-medium uppercase tracking-[0.18em] text-[var(--color-bg)] transition-colors hover:border-[var(--color-accent-deep)] hover:bg-[var(--color-accent-deep)] hover:text-[var(--color-accent-ink)]"
             >
               {t('ctaPrimary')}
               <ArrowRight size={16} weight="regular" aria-hidden />
