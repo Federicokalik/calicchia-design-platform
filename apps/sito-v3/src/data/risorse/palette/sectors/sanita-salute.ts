@@ -1243,8 +1243,8 @@ export const SANITA_SALUTE_SECTORS: PaletteSectorContent[] = [
     "slug": "podologi",
     "preset": "netto",
     "queriesEn": [
-      "podiatry clinic interior",
-      "foot examination room",
+      "orthopedic shoes",
+      "feet massage treatment",
       "podiatry instruments tray"
     ],
     "aliases": {
