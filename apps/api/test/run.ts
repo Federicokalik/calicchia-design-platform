@@ -34,6 +34,9 @@ const SUITES: Record<string, string> = {
   // Radicale reale, mock di verify-credentials e inventario: senza Radicale le
   // suite che lo richiedono vengono saltate (helpers/radicale.ts).
   integration: 'test/integration/**/*.test.ts',
+  // Tool "Palette di settore": route /api/palette, brand_palette sul lead e
+  // sequenza email (fetch sostituito, nessuna rete).
+  palette: 'test/palette/**/*.test.ts',
 };
 
 /** Opzioni di node --test che accettano il valore come argomento separato. */

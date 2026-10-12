@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { brandPaletteSchema } from './palette/share';
 
 export const contactSchema = z.object({
   name: z.string().min(2, 'Il nome deve avere almeno 2 caratteri'),
@@ -45,6 +46,9 @@ export const publicContactSchema = z.object({
   source_profession: z.string().max(64).optional(),
   lead_source: z.string().trim().max(64, 'Origine lead troppo lunga').optional().or(z.literal('')).transform((v) => v || undefined),
   meet_slot: z.string().regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/, 'Formato slot non valido').optional().or(z.literal('')).transform((v) => v || undefined),
+  // Palette del tool "Palette di settore" (link condividi → /contatti?palette=…).
+  // Una palette non valida viene scartata, non blocca il contatto.
+  brand_palette: brandPaletteSchema.optional().catch(undefined),
 }).passthrough();
 export type PublicContactBody = z.infer<typeof publicContactSchema>;
 

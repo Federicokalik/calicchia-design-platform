@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { publicContactSchema, firstZodIssue } from '@calicchia/shared';
-import { sql } from '../db';
+import { sql, jsonb } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { sendContactNotification } from '../lib/email';
 import { captcha } from '../lib/captcha';
@@ -21,6 +21,11 @@ import {
   scheduleAuditOnboardingSequence,
   runLeadAuditSequence,
 } from '../jobs/lead-audit-sequence';
+import {
+  isPaletteLeadSource,
+  schedulePaletteOnboardingSequence,
+  runLeadPaletteSequence,
+} from '../jobs/lead-palette-sequence';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'contacts' });
@@ -94,11 +99,14 @@ contacts.post('/', async (c) => {
     source_page, source_service, source_profession,
     lead_source,
     meet_slot,
+    brand_palette,
   } = parsed.data;
 
   const safeServices = services ?? null;
   const safeSectors = sectors ?? null;
   const safeLeadSource = lead_source ?? null;
+  // Palette dal tool "Palette di settore": già validata da brandPaletteSchema.
+  const brandPalette = brand_palette ?? null;
 
   // Crea booking interno se l'utente ha scelto uno slot
   let calBookingUid: string | null = null;
@@ -170,7 +178,8 @@ contacts.post('/', async (c) => {
       source_page, source_service, source_profession,
       lead_source,
       meet_slot, cal_booking_uid,
-      consent_ip, consent_user_agent
+      consent_ip, consent_user_agent,
+      brand_palette
     )
     VALUES (
       ${name},
@@ -190,7 +199,8 @@ contacts.post('/', async (c) => {
       ${meet_slot || null},
       ${calBookingUid},
       ${consentIp},
-      ${consentUserAgent}
+      ${consentUserAgent},
+      ${jsonb(brandPalette)}
     )
     RETURNING id
   `;
@@ -201,10 +211,16 @@ contacts.post('/', async (c) => {
       .catch((err) => log.error({ err }, 'audit sequence schedule failed'));
   }
 
+  if (isPaletteLeadSource(safeLeadSource)) {
+    schedulePaletteOnboardingSequence(inserted.id, safeLeadSource, brandPalette)
+      .then((scheduled) => (scheduled ? runLeadPaletteSequence() : undefined))
+      .catch((err) => log.error({ err }, 'palette sequence schedule failed'));
+  }
+
   // Auto-create lead in pipeline + notify Telegram
   try {
     await sql`
-      INSERT INTO leads (name, email, phone, company, source, source_id, status, notes)
+      INSERT INTO leads (name, email, phone, company, source, source_id, status, notes, brand_palette)
       VALUES (
         ${name},
         ${email},
@@ -213,7 +229,8 @@ contacts.post('/', async (c) => {
         'website_form',
         ${inserted.id},
         'new',
-        ${message || null}
+        ${message || null},
+        ${jsonb(brandPalette)}
       )
     `;
     // Notify via Telegram

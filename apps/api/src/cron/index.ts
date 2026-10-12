@@ -12,6 +12,7 @@ import { runWorkflowScheduler } from './workflow-scheduler';
 import { runMailSync } from './mail-sync';
 import { runBookingReminders } from './booking-reminders';
 import { runLeadAuditSequence } from '../jobs/lead-audit-sequence';
+import { runLeadPaletteSequence } from '../jobs/lead-palette-sequence';
 import { runAnalyticsRetention } from './analytics-retention';
 import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintenance';
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
@@ -72,6 +73,11 @@ const jobs: CronJob[] = [
     name: 'lead-audit-sequence',
     intervalMs: 60 * 60 * 1000,
     run: runLeadAuditSequence,
+  },
+  {
+    name: 'lead-palette-sequence',
+    intervalMs: 60 * 60 * 1000,
+    run: runLeadPaletteSequence,
   },
   {
     name: 'domain-alerts',

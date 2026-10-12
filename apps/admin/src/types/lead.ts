@@ -1,3 +1,5 @@
+import type { BrandPalette } from '@calicchia/shared/palette';
+
 export type LeadStatus = 'new' | 'contacted' | 'proposal' | 'negotiation' | 'won' | 'lost';
 export type LeadSource = 'manual' | 'website_form' | 'calcom' | 'referral';
 
@@ -16,6 +18,8 @@ export interface Lead {
   lost_reason: string | null;
   converted_customer_id: string | null;
   converted_project_id: string | null;
+  /** Palette portata dal tool "Palette di settore" nel modulo contatti (migrazione 166). */
+  brand_palette?: BrandPalette | null;
   created_at: string;
   updated_at: string;
 }

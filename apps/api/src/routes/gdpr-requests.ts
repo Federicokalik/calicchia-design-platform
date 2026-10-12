@@ -154,7 +154,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     quotes,
     invoices,
   ] = await Promise.all([
-    sql`SELECT name, email, phone, company, message, services, sectors, wants_call, wants_meet, source_page, created_at FROM contacts WHERE LOWER(email) = ${email}`,
+    sql`SELECT name, email, phone, company, message, services, sectors, wants_call, wants_meet, source_page, brand_palette, created_at FROM contacts WHERE LOWER(email) = ${email}`,
     sql`SELECT email, name, status, confirmed_at, created_at FROM newsletter_subscribers WHERE LOWER(email) = ${email}`,
     customerIds.length || leadIds.length
       ? sql`SELECT id, chat_id, phone, contact_name, customer_id, lead_id, ai_mode, last_message_at, created_at
@@ -183,7 +183,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
             FROM customers WHERE id = ANY(${customerIds as any})`
       : Promise.resolve([] as any[]),
     leadIds.length
-      ? sql`SELECT id, name, email, phone, company, source, status, notes, tags, gdpr_consent, consent_ip, created_at, updated_at
+      ? sql`SELECT id, name, email, phone, company, source, status, notes, tags, gdpr_consent, consent_ip, brand_palette, created_at, updated_at
             FROM leads WHERE id = ANY(${leadIds as any})`
       : Promise.resolve([] as any[]),
     sql`SELECT email, phone, first_name, last_name, company, role, website, industry, city, country,
@@ -317,6 +317,7 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             tags = '{}'::text[],
             consent_ip = NULL,
             consent_user_agent = NULL,
+            brand_palette = NULL,
             anonymized_at = NOW(),
             updated_at = NOW()
           WHERE id = ANY(${leadIds as any}) RETURNING id`

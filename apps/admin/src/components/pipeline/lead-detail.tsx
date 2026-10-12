@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { GeoAuditPanel } from './geo-audit-panel';
+import { PalettePanel } from './palette-panel';
 import type { Lead, LeadStatus, LeadSource } from '@/types/lead';
 import { LEAD_STATUS_CONFIG, LEAD_SOURCE_CONFIG } from '@/types/lead';
 import { useI18n } from '@/hooks/use-i18n';
@@ -187,6 +188,9 @@ export function LeadDetail({ lead, open, onClose, onSave, onDelete, onConvert, o
 
           {/* GEO Audit (only renders if this lead came from the GEO Audit tool) */}
           <GeoAuditPanel leadId={lead.id} />
+
+          {/* Palette di settore (only renders if the lead brought one from the tool) */}
+          <PalettePanel value={lead.brand_palette} />
 
           {/* Meta */}
           <div className="text-xs text-muted-foreground space-y-1 pt-2 border-t">

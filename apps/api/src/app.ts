@@ -33,6 +33,7 @@ import { blog } from './routes/blog';
 import { projects } from './routes/projects';
 import { contacts } from './routes/contacts';
 import { geoAudit } from './routes/geo-audit';
+import { palette, paletteAdmin } from './routes/palette';
 import { publicLeads } from './routes/public-leads';
 import { analytics } from './routes/analytics';
 import { keys } from './routes/keys';
@@ -286,6 +287,16 @@ app.route('/api/contacts', contacts);
 app.use('/api/geo-audit/scan', postOnly(createRateLimit(15, 10 * 60 * 1000)));
 app.use('/api/geo-audit/unlock', postOnly(createRateLimit(5, 10 * 60 * 1000)));
 app.route('/api/geo-audit', geoAudit);
+// Tool "Palette di settore" (public). La ricerca libera consuma quota Unsplash
+// (50/ora in demo, condivisa con le copertine del blog): oltre a questo limite
+// per IP la route applica un tetto globale orario e una cache di 24 h.
+// /download registra l'uso delle foto (linee guida Unsplash); /unsubscribe è il
+// link firmato delle email palette-onboarding. GET /api/palette/searches è
+// admin-only: router separato (paletteAdmin) dopo i protectedPaths.
+app.use('/api/palette/search', getOnly(createRateLimit(20, 10 * 60 * 1000)));
+app.use('/api/palette/download', postOnly(createRateLimit(30, 10 * 60 * 1000)));
+app.use('/api/palette/unsubscribe', createRateLimit(20, 60 * 1000));
+app.route('/api/palette', palette);
 app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);
 // ICS feed pubblico per subscription esterne (iPhone/macOS Calendar/Outlook)
@@ -494,6 +505,8 @@ const protectedPaths = [
   '/api/whatsapp-admin',
   '/api/admin/kb',
   '/api/cms',
+  // Solo il registro admin: /api/palette/search, /download e /unsubscribe restano pubbliche.
+  '/api/palette/searches',
 ];
 
 // /api/track is intentionally NOT in protectedPaths — it's the cookieless
@@ -562,6 +575,7 @@ app.route('/api/caldav-tokens', caldavTokens);
 app.route('/api/whatsapp-admin', whatsappAdmin);
 app.route('/api/admin/kb', adminKb);
 app.route('/api/cms', cmsAdmin);
+app.route('/api/palette/searches', paletteAdmin);
 
 // Full DB backup/restore — admin-only, rate-limited (3 req / 10 min).
 // Solo export e import: limitare anche GET /info (letta a ogni apertura del

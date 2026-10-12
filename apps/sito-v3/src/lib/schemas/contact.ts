@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { brandPaletteSchema } from '@calicchia/shared/palette';
 
 export const SERVICE_OPTIONS = [
   // Matrix services (4)
@@ -60,6 +61,9 @@ export const contactSchema = z.object({
     .optional()
     .or(z.literal('')),
   turnstile_token: z.string().trim().min(1, 'Verifica anti-bot richiesta.'),
+  // Palette dal link "condividi" del tool Palette di settore (?palette=…).
+  // Va dichiarata qui: z.object scarta i campi non elencati prima dell'invio.
+  brand_palette: brandPaletteSchema.optional(),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
