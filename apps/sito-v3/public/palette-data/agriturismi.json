@@ -1,0 +1,335 @@
+{
+  "slug": "agriturismi",
+  "queries": [
+    "farmhouse olive grove",
+    "vineyard hills",
+    "rustic stone table"
+  ],
+  "generatedAt": "2026-10-12T18:42:53.511Z",
+  "photos": [
+    {
+      "id": "uEgvfFnXgmU",
+      "small": "https://images.unsplash.com/photo-1774281114964-2e3a969d500b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774281114964-2e3a969d500b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4029,
+      "height": 2686,
+      "blurHash": "LZGu?mt7IUjs~pk9WCt7^+j[Rjxa",
+      "color": "#737359",
+      "alt": "Rural landscape with old house and distant mountains",
+      "author": "Marc Wieland",
+      "authorUrl": "https://unsplash.com/@mawiswiss?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rural-landscape-with-old-house-and-distant-mountains-uEgvfFnXgmU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#697354",
+          "w": 0.4476
+        },
+        {
+          "hex": "#929779",
+          "w": 0.3409
+        },
+        {
+          "hex": "#E7E0DA",
+          "w": 0.2115
+        }
+      ]
+    },
+    {
+      "id": "m24V91y_Jm0",
+      "small": "https://images.unsplash.com/photo-1774281108311-a2ec66cbfd5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774281108311-a2ec66cbfd5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7849,
+      "height": 5233,
+      "blurHash": "LwJH,IIoW.bG?^IpoLaypJR+WCa}",
+      "color": "#f3f3f3",
+      "alt": "Rural village nestled in a valley with rolling hills",
+      "author": "Marc Wieland",
+      "authorUrl": "https://unsplash.com/@mawiswiss?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rural-village-nestled-in-a-valley-with-rolling-hills-m24V91y_Jm0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2885C",
+          "w": 0.4971
+        },
+        {
+          "hex": "#665A36",
+          "w": 0.2936
+        },
+        {
+          "hex": "#E9F2EE",
+          "w": 0.2092
+        }
+      ]
+    },
+    {
+      "id": "3UUiAaSM3yY",
+      "small": "https://images.unsplash.com/photo-1789995377277-4b844e420116?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789995377277-4b844e420116?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LaEWgvxuD*xuF*bI%0Wrp0jsM{WB",
+      "color": "#40400c",
+      "alt": "A gravel road lined with tall cypress trees leading to a hilltop villa in Tuscany",
+      "author": "MrDuck Tail",
+      "authorUrl": "https://unsplash.com/@mrducktail?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cypress-trees-and-hilltop-villa-tuscany-3UUiAaSM3yY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7E833B",
+          "w": 0.3395
+        },
+        {
+          "hex": "#414A13",
+          "w": 0.3302
+        },
+        {
+          "hex": "#418BC7",
+          "w": 0.3302
+        }
+      ]
+    },
+    {
+      "id": "AarigHIbqyk",
+      "small": "https://images.unsplash.com/photo-1760192686356-4b9777a9ceb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760192686356-4b9777a9ceb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYXJtaG91c2UlMjBvbGl2ZSUyMGdyb3ZlfGVufDF8MHx8fDE3OTE4MzA1NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L^K1m^ayWWay~qWBWBayogR*WBfk",
+      "color": "#d9d9d9",
+      "alt": "Stone building on a hill with vineyard below",
+      "author": "Wolfgang Hasselmann",
+      "authorUrl": "https://unsplash.com/@wolfgang_hasselmann?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stone-building-on-a-hill-with-vineyard-below-AarigHIbqyk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFDCDA",
+          "w": 0.5728
+        },
+        {
+          "hex": "#584906",
+          "w": 0.2379
+        },
+        {
+          "hex": "#372D00",
+          "w": 0.1893
+        }
+      ]
+    },
+    {
+      "id": "bRw46I773E4",
+      "small": "https://images.unsplash.com/photo-1558138818-34316d616e44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558138818-34316d616e44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5461,
+      "blurHash": "LEB{u+%19ZIo~qxtIoM|OGxZ%2oe",
+      "color": "#26260c",
+      "alt": "green leaf trees at daytime",
+      "author": "Tim Mossholder",
+      "authorUrl": "https://unsplash.com/@timmossholder?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-leaf-trees-at-daytime-bRw46I773E4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#271804",
+          "w": 0.4487
+        },
+        {
+          "hex": "#543E1E",
+          "w": 0.3076
+        },
+        {
+          "hex": "#706A5C",
+          "w": 0.2436
+        }
+      ]
+    },
+    {
+      "id": "gGs55RCA2MY",
+      "small": "https://images.unsplash.com/photo-1717240049346-b6a9f43f4e1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717240049346-b6a9f43f4e1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5129,
+      "height": 3424,
+      "blurHash": "LeFrz;R,RQt6%joen#a#ECs:oIWC",
+      "color": "#40400c",
+      "alt": "a vineyard with a house in the background",
+      "author": "Sue Winston",
+      "authorUrl": "https://unsplash.com/@winniepix?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-vineyard-with-a-house-in-the-background-gGs55RCA2MY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6B579",
+          "w": 0.3677
+        },
+        {
+          "hex": "#837D00",
+          "w": 0.3246
+        },
+        {
+          "hex": "#473800",
+          "w": 0.3077
+        }
+      ]
+    },
+    {
+      "id": "N1c4X5csoTg",
+      "small": "https://images.unsplash.com/photo-1558138818-d44c4dea7a6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558138818-d44c4dea7a6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5461,
+      "blurHash": "LA9jDg~A-oxt^+-UxZt75UE2M|jt",
+      "color": "#260c0c",
+      "alt": "plants and mountains during golden hour",
+      "author": "Tim Mossholder",
+      "authorUrl": "https://unsplash.com/@timmossholder?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/plants-and-mountains-during-golden-hour-N1c4X5csoTg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#40352B",
+          "w": 0.383
+        },
+        {
+          "hex": "#29170B",
+          "w": 0.3476
+        },
+        {
+          "hex": "#62523D",
+          "w": 0.2694
+        }
+      ]
+    },
+    {
+      "id": "-r3ARWNHekk",
+      "small": "https://images.unsplash.com/photo-1558241665-f0512695d322?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558241665-f0512695d322?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2aW5leWFyZCUyMGhpbGxzfGVufDF8MHx8fDE3OTE4MzA1NjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 3958,
+      "blurHash": "LDAco8~B-pxt^,^j-oozx]oMs.kC",
+      "color": "#26260c",
+      "alt": "sun rays through clouds at orchard",
+      "author": "Tim Mossholder",
+      "authorUrl": "https://unsplash.com/@timmossholder?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sun-rays-through-clouds-at-orchard--r3ARWNHekk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2F2114",
+          "w": 0.4226
+        },
+        {
+          "hex": "#473F36",
+          "w": 0.4202
+        },
+        {
+          "hex": "#786947",
+          "w": 0.1572
+        }
+      ]
+    },
+    {
+      "id": "inP1W0FvfyQ",
+      "small": "https://images.unsplash.com/photo-1758619339029-16d3f941cc7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758619339029-16d3f941cc7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LEB:EJoL0MjZRPR+a#oeD%kCxuoL",
+      "color": "#402626",
+      "alt": "A cat sleeps on a stone table outdoors",
+      "author": "Mads Leif Hansen",
+      "authorUrl": "https://unsplash.com/@mads_leif_hansen?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-cat-sleeps-on-a-stone-table-outdoors-inP1W0FvfyQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#594635",
+          "w": 0.4085
+        },
+        {
+          "hex": "#3E2F21",
+          "w": 0.3114
+        },
+        {
+          "hex": "#816A55",
+          "w": 0.2802
+        }
+      ]
+    },
+    {
+      "id": "B_SajmZZneA",
+      "small": "https://images.unsplash.com/photo-1782765435788-bb3c74a965b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782765435788-bb3c74a965b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5948,
+      "height": 3965,
+      "blurHash": "LKF5$~4Tof%g.99Fsm-;_39FkCt8",
+      "color": "#f3f3f3",
+      "alt": "Charming stone building with a vine-covered patio and red blossoms",
+      "author": "Mavi Atlas",
+      "authorUrl": "https://unsplash.com/@maviatlas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/charming-stone-building-with-a-vine-covered-patio-and-red-blossoms-B_SajmZZneA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#928068",
+          "w": 0.4089
+        },
+        {
+          "hex": "#604E3C",
+          "w": 0.3964
+        },
+        {
+          "hex": "#241B11",
+          "w": 0.1948
+        }
+      ]
+    },
+    {
+      "id": "m-27OtBg9kM",
+      "small": "https://images.unsplash.com/photo-1791117592616-ea4e77524c50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1791117592616-ea4e77524c50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LFGuHy4:%M-o}%InR%t2?b%LNaNH",
+      "color": "#8c8c8c",
+      "alt": "Potted herbs and glassware on a rustic stone patio with a small sign",
+      "author": "Welmoed Wigarda",
+      "authorUrl": "https://unsplash.com/@_welmoed_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/potted-herbs-on-rustic-stone-patio-m-27OtBg9kM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A78F6E",
+          "w": 0.4708
+        },
+        {
+          "hex": "#7D673B",
+          "w": 0.3225
+        },
+        {
+          "hex": "#413D0F",
+          "w": 0.2067
+        }
+      ]
+    },
+    {
+      "id": "I-D9e7EYDwI",
+      "small": "https://images.unsplash.com/photo-1761116184178-a3ab36cdbf46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761116184178-a3ab36cdbf46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxydXN0aWMlMjBzdG9uZSUyMHRhYmxlfGVufDF8MHx8fDE3OTE4MzA1NzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LDA9fz0h%1xD#Rx[Ip-U-nIpxtRk",
+      "color": "#40260c",
+      "alt": "Table with flowers and food in rustic room",
+      "author": "SOHAM BANERJEE",
+      "authorUrl": "https://unsplash.com/@soham1991?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/table-with-flowers-and-food-in-rustic-room-I-D9e7EYDwI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#140500",
+          "w": 0.4281
+        },
+        {
+          "hex": "#41260D",
+          "w": 0.3771
+        },
+        {
+          "hex": "#7B4D21",
+          "w": 0.1948
+        }
+      ]
+    }
+  ]
+}

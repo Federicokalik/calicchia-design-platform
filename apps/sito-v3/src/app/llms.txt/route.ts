@@ -20,6 +20,7 @@ import { SITE } from '@/data/site';
 import { getServiceCatalog, getSeoCities } from '@/lib/cms';
 import { fetchAllPublishedProjects } from '@/lib/projects-api';
 import { fetchBlogList, buildBlogUrl } from '@/lib/blog-api';
+import { getSectorProfession, isIndexable, listSectorPageSlugs } from '@/data/risorse/palette';
 
 export const revalidate = 3600;
 
@@ -104,6 +105,12 @@ export async function GET(): Promise<Response> {
   // ─── Risorse ──────────────────────────────────────────────────────
   sections.push('## Resources');
   sections.push(mdLink('Dalla SEO alla GEO — White Paper (esteso)', '/risorse/dalla-seo-alla-geo', '.md', 'Come funzionano i motori generativi (retrieval, embeddings, chunking, fan-out), citabilità e quadro UE/Italia'));
+  sections.push(mdLink('Palette di settore — Strumento gratuito', '/risorse/palette-di-settore', '.md', 'Colori dominanti estratti da foto del settore (k-means in OKLab), quattro stili, contrasti WCAG 2.2 verificati, esportazione CSS/Tailwind/JSON/Canva'));
+  // Pagine settore indicizzabili (tier 1-2 con testi rivisti): niente mirror .md, link alla pagina HTML.
+  for (const slug of listSectorPageSlugs().filter(isIndexable)) {
+    const label = getSectorProfession(slug)?.label.it ?? slug;
+    sections.push(mdLink(`Palette di colori per ${label.toLowerCase()}`, `/risorse/palette-di-settore/${slug}`, ''));
+  }
   sections.push('');
 
   // ─── Glossari ─────────────────────────────────────────────────────

@@ -9,12 +9,17 @@
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
     "./validators": "./src/validators.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./palette": "./src/palette/index.ts"
+  },
+  "scripts": {
+    "test": "tsx --test src/palette/palette.test.ts"
   },
   "dependencies": {
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "tsx": "^4.21.0",
     "typescript": "^5.7.0"
   }
 }

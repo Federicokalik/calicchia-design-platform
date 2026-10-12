@@ -1,0 +1,335 @@
+{
+  "slug": "palestre",
+  "queries": [
+    "gym equipment dark",
+    "concrete gym weights",
+    "training neon light"
+  ],
+  "generatedAt": "2026-10-12T18:42:10.401Z",
+  "photos": [
+    {
+      "id": "JWK2H-2qz1Y",
+      "small": "https://images.unsplash.com/photo-1672344048213-76b6e77304bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1672344048213-76b6e77304bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3880,
+      "height": 2417,
+      "blurHash": "L455FBR*00?H%Mt7M{Rj4nt7-;D%",
+      "color": "#262626",
+      "alt": "a black and white photo of a dumbbell",
+      "author": "Paweł Bulwan",
+      "authorUrl": "https://unsplash.com/@pbulwan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-and-white-photo-of-a-dumbbell-JWK2H-2qz1Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#131313",
+          "w": 0.3911
+        },
+        {
+          "hex": "#020202",
+          "w": 0.3226
+        },
+        {
+          "hex": "#3C3A3C",
+          "w": 0.2863
+        }
+      ]
+    },
+    {
+      "id": "m4Jqyv5VwqY",
+      "small": "https://images.unsplash.com/photo-1734630341082-0fec0e10126c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1734630341082-0fec0e10126c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5440,
+      "height": 3520,
+      "blurHash": "L36uqxL}4TyD%#Mxoz%~tQ%gIUDh",
+      "color": "#262626",
+      "alt": "A row of dumbs in a gym",
+      "author": "Jason Grant",
+      "authorUrl": "https://unsplash.com/@jgrant1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-dumbs-in-a-gym-m4Jqyv5VwqY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#171D20",
+          "w": 0.6729
+        },
+        {
+          "hex": "#224046",
+          "w": 0.2115
+        },
+        {
+          "hex": "#51797F",
+          "w": 0.1156
+        }
+      ]
+    },
+    {
+      "id": "mTorQ9gFfOg",
+      "small": "https://images.unsplash.com/photo-1544033527-b192daee1f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1544033527-b192daee1f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LAEo[I~q00WB_3~qWBof%MxuD%ay",
+      "color": "#262626",
+      "alt": "gray scale photo of dumbbells",
+      "author": "Luis Reyes",
+      "authorUrl": "https://unsplash.com/@tuga760?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-scale-photo-of-dumbbells-mTorQ9gFfOg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4F4F4F",
+          "w": 0.3887
+        },
+        {
+          "hex": "#8B8B8B",
+          "w": 0.3371
+        },
+        {
+          "hex": "#171717",
+          "w": 0.2743
+        }
+      ]
+    },
+    {
+      "id": "gzeTjGu3b_k",
+      "small": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxneW0lMjBlcXVpcG1lbnQlMjBkYXJrfGVufDF8MHx8fDE3OTE4MzA1MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2333,
+      "blurHash": "LNDcE#xu4.M|~pj[IUofIpRjt6%M",
+      "color": "#262626",
+      "alt": "barbell on rack",
+      "author": "Jelmer Assink",
+      "authorUrl": "https://unsplash.com/@jelmerassink?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/barbell-on-rack-gzeTjGu3b_k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#191620",
+          "w": 0.3883
+        },
+        {
+          "hex": "#534C51",
+          "w": 0.3359
+        },
+        {
+          "hex": "#978B83",
+          "w": 0.2758
+        }
+      ]
+    },
+    {
+      "id": "Yuv-iwByVRQ",
+      "small": "https://images.unsplash.com/photo-1521805103424-d8f8430e8933?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1521805103424-d8f8430e8933?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LDC6+9?b9FD%~q%MM{t7%MxuWBfQ",
+      "color": "#404040",
+      "alt": "black barbell on tile flooring",
+      "author": "Victor Freitas",
+      "authorUrl": "https://unsplash.com/@victorfreitas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-barbell-on-tile-flooring-Yuv-iwByVRQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B6B6B",
+          "w": 0.4
+        },
+        {
+          "hex": "#9F9F9F",
+          "w": 0.3153
+        },
+        {
+          "hex": "#3F3F3F",
+          "w": 0.2847
+        }
+      ]
+    },
+    {
+      "id": "uwk8IS-HfJ8",
+      "small": "https://images.unsplash.com/photo-1597076537061-a6b58163aa45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597076537061-a6b58163aa45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5168,
+      "height": 3448,
+      "blurHash": "L3AwCzxt4p-:pb~q8{bb9YIoE1t6",
+      "color": "#595959",
+      "alt": "black and red kettle bell lot",
+      "author": "Ambitious Studio* | Rick Barrett",
+      "authorUrl": "https://unsplash.com/@weareambitious?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-kettle-bell-lot-uwk8IS-HfJ8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6A6864",
+          "w": 0.5847
+        },
+        {
+          "hex": "#191D1E",
+          "w": 0.2109
+        },
+        {
+          "hex": "#3C3C3B",
+          "w": 0.2044
+        }
+      ]
+    },
+    {
+      "id": "Z__WwJxWP0g",
+      "small": "https://images.unsplash.com/photo-1706029831385-1c89922848eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706029831385-1c89922848eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LICQ0*D%RjRj~pIUIUaz-pRjM{t7",
+      "color": "#262626",
+      "alt": "a black and white photo of a barbell in a gym",
+      "author": "Ambitious Studio* | Rick Barrett",
+      "authorUrl": "https://unsplash.com/@weareambitious?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-and-white-photo-of-a-barbell-in-a-gym-Z__WwJxWP0g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#50565B",
+          "w": 0.4175
+        },
+        {
+          "hex": "#21272C",
+          "w": 0.363
+        },
+        {
+          "hex": "#87888A",
+          "w": 0.2195
+        }
+      ]
+    },
+    {
+      "id": "JUVMefHzC6U",
+      "small": "https://images.unsplash.com/photo-1689514226761-336eaf77e311?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1689514226761-336eaf77e311?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxjb25jcmV0ZSUyMGd5bSUyMHdlaWdodHN8ZW58MXwwfHx8MTc5MTgzMDUyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2667,
+      "blurHash": "LMC?in~q~pRjNGkCt7xu%LWBxuof",
+      "color": "#262626",
+      "alt": "a close up of a set of gym equipment",
+      "author": "Alex Saks",
+      "authorUrl": "https://unsplash.com/@alexsaks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-set-of-gym-equipment-JUVMefHzC6U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#383733",
+          "w": 0.4836
+        },
+        {
+          "hex": "#B5B2AE",
+          "w": 0.2595
+        },
+        {
+          "hex": "#161511",
+          "w": 0.2569
+        }
+      ]
+    },
+    {
+      "id": "K8bEq0PU6iY",
+      "small": "https://images.unsplash.com/photo-1636391594524-9afc2bbeedf2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1636391594524-9afc2bbeedf2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LkEDCuo#D4V?WAoMofoIoztRWCZ$",
+      "color": "#0c2626",
+      "alt": "a close up of a light",
+      "author": "Steven Cordes",
+      "authorUrl": "https://unsplash.com/@steven3466?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-light-K8bEq0PU6iY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3F343B",
+          "w": 0.4222
+        },
+        {
+          "hex": "#805867",
+          "w": 0.2983
+        },
+        {
+          "hex": "#92A7AA",
+          "w": 0.2795
+        }
+      ]
+    },
+    {
+      "id": "_wZaegHzdQc",
+      "small": "https://images.unsplash.com/photo-1555323912-3526a765162b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1555323912-3526a765162b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5925,
+      "height": 3326,
+      "blurHash": "LH8;0?o#0zR*R*j[s:fke-f6jtj[",
+      "color": "#0c2626",
+      "alt": "Work and Play yellow neon sign",
+      "author": "Antonio Gabola",
+      "authorUrl": "https://unsplash.com/@antogabb?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/work-and-play-yellow-neon-sign-_wZaegHzdQc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#34393B",
+          "w": 0.3994
+        },
+        {
+          "hex": "#131619",
+          "w": 0.3767
+        },
+        {
+          "hex": "#685850",
+          "w": 0.2239
+        }
+      ]
+    },
+    {
+      "id": "zEawlLdVloo",
+      "small": "https://images.unsplash.com/photo-1526324502790-ad8c7c6076df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1526324502790-ad8c7c6076df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LJBWhZxZ4sN1D+WVxsf605M~%Kxr",
+      "color": "#26260c",
+      "alt": "yellow neon light signage",
+      "author": "Gabriel Bassino",
+      "authorUrl": "https://unsplash.com/@gabrielbassino?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-neon-light-signage-zEawlLdVloo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#131511",
+          "w": 0.4186
+        },
+        {
+          "hex": "#34360B",
+          "w": 0.3358
+        },
+        {
+          "hex": "#646710",
+          "w": 0.2456
+        }
+      ]
+    },
+    {
+      "id": "EesL2HtBYbI",
+      "small": "https://images.unsplash.com/photo-1554735361-3e8df0da97f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554735361-3e8df0da97f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmluZyUyMG5lb24lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMwNTI4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LBEl+*=Jnj,X=c$PR+E#1d5-bGSf",
+      "color": "#400c0c",
+      "alt": "orange neon signage",
+      "author": "camilo jimenez",
+      "authorUrl": "https://unsplash.com/@camstejim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/orange-neon-signage-EesL2HtBYbI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#350001",
+          "w": 0.4475
+        },
+        {
+          "hex": "#5E0001",
+          "w": 0.3832
+        },
+        {
+          "hex": "#A71A06",
+          "w": 0.1693
+        }
+      ]
+    }
+  ]
+}

@@ -3,13 +3,14 @@ import type { Locale } from '@/lib/i18n';
 /**
  * Static registry of /risorse entries. Source of truth for the hub listing.
  * Not DB-backed: resources are curated, evergreen documents (white papers,
- * glossaries) that don't need the blog CMS workflow.
+ * glossaries) and free tools that don't need the blog CMS workflow.
  *
  * `path` is the IT-canonical path; the hub localizes it with `localizedPath`.
  * `kind` drives the card label; `standalone` marks bespoke-design documents
- * (own layout, no site chrome).
+ * (own layout, no site chrome). I `tool` finiscono nelle card "Strumento
+ * gratuito" in cima all'hub, anche se vivono fuori da /risorse (audit GEO).
  */
-export type ResourceKind = 'whitepaper' | 'glossary';
+export type ResourceKind = 'whitepaper' | 'glossary' | 'tool';
 
 export interface ResourceEntry {
   key: string;
@@ -22,9 +23,57 @@ export interface ResourceEntry {
   description: Record<Locale, string>;
   /** Short meta line shown on the card (e.g. "White paper · 2026"). */
   meta: Record<Locale, string>;
+  /** Invito all'azione della card (default "Apri"). */
+  cta?: Record<Locale, string>;
 }
 
 export const RESOURCES: ResourceEntry[] = [
+  {
+    key: 'palette-di-settore',
+    path: '/risorse/palette-di-settore',
+    kind: 'tool',
+    standalone: false,
+    weight: 300,
+    title: {
+      it: 'Palette di settore: i colori del tuo settore',
+      en: "Industry colour palette: your industry's colours",
+    },
+    description: {
+      it: 'Scrivi la tua attività: estraggo i colori dominanti dalle foto del settore e te li mostro su un sito, un post e un biglietto, con i contrasti WCAG verificati. Esporti in CSS, Tailwind, JSON e Canva.',
+      en: 'Type your business: I extract the dominant colours from photos of your industry and show them on a website, a post and a business card, with WCAG contrast checked. Export to CSS, Tailwind, JSON and Canva.',
+    },
+    meta: {
+      it: 'Strumento gratuito',
+      en: 'Free tool',
+    },
+    cta: {
+      it: 'Crea la tua palette',
+      en: 'Create your palette',
+    },
+  },
+  {
+    key: 'audit-geo',
+    path: '/audit-geo',
+    kind: 'tool',
+    standalone: false,
+    weight: 200,
+    title: {
+      it: 'GEO Audit: il tuo sito è pronto per i motori AI?',
+      en: 'GEO Audit: is your site ready for AI engines?',
+    },
+    description: {
+      it: 'Inserisci l’URL e ottieni subito uno score GEO con le azioni per migliorarlo — basato sul white paper.',
+      en: 'Enter your URL and get an instant GEO score with the actions to improve it — based on the white paper.',
+    },
+    meta: {
+      it: 'Strumento gratuito',
+      en: 'Free tool',
+    },
+    cta: {
+      it: 'Analizza il mio sito',
+      en: 'Analyze my site',
+    },
+  },
   {
     key: 'geo-whitepaper',
     path: '/risorse/dalla-seo-alla-geo',

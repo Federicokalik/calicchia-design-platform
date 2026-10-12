@@ -73,7 +73,12 @@ const NAV: NavEntry[] = [
 ];
 
 const SECONDARY_LINKS = [
-  { label: 'Risorse', href: '/risorse', description: 'White paper e glossari curati.' },
+  { label: 'Risorse', href: '/risorse', description: 'White paper, glossari e strumenti gratuiti.' },
+  {
+    label: 'Palette di settore',
+    href: '/risorse/palette-di-settore',
+    description: 'Strumento gratuito: i colori del tuo settore, pronti da usare.',
+  },
   { label: 'Area Clienti', href: '/clienti/login', description: 'Documenti, file e avanzamento progetto.' },
   { label: 'Servizi per professioni', href: '/servizi-per-professioni', description: 'Landing verticali per categorie e attività.' },
   { label: 'FAQ', href: '/faq', description: 'Dubbi frequenti prima di iniziare.' },
@@ -214,6 +219,7 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
   const secondaryLabel = (href: string, fallback: string) =>
     ({
       '/risorse': t('nav.risorse'),
+      '/risorse/palette-di-settore': t('nav.paletteDiSettore'),
       '/clienti/login': t('nav.areaClienti'),
       '/servizi-per-professioni': t('nav.serviziPerProfessioni'),
       '/faq': t('nav.faq'),
@@ -221,6 +227,7 @@ export function MenuOverlay({ open, onClose }: MenuOverlayProps) {
   const secondaryDescription = (href: string, fallback: string) =>
     ({
       '/risorse': t('menuOverlay.secondary.resourcesDescription'),
+      '/risorse/palette-di-settore': t('menuOverlay.secondary.paletteDescription'),
       '/clienti/login': t('menuOverlay.secondary.clientAreaDescription'),
       '/servizi-per-professioni': t('menuOverlay.secondary.professionsDescription'),
       '/faq': t('menuOverlay.secondary.faqDescription'),

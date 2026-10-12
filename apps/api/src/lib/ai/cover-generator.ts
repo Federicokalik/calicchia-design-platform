@@ -6,6 +6,7 @@
 import { uploadFile, generateFileKey } from '../s3';
 import { generateVisualImagePrompt, isOpenAIConfigured } from './openai';
 import { logger } from '../logger';
+import { searchPhotos, trackDownloadLocation } from '../unsplash';
 
 const log = logger.child({ scope: 'cover' });
 
@@ -290,21 +291,8 @@ async function searchUnsplash(options: CoverGenerationOptions): Promise<CoverRes
   const { topic, unsplashQuery } = options;
   const query = unsplashQuery || topic;
 
-  const response = await fetch(
-    `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&orientation=landscape&per_page=1`,
-    {
-      headers: {
-        'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Unsplash API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const photo = data.results[0];
+  const { photos } = await searchPhotos(query, { perPage: 1, contentFilter: 'low' });
+  const photo = photos[0];
 
   if (!photo) {
     throw new Error('Unsplash: nessuna immagine trovata');
@@ -316,11 +304,7 @@ async function searchUnsplash(options: CoverGenerationOptions): Promise<CoverRes
   const saved = await saveImageToS3(imageUrl, 'covers/unsplash');
 
   // Track download (required by Unsplash API)
-  if (photo.links?.download_location) {
-    fetch(photo.links.download_location, {
-      headers: { 'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}` },
-    }).catch(() => {});
-  }
+  trackDownloadLocation(photo.links?.download_location);
 
   return {
     url: saved?.url || imageUrl,
@@ -626,17 +610,8 @@ async function searchUnsplashCustom(options: {
     throw new Error('UNSPLASH_ACCESS_KEY non configurata');
   }
 
-  const response = await fetch(
-    `https://api.unsplash.com/search/photos?query=${encodeURIComponent(options.query)}&orientation=landscape&per_page=1`,
-    { headers: { 'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}` } }
-  );
-
-  if (!response.ok) {
-    throw new Error(`Unsplash API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  const photo = data.results[0];
+  const { photos } = await searchPhotos(options.query, { perPage: 1, contentFilter: 'low' });
+  const photo = photos[0];
 
   if (!photo) {
     throw new Error('Unsplash: nessuna immagine trovata');
@@ -646,11 +621,7 @@ async function searchUnsplashCustom(options: {
   const saved = await saveImageToS3(imageUrl, options.folder);
 
   // Track download
-  if (photo.links?.download_location) {
-    fetch(photo.links.download_location, {
-      headers: { 'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}` },
-    }).catch(() => {});
-  }
+  trackDownloadLocation(photo.links?.download_location);
 
   return {
     url: saved?.url || imageUrl,

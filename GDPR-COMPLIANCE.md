@@ -1,6 +1,6 @@
 # GDPR Compliance Checklist — Calicchia Design Platform
 
-> Ultimo aggiornamento: 2026-05-19
+> Ultimo aggiornamento: 2026-10-12
 > Riferimenti normativi: GDPR (EU 2016/679), Codice Privacy (D.Lgs. 196/2003 mod. D.Lgs. 101/2018), Linee Guida Garante Cookie (luglio 2021), Decisione Garante 330/2025 (double opt-in)
 
 Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
@@ -123,7 +123,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | I6 | DPA con Cal.com | ⚠️ | Da sottoscrivere |
 | I7 | DPA con PayPal | ✅ | Incluso nei ToS |
 | I8 | Documentazione trasferimenti extra-UE | ✅ | Privacy policy sezione 9 |
-| I9 | Elenco sub-responsabili aggiornato | ✅ | Privacy policy sezione 8 + ROPA |
+| I9 | Elenco sub-responsabili aggiornato | ✅ | Privacy policy sezione 8 + ROPA. 2026-10-12: aggiunta Unsplash Inc. per la Palette di settore (`/risorse/palette-di-settore`): le foto sono in hotlink da images.unsplash.com (obbligo delle linee guida API), quindi il browser del visitatore espone IP e dati tecnici a Unsplash, terza parte con infrastruttura anche negli USA. Base art. 6(1)(f), coperta in cookie policy 02.07 e privacy policy sez. 2/3/8/9. Logo e foto caricati dall'utente restano nel browser; font dei preset self-hosted (nessuna connessione a Google). Da verificare: garanzie di trasferimento dichiarate da Unsplash (DPF/SCC) per la sez. 9. |
 
 ## J. DOCUMENTAZIONE & PROCESSI
 
