@@ -1,0 +1,335 @@
+{
+  "slug": "barbieri",
+  "queries": [
+    "barbershop leather chairs",
+    "barber straight razor tools",
+    "barbershop mirrors warm light"
+  ],
+  "generatedAt": "2026-10-12T18:56:01.463Z",
+  "photos": [
+    {
+      "id": "EW_rqoSdDes",
+      "small": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4288,
+      "height": 2848,
+      "blurHash": "L9D8tOtRRkr=0#NGxZo00znhNbJ-",
+      "color": "#260c0c",
+      "alt": "black leather barber chair near brown brick wall",
+      "author": "Nathon Oski",
+      "authorUrl": "https://unsplash.com/@onatecan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-leather-barber-chair-near-brown-brick-wall-EW_rqoSdDes?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#170602",
+          "w": 0.3841
+        },
+        {
+          "hex": "#54341E",
+          "w": 0.3136
+        },
+        {
+          "hex": "#9A6646",
+          "w": 0.3023
+        }
+      ]
+    },
+    {
+      "id": "1_DAlXy0wng",
+      "small": "https://images.unsplash.com/photo-1592647420148-bfcc177e2117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1592647420148-bfcc177e2117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5149,
+      "height": 3562,
+      "blurHash": "L25XDM9|0}nP-nEO$$ae5kWC^5JT",
+      "color": "#260c0c",
+      "alt": "red and white leather padded chair",
+      "author": "André Reis",
+      "authorUrl": "https://unsplash.com/@andrereispt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-white-leather-padded-chair-1_DAlXy0wng?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B0B00",
+          "w": 0.4538
+        },
+        {
+          "hex": "#050100",
+          "w": 0.2802
+        },
+        {
+          "hex": "#39210A",
+          "w": 0.2659
+        }
+      ]
+    },
+    {
+      "id": "tX5JNBNSJic",
+      "small": "https://images.unsplash.com/photo-1672257493626-038f96997ade?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1672257493626-038f96997ade?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2523,
+      "blurHash": "LOFr9boyR*ozH?R%oLV@~WoekCt8",
+      "color": "#c0c0c0",
+      "alt": "a barber shop with a brick wall and lots of chairs",
+      "author": "František Čaník",
+      "authorUrl": "https://unsplash.com/@snipi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-barber-shop-with-a-brick-wall-and-lots-of-chairs-tX5JNBNSJic?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9B756D",
+          "w": 0.3673
+        },
+        {
+          "hex": "#6A473D",
+          "w": 0.34
+        },
+        {
+          "hex": "#BCB0B0",
+          "w": 0.2927
+        }
+      ]
+    },
+    {
+      "id": "BBGyxhtPpC0",
+      "small": "https://images.unsplash.com/photo-1702865272115-5afdbae975af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1702865272115-5afdbae975af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXJzaG9wJTIwbGVhdGhlciUyMGNoYWlyc3xlbnwxfDB8fHwxNzkxODMxMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LDCPIlNxEN~B%Lxuxu%LIooL%1Io",
+      "color": "#26260c",
+      "alt": "a barber shop with a chair and a mirror",
+      "author": "Redd Francisco",
+      "authorUrl": "https://unsplash.com/@reddfrancisco?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-barber-shop-with-a-chair-and-a-mirror-BBGyxhtPpC0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#120D07",
+          "w": 0.4625
+        },
+        {
+          "hex": "#3F352A",
+          "w": 0.2886
+        },
+        {
+          "hex": "#816D56",
+          "w": 0.2489
+        }
+      ]
+    },
+    {
+      "id": "Xb_6OTCCnXo",
+      "small": "https://images.unsplash.com/photo-1675599193741-e6f078a65fbd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1675599193741-e6f078a65fbd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4500,
+      "height": 3000,
+      "blurHash": "LOKA4*0f9^o~4:bbxuw[bx9FNHR*",
+      "color": "#d9a68c",
+      "alt": "a wooden table topped with lots of different types of scissors",
+      "author": "František Čaník",
+      "authorUrl": "https://unsplash.com/@snipi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-lots-of-different-types-of-scissors-Xb_6OTCCnXo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1B6A8",
+          "w": 0.3976
+        },
+        {
+          "hex": "#C7876C",
+          "w": 0.3625
+        },
+        {
+          "hex": "#342C33",
+          "w": 0.2399
+        }
+      ]
+    },
+    {
+      "id": "FvKpUZCbZ-s",
+      "small": "https://images.unsplash.com/photo-1524230616393-d6229fcd2eff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1524230616393-d6229fcd2eff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LON0@-WY_4%1xtayM{j?t8oeIARk",
+      "color": "#d9d9d9",
+      "alt": "black straight razor beside beige ceramic mug and shaving cream brush",
+      "author": "Josh Sorenson",
+      "authorUrl": "https://unsplash.com/@joshsorenson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-straight-razor-beside-beige-ceramic-mug-and-shaving-cream-brush-FvKpUZCbZ-s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6D1CF",
+          "w": 0.8097
+        },
+        {
+          "hex": "#B9A48F",
+          "w": 0.1143
+        },
+        {
+          "hex": "#736A65",
+          "w": 0.0761
+        }
+      ]
+    },
+    {
+      "id": "1Ig9rw7aC5g",
+      "small": "https://images.unsplash.com/photo-1761148438883-e34e0289a214?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761148438883-e34e0289a214?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4000,
+      "blurHash": "LeD9k[%NNyt7_4xvWYX9%Mt7fSSh",
+      "color": "#c0c0d9",
+      "alt": "Barber shaves man's beard with straight razor",
+      "author": "Antonio Reynoso",
+      "authorUrl": "https://unsplash.com/@infantleon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/barber-shaves-mans-beard-with-straight-razor-1Ig9rw7aC5g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#151013",
+          "w": 0.4987
+        },
+        {
+          "hex": "#BBB8C3",
+          "w": 0.2725
+        },
+        {
+          "hex": "#443B3F",
+          "w": 0.2288
+        }
+      ]
+    },
+    {
+      "id": "XAkSmK_8kXM",
+      "small": "https://images.unsplash.com/photo-1612036329215-e9f06711a7fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1612036329215-e9f06711a7fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXIlMjBzdHJhaWdodCUyMHJhem9yJTIwdG9vbHN8ZW58MXwwfHx8MTc5MTgzMTM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3435,
+      "height": 2454,
+      "blurHash": "LMJ6[z0MV@o}oIS4rqoerCbwS%RP",
+      "color": "#59400c",
+      "alt": "silver scissors on brown wooden table",
+      "author": "Jonathan Cooper",
+      "authorUrl": "https://unsplash.com/@theshuttervision?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/silver-scissors-on-brown-wooden-table-XAkSmK_8kXM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B17720",
+          "w": 0.4168
+        },
+        {
+          "hex": "#815103",
+          "w": 0.3737
+        },
+        {
+          "hex": "#D4B481",
+          "w": 0.2096
+        }
+      ]
+    },
+    {
+      "id": "gX-2La5XAso",
+      "small": "https://images.unsplash.com/photo-1536520843734-bfb7a8a3ebcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1536520843734-bfb7a8a3ebcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6378,
+      "height": 4252,
+      "blurHash": "LPC=YV0$%0ofNexYWBt79vxZIpxZ",
+      "color": "#260c0c",
+      "alt": "empty black leather padded chairs",
+      "author": "Jason Leung",
+      "authorUrl": "https://unsplash.com/@ninjason?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-black-leather-padded-chairs-gX-2La5XAso?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#492806",
+          "w": 0.4361
+        },
+        {
+          "hex": "#150300",
+          "w": 0.3283
+        },
+        {
+          "hex": "#8A5A2B",
+          "w": 0.2356
+        }
+      ]
+    },
+    {
+      "id": "tRBc_UytQZU",
+      "small": "https://images.unsplash.com/photo-1635611578109-4b9ce9525b13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635611578109-4b9ce9525b13?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LJE_8Y^itLOY}l%LkqSzI;NbxGs;",
+      "color": "#260c0c",
+      "alt": "a barber shop with a neon sign in the window",
+      "author": "Mick Haupt",
+      "authorUrl": "https://unsplash.com/@rocinante_11?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-barber-shop-with-a-neon-sign-in-the-window-tRBc_UytQZU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#763F31",
+          "w": 0.3822
+        },
+        {
+          "hex": "#321613",
+          "w": 0.3275
+        },
+        {
+          "hex": "#946F64",
+          "w": 0.2903
+        }
+      ]
+    },
+    {
+      "id": "o48W6ydWSUA",
+      "small": "https://images.unsplash.com/photo-1546664278-c0a27e0cdc88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1546664278-c0a27e0cdc88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "L66RM%WBD%ay~qWBIUj[fQofWBof",
+      "color": "#262626",
+      "alt": "gray scale photo of man inside barber shop",
+      "author": "Andre Hunter",
+      "authorUrl": "https://unsplash.com/@dre0316?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-scale-photo-of-man-inside-barber-shop-o48W6ydWSUA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030303",
+          "w": 0.4885
+        },
+        {
+          "hex": "#252525",
+          "w": 0.2989
+        },
+        {
+          "hex": "#535353",
+          "w": 0.2127
+        }
+      ]
+    },
+    {
+      "id": "o6cWr3SwyNw",
+      "small": "https://images.unsplash.com/photo-1628274459813-74bc7e2c53b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628274459813-74bc7e2c53b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxiYXJiZXJzaG9wJTIwbWlycm9ycyUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkxODMxMzU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5458,
+      "height": 3639,
+      "blurHash": "L14.0iyD0LRQ_2V?D%s:R6aKIUof",
+      "color": "#260c0c",
+      "alt": "man in black jacket sitting on chair",
+      "author": "André Reis",
+      "authorUrl": "https://unsplash.com/@andrereispt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-black-jacket-sitting-on-chair-o6cWr3SwyNw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070202",
+          "w": 0.4863
+        },
+        {
+          "hex": "#211917",
+          "w": 0.3827
+        },
+        {
+          "hex": "#474845",
+          "w": 0.131
+        }
+      ]
+    }
+  ]
+}

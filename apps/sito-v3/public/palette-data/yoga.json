@@ -1,0 +1,335 @@
+{
+  "slug": "yoga",
+  "queries": [
+    "yoga studio natural light",
+    "yoga mats wooden floor",
+    "yoga class linen curtains"
+  ],
+  "generatedAt": "2026-10-12T19:50:42.838Z",
+  "photos": [
+    {
+      "id": "vpVE1Xk1eR4",
+      "small": "https://images.unsplash.com/photo-1683056255281-e52a141924f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1683056255281-e52a141924f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "L9I#DR%0yE9G?^WAVts;?uNfD%t7",
+      "color": "#a6a68c",
+      "alt": "a group of people doing yoga in a room",
+      "author": "Jaspinder Singh",
+      "authorUrl": "https://unsplash.com/@jaspindersingh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-doing-yoga-in-a-room-vpVE1Xk1eR4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B7A694",
+          "w": 0.585
+        },
+        {
+          "hex": "#9E836E",
+          "w": 0.2796
+        },
+        {
+          "hex": "#7A553E",
+          "w": 0.1354
+        }
+      ]
+    },
+    {
+      "id": "PktK6GuC3U4",
+      "small": "https://images.unsplash.com/photo-1651077837628-52b3247550ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1651077837628-52b3247550ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LUKmC7%1o#v}~Vx]xEE2$$%MIpwu",
+      "color": "#c08c73",
+      "alt": "a group of people sitting at a table",
+      "author": "David Whipple",
+      "authorUrl": "https://unsplash.com/@iamdavidwhipple?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-sitting-at-a-table-PktK6GuC3U4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CB8C60",
+          "w": 0.5214
+        },
+        {
+          "hex": "#805D4A",
+          "w": 0.2676
+        },
+        {
+          "hex": "#F1C9AB",
+          "w": 0.211
+        }
+      ]
+    },
+    {
+      "id": "dwka5DDrnY0",
+      "small": "https://images.unsplash.com/photo-1687783615494-b4a1f1af8b58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687783615494-b4a1f1af8b58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LSELZ*4:xukCxaxDRkoe02?aRPWE",
+      "color": "#260c0c",
+      "alt": "a large room with a lot of yoga mats on the floor",
+      "author": "Olga Pukhalskaya",
+      "authorUrl": "https://unsplash.com/@pukhalskaya_olga?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-room-with-a-lot-of-yoga-mats-on-the-floor-dwka5DDrnY0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3B1100",
+          "w": 0.4401
+        },
+        {
+          "hex": "#62340D",
+          "w": 0.354
+        },
+        {
+          "hex": "#A47D43",
+          "w": 0.206
+        }
+      ]
+    },
+    {
+      "id": "SIqmq_6726Y",
+      "small": "https://images.unsplash.com/photo-1611094607507-8c8173e5cf33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611094607507-8c8173e5cf33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwc3R1ZGlvJTIwbmF0dXJhbCUyMGxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4242,
+      "height": 2828,
+      "blurHash": "LLNAr4t7D$W;.8WBMxkC00ofofj[",
+      "color": "#f3f3f3",
+      "alt": "woman in black tank top and black leggings doing yoga",
+      "author": "Dmitriy Frantsev",
+      "authorUrl": "https://unsplash.com/@vapricot?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-black-tank-top-and-black-leggings-doing-yoga-SIqmq_6726Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECEDEE",
+          "w": 0.6409
+        },
+        {
+          "hex": "#A1A1A1",
+          "w": 0.2758
+        },
+        {
+          "hex": "#6F6C67",
+          "w": 0.0833
+        }
+      ]
+    },
+    {
+      "id": "TKtX__4StxM",
+      "small": "https://images.unsplash.com/photo-1706285101032-a23ba26940d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706285101032-a23ba26940d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2843,
+      "height": 2132,
+      "blurHash": "LQBqG0rVg3SiPqI[oeslx]s8nNaz",
+      "color": "#73a6c0",
+      "alt": "a room with a wooden floor and large windows",
+      "author": "Steven Wong",
+      "authorUrl": "https://unsplash.com/@stevenwong?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-wooden-floor-and-large-windows-TKtX__4StxM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#78AAC0",
+          "w": 0.3677
+        },
+        {
+          "hex": "#82725D",
+          "w": 0.3503
+        },
+        {
+          "hex": "#040607",
+          "w": 0.2821
+        }
+      ]
+    },
+    {
+      "id": "LkcE7fSop1s",
+      "small": "https://images.unsplash.com/photo-1772143535064-9f89345843cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772143535064-9f89345843cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LIEB?00$Ipt6%0t7%LR,E2s,t7WC",
+      "color": "#8c7340",
+      "alt": "A person wearing white sneakers walks on a wooden floor",
+      "author": "Josh Sorenson",
+      "authorUrl": "https://unsplash.com/@joshsorenson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-wearing-white-sneakers-walks-on-a-wooden-floor-LkcE7fSop1s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#907043",
+          "w": 0.473
+        },
+        {
+          "hex": "#5E4926",
+          "w": 0.3547
+        },
+        {
+          "hex": "#15170F",
+          "w": 0.1723
+        }
+      ]
+    },
+    {
+      "id": "lKFl-LDHgmU",
+      "small": "https://images.unsplash.com/photo-1628838481466-21e0f4ee35ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628838481466-21e0f4ee35ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LCE{RnR%00ay-pM{j[ofIURjogof",
+      "color": "#8c8c73",
+      "alt": "brown and white wooden surface",
+      "author": "Lampos Aritonang",
+      "authorUrl": "https://unsplash.com/@lamposaritonang?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-white-wooden-surface-lKFl-LDHgmU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#837C73",
+          "w": 0.3957
+        },
+        {
+          "hex": "#9E9990",
+          "w": 0.3649
+        },
+        {
+          "hex": "#645C53",
+          "w": 0.2394
+        }
+      ]
+    },
+    {
+      "id": "Q9m-ax6_PlQ",
+      "small": "https://images.unsplash.com/photo-1628838481489-d9d5b860566e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628838481489-d9d5b860566e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwbWF0cyUyMHdvb2RlbiUyMGZsb29yfGVufDF8MHx8fDE3OTE4MzQ2Mzh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "L5CimxnN01^+-oMx_2WBRP%2Rj9F",
+      "color": "#735959",
+      "alt": "brown wooden plank in close up photography",
+      "author": "Lampos Aritonang",
+      "authorUrl": "https://unsplash.com/@lamposaritonang?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-plank-in-close-up-photography-Q9m-ax6_PlQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#62564D",
+          "w": 0.4568
+        },
+        {
+          "hex": "#7E726A",
+          "w": 0.3081
+        },
+        {
+          "hex": "#44382F",
+          "w": 0.2351
+        }
+      ]
+    },
+    {
+      "id": "3VSa5sbvdpc",
+      "small": "https://images.unsplash.com/photo-1682421938316-4b186e25174c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1682421938316-4b186e25174c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LFIhQs%00LT1-;NHNIo#01R+t7n$",
+      "color": "#8c8c8c",
+      "alt": "a shadow of a plant on a curtain",
+      "author": "Saad Ahmad",
+      "authorUrl": "https://unsplash.com/@saadahmad_umn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shadow-of-a-plant-on-a-curtain-3VSa5sbvdpc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9D988F",
+          "w": 0.4007
+        },
+        {
+          "hex": "#C7C0B2",
+          "w": 0.3449
+        },
+        {
+          "hex": "#797369",
+          "w": 0.2543
+        }
+      ]
+    },
+    {
+      "id": "cTA8m7VwejE",
+      "small": "https://images.unsplash.com/photo-1578500467296-441a11d5d55a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1578500467296-441a11d5d55a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LRPP.R8^R5%N_4Vsa}azRPtSaeae",
+      "color": "#f3f3f3",
+      "alt": "beige curtain",
+      "author": "Katsia Jazwinska",
+      "authorUrl": "https://unsplash.com/@katsiajazwinska?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/beige-curtain-cTA8m7VwejE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDEDEA",
+          "w": 0.4624
+        },
+        {
+          "hex": "#D3CCC2",
+          "w": 0.3082
+        },
+        {
+          "hex": "#BDB0A2",
+          "w": 0.2294
+        }
+      ]
+    },
+    {
+      "id": "tfazediSzU8",
+      "small": "https://images.unsplash.com/photo-1644316551857-8096d9b2304c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1644316551857-8096d9b2304c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LVM@Gq_NRk%NaxfQj[fQkCaxj]j[",
+      "color": "#c0c0a6",
+      "alt": "a close up of a curtain with a white background",
+      "author": "Se. Tsuchiya",
+      "authorUrl": "https://unsplash.com/@s_tsuchiya?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-curtain-with-a-white-background-tfazediSzU8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AF9D87",
+          "w": 0.379
+        },
+        {
+          "hex": "#C2BAAA",
+          "w": 0.3488
+        },
+        {
+          "hex": "#D2CABC",
+          "w": 0.2722
+        }
+      ]
+    },
+    {
+      "id": "HdK3z5GgSe4",
+      "small": "https://images.unsplash.com/photo-1545668945-7d68ed36b837?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1545668945-7d68ed36b837?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b2dhJTIwY2xhc3MlMjBsaW5lbiUyMGN1cnRhaW5zfGVufDF8MHx8fDE3OTE4MzQ2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LRFFKhE1D%RQ_NM{RPWB-;V@V@WB",
+      "color": "#402626",
+      "alt": "brown curtain",
+      "author": "Tom Rumble",
+      "authorUrl": "https://unsplash.com/@tomrumble?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-curtain-HdK3z5GgSe4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B8B4AF",
+          "w": 0.3976
+        },
+        {
+          "hex": "#876E66",
+          "w": 0.3506
+        },
+        {
+          "hex": "#613D31",
+          "w": 0.2518
+        }
+      ]
+    }
+  ]
+}

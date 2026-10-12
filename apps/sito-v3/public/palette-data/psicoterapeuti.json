@@ -1,0 +1,281 @@
+{
+  "slug": "psicoterapeuti",
+  "queries": [
+    "quiet therapy room",
+    "armchairs soft daylight",
+    "linen curtains interior"
+  ],
+  "generatedAt": "2026-10-12T21:02:24.260Z",
+  "photos": [
+    {
+      "id": "kf_P2_M61WU",
+      "small": "https://images.unsplash.com/photo-1758876201548-ade1eff8b169?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758876201548-ade1eff8b169?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LnIX~m-:R*WB~p%LofWXodo0ogbc",
+      "color": "#595959",
+      "alt": "Woman meditating on couch with headphones on",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-meditating-on-couch-with-headphones-on-kf_P2_M61WU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#707475",
+          "w": 0.3448
+        },
+        {
+          "hex": "#B2AA8E",
+          "w": 0.3422
+        },
+        {
+          "hex": "#454849",
+          "w": 0.313
+        }
+      ]
+    },
+    {
+      "id": "zAVJqBhFyjM",
+      "small": "https://images.unsplash.com/photo-1627257058738-001d206ba180?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627257058738-001d206ba180?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LTI}#2M_Rlt7_NWBt7xuIUkDaeRj",
+      "color": "#c0c0c0",
+      "alt": "white and brown bed beside white and green floral curtain",
+      "author": "Brian Wangenheim",
+      "authorUrl": "https://unsplash.com/@brianwangenheim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-bed-beside-white-and-green-floral-curtain-zAVJqBhFyjM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6C6C1",
+          "w": 0.5342
+        },
+        {
+          "hex": "#8E887A",
+          "w": 0.3084
+        },
+        {
+          "hex": "#6B5E4A",
+          "w": 0.1573
+        }
+      ]
+    },
+    {
+      "id": "LoVaYEMUoXs",
+      "small": "https://images.unsplash.com/photo-1630834940713-08078c3d679e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630834940713-08078c3d679e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6696,
+      "height": 4464,
+      "blurHash": "LNK^.?bv%K?u?^V?IVV]VXR-M|of",
+      "color": "#c0c0a6",
+      "alt": "black leather sofa near brown wooden coffee table",
+      "author": "Cherosi",
+      "authorUrl": "https://unsplash.com/@cherosi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-leather-sofa-near-brown-wooden-coffee-table-LoVaYEMUoXs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD3C2",
+          "w": 0.4077
+        },
+        {
+          "hex": "#B9A07E",
+          "w": 0.368
+        },
+        {
+          "hex": "#7E6A55",
+          "w": 0.2243
+        }
+      ]
+    },
+    {
+      "id": "Fn3xGr4vkF4",
+      "small": "https://images.unsplash.com/photo-1655392032399-de1c74a86d01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1655392032399-de1c74a86d01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxxdWlldCUyMHRoZXJhcHklMjByb29tfGVufDF8MHx8fDE3OTE4Mzg5Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 4472,
+      "blurHash": "LiH_oX}UbwOEYk$jWBt6^jt7M{Ip",
+      "color": "#26a6c0",
+      "alt": "a black bean bag on a wood floor in front of a bookcase",
+      "author": "Duane Loux",
+      "authorUrl": "https://unsplash.com/@dloux?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-bean-bag-on-a-wood-floor-in-front-of-a-bookcase-Fn3xGr4vkF4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#999588",
+          "w": 0.5861
+        },
+        {
+          "hex": "#504447",
+          "w": 0.2444
+        },
+        {
+          "hex": "#221A1F",
+          "w": 0.1695
+        }
+      ]
+    },
+    {
+      "id": "YlEqSFHPP-o",
+      "small": "https://images.unsplash.com/photo-1773625688491-6110ff9f1e4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcm1jaGFpcnMlMjBzb2Z0JTIwZGF5bGlnaHR8ZW58MXwwfHx8MTc5MTgzODk0Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773625688491-6110ff9f1e4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcm1jaGFpcnMlMjBzb2Z0JTIwZGF5bGlnaHR8ZW58MXwwfHx8MTc5MTgzODk0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5758,
+      "height": 3839,
+      "blurHash": "LBBV@Ho}0hR+0h^j-oIqMx9axY-U",
+      "color": "#262626",
+      "alt": "Sunlight streams through blinds onto wooden desks",
+      "author": "Andrew Bright",
+      "authorUrl": "https://unsplash.com/@andrew_bright?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-streams-through-blinds-onto-wooden-desks-YlEqSFHPP-o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C0F0E",
+          "w": 0.6748
+        },
+        {
+          "hex": "#9B7B54",
+          "w": 0.169
+        },
+        {
+          "hex": "#54574D",
+          "w": 0.1562
+        }
+      ]
+    },
+    {
+      "id": "mpYew9tD2fo",
+      "small": "https://images.unsplash.com/photo-1790800205919-423c46da90b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcm1jaGFpcnMlMjBzb2Z0JTIwZGF5bGlnaHR8ZW58MXwwfHx8MTc5MTgzODk0Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790800205919-423c46da90b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcm1jaGFpcnMlMjBzb2Z0JTIwZGF5bGlnaHR8ZW58MXwwfHx8MTc5MTgzODk0Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3108,
+      "height": 2074,
+      "blurHash": "LHBWYk_L-mE2-;%ft7M|j]xtkDt6",
+      "color": "#262626",
+      "alt": "A small table and two chairs outside a cafe with a menu on the glass",
+      "author": "Evgeny Karpov",
+      "authorUrl": "https://unsplash.com/@evgeny_karp97?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cafe-table-and-chairs-outside-mpYew9tD2fo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#403D36",
+          "w": 0.4209
+        },
+        {
+          "hex": "#191513",
+          "w": 0.3218
+        },
+        {
+          "hex": "#6D6A48",
+          "w": 0.2573
+        }
+      ]
+    },
+    {
+      "id": "3VSa5sbvdpc",
+      "small": "https://images.unsplash.com/photo-1682421938316-4b186e25174c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1682421938316-4b186e25174c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LFIhQs%00LT1-;NHNIo#01R+t7n$",
+      "color": "#8c8c8c",
+      "alt": "a shadow of a plant on a curtain",
+      "author": "Saad Ahmad",
+      "authorUrl": "https://unsplash.com/@saadahmad_umn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shadow-of-a-plant-on-a-curtain-3VSa5sbvdpc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9D988F",
+          "w": 0.4007
+        },
+        {
+          "hex": "#C7C0B2",
+          "w": 0.3449
+        },
+        {
+          "hex": "#797369",
+          "w": 0.2543
+        }
+      ]
+    },
+    {
+      "id": "j_J2JvXTe7M",
+      "small": "https://images.unsplash.com/photo-1754611380518-61a923cc47ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1754611380518-61a923cc47ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4980,
+      "height": 3648,
+      "blurHash": "LZKUQL00?c-;t7Rjozofs:WBV@R*",
+      "color": "#a6a6a6",
+      "alt": "Curtains frame a window in a bright room",
+      "author": "EZcurtain Life",
+      "authorUrl": "https://unsplash.com/@ezcurtainlife?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/curtains-frame-a-window-in-a-bright-room-j_J2JvXTe7M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9894",
+          "w": 0.5391
+        },
+        {
+          "hex": "#66605F",
+          "w": 0.2641
+        },
+        {
+          "hex": "#F1F3F4",
+          "w": 0.1967
+        }
+      ]
+    },
+    {
+      "id": "TZ6hv1goy6g",
+      "small": "https://images.unsplash.com/photo-1787684047668-58cbac5e5929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787684047668-58cbac5e5929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "LDFF+?ITIVs;?bROWCWBDgWYa#oe",
+      "color": "#737359",
+      "alt": "Sheer white curtains hanging in front of a window with soft daylight",
+      "author": "Leah",
+      "authorUrl": "https://unsplash.com/@jasminepurple?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sheer-white-curtains-in-window-TZ6hv1goy6g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#70705B",
+          "w": 0.426
+        },
+        {
+          "hex": "#82836B",
+          "w": 0.3563
+        },
+        {
+          "hex": "#959B8E",
+          "w": 0.2177
+        }
+      ]
+    },
+    {
+      "id": "G8jWN3-S6XE",
+      "small": "https://images.unsplash.com/photo-1754613389131-ea9b5f234cda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1754613389131-ea9b5f234cda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMGN1cnRhaW5zJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MTgzODk0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4762,
+      "height": 3648,
+      "blurHash": "LaOM:5IU_NaKV?f5xuof-;ofRjWV",
+      "color": "#f3f3f3",
+      "alt": "A bright living room with neutral curtains",
+      "author": "EZcurtain Life",
+      "authorUrl": "https://unsplash.com/@ezcurtainlife?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bright-living-room-with-neutral-curtains-G8jWN3-S6XE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBC0B5",
+          "w": 0.3965
+        },
+        {
+          "hex": "#E1DEDA",
+          "w": 0.322
+        },
+        {
+          "hex": "#A38F80",
+          "w": 0.2815
+        }
+      ]
+    }
+  ]
+}

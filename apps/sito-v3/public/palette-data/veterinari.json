@@ -1,0 +1,331 @@
+{
+  "slug": "veterinari",
+  "queries": [
+    "veterinarian with dog",
+    "vet clinic",
+    "cat at veterinarian"
+  ],
+  "generatedAt": "2026-10-12T21:02:19.267Z",
+  "photos": [
+    {
+      "id": "P1Ku27zZJDs",
+      "small": "https://images.unsplash.com/photo-1700665537604-412e89a285c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700665537604-412e89a285c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5392,
+      "height": 3588,
+      "blurHash": "LLFYW40MpIskpc-pNGt8%KaeR-Rk",
+      "color": "#a6a6a6",
+      "alt": "a man and a woman holding a dog in a room",
+      "author": "Jonatan Bustos",
+      "authorUrl": "https://unsplash.com/@jonatanbustos25?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-a-woman-holding-a-dog-in-a-room-P1Ku27zZJDs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F857F",
+          "w": 0.3811
+        },
+        {
+          "hex": "#B7AAA1",
+          "w": 0.3168
+        },
+        {
+          "hex": "#282E47",
+          "w": 0.302
+        }
+      ]
+    },
+    {
+      "id": "7gcjFeXjayw",
+      "small": "https://images.unsplash.com/photo-1700665537650-1bf37979aae0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700665537650-1bf37979aae0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5926,
+      "height": 3943,
+      "blurHash": "LTGR^[tSNeOX_NWCsmR*o}RPadkC",
+      "color": "#a6c0c0",
+      "alt": "a man holding a small dog in a room",
+      "author": "Jonatan Bustos",
+      "authorUrl": "https://unsplash.com/@jonatanbustos25?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-holding-a-small-dog-in-a-room-7gcjFeXjayw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1C2BF",
+          "w": 0.3794
+        },
+        {
+          "hex": "#4D544E",
+          "w": 0.32
+        },
+        {
+          "hex": "#242840",
+          "w": 0.3006
+        }
+      ]
+    },
+    {
+      "id": "ybZ5hRxaWS4",
+      "small": "https://images.unsplash.com/photo-1644675272883-0c4d582528d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1644675272883-0c4d582528d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2582,
+      "height": 1937,
+      "blurHash": "LUH-lV9{V?n#0L%0kXRQ%1i^oyXT",
+      "color": "#402626",
+      "alt": "a man wearing a face mask sitting next to a dog",
+      "author": "Karlo Tottoc",
+      "authorUrl": "https://unsplash.com/@josekarlo01?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-wearing-a-face-mask-sitting-next-to-a-dog-ybZ5hRxaWS4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CABCB0",
+          "w": 0.3441
+        },
+        {
+          "hex": "#785B48",
+          "w": 0.3327
+        },
+        {
+          "hex": "#A78167",
+          "w": 0.3232
+        }
+      ]
+    },
+    {
+      "id": "Qdt8f7Tcle0",
+      "small": "https://images.unsplash.com/photo-1579119134757-5c38803f34fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1579119134757-5c38803f34fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2ZXRlcmluYXJpYW4lMjB3aXRoJTIwZG9nfGVufDF8MHx8fDE3OTE4Mzg5MzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "LfLXMXt7?^%M_NRiRPt7%Nt7M_jF",
+      "color": "#d9d9d9",
+      "alt": "dog kissing woman in black crew-neck shirt",
+      "author": "Tamas Pap",
+      "authorUrl": "https://unsplash.com/@tamasp?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dog-kissing-woman-in-black-crew-neck-shirt-Qdt8f7Tcle0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCDDDC",
+          "w": 0.6101
+        },
+        {
+          "hex": "#B59376",
+          "w": 0.2167
+        },
+        {
+          "hex": "#151009",
+          "w": 0.1732
+        }
+      ]
+    },
+    {
+      "id": "nWKMtmbpxQs",
+      "small": "https://images.unsplash.com/photo-1632236542159-809925d85fc0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1632236542159-809925d85fc0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LOIEhC0e0h-QxAS5SjVrx^V@aeoz",
+      "color": "#a6a6a6",
+      "alt": "a dog laying on the floor with a person holding a stick",
+      "author": "Ayla Verschueren",
+      "authorUrl": "https://unsplash.com/@moob?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dog-laying-on-the-floor-with-a-person-holding-a-stick-nWKMtmbpxQs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBB4AA",
+          "w": 0.4757
+        },
+        {
+          "hex": "#84755F",
+          "w": 0.3751
+        },
+        {
+          "hex": "#333427",
+          "w": 0.1492
+        }
+      ]
+    },
+    {
+      "id": "DE6rYp1nAho",
+      "small": "https://images.unsplash.com/photo-1551076805-e1869033e561?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1551076805-e1869033e561?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 4472,
+      "blurHash": "LKMaeT%Mxuxu~qRjRjWB9FkCfQWB",
+      "color": "#d9d9d9",
+      "alt": "An operating room with a surgical table, overhead light, and medical equipment",
+      "author": "Arseny Togulev",
+      "authorUrl": "https://unsplash.com/@tetrakiss?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/operating-room-with-surgical-table-DE6rYp1nAho?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D0D4D7",
+          "w": 0.7334
+        },
+        {
+          "hex": "#AEB3B7",
+          "w": 0.1828
+        },
+        {
+          "hex": "#83878B",
+          "w": 0.0838
+        }
+      ]
+    },
+    {
+      "id": "loJL4ijUobg",
+      "small": "https://images.unsplash.com/photo-1630438994394-3deff7a591bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630438994394-3deff7a591bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LkMaFi%M%NIU_NoJayoft7M{M{of",
+      "color": "#d9d9d9",
+      "alt": "white and black short coated dog wearing white and black polka dot shirt",
+      "author": "Karsten Winegeart",
+      "authorUrl": "https://unsplash.com/@_karsten?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-black-short-coated-dog-wearing-white-and-black-polka-dot-shirt-loJL4ijUobg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0DDE0",
+          "w": 0.5803
+        },
+        {
+          "hex": "#A69A93",
+          "w": 0.2785
+        },
+        {
+          "hex": "#6A5D57",
+          "w": 0.1411
+        }
+      ]
+    },
+    {
+      "id": "_9xRHrMOjeg",
+      "small": "https://images.unsplash.com/photo-1602052577122-f73b9710adba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1602052577122-f73b9710adba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHx2ZXQlMjBjbGluaWN8ZW58MXwwfHx8MTc5MTgzODkzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5845,
+      "height": 3897,
+      "blurHash": "LMLXD7oe%MWU~qa#s:of~Wt6NGRj",
+      "color": "#c0c0c0",
+      "alt": "A laboratory workbench with a microscope and analytical equipment in a bright room",
+      "author": "Trnava University",
+      "authorUrl": "https://unsplash.com/@trnavskauni?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/laboratory-workbench-with-microscope-and-equipment-_9xRHrMOjeg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFC7C2",
+          "w": 0.6837
+        },
+        {
+          "hex": "#A29B93",
+          "w": 0.2021
+        },
+        {
+          "hex": "#645D55",
+          "w": 0.1142
+        }
+      ]
+    },
+    {
+      "id": "5Bi6MWlWMbw",
+      "small": "https://images.unsplash.com/photo-1725409796872-8b41e8eca929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725409796872-8b41e8eca929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4088,
+      "height": 2725,
+      "blurHash": "LEHd,1w~9|o#?]?bxttP56~V.7D*",
+      "color": "#d9d9c0",
+      "alt": "A white kitten being examined by a veterinator",
+      "author": "Judy Beth Morris",
+      "authorUrl": "https://unsplash.com/@judy_beth_morris_idaho?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-kitten-being-examined-by-a-veterinator-5Bi6MWlWMbw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B37653",
+          "w": 0.3846
+        },
+        {
+          "hex": "#704D36",
+          "w": 0.3467
+        },
+        {
+          "hex": "#322722",
+          "w": 0.2687
+        }
+      ]
+    },
+    {
+      "id": "qqT6nYoG5xg",
+      "small": "https://images.unsplash.com/photo-1728013274420-ed02b1f58887?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1728013274420-ed02b1f58887?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4088,
+      "height": 2725,
+      "blurHash": "LGG[K9~qERS$9FivXSyD9uw]?Ho|",
+      "color": "#404040",
+      "alt": "A person holding a small white kitten in their hands",
+      "author": "Judy Beth Morris",
+      "authorUrl": "https://unsplash.com/@judy_beth_morris_idaho?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-small-white-kitten-in-their-hands-qqT6nYoG5xg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1B6AB",
+          "w": 0.3511
+        },
+        {
+          "hex": "#3C392D",
+          "w": 0.3389
+        },
+        {
+          "hex": "#A08575",
+          "w": 0.31
+        }
+      ]
+    },
+    {
+      "id": "CwB_5q5OLwQ",
+      "small": "https://images.unsplash.com/photo-1651409701894-420edc9c1bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1651409701894-420edc9c1bd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "L026E7DiIT?u-;MxM{x]Mex[X6R6",
+      "color": "#0c2626",
+      "alt": "a black cat with green eyes",
+      "author": "Fatane Rahimi",
+      "authorUrl": "https://unsplash.com/@fatane?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-cat-with-green-eyes-CwB_5q5OLwQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#13181C",
+          "w": 0.8486
+        },
+        {
+          "hex": "#202429",
+          "w": 0.1514
+        }
+      ]
+    },
+    {
+      "id": "_C0d7QRGtJI",
+      "small": "https://images.unsplash.com/photo-1728013183949-ac8ebaf927ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1728013183949-ac8ebaf927ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXQlMjBhdCUyMHZldGVyaW5hcmlhbnxlbnwxfDB8fHwxNzkxODM4OTM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LeH2Dz0KIVxuoHt7t7M{%LxtIUWW",
+      "color": "#a6a68c",
+      "alt": "A black and white cat laying on top of a couch",
+      "author": "Judy Beth Morris",
+      "authorUrl": "https://unsplash.com/@judy_beth_morris_idaho?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-and-white-cat-laying-on-top-of-a-couch-_C0d7QRGtJI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#12121E",
+          "w": 0.3998
+        },
+        {
+          "hex": "#DED4C8",
+          "w": 0.3039
+        },
+        {
+          "hex": "#A59980",
+          "w": 0.2962
+        }
+      ]
+    }
+  ]
+}

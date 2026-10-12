@@ -1,0 +1,227 @@
+{
+  "slug": "logopedisti",
+  "queries": [
+    "speech therapy room",
+    "picture cards on table",
+    "quiet clinic interior"
+  ],
+  "generatedAt": "2026-10-12T21:02:57.833Z",
+  "photos": [
+    {
+      "id": "YPH2q0BAsMA",
+      "small": "https://images.unsplash.com/photo-1728167049092-de4e98571c1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1728167049092-de4e98571c1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LD8Ne3WB4nofRjofofWB00of?bWB",
+      "color": "#260c0c",
+      "alt": "A stack of playing cards sitting on top of a wooden table",
+      "author": "Samyam Kittur",
+      "authorUrl": "https://unsplash.com/@ideawashy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-stack-of-playing-cards-sitting-on-top-of-a-wooden-table-YPH2q0BAsMA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A0601",
+          "w": 0.6998
+        },
+        {
+          "hex": "#9C9C9B",
+          "w": 0.1726
+        },
+        {
+          "hex": "#2A1207",
+          "w": 0.1276
+        }
+      ]
+    },
+    {
+      "id": "3oGPOKA2BC8",
+      "small": "https://images.unsplash.com/photo-1598555330178-c3d6ee641667?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598555330178-c3d6ee641667?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4973,
+      "height": 3978,
+      "blurHash": "LFBpkLp0Di4.%0D%V?x^4m9F^+-;",
+      "color": "#262626",
+      "alt": "white printer paper on black round table",
+      "author": "Alabaster Co",
+      "authorUrl": "https://unsplash.com/@alabaster_co?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-printer-paper-on-black-round-table-3oGPOKA2BC8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#161617",
+          "w": 0.6546
+        },
+        {
+          "hex": "#544E46",
+          "w": 0.2062
+        },
+        {
+          "hex": "#999387",
+          "w": 0.1392
+        }
+      ]
+    },
+    {
+      "id": "Vye3aVdKKcY",
+      "small": "https://images.unsplash.com/photo-1514195153638-0f25d3db91a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1514195153638-0f25d3db91a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LBCGGa4T0eTKO?4m?G-;D%%gkrD%",
+      "color": "#262626",
+      "alt": "assorted posters on brown wooden table",
+      "author": "Raychan",
+      "authorUrl": "https://unsplash.com/@wx1993?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-posters-on-brown-wooden-table-Vye3aVdKKcY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#291D18",
+          "w": 0.3846
+        },
+        {
+          "hex": "#4F352A",
+          "w": 0.3778
+        },
+        {
+          "hex": "#91756E",
+          "w": 0.2375
+        }
+      ]
+    },
+    {
+      "id": "I7mwxvPi0bA",
+      "small": "https://images.unsplash.com/photo-1584116573168-b4df931e313a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584116573168-b4df931e313a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWN0dXJlJTIwY2FyZHMlMjBvbiUyMHRhYmxlfGVufDF8MHx8fDE3OTE4Mzg5NzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4500,
+      "height": 3000,
+      "blurHash": "LgKnF}HqEkM{Nat7xaV@IA%Mofof",
+      "color": "#f3f3f3",
+      "alt": "person holding photos on brown wooden table",
+      "author": "Robert Tjalondo",
+      "authorUrl": "https://unsplash.com/@tjalondo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-photos-on-brown-wooden-table-I7mwxvPi0bA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD6D0",
+          "w": 0.4624
+        },
+        {
+          "hex": "#BBA188",
+          "w": 0.3133
+        },
+        {
+          "hex": "#856142",
+          "w": 0.2243
+        }
+      ]
+    },
+    {
+      "id": "-i6kaig732w",
+      "small": "https://images.unsplash.com/photo-1665231795856-769fb08a90bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1665231795856-769fb08a90bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5999,
+      "height": 3991,
+      "blurHash": "LKHw*~D%?ur=~VR+jcbG0LxuNGR+",
+      "color": "#a68c73",
+      "alt": "a room with a desk and a chair",
+      "author": "Marios Gkortsilas",
+      "authorUrl": "https://unsplash.com/@mr_mgk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-desk-and-a-chair--i6kaig732w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A502F",
+          "w": 0.4005
+        },
+        {
+          "hex": "#B18E6E",
+          "w": 0.3145
+        },
+        {
+          "hex": "#321A07",
+          "w": 0.285
+        }
+      ]
+    },
+    {
+      "id": "yJsMOVwazRU",
+      "small": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6013,
+      "height": 4009,
+      "blurHash": "LULz:Lf,00IU~qRit7WBM_NGt7oJ",
+      "color": "#d9d9d9",
+      "alt": "a hospital room with medical equipment in it",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hospital-room-with-medical-equipment-in-it-yJsMOVwazRU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD5D2",
+          "w": 0.6133
+        },
+        {
+          "hex": "#B2A89E",
+          "w": 0.2103
+        },
+        {
+          "hex": "#84735F",
+          "w": 0.1764
+        }
+      ]
+    },
+    {
+      "id": "Pk-KuizxQv8",
+      "small": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5552,
+      "height": 4164,
+      "blurHash": "LALhG79ZDjR*4TxuxGa#v{RjDit7",
+      "color": "#c0c0c0",
+      "alt": "Empty hospital corridor with benches and doors",
+      "author": "Tasha Kostyuk",
+      "authorUrl": "https://unsplash.com/@tashakostyuk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-hospital-corridor-with-benches-and-doors-Pk-KuizxQv8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3B9B7",
+          "w": 0.4878
+        },
+        {
+          "hex": "#CED4D6",
+          "w": 0.4287
+        },
+        {
+          "hex": "#8B9695",
+          "w": 0.0835
+        }
+      ]
+    },
+    {
+      "id": "Fdku_oMrDvk",
+      "small": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxxdWlldCUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4Mzg5Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6147,
+      "height": 4098,
+      "blurHash": "LUNd5cxvxuof_4M{aeIUIAWVt7fk",
+      "color": "#d9d9d9",
+      "alt": "a dental room with a desk and chairs",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dental-room-with-a-desk-and-chairs-Fdku_oMrDvk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD7D4",
+          "w": 0.6936
+        },
+        {
+          "hex": "#B9A692",
+          "w": 0.1844
+        },
+        {
+          "hex": "#88755F",
+          "w": 0.122
+        }
+      ]
+    }
+  ]
+}

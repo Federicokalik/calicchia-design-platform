@@ -1,0 +1,281 @@
+{
+  "slug": "geometri",
+  "queries": [
+    "surveying equipment tripod",
+    "land survey field",
+    "measuring tape floor plan"
+  ],
+  "generatedAt": "2026-10-12T21:03:55.351Z",
+  "photos": [
+    {
+      "id": "zSrksQgp4W0",
+      "small": "https://images.unsplash.com/photo-1628158088936-68ccaaa400dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628158088936-68ccaaa400dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7647,
+      "height": 5101,
+      "blurHash": "L?D1W$o#RjfP%jogWUj[tTWBkBj]",
+      "color": "#8cc0f3",
+      "alt": "black and white tripod on green grass field during daytime",
+      "author": "Valerie V",
+      "authorUrl": "https://unsplash.com/@valerief?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-tripod-on-green-grass-field-during-daytime-zSrksQgp4W0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#99C8F1",
+          "w": 0.3838
+        },
+        {
+          "hex": "#406023",
+          "w": 0.3237
+        },
+        {
+          "hex": "#648746",
+          "w": 0.2925
+        }
+      ]
+    },
+    {
+      "id": "5Rp0rkDziGY",
+      "small": "https://images.unsplash.com/photo-1628158088803-4200c2be52f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628158088803-4200c2be52f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2836,
+      "height": 1891,
+      "blurHash": "L~G]I9WVRkj]cbofoebHxbWXazfP",
+      "color": "#8cc0f3",
+      "alt": "gray tripod on brown rock",
+      "author": "Valerie V",
+      "authorUrl": "https://unsplash.com/@valerief?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-tripod-on-brown-rock-5Rp0rkDziGY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3835C",
+          "w": 0.3942
+        },
+        {
+          "hex": "#94BBFD",
+          "w": 0.3471
+        },
+        {
+          "hex": "#312711",
+          "w": 0.2587
+        }
+      ]
+    },
+    {
+      "id": "w3WwUqNIHMk",
+      "small": "https://images.unsplash.com/photo-1543192552-e2b66bd9282d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1543192552-e2b66bd9282d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LMINjm=_%1WAKRnhoJRj1P%1WBs:",
+      "color": "#c08c73",
+      "alt": "black action camera",
+      "author": "Joshua Case",
+      "authorUrl": "https://unsplash.com/@joshcase?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-action-camera-w3WwUqNIHMk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C49882",
+          "w": 0.531
+        },
+        {
+          "hex": "#9F755E",
+          "w": 0.2933
+        },
+        {
+          "hex": "#3780A3",
+          "w": 0.1756
+        }
+      ]
+    },
+    {
+      "id": "exRCI8eChRE",
+      "small": "https://images.unsplash.com/photo-1631462016268-8f26549de61f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631462016268-8f26549de61f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdXJ2ZXlpbmclMjBlcXVpcG1lbnQlMjB0cmlwb2R8ZW58MXwwfHx8MTc5MTgzOTAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4300,
+      "height": 2867,
+      "blurHash": "LIGb;p_NxvRjM{WB%2%MR+M{t7fl",
+      "color": "#a6a6a6",
+      "alt": "black dslr camera on tripod",
+      "author": "insung yoon",
+      "authorUrl": "https://unsplash.com/@insungpandora?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-dslr-camera-on-tripod-exRCI8eChRE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8E969A",
+          "w": 0.4413
+        },
+        {
+          "hex": "#B7B7B8",
+          "w": 0.3689
+        },
+        {
+          "hex": "#171E1F",
+          "w": 0.1898
+        }
+      ]
+    },
+    {
+      "id": "NKi2AhgDp-0",
+      "small": "https://images.unsplash.com/photo-1759772238410-fa185c7947d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYW5kJTIwc3VydmV5JTIwZmllbGR8ZW58MXwwfHx8MTc5MTgzOTAyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759772238410-fa185c7947d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYW5kJTIwc3VydmV5JTIwZmllbGR8ZW58MXwwfHx8MTc5MTgzOTAyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2837,
+      "height": 2000,
+      "blurHash": "LaECnHNGNGn+_NWBafR*-;a#ayWB",
+      "color": "#a6a6a6",
+      "alt": "Worker in high-visibility vest on dirt path",
+      "author": "Illia Horokhovsky",
+      "authorUrl": "https://unsplash.com/@fili_ja?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/worker-in-high-visibility-vest-on-dirt-path-NKi2AhgDp-0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#47453D",
+          "w": 0.4698
+        },
+        {
+          "hex": "#605959",
+          "w": 0.2913
+        },
+        {
+          "hex": "#B3B2B6",
+          "w": 0.2389
+        }
+      ]
+    },
+    {
+      "id": "ulkva5je7bE",
+      "small": "https://images.unsplash.com/photo-1774281592944-c3acea573bac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYW5kJTIwc3VydmV5JTIwZmllbGR8ZW58MXwwfHx8MTc5MTgzOTAyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774281592944-c3acea573bac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYW5kJTIwc3VydmV5JTIwZmllbGR8ZW58MXwwfHx8MTc5MTgzOTAyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8064,
+      "height": 5376,
+      "blurHash": "LqH.Z.xuV@NG_4WWR+j]%Mj@WVj[",
+      "color": "#f3f3f3",
+      "alt": "Aerial view of a volcanic landscape with a lava flow",
+      "author": "Marc Wieland",
+      "authorUrl": "https://unsplash.com/@mawiswiss?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/aerial-view-of-a-volcanic-landscape-with-a-lava-flow-ulkva5je7bE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#74747E",
+          "w": 0.4098
+        },
+        {
+          "hex": "#9EA2AA",
+          "w": 0.3576
+        },
+        {
+          "hex": "#E1E7EE",
+          "w": 0.2326
+        }
+      ]
+    },
+    {
+      "id": "wTtBtw80erg",
+      "small": "https://images.unsplash.com/photo-1716698286313-9a2349d41110?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1716698286313-9a2349d41110?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5748,
+      "height": 3832,
+      "blurHash": "LDB|QYoL9Gj]4Uayxua|4=f6s,jY",
+      "color": "#597359",
+      "alt": "a person holding a tape measure in their hand",
+      "author": "josh A. D.",
+      "authorUrl": "https://unsplash.com/@mista_j?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-tape-measure-in-their-hand-wTtBtw80erg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6C7466",
+          "w": 0.4071
+        },
+        {
+          "hex": "#56574A",
+          "w": 0.3402
+        },
+        {
+          "hex": "#3D3427",
+          "w": 0.2526
+        }
+      ]
+    },
+    {
+      "id": "VdB1EHqEzX0",
+      "small": "https://images.unsplash.com/photo-1719244395193-bf7f119728ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1719244395193-bf7f119728ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5755,
+      "height": 3003,
+      "blurHash": "LnL_%o=cNHIp-oIpSfw^}RM|t7bI",
+      "color": "#f38c40",
+      "alt": "A tape measure is on a wooden table",
+      "author": "Mark Owen Wilkinson Hughes",
+      "authorUrl": "https://unsplash.com/@markowihu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tape-measure-is-on-a-wooden-table-VdB1EHqEzX0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EB8C42",
+          "w": 0.6242
+        },
+        {
+          "hex": "#1B0706",
+          "w": 0.2313
+        },
+        {
+          "hex": "#B5B8B7",
+          "w": 0.1445
+        }
+      ]
+    },
+    {
+      "id": "zIJlAO0ib_A",
+      "small": "https://images.unsplash.com/photo-1637666418115-305af1338928?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1637666418115-305af1338928?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3071,
+      "height": 2047,
+      "blurHash": "LAI:T@=_-:9c5X57RoRP-64;~SEM",
+      "color": "#59260c",
+      "alt": "a pile of measuring tape sitting on top of a table",
+      "author": "Rob McGlade",
+      "authorUrl": "https://unsplash.com/@bobajob?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-measuring-tape-sitting-on-top-of-a-table-zIJlAO0ib_A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D2B00",
+          "w": 0.4022
+        },
+        {
+          "hex": "#955300",
+          "w": 0.384
+        },
+        {
+          "hex": "#CF850C",
+          "w": 0.2138
+        }
+      ]
+    },
+    {
+      "id": "To4geE1vSfk",
+      "small": "https://images.unsplash.com/photo-1585679101330-6f31ea19605b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585679101330-6f31ea19605b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWFzdXJpbmclMjB0YXBlJTIwZmxvb3IlMjBwbGFufGVufDF8MHx8fDE3OTE4MzkwMzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "L8A,E%Rp0NX3tPx?D-R94=x:x?Dn",
+      "color": "#402626",
+      "alt": "yellow measuring tape on brown wooden table",
+      "author": "Erik Mclean",
+      "authorUrl": "https://unsplash.com/@introspectivedsgn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-measuring-tape-on-brown-wooden-table-To4geE1vSfk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#604434",
+          "w": 0.5337
+        },
+        {
+          "hex": "#382A24",
+          "w": 0.4136
+        },
+        {
+          "hex": "#968E26",
+          "w": 0.0527
+        }
+      ]
+    }
+  ]
+}

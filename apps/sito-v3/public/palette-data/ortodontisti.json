@@ -1,0 +1,331 @@
+{
+  "slug": "ortodontisti",
+  "queries": [
+    "orthodontic clinic interior",
+    "clear aligner trays",
+    "dental braces close up"
+  ],
+  "generatedAt": "2026-10-12T19:51:53.722Z",
+  "photos": [
+    {
+      "id": "Fdku_oMrDvk",
+      "small": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306251-b4634215d98f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6147,
+      "height": 4098,
+      "blurHash": "LUNd5cxvxuof_4M{aeIUIAWVt7fk",
+      "color": "#d9d9d9",
+      "alt": "a dental room with a desk and chairs",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dental-room-with-a-desk-and-chairs-Fdku_oMrDvk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD7D4",
+          "w": 0.6936
+        },
+        {
+          "hex": "#B9A692",
+          "w": 0.1844
+        },
+        {
+          "hex": "#88755F",
+          "w": 0.122
+        }
+      ]
+    },
+    {
+      "id": "I-kDEBUMAaQ",
+      "small": "https://images.unsplash.com/photo-1616391182219-e080b4d1043a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1616391182219-e080b4d1043a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4208,
+      "height": 3120,
+      "blurHash": "LGG+K?_N?wM|%Kbcj]xut5RjIUWV",
+      "color": "#a6a6a6",
+      "alt": "red and white leather padded chair",
+      "author": "Sam Moghadam",
+      "authorUrl": "https://unsplash.com/@sammoghadam?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-white-leather-padded-chair-I-kDEBUMAaQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#999487",
+          "w": 0.4256
+        },
+        {
+          "hex": "#BABAB4",
+          "w": 0.3454
+        },
+        {
+          "hex": "#62564A",
+          "w": 0.229
+        }
+      ]
+    },
+    {
+      "id": "yJsMOVwazRU",
+      "small": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704455306925-1401c3012117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6013,
+      "height": 4009,
+      "blurHash": "LULz:Lf,00IU~qRit7WBM_NGt7oJ",
+      "color": "#d9d9d9",
+      "alt": "a hospital room with medical equipment in it",
+      "author": "Kari Bjorn Photography",
+      "authorUrl": "https://unsplash.com/@karibjorn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hospital-room-with-medical-equipment-in-it-yJsMOVwazRU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD5D2",
+          "w": 0.6133
+        },
+        {
+          "hex": "#B2A89E",
+          "w": 0.2103
+        },
+        {
+          "hex": "#84735F",
+          "w": 0.1764
+        }
+      ]
+    },
+    {
+      "id": "kZMIIVHYSpc",
+      "small": "https://images.unsplash.com/photo-1635108198085-89b73e046fdb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635108198085-89b73e046fdb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvcnRob2RvbnRpYyUyMGNsaW5pYyUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzQ3MDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LWJ@|6x]xvn$_NozjEs:n$xuM{oz",
+      "color": "#c0c0c0",
+      "alt": "a room with a desk, chair and a television",
+      "author": "Point3D Commercial Imaging Ltd.",
+      "authorUrl": "https://unsplash.com/@3dottawa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-desk-chair-and-a-television-kZMIIVHYSpc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CDCAC8",
+          "w": 0.4621
+        },
+        {
+          "hex": "#886A4F",
+          "w": 0.2935
+        },
+        {
+          "hex": "#A7A19C",
+          "w": 0.2444
+        }
+      ]
+    },
+    {
+      "id": "fmB7IdFjhTM",
+      "small": "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LLO-cq9j=qxc}*NN%FIW%KoeIUf,",
+      "color": "#d98c73",
+      "alt": "A person inserting a clear plastic dental aligner over their teeth against a yellow background",
+      "author": "Diana Polekhina",
+      "authorUrl": "https://unsplash.com/@diana_pole?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-inserting-clear-dental-aligner-fmB7IdFjhTM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E09172",
+          "w": 0.465
+        },
+        {
+          "hex": "#FFB76C",
+          "w": 0.305
+        },
+        {
+          "hex": "#BC6C54",
+          "w": 0.23
+        }
+      ]
+    },
+    {
+      "id": "uTUsnv_UCSQ",
+      "small": "https://images.unsplash.com/photo-1777793636393-a0fec488f3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777793636393-a0fec488f3fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2880,
+      "height": 2160,
+      "blurHash": "LGOxj;+tp{=spJH=5SrqXRn~E3%1",
+      "color": "#d9a68c",
+      "alt": "Woman adjusting clear dental aligners on teeth",
+      "author": "Harold Hisona",
+      "authorUrl": "https://unsplash.com/@harold_angus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-adjusting-clear-dental-aligners-on-teeth-uTUsnv_UCSQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F7C8B8",
+          "w": 0.3874
+        },
+        {
+          "hex": "#DC9C85",
+          "w": 0.3786
+        },
+        {
+          "hex": "#B16F58",
+          "w": 0.234
+        }
+      ]
+    },
+    {
+      "id": "irPpXQF5bSI",
+      "small": "https://images.unsplash.com/photo-1590062033099-a43ac5f82979?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1590062033099-a43ac5f82979?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3458,
+      "blurHash": "L3S6Pl00xu-;xuM{M{of_3xuRjRj",
+      "color": "#f3f3f3",
+      "alt": "white spiral lace on white surface",
+      "author": "Geniova Technologies",
+      "authorUrl": "https://unsplash.com/@geniovatechnologies?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-spiral-lace-on-white-surface-irPpXQF5bSI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F5F5F5",
+          "w": 0.9339
+        },
+        {
+          "hex": "#E3E3E3",
+          "w": 0.0661
+        }
+      ]
+    },
+    {
+      "id": "Mv7xZmOgrQk",
+      "small": "https://images.unsplash.com/photo-1695275884195-70381520643d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1695275884195-70381520643d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGVhciUyMGFsaWduZXIlMjB0cmF5c3xlbnwxfDB8fHwxNzkxODM0NzA5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LhMa|%^%~UM}xY4:%1?F%1RjIWxu",
+      "color": "#f3f3f3",
+      "alt": "a person in blue gloves holding a toothbrush",
+      "author": "Katarzyna Zygnerska",
+      "authorUrl": "https://unsplash.com/@katasha?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-in-blue-gloves-holding-a-toothbrush-Mv7xZmOgrQk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F8FBFB",
+          "w": 0.5296
+        },
+        {
+          "hex": "#0091CF",
+          "w": 0.3791
+        },
+        {
+          "hex": "#116798",
+          "w": 0.0914
+        }
+      ]
+    },
+    {
+      "id": "P8ernb_Ht-M",
+      "small": "https://images.unsplash.com/photo-1720685193964-4529228a33c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1720685193964-4529228a33c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5333,
+      "height": 4000,
+      "blurHash": "LNOWEI?GEKiH.SM_V?kBy?R%V?kq",
+      "color": "#d9d9d9",
+      "alt": "A close up of a tooth with braces on it",
+      "author": "Katarzyna Zygnerska",
+      "authorUrl": "https://unsplash.com/@katasha?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-tooth-with-braces-on-it-P8ernb_Ht-M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0E2E3",
+          "w": 0.5459
+        },
+        {
+          "hex": "#D0BFB8",
+          "w": 0.2908
+        },
+        {
+          "hex": "#D4847D",
+          "w": 0.1633
+        }
+      ]
+    },
+    {
+      "id": "YKqYvUYzw0w",
+      "small": "https://images.unsplash.com/photo-1656514894252-fb336a3ad6a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1656514894252-fb336a3ad6a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L8Fh#F~q54IUWTs:^+ju9FV@%gkC",
+      "color": "#8c7373",
+      "alt": "close-up of a person's mouth",
+      "author": "Ozkan Guner",
+      "authorUrl": "https://unsplash.com/@dentistozkanguner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-persons-mouth-YKqYvUYzw0w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#887068",
+          "w": 0.5303
+        },
+        {
+          "hex": "#A89893",
+          "w": 0.314
+        },
+        {
+          "hex": "#5A413A",
+          "w": 0.1557
+        }
+      ]
+    },
+    {
+      "id": "hKaYlAF1nDw",
+      "small": "https://images.unsplash.com/photo-1598256989809-394fa4f6cd26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598256989809-394fa4f6cd26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LTI#fT000f%LWYI9x^%M9v%1s;Mx",
+      "color": "#f3f3f3",
+      "alt": "person with silver teeth braces",
+      "author": "Atikah Akhtar",
+      "authorUrl": "https://unsplash.com/@atikahakhtar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-with-silver-teeth-braces-hKaYlAF1nDw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8E3E0",
+          "w": 0.3909
+        },
+        {
+          "hex": "#B6A6A2",
+          "w": 0.3094
+        },
+        {
+          "hex": "#6C6869",
+          "w": 0.2998
+        }
+      ]
+    },
+    {
+      "id": "HqFpHQzE-Ko",
+      "small": "https://images.unsplash.com/photo-1720685193975-3b449a7cb905?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1720685193975-3b449a7cb905?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkZW50YWwlMjBicmFjZXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzQ3MTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5333,
+      "height": 4000,
+      "blurHash": "LQL}W[0g5TX.H=?Gs,WBEf?bVsIA",
+      "color": "#d9d9d9",
+      "alt": "A person in blue gloves holding a toothbrush",
+      "author": "Katarzyna Zygnerska",
+      "authorUrl": "https://unsplash.com/@katasha?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-in-blue-gloves-holding-a-toothbrush-HqFpHQzE-Ko?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBDFDE",
+          "w": 0.6273
+        },
+        {
+          "hex": "#75AFCA",
+          "w": 0.2594
+        },
+        {
+          "hex": "#95777C",
+          "w": 0.1133
+        }
+      ]
+    }
+  ]
+}

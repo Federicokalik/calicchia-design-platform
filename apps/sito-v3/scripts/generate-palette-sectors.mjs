@@ -9,6 +9,8 @@
  * (voice rules + contesto del settore + un settore già scritto come esempio),
  * estrae il JSON dall'output, valida la forma ed esegue il linter della voce.
  * I file di categoria vengono riscritti in forma canonica (JSON indentato).
+ * Insieme a loro si aggiorna sectors/slugs.ts (solo gli slug presenti, per chi
+ * deve sapere se un settore esiste senza importarne i testi).
  *
  * Regole di scrittura:
  *  - le voci con `reviewed: true` non vengono mai riscritte, nemmeno con --force;
@@ -44,6 +46,7 @@ const OUT_DIR = resolve(DATA_DIR, 'risorse/palette/sectors');
 const COMPANION = 'C:/Users/calicchiadesign/.claude/plugins/cache/openai-codex/codex/1.0.4/scripts/codex-companion.mjs';
 
 const CONCURRENCY = Number(process.env.CONCURRENCY ?? '3');
+const MAX_ATTEMPTS = 2;
 const DRY_RUN = process.env.DRY_RUN === '1';
 
 // ─── CLI args ─────────────────────────────────────────────────────
@@ -182,7 +185,8 @@ const US_SPELLING = [
   /\bgray\b/i,
   /\b(organiz|personaliz|customiz|optimiz|realiz|recogniz|prioritiz|minimiz|apologiz)/i,
   /\bjewelry\b/i,
-  /\btires?\b/i,
+  // "tire" come verbo ("tire the eye") va bene: si segnala solo lo pneumatico.
+  /\b(car|spare|flat|winter|summer|new|worn|four)\s+tires?\b|\btires?\s+(pressure|change|changes|shop|fitting|storage)\b/i,
   /\bcheckup\b/i,
   /\bcatalog\b/i,
 ];
@@ -275,7 +279,58 @@ function validateSector(s, slug) {
     }
   }
   if (typeof s.reviewed !== 'boolean') errs.push('reviewed non booleano');
+  textHygiene(s, errs);
   return errs;
+}
+
+/**
+ * Niente a capo né sequenze "\n" o "/n" visibili nei testi. Unica eccezione:
+ * nell'intro i paragrafi si separano con una riga vuota (PageHero la divide
+ * in <p>), quindi lì sono ammessi solo a capo doppi fra un paragrafo e l'altro.
+ * "b/n" (bianco e nero) resta valido.
+ */
+function textHygiene(s, errs) {
+  const check = (value, path, isIntro) => {
+    if (typeof value === 'string') {
+      if (value.includes('\\')) errs.push(`${path}: backslash letterale`);
+      if (/\/n\b/i.test(value.replace(/\bb\/n\b/gi, ''))) errs.push(`${path}: "/n" nel testo`);
+      if (isIntro) {
+        const paras = value.split(/\n\s*\n/);
+        if (paras.some((p) => p.includes('\n'))) errs.push(`${path}: a capo singolo dentro un paragrafo`);
+      } else if (/[\r\n]/.test(value)) {
+        errs.push(`${path}: a capo nel testo`);
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((v, i) => check(v, `${path}[${i}]`, isIntro));
+    } else if (value && typeof value === 'object') {
+      for (const [k, v] of Object.entries(value)) check(v, `${path}.${k}`, isIntro);
+    }
+  };
+  check(s.copy, 'copy', false);
+  check(s.aliases, 'aliases', false);
+  check(s.queriesEn, 'queriesEn', false);
+  check(s.intro, 'intro', true);
+}
+
+/** Ricerche Unsplash identiche in settori diversi: stesse foto, stessa palette. */
+function queryCollisions(sectors) {
+  const owners = new Map();
+  for (const s of sectors) {
+    for (const q of s.queriesEn ?? []) {
+      const key = q.trim().toLowerCase();
+      if (!owners.has(key)) owners.set(key, new Set());
+      owners.get(key).add(s.slug);
+    }
+  }
+  const out = new Map();
+  for (const [q, slugs] of owners) {
+    if (slugs.size < 2) continue;
+    for (const slug of slugs) {
+      if (!out.has(slug)) out.set(slug, []);
+      out.get(slug).push(`"${q}" (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+    }
+  }
+  return out;
 }
 
 /** Radici condivise con altri settori (il matching del testo libero diventa ambiguo). */
@@ -291,11 +346,31 @@ function aliasCollisions(sectors) {
     }
   }
   const out = new Map();
+  const add = (slug, msg) => {
+    if (!out.has(slug)) out.set(slug, []);
+    out.get(slug).push(msg);
+  };
   for (const [key, slugs] of owners) {
     if (slugs.size < 2) continue;
-    for (const slug of slugs) {
-      if (!out.has(slug)) out.set(slug, []);
-      out.get(slug).push(`${key} (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+    for (const slug of slugs) add(slug, `${key} (anche ${[...slugs].filter((x) => x !== slug).join(', ')})`);
+  }
+  // Una radice di 4+ caratteri combacia anche con le parole che la estendono:
+  // "matton" prende "mattonelle", quindi pesta i piedi a "mattonell".
+  const entries = [...owners.keys()].map((key) => {
+    const [loc, root] = key.split(':');
+    return { loc, root, slugs: owners.get(key) };
+  });
+  for (const a of entries) {
+    if (a.root.length < 4) continue;
+    for (const b of entries) {
+      if (a === b || a.loc !== b.loc || !b.root.startsWith(a.root)) continue;
+      for (const sa of a.slugs) {
+        for (const sb of b.slugs) {
+          if (sa === sb) continue;
+          add(sa, `${a.loc}:${a.root} copre ${b.root} di ${sb}`);
+          add(sb, `${b.loc}:${b.root} coperta da ${a.root} di ${sa}`);
+        }
+      }
     }
   }
   return out;
@@ -396,10 +471,25 @@ export const ${constName(catId)}: PaletteSectorContent[] = ${JSON.stringify(sect
 `;
 }
 
+function renderSlugs(slugs) {
+  return `// Generato da scripts/generate-palette-sectors.mjs: non modificare a mano.
+// Slug dei settori presenti in questa cartella, senza testi: lo importa chi
+// deve solo sapere se un settore esiste (es. il box nelle landing della matrice).
+
+export const SECTOR_SLUGS: readonly string[] = ${JSON.stringify(slugs, null, 2)};
+
+const SECTOR_SLUG_SET = new Set(SECTOR_SLUGS);
+
+export function hasPaletteSector(slug: string): boolean {
+  return SECTOR_SLUG_SET.has(slug);
+}
+`;
+}
+
+const SLUGS_FILE = resolve(OUT_DIR, 'slugs.ts');
+
 /** Scrive il file solo se cambia. Ritorna true se ha scritto. */
-async function writeCategory(catId, sectors) {
-  const file = categoryFile(catId);
-  const next = renderCategory(catId, sectors);
+async function writeIfChanged(file, next) {
   // Il checkout su Windows può avere CRLF: si confronta il contenuto, non i fine riga.
   const prev = await readFile(file, 'utf8').catch(() => null);
   if (prev?.replace(/\r\n/g, '\n') === next) return false;
@@ -407,12 +497,25 @@ async function writeCategory(catId, sectors) {
   return true;
 }
 
+const writeCategory = (catId, sectors) => writeIfChanged(categoryFile(catId), renderCategory(catId, sectors));
+
+/** slugs.ts atteso, dai file di categoria come sono ora su disco. */
+async function expectedSlugs(order) {
+  const all = [];
+  for (const catId of Object.keys(CATEGORIES)) all.push(...(await loadCategory(catId)));
+  return renderSlugs(sortByProfession(all, order).map((s) => s.slug));
+}
+
+async function syncSlugs(order) {
+  if (await writeIfChanged(SLUGS_FILE, await expectedSlugs(order))) console.log(`[wrote] ${SLUGS_FILE}`);
+}
+
 function sortByProfession(sectors, order) {
   return [...sectors].sort((a, b) => (order.get(a.slug) ?? 1e9) - (order.get(b.slug) ?? 1e9));
 }
 
 // ─── Brief ────────────────────────────────────────────────────────
-function buildPrompt(prof, labelEn, example, siblings, takenAliases) {
+function buildPrompt(prof, labelEn, example, siblings, takenAliases, takenQueries) {
   const cat = CATEGORIES[prof.categoryId];
   const presets = Object.entries(PRESETS)
     .map(([k, d]) => `  - ${k}: ${d}`)
@@ -435,8 +538,9 @@ VOCE (vale per tutti i testi, IT ed EN):
 CAMPI:
 - preset: uno fra
 ${presets}
-- queriesEn: 3 ricerche Unsplash in inglese, 2-5 parole, concrete e visive (luoghi, oggetti, materiali, luce tipici del settore). Niente parole astratte ("success", "professional", "business").
-- aliases.it / aliases.en: 3-8 radici per riconoscere il settore nel testo libero del visitatore. Una parola sola ciascuna, minuscolo, senza accenti né spazi (solo a-z, 0-9, &). Una parola del visitatore combacia se è uguale alla radice o, con radici di 4+ caratteri, se inizia con essa: evita radici che siano l'inizio di parole di altri settori (es. "foto" prende anche "fotovoltaico"). Solo radici di QUESTA professione.${takenAliases.length ? `\n  Radici già usate da altri settori, da non ripetere: ${takenAliases.join(', ')}` : ''}
+- queriesEn: 3 ricerche Unsplash in inglese, 2-4 parole, concrete e visive (luoghi, oggetti, materiali, luce tipici del settore), abbastanza comuni da avere decine di risultati: niente combinazioni troppo specifiche. Qui usa le grafie americane, più frequenti nei titoli Unsplash ("center", "color"). Niente parole astratte ("success", "professional", "business").${takenQueries.length ? `
+  Ricerche già usate da altri settori, da non ripetere uguali: ${takenQueries.join(' | ')}` : ''}
+- aliases.it / aliases.en: 3-8 radici per riconoscere il settore nel testo libero del visitatore. Una parola sola ciascuna, minuscolo, senza accenti né spazi (solo a-z, 0-9, &). Una parola del visitatore combacia se è uguale alla radice o, con radici di 4+ caratteri, se inizia con essa: evita radici che siano l'inizio di parole di altri settori (es. "foto" prende anche "fotovoltaico"). Il confronto è parola per parola: non unire più parole ("medicodibase", "personaltrainer" non combaciano mai); per i nomi di più parole scegli la parola più distintiva o un termine colloquiale ("mutua", "trainer"). Niente varianti già coperte da una radice più corta ("logopedia" se c'è già "logoped"). Solo radici di QUESTA professione.${takenAliases.length ? `\n  Radici già usate da altri settori, da non ripetere: ${takenAliases.join(', ')}` : ''}
 - copy.it / copy.en: attività inventata ma plausibile in Italia, senza nominare città o quartieri reali (l'anteprima la vede chiunque); orari, numeri e prezzi realistici. Prezzi IT "7,50 €", "Da 45 €"; EN "€7.50", "From €45". Orari IT "19:00"; EN "7pm", "11.30pm". Il nome dell'attività può restare uguale o adattarsi in EN.
   Lunghezze massime: name ${LIMITS.name}, nav ${LIMITS.nav} (voce del bottone in navigazione), eyebrow ${LIMITS.eyebrow}, h1 ${LIMITS.h1}, lead ${LIMITS.lead}, btn1/btn2 ${LIMITS.btn1}, cards[].title ${LIMITS.title}, cards[].description ${LIMITS.description}, cards[].meta ${LIMITS.meta} (prezzo, orario o nota breve), banner ${LIMITS.banner}. Esattamente 3 cards.
 - intro.it / intro.en: 2-3 paragrafi separati da una riga vuota ("\\n\\n"), ${INTRO_WORDS.min}-${INTRO_WORDS.max} parole per lingua. Cosa cerca il cliente di questo settore, quali toni funzionano e perché, cosa evitare, dove finiscono i colori fuori dallo schermo (insegna, stampa, divise, packaging...), un consiglio pratico sul contrasto. Niente prezzi, niente "preventivo".
@@ -508,15 +612,23 @@ async function generateSector(job) {
   console.log(`[run] ${tag} — invio a codex…`);
   const t0 = Date.now();
   let content;
-  try {
-    const raw = extractJson(await runCodex(prompt));
-    const candidate = { ...raw, slug: raw.slug ?? prof.slug, reviewed: false };
-    const errs = validateSector(candidate, prof.slug);
-    if (errs.length) throw new Error(`forma: ${errs.join('; ')}`);
-    content = canonical(candidate);
-  } catch (e) {
-    console.error(`[FAIL] ${tag} — ${e.message}`);
-    return { prof, ok: false, error: e.message };
+  let feedback = '';
+  // Un secondo tentativo, con gli errori del primo nel brief.
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS && !content; attempt++) {
+    try {
+      const raw = extractJson(await runCodex(prompt + feedback));
+      const candidate = { ...raw, slug: raw.slug ?? prof.slug, reviewed: false };
+      const errs = validateSector(candidate, prof.slug);
+      if (errs.length) throw new Error(`forma: ${errs.join('; ')}`);
+      content = canonical(candidate);
+    } catch (e) {
+      if (attempt === MAX_ATTEMPTS) {
+        console.error(`[FAIL] ${tag} — ${e.message}`);
+        return { prof, ok: false, error: e.message };
+      }
+      console.warn(`[retry] ${tag} — ${e.message}`);
+      feedback = `\n\nIL TENTATIVO PRECEDENTE ERA DA SCARTARE (${e.message}). Rispetta le lunghezze massime e la forma richiesta.`;
+    }
   }
   const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
   const lintHits = voiceLint(content);
@@ -540,22 +652,41 @@ async function pool(items, worker, concurrency) {
 }
 
 // ─── Modalità senza codex ─────────────────────────────────────────
-function lintAll(byCategory, order) {
+async function lintAll(byCategory, order) {
   const all = Object.values(byCategory).flat();
   const collisions = aliasCollisions(all);
+  const sameQueries = queryCollisions(all);
   let errors = 0;
+  let warned = 0;
   for (const s of all) {
     const errs = validateSector(s, null);
     if (!order.has(s.slug)) errs.push('slug non presente in seo-professions.ts');
-    const warns = [...voiceLint(s), ...(collisions.get(s.slug) ?? []).map((c) => `radice condivisa ${c}`)];
+    const warns = [
+      ...voiceLint(s),
+      ...(collisions.get(s.slug) ?? []).map((c) => `radice condivisa ${c}`),
+      ...(sameQueries.get(s.slug) ?? []).map((q) => `ricerca ripetuta ${q}`),
+    ];
     if (errs.length) {
       errors++;
       console.error(`[FAIL] ${s.slug} — ${errs.join('; ')}`);
     }
-    if (warns.length) console.warn(`[warn] ${s.slug} — ${warns.join(', ')}`);
+    if (warns.length) {
+      warned++;
+      console.warn(`[warn] ${s.slug} — ${warns.join(', ')}`);
+    }
     if (!errs.length && !warns.length) console.log(`[ok]   ${s.slug}${s.reviewed ? ' (rivisto)' : ''}`);
   }
-  console.log(`\n${all.length} settori, ${errors} con errori di forma.`);
+  const dupes = all.length - new Set(all.map((s) => s.slug)).size;
+  if (dupes) {
+    errors++;
+    console.error(`[FAIL] ${dupes} slug duplicati fra i file di categoria`);
+  }
+  const prevSlugs = await readFile(SLUGS_FILE, 'utf8').catch(() => null);
+  if (prevSlugs?.replace(/\r\n/g, '\n') !== (await expectedSlugs(order))) {
+    errors++;
+    console.error('[FAIL] slugs.ts non allineato ai file di categoria: lancia --format');
+  }
+  console.log(`\n${all.length} settori, ${errors} errori di forma, ${warned} con avvisi del linter.`);
   if (errors) process.exitCode = 1;
 }
 
@@ -564,6 +695,7 @@ async function formatAll(byCategory, order) {
     const wrote = await writeCategory(catId, sortByProfession(list.map(canonical), order));
     console.log(`${wrote ? '[wrote]' : '[same] '} ${catId}.ts (${list.length})`);
   }
+  await syncSlugs(order);
 }
 
 // ─── Main ─────────────────────────────────────────────────────────
@@ -618,7 +750,8 @@ async function main() {
       ),
     ].sort();
     const labelEn = labelsEn[prof.slug] ?? prof.label;
-    return { prof, prompt: buildPrompt(prof, labelEn, example, siblings, taken) };
+    const takenQueries = [...new Set(allSectors.filter((s) => s.slug !== prof.slug).flatMap((s) => s.queriesEn ?? []))].sort();
+    return { prof, prompt: buildPrompt(prof, labelEn, example, siblings, taken, takenQueries) };
   });
 
   console.log(`Plan: ${jobs.length} settori, concurrency=${CONCURRENCY}, dryRun=${DRY_RUN}, force=${FORCE}`);
@@ -646,6 +779,7 @@ async function main() {
       const list = sortByProfession([...merged.values()].map(canonical), order);
       if (await writeCategory(catId, list)) console.log(`[wrote] ${categoryFile(catId)}`);
     }
+    await syncSlugs(order);
 
     const collisions = aliasCollisions([...existing.values(), ...generated.map((r) => r.content)]);
     for (const r of generated) {

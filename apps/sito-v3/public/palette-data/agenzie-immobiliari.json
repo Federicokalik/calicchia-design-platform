@@ -1,0 +1,335 @@
+{
+  "slug": "agenzie-immobiliari",
+  "queries": [
+    "sunlit apartment interior",
+    "house keys table",
+    "residential building facade"
+  ],
+  "generatedAt": "2026-10-12T21:03:44.267Z",
+  "photos": [
+    {
+      "id": "AgK_XAqSbfk",
+      "small": "https://images.unsplash.com/photo-1665249934445-1de680641f50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1665249934445-1de680641f50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LRLppo-;0g-;~V%g?HozT1x^oJt6",
+      "color": "#f3f3d9",
+      "alt": "a living room with a large window",
+      "author": "Danilo Rios",
+      "authorUrl": "https://unsplash.com/@danrop?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-with-a-large-window-AgK_XAqSbfk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BC9C77",
+          "w": 0.4183
+        },
+        {
+          "hex": "#F0DEC4",
+          "w": 0.3656
+        },
+        {
+          "hex": "#7E6042",
+          "w": 0.216
+        }
+      ]
+    },
+    {
+      "id": "VZ2z8ozzy10",
+      "small": "https://images.unsplash.com/photo-1738168246881-40f35f8aba0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1738168246881-40f35f8aba0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2500,
+      "blurHash": "LSI;^q4T%MIUkDbHM{R*s+fRaxt7",
+      "color": "#a68c8c",
+      "alt": "A living room with a large green couch",
+      "author": "Prydumano Design",
+      "authorUrl": "https://unsplash.com/@prydumanodesign?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-with-a-large-green-couch-VZ2z8ozzy10?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A49584",
+          "w": 0.4543
+        },
+        {
+          "hex": "#D3CBC3",
+          "w": 0.3202
+        },
+        {
+          "hex": "#70604F",
+          "w": 0.2255
+        }
+      ]
+    },
+    {
+      "id": "G4fICun7Q48",
+      "small": "https://images.unsplash.com/photo-1650137938625-11576502aecd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1650137938625-11576502aecd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3885,
+      "height": 2993,
+      "blurHash": "LXG+8oR%NZM{~qkDahWYjKfmjts,",
+      "color": "#a68c73",
+      "alt": "a living room filled with furniture and lots of windows",
+      "author": "Steph Wilson",
+      "authorUrl": "https://unsplash.com/@stephwilll?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-lots-of-windows-G4fICun7Q48?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#938884",
+          "w": 0.3508
+        },
+        {
+          "hex": "#C5C5C4",
+          "w": 0.3433
+        },
+        {
+          "hex": "#665B53",
+          "w": 0.3059
+        }
+      ]
+    },
+    {
+      "id": "tWPDKhDaE4k",
+      "small": "https://images.unsplash.com/photo-1527772482340-7895c3f2b3f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1527772482340-7895c3f2b3f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdW5saXQlMjBhcGFydG1lbnQlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODM5MDE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3164,
+      "blurHash": "LI9aQ[E0ITxGxuRijaj[4mxax]Se",
+      "color": "#262640",
+      "alt": "gray fabric sofa inside room",
+      "author": "christopher lemercier",
+      "authorUrl": "https://unsplash.com/@elevantarts?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-fabric-sofa-inside-room-tWPDKhDaE4k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2E363D",
+          "w": 0.5072
+        },
+        {
+          "hex": "#A0A7AE",
+          "w": 0.2489
+        },
+        {
+          "hex": "#101218",
+          "w": 0.2439
+        }
+      ]
+    },
+    {
+      "id": "t0CRdNl_mTg",
+      "small": "https://images.unsplash.com/photo-1759428679273-11d914866394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759428679273-11d914866394?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2001,
+      "blurHash": "LMJ%LUH=t,v%--~BV@Sx5P%fWTOW",
+      "color": "#262626",
+      "alt": "Hand holding house keys over miniature houses",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-house-keys-over-miniature-houses-t0CRdNl_mTg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2B231D",
+          "w": 0.3478
+        },
+        {
+          "hex": "#E8C0B0",
+          "w": 0.3278
+        },
+        {
+          "hex": "#DC7A6F",
+          "w": 0.3244
+        }
+      ]
+    },
+    {
+      "id": "ZWiKjts3amM",
+      "small": "https://images.unsplash.com/photo-1763621605783-307c1743e308?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763621605783-307c1743e308?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2001,
+      "blurHash": "LLHwGo0fX4Iq0_=#aKEfOFATR-+~",
+      "color": "#26260c",
+      "alt": "Hand holding a key above miniature houses",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-a-key-above-miniature-houses-ZWiKjts3amM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#625032",
+          "w": 0.3384
+        },
+        {
+          "hex": "#262014",
+          "w": 0.3321
+        },
+        {
+          "hex": "#9D7154",
+          "w": 0.3295
+        }
+      ]
+    },
+    {
+      "id": "UVowxSHQA0s",
+      "small": "https://images.unsplash.com/photo-1638953471155-7de7d58048b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1638953471155-7de7d58048b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2656,
+      "blurHash": "LdHCs68^j[-=%gxuaxj]t7tQRij[",
+      "color": "#a6c0d9",
+      "alt": "a pair of scissors sitting on top of a wooden table",
+      "author": "Alicia Christin Gerald",
+      "authorUrl": "https://unsplash.com/@allysphotos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pair-of-scissors-sitting-on-top-of-a-wooden-table-UVowxSHQA0s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AFC7D5",
+          "w": 0.6021
+        },
+        {
+          "hex": "#434C4D",
+          "w": 0.2031
+        },
+        {
+          "hex": "#707E7F",
+          "w": 0.1949
+        }
+      ]
+    },
+    {
+      "id": "kGE6fLbfKys",
+      "small": "https://images.unsplash.com/photo-1743487014165-c26c868b8186?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1743487014165-c26c868b8186?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3VzZSUyMGtleXMlMjB0YWJsZXxlbnwxfDB8fHwxNzkxODM5MDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2001,
+      "blurHash": "LUK,pJ?H9v%z0hs89HEMRmNHt6Rk",
+      "color": "#d9c073",
+      "alt": "Hand holding keys with house charm and wallet",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-keys-with-house-charm-and-wallet-kGE6fLbfKys?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C99A57",
+          "w": 0.3854
+        },
+        {
+          "hex": "#9A6331",
+          "w": 0.3185
+        },
+        {
+          "hex": "#F0D795",
+          "w": 0.2961
+        }
+      ]
+    },
+    {
+      "id": "wR11KBaB86U",
+      "small": "https://images.unsplash.com/photo-1460317442991-0ec209397118?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1460317442991-0ec209397118?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4368,
+      "height": 2912,
+      "blurHash": "LoG8~300-=em%NM_WBxukCoLRjoz",
+      "color": "#d9d9f3",
+      "alt": "low angle view of building",
+      "author": "Brandon Griggs",
+      "authorUrl": "https://unsplash.com/@paralitik?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/low-angle-view-of-building-wR11KBaB86U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3C3E45",
+          "w": 0.4555
+        },
+        {
+          "hex": "#66636A",
+          "w": 0.3082
+        },
+        {
+          "hex": "#E0DEE7",
+          "w": 0.2363
+        }
+      ]
+    },
+    {
+      "id": "B0aCvAVSX8E",
+      "small": "https://images.unsplash.com/photo-1448630360428-65456885c650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1448630360428-65456885c650?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "LC9*WRr{NkEU4TNEV?$|Mb%Ls$V?",
+      "color": "#262659",
+      "alt": "windowpanes at the building",
+      "author": "Étienne Beauregard-Riverin",
+      "authorUrl": "https://unsplash.com/@etienne_beauregard?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/windowpanes-at-the-building-B0aCvAVSX8E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#263B7A",
+          "w": 0.3644
+        },
+        {
+          "hex": "#485B7E",
+          "w": 0.3405
+        },
+        {
+          "hex": "#88A3C4",
+          "w": 0.2951
+        }
+      ]
+    },
+    {
+      "id": "UHyrjKPsshk",
+      "small": "https://images.unsplash.com/photo-1469022563428-aa04fef9f5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1469022563428-aa04fef9f5a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3072,
+      "height": 2041,
+      "blurHash": "LGI};S~p%2x]DONGogaerpIVRiX9",
+      "color": "#d9c0a6",
+      "alt": "white and blue concrete 4-storey building",
+      "author": "Ján Jakub Naništa",
+      "authorUrl": "https://unsplash.com/@janjakubnanista?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-blue-concrete-4-storey-building-UHyrjKPsshk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFC8BC",
+          "w": 0.5154
+        },
+        {
+          "hex": "#98A4A4",
+          "w": 0.2768
+        },
+        {
+          "hex": "#55767C",
+          "w": 0.2079
+        }
+      ]
+    },
+    {
+      "id": "PshCtT16gJo",
+      "small": "https://images.unsplash.com/photo-1565363887735-c63cb07cf57e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1565363887735-c63cb07cf57e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwZmFjYWRlfGVufDF8MHx8fDE3OTE4MzkwMjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2802,
+      "height": 2242,
+      "blurHash": "LJCRp2?bCmX87~NbVDNGK6s:#RsA",
+      "color": "#0ca6c0",
+      "alt": "white and brown concrete building",
+      "author": "Mika Baumeister",
+      "authorUrl": "https://unsplash.com/@kommumikation?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-concrete-building-PshCtT16gJo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2AB1C3",
+          "w": 0.6427
+        },
+        {
+          "hex": "#A28376",
+          "w": 0.1967
+        },
+        {
+          "hex": "#6F625A",
+          "w": 0.1606
+        }
+      ]
+    }
+  ]
+}

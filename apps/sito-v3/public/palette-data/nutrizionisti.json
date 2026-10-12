@@ -1,0 +1,227 @@
+{
+  "slug": "nutrizionisti",
+  "queries": [
+    "nutrition consultation desk",
+    "fresh vegetables natural light",
+    "linen notebook kitchen"
+  ],
+  "generatedAt": "2026-10-12T19:51:38.071Z",
+  "photos": [
+    {
+      "id": "5aJVJvJ9rG8",
+      "small": "https://images.unsplash.com/photo-1597362925123-77861d3fbac7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597362925123-77861d3fbac7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LhMGw{R6?woIS|I.s;jGyXoIRPRl",
+      "color": "#f3f3f3",
+      "alt": "a pile of different types of vegetables on a white surface",
+      "author": "Randy Fath",
+      "authorUrl": "https://unsplash.com/@randyfath?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-different-types-of-vegetables-on-a-white-surface-5aJVJvJ9rG8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AA711D",
+          "w": 0.3811
+        },
+        {
+          "hex": "#EFF0E6",
+          "w": 0.3207
+        },
+        {
+          "hex": "#783A00",
+          "w": 0.2982
+        }
+      ]
+    },
+    {
+      "id": "s285sDw5Ikc",
+      "small": "https://images.unsplash.com/photo-1557844352-761f2565b576?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1557844352-761f2565b576?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LEG[$RuK0LGF#Fv}X+-C0e-CMy-B",
+      "color": "#0c2626",
+      "alt": "vegetables and fruits",
+      "author": "Iñigo De la Maza",
+      "authorUrl": "https://unsplash.com/@idelamaza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/vegetables-and-fruits-s285sDw5Ikc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9A9373",
+          "w": 0.3611
+        },
+        {
+          "hex": "#C5C8A5",
+          "w": 0.3394
+        },
+        {
+          "hex": "#635E46",
+          "w": 0.2995
+        }
+      ]
+    },
+    {
+      "id": "KUZnfk-2DSQ",
+      "small": "https://images.unsplash.com/photo-1518843875459-f738682238a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1518843875459-f738682238a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3176,
+      "blurHash": "LIDt-4NG0hxa5psmK0Oq58kC=_jY",
+      "color": "#260c0c",
+      "alt": "assorted vegetables",
+      "author": "Sharon Pittaway",
+      "authorUrl": "https://unsplash.com/@sharonp?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-vegetables-KUZnfk-2DSQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#141313",
+          "w": 0.613
+        },
+        {
+          "hex": "#CD4E1F",
+          "w": 0.2098
+        },
+        {
+          "hex": "#642E18",
+          "w": 0.1772
+        }
+      ]
+    },
+    {
+      "id": "vyHo3nnk8G8",
+      "small": "https://images.unsplash.com/photo-1575218823251-f9d243b6f720?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1575218823251-f9d243b6f720?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaCUyMHZlZ2V0YWJsZXMlMjBuYXR1cmFsJTIwbGlnaHR8ZW58MXwwfHx8MTc5MTgzNDY5M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LMI4wski0*ICs%$*rqKg,uX6KOsp",
+      "color": "#402626",
+      "alt": "red tomatoes",
+      "author": "Markus Spiske",
+      "authorUrl": "https://unsplash.com/@markusspiske?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-tomatoes-vyHo3nnk8G8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AB9870",
+          "w": 0.3926
+        },
+        {
+          "hex": "#806948",
+          "w": 0.3445
+        },
+        {
+          "hex": "#DAC88E",
+          "w": 0.2628
+        }
+      ]
+    },
+    {
+      "id": "_3yOqmFjE8I",
+      "small": "https://images.unsplash.com/photo-1709422889872-49b1d6aa77b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1709422889872-49b1d6aa77b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5888,
+      "height": 3925,
+      "blurHash": "LFEM2h00_2E10Lt6?bR*oh4oxvD%",
+      "color": "#737359",
+      "alt": "a kitchen counter with a napkin and a pen on it",
+      "author": "Marc Pell",
+      "authorUrl": "https://unsplash.com/@blinky264?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-counter-with-a-napkin-and-a-pen-on-it-_3yOqmFjE8I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#655A46",
+          "w": 0.4627
+        },
+        {
+          "hex": "#27251D",
+          "w": 0.3586
+        },
+        {
+          "hex": "#918A82",
+          "w": 0.1787
+        }
+      ]
+    },
+    {
+      "id": "7MYJbEfc5kU",
+      "small": "https://images.unsplash.com/photo-1516201479280-ae3034c9fe7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516201479280-ae3034c9fe7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3428,
+      "height": 2230,
+      "blurHash": "LYI=igVsRkbIDgngxukC^%I9aeWX",
+      "color": "#d9d9f3",
+      "alt": "gray and white ceramic mug beside multicolored covered book",
+      "author": "Toa Heftiba",
+      "authorUrl": "https://unsplash.com/@heftiba?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-and-white-ceramic-mug-beside-multicolored-covered-book-7MYJbEfc5kU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#96A5C6",
+          "w": 0.3935
+        },
+        {
+          "hex": "#D0D7E7",
+          "w": 0.3605
+        },
+        {
+          "hex": "#5B728C",
+          "w": 0.246
+        }
+      ]
+    },
+    {
+      "id": "yjYxtxLOiF4",
+      "small": "https://images.unsplash.com/photo-1758279745466-f5f4087a87d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758279745466-f5f4087a87d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 6192,
+      "blurHash": "LLHLSP4Txus:f8ogRi%LT0x]t8xa",
+      "color": "#a6a6a6",
+      "alt": "Open cookbooks rest on a kitchen counter",
+      "author": "Annie Spratt",
+      "authorUrl": "https://unsplash.com/@anniespratt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/open-cookbooks-rest-on-a-kitchen-counter-yjYxtxLOiF4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3AFA7",
+          "w": 0.423
+        },
+        {
+          "hex": "#8D8372",
+          "w": 0.4123
+        },
+        {
+          "hex": "#725735",
+          "w": 0.1647
+        }
+      ]
+    },
+    {
+      "id": "C4hSoBjTJk0",
+      "small": "https://images.unsplash.com/photo-1556808486-e8ce4a09a42e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1556808486-e8ce4a09a42e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaW5lbiUyMG5vdGVib29rJTIwa2l0Y2hlbnxlbnwxfDB8fHwxNzkxODM0Njk2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4598,
+      "height": 3448,
+      "blurHash": "LMNvh~-pD%tT}*nhxWW=5sR*Nead",
+      "color": "#d9c08c",
+      "alt": "white Bauhaus box on table",
+      "author": "Thanos Pal",
+      "authorUrl": "https://unsplash.com/@thanospal?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-bauhaus-box-on-table-C4hSoBjTJk0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4B98E",
+          "w": 0.4542
+        },
+        {
+          "hex": "#C99A61",
+          "w": 0.3463
+        },
+        {
+          "hex": "#F1EEED",
+          "w": 0.1995
+        }
+      ]
+    }
+  ]
+}
