@@ -106,6 +106,8 @@ const config: NextConfig = {
   // Self-contained build output for Docker: produces .next/standalone with a
   // minimal server.js + traced node_modules. Required by apps/sito-v3/Dockerfile.
   output: 'standalone',
+  // packages/shared espone sorgenti TypeScript (es. il motore della Palette di settore).
+  transpilePackages: ['@calicchia/shared'],
   env: {
     NEXT_PUBLIC_GOOGLE_MAPS_KEY: googleMapsKey,
     NEXT_PUBLIC_BUGSINK_DSN: bugsinkDsn,
