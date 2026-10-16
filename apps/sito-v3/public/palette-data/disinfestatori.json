@@ -1,0 +1,223 @@
+{
+  "slug": "disinfestatori",
+  "queries": [
+    "pest control worker",
+    "mosquito close up",
+    "mouse trap wood"
+  ],
+  "generatedAt": "2026-10-16T18:49:42.093Z",
+  "photos": [
+    {
+      "id": "UjGSnzfDUl8",
+      "small": "https://images.unsplash.com/photo-1670989292166-8b20b9530438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1670989292166-8b20b9530438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L]KBH-xuawxu~WogRjjuxuNGWBRj",
+      "color": "#f3f3f3",
+      "alt": "a man with a vacuum in front of a house",
+      "author": "Pro Pest Control Canberra",
+      "authorUrl": "https://unsplash.com/@propestcanberra?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-with-a-vacuum-in-front-of-a-house-UjGSnzfDUl8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F8F2EA",
+          "w": 0.4306
+        },
+        {
+          "hex": "#596156",
+          "w": 0.3341
+        },
+        {
+          "hex": "#A8A19A",
+          "w": 0.2353
+        }
+      ]
+    },
+    {
+      "id": "yh7VODxI0B0",
+      "small": "https://images.unsplash.com/photo-1764154739233-659b2681d162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1764154739233-659b2681d162?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LMAwa}~m-:D=?G%LxtRkD.IYRjot",
+      "color": "#0c260c",
+      "alt": "Worker in high-visibility vest operating machinery",
+      "author": "atelierbyvineeth ...",
+      "authorUrl": "https://unsplash.com/@atelierbyvineeth?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/worker-in-high-visibility-vest-operating-machinery-yh7VODxI0B0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#040602",
+          "w": 0.4619
+        },
+        {
+          "hex": "#142D00",
+          "w": 0.3299
+        },
+        {
+          "hex": "#BAC63D",
+          "w": 0.2083
+        }
+      ]
+    },
+    {
+      "id": "dwnDq5k9FuA",
+      "small": "https://images.unsplash.com/photo-1763738173495-f09412af5997?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763738173495-f09412af5997?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5000,
+      "height": 3330,
+      "blurHash": "LCC$yU^+xWxb_4-;WUM{0gNbNGM{",
+      "color": "#595959",
+      "alt": "Workers burning agave plants in a field",
+      "author": "stephan de MARANTHI",
+      "authorUrl": "https://unsplash.com/@maranthi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/workers-burning-agave-plants-in-a-field-dwnDq5k9FuA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#58505B",
+          "w": 0.4278
+        },
+        {
+          "hex": "#383643",
+          "w": 0.2879
+        },
+        {
+          "hex": "#7D747F",
+          "w": 0.2842
+        }
+      ]
+    },
+    {
+      "id": "j4PspeHRvxE",
+      "small": "https://images.unsplash.com/photo-1615743903763-53b2c854ac83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1615743903763-53b2c854ac83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZXN0JTIwY29udHJvbCUyMHdvcmtlcnxlbnwxfDB8fHwxNzkyMTc2NTc3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4588,
+      "height": 3203,
+      "blurHash": "LPHd:0Mx0#FeR$ovbwIp.7W-n$sp",
+      "color": "#262626",
+      "alt": "man in red jacket and pants walking on sidewalk during daytime",
+      "author": "Jon Tyson",
+      "authorUrl": "https://unsplash.com/@jontyson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-red-jacket-and-pants-walking-on-sidewalk-during-daytime-j4PspeHRvxE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1AC82",
+          "w": 0.4789
+        },
+        {
+          "hex": "#9E6F4F",
+          "w": 0.3139
+        },
+        {
+          "hex": "#723B2E",
+          "w": 0.2072
+        }
+      ]
+    },
+    {
+      "id": "Z2pq_4mj6BI",
+      "small": "https://images.unsplash.com/photo-1707943768453-7850f916ebde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707943768453-7850f916ebde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3809,
+      "height": 2539,
+      "blurHash": "L8O_+g=__2-o-:4m%gxt-:nOIoE1",
+      "color": "#d9a68c",
+      "alt": "a close up of a mosquito on a human's skin",
+      "author": "National Institute of Allergy and Infectious Diseases",
+      "authorUrl": "https://unsplash.com/@niaid?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-mosquito-on-a-humans-skin-Z2pq_4mj6BI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDB098",
+          "w": 0.7854
+        },
+        {
+          "hex": "#CC9A81",
+          "w": 0.2146
+        }
+      ]
+    },
+    {
+      "id": "iTDCtgM9KwU",
+      "small": "https://images.unsplash.com/photo-1698566445612-b6e552371334?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1698566445612-b6e552371334?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6968,
+      "height": 4648,
+      "blurHash": "LZGScPt7X9oJ00RjofaeIoWBV?bI",
+      "color": "#a6c0c0",
+      "alt": "a close up of a mosquito on a white surface",
+      "author": "Rapha Wilde",
+      "authorUrl": "https://unsplash.com/@veloradio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-mosquito-on-a-white-surface-iTDCtgM9KwU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AEB4B7",
+          "w": 0.5938
+        },
+        {
+          "hex": "#858987",
+          "w": 0.2155
+        },
+        {
+          "hex": "#242C2F",
+          "w": 0.1907
+        }
+      ]
+    },
+    {
+      "id": "oXh6ZUdW-gg",
+      "small": "https://images.unsplash.com/photo-1707943768467-84fe5c76a40c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707943768467-84fe5c76a40c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3613,
+      "height": 2759,
+      "blurHash": "LaQ*_kp{yEkDysocn%VsVsV?WDWB",
+      "color": "#f3f3f3",
+      "alt": "a close up of a mosquito on a person's arm",
+      "author": "National Institute of Allergy and Infectious Diseases",
+      "authorUrl": "https://unsplash.com/@niaid?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-mosquito-on-a-persons-arm-oXh6ZUdW-gg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E79C80",
+          "w": 0.3674
+        },
+        {
+          "hex": "#E7B3A8",
+          "w": 0.3466
+        },
+        {
+          "hex": "#F4F1F3",
+          "w": 0.286
+        }
+      ]
+    },
+    {
+      "id": "eOR3TOE9Jw0",
+      "small": "https://images.unsplash.com/photo-1707943768493-70241590b0e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707943768493-70241590b0e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3NxdWl0byUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3NjU4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2583,
+      "height": 2009,
+      "blurHash": "LTOfxJ9r9ZaiCh0Lt8t79EjK%3Rj",
+      "color": "#c08c59",
+      "alt": "a mosquito crawling on the skin of someone's arm",
+      "author": "National Institute of Allergy and Infectious Diseases",
+      "authorUrl": "https://unsplash.com/@niaid?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-mosquito-crawling-on-the-skin-of-someones-arm-eOR3TOE9Jw0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F5E09D",
+          "w": 0.5452
+        },
+        {
+          "hex": "#CAA062",
+          "w": 0.3252
+        },
+        {
+          "hex": "#A1BC44",
+          "w": 0.1296
+        }
+      ]
+    }
+  ]
+}

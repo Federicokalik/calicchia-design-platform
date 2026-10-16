@@ -1,0 +1,335 @@
+{
+  "slug": "hotel",
+  "queries": [
+    "hotel lobby interior",
+    "hotel room sunlight",
+    "hotel reception desk"
+  ],
+  "generatedAt": "2026-10-16T18:51:06.763Z",
+  "photos": [
+    {
+      "id": "1CcryZiF2PA",
+      "small": "https://images.unsplash.com/photo-1692153142524-60285a93c249?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1692153142524-60285a93c249?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4534,
+      "height": 3023,
+      "blurHash": "LQEC:;00t7Wq-=ofRjf6R.t7jbWV",
+      "color": "#262626",
+      "alt": "a room with a checkered floor and a bar",
+      "author": "Steven Van Elk",
+      "authorUrl": "https://unsplash.com/@stevenvanelk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-checkered-floor-and-a-bar-1CcryZiF2PA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#848989",
+          "w": 0.3628
+        },
+        {
+          "hex": "#1C1C1A",
+          "w": 0.3407
+        },
+        {
+          "hex": "#B5B8B8",
+          "w": 0.2965
+        }
+      ]
+    },
+    {
+      "id": "wOkEwfChQqM",
+      "small": "https://images.unsplash.com/photo-1724230758718-406bab979e67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1724230758718-406bab979e67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGDv7p4noz9ZI.ozsos:01t7WBoz",
+      "color": "#262626",
+      "alt": "A woman is standing at the front desk of a restaurant",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-standing-at-the-front-desk-of-a-restaurant-wOkEwfChQqM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#826860",
+          "w": 0.386
+        },
+        {
+          "hex": "#191210",
+          "w": 0.3291
+        },
+        {
+          "hex": "#B4ACA6",
+          "w": 0.2849
+        }
+      ]
+    },
+    {
+      "id": "vi59jclwSko",
+      "small": "https://images.unsplash.com/photo-1628630468464-4168a51129f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628630468464-4168a51129f1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4468,
+      "height": 2983,
+      "blurHash": "LHHC1BInWV%1?ZD%%2j[_4-;M{of",
+      "color": "#c0c0a6",
+      "alt": "black and gray chairs and table near glass window",
+      "author": "Trac Vu",
+      "authorUrl": "https://unsplash.com/@tracminhvu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-chairs-and-table-near-glass-window-vi59jclwSko?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#949178",
+          "w": 0.3999
+        },
+        {
+          "hex": "#C4C2B3",
+          "w": 0.3489
+        },
+        {
+          "hex": "#666348",
+          "w": 0.2512
+        }
+      ]
+    },
+    {
+      "id": "kfnWOD1Tbp8",
+      "small": "https://images.unsplash.com/photo-1759038085950-1234ca8f5fed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759038085950-1234ca8f5fed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMGxvYmJ5JTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjY2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8000,
+      "height": 6000,
+      "blurHash": "LOJ%dw%L9ZWB.8IVs.of~qt6V@ae",
+      "color": "#260c0c",
+      "alt": "Hotel reception desk with modern wooden furniture and seating",
+      "author": "Neon Wang",
+      "authorUrl": "https://unsplash.com/@neonwangphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hotel-reception-desk-with-modern-wooden-furniture-and-seating-kfnWOD1Tbp8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9965A",
+          "w": 0.5048
+        },
+        {
+          "hex": "#391404",
+          "w": 0.2534
+        },
+        {
+          "hex": "#DBC3A6",
+          "w": 0.2418
+        }
+      ]
+    },
+    {
+      "id": "6dFW8PJwt0s",
+      "small": "https://images.unsplash.com/photo-1588840103995-02893d4eb8fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1588840103995-02893d4eb8fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5087,
+      "height": 3391,
+      "blurHash": "L9AAH+M_%1E2xv01-:tRNKIAxao#",
+      "color": "#262626",
+      "alt": "white bed linen near brown window curtain",
+      "author": "J Shim",
+      "authorUrl": "https://unsplash.com/@uncertainthink?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-bed-linen-near-brown-window-curtain-6dFW8PJwt0s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#211915",
+          "w": 0.4801
+        },
+        {
+          "hex": "#3F342F",
+          "w": 0.3222
+        },
+        {
+          "hex": "#6B6765",
+          "w": 0.1977
+        }
+      ]
+    },
+    {
+      "id": "AEbFQXf7tS4",
+      "small": "https://images.unsplash.com/photo-1773190550340-77369fa4c091?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773190550340-77369fa4c091?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2432,
+      "blurHash": "LH97Op4:aK-:0L-:xuIUxut6IVxu",
+      "color": "#260c0c",
+      "alt": "A white shoe rests on a textured surface in shadow",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-shoe-rests-on-a-textured-surface-in-shadow-AEbFQXf7tS4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030100",
+          "w": 0.7782
+        },
+        {
+          "hex": "#251908",
+          "w": 0.1274
+        },
+        {
+          "hex": "#DDD1AC",
+          "w": 0.0944
+        }
+      ]
+    },
+    {
+      "id": "qKel0wV2sIY",
+      "small": "https://images.unsplash.com/photo-1779239358567-8a8e26f503d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779239358567-8a8e26f503d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHEV._?b00IU0KWE-;oLROWBR%j?",
+      "color": "#595959",
+      "alt": "Sunlight illuminates a cozy bedroom with a bed and nightstand",
+      "author": "Franco Debartolo",
+      "authorUrl": "https://unsplash.com/@francotheshooter?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-illuminates-a-cozy-bedroom-with-a-bed-and-nightstand-qKel0wV2sIY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5B5A5B",
+          "w": 0.4715
+        },
+        {
+          "hex": "#888989",
+          "w": 0.3527
+        },
+        {
+          "hex": "#C2C3C1",
+          "w": 0.1758
+        }
+      ]
+    },
+    {
+      "id": "-Fe_er8ZTuU",
+      "small": "https://images.unsplash.com/photo-1787706882637-6bbef41c3709?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787706882637-6bbef41c3709?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJvb20lMjBzdW5saWdodHxlbnwxfDB8fHwxNzkyMTc2NjYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2432,
+      "blurHash": "LcHx$r-;01j[M{IVRjoKD%Rk%Lt6",
+      "color": "#8c8c8c",
+      "alt": "A rumpled white bed with pillows beside a wooden nightstand in a sunlit room",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rumpled-white-bed-in-sunlit-bedroom--Fe_er8ZTuU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9C9D90",
+          "w": 0.4956
+        },
+        {
+          "hex": "#D8D9CD",
+          "w": 0.2991
+        },
+        {
+          "hex": "#646153",
+          "w": 0.2052
+        }
+      ]
+    },
+    {
+      "id": "FDcydLvV7Io",
+      "small": "https://images.unsplash.com/photo-1543325042-c67825847491?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1543325042-c67825847491?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7682,
+      "height": 5189,
+      "blurHash": "LWGSAYt6IUxu~qj[Rjt7D%R*oeRj",
+      "color": "#262626",
+      "alt": "white and brown table",
+      "author": "Random Institute",
+      "authorUrl": "https://unsplash.com/@randominstitute?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-table-FDcydLvV7Io?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2A19F",
+          "w": 0.4173
+        },
+        {
+          "hex": "#302D2E",
+          "w": 0.352
+        },
+        {
+          "hex": "#CFCECC",
+          "w": 0.2307
+        }
+      ]
+    },
+    {
+      "id": "_geAgtjqLzY",
+      "small": "https://images.unsplash.com/photo-1581309558346-f325181f9df6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581309558346-f325181f9df6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LDAw3V~p4o4o^*%2IVM{0KD%xt%L",
+      "color": "#262626",
+      "alt": "white and black ip desk phone",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-black-ip-desk-phone-_geAgtjqLzY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181717",
+          "w": 0.7137
+        },
+        {
+          "hex": "#534C41",
+          "w": 0.1639
+        },
+        {
+          "hex": "#948C73",
+          "w": 0.1225
+        }
+      ]
+    },
+    {
+      "id": "T8rO5Pp_4Ig",
+      "small": "https://images.unsplash.com/photo-1632429036228-a4ce4c705894?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1632429036228-a4ce4c705894?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3017,
+      "height": 2413,
+      "blurHash": "LBF=%cD$e=n#PXbcM{xuEot8M{Rk",
+      "color": "#8c8c8c",
+      "alt": "a sign that is on the side of a building",
+      "author": "Dmitry Limonov",
+      "authorUrl": "https://unsplash.com/@limonov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-sign-that-is-on-the-side-of-a-building-T8rO5Pp_4Ig?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A197A0",
+          "w": 0.528
+        },
+        {
+          "hex": "#737692",
+          "w": 0.3567
+        },
+        {
+          "hex": "#535875",
+          "w": 0.1154
+        }
+      ]
+    },
+    {
+      "id": "ZiMY3tT7y5Q",
+      "small": "https://images.unsplash.com/photo-1758708536313-e7055ddba277?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758708536313-e7055ddba277?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxob3RlbCUyMHJlY2VwdGlvbiUyMGRlc2t8ZW58MXwwfHx8MTc5MjE3NjY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2968,
+      "height": 1805,
+      "blurHash": "L48zfN?H9d-:tlE1E2xuyGt7-OWF",
+      "color": "#594040",
+      "alt": "A vintage brass service bell on a wooden desk",
+      "author": "Jonathan Cosens Photography",
+      "authorUrl": "https://unsplash.com/@jcosens?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-vintage-brass-service-bell-on-a-wooden-desk-ZiMY3tT7y5Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C5655",
+          "w": 0.3835
+        },
+        {
+          "hex": "#433D3A",
+          "w": 0.3585
+        },
+        {
+          "hex": "#1D1B1B",
+          "w": 0.2579
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "traslocatori",
+  "queries": [
+    "moving boxes apartment",
+    "moving truck street",
+    "cardboard boxes home"
+  ],
+  "generatedAt": "2026-10-16T18:49:48.635Z",
+  "photos": [
+    {
+      "id": "12fPtfXsktE",
+      "small": "https://images.unsplash.com/photo-1772724317350-520faccb15e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772724317350-520faccb15e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7281,
+      "height": 4696,
+      "blurHash": "LGC6=VMw-:Rk_34mo#M{-=nh%NxF",
+      "color": "#262626",
+      "alt": "Young people carrying boxes and luggage outside building entrance",
+      "author": "Apartment Life",
+      "authorUrl": "https://unsplash.com/@apartmentlife?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/young-people-carrying-boxes-and-luggage-outside-building-entrance-12fPtfXsktE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#75777C",
+          "w": 0.4245
+        },
+        {
+          "hex": "#424349",
+          "w": 0.3081
+        },
+        {
+          "hex": "#18191B",
+          "w": 0.2674
+        }
+      ]
+    },
+    {
+      "id": "fKPmtXH8xBs",
+      "small": "https://images.unsplash.com/photo-1758523671637-5a39ea2c129b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758523671637-5a39ea2c129b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LTJ7:c?wR+9Fv|R5r;RjD%RPo#%g",
+      "color": "#c0a673",
+      "alt": "Couple kissing while holding a small wooden house",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/couple-kissing-while-holding-a-small-wooden-house-fKPmtXH8xBs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BA9C74",
+          "w": 0.4383
+        },
+        {
+          "hex": "#DADCD8",
+          "w": 0.2877
+        },
+        {
+          "hex": "#583819",
+          "w": 0.274
+        }
+      ]
+    },
+    {
+      "id": "J5KT6e4YLfA",
+      "small": "https://images.unsplash.com/photo-1780932564199-1bcb4d9e6571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780932564199-1bcb4d9e6571?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7836,
+      "height": 5229,
+      "blurHash": "LpJREtt8M{SO_4t7jFoz%hayo0t7",
+      "color": "#8c8c8c",
+      "alt": "Cardboard boxes on wheels moving past apartment buildings",
+      "author": "Jimmy Liu",
+      "authorUrl": "https://unsplash.com/@jimmy__liu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cardboard-boxes-on-wheels-moving-past-apartment-buildings-J5KT6e4YLfA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#857D7B",
+          "w": 0.4724
+        },
+        {
+          "hex": "#C2ADAA",
+          "w": 0.2838
+        },
+        {
+          "hex": "#E0E1F2",
+          "w": 0.2438
+        }
+      ]
+    },
+    {
+      "id": "5BNyvWLxsFY",
+      "small": "https://images.unsplash.com/photo-1772724316733-57e51acf7fac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772724316733-57e51acf7fac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3ZpbmclMjBib3hlcyUyMGFwYXJ0bWVudHxlbnwxfDB8fHwxNzkyMTc2NTgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 5152,
+      "blurHash": "LQCss@%3aet7?wW=RiWryERjWAs:",
+      "color": "#262626",
+      "alt": "People walking towards modern apartment buildings",
+      "author": "Apartment Life",
+      "authorUrl": "https://unsplash.com/@apartmentlife?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-walking-towards-modern-apartment-buildings-5BNyvWLxsFY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#737072",
+          "w": 0.4284
+        },
+        {
+          "hex": "#A3ADB5",
+          "w": 0.2914
+        },
+        {
+          "hex": "#413B3B",
+          "w": 0.2802
+        }
+      ]
+    },
+    {
+      "id": "ZdySMOIicMo",
+      "small": "https://images.unsplash.com/photo-1614976523626-d598aafd4fda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614976523626-d598aafd4fda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5180,
+      "height": 3453,
+      "blurHash": "LFBpndt94m%MWERiRit8D$xu%NM{",
+      "color": "#262626",
+      "alt": "white van on road near trees during daytime",
+      "author": "JavyGo",
+      "authorUrl": "https://unsplash.com/@laideaes?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-van-on-road-near-trees-during-daytime-ZdySMOIicMo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#72707B",
+          "w": 0.384
+        },
+        {
+          "hex": "#4A4B4D",
+          "w": 0.3805
+        },
+        {
+          "hex": "#242325",
+          "w": 0.2355
+        }
+      ]
+    },
+    {
+      "id": "YAy7pJwhgjU",
+      "small": "https://images.unsplash.com/photo-1648500434498-5a1d4ed1e3d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1648500434498-5a1d4ed1e3d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5638,
+      "height": 3512,
+      "blurHash": "L_NTq7kCNbNF_Nj@n$WBWXoLo0t7",
+      "color": "#f3f3f3",
+      "alt": "a large orange truck parked in a parking lot",
+      "author": "Fiona Frommelt",
+      "authorUrl": "https://unsplash.com/@fionafrommelt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-orange-truck-parked-in-a-parking-lot-YAy7pJwhgjU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F8F9F9",
+          "w": 0.506
+        },
+        {
+          "hex": "#7E7B75",
+          "w": 0.2649
+        },
+        {
+          "hex": "#BBAEA4",
+          "w": 0.2291
+        }
+      ]
+    },
+    {
+      "id": "iq_88VJIzDA",
+      "small": "https://images.unsplash.com/photo-1761141704985-6d060c07f5c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761141704985-6d060c07f5c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5990,
+      "height": 3999,
+      "blurHash": "LcI=0?=|MxMy~VxDogWYxubcX9f+",
+      "color": "#d9d9d9",
+      "alt": "White truck parked on a city street with shops",
+      "author": "Geoffrey Faber",
+      "authorUrl": "https://unsplash.com/@geoffreyafaber?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-truck-parked-on-a-city-street-with-shops-iq_88VJIzDA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6CDC4",
+          "w": 0.4428
+        },
+        {
+          "hex": "#99948A",
+          "w": 0.3383
+        },
+        {
+          "hex": "#5F5E5B",
+          "w": 0.219
+        }
+      ]
+    },
+    {
+      "id": "gYbCzQZgex4",
+      "small": "https://images.unsplash.com/photo-1746985106190-6c116edec9bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1746985106190-6c116edec9bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3ZpbmclMjB0cnVjayUyMHN0cmVldHxlbnwxfDB8fHwxNzkyMTc2NTg0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L[L#FJR-WVWB_NR+ayfkS6WCaykC",
+      "color": "#f3f3f3",
+      "alt": "A white truck drives on a road with an advertisement",
+      "author": "Mehan Talukder",
+      "authorUrl": "https://unsplash.com/@mehan_talukder?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-truck-drives-on-a-road-with-an-advertisement-gYbCzQZgex4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8EFF4",
+          "w": 0.479
+        },
+        {
+          "hex": "#808080",
+          "w": 0.4266
+        },
+        {
+          "hex": "#CAD1D8",
+          "w": 0.0944
+        }
+      ]
+    },
+    {
+      "id": "bYhDEWgqYLM",
+      "small": "https://images.unsplash.com/photo-1656543802898-41c8c46683a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1656543802898-41c8c46683a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4822,
+      "height": 3214,
+      "blurHash": "LlQlqKWC%%t6%goeV@aytnf6R4a}",
+      "color": "#f3f3f3",
+      "alt": "a brown box with a white background",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-brown-box-with-a-white-background-bYhDEWgqYLM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F1F5",
+          "w": 0.4726
+        },
+        {
+          "hex": "#DBAA82",
+          "w": 0.346
+        },
+        {
+          "hex": "#E4DCDD",
+          "w": 0.1814
+        }
+      ]
+    },
+    {
+      "id": "gthSas4oYC0",
+      "small": "https://images.unsplash.com/photo-1700165644892-3dd6b67b25bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700165644892-3dd6b67b25bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "L5B{DPE30goL^iR*-ns.IpsS9vS5",
+      "color": "#40260c",
+      "alt": "a lot of brown boxes that are open",
+      "author": "Luke Heibert",
+      "authorUrl": "https://unsplash.com/@lukeheibert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-lot-of-brown-boxes-that-are-open-gthSas4oYC0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3B2007",
+          "w": 0.4548
+        },
+        {
+          "hex": "#9A734D",
+          "w": 0.2789
+        },
+        {
+          "hex": "#7D5630",
+          "w": 0.2663
+        }
+      ]
+    },
+    {
+      "id": "GopRYASfsOc",
+      "small": "https://images.unsplash.com/photo-1573376670774-4427757f7963?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1573376670774-4427757f7963?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5768,
+      "height": 3845,
+      "blurHash": "LNOp#;?b0Kt7IUj[tRofbbWBs,j[",
+      "color": "#d9d9d9",
+      "alt": "white box on white table",
+      "author": "Kelli McClintock",
+      "authorUrl": "https://unsplash.com/@kelli_mcclintock?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-box-on-white-table-GopRYASfsOc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7D7D5",
+          "w": 0.4825
+        },
+        {
+          "hex": "#EBEAEA",
+          "w": 0.3465
+        },
+        {
+          "hex": "#BFC0BF",
+          "w": 0.171
+        }
+      ]
+    },
+    {
+      "id": "j7vbBmTHmjY",
+      "small": "https://images.unsplash.com/photo-1730154838368-c37b1fdebcf6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1730154838368-c37b1fdebcf6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXJkYm9hcmQlMjBib3hlcyUyMGhvbWV8ZW58MXwwfHx8MTc5MjE3NjU4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3091,
+      "height": 2048,
+      "blurHash": "LIIzu5DiEk-;~q9FD%R*E1NbIUNG",
+      "color": "#c0a6a6",
+      "alt": "A room filled with lots of boxes and plants",
+      "author": "Dina Badamshina",
+      "authorUrl": "https://unsplash.com/@dinaamazing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-filled-with-lots-of-boxes-and-plants-j7vbBmTHmjY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2BBAD",
+          "w": 0.3454
+        },
+        {
+          "hex": "#B5866A",
+          "w": 0.3329
+        },
+        {
+          "hex": "#8A5633",
+          "w": 0.3217
+        }
+      ]
+    }
+  ]
+}

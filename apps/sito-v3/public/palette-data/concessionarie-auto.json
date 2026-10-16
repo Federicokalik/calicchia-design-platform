@@ -1,0 +1,335 @@
+{
+  "slug": "concessionarie-auto",
+  "queries": [
+    "car showroom interior",
+    "cars in showroom",
+    "car dealership exterior"
+  ],
+  "generatedAt": "2026-10-16T18:50:34.542Z",
+  "photos": [
+    {
+      "id": "usnU4StgpC8",
+      "small": "https://images.unsplash.com/photo-1785103182027-f826b1759da8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785103182027-f826b1759da8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LUF=swRPM|of01xtkBa}?aR*WBs.",
+      "color": "#404026",
+      "alt": "Vintage and modern cars showcased under hanging lights",
+      "author": "Danny Greenberg",
+      "authorUrl": "https://unsplash.com/@by_danny_g?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/vintage-and-modern-cars-showcased-under-hanging-lights-usnU4StgpC8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#756846",
+          "w": 0.4296
+        },
+        {
+          "hex": "#50472F",
+          "w": 0.3706
+        },
+        {
+          "hex": "#DDD7B6",
+          "w": 0.1998
+        }
+      ]
+    },
+    {
+      "id": "49fT49Q9hL4",
+      "small": "https://images.unsplash.com/photo-1763296840082-cac05bc18337?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763296840082-cac05bc18337?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6192,
+      "height": 3483,
+      "blurHash": "L34.9:9F00_3xuWAWAof9Fxu-;IU",
+      "color": "#262626",
+      "alt": "Nissan logo illuminated on a dark background",
+      "author": "Bhanu Singh",
+      "authorUrl": "https://unsplash.com/@insane_scene?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/nissan-logo-illuminated-on-a-dark-background-49fT49Q9hL4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#060604",
+          "w": 0.3891
+        },
+        {
+          "hex": "#1F1E1E",
+          "w": 0.3254
+        },
+        {
+          "hex": "#393838",
+          "w": 0.2855
+        }
+      ]
+    },
+    {
+      "id": "EtwaAL1fabg",
+      "small": "https://images.unsplash.com/photo-1783937570044-00cb0b296076?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783937570044-00cb0b296076?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5932,
+      "height": 3338,
+      "blurHash": "LGBf^O%M01WA01M{-;ozR,ozj?M|",
+      "color": "#a6a68c",
+      "alt": "Person in a BMW 5 series car at a showroom",
+      "author": "Arjun Raj",
+      "authorUrl": "https://unsplash.com/@mr_hell?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-a-bmw-5-series-car-at-a-showroom-EtwaAL1fabg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030202",
+          "w": 0.5477
+        },
+        {
+          "hex": "#C3C0B3",
+          "w": 0.2699
+        },
+        {
+          "hex": "#756F60",
+          "w": 0.1823
+        }
+      ]
+    },
+    {
+      "id": "F5ZuYe7n4EI",
+      "small": "https://images.unsplash.com/photo-1763292393629-ceecc5d9e5af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763292393629-ceecc5d9e5af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 5152,
+      "blurHash": "LEAv,[s:9bR*0LWV-ooe-;ayM_ay",
+      "color": "#404040",
+      "alt": "Yellow sports car with doors open in garage",
+      "author": "Lauro Fagel",
+      "authorUrl": "https://unsplash.com/@laurobot?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-sports-car-with-doors-open-in-garage-F5ZuYe7n4EI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3D373B",
+          "w": 0.4493
+        },
+        {
+          "hex": "#665E63",
+          "w": 0.3119
+        },
+        {
+          "hex": "#09050D",
+          "w": 0.2388
+        }
+      ]
+    },
+    {
+      "id": "RVEdgp-dkYY",
+      "small": "https://images.unsplash.com/photo-1692406069831-0bb7ea297645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1692406069831-0bb7ea297645?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9600,
+      "height": 5376,
+      "blurHash": "LWI;@r?^NKNG?wxusmt7krM{t7x]",
+      "color": "#f3f3f3",
+      "alt": "a car showroom filled with lots of cars",
+      "author": "Kenjiro Yagi",
+      "authorUrl": "https://unsplash.com/@kenji4861?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-car-showroom-filled-with-lots-of-cars-RVEdgp-dkYY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFD1D0",
+          "w": 0.3821
+        },
+        {
+          "hex": "#AB9083",
+          "w": 0.3799
+        },
+        {
+          "hex": "#80544B",
+          "w": 0.238
+        }
+      ]
+    },
+    {
+      "id": "bC5NNbwuoB0",
+      "small": "https://images.unsplash.com/photo-1643142314913-0cf633d9bbb5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643142314913-0cf633d9bbb5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LHGIDo_N4nIA%#?HRjM{%1ofV@S2",
+      "color": "#404040",
+      "alt": "a red car is parked in a showroom",
+      "author": "Crosby Hinze",
+      "authorUrl": "https://unsplash.com/@crosbyhinze?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-red-car-is-parked-in-a-showroom-bC5NNbwuoB0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E8978",
+          "w": 0.3837
+        },
+        {
+          "hex": "#564B45",
+          "w": 0.3733
+        },
+        {
+          "hex": "#D2CFCB",
+          "w": 0.243
+        }
+      ]
+    },
+    {
+      "id": "A-6ymDPGMbU",
+      "small": "https://images.unsplash.com/photo-1764013290175-2b76e9a00b2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1764013290175-2b76e9a00b2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5939,
+      "height": 3965,
+      "blurHash": "LbI}O@NGxuS1_MjZoen%D%ofWBX8",
+      "color": "#d9d9c0",
+      "alt": "Collection of luxury cars in a showroom",
+      "author": "Mubashir Shoukat",
+      "authorUrl": "https://unsplash.com/@mubashir23?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/collection-of-luxury-cars-in-a-showroom-A-6ymDPGMbU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3CAC0",
+          "w": 0.4147
+        },
+        {
+          "hex": "#988A84",
+          "w": 0.3482
+        },
+        {
+          "hex": "#7F3D3D",
+          "w": 0.2372
+        }
+      ]
+    },
+    {
+      "id": "AmFj7Xn9x_k",
+      "small": "https://images.unsplash.com/photo-1777175013302-eaf4b3ef785a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777175013302-eaf4b3ef785a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXJzJTIwaW4lMjBzaG93cm9vbXxlbnwxfDB8fHwxNzkyMTc2NjI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5619,
+      "height": 3746,
+      "blurHash": "LKHA|p0yN[E0~pRPNG-pyrMeR5of",
+      "color": "#404040",
+      "alt": "Several new cars parked in a showroom",
+      "author": "Portafolio fotográfico automotriz",
+      "authorUrl": "https://unsplash.com/@portafoliofotograficoautomotriz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/several-new-cars-parked-in-a-showroom-AmFj7Xn9x_k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8D433F",
+          "w": 0.4976
+        },
+        {
+          "hex": "#A9877F",
+          "w": 0.278
+        },
+        {
+          "hex": "#3A2421",
+          "w": 0.2243
+        }
+      ]
+    },
+    {
+      "id": "nYdD0pb4HZc",
+      "small": "https://images.unsplash.com/photo-1600191763437-4262cefe23ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600191763437-4262cefe23ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4315,
+      "height": 2877,
+      "blurHash": "LG8XLS~p?a%M?b.7%MxuE3IqS4bI",
+      "color": "#0c2626",
+      "alt": "red car parked beside building",
+      "author": "Arvid Skywalker",
+      "authorUrl": "https://unsplash.com/@brandad?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-car-parked-beside-building-nYdD0pb4HZc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#132332",
+          "w": 0.8456
+        },
+        {
+          "hex": "#563E47",
+          "w": 0.0794
+        },
+        {
+          "hex": "#94A19C",
+          "w": 0.075
+        }
+      ]
+    },
+    {
+      "id": "4jhLb0YTzdM",
+      "small": "https://images.unsplash.com/photo-1763071686691-3f77692c5ebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763071686691-3f77692c5ebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8160,
+      "height": 6144,
+      "blurHash": "LIFsDUx]_4R5%$IAa#tlx]NGIUIA",
+      "color": "#404059",
+      "alt": "Row of lincoln suvs parked in a lot",
+      "author": "Obi",
+      "authorUrl": "https://unsplash.com/@obionyeador?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/row-of-lincoln-suvs-parked-in-a-lot-4jhLb0YTzdM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3A3D53",
+          "w": 0.3472
+        },
+        {
+          "hex": "#B4C3D7",
+          "w": 0.3355
+        },
+        {
+          "hex": "#7D8292",
+          "w": 0.3173
+        }
+      ]
+    },
+    {
+      "id": "h5mmlQL_CIg",
+      "small": "https://images.unsplash.com/photo-1777639474620-12f6dc96358e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777639474620-12f6dc96358e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6726,
+      "height": 4671,
+      "blurHash": "LXEMUBR5M|t70LR-oNt6_1j=WVjs",
+      "color": "#264040",
+      "alt": "Porsche logo on a dark wall with greenery",
+      "author": "Salman Sidheek",
+      "authorUrl": "https://unsplash.com/@salman_sidheek?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/porsche-logo-on-a-dark-wall-with-greenery-h5mmlQL_CIg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#344C29",
+          "w": 0.4502
+        },
+        {
+          "hex": "#CBC399",
+          "w": 0.3198
+        },
+        {
+          "hex": "#62763C",
+          "w": 0.23
+        }
+      ]
+    },
+    {
+      "id": "s6qrMXmJSdM",
+      "small": "https://images.unsplash.com/photo-1771340042944-0136047b3c3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771340042944-0136047b3c3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBkZWFsZXJzaGlwJTIwZXh0ZXJpb3J8ZW58MXwwfHx8MTc5MjE3NjYzMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LFIE%]My~qtS9EtRx]Ip.8t7WBIB",
+      "color": "#a6a6a6",
+      "alt": "Man looking at car with hood open outside dealership",
+      "author": "Dextar Studio",
+      "authorUrl": "https://unsplash.com/@dextarstudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-looking-at-car-with-hood-open-outside-dealership-s6qrMXmJSdM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BCB7AC",
+          "w": 0.5243
+        },
+        {
+          "hex": "#8F877F",
+          "w": 0.2762
+        },
+        {
+          "hex": "#615B57",
+          "w": 0.1996
+        }
+      ]
+    }
+  ]
+}

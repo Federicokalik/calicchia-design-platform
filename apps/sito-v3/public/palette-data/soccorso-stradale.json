@@ -1,0 +1,335 @@
+{
+  "slug": "soccorso-stradale",
+  "queries": [
+    "tow truck highway",
+    "flat tire roadside",
+    "car battery jumper cables"
+  ],
+  "generatedAt": "2026-10-16T18:50:54.698Z",
+  "photos": [
+    {
+      "id": "Qh6Shiy6ucY",
+      "small": "https://images.unsplash.com/photo-1707905862671-5227ea6099ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707905862671-5227ea6099ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4623,
+      "height": 3461,
+      "blurHash": "LUFiMq_4xuRPD#V?j?t7NFITIUM{",
+      "color": "#d9d9f3",
+      "alt": "a white truck driving down a road next to a forest",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-truck-driving-down-a-road-next-to-a-forest-Qh6Shiy6ucY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A473A",
+          "w": 0.372
+        },
+        {
+          "hex": "#7F7A6D",
+          "w": 0.3549
+        },
+        {
+          "hex": "#CBCDD8",
+          "w": 0.2731
+        }
+      ]
+    },
+    {
+      "id": "yWfr7f-3Ryg",
+      "small": "https://images.unsplash.com/photo-1517596623376-deccebb96b46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1517596623376-deccebb96b46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LG9j}+tSRPRjPDkrjZt6?wX9axay",
+      "color": "#26260c",
+      "alt": "green single cab towing orange single cab",
+      "author": "Clayton Lincoln",
+      "authorUrl": "https://unsplash.com/@claylinco?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-single-cab-towing-orange-single-cab-yWfr7f-3Ryg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#121309",
+          "w": 0.3897
+        },
+        {
+          "hex": "#383529",
+          "w": 0.3083
+        },
+        {
+          "hex": "#7997A5",
+          "w": 0.302
+        }
+      ]
+    },
+    {
+      "id": "HQmj8UXYy-Y",
+      "small": "https://images.unsplash.com/photo-1747930838451-1f9c3a8ea057?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1747930838451-1f9c3a8ea057?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LOGk]_0L-:aexwROt8RkI=IUogt6",
+      "color": "#404040",
+      "alt": "Emergency vehicles responding to a traffic incident on the road",
+      "author": "Carl Tronders",
+      "authorUrl": "https://unsplash.com/@allvar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/emergency-vehicles-responding-to-a-traffic-incident-on-the-road-HQmj8UXYy-Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#92887E",
+          "w": 0.3871
+        },
+        {
+          "hex": "#C7BBB1",
+          "w": 0.3262
+        },
+        {
+          "hex": "#5D5953",
+          "w": 0.2867
+        }
+      ]
+    },
+    {
+      "id": "ncddBMNKqlM",
+      "small": "https://images.unsplash.com/photo-1773408285431-cfd94cc861be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773408285431-cfd94cc861be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b3clMjB0cnVjayUyMGhpZ2h3YXl8ZW58MXwwfHx8MTc5MjE3NjY0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LsEfyp%3WBf6?ws:WBj[IpRjfkoM",
+      "color": "#a6c0c0",
+      "alt": "Two cars drive on a bridge under a cloudy sky",
+      "author": "Chris Lynch",
+      "authorUrl": "https://unsplash.com/@chris_lynch_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-cars-drive-on-a-bridge-under-a-cloudy-sky-ncddBMNKqlM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#01060B",
+          "w": 0.4186
+        },
+        {
+          "hex": "#B9C1CF",
+          "w": 0.3107
+        },
+        {
+          "hex": "#88A8BD",
+          "w": 0.2707
+        }
+      ]
+    },
+    {
+      "id": "f8ewEmPh60Y",
+      "small": "https://images.unsplash.com/photo-1761659111095-a11e1d2ba294?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761659111095-a11e1d2ba294?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L8Bg3rIo01ay_2ozD%RjM|of?HRj",
+      "color": "#262626",
+      "alt": "Close-up of a worn car tire and rim",
+      "author": "Da-shika",
+      "authorUrl": "https://unsplash.com/@da_shika_photo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-worn-car-tire-and-rim-f8ewEmPh60Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#42423C",
+          "w": 0.3465
+        },
+        {
+          "hex": "#74736E",
+          "w": 0.335
+        },
+        {
+          "hex": "#171715",
+          "w": 0.3185
+        }
+      ]
+    },
+    {
+      "id": "S7ecAEyYnZQ",
+      "small": "https://images.unsplash.com/photo-1768401658109-a4dc907f2734?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768401658109-a4dc907f2734?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4569,
+      "height": 2992,
+      "blurHash": "LFD9bU9GRjxt4:E1?GIo~UE1tSM{",
+      "color": "#26260c",
+      "alt": "Person in sheet sits by car with no wheels",
+      "author": "Caleb Minear",
+      "authorUrl": "https://unsplash.com/@calebminear?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-sheet-sits-by-car-with-no-wheels-S7ecAEyYnZQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A1D10",
+          "w": 0.3789
+        },
+        {
+          "hex": "#403F28",
+          "w": 0.3286
+        },
+        {
+          "hex": "#BEA990",
+          "w": 0.2925
+        }
+      ]
+    },
+    {
+      "id": "tQ3yGo-oX20",
+      "small": "https://images.unsplash.com/photo-1784115785026-6325bbf9d1e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784115785026-6325bbf9d1e0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7667,
+      "height": 5133,
+      "blurHash": "LoJRKy$yjXxt_NNGRjof?bozWBRj",
+      "color": "#f3f3f3",
+      "alt": "Men push a car while another changes its flat tire",
+      "author": "Isaac Berrocal",
+      "authorUrl": "https://unsplash.com/@aikdesign?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/men-push-a-car-while-another-changes-its-flat-tire-tQ3yGo-oX20?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A08A",
+          "w": 0.3976
+        },
+        {
+          "hex": "#69635D",
+          "w": 0.3227
+        },
+        {
+          "hex": "#F0EFED",
+          "w": 0.2797
+        }
+      ]
+    },
+    {
+      "id": "PHqNEGm-1WY",
+      "small": "https://images.unsplash.com/photo-1791961895425-87bc3e220b28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1791961895425-87bc3e220b28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbGF0JTIwdGlyZSUyMHJvYWRzaWRlfGVufDF8MHx8fDE3OTIxNzY2NTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LJFr;X_3IUM{~qt7D%j[M{j[Rjj[",
+      "color": "#595959",
+      "alt": "A black and white overhead view of a car wheel rim and an impact wrench on concrete",
+      "author": "Yuriy Vertikov",
+      "authorUrl": "https://unsplash.com/@noa69?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/car-wheel-rim-and-impact-wrench-PHqNEGm-1WY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6B6B6",
+          "w": 0.4108
+        },
+        {
+          "hex": "#5A5A5A",
+          "w": 0.3225
+        },
+        {
+          "hex": "#888888",
+          "w": 0.2667
+        }
+      ]
+    },
+    {
+      "id": "ovGrEUgrkyE",
+      "small": "https://images.unsplash.com/photo-1597766325363-f5576d851d6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766325363-f5576d851d6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LFC~k}~WKPS#-;%MS#NaK%x]$4oM",
+      "color": "#404040",
+      "alt": "black and brown handle hand tool",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-brown-handle-hand-tool-ovGrEUgrkyE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#816463",
+          "w": 0.4134
+        },
+        {
+          "hex": "#443F43",
+          "w": 0.3985
+        },
+        {
+          "hex": "#141215",
+          "w": 0.1881
+        }
+      ]
+    },
+    {
+      "id": "Pnhzg9cKsS4",
+      "small": "https://images.unsplash.com/photo-1597766321604-9de3ff9e93e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766321604-9de3ff9e93e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LGDbmJ5kPB}[ELDj$fE2Fy-V=|OD",
+      "color": "#404040",
+      "alt": "person holding red and black hand tool",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-red-and-black-hand-tool-Pnhzg9cKsS4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3D373E",
+          "w": 0.3539
+        },
+        {
+          "hex": "#0F0F17",
+          "w": 0.3276
+        },
+        {
+          "hex": "#7D5E60",
+          "w": 0.3185
+        }
+      ]
+    },
+    {
+      "id": "1LC2OTrIKag",
+      "small": "https://images.unsplash.com/photo-1597766370173-a14200ec0b42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766370173-a14200ec0b42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LKQl|Dtl?b.8DiRj%#V@_NofIUMx",
+      "color": "#f3f3f3",
+      "alt": "red and black coated wire",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-black-coated-wire-1LC2OTrIKag?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F5F4F4",
+          "w": 0.812
+        },
+        {
+          "hex": "#D3A2A2",
+          "w": 0.0969
+        },
+        {
+          "hex": "#926063",
+          "w": 0.0911
+        }
+      ]
+    },
+    {
+      "id": "A1cjN9tu9Ck",
+      "small": "https://images.unsplash.com/photo-1597766380552-36f5c673637a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766380552-36f5c673637a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBiYXR0ZXJ5JTIwanVtcGVyJTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4597,
+      "height": 3065,
+      "blurHash": "LpN,Vws:?^t8WVazjZoL?vRjMxj[",
+      "color": "#f3f3f3",
+      "alt": "red and black coated wire",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-black-coated-wire-A1cjN9tu9Ck?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F1F0EF",
+          "w": 0.5426
+        },
+        {
+          "hex": "#B84644",
+          "w": 0.257
+        },
+        {
+          "hex": "#4A2425",
+          "w": 0.2004
+        }
+      ]
+    }
+  ]
+}

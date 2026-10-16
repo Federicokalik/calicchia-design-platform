@@ -1,0 +1,200 @@
+{
+  "slug": "autonoleggi",
+  "queries": [
+    "rental cars parking lot",
+    "car rental desk",
+    "parked cars sunlight"
+  ],
+  "generatedAt": "2026-10-16T18:50:25.988Z",
+  "photos": [
+    {
+      "id": "TMVchMMni80",
+      "small": "https://images.unsplash.com/photo-1762196287015-889965235882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762196287015-889965235882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5813,
+      "height": 3898,
+      "blurHash": "LWD9ClxtWVR*~VofWBR*ozNHWBR*",
+      "color": "#c0a68c",
+      "alt": "Apartment buildings with palm trees at sunset",
+      "author": "Nishat Samadzai",
+      "authorUrl": "https://unsplash.com/@nishatsamadzai2001?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/apartment-buildings-with-palm-trees-at-sunset-TMVchMMni80?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0F0B07",
+          "w": 0.3914
+        },
+        {
+          "hex": "#412F1F",
+          "w": 0.3141
+        },
+        {
+          "hex": "#B7A08C",
+          "w": 0.2944
+        }
+      ]
+    },
+    {
+      "id": "pbq5AHglwrs",
+      "small": "https://images.unsplash.com/photo-1792010359313-1d0d59ed7cc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1792010359313-1d0d59ed7cc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 4347,
+      "blurHash": "LiGJ1=IAivRjlVROnNRj5=sSadn$",
+      "color": "#59c0d9",
+      "alt": "A row of parked cars in front of a pink commercial building in San Francisco",
+      "author": "Kellen Riggin",
+      "authorUrl": "https://unsplash.com/@kalaniparker?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-commercial-building-in-san-francisco-pbq5AHglwrs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7FA7AE",
+          "w": 0.3775
+        },
+        {
+          "hex": "#766B4F",
+          "w": 0.3478
+        },
+        {
+          "hex": "#ABCED2",
+          "w": 0.2747
+        }
+      ]
+    },
+    {
+      "id": "6DLKPqchw_k",
+      "small": "https://images.unsplash.com/photo-1766016642153-4063f568870c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766016642153-4063f568870c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZW50YWwlMjBjYXJzJTIwcGFya2luZyUyMGxvdHxlbnwxfDB8fHwxNzkyMTc2NjIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4966,
+      "height": 3973,
+      "blurHash": "LF5r*~x^McIARiV@ogt7DNROx^x]",
+      "color": "#0c2640",
+      "alt": "Modern building exterior at night with wet reflections",
+      "author": "Raymond Kotewicz",
+      "authorUrl": "https://unsplash.com/@raymondkotewicz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-building-exterior-at-night-with-wet-reflections-6DLKPqchw_k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#022037",
+          "w": 0.8182
+        },
+        {
+          "hex": "#24435E",
+          "w": 0.1201
+        },
+        {
+          "hex": "#5887A5",
+          "w": 0.0618
+        }
+      ]
+    },
+    {
+      "id": "mvwVLWLi9zY",
+      "small": "https://images.unsplash.com/photo-1534938508735-6555938596f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1534938508735-6555938596f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LaGaRBjZE3WX-noKayfP0%kAxYoL",
+      "color": "#735940",
+      "alt": "cars on parking lot",
+      "author": "Lama Roscu",
+      "authorUrl": "https://unsplash.com/@lamaroscu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cars-on-parking-lot-mvwVLWLi9zY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#906740",
+          "w": 0.522
+        },
+        {
+          "hex": "#D39C49",
+          "w": 0.2586
+        },
+        {
+          "hex": "#583D2D",
+          "w": 0.2193
+        }
+      ]
+    },
+    {
+      "id": "XtbI8Lv0G5Y",
+      "small": "https://images.unsplash.com/photo-1772141635708-a1e8a8b493d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772141635708-a1e8a8b493d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2657,
+      "blurHash": "LGBgC:R,03t7%dflRoRkD%j[%Loc",
+      "color": "#262626",
+      "alt": "Cars parked on a tree-lined street with sunlight filtering through",
+      "author": "Nikolai Kolosov",
+      "authorUrl": "https://unsplash.com/@nikolaikolosov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cars-parked-on-a-tree-lined-street-with-sunlight-filtering-through-XtbI8Lv0G5Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4C4F4D",
+          "w": 0.4124
+        },
+        {
+          "hex": "#787D6E",
+          "w": 0.3314
+        },
+        {
+          "hex": "#212428",
+          "w": 0.2562
+        }
+      ]
+    },
+    {
+      "id": "4sr9ct2xI4E",
+      "small": "https://images.unsplash.com/photo-1781409884255-bf4a3826a7dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781409884255-bf4a3826a7dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5784,
+      "height": 3856,
+      "blurHash": "LRDS]#4n4n~qbvaeV@x[?aM{IUxu",
+      "color": "#0c2626",
+      "alt": "Cars parked on a cobblestone street under sunlight through trees",
+      "author": "Christian Lue",
+      "authorUrl": "https://unsplash.com/@christianlue?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cars-parked-on-a-cobblestone-street-under-sunlight-through-trees-4sr9ct2xI4E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0E1A17",
+          "w": 0.4488
+        },
+        {
+          "hex": "#374A38",
+          "w": 0.2859
+        },
+        {
+          "hex": "#DBD5CC",
+          "w": 0.2653
+        }
+      ]
+    },
+    {
+      "id": "kQnIHUBgrxk",
+      "small": "https://images.unsplash.com/photo-1771873110017-700a00f94160?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771873110017-700a00f94160?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXJrZWQlMjBjYXJzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE3NjYyM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5464,
+      "blurHash": "LA8q4#^%RPM|~T?FniNHxGs:bFWC",
+      "color": "#262626",
+      "alt": "Blue and red cars parked beside tropical plants",
+      "author": "Infinara",
+      "authorUrl": "https://unsplash.com/@infinara?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-red-cars-parked-beside-tropical-plants-kQnIHUBgrxk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0908",
+          "w": 0.3884
+        },
+        {
+          "hex": "#292722",
+          "w": 0.313
+        },
+        {
+          "hex": "#49483B",
+          "w": 0.2986
+        }
+      ]
+    }
+  ]
+}

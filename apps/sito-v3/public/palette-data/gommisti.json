@@ -1,0 +1,277 @@
+{
+  "slug": "gommisti",
+  "queries": [
+    "tire shop interior",
+    "stacked car tires",
+    "tire tread close up"
+  ],
+  "generatedAt": "2026-10-16T18:50:15.905Z",
+  "photos": [
+    {
+      "id": "6mcF4AHqqSw",
+      "small": "https://images.unsplash.com/photo-1786489283327-2fbcb441a82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aXJlJTIwc2hvcCUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786489283327-2fbcb441a82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aXJlJTIwc2hvcCUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5820,
+      "height": 3880,
+      "blurHash": "LF9@^kR5Riad_MkARPjY%#MekCWV",
+      "color": "#405959",
+      "alt": "A light blue sports car with glowing red taillights inside an automotive repair shop",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sports-car-in-automotive-repair-shop-6mcF4AHqqSw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3A4542",
+          "w": 0.3634
+        },
+        {
+          "hex": "#577670",
+          "w": 0.3583
+        },
+        {
+          "hex": "#131716",
+          "w": 0.2783
+        }
+      ]
+    },
+    {
+      "id": "tjcr2mxdDj0",
+      "small": "https://images.unsplash.com/photo-1786489284043-82452bc3b5b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aXJlJTIwc2hvcCUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786489284043-82452bc3b5b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aXJlJTIwc2hvcCUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxNzY2MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5623,
+      "height": 3699,
+      "blurHash": "L87By8kWbbo|?]t+M{oy%fWVtlWA",
+      "color": "#262626",
+      "alt": "A grey supercar parked inside an automotive workshop with wheels displayed on the wall",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/supercar-in-automotive-workshop-tjcr2mxdDj0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#445552",
+          "w": 0.3402
+        },
+        {
+          "hex": "#262D2B",
+          "w": 0.3353
+        },
+        {
+          "hex": "#0A0C0D",
+          "w": 0.3244
+        }
+      ]
+    },
+    {
+      "id": "WHPOFFzY9gU",
+      "small": "https://images.unsplash.com/photo-1578844251758-2f71da64c96f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1578844251758-2f71da64c96f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4184,
+      "height": 2789,
+      "blurHash": "LUDvcvM{%2s:~qRk%2oz_4WBxvs:",
+      "color": "#262626",
+      "alt": "piles of car tires",
+      "author": "Robert Laursoo",
+      "authorUrl": "https://unsplash.com/@robineero?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/piles-of-car-tires-WHPOFFzY9gU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181D1E",
+          "w": 0.4511
+        },
+        {
+          "hex": "#4B4C50",
+          "w": 0.3239
+        },
+        {
+          "hex": "#99989F",
+          "w": 0.225
+        }
+      ]
+    },
+    {
+      "id": "vVLrfAzmWYw",
+      "small": "https://images.unsplash.com/photo-1477823986828-5aff156284aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1477823986828-5aff156284aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 2268,
+      "blurHash": "L59H2_xu00RjD%ayt7WB4nof%Mt7",
+      "color": "#262626",
+      "alt": "bunch of tires",
+      "author": "Imthaz Ahamed",
+      "authorUrl": "https://unsplash.com/@imthaz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bunch-of-tires-vVLrfAzmWYw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#353535",
+          "w": 0.3782
+        },
+        {
+          "hex": "#5F5F5F",
+          "w": 0.3727
+        },
+        {
+          "hex": "#0E0E0E",
+          "w": 0.2491
+        }
+      ]
+    },
+    {
+      "id": "Ebd514pvJA0",
+      "small": "https://images.unsplash.com/photo-1613214036979-1c6a7e0cf677?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613214036979-1c6a7e0cf677?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LI8;iNRj4T%M-;WCIAt7aej[kCae",
+      "color": "#262626",
+      "alt": "black and white round container",
+      "author": "Benjamin Brunner",
+      "authorUrl": "https://unsplash.com/@ben_brunner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-round-container-Ebd514pvJA0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#212222",
+          "w": 0.6942
+        },
+        {
+          "hex": "#444949",
+          "w": 0.1732
+        },
+        {
+          "hex": "#777E7F",
+          "w": 0.1326
+        }
+      ]
+    },
+    {
+      "id": "ud0twV98uvg",
+      "small": "https://images.unsplash.com/photo-1527266258038-6ae3e089a609?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1527266258038-6ae3e089a609?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwY2FyJTIwdGlyZXN8ZW58MXwwfHx8MTc5MjE3NjYxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "L58qy#_Ntm%L%hE2I@o#R*X9S6xv",
+      "color": "#405959",
+      "alt": "assorted verhicle tire lot",
+      "author": "Goh Rhy Yan",
+      "authorUrl": "https://unsplash.com/@gohrhyyan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-verhicle-tire-lot-ud0twV98uvg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#455A68",
+          "w": 0.4188
+        },
+        {
+          "hex": "#727E84",
+          "w": 0.3252
+        },
+        {
+          "hex": "#070C14",
+          "w": 0.256
+        }
+      ]
+    },
+    {
+      "id": "ucOoviYVYhA",
+      "small": "https://images.unsplash.com/photo-1772058527315-babac9ca2654?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772058527315-babac9ca2654?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "L7D,7YoeDjV[-;0JxbRk0JxuRjRk",
+      "color": "#737373",
+      "alt": "Close-up of a worn tire tread with grass blades",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-worn-tire-tread-with-grass-blades-ucOoviYVYhA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7D7E78",
+          "w": 0.4179
+        },
+        {
+          "hex": "#5B5C55",
+          "w": 0.2937
+        },
+        {
+          "hex": "#A2A29A",
+          "w": 0.2884
+        }
+      ]
+    },
+    {
+      "id": "23JuJhJeKD8",
+      "small": "https://images.unsplash.com/photo-1765220625875-3083a2b387c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1765220625875-3083a2b387c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L03+Dt%MM_t6-;ofRjj[Riayfkay",
+      "color": "#262626",
+      "alt": "Close-up of a dark tire tread pattern",
+      "author": "maks_d",
+      "authorUrl": "https://unsplash.com/@maks_d?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-dark-tire-tread-pattern-23JuJhJeKD8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1E1E1E",
+          "w": 0.8607
+        },
+        {
+          "hex": "#2A2A2A",
+          "w": 0.1393
+        }
+      ]
+    },
+    {
+      "id": "CNFac-rBTag",
+      "small": "https://images.unsplash.com/photo-1783333794944-af5647541028?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783333794944-af5647541028?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 10000,
+      "height": 7500,
+      "blurHash": "L25=334,E1ngtmIU$*tSNHof%2T2",
+      "color": "#262626",
+      "alt": "Detailed rubber tire surface showing wear marks",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/detailed-rubber-tire-surface-showing-wear-marks-CNFac-rBTag?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#25252A",
+          "w": 0.4534
+        },
+        {
+          "hex": "#30313B",
+          "w": 0.2878
+        },
+        {
+          "hex": "#41404A",
+          "w": 0.2587
+        }
+      ]
+    },
+    {
+      "id": "BcsNIVPtx4Y",
+      "small": "https://images.unsplash.com/photo-1760486423116-5afdee549223?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760486423116-5afdee549223?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0aXJlJTIwdHJlYWQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LCDS:tD%9FM{~qM{IUM{?bRjofM{",
+      "color": "#595959",
+      "alt": "Close up of a bicycle wheel resting on grass",
+      "author": "Murphy Stay",
+      "authorUrl": "https://unsplash.com/@murphyf?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-bicycle-wheel-resting-on-grass-BcsNIVPtx4Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#595959",
+          "w": 0.4313
+        },
+        {
+          "hex": "#7A7A7A",
+          "w": 0.318
+        },
+        {
+          "hex": "#ABABAB",
+          "w": 0.2507
+        }
+      ]
+    }
+  ]
+}

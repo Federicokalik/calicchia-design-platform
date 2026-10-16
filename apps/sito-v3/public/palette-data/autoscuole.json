@@ -1,0 +1,227 @@
+{
+  "slug": "autoscuole",
+  "queries": [
+    "driving school car",
+    "learner driver steering wheel",
+    "car dashboard road"
+  ],
+  "generatedAt": "2026-10-16T18:50:20.337Z",
+  "photos": [
+    {
+      "id": "lcirqLKB8B4",
+      "small": "https://images.unsplash.com/photo-1527593167147-e9c94a5883e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1527593167147-e9c94a5883e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJFF8C4.4.0f.8D%ae-V%2E2xaxa",
+      "color": "#0c2626",
+      "alt": "woman driving car",
+      "author": "Andraz Lazic",
+      "authorUrl": "https://unsplash.com/@andrazlazic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-driving-car-lcirqLKB8B4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#131F1F",
+          "w": 0.4446
+        },
+        {
+          "hex": "#D7BBB0",
+          "w": 0.2857
+        },
+        {
+          "hex": "#9D8478",
+          "w": 0.2698
+        }
+      ]
+    },
+    {
+      "id": "XuDPnpox8tc",
+      "small": "https://images.unsplash.com/photo-1550517636-ad7bac40dc28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1550517636-ad7bac40dc28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3859,
+      "height": 2576,
+      "blurHash": "LIDct4_NRiMx_N?vt7IUI9x]tRxu",
+      "color": "#262626",
+      "alt": "person driving Volkswagen vehicle",
+      "author": "Jerry Kavan",
+      "authorUrl": "https://unsplash.com/@jerrykavan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-driving-volkswagen-vehicle-XuDPnpox8tc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#24272B",
+          "w": 0.4119
+        },
+        {
+          "hex": "#4C5257",
+          "w": 0.3355
+        },
+        {
+          "hex": "#CCD5D7",
+          "w": 0.2526
+        }
+      ]
+    },
+    {
+      "id": "GXA2XiAsko8",
+      "small": "https://images.unsplash.com/photo-1611508106567-6218ae6c5f6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611508106567-6218ae6c5f6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LMC%mb8wD%M{?vMxaKRjIAx]NGaf",
+      "color": "#8ca6a6",
+      "alt": "man in black shirt driving car",
+      "author": "Mira Kireeva",
+      "authorUrl": "https://unsplash.com/@solarfri?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-black-shirt-driving-car-GXA2XiAsko8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#95B3AF",
+          "w": 0.4249
+        },
+        {
+          "hex": "#131716",
+          "w": 0.3883
+        },
+        {
+          "hex": "#7C776A",
+          "w": 0.1868
+        }
+      ]
+    },
+    {
+      "id": "JgEtmgOjoew",
+      "small": "https://images.unsplash.com/photo-1484373030460-8de45ac8796d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1484373030460-8de45ac8796d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcml2aW5nJTIwc2Nob29sJTIwY2FyfGVufDF8MHx8fDE3OTIxNzY2MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4496,
+      "height": 3000,
+      "blurHash": "LNDlydV@9FNG~qoLIUV@%NofRjV@",
+      "color": "#404040",
+      "alt": "man driving straight on pathway during day time",
+      "author": "Alex Jumper",
+      "authorUrl": "https://unsplash.com/@alexjumper?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-driving-straight-on-pathway-during-day-time-JgEtmgOjoew?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3E343C",
+          "w": 0.558
+        },
+        {
+          "hex": "#67585C",
+          "w": 0.2654
+        },
+        {
+          "hex": "#8E887D",
+          "w": 0.1766
+        }
+      ]
+    },
+    {
+      "id": "fey671cCzNo",
+      "small": "https://images.unsplash.com/photo-1675962548788-35892e0f7ae4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1675962548788-35892e0f7ae4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3790,
+      "height": 2527,
+      "blurHash": "LCAv]~lAD*H@_M%zRjIB5Y-:xtM|",
+      "color": "#260c0c",
+      "alt": "a person driving a car on a road next to a forest",
+      "author": "fruitfullmedia",
+      "authorUrl": "https://unsplash.com/@fruitfullmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-driving-a-car-on-a-road-next-to-a-forest-fey671cCzNo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F0F03",
+          "w": 0.503
+        },
+        {
+          "hex": "#846F43",
+          "w": 0.3079
+        },
+        {
+          "hex": "#483618",
+          "w": 0.1891
+        }
+      ]
+    },
+    {
+      "id": "fNUQTZgFpUQ",
+      "small": "https://images.unsplash.com/photo-1561063764-33d27700e0e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1561063764-33d27700e0e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5720,
+      "height": 3813,
+      "blurHash": "LB7nal%K4nD*-.t7M|M_01M{?a%M",
+      "color": "#262626",
+      "alt": "people inside vehicle",
+      "author": "Ian Noble",
+      "authorUrl": "https://unsplash.com/@i_m_noble?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-inside-vehicle-fNUQTZgFpUQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#020304",
+          "w": 0.7052
+        },
+        {
+          "hex": "#24282F",
+          "w": 0.1581
+        },
+        {
+          "hex": "#646C62",
+          "w": 0.1368
+        }
+      ]
+    },
+    {
+      "id": "l9_f-ikWZG4",
+      "small": "https://images.unsplash.com/photo-1573655536459-41db384c0e49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1573655536459-41db384c0e49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4376,
+      "height": 3286,
+      "blurHash": "LOFFvs?bM_?b~q?bt6xu4.X9-;R+",
+      "color": "#f3f3f3",
+      "alt": "different vehicles on road viewing buildings during daytime",
+      "author": "Esther T",
+      "authorUrl": "https://unsplash.com/@esther_tch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/different-vehicles-on-road-viewing-buildings-during-daytime-l9_f-ikWZG4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A190F",
+          "w": 0.5038
+        },
+        {
+          "hex": "#94958A",
+          "w": 0.2519
+        },
+        {
+          "hex": "#4B4D3F",
+          "w": 0.2443
+        }
+      ]
+    },
+    {
+      "id": "SncIq0P9s_Y",
+      "small": "https://images.unsplash.com/photo-1687039618665-9588be0d3fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687039618665-9588be0d3fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBkYXNoYm9hcmQlMjByb2FkfGVufDF8MHx8fDE3OTIxNzY2MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6960,
+      "height": 4640,
+      "blurHash": "LsF$kbIURjRj~qRjWBf6kCogj@of",
+      "color": "#f3f3f3",
+      "alt": "the interior of a car with a steering wheel and dashboard",
+      "author": "Zhivko Minkov",
+      "authorUrl": "https://unsplash.com/@lazywhiskey?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/the-interior-of-a-car-with-a-steering-wheel-and-dashboard-SncIq0P9s_Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#131214",
+          "w": 0.5768
+        },
+        {
+          "hex": "#E8EDEA",
+          "w": 0.2819
+        },
+        {
+          "hex": "#4B4D4D",
+          "w": 0.1413
+        }
+      ]
+    }
+  ]
+}

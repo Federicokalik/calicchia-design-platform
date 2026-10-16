@@ -1,0 +1,335 @@
+{
+  "slug": "elettrauto",
+  "queries": [
+    "car fuse box",
+    "car battery cables",
+    "dashboard warning lights"
+  ],
+  "generatedAt": "2026-10-16T18:50:41.448Z",
+  "photos": [
+    {
+      "id": "b9SuDwcHgaQ",
+      "small": "https://images.unsplash.com/photo-1762329343682-94081d433990?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762329343682-94081d433990?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGAw9u~q?b?btRs:xaxuE1j[n%R%",
+      "color": "#262626",
+      "alt": "Vintage car radio with illuminated buttons",
+      "author": "Zulfugar Karimov",
+      "authorUrl": "https://unsplash.com/@zulfugarkarimov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/vintage-car-radio-with-illuminated-buttons-b9SuDwcHgaQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0F12",
+          "w": 0.4202
+        },
+        {
+          "hex": "#383739",
+          "w": 0.3143
+        },
+        {
+          "hex": "#666264",
+          "w": 0.2655
+        }
+      ]
+    },
+    {
+      "id": "ex-cZIK0omU",
+      "small": "https://images.unsplash.com/photo-1567093321629-c23611f44d52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1567093321629-c23611f44d52?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LCBC}aRj0L%MofRkxtt6D*xtxtRj",
+      "color": "#262626",
+      "alt": "a close up of the inside of a car",
+      "author": "Jonathan Borba",
+      "authorUrl": "https://unsplash.com/@jonathanborba?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-the-inside-of-a-car-ex-cZIK0omU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6A5C51",
+          "w": 0.373
+        },
+        {
+          "hex": "#3E3229",
+          "w": 0.3248
+        },
+        {
+          "hex": "#9F8D7E",
+          "w": 0.3021
+        }
+      ]
+    },
+    {
+      "id": "rt2yrfIHl5c",
+      "small": "https://images.unsplash.com/photo-1745766294376-70be29fbc8c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1745766294376-70be29fbc8c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "LGC$$N00ksIn.7ozDj-p?HxZIpoy",
+      "color": "#737359",
+      "alt": "Car fuses are labeled and ready for action",
+      "author": "Diego Romeo",
+      "authorUrl": "https://unsplash.com/@gopitri_prem?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/car-fuses-are-labeled-and-ready-for-action-rt2yrfIHl5c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100E0C",
+          "w": 0.3696
+        },
+        {
+          "hex": "#474034",
+          "w": 0.3306
+        },
+        {
+          "hex": "#7D7165",
+          "w": 0.2998
+        }
+      ]
+    },
+    {
+      "id": "SleX1oT6vGU",
+      "small": "https://images.unsplash.com/photo-1677230017871-f19937f21a8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1677230017871-f19937f21a8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBmdXNlJTIwYm94fGVufDF8MHx8fDE3OTIxNzY2MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LGAcugJU~CT0^QFe-VSg=|I;%3NH",
+      "color": "#262626",
+      "alt": "a person is working on a car's engine compartment",
+      "author": "Sincerely Media",
+      "authorUrl": "https://unsplash.com/@sincerelymedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-is-working-on-a-cars-engine-compartment-SleX1oT6vGU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2C2B34",
+          "w": 0.4447
+        },
+        {
+          "hex": "#0D0D14",
+          "w": 0.3153
+        },
+        {
+          "hex": "#545562",
+          "w": 0.24
+        }
+      ]
+    },
+    {
+      "id": "ovGrEUgrkyE",
+      "small": "https://images.unsplash.com/photo-1597766325363-f5576d851d6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766325363-f5576d851d6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LFC~k}~WKPS#-;%MS#NaK%x]$4oM",
+      "color": "#404040",
+      "alt": "black and brown handle hand tool",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-brown-handle-hand-tool-ovGrEUgrkyE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#816463",
+          "w": 0.4134
+        },
+        {
+          "hex": "#443F43",
+          "w": 0.3985
+        },
+        {
+          "hex": "#141215",
+          "w": 0.1881
+        }
+      ]
+    },
+    {
+      "id": "E4Oz0TZUDe8",
+      "small": "https://images.unsplash.com/photo-1765211003026-f7666ea3a948?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1765211003026-f7666ea3a948?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LWEyxn00_39ZspoJs:WCMxWBxuWB",
+      "color": "#f3f3f3",
+      "alt": "Close-up of a car battery with wires connected",
+      "author": "Wesley Tingey",
+      "authorUrl": "https://unsplash.com/@wesleyphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-car-battery-with-wires-connected-E4Oz0TZUDe8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#040B13",
+          "w": 0.3588
+        },
+        {
+          "hex": "#738183",
+          "w": 0.3475
+        },
+        {
+          "hex": "#2A4450",
+          "w": 0.2937
+        }
+      ]
+    },
+    {
+      "id": "1LC2OTrIKag",
+      "small": "https://images.unsplash.com/photo-1597766370173-a14200ec0b42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766370173-a14200ec0b42?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LKQl|Dtl?b.8DiRj%#V@_NofIUMx",
+      "color": "#f3f3f3",
+      "alt": "red and black coated wire",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-black-coated-wire-1LC2OTrIKag?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F5F4F4",
+          "w": 0.812
+        },
+        {
+          "hex": "#D3A2A2",
+          "w": 0.0969
+        },
+        {
+          "hex": "#926063",
+          "w": 0.0911
+        }
+      ]
+    },
+    {
+      "id": "A1cjN9tu9Ck",
+      "small": "https://images.unsplash.com/photo-1597766380552-36f5c673637a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597766380552-36f5c673637a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBiYXR0ZXJ5JTIwY2FibGVzfGVufDF8MHx8fDE3OTIxNzY2Mzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4597,
+      "height": 3065,
+      "blurHash": "LpN,Vws:?^t8WVazjZoL?vRjMxj[",
+      "color": "#f3f3f3",
+      "alt": "red and black coated wire",
+      "author": "Daniel @ bestjumpstarterreview.com",
+      "authorUrl": "https://unsplash.com/@jumpstarterexpert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-black-coated-wire-A1cjN9tu9Ck?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F1F0EF",
+          "w": 0.5426
+        },
+        {
+          "hex": "#B84644",
+          "w": 0.257
+        },
+        {
+          "hex": "#4A2425",
+          "w": 0.2004
+        }
+      ]
+    },
+    {
+      "id": "BKM4T2BLlFE",
+      "small": "https://images.unsplash.com/photo-1597386601945-8980df52c3dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597386601945-8980df52c3dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4957,
+      "height": 2788,
+      "blurHash": "L34-kTJQM|w|KNwyNIW.0~a}xGbF",
+      "color": "#260c0c",
+      "alt": "black and yellow analog speedometer",
+      "author": "McCarthy Beckan",
+      "authorUrl": "https://unsplash.com/@mccarthybeckan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-yellow-analog-speedometer-BKM4T2BLlFE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030710",
+          "w": 0.7011
+        },
+        {
+          "hex": "#290D0C",
+          "w": 0.175
+        },
+        {
+          "hex": "#59310D",
+          "w": 0.1238
+        }
+      ]
+    },
+    {
+      "id": "mMLCPVp0N7M",
+      "small": "https://images.unsplash.com/photo-1610913721979-b20ede600e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1610913721979-b20ede600e63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3032,
+      "height": 2021,
+      "blurHash": "L44Lq2S}VrX8tQkVV@R*8wn%kXV@",
+      "color": "#0c2626",
+      "alt": "black and white car instrument panel cluster",
+      "author": "Nick Fewings",
+      "authorUrl": "https://unsplash.com/@jannerboy62?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-car-instrument-panel-cluster-mMLCPVp0N7M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#040404",
+          "w": 0.6414
+        },
+        {
+          "hex": "#191D19",
+          "w": 0.2538
+        },
+        {
+          "hex": "#455147",
+          "w": 0.1049
+        }
+      ]
+    },
+    {
+      "id": "dSIGtqR7evY",
+      "small": "https://images.unsplash.com/photo-1611760357505-922600d8ffa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611760357505-922600d8ffa6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5636,
+      "height": 3757,
+      "blurHash": "L86*BtkCIANaNGWVxaj[0Kn$%Ns:",
+      "color": "#0c2626",
+      "alt": "black and red analog speedometer",
+      "author": "Claude Gabriel",
+      "authorUrl": "https://unsplash.com/@claudegabriel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-analog-speedometer-dSIGtqR7evY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#050E0F",
+          "w": 0.7612
+        },
+        {
+          "hex": "#3F2627",
+          "w": 0.1253
+        },
+        {
+          "hex": "#7B5B5C",
+          "w": 0.1135
+        }
+      ]
+    },
+    {
+      "id": "ttqUsX1G3aE",
+      "small": "https://images.unsplash.com/photo-1511697344731-2419473a40c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1511697344731-2419473a40c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYXNoYm9hcmQlMjB3YXJuaW5nJTIwbGlnaHRzfGVufDF8MHx8fDE3OTIxNzY2NDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3375,
+      "blurHash": "L12h]ssp9ZkCbvW;V@jZ0KWU%MWB",
+      "color": "#260c0c",
+      "alt": "closeup photo of black car instrument cluster panel",
+      "author": "Marek Szturc",
+      "authorUrl": "https://unsplash.com/@marxgall?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/closeup-photo-of-black-car-instrument-cluster-panel-ttqUsX1G3aE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#000000",
+          "w": 0.5246
+        },
+        {
+          "hex": "#060302",
+          "w": 0.3919
+        },
+        {
+          "hex": "#472B2D",
+          "w": 0.0835
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "autospurghi",
+  "queries": [
+    "storm drain street",
+    "water utility truck",
+    "drain pipe close up"
+  ],
+  "generatedAt": "2026-10-16T18:50:04.793Z",
+  "photos": [
+    {
+      "id": "7GNNwetwAm4",
+      "small": "https://images.unsplash.com/photo-1741997376539-a63ee600dac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1741997376539-a63ee600dac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5925,
+      "height": 4000,
+      "blurHash": "L5Bf-3Mv0JWFxVxuRjR%4nt7e?ax",
+      "color": "#595959",
+      "alt": "A round drain cover reads \"drain\"",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-round-drain-cover-reads-drain-7GNNwetwAm4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#716A66",
+          "w": 0.4966
+        },
+        {
+          "hex": "#615C56",
+          "w": 0.3713
+        },
+        {
+          "hex": "#4E4941",
+          "w": 0.1321
+        }
+      ]
+    },
+    {
+      "id": "doWJZVOm8JM",
+      "small": "https://images.unsplash.com/photo-1740484708120-86a447d6ca6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740484708120-86a447d6ca6c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7228,
+      "height": 5937,
+      "blurHash": "LDIYIMxanNRjt7V[R*s:s,of00R*",
+      "color": "#c0c0c0",
+      "alt": "A grate on the side of a brick wall",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-grate-on-the-side-of-a-brick-wall-doWJZVOm8JM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C0C7C6",
+          "w": 0.5559
+        },
+        {
+          "hex": "#6F6F72",
+          "w": 0.2515
+        },
+        {
+          "hex": "#929391",
+          "w": 0.1926
+        }
+      ]
+    },
+    {
+      "id": "ZleoqT-LWsY",
+      "small": "https://images.unsplash.com/photo-1741997376476-04fb29e5af7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1741997376476-04fb29e5af7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5517,
+      "height": 3678,
+      "blurHash": "L6A,k3Mw0Kog?GaxRjkC0Kogjvax",
+      "color": "#595959",
+      "alt": "Drain cover with the word \"drain\" on it",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/drain-cover-with-the-word-drain-on-it-ZleoqT-LWsY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6F6966",
+          "w": 0.4722
+        },
+        {
+          "hex": "#5B5652",
+          "w": 0.3297
+        },
+        {
+          "hex": "#423F3A",
+          "w": 0.1981
+        }
+      ]
+    },
+    {
+      "id": "10e5tR3wk98",
+      "small": "https://images.unsplash.com/photo-1776950228025-d2d49fd58f62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1776950228025-d2d49fd58f62?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdG9ybSUyMGRyYWluJTIwc3RyZWV0fGVufDF8MHx8fDE3OTIxNzY1OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2560,
+      "blurHash": "L5A103XV#3M_.T?FDhS4EKs+9Go~",
+      "color": "#595959",
+      "alt": "A metal grate on a concrete surface",
+      "author": "Juan Pablo",
+      "authorUrl": "https://unsplash.com/@who0ne?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-metal-grate-on-a-concrete-surface-10e5tR3wk98?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C5D59",
+          "w": 0.4272
+        },
+        {
+          "hex": "#727676",
+          "w": 0.3233
+        },
+        {
+          "hex": "#3A3F44",
+          "w": 0.2495
+        }
+      ]
+    },
+    {
+      "id": "DnEco7eg1Uc",
+      "small": "https://images.unsplash.com/photo-1707960190202-72087bace8cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707960190202-72087bace8cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5843,
+      "height": 3895,
+      "blurHash": "LYH-S}yq?Ga_~C%gtRxHXm-pOEsW",
+      "color": "#f3f3f3",
+      "alt": "a blue truck parked in front of a pink building",
+      "author": "fr0ggy5",
+      "authorUrl": "https://unsplash.com/@fr0ggy5_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-blue-truck-parked-in-front-of-a-pink-building-DnEco7eg1Uc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B5E64",
+          "w": 0.4414
+        },
+        {
+          "hex": "#CB7E84",
+          "w": 0.301
+        },
+        {
+          "hex": "#2A242F",
+          "w": 0.2576
+        }
+      ]
+    },
+    {
+      "id": "TeqXxPwpxZg",
+      "small": "https://images.unsplash.com/photo-1574359134132-34647f92dbbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1574359134132-34647f92dbbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3600,
+      "height": 2400,
+      "blurHash": "LIGlLz$@8^.9%NRQxcR:9zS7tQx@",
+      "color": "#8c8c8c",
+      "alt": "parked white truck near green grass during daytime",
+      "author": "MICHAEL WILSON",
+      "authorUrl": "https://unsplash.com/@mwilson078?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/parked-white-truck-near-green-grass-during-daytime-TeqXxPwpxZg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#888A6B",
+          "w": 0.4511
+        },
+        {
+          "hex": "#B3B3A9",
+          "w": 0.4028
+        },
+        {
+          "hex": "#454944",
+          "w": 0.1461
+        }
+      ]
+    },
+    {
+      "id": "EF_e8IyQbX0",
+      "small": "https://images.unsplash.com/photo-1590236796536-0bfe20918c24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1590236796536-0bfe20918c24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LnEzKURjbIn#KUj]flaxt9ofjskD",
+      "color": "#a6a6a6",
+      "alt": "white and blue truck on road during daytime",
+      "author": "Yanik Ammann",
+      "authorUrl": "https://unsplash.com/@confusedant?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-blue-truck-on-road-during-daytime-EF_e8IyQbX0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAB2BF",
+          "w": 0.443
+        },
+        {
+          "hex": "#5B96E4",
+          "w": 0.387
+        },
+        {
+          "hex": "#4F5657",
+          "w": 0.17
+        }
+      ]
+    },
+    {
+      "id": "Z7K9rrtJUYM",
+      "small": "https://images.unsplash.com/photo-1789431745384-c3d933196819?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789431745384-c3d933196819?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXRlciUyMHV0aWxpdHklMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NjAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 2631,
+      "blurHash": "LbFYuz%MD%ozR.ofj[fR01M{%LRk",
+      "color": "#d9d9c0",
+      "alt": "A white pickup truck with Tiaki Wai branding parked in a paved lot",
+      "author": "Matthew Larsen",
+      "authorUrl": "https://unsplash.com/@matthew_larsen?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-pickup-truck-with-branding-Z7K9rrtJUYM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8D3C6",
+          "w": 0.4153
+        },
+        {
+          "hex": "#45484C",
+          "w": 0.3275
+        },
+        {
+          "hex": "#0F0D0C",
+          "w": 0.2573
+        }
+      ]
+    },
+    {
+      "id": "jswzv99_k4o",
+      "small": "https://images.unsplash.com/photo-1635359800970-90b35af94a4a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635359800970-90b35af94a4a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LRFY+A~pt5%gRPRiaxoeNGWWRjM{",
+      "color": "#737373",
+      "alt": "a close up of a metal object on a wall",
+      "author": "Georgi Zvezdov",
+      "authorUrl": "https://unsplash.com/@gzvezdov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-metal-object-on-a-wall-jswzv99_k4o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7E7F81",
+          "w": 0.4494
+        },
+        {
+          "hex": "#B7B7B6",
+          "w": 0.2941
+        },
+        {
+          "hex": "#5D5C5D",
+          "w": 0.2565
+        }
+      ]
+    },
+    {
+      "id": "OUmM6mx8pf8",
+      "small": "https://images.unsplash.com/photo-1710964821010-cd96202b09c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1710964821010-cd96202b09c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3878,
+      "height": 3047,
+      "blurHash": "LC7^J89w9v~8-mIqRl-mI=s-xFNc",
+      "color": "#260c0c",
+      "alt": "a dark room with pipes and a window",
+      "author": "Random Thinking",
+      "authorUrl": "https://unsplash.com/@randomthinking?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dark-room-with-pipes-and-a-window-OUmM6mx8pf8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#130B04",
+          "w": 0.4377
+        },
+        {
+          "hex": "#030100",
+          "w": 0.4265
+        },
+        {
+          "hex": "#5A3A12",
+          "w": 0.1358
+        }
+      ]
+    },
+    {
+      "id": "IlvLCz15WdM",
+      "small": "https://images.unsplash.com/photo-1771235920955-ce44a568803c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771235920955-ce44a568803c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LAF5vw=rx^M{B@IU-;t7tSOGxu-p",
+      "color": "#8c8c8c",
+      "alt": "Water flows from a pipe onto cobblestones",
+      "author": "Bino Grepolian",
+      "authorUrl": "https://unsplash.com/@binogrepolian?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/water-flows-from-a-pipe-onto-cobblestones-IlvLCz15WdM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8D8066",
+          "w": 0.4046
+        },
+        {
+          "hex": "#B09E81",
+          "w": 0.3181
+        },
+        {
+          "hex": "#625233",
+          "w": 0.2773
+        }
+      ]
+    },
+    {
+      "id": "cNDctMEbdR8",
+      "small": "https://images.unsplash.com/photo-1639164631264-e0efc4d35df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1639164631264-e0efc4d35df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxkcmFpbiUyMHBpcGUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzY2MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LFBC=FRj0fR+IpoLt6W;4:of%2oK",
+      "color": "#262626",
+      "alt": "a skateboard laying in the middle of a flooded street",
+      "author": "Juan Manuel Sanchez",
+      "authorUrl": "https://unsplash.com/@juanman61?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-skateboard-laying-in-the-middle-of-a-flooded-street-cNDctMEbdR8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2B2724",
+          "w": 0.3541
+        },
+        {
+          "hex": "#735E54",
+          "w": 0.3238
+        },
+        {
+          "hex": "#4F423D",
+          "w": 0.3222
+        }
+      ]
+    }
+  ]
+}
