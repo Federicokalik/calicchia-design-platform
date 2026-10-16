@@ -17,8 +17,8 @@ export type LegalDocument = {
 
 export const TITOLARE_EMAIL = 'mail@calicchia.design';
 export const LAST_LEGAL_UPDATE = '2026-05-24';
-/** Cookie e privacy policy: aggiunte le foto Unsplash della Palette di settore. */
-const PRIVACY_DOCS_UPDATE = '2026-10-12';
+/** Cookie e privacy policy: foto Unsplash e brand kit in PDF della Palette di settore. */
+const PRIVACY_DOCS_UPDATE = '2026-10-16';
 
 /**
  * Major version dei documenti gating-ati nel portale clienti (T&C + DPA).
@@ -233,7 +233,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Dati area clienti: nome, email, ragione sociale, indirizzo di fatturazione, telefono, documenti e informazioni di progetto.',
           'Comunicazioni WhatsApp con clienti e contatti commerciali: numero di telefono, contenuto dei messaggi scambiati, metadati tecnici (timestamp, stato lettura), preferenze di comunicazione e relativi opt-in/opt-out.',
           'Cookie e tecnologie simili: dettagli nella Cookie Policy.',
-          'Strumento Palette di settore: logo e foto caricati vengono elaborati solo nel browser e non sono raccolti; le ricerche libere arrivano al server come testo normalizzato, senza dati identificativi.'
+          'Strumento Palette di settore: logo e foto caricati vengono elaborati solo nel browser e non sono raccolti; le ricerche libere arrivano al server come testo normalizzato, senza dati identificativi.',
+          'Brand kit in PDF della Palette di settore, solo se lo richiedi: email, nome facoltativo, la palette (colori, stile, settore se scelto dall’elenco), lingua, versione del testo di consenso accettato, IP e user-agent al momento della richiesta e della conferma.'
         ]
       },
       {
@@ -245,6 +246,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Fornire servizi contrattualizzati e area clienti: art. 6(1)(b) GDPR, esecuzione del contratto.',
           'Gestire richieste privacy e adempimenti legali: art. 6(1)(c) GDPR, obbligo legale.',
           'Inviare newsletter o comunicazioni facoltative: art. 6(1)(a) GDPR, consenso esplicito e revocabile.',
+          'Iscriverti alla newsletter dallo strumento Palette di settore e mandarti, dopo la conferma via email (double opt-in), il brand kit in PDF della tua palette: art. 6(1)(a) GDPR, consenso. Il PDF è il regalo legato all’iscrizione, che puoi revocare quando vuoi con un clic.',
           'Misurare traffico e uso del sito con strumenti aggregati, se attivi: art. 6(1)(a) GDPR, consenso.',
           'Garantire sicurezza, prevenzione abusi e protezione anti-bot: art. 6(1)(f) GDPR, interesse legittimo.',
           'Diagnosticare errori tecnici e garantire la stabilità del sito tramite error tracking self-hosted, con PII filtrate lato client prima dell\'invio: art. 6(1)(f) GDPR, interesse legittimo.',
@@ -287,6 +289,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         list: [
           'Dati di contatto e preventivo: fino a 24 mesi dalla richiesta, salvo instaurazione di un rapporto contrattuale.',
           'Dati newsletter: fino a revoca, disiscrizione o richiesta di cancellazione.',
+          'Brand kit della Palette di settore: le richieste non confermate e gli indirizzi nati solo da quelle si cancellano dopo 7 giorni; per chi è iscritto la palette resta finché resta iscritto e si cancella entro 30 giorni dalla disiscrizione. Il PDF non viene conservato: si genera e si allega all’email.',
           'Dati contrattuali e di fatturazione: 10 anni per obblighi fiscali e contabili.',
           'Log tecnici e di sicurezza: per il tempo necessario alla protezione del sito e comunque in misura proporzionata.',
           'Consensi cookie: di norma 6 mesi, salvo rinnovo o modifica normativa/tecnica.',

@@ -142,6 +142,22 @@ export interface ToolStrings {
   shareReady: string;
   shareLinkLabel: string;
   shareNote: string;
+  // 08 · brand kit in PDF (iscrizione alla newsletter)
+  kitTitle: string;
+  kitText: string;
+  kitOpen: string;
+  kitEmail: string;
+  kitName: string;
+  kitOptional: string;
+  kitPrivacy: string;
+  kitSubmit: string;
+  kitSending: string;
+  kitSentTitle: string;
+  kitSentText: (email: string) => string;
+  kitErrEmail: string;
+  kitErrConsent: string;
+  kitErrGeneric: string;
+  kitErrNetwork: string;
   // 09 CTA
   ctaEyebrow: string;
   ctaTitle: [string, string];
@@ -295,6 +311,23 @@ export const T: Record<Locale, ToolStrings> = {
     shareReady: 'Ecco il link: selezionalo e copialo.',
     shareLinkLabel: 'Link alla palette',
     shareNote: 'Il link contiene solo colori, stile e settore: niente logo, niente foto tue, niente testo cercato.',
+    kitTitle: 'Il brand kit in PDF',
+    kitText:
+      'Colori con i codici HEX, RGB e CMYK, ruoli e contrasti, caratteri dello stile e anteprime su home, biglietto, insegna e post. Te lo mando via email quando ti iscrivi alla newsletter.',
+    kitOpen: 'Ricevi il brand kit',
+    kitEmail: 'Email',
+    kitName: 'Nome',
+    kitOptional: 'facoltativo',
+    kitPrivacy: 'Come tratto i dati: informativa privacy',
+    kitSubmit: 'Iscrivimi e mandami il PDF',
+    kitSending: 'Invio in corso…',
+    kitSentTitle: 'Controlla la posta',
+    kitSentText: (email) =>
+      `Ho scritto a ${email} per confermare l'iscrizione. Dopo la conferma il PDF arriva in pochi minuti. Se non vedi l'email, guarda anche in Promozioni o Spam.`,
+    kitErrEmail: "Inserisci un'email valida.",
+    kitErrConsent: "Per ricevere il PDF serve l'iscrizione alla newsletter.",
+    kitErrGeneric: 'Non sono riuscito a registrare la richiesta. Riprova tra poco.',
+    kitErrNetwork: 'Il servizio non risponde. Riprova tra qualche minuto.',
     ctaEyebrow: '09 · Prossimo passo',
     ctaTitle: ["Hai un'idea?", 'Vediamola insieme.'],
     ctaBody:
@@ -445,6 +478,23 @@ export const T: Record<Locale, ToolStrings> = {
     shareReady: 'Here is the link: select it and copy it.',
     shareLinkLabel: 'Palette link',
     shareNote: 'The link only holds the colours, style and industry: no logo, none of your photos, no search text.',
+    kitTitle: 'The PDF brand kit',
+    kitText:
+      'Colours with HEX, RGB and CMYK codes, roles and contrast, the typefaces of your style and previews on a home page, business card, shop sign and post. I email it to you when you subscribe to the newsletter.',
+    kitOpen: 'Get the brand kit',
+    kitEmail: 'Email',
+    kitName: 'Name',
+    kitOptional: 'optional',
+    kitPrivacy: 'How I handle your data: privacy policy',
+    kitSubmit: 'Subscribe and send me the PDF',
+    kitSending: 'Sending…',
+    kitSentTitle: 'Check your inbox',
+    kitSentText: (email) =>
+      `I have written to ${email} to confirm your subscription. Once you confirm, the PDF arrives within a few minutes. If you cannot see the email, check Promotions or Spam too.`,
+    kitErrEmail: 'Enter a valid email address.',
+    kitErrConsent: 'To get the PDF you need to subscribe to the newsletter.',
+    kitErrGeneric: 'I could not save the request. Please try again shortly.',
+    kitErrNetwork: 'The service is not responding. Please try again in a few minutes.',
     ctaEyebrow: '09 · Next step',
     ctaTitle: ['Got an idea?', "Let's look at it together."],
     ctaBody:

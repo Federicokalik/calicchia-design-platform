@@ -392,6 +392,13 @@ export function PaletteTool({ locale, sectorIndex, chipSlugs, initialSector, def
               trackEvent('palette_share', { sector: sector.slug ?? 'custom' });
               reportDownloads(unsplashIds);
             }}
+            locale={locale}
+            shared={shared}
+            sectorLabel={sector.slug ? sector.label : null}
+            onKitRequested={() => {
+              trackEvent('palette_kit', { sector: sector.slug ?? 'custom' });
+              reportDownloads(unsplashIds);
+            }}
           />
         </>
       ) : (

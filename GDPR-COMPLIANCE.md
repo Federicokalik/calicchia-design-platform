@@ -1,6 +1,6 @@
 # GDPR Compliance Checklist — Calicchia Design Platform
 
-> Ultimo aggiornamento: 2026-10-12
+> Ultimo aggiornamento: 2026-10-16
 > Riferimenti normativi: GDPR (EU 2016/679), Codice Privacy (D.Lgs. 196/2003 mod. D.Lgs. 101/2018), Linee Guida Garante Cookie (luglio 2021), Decisione Garante 330/2025 (double opt-in)
 
 Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
@@ -62,6 +62,7 @@ Legenda: ✅ Conforme | ⚠️ Parziale | ❌ Mancante | 🔧 In corso
 | D4 | Prova del consenso (timestamp, IP, versione policy) | ✅ | Timestamp + IP + user-agent al subscribe e al confirm (migration 103, 2026-05-24) |
 | D5 | Informativa al punto di iscrizione | ✅ | Testo sotto SubscribeForm |
 | D6 | Link privacy policy sul form di iscrizione | ✅ | Link a /privacy-policy |
+| D7 | Brand kit in PDF della Palette di settore (iscrizione con regalo) | ⚠️ | 2026-10-16, migrazione 167. Scopo dichiarato: iscrizione alla newsletter (lista "Newsletter · Palette di settore"); il PDF arriva dopo il double opt-in. Checkbox non preselezionata, testo versionato (`KIT_CONSENT_VERSION` in `packages/shared/src/palette/kit.ts`, salvato su ogni richiesta con IP/UA di richiesta e conferma). Conferma in POST dalla pagina dell'API (i link in GET non confermano). List-Unsubscribe one-click sull'email del kit; PDF non conservato. Pulizia: non confermati dopo 7 giorni, palette dei disiscritti dopo 30. Export GDPR `palette_brand_kits`, cancellazione in cascata con mkt_contacts. **Da validare con un legale**: regalo legato all'iscrizione (art. 7(4) GDPR) e testo del consenso. |
 
 ## E. ANALYTICS & TRACCIAMENTO
 
