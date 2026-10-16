@@ -94,7 +94,11 @@ function page(state: PageState, token = ''): string {
 
 const STATUS: Record<PageState, 200 | 400 | 404 | 500> = { pending: 200, confirmed: 200, already: 200, invalid: 404, error: 500 };
 
+/** La CSP di default dell'API è deny-all: queste pagine hanno solo stili inline e il form di conferma. */
+const PAGE_CSP = "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+
 paletteKit.get('/confirm', async (c) => {
+  c.header('Content-Security-Policy', PAGE_CSP);
   const token = c.req.query('t') ?? '';
   try {
     const state = await peekBrandKitToken(token);
@@ -106,6 +110,7 @@ paletteKit.get('/confirm', async (c) => {
 });
 
 paletteKit.post('/confirm', async (c) => {
+  c.header('Content-Security-Policy', PAGE_CSP);
   const form = await c.req.parseBody().catch(() => ({}) as Record<string, unknown>);
   const token = typeof form.t === 'string' ? form.t : '';
   try {
