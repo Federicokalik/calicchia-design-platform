@@ -11,6 +11,7 @@
     "percheScegliereMe": "Why work with me",
     "blog": "Blog",
     "risorse": "Resources",
+    "paletteDiSettore": "Industry colour palette",
     "areaClienti": "Client Area",
     "faq": "FAQ",
     "freelance": "Freelance Web Designer"
@@ -47,7 +48,8 @@
     "quickPaths": "Quick paths",
     "studio": "Studio",
     "secondary": {
-      "resourcesDescription": "Curated white papers and glossaries.",
+      "resourcesDescription": "White papers, glossaries and free tools.",
+      "paletteDescription": "Free tool: your industry's colours, ready to use.",
       "clientAreaDescription": "Documents, files and project progress.",
       "professionsDescription": "Vertical landing pages for categories and businesses.",
       "faqDescription": "Common questions before starting."

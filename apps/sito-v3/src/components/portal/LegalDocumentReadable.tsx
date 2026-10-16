@@ -75,7 +75,7 @@ export function LegalDocumentReadable({
           {checked && (
             <span
               className="inline-flex h-6 w-6 items-center justify-center rounded-full"
-              style={{ background: 'var(--color-accent)', color: 'var(--color-bg)' }}
+              style={{ background: 'var(--color-accent)', color: 'var(--color-accent-ink)' }}
               aria-hidden
             >
               <Check size={14} weight="bold" />

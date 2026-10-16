@@ -1,0 +1,621 @@
+/*
+ * Anteprima e supporti del tool "Palette di settore".
+ *
+ * I colori qui dentro sono contenuto generato, non tema del sito: arrivano
+ * come variabili --p-* impostate inline dal componente (ruoli della palette
+ * e parametri dello stile). `data-preset` cambia i dettagli dei quattro
+ * stili. Container query: l'anteprima si adatta alla larghezza del riquadro,
+ * non a quella della finestra.
+ */
+
+/* ---------- Anteprima: home di esempio ---------- */
+
+.pv {
+  --p-bg: #faf7f2;
+  --p-surface: #ffffff;
+  --p-text: #1a1a1a;
+  --p-muted: #555555;
+  --p-border: #dddddd;
+  --p-primary: #333333;
+  --p-on-primary: #ffffff;
+  --p-accent: #888888;
+  --p-accent-text: #555555;
+  --p-radius: 0px;
+  --p-btn-radius: 0px;
+  --p-img-radius: 0px;
+  --p-bw: 1px;
+  --p-shadow: none;
+  --p-font-h: system-ui, sans-serif;
+  --p-font-b: system-ui, sans-serif;
+  --p-font-a: ui-monospace, monospace;
+  --p-h-weight: 700;
+  --p-h-track: 0;
+  --p-h-transform: none;
+  container-type: inline-size;
+  background: var(--p-bg);
+  color: var(--p-text);
+  font-family: var(--p-font-b);
+  padding: clamp(1rem, 3.5vw, 2.5rem);
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.75rem);
+  line-height: 1.5;
+}
+
+.pv,
+.pv *,
+.mk,
+.mk * {
+  transition:
+    background-color var(--motion-short) var(--ease-expo-out),
+    color var(--motion-short) var(--ease-expo-out),
+    border-color var(--motion-short) var(--ease-expo-out),
+    border-radius var(--motion-short) var(--ease-expo-out),
+    box-shadow var(--motion-short) var(--ease-expo-out);
+}
+
+.pvNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--p-border);
+}
+
+.pvLogo,
+.pvH1,
+.pvCardT {
+  font-family: var(--p-font-h);
+  font-weight: var(--p-h-weight);
+  letter-spacing: var(--p-h-track);
+  text-transform: var(--p-h-transform);
+}
+
+.pvLogo {
+  font-size: 1.15rem;
+  line-height: 1.1;
+}
+
+.pvLogo img {
+  display: block;
+  height: 2.1rem;
+  width: auto;
+  max-width: 11rem;
+  object-fit: contain;
+}
+
+.pvLinks {
+  display: none;
+  gap: 1.25rem;
+  font-size: 0.9rem;
+  color: var(--p-muted);
+}
+
+@container (min-width: 600px) {
+  .pvLinks {
+    display: flex;
+  }
+}
+
+.pvHero {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@container (min-width: 560px) {
+  .pvHero {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+
+.pvEyebrow {
+  color: var(--p-accent-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pvH1 {
+  font-size: clamp(1.75rem, 6.2cqi, 3.25rem);
+  line-height: 1.05;
+  margin-top: 0.6rem;
+  text-wrap: balance;
+}
+
+.pvLead {
+  color: var(--p-muted);
+  margin-top: 1rem;
+  max-width: 46ch;
+  line-height: 1.55;
+}
+
+.pvCtas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.pvBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.8rem 1.3rem;
+  border-radius: var(--p-btn-radius);
+  background: var(--p-primary);
+  color: var(--p-on-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  border: var(--p-bw) solid transparent;
+}
+
+.pvBtn2 {
+  background: transparent;
+  color: var(--p-text);
+  border: max(1px, var(--p-bw)) solid currentColor;
+}
+
+.pvBtnSm {
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+}
+
+.pvMedia {
+  min-width: 0;
+}
+
+.pvMedia img {
+  display: block;
+}
+
+.pvMedia img,
+.pvMedia .bands {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--p-img-radius);
+}
+
+.pvCards {
+  display: grid;
+  gap: 1rem;
+}
+
+@container (min-width: 560px) {
+  .pvCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.pvCard {
+  background: var(--p-surface);
+  border: var(--p-bw) solid var(--p-border);
+  border-radius: var(--p-radius);
+  box-shadow: var(--p-shadow);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.pvCardT {
+  font-size: 1.15rem;
+  line-height: 1.15;
+}
+
+.pvCard p {
+  color: var(--p-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.pvMeta {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  color: var(--p-accent-text);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.pvBanner {
+  background: var(--p-primary);
+  color: var(--p-on-primary);
+  border-radius: var(--p-radius);
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+}
+
+.pv[data-preset='editoriale'] .pvCard {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--p-text);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1rem 0 0;
+}
+
+.pv[data-preset='editoriale'] .pvBtn2 {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding-inline: 0;
+}
+
+.pv[data-preset='editoriale'] .pvEyebrow {
+  letter-spacing: 0.16em;
+  font-weight: 500;
+}
+
+.pv[data-preset='tecnico'] .pvBtn {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-color: var(--p-text);
+  box-shadow: 3px 3px 0 var(--p-text);
+}
+
+.pv[data-preset='tecnico'] .pvBtn2 {
+  box-shadow: none;
+}
+
+.pv[data-preset='tecnico'] .pvCard {
+  border-color: var(--p-text);
+}
+
+.pv[data-preset='tecnico'] .pvEyebrow,
+.pv[data-preset='tecnico'] .pvMeta {
+  font-family: var(--p-font-a);
+  font-weight: 500;
+}
+
+.pv[data-preset='tecnico'] .pvBanner {
+  border: 2px solid var(--p-text);
+}
+
+/* Fasce colore al posto di una foto che non carica. */
+.bands {
+  display: flex;
+  overflow: hidden;
+}
+
+.bands span {
+  display: block;
+  height: 100%;
+}
+
+/* ---------- Supporti: post, biglietto, insegna ---------- */
+
+.mk {
+  --p-bg: #faf7f2;
+  --p-surface: #ffffff;
+  --p-text: #1a1a1a;
+  --p-muted: #555555;
+  --p-border: #dddddd;
+  --p-primary: #333333;
+  --p-on-primary: #ffffff;
+  --p-accent-text: #555555;
+  --p-radius: 0px;
+  --p-btn-radius: 0px;
+  --p-bw: 1px;
+  --p-font-h: system-ui, sans-serif;
+  --p-font-b: system-ui, sans-serif;
+  --p-font-a: ui-monospace, monospace;
+  --p-h-weight: 700;
+  --p-h-track: 0;
+  --p-h-transform: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  font-family: var(--p-font-b);
+}
+
+@media (min-width: 720px) {
+  .mk {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .mkSignFig {
+    grid-column: 1 / -1;
+  }
+}
+
+.mk figure {
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.mk figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-xs);
+  letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+}
+
+.mkCards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.mkBrand {
+  font-family: var(--p-font-h);
+  font-weight: var(--p-h-weight);
+  letter-spacing: var(--p-h-track);
+  text-transform: var(--p-h-transform);
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.mkBrand img {
+  display: block;
+  height: 1.7em;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.mkPlate {
+  display: inline-flex;
+  background: var(--p-surface);
+  padding: 0.35em 0.6em;
+  border-radius: min(var(--p-radius), 8px);
+}
+
+.mkPost {
+  aspect-ratio: 4 / 5;
+  max-width: 100%;
+  display: grid;
+  grid-template-rows: 54% 46%;
+  background: var(--p-primary);
+  color: var(--p-on-primary);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+}
+
+.mkPostImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 0;
+}
+
+.mkPostBody {
+  padding: 6cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqi;
+  min-height: 0;
+}
+
+.mkEyebrow {
+  font-size: 3.3cqi;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.mkPostH {
+  font-family: var(--p-font-h);
+  font-weight: var(--p-h-weight);
+  letter-spacing: var(--p-h-track);
+  text-transform: var(--p-h-transform);
+  font-size: 8.2cqi;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.mkPostFoot {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 3cqi;
+  font-size: 3.8cqi;
+}
+
+.mkChip {
+  border: max(1px, var(--p-bw)) solid currentColor;
+  border-radius: var(--p-btn-radius);
+  padding: 1.5cqi 3cqi;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mkCard {
+  aspect-ratio: 85 / 55;
+  max-width: 100%;
+  border-radius: min(var(--p-radius), 10px);
+  border: 1px solid var(--color-line);
+  overflow: hidden;
+  position: relative;
+}
+
+.mkCardFront {
+  background: var(--p-surface);
+  color: var(--p-text);
+  padding: 7cqi 7cqi 9cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 2cqi;
+}
+
+.mkCardFront .mkBrand {
+  font-size: 6.8cqi;
+}
+
+.mkCardRole {
+  color: var(--p-accent-text);
+  font-size: 3.4cqi;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mkCardContacts {
+  margin-top: auto;
+  font-size: 3.6cqi;
+  line-height: 1.45;
+  color: var(--p-muted);
+}
+
+.mkCardFront::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3cqi;
+  background: var(--p-primary);
+}
+
+.mkCardBack {
+  background: var(--p-primary);
+  color: var(--p-on-primary);
+  display: grid;
+  place-items: center;
+  padding: 8cqi;
+  text-align: center;
+}
+
+.mkCardBack .mkBrand {
+  font-size: 8cqi;
+  justify-content: center;
+}
+
+.mkSignboard {
+  aspect-ratio: 4 / 1;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4cqi;
+  padding: 0 6cqi;
+  overflow: hidden;
+  background: var(--p-primary);
+  color: var(--p-on-primary);
+  border-radius: min(var(--p-radius), 12px);
+  border: var(--p-bw) solid var(--p-text);
+}
+
+.mkSignboard .mkBrand {
+  font-size: 7cqi;
+}
+
+.mkSignboard .mkBrand img {
+  height: 1.9em;
+}
+
+.mkSignSub {
+  margin-left: auto;
+  max-width: 40%;
+  text-align: right;
+  font-size: 2.3cqi;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+.mkSignboard[data-logo='true'] {
+  background: var(--p-surface);
+  color: var(--p-text);
+}
+
+.mk[data-preset='tecnico'] .mkCard,
+.mk[data-preset='tecnico'] .mkSignboard,
+.mk[data-preset='tecnico'] .mkPost {
+  border: 2px solid var(--p-text);
+}
+
+.mk[data-preset='tecnico'] .mkCardContacts,
+.mk[data-preset='tecnico'] .mkSignSub,
+.mk[data-preset='tecnico'] .mkEyebrow {
+  font-family: var(--p-font-a);
+  font-weight: 500;
+}
+
+.mk[data-preset='editoriale'] .mkCardFront::after {
+  height: 1.2cqi;
+}
+
+.mk[data-preset='editoriale'] .mkChip {
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  padding-inline: 0;
+  border-radius: 0;
+}
+
+/* ---------- Dettagli del tool ---------- */
+
+/* Logo su scacchiera: si vede cosa è diventato trasparente. */
+.logoThumb {
+  width: 10rem;
+  height: 6.5rem;
+  max-width: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0.6rem;
+  border: 1px solid var(--color-line);
+  background-color: var(--color-bg-elev);
+  background-image:
+    linear-gradient(45deg, var(--color-line) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--color-line) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--color-line) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--color-line) 75%);
+  background-size: 12px 12px;
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
+}
+
+.logoThumb img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Riquadro foto trascinabile. */
+.photoZone {
+  outline: 1px solid transparent;
+  outline-offset: 8px;
+  transition: outline-color var(--motion-micro);
+}
+
+.photoZone[data-drag='true'] {
+  outline-color: var(--color-ink);
+}
+
+.code {
+  margin: 0;
+  background: var(--color-bg-elev);
+  border: 1px solid var(--color-line);
+  padding: 1rem;
+  overflow: auto;
+  max-height: 26rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.code:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}

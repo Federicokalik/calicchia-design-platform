@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Breadcrumbs } from '@/components/seo/Breadcrumbs';
 import type { BreadcrumbItem } from '@/data/structured-data';
+import type { Locale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
 interface PageHeroAction {
@@ -13,6 +14,8 @@ interface PageHeroAction {
 
 interface PageHeroProps {
   breadcrumbs?: BreadcrumbItem[];
+  /** Localizza gli URL dello schema BreadcrumbList (vedi Breadcrumbs). */
+  breadcrumbsLocale?: Locale;
   eyebrow?: ReactNode;
   title: ReactNode;
   intro?: ReactNode;
@@ -31,7 +34,7 @@ interface PageHeroProps {
 
 function actionClass(variant: NonNullable<PageHeroAction['variant']>) {
   if (variant === 'primary') {
-    return 'border border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-bg)] hover:bg-[var(--color-accent-deep)] hover:border-[var(--color-accent-deep)]';
+    return 'border border-[var(--color-ink)] bg-[var(--color-ink)] text-[var(--color-bg)] hover:bg-[var(--color-accent-deep)] hover:border-[var(--color-accent-deep)] hover:text-[var(--color-accent-ink)]';
   }
   if (variant === 'secondary') {
     return 'border border-[var(--color-border-strong)] text-[var(--color-ink)] hover:bg-[var(--color-surface-elev)]';
@@ -41,6 +44,7 @@ function actionClass(variant: NonNullable<PageHeroAction['variant']>) {
 
 export function PageHero({
   breadcrumbs,
+  breadcrumbsLocale,
   eyebrow,
   title,
   intro,
@@ -61,7 +65,7 @@ export function PageHero({
         className
       )}
     >
-      {breadcrumbs && <Breadcrumbs items={breadcrumbs} className="mb-8" />}
+      {breadcrumbs && <Breadcrumbs items={breadcrumbs} locale={breadcrumbsLocale} className="mb-8" />}
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-x-10 gap-y-10">
         <div className="md:col-span-12">
