@@ -13,6 +13,7 @@ import { runMailSync } from './mail-sync';
 import { runBookingReminders } from './booking-reminders';
 import { runLeadAuditSequence } from '../jobs/lead-audit-sequence';
 import { runLeadPaletteSequence } from '../jobs/lead-palette-sequence';
+import { cleanupPaletteKit, runPaletteKitSender } from '../lib/palette-kit';
 import { runAnalyticsRetention } from './analytics-retention';
 import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintenance';
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
@@ -78,6 +79,18 @@ const jobs: CronJob[] = [
     name: 'lead-palette-sequence',
     intervalMs: 60 * 60 * 1000,
     run: runLeadPaletteSequence,
+  },
+  {
+    // Brand kit in PDF: invii in coda dopo la conferma (di solito partono già
+    // alla conferma; qui i nuovi tentativi).
+    name: 'palette-kit-sender',
+    intervalMs: 60 * 1000,
+    run: runPaletteKitSender,
+  },
+  {
+    name: 'palette-kit-cleanup',
+    intervalMs: 60 * 60 * 1000,
+    run: cleanupPaletteKit,
   },
   {
     name: 'domain-alerts',

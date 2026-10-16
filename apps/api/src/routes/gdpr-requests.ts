@@ -150,6 +150,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     customerRows,
     leadRows,
     mktContacts,
+    paletteKits,
     geoAudits,
     quotes,
     invoices,
@@ -193,6 +194,16 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
         WHERE email_norm = ${email}
            OR customer_id = ANY(${customerIds as any})
            OR lead_id = ANY(${leadIds as any})`,
+    // Brand kit della Palette di settore: cade in cascata con mkt_contacts
+    // nella cancellazione, qui solo l'export.
+    sql`SELECT r.palette, r.locale, r.sector_label, r.consent_version, r.request_ip, r.created_at,
+               r.confirmed_at, r.confirm_ip, r.sent_at
+        FROM palette_kit_requests r
+        JOIN mkt_contacts m ON m.id = r.contact_id
+        WHERE m.email_norm = ${email}
+           OR m.customer_id = ANY(${customerIds as any})
+           OR m.lead_id = ANY(${leadIds as any})
+        ORDER BY r.created_at`,
     sql`SELECT url, score, email, locale, ip, created_at
         FROM geo_audits
         WHERE LOWER(email) = ${email} OR lead_id = ANY(${leadIds as any})`,
@@ -215,6 +226,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     contacts,
     newsletter: newsletterSubs,
     marketing_contacts: mktContacts,
+    palette_brand_kits: paletteKits,
     geo_audits: geoAudits,
     quotes,
     invoices,
@@ -232,7 +244,8 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
 //  • DELETE — pure-PII records with no retention obligation:
 //      contacts, newsletter_subscribers, communication_preferences,
 //      whatsapp_conversations (whatsapp_messages cascade), portal_login_events,
-//      mkt_contacts (audience marketing). geo_audits: email e IP azzerati.
+//      mkt_contacts (audience marketing; palette_kit_requests in cascata).
+//      geo_audits: email e IP azzerati.
 //
 //  • ANONYMIZE — records that cannot be deleted because fiscal/contractual
 //      children (invoices, payments, quotes) reference them under a 10-year
