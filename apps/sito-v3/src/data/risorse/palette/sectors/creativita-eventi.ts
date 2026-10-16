@@ -88,7 +88,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Per un fotografo il sito è soprattutto una cornice: le foto devono stare al centro e i colori non devono rubare la scena. Il rischio opposto è il sito tutto nero o tutto bianco, corretto ma senza carattere, che potrebbe essere di chiunque.\n\nParti dal tuo modo di fotografare. Se lavori con toni caldi e luce naturale, uno sfondo panna o carta e un testo bruno scuro accompagnano bene le immagini; se il tuo stile è più freddo e contrastato, un grigio carbone e un bianco pieno sono più coerenti. Il colore principale può restare discreto, un salvia, un rosa polvere o un ottone, e comparire solo su bottoni e link.\n\nProva la palette accanto a una decina di foto del tuo portfolio, non a una sola. I colori finiranno anche su album, scatole delle chiavette, biglietti e contratti: scegli tinte che stampano bene su carta opaca, perché è lì che il cliente tocca con mano il tuo lavoro.",
       "en": "For a photographer the site is mostly a frame: the photos belong at the centre and the colours shouldn't steal the scene. The opposite risk is the all-black or all-white site, correct but without character, which could belong to anyone.\n\nStart from the way you shoot. If you work with warm tones and natural light, a cream or paper background with dark brown text suits the images; if your style is cooler and higher in contrast, charcoal grey and a clean white are more consistent. The main colour can stay understated, a sage, dusty pink or brass, and appear only on buttons and links.\n\nTest the palette next to a dozen photos from your portfolio, not just one. The colours will also end up on albums, USB boxes, cards and contracts: choose shades that print well on matte paper, because that is where clients actually hold your work in their hands."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "wedding-planner",
@@ -170,7 +170,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Chi organizza un matrimonio compra una cosa sola: che il giorno vada davvero bene. La pagina deve dare questa fiducia con concretezza, timeline, fornitori scelti, foto di tavoli veri; il tono frivolo o troppo romantico manca il bersaglio, perché chi decide ha già l'emozione e cerca ordine.\n\nLe tavolozze che funzionano: fondi carta o sabbia con un accento pastello, rosa polvere, verde salvia o un blu tenue, che accompagnano qualunque stagione di matrimoni. Evita il nero grande e i contrasti secchi: questa è la pagina più calda del vostro lavoro, e non deve sembrare quella di una banca.\n\nI colori finiscono nelle proposte stampate, nei programmi del giorno e nei segnaposto, che sono le cose che restano agli ospiti. Su carta piccola il contrasto deve restare pieno: testo scuro su fondo chiaro, mai pastello su pastello.",
       "en": "Organising a wedding is buying one thing: that the day really goes well. The page has to earn that trust with concreteness, timetables, chosen suppliers, photographs of real tables; a flippant or over-sentimental tone misses, because the person deciding already has the emotion and is looking for order.\n\nPalettes that work: paper or sand grounds with a pastel accent, dusty pink, sage or a soft blue, which accompany any wedding season. Avoid large black and dry contrasts: this is the warmest page in your work, and it should not look like a bank's.\n\nThe colours end up in the printed proposals, the day programmes and the place cards, which are the things guests keep. On small paper the contrast must stay full: dark text on a light ground, never pastel on pastel."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "videomaker",
@@ -254,7 +254,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Chi apre la pagina di un videomaker ha due domande: i video tengono l'attenzione, e quando arrivano le consegne. Il resto è ripetizione: un film in riproduzione in cima alla pagina dà più di mille parole, e i colori della pagina devono stare all'ombra del film.\n\nCarbone e quasi nero funzionano bene, con un solo accento pieno, rosso o ciano, tenuto su bottoni e link. Evita i pastelli intorno al video: spostano l'attenzione dagli inquadramenti.\n\nI colori finiscono sul furgone, sulle magliette del set e sui biglietti che accompagnano le chiavette. Fai attenzione ai contrasti su schermi piccoli: video e testo si alternano in verticale, e grigio tenue su grigio tenue non funziona.",
       "en": "Opening a videographer's page people ask two things: do the films keep attention, and when do the deliveries arrive. Everything else is repetition: a playing film at the top of the page says more than a thousand words, and the colours of the page should stick to the film.\n\nCharcoal and near-black work well, with one full-bodied accent, red or cyan, kept to buttons and links. Avoid pastels around the video: they pull attention away from the framing.\n\nThe colours end up on the van, the crew's shirts and the cards that travel with the USB sticks. Mind contrast on small screens: film and text alternate vertically, and soft grey on soft grey does not work."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "organizzatori-eventi",
@@ -336,7 +336,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Chi promette un evento risponde di cento dettagli, e nessuno perdona una sala non pronta. La pagina deve dare la misura dell'organizzazione: gallerie di allestimenti veri e tempi dichiarati. Le foto dell'aula che passa da vuota a piena dicono più di qualunque descrizione.\n\nLe tavolozze affidabili mettono un blu o un verde pacato su fondo chiaro, con un solo accento che marca bottoni e date. Evita il rosso e l'arancio su tutta la pagina: l'evento porta già i suoi colori, dall'allestimento alle locandine.\n\nI colori finiscono sui badge, sul tabellone del programma, sulle locandine e sulle casacche dello staff. Le tabelle degli orari si leggono meglio su fondo chiaro, con testo scuro e colonne allineate: in sala tutto corre.",
       "en": "Pledging an event means answering for a hundred details, and nobody forgives a room that is not ready. The page has to show the measure of the organisation: galleries of real set-ups and declared times. Photographs of the room going from empty to full say more than any description.\n\nReliable palettes put a measured blue or green on a light ground, with a single accent marking buttons and dates. Avoid red and orange across the page: the event already carries its own colours, from the set-up to the posters.\n\nThe colours end up on the badges, the programme board, the posters and the staff gilets. Timetables read best on a light ground, with dark text and aligned columns: in the hall, everything runs."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "agenzie-viaggi",
@@ -418,7 +418,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Chi compra un viaggio parte prima con la mente che con l'aereo: sulla cartina, fra i programmi stampati, nelle foto. La pagina deve dare proprio questo: destinazioni concrete, date chiare e un nome da chiamare. Le grandi piattaforme non danno un nome da chiamare: la vostra differenza sta lì.\n\nLe tavolozze che funzionano: blu mare e turchese su fondo carta, con una punta di giallo sole usata in dose piccolissima. Evita gradienti di cielo su tutto lo schermo: il bianco carta scandisce meglio itinerari e date.\n\nI colori finiscono sui cataloghi, sulle cartine che partono con i clienti e sulla vetrina. Nella vetrina e nei documenti di viaggio il contrasto conta: orari e date si leggono meglio a testo scuro su fondo chiaro, anche al sole.",
       "en": "People who buy a journey travel first with their minds: over the map, among printed programmes, across photographs. The page must give exactly that: concrete destinations, clear dates and a name to call. Big platforms give no name to call; that is where your difference lives.\n\nPalettes that work: sea blue and turquoise on a paper ground, with a small touch of sunshine yellow. Avoid sky gradients across the whole screen: paper white orders itineraries and dates better.\n\nThe colours end up on the catalogues, the maps that leave with the clients and the front window. In the window and in travel documents contrast matters: hours and dates read best in dark text on a light ground, also under the sun."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "scuole-private",
@@ -501,7 +501,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Una scuola si sceglie per fiducia, e il sito ha un compito preciso: mostrare come passa una giornata tipo. Orari, cambi d'ora, lavoro in piccoli gruppi: si vedono meglio nelle foto delle classi vere che in qualunque descrizione.\n\nLe tavolozze giuste per una scuola vengono dalle stanze reali dell'istituto: blu o verdi pacati su fondo beige o bianco, con un accento pieno che marca bottoni e link. Evita i pastelli grigi: una scuola deve tenersi su un colore, e restare ferma lì.\n\nI colori finiscono sull'insegna, sui diari, sulle magliette dello sport e sui programmi stampati per le famiglie. Le tabelle degli orari si leggono meglio su fondo chiaro, con testo scuro e colonne allineate: le famiglie le consultano dal telefono, spesso la sera.",
       "en": "A school is chosen on trust, and the site has a precise job: showing how a typical day passes. Timetables, room changes, work in small groups: they are seen better in photographs of real classes than in any description.\n\nThe right palettes for a school come from the real rooms of the building: a measured blue or green on a beige or white ground, with one full accent marking buttons and links. Avoid grey pastels: a school should hold to one colour and stay there.\n\nThe colours end up on the sign, the diaries, the sports shirts and the programmes printed for families. Timetable tables read best on a light ground, with dark text and aligned columns: families look them up on the phone, often in the evening."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "asili-nido",
@@ -585,7 +585,7 @@ export const CREATIVITA_EVENTI_SECTORS: PaletteSectorContent[] = [
       "it": "Le famiglie visitano spesso più nidi prima di decidere, e il sito deve rendere facile il primo passo: foto delle sezioni, orari di ingresso e un appuntamento prenotabile in fretta. Il sorriso delle educatrici nelle foto vale più di ogni parola.\n\nFondi chiari e caldi, come crema o avorio, con accenti pieni di colore che vengono dai materiali del gioco, senza neon. Un verde o un giallo pieno su bottoni e link funziona bene; evita i colori fluo e le sfumature che ballano: la serenità viene prima.\n\nI colori finiscono sull'insegna, sul menu affisso, sulle magliette degli educatori e sul cartello del parcheggio. Le tabelle con orari e turni si leggono meglio su fondo chiaro, con testo scuro: le famiglie le aprono dal telefono, magari con un braccio già occupato.",
       "en": "Families often visit several nurseries before deciding, and the site's job is to make that first step easy: photographs of the rooms, arrival times and an appointment bookable in a hurry. The smile of the educators in the photos is worth more than any word.\n\nLight warm grounds, like cream or ivory, with full colour accents that come from the play materials, not from neon. A solid green or yellow on buttons and links works well; avoid fluorescent shades and colours that dance: calm comes first.\n\nThe colours end up on the sign, the posted menu, the educators' shirts and the parking sign. Tables of times and shifts read best on a light ground, with dark text: families open them on the phone, often with one arm already busy."
     },
-    "reviewed": false
+    "reviewed": true
   },
   {
     "slug": "tipografi",
