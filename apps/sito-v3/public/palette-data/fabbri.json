@@ -1,0 +1,327 @@
+{
+  "slug": "fabbri",
+  "queries": [
+    "door lock close up",
+    "brass keys workbench",
+    "locksmith cutting keys"
+  ],
+  "generatedAt": "2026-10-16T17:46:36.152Z",
+  "photos": [
+    {
+      "id": "7tkDoo2L_Eg",
+      "small": "https://images.unsplash.com/photo-1585914641050-fa9883c4e21c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585914641050-fa9883c4e21c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3043,
+      "height": 2036,
+      "blurHash": "LEK1,r.69F-:%g~q4nIVx]RjIU_2",
+      "color": "#c0c0c0",
+      "alt": "black and silver padlock on white door",
+      "author": "Jaye Haych",
+      "authorUrl": "https://unsplash.com/@jaye_haych?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-padlock-on-white-door-7tkDoo2L_Eg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CECECE",
+          "w": 0.5158
+        },
+        {
+          "hex": "#312E4C",
+          "w": 0.268
+        },
+        {
+          "hex": "#B4B3BA",
+          "w": 0.2162
+        }
+      ]
+    },
+    {
+      "id": "KrPulSdUetk",
+      "small": "https://images.unsplash.com/photo-1635602739175-bab409a6e94c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635602739175-bab409a6e94c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4648,
+      "height": 3079,
+      "blurHash": "Le9wkNQ7WArWyDSgbvs:t6RPnPjH",
+      "color": "#0cc0c0",
+      "alt": "a close up of a padlock on a door",
+      "author": "Kaffeebart",
+      "authorUrl": "https://unsplash.com/@kaffeebart?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-padlock-on-a-door-KrPulSdUetk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1CD8D9",
+          "w": 0.4116
+        },
+        {
+          "hex": "#32959A",
+          "w": 0.3475
+        },
+        {
+          "hex": "#2C3735",
+          "w": 0.2409
+        }
+      ]
+    },
+    {
+      "id": "fvoGQce1GTs",
+      "small": "https://images.unsplash.com/photo-1676337436892-913c018a5bff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676337436892-913c018a5bff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7907,
+      "height": 5274,
+      "blurHash": "LcJju3#3OuIps+t6NHoLE1XANHkC",
+      "color": "#c08c0c",
+      "alt": "a yellow door with a white handle on it",
+      "author": "Xiangkun ZHU",
+      "authorUrl": "https://unsplash.com/@arttoinspire?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-yellow-door-with-a-white-handle-on-it-fvoGQce1GTs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BB9525",
+          "w": 0.4585
+        },
+        {
+          "hex": "#866924",
+          "w": 0.3803
+        },
+        {
+          "hex": "#BAC0D0",
+          "w": 0.1612
+        }
+      ]
+    },
+    {
+      "id": "h3OO04IDPug",
+      "small": "https://images.unsplash.com/photo-1630873711387-c8835df3c1f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630873711387-c8835df3c1f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkb29yJTIwbG9jayUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE3Mjc4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LgI4w;_N?v%f-pozogofjus:bbf+",
+      "color": "#8c5940",
+      "alt": "brown wooden door with gray steel handle",
+      "author": "Lucas Santos",
+      "authorUrl": "https://unsplash.com/@_staticvoid?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-door-with-gray-steel-handle-h3OO04IDPug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#804E3B",
+          "w": 0.4198
+        },
+        {
+          "hex": "#A4755A",
+          "w": 0.3359
+        },
+        {
+          "hex": "#D9DCD4",
+          "w": 0.2444
+        }
+      ]
+    },
+    {
+      "id": "zFy6fOPZEu0",
+      "small": "https://images.unsplash.com/photo-1579728866437-6397f3d89ec3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1579728866437-6397f3d89ec3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3652,
+      "height": 2608,
+      "blurHash": "LHFFQ?vL9Fxa0xOEtRozDORiWAWC",
+      "color": "#8c5959",
+      "alt": "silver and gold round coins",
+      "author": "Samantha Lam",
+      "authorUrl": "https://unsplash.com/@contradirony?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/silver-and-gold-round-coins-zFy6fOPZEu0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8E6366",
+          "w": 0.4588
+        },
+        {
+          "hex": "#AEB2BD",
+          "w": 0.3164
+        },
+        {
+          "hex": "#534649",
+          "w": 0.2248
+        }
+      ]
+    },
+    {
+      "id": "7BhTfoKsheQ",
+      "small": "https://images.unsplash.com/photo-1553386323-60698d6f7325?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1553386323-60698d6f7325?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5433,
+      "height": 3622,
+      "blurHash": "L7D+uS?b4:-:jYIVjZWB0KM{RkbI",
+      "color": "#262626",
+      "alt": "brass-colored skeleton key lot",
+      "author": "Jason D",
+      "authorUrl": "https://unsplash.com/@jasondeblooisphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brass-colored-skeleton-key-lot-7BhTfoKsheQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7F7469",
+          "w": 0.3865
+        },
+        {
+          "hex": "#594E44",
+          "w": 0.3445
+        },
+        {
+          "hex": "#AFA398",
+          "w": 0.269
+        }
+      ]
+    },
+    {
+      "id": "Dt5uJkuoSIk",
+      "small": "https://images.unsplash.com/photo-1571600136066-4b261af20a24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571600136066-4b261af20a24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5724,
+      "height": 3816,
+      "blurHash": "L5B3c@AbIAIA~WIps:n$4oRPx]xu",
+      "color": "#595959",
+      "alt": "gray key",
+      "author": "Andre William",
+      "authorUrl": "https://unsplash.com/@andrewilliam?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-key-Dt5uJkuoSIk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5B514A",
+          "w": 0.4351
+        },
+        {
+          "hex": "#6E6158",
+          "w": 0.3827
+        },
+        {
+          "hex": "#433931",
+          "w": 0.1822
+        }
+      ]
+    },
+    {
+      "id": "R1zjgb4uFIY",
+      "small": "https://images.unsplash.com/photo-1707430374875-7e9267017bf6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707430374875-7e9267017bf6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmFzcyUyMGtleXMlMjB3b3JrYmVuY2h8ZW58MXwwfHx8MTc5MjE3Mjc5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5000,
+      "height": 4000,
+      "blurHash": "L66u#8%h8{v{H;V?tRfkH=e-ozR-",
+      "color": "#265973",
+      "alt": "a bunch of keys sitting on top of a blue surface",
+      "author": "Jason D",
+      "authorUrl": "https://unsplash.com/@jasondeblooisphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-keys-sitting-on-top-of-a-blue-surface-R1zjgb4uFIY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#475249",
+          "w": 0.3844
+        },
+        {
+          "hex": "#0D3E59",
+          "w": 0.3196
+        },
+        {
+          "hex": "#397390",
+          "w": 0.296
+        }
+      ]
+    },
+    {
+      "id": "PxiAc1aElFQ",
+      "small": "https://images.unsplash.com/photo-1643804926339-e94f0a655185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643804926339-e94f0a655185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LMEexu0MRPxt^iI;V@s:w[t7RkWB",
+      "color": "#a68c73",
+      "alt": "a bunch of keys sitting on top of a wooden table",
+      "author": "Filip Szalbot",
+      "authorUrl": "https://unsplash.com/@fess0?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-keys-sitting-on-top-of-a-wooden-table-PxiAc1aElFQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#736757",
+          "w": 0.3551
+        },
+        {
+          "hex": "#B09575",
+          "w": 0.3408
+        },
+        {
+          "hex": "#514232",
+          "w": 0.3041
+        }
+      ]
+    },
+    {
+      "id": "y5N2HDwagVw",
+      "small": "https://images.unsplash.com/photo-1575908539614-ff89490f4a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1575908539614-ff89490f4a78?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3821,
+      "height": 3024,
+      "blurHash": "LBQ0jqxu?cxv9Zj[Rjj[~qj[9EV@",
+      "color": "#f3f3f3",
+      "alt": "three silver keys",
+      "author": "Jozsef Hocza",
+      "authorUrl": "https://unsplash.com/@hocza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/three-silver-keys-y5N2HDwagVw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E6EBEE",
+          "w": 1
+        }
+      ]
+    },
+    {
+      "id": "Nel8STCcWy8",
+      "small": "https://images.unsplash.com/photo-1562770584-eaf50b017307?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562770584-eaf50b017307?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3269,
+      "height": 1894,
+      "blurHash": "L75rSrHqElnNayWCoLs:D%oz%LRk",
+      "color": "#262626",
+      "alt": "gray key",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-key-Nel8STCcWy8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181B17",
+          "w": 0.4962
+        },
+        {
+          "hex": "#222F31",
+          "w": 0.2642
+        },
+        {
+          "hex": "#2E474E",
+          "w": 0.2395
+        }
+      ]
+    },
+    {
+      "id": "-o90yRQoXAM",
+      "small": "https://images.unsplash.com/photo-1634979149798-e9a118734e93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1634979149798-e9a118734e93?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsb2Nrc21pdGglMjBjdXR0aW5nJTIwa2V5c3xlbnwxfDB8fHwxNzkyMTcyNzk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4728,
+      "height": 3156,
+      "blurHash": "LE7-Tgs:0KE1NHRj%2t7D%Rj-;xt",
+      "color": "#0c2626",
+      "alt": "a close up of a key on a table",
+      "author": "rc.xyz NFT gallery",
+      "authorUrl": "https://unsplash.com/@moneyphotos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-key-on-a-table--o90yRQoXAM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#09131A",
+          "w": 0.769
+        },
+        {
+          "hex": "#353E44",
+          "w": 0.1474
+        },
+        {
+          "hex": "#85766F",
+          "w": 0.0835
+        }
+      ]
+    }
+  ]
+}

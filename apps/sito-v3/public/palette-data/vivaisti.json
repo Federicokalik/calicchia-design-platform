@@ -1,0 +1,335 @@
+{
+  "slug": "vivaisti",
+  "queries": [
+    "plant nursery greenhouse",
+    "potted plants nursery",
+    "seedling trays greenhouse"
+  ],
+  "generatedAt": "2026-10-16T17:48:13.135Z",
+  "photos": [
+    {
+      "id": "lrQmvqmYVPw",
+      "small": "https://images.unsplash.com/photo-1688314418997-6917d32d703f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1688314418997-6917d32d703f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LRKkl^-7EkxW%Loer^xD1hJUS2W;",
+      "color": "#f35926",
+      "alt": "a bunch of flowers that are in a garden",
+      "author": "snake v.",
+      "authorUrl": "https://unsplash.com/@pilssken?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-flowers-that-are-in-a-garden-lrQmvqmYVPw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EB5433",
+          "w": 0.3774
+        },
+        {
+          "hex": "#964D2D",
+          "w": 0.3551
+        },
+        {
+          "hex": "#432C14",
+          "w": 0.2675
+        }
+      ]
+    },
+    {
+      "id": "_S8UGWX_G6k",
+      "small": "https://images.unsplash.com/photo-1624568845978-d7a80d20af47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624568845978-d7a80d20af47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LCF=%B~Bi$-;9G%LXPbq4nNFR%ag",
+      "color": "#a6a68c",
+      "alt": "green and white flower plants",
+      "author": "Maria Stewart",
+      "authorUrl": "https://unsplash.com/@mariatakesphotos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-white-flower-plants-_S8UGWX_G6k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F886F",
+          "w": 0.4286
+        },
+        {
+          "hex": "#B8B5A9",
+          "w": 0.2982
+        },
+        {
+          "hex": "#635742",
+          "w": 0.2731
+        }
+      ]
+    },
+    {
+      "id": "b_dfAAW-k0s",
+      "small": "https://images.unsplash.com/photo-1653842647992-b584fb66b362?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1653842647992-b584fb66b362?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L5C$+A_M9bIn.7no$*s-9aNGx[xI",
+      "color": "#404026",
+      "alt": "rows of headstones in a field of green plants",
+      "author": "Rachel Clark",
+      "authorUrl": "https://unsplash.com/@rachedda?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-headstones-in-a-field-of-green-plants-b_dfAAW-k0s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#635829",
+          "w": 0.3949
+        },
+        {
+          "hex": "#807641",
+          "w": 0.3548
+        },
+        {
+          "hex": "#433915",
+          "w": 0.2503
+        }
+      ]
+    },
+    {
+      "id": "vFSn6mhXRJM",
+      "small": "https://images.unsplash.com/photo-1653842648072-a1beef80c4aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1653842648072-a1beef80c4aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwbGFudCUyMG51cnNlcnklMjBncmVlbmhvdXNlfGVufDF8MHx8fDE3OTIxNzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L4Cs$dH^4ax.-:xuD,RU4WDmyBJP",
+      "color": "#262626",
+      "alt": "a bunch of plants that are in some pots",
+      "author": "Rachel Clark",
+      "authorUrl": "https://unsplash.com/@rachedda?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-plants-that-are-in-some-pots-vFSn6mhXRJM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7E8938",
+          "w": 0.425
+        },
+        {
+          "hex": "#5F641F",
+          "w": 0.3391
+        },
+        {
+          "hex": "#3D3817",
+          "w": 0.2359
+        }
+      ]
+    },
+    {
+      "id": "bRIsFBstncI",
+      "small": "https://images.unsplash.com/photo-1775681150189-0c76d017d869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775681150189-0c76d017d869?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LwH{7tW.IVoe_NM{RjWA%hWCofWU",
+      "color": "#f3f3f3",
+      "alt": "Seedlings growing on shelves in a greenhouse",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/seedlings-growing-on-shelves-in-a-greenhouse-bRIsFBstncI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E9EB",
+          "w": 0.3777
+        },
+        {
+          "hex": "#111112",
+          "w": 0.3558
+        },
+        {
+          "hex": "#9DAC8E",
+          "w": 0.2665
+        }
+      ]
+    },
+    {
+      "id": "FMeyLuiUdMw",
+      "small": "https://images.unsplash.com/photo-1775681150219-b3d45dcd03f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775681150219-b3d45dcd03f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LiHoE+%LaykC?^kWkCoe?bofj@fQ",
+      "color": "#d9d9d9",
+      "alt": "Rows of potted plants inside a greenhouse",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-potted-plants-inside-a-greenhouse-FMeyLuiUdMw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9C8862",
+          "w": 0.4134
+        },
+        {
+          "hex": "#CFD7CF",
+          "w": 0.3475
+        },
+        {
+          "hex": "#5D592C",
+          "w": 0.2391
+        }
+      ]
+    },
+    {
+      "id": "py_UeLe--9E",
+      "small": "https://images.unsplash.com/photo-1752401961634-3c0f9eee70db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1752401961634-3c0f9eee70db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGF5$|^+RPou~o^+rxjX?F-:j]IV",
+      "color": "#404026",
+      "alt": "A vibrant garden display with colorful flowers",
+      "author": "Luba Glazunova",
+      "authorUrl": "https://unsplash.com/@l_glazunova?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-vibrant-garden-display-with-colorful-flowers-py_UeLe--9E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#877C74",
+          "w": 0.4707
+        },
+        {
+          "hex": "#5C533E",
+          "w": 0.3674
+        },
+        {
+          "hex": "#D4C6B1",
+          "w": 0.1619
+        }
+      ]
+    },
+    {
+      "id": "JuXvWh--sMw",
+      "small": "https://images.unsplash.com/photo-1752401967034-db75e9f62ae6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1752401967034-db75e9f62ae6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxwb3R0ZWQlMjBwbGFudHMlMjBudXJzZXJ5fGVufDF8MHx8fDE3OTIxNzI4ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5416,
+      "height": 3812,
+      "blurHash": "L5E2j,mKxTRf4WMy={-WVYoH%M-q",
+      "color": "#735940",
+      "alt": "There are various succulents displayed on a ground",
+      "author": "Luba Glazunova",
+      "authorUrl": "https://unsplash.com/@l_glazunova?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/there-are-various-succulents-displayed-on-a-ground-JuXvWh--sMw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6D5631",
+          "w": 0.419
+        },
+        {
+          "hex": "#857649",
+          "w": 0.3866
+        },
+        {
+          "hex": "#4B361A",
+          "w": 0.1944
+        }
+      ]
+    },
+    {
+      "id": "KQMLfA8L5Os",
+      "small": "https://images.unsplash.com/photo-1624905918163-bd455354cfed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624905918163-bd455354cfed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2670,
+      "blurHash": "LKD0S#~X%4x[^+?a%Le??c-=%Mt7",
+      "color": "#404026",
+      "alt": "green and brown leaves on gray steel rack",
+      "author": "Zoe Richardson",
+      "authorUrl": "https://unsplash.com/@farmsteadphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-brown-leaves-on-gray-steel-rack-KQMLfA8L5Os?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C623F",
+          "w": 0.4189
+        },
+        {
+          "hex": "#7D8954",
+          "w": 0.3445
+        },
+        {
+          "hex": "#3E392D",
+          "w": 0.2366
+        }
+      ]
+    },
+    {
+      "id": "H0iAXFekiWo",
+      "small": "https://images.unsplash.com/photo-1587316807833-7008b6d63a4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587316807833-7008b6d63a4e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LPF$98#WX4%L~pnjIos;56EMInM|",
+      "color": "#595940",
+      "alt": "person holding green plant on black plastic pot",
+      "author": "Zoe Richardson",
+      "authorUrl": "https://unsplash.com/@farmsteadphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-green-plant-on-black-plastic-pot-H0iAXFekiWo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5F5B4F",
+          "w": 0.4328
+        },
+        {
+          "hex": "#363029",
+          "w": 0.3403
+        },
+        {
+          "hex": "#E0CDB4",
+          "w": 0.2269
+        }
+      ]
+    },
+    {
+      "id": "YAIr7N0GyFM",
+      "small": "https://images.unsplash.com/photo-1601144698750-c9b8560bc1fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1601144698750-c9b8560bc1fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3696,
+      "height": 2448,
+      "blurHash": "LNE3qm%Lt6xu_Kx[x[tQV_t6t7t8",
+      "color": "#262626",
+      "alt": "green plant on black pot",
+      "author": "Amber",
+      "authorUrl": "https://unsplash.com/@lifeinspired?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-plant-on-black-pot-YAIr7N0GyFM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#83945D",
+          "w": 0.3584
+        },
+        {
+          "hex": "#192221",
+          "w": 0.3389
+        },
+        {
+          "hex": "#AAC46B",
+          "w": 0.3027
+        }
+      ]
+    },
+    {
+      "id": "F47-qMQzVwQ",
+      "small": "https://images.unsplash.com/photo-1550968378-2b662fc67c26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1550968378-2b662fc67c26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZWVkbGluZyUyMHRyYXlzJTIwZ3JlZW5ob3VzZXxlbnwxfDB8fHwxNzkyMTcyODg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 2592,
+      "blurHash": "LKG]294TD,xu%P9F4n%M-qjwIA%M",
+      "color": "#262626",
+      "alt": "green vegetables",
+      "author": "Harits Mustya Pratama",
+      "authorUrl": "https://unsplash.com/@haritsmustya?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-vegetables-F47-qMQzVwQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A1A787",
+          "w": 0.3745
+        },
+        {
+          "hex": "#727551",
+          "w": 0.3558
+        },
+        {
+          "hex": "#36332E",
+          "w": 0.2698
+        }
+      ]
+    }
+  ]
+}

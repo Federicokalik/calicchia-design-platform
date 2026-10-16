@@ -1,0 +1,335 @@
+{
+  "slug": "installatori-fotovoltaico",
+  "queries": [
+    "solar panels rooftop",
+    "solar installer roof",
+    "solar panels sunlight"
+  ],
+  "generatedAt": "2026-10-16T17:46:52.582Z",
+  "photos": [
+    {
+      "id": "VNIjztzKF_U",
+      "small": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761472823286-9f6093ed6663?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LqGlepWCaeWY?wofWCt6V?s;bHoe",
+      "color": "#a6a6c0",
+      "alt": "Rainbow over a suburban neighborhood with solar panels",
+      "author": "Lara John",
+      "authorUrl": "https://unsplash.com/@lara_j?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rainbow-over-a-suburban-neighborhood-with-solar-panels-VNIjztzKF_U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B2BECD",
+          "w": 0.4133
+        },
+        {
+          "hex": "#674E3F",
+          "w": 0.3154
+        },
+        {
+          "hex": "#92A3B8",
+          "w": 0.2713
+        }
+      ]
+    },
+    {
+      "id": "g-SFUAYL0MY",
+      "small": "https://images.unsplash.com/photo-1726866492047-7f9516558c6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1726866492047-7f9516558c6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5129,
+      "height": 3190,
+      "blurHash": "LLH2WYfiNGRjI8xaozfk00xtbHR*",
+      "color": "#d9d9d9",
+      "alt": "An aerial view of a parking lot with lots of solar panels",
+      "author": "Bernd 📷 Dittrich",
+      "authorUrl": "https://unsplash.com/@hdbernd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-aerial-view-of-a-parking-lot-with-lots-of-solar-panels-g-SFUAYL0MY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6D6A67",
+          "w": 0.5467
+        },
+        {
+          "hex": "#DDDCD8",
+          "w": 0.2684
+        },
+        {
+          "hex": "#9A9995",
+          "w": 0.1848
+        }
+      ]
+    },
+    {
+      "id": "O6t9RkVkjNE",
+      "small": "https://images.unsplash.com/photo-1726795867801-63c0a37b80c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1726795867801-63c0a37b80c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5419,
+      "height": 3640,
+      "blurHash": "L7F$Y39a4m9GIqWBWCoL_1WBoeoe",
+      "color": "#737373",
+      "alt": "A large array of blue and white tiles",
+      "author": "Bernd 📷 Dittrich",
+      "authorUrl": "https://unsplash.com/@hdbernd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-array-of-blue-and-white-tiles-O6t9RkVkjNE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#66686A",
+          "w": 0.5799
+        },
+        {
+          "hex": "#7E7F7C",
+          "w": 0.226
+        },
+        {
+          "hex": "#DBDBCE",
+          "w": 0.1941
+        }
+      ]
+    },
+    {
+      "id": "Scaj0T40nFI",
+      "small": "https://images.unsplash.com/photo-1635424824849-1b09bdcc55b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635424824849-1b09bdcc55b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb2xhciUyMHBhbmVscyUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3MjgwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4898,
+      "height": 3265,
+      "blurHash": "L|HV-rWZWFj].TR-a$j[ozWBaeae",
+      "color": "#c0d9f3",
+      "alt": "a man working on a roof with a power drill",
+      "author": "Raze Solar",
+      "authorUrl": "https://unsplash.com/@razesolar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-working-on-a-roof-with-a-power-drill-Scaj0T40nFI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3DFF2",
+          "w": 0.4962
+        },
+        {
+          "hex": "#6E5840",
+          "w": 0.3831
+        },
+        {
+          "hex": "#9C9585",
+          "w": 0.1207
+        }
+      ]
+    },
+    {
+      "id": "wmaP3Tl80ww",
+      "small": "https://images.unsplash.com/photo-1624397640148-949b1732bb0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624397640148-949b1732bb0a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LsALF:nft8p0Oxj=WsWsjFR.WBjD",
+      "color": "#408cf3",
+      "alt": "A person installing a black solar panel on a shingled roof under blue sky",
+      "author": "Bill Mead",
+      "authorUrl": "https://unsplash.com/@wmmead?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-installing-solar-panel-on-roof-wmaP3Tl80ww?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2E85E2",
+          "w": 0.5658
+        },
+        {
+          "hex": "#515760",
+          "w": 0.2596
+        },
+        {
+          "hex": "#A69D92",
+          "w": 0.1746
+        }
+      ]
+    },
+    {
+      "id": "Q8V1EEvnJgk",
+      "small": "https://images.unsplash.com/photo-1660330589257-813305a4a383?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660330589257-813305a4a383?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5600,
+      "height": 3150,
+      "blurHash": "LUC%gnSkNHjXFkt8ahfix_V?V@of",
+      "color": "#4073c0",
+      "alt": "a man on a roof",
+      "author": "Raze Solar",
+      "authorUrl": "https://unsplash.com/@razesolar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-on-a-roof-Q8V1EEvnJgk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7C746E",
+          "w": 0.4363
+        },
+        {
+          "hex": "#4884CE",
+          "w": 0.3314
+        },
+        {
+          "hex": "#272932",
+          "w": 0.2323
+        }
+      ]
+    },
+    {
+      "id": "Ja8t8nJN2I4",
+      "small": "https://images.unsplash.com/photo-1655300256335-beef51a914fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1655300256335-beef51a914fe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3936,
+      "height": 2216,
+      "blurHash": "LxGJK#%hbHaz.Tt8WXRitSRiV@WB",
+      "color": "#c0d9f3",
+      "alt": "a house with solar panels",
+      "author": "Watt A Lot",
+      "authorUrl": "https://unsplash.com/@wattalot?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-house-with-solar-panels-Ja8t8nJN2I4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#79869A",
+          "w": 0.446
+        },
+        {
+          "hex": "#BAD7F7",
+          "w": 0.3871
+        },
+        {
+          "hex": "#464F5B",
+          "w": 0.1669
+        }
+      ]
+    },
+    {
+      "id": "pIcseKMisrs",
+      "small": "https://images.unsplash.com/photo-1660330589243-4c640d878052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660330589243-4c640d878052?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb2xhciUyMGluc3RhbGxlciUyMHJvb2Z8ZW58MXwwfHx8MTc5MjE3MjgwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5600,
+      "height": 3150,
+      "blurHash": "LcB;CNRnR-s+F*j[ofaxWHaxaej]",
+      "color": "#4073c0",
+      "alt": "men on top of a roof",
+      "author": "Raze Solar",
+      "authorUrl": "https://unsplash.com/@razesolar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/men-on-top-of-a-roof-pIcseKMisrs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3978CA",
+          "w": 0.3922
+        },
+        {
+          "hex": "#7A6F66",
+          "w": 0.3449
+        },
+        {
+          "hex": "#1E1F25",
+          "w": 0.2629
+        }
+      ]
+    },
+    {
+      "id": "513dBrMJ_5w",
+      "small": "https://images.unsplash.com/photo-1509391366360-2e959784a276?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1509391366360-2e959784a276?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6144,
+      "height": 4088,
+      "blurHash": "LaCjY3IBj[t7.AIVa#ofjDRkR+of",
+      "color": "#595926",
+      "alt": "solar panels on green field",
+      "author": "American Public Power Association",
+      "authorUrl": "https://unsplash.com/@publicpowerorg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/solar-panels-on-green-field-513dBrMJ_5w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4C514E",
+          "w": 0.4815
+        },
+        {
+          "hex": "#6D7E96",
+          "w": 0.2942
+        },
+        {
+          "hex": "#AEB8C3",
+          "w": 0.2243
+        }
+      ]
+    },
+    {
+      "id": "XGAZzyLzn18",
+      "small": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3280,
+      "blurHash": "LoB64DWCWBkCNOa}jEj@QkWBofj[",
+      "color": "#73c0f3",
+      "alt": "solar panel under blue sky",
+      "author": "American Public Power Association",
+      "authorUrl": "https://unsplash.com/@publicpowerorg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/solar-panel-under-blue-sky-XGAZzyLzn18?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#46A3E2",
+          "w": 0.3468
+        },
+        {
+          "hex": "#85CAF6",
+          "w": 0.3368
+        },
+        {
+          "hex": "#0D7CC0",
+          "w": 0.3164
+        }
+      ]
+    },
+    {
+      "id": "omfN1pW-n2Y",
+      "small": "https://images.unsplash.com/photo-1658298775754-5839ffd434cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1658298775754-5839ffd434cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LwAe:hWEWBj[yZRjayjtMxaeoff6",
+      "color": "#8cc0d9",
+      "alt": "solar panels on a roof",
+      "author": "Soren H",
+      "authorUrl": "https://unsplash.com/@hosoren?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/solar-panels-on-a-roof-omfN1pW-n2Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A8CCA",
+          "w": 0.4191
+        },
+        {
+          "hex": "#93BAE3",
+          "w": 0.3518
+        },
+        {
+          "hex": "#2B4A73",
+          "w": 0.2291
+        }
+      ]
+    },
+    {
+      "id": "fm5_vCUa-Bc",
+      "small": "https://images.unsplash.com/photo-1509389928833-fe62aef36deb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1509389928833-fe62aef36deb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzb2xhciUyMHBhbmVscyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTIxNzI4MDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2100,
+      "height": 1500,
+      "blurHash": "LMDmm--:r:S5u6WCbIoe%MM{R+oJ",
+      "color": "#8c7359",
+      "alt": "solar panel boards on brown ground",
+      "author": "American Public Power Association",
+      "authorUrl": "https://unsplash.com/@publicpowerorg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/solar-panel-boards-on-brown-ground-fm5_vCUa-Bc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7D878F",
+          "w": 0.4981
+        },
+        {
+          "hex": "#5D6466",
+          "w": 0.2677
+        },
+        {
+          "hex": "#A1C1D5",
+          "w": 0.2342
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,327 @@
+{
+  "slug": "muratori",
+  "queries": [
+    "bricklayer laying bricks",
+    "brick wall mortar",
+    "masonry trowel bricks"
+  ],
+  "generatedAt": "2026-10-16T17:47:39.058Z",
+  "photos": [
+    {
+      "id": "i6V6diaf71A",
+      "small": "https://images.unsplash.com/photo-1701850009190-2859ba2aeea6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1701850009190-2859ba2aeea6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDEyA0.8Vts+~CpI%3-p9FM{kVs:",
+      "color": "#737373",
+      "alt": "a person is putting cement on a brick wall",
+      "author": "Solømen",
+      "authorUrl": "https://unsplash.com/@solomen?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-is-putting-cement-on-a-brick-wall-i6V6diaf71A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#877E7A",
+          "w": 0.5028
+        },
+        {
+          "hex": "#5B504A",
+          "w": 0.2791
+        },
+        {
+          "hex": "#BBB2AF",
+          "w": 0.2182
+        }
+      ]
+    },
+    {
+      "id": "oL3cNYKY3yU",
+      "small": "https://images.unsplash.com/photo-1617720356637-6264c1c0b4bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1617720356637-6264c1c0b4bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2992,
+      "height": 2000,
+      "blurHash": "LpIrKNtO%gM|_Noyx]jb^,aOt7bb",
+      "color": "#f3f3f3",
+      "alt": "man in yellow t-shirt and blue denim jeans climbing on brown concrete wall during daytime",
+      "author": "Oladipo Adejumo",
+      "authorUrl": "https://unsplash.com/@eniyato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-yellow-t-shirt-and-blue-denim-jeans-climbing-on-brown-concrete-wall-during-daytime-oL3cNYKY3yU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#646253",
+          "w": 0.3578
+        },
+        {
+          "hex": "#A5AB72",
+          "w": 0.3304
+        },
+        {
+          "hex": "#313425",
+          "w": 0.3118
+        }
+      ]
+    },
+    {
+      "id": "wASesy3WhK8",
+      "small": "https://images.unsplash.com/photo-1691762523478-88af52155f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1691762523478-88af52155f5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4778,
+      "height": 3185,
+      "blurHash": "LDIper_210-Ut2IpM|$$^hV@IVEk",
+      "color": "#c08c73",
+      "alt": "a stack of bricks sitting on top of each other",
+      "author": "Steve A Johnson",
+      "authorUrl": "https://unsplash.com/@steve_j?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-stack-of-bricks-sitting-on-top-of-each-other-wASesy3WhK8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C8926B",
+          "w": 0.4159
+        },
+        {
+          "hex": "#AF6B51",
+          "w": 0.3249
+        },
+        {
+          "hex": "#83483D",
+          "w": 0.2592
+        }
+      ]
+    },
+    {
+      "id": "A8KeditXu5w",
+      "small": "https://images.unsplash.com/photo-1706715201231-b703e7df3395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706715201231-b703e7df3395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlja2xheWVyJTIwbGF5aW5nJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3240,
+      "blurHash": "LHH1M558=wjE~9S~rrRnWFs,ENoe",
+      "color": "#8c7340",
+      "alt": "a group of people standing around a pile of bricks",
+      "author": "Swastik Arora",
+      "authorUrl": "https://unsplash.com/@swastikarora?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-standing-around-a-pile-of-bricks-A8KeditXu5w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#997241",
+          "w": 0.3788
+        },
+        {
+          "hex": "#BD8D57",
+          "w": 0.363
+        },
+        {
+          "hex": "#725028",
+          "w": 0.2582
+        }
+      ]
+    },
+    {
+      "id": "XEsx2NVpqWY",
+      "small": "https://images.unsplash.com/photo-1495578942200-c5f5d2137def?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1495578942200-c5f5d2137def?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4696,
+      "height": 3115,
+      "blurHash": "L1C;qn~qOFJB^,=|s.bbEMays:s:",
+      "color": "#734026",
+      "alt": "red bricks wall",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-bricks-wall-XEsx2NVpqWY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#743A2E",
+          "w": 0.8734
+        },
+        {
+          "hex": "#895047",
+          "w": 0.1266
+        }
+      ]
+    },
+    {
+      "id": "KREQ7J7nsNw",
+      "small": "https://images.unsplash.com/photo-1585750629386-33bdc1431574?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585750629386-33bdc1431574?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "L4HAeL^jIp%L#*R*ofof10NbNvRk",
+      "color": "#8c5940",
+      "alt": "brown and black brick wall",
+      "author": "Gareth David",
+      "authorUrl": "https://unsplash.com/@gareth_david?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-black-brick-wall-KREQ7J7nsNw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5776C",
+          "w": 0.5622
+        },
+        {
+          "hex": "#916258",
+          "w": 0.2728
+        },
+        {
+          "hex": "#7E5047",
+          "w": 0.165
+        }
+      ]
+    },
+    {
+      "id": "t4DuoDHjxrQ",
+      "small": "https://images.unsplash.com/photo-1520758594221-872948699332?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1520758594221-872948699332?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5941,
+      "height": 3961,
+      "blurHash": "L3J~T3=x0L$*0eR*kCae9FoKbHjZ",
+      "color": "#c07373",
+      "alt": "brown concrete brick",
+      "author": "Bernard Hermant",
+      "authorUrl": "https://unsplash.com/@bernardhermant?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-concrete-brick-t4DuoDHjxrQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A97666",
+          "w": 0.8288
+        },
+        {
+          "hex": "#9C6455",
+          "w": 0.1712
+        }
+      ]
+    },
+    {
+      "id": "rhaS97NhnHg",
+      "small": "https://images.unsplash.com/photo-1547056961-3c25e9140b05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1547056961-3c25e9140b05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmljayUyMHdhbGwlMjBtb3J0YXJ8ZW58MXwwfHx8MTc5MjE3Mjg1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDK[i0t60}aeAaxGoebbEMNbs:of",
+      "color": "#c05940",
+      "alt": "brown brick wall",
+      "author": "Waldemar Brandt",
+      "authorUrl": "https://unsplash.com/@waldemarbrandt67w?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-brick-wall-rhaS97NhnHg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BF6F62",
+          "w": 0.4152
+        },
+        {
+          "hex": "#DB8B7B",
+          "w": 0.3708
+        },
+        {
+          "hex": "#A05144",
+          "w": 0.214
+        }
+      ]
+    },
+    {
+      "id": "2_3JKm2BPNs",
+      "small": "https://images.unsplash.com/photo-1490478965551-2364145dccb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1490478965551-2364145dccb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "L4N8:D~B%2-T57R*ofkW5RWURPt7",
+      "color": "#d9a68c",
+      "alt": "red brick wall during daytime",
+      "author": "Hayden Mills",
+      "authorUrl": "https://unsplash.com/@haydmills?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-brick-wall-during-daytime-2_3JKm2BPNs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D49C82",
+          "w": 0.4395
+        },
+        {
+          "hex": "#C28C73",
+          "w": 0.2898
+        },
+        {
+          "hex": "#E3AD93",
+          "w": 0.2707
+        }
+      ]
+    },
+    {
+      "id": "O-rCs_m4dvM",
+      "small": "https://images.unsplash.com/photo-1629608564457-5d74829a9e14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1629608564457-5d74829a9e14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2334,
+      "blurHash": "LEKbs*$%NbNH}?flxZxZj[ayoeoL",
+      "color": "#a67340",
+      "alt": "a pile of bricks sitting next to each other",
+      "author": "Lluvia Morales",
+      "authorUrl": "https://unsplash.com/@hi_lluvia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-bricks-sitting-next-to-each-other-O-rCs_m4dvM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A97650",
+          "w": 0.5621
+        },
+        {
+          "hex": "#8A5936",
+          "w": 0.2783
+        },
+        {
+          "hex": "#CC9A6E",
+          "w": 0.1597
+        }
+      ]
+    },
+    {
+      "id": "WhM5NJ11sFk",
+      "small": "https://images.unsplash.com/photo-1513508111811-9c87fccad7d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1513508111811-9c87fccad7d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3456,
+      "height": 2304,
+      "blurHash": "L7GtKe~DIoIU^kt7NGX8tRe.-;oz",
+      "color": "#8c5959",
+      "alt": "brown brick wall closeup photography",
+      "author": "Ansh Bhagania",
+      "authorUrl": "https://unsplash.com/@thelens_artist?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-brick-wall-closeup-photography-WhM5NJ11sFk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#884F4C",
+          "w": 0.4372
+        },
+        {
+          "hex": "#A26F6B",
+          "w": 0.3232
+        },
+        {
+          "hex": "#B9908B",
+          "w": 0.2397
+        }
+      ]
+    },
+    {
+      "id": "91QTKM9OfSY",
+      "small": "https://images.unsplash.com/photo-1517056338492-cb43f18f72a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1517056338492-cb43f18f72a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxtYXNvbnJ5JTIwdHJvd2VsJTIwYnJpY2tzfGVufDF8MHx8fDE3OTIxNzI4NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3456,
+      "height": 2304,
+      "blurHash": "L8KbEu-9IV$e}s$%xDslt6xZRkX7",
+      "color": "#c05940",
+      "alt": "orange brick wall",
+      "author": "Khadeeja Yasser",
+      "authorUrl": "https://unsplash.com/@k_yasser?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/orange-brick-wall-91QTKM9OfSY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B86548",
+          "w": 0.7552
+        },
+        {
+          "hex": "#9D5539",
+          "w": 0.1676
+        },
+        {
+          "hex": "#D6845E",
+          "w": 0.0771
+        }
+      ]
+    }
+  ]
+}

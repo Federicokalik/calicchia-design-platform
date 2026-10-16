@@ -1,0 +1,331 @@
+{
+  "slug": "piastrellisti",
+  "queries": [
+    "ceramic tile installation",
+    "bathroom wall tiles",
+    "tile grout close up"
+  ],
+  "generatedAt": "2026-10-16T17:47:46.566Z",
+  "photos": [
+    {
+      "id": "AtUTJiKaFxo",
+      "small": "https://images.unsplash.com/photo-1522061541612-28ef361a3045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1522061541612-28ef361a3045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4202,
+      "height": 2749,
+      "blurHash": "LLMahT~qD*afRQaej]j[xuM|t7WB",
+      "color": "#f3f3f3",
+      "alt": "green and white tile flooring",
+      "author": "Alex Block",
+      "authorUrl": "https://unsplash.com/@alexblock?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-white-tile-flooring-AtUTJiKaFxo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBEDE7",
+          "w": 0.4988
+        },
+        {
+          "hex": "#BDBFB9",
+          "w": 0.3139
+        },
+        {
+          "hex": "#868986",
+          "w": 0.1874
+        }
+      ]
+    },
+    {
+      "id": "8RXUZg5h_QA",
+      "small": "https://images.unsplash.com/photo-1656646523907-97b094c7e63a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1656646523907-97b094c7e63a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2880,
+      "height": 1920,
+      "blurHash": "LDJkP}bw8_IA0KM|V@xu-;%MtRt7",
+      "color": "#a6a6a6",
+      "alt": "a white tiled floor",
+      "author": "Point3D Commercial Imaging Ltd.",
+      "authorUrl": "https://unsplash.com/@3dottawa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-tiled-floor-8RXUZg5h_QA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AEA8A0",
+          "w": 0.4566
+        },
+        {
+          "hex": "#9A9289",
+          "w": 0.3037
+        },
+        {
+          "hex": "#C3BDB6",
+          "w": 0.2397
+        }
+      ]
+    },
+    {
+      "id": "NUNCMVc6Bwg",
+      "small": "https://images.unsplash.com/photo-1560005627-c96e0aeb6eaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1560005627-c96e0aeb6eaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2845,
+      "blurHash": "LGK^yy01kXtS~p4mD%%L9GR+%MWF",
+      "color": "#8c7373",
+      "alt": "brown and beige floral tiles",
+      "author": "Klavs Krumins",
+      "authorUrl": "https://unsplash.com/@paklavs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-beige-floral-tiles-NUNCMVc6Bwg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C4B8AC",
+          "w": 0.38
+        },
+        {
+          "hex": "#9F8B7E",
+          "w": 0.3379
+        },
+        {
+          "hex": "#E6DFD8",
+          "w": 0.2821
+        }
+      ]
+    },
+    {
+      "id": "VVEAyeiavdw",
+      "small": "https://images.unsplash.com/photo-1636200534256-c08268363482?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1636200534256-c08268363482?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjZXJhbWljJTIwdGlsZSUyMGluc3RhbGxhdGlvbnxlbnwxfDB8fHwxNzkyMTcyODU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4128,
+      "height": 3096,
+      "blurHash": "LEJ[kyDijEV?Q*%hNfWB9FNGx]x^",
+      "color": "#c0d9d9",
+      "alt": "a hammer sitting on top of a pile of tile",
+      "author": "burin rujjanapan",
+      "authorUrl": "https://unsplash.com/@thaiall?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hammer-sitting-on-top-of-a-pile-of-tile-VVEAyeiavdw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A4AAAB",
+          "w": 0.4499
+        },
+        {
+          "hex": "#C4D1D8",
+          "w": 0.4231
+        },
+        {
+          "hex": "#808382",
+          "w": 0.127
+        }
+      ]
+    },
+    {
+      "id": "Aac7IlKnYX8",
+      "small": "https://images.unsplash.com/photo-1620626011761-996317b8d101?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1620626011761-996317b8d101?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LELE7.jEi^0K?b-pt6M|D%IUfh-q",
+      "color": "#c0c0c0",
+      "alt": "white ceramic bathtub near green potted plant",
+      "author": "Steven Ungermann",
+      "authorUrl": "https://unsplash.com/@steveungermann?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ceramic-bathtub-near-green-potted-plant-Aac7IlKnYX8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6AFAB",
+          "w": 0.4618
+        },
+        {
+          "hex": "#D2CBC7",
+          "w": 0.3892
+        },
+        {
+          "hex": "#888581",
+          "w": 0.149
+        }
+      ]
+    },
+    {
+      "id": "FPim6ZLM6fc",
+      "small": "https://images.unsplash.com/photo-1682888818696-906287d759f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1682888818696-906287d759f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LWLN-}E0%NM{~qj[E1WBM{j@xukC",
+      "color": "#c0c0c0",
+      "alt": "a bathroom with marble counter tops and green cabinets",
+      "author": "Zac Gudakov",
+      "authorUrl": "https://unsplash.com/@zacgudakov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bathroom-with-marble-counter-tops-and-green-cabinets-FPim6ZLM6fc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C7C5BF",
+          "w": 0.5031
+        },
+        {
+          "hex": "#DDDBD8",
+          "w": 0.269
+        },
+        {
+          "hex": "#4B5A46",
+          "w": 0.2279
+        }
+      ]
+    },
+    {
+      "id": "FiKcg6EMneY",
+      "small": "https://images.unsplash.com/photo-1682888818704-6dc91e9d7532?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1682888818704-6dc91e9d7532?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LVKxC%%gxvxa~WIUWq%Mjst7WBj[",
+      "color": "#c0c0c0",
+      "alt": "a bathroom with green cabinets and a marble shower",
+      "author": "Zac Gudakov",
+      "authorUrl": "https://unsplash.com/@zacgudakov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bathroom-with-green-cabinets-and-a-marble-shower-FiKcg6EMneY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B8BBBA",
+          "w": 0.4536
+        },
+        {
+          "hex": "#D9D8D5",
+          "w": 0.3115
+        },
+        {
+          "hex": "#4B6251",
+          "w": 0.2349
+        }
+      ]
+    },
+    {
+      "id": "SWSY0NEicIs",
+      "small": "https://images.unsplash.com/photo-1667550177753-52b318cd4d40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1667550177753-52b318cd4d40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYXRocm9vbSUyMHdhbGwlMjB0aWxlc3xlbnwxfDB8fHwxNzkyMTcyODYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 1688,
+      "blurHash": "LMI5Mb%MWA9Z~q%MWBIoxut7xvxu",
+      "color": "#c0c0c0",
+      "alt": "a bathroom with a tub sink and toilet",
+      "author": "Medea Dzagnidze",
+      "authorUrl": "https://unsplash.com/@medeadza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bathroom-with-a-tub-sink-and-toilet-SWSY0NEicIs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1CFD1",
+          "w": 0.3575
+        },
+        {
+          "hex": "#423734",
+          "w": 0.3251
+        },
+        {
+          "hex": "#A6A1A4",
+          "w": 0.3174
+        }
+      ]
+    },
+    {
+      "id": "2Xmc6tf6nkk",
+      "small": "https://images.unsplash.com/photo-1572596116404-98f227c01ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1572596116404-98f227c01ac1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2828,
+      "height": 2121,
+      "blurHash": "L7J*-g009bM{N6Rit6V@ShogR%of",
+      "color": "#a6a6a6",
+      "alt": "a close up view of a white ceramic object",
+      "author": "Art Lasovsky",
+      "authorUrl": "https://unsplash.com/@artlasovsky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-view-of-a-white-ceramic-object-2Xmc6tf6nkk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B7BBBB",
+          "w": 0.5667
+        },
+        {
+          "hex": "#A2A7A7",
+          "w": 0.3337
+        },
+        {
+          "hex": "#858A8C",
+          "w": 0.0996
+        }
+      ]
+    },
+    {
+      "id": "Qzib41bLy7Y",
+      "small": "https://images.unsplash.com/photo-1731362658723-cac1146da9dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1731362658723-cac1146da9dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 4472,
+      "blurHash": "LAJkZQ?w4;%MWAbIRiofIXofWBWB",
+      "color": "#a6a6a6",
+      "alt": "A close up of a white tiled wall",
+      "author": "Jor Eg",
+      "authorUrl": "https://unsplash.com/@jor0e?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-white-tiled-wall-Qzib41bLy7Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AEA9A7",
+          "w": 0.8754
+        },
+        {
+          "hex": "#BEBAB4",
+          "w": 0.1246
+        }
+      ]
+    },
+    {
+      "id": "5iTIT-ja6dE",
+      "small": "https://images.unsplash.com/photo-1639133283847-6d0ebd4f9948?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1639133283847-6d0ebd4f9948?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4652,
+      "height": 3882,
+      "blurHash": "LQH.Qb~qIot7_3IUj[xux]M{j[a|",
+      "color": "#c0c0c0",
+      "alt": "a close up of a wall with a pattern on it",
+      "author": "Franck V.",
+      "authorUrl": "https://unsplash.com/@possessedphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-wall-with-a-pattern-on-it-5iTIT-ja6dE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1BFBF",
+          "w": 0.5067
+        },
+        {
+          "hex": "#8C8987",
+          "w": 0.2978
+        },
+        {
+          "hex": "#595652",
+          "w": 0.1955
+        }
+      ]
+    },
+    {
+      "id": "lRKu4By9AKA",
+      "small": "https://images.unsplash.com/photo-1717018431261-5415cc1c7173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717018431261-5415cc1c7173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0aWxlJTIwZ3JvdXQlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxNzI4NjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8064,
+      "height": 6048,
+      "blurHash": "LBFOZI%N?^%M?bM|t7smK%$*t8o}",
+      "color": "#734026",
+      "alt": "a close up of a tiled wall with different colors",
+      "author": "Joshua Kettle",
+      "authorUrl": "https://unsplash.com/@joshuakettle?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-tiled-wall-with-different-colors-lRKu4By9AKA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#92786C",
+          "w": 0.3679
+        },
+        {
+          "hex": "#835440",
+          "w": 0.3494
+        },
+        {
+          "hex": "#6B381D",
+          "w": 0.2827
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "serramentisti",
+  "queries": [
+    "wooden window frames",
+    "glass patio doors",
+    "aluminum window frames"
+  ],
+  "generatedAt": "2026-10-16T17:46:44.526Z",
+  "photos": [
+    {
+      "id": "nWJTDaZSWzw",
+      "small": "https://images.unsplash.com/photo-1687898324870-c72b871002ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687898324870-c72b871002ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9920,
+      "height": 6612,
+      "blurHash": "LBF5ji8w0KNb9tkVNGt79ZS2%MRP",
+      "color": "#262626",
+      "alt": "a pile of old wooden boards stacked on top of each other",
+      "author": "Eric Prouzet",
+      "authorUrl": "https://unsplash.com/@eprouzet?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-old-wooden-boards-stacked-on-top-of-each-other-nWJTDaZSWzw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#907F7E",
+          "w": 0.4173
+        },
+        {
+          "hex": "#5E5151",
+          "w": 0.3042
+        },
+        {
+          "hex": "#B8AEB0",
+          "w": 0.2785
+        }
+      ]
+    },
+    {
+      "id": "aq9JrdezRxA",
+      "small": "https://images.unsplash.com/photo-1763621104490-10f7fe3f0843?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763621104490-10f7fe3f0843?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4912,
+      "height": 2760,
+      "blurHash": "LBEV.onA8{MK0KJO?cRi-rIUO9E2",
+      "color": "#26260c",
+      "alt": "Green wooden house with yellow window frames and berries",
+      "author": "Murat Ts.",
+      "authorUrl": "https://unsplash.com/@murtts?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-wooden-house-with-yellow-window-frames-and-berries-aq9JrdezRxA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#55763C",
+          "w": 0.4981
+        },
+        {
+          "hex": "#364517",
+          "w": 0.2635
+        },
+        {
+          "hex": "#A99466",
+          "w": 0.2384
+        }
+      ]
+    },
+    {
+      "id": "sLrHMlm_xKw",
+      "small": "https://images.unsplash.com/photo-1776516171177-e51be9e02700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1776516171177-e51be9e02700?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2432,
+      "blurHash": "LRCjLlt88_Rj_Nt7IURj%2j?o#WB",
+      "color": "#262626",
+      "alt": "Green wooden building with a balcony and windows",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-wooden-building-with-a-balcony-and-windows-sLrHMlm_xKw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#202825",
+          "w": 0.3896
+        },
+        {
+          "hex": "#4E5757",
+          "w": 0.3399
+        },
+        {
+          "hex": "#8A979E",
+          "w": 0.2705
+        }
+      ]
+    },
+    {
+      "id": "IPYeoe8UXmQ",
+      "small": "https://images.unsplash.com/photo-1786908893389-6449f227a72a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786908893389-6449f227a72a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjB3aW5kb3clMjBmcmFtZXN8ZW58MXwwfHx8MTc5MjE3Mjc5Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4328,
+      "height": 2904,
+      "blurHash": "LeD^7rIVE3t8yGado#og9Ixu%MR+",
+      "color": "#f3f3f3",
+      "alt": "A small white house with blue decorative window frames behind a blue fence",
+      "author": "Boris Busorgin",
+      "authorUrl": "https://unsplash.com/@borbus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-house-with-blue-window-frames-IPYeoe8UXmQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#48556C",
+          "w": 0.3741
+        },
+        {
+          "hex": "#6795D5",
+          "w": 0.3514
+        },
+        {
+          "hex": "#222325",
+          "w": 0.2745
+        }
+      ]
+    },
+    {
+      "id": "bqxXFQ8s2Y4",
+      "small": "https://images.unsplash.com/photo-1721902024148-287438cf3e05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721902024148-287438cf3e05?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDGl6Z-m~7E8G0WnxUR.]|bI4;n}",
+      "color": "#a6a68c",
+      "alt": "An empty room with a large sliding glass door",
+      "author": "Lisa Anna",
+      "authorUrl": "https://unsplash.com/@lisaanna195?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-empty-room-with-a-large-sliding-glass-door-bqxXFQ8s2Y4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A4998E",
+          "w": 0.702
+        },
+        {
+          "hex": "#656869",
+          "w": 0.1718
+        },
+        {
+          "hex": "#1E4162",
+          "w": 0.1261
+        }
+      ]
+    },
+    {
+      "id": "QmiR1c9azJY",
+      "small": "https://images.unsplash.com/photo-1702724758750-9ff8d50f02e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1702724758750-9ff8d50f02e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "L7D^DsD%4mi^tR?cofITt7M_WBWX",
+      "color": "#738c8c",
+      "alt": "an empty room with a sliding glass door",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-empty-room-with-a-sliding-glass-door-QmiR1c9azJY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#798791",
+          "w": 0.5421
+        },
+        {
+          "hex": "#9BA7B5",
+          "w": 0.2891
+        },
+        {
+          "hex": "#5B6F77",
+          "w": 0.1688
+        }
+      ]
+    },
+    {
+      "id": "iQ9_1cVOwiQ",
+      "small": "https://images.unsplash.com/photo-1565261949232-3fcc78206c0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1565261949232-3fcc78206c0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LxLq8~%Moft7?wofW=kDIqjZj[bb",
+      "color": "#a68c59",
+      "alt": "photo of sliding door",
+      "author": "Adam Elwan",
+      "authorUrl": "https://unsplash.com/@aielwan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/photo-of-sliding-door-iQ9_1cVOwiQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A07F55",
+          "w": 0.3986
+        },
+        {
+          "hex": "#E6E4DC",
+          "w": 0.3648
+        },
+        {
+          "hex": "#C7C3B9",
+          "w": 0.2366
+        }
+      ]
+    },
+    {
+      "id": "U21ujbfwuIg",
+      "small": "https://images.unsplash.com/photo-1768791211104-7f1c5474f07d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768791211104-7f1c5474f07d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnbGFzcyUyMHBhdGlvJTIwZG9vcnN8ZW58MXwwfHx8MTc5MjE3MjgwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LNDT00%MeSs.?bRjnNoI~pkCi^oI",
+      "color": "#8c8c8c",
+      "alt": "Modern building with outdoor seating and string lights",
+      "author": "Jay lee",
+      "authorUrl": "https://unsplash.com/@cronos449?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-building-with-outdoor-seating-and-string-lights-U21ujbfwuIg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#555756",
+          "w": 0.4382
+        },
+        {
+          "hex": "#878A88",
+          "w": 0.3317
+        },
+        {
+          "hex": "#262829",
+          "w": 0.23
+        }
+      ]
+    },
+    {
+      "id": "8yT8YL-x8CQ",
+      "small": "https://images.unsplash.com/photo-1522195491553-dbda973beac4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1522195491553-dbda973beac4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LQCHWoadi^IA*0ROV?ae4nofaexa",
+      "color": "#0c2626",
+      "alt": "A view of a city street with palm trees through a window",
+      "author": "Alina Grubnyak",
+      "authorUrl": "https://unsplash.com/@alinnnaaaa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/city-street-view-through-window-8yT8YL-x8CQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#90C8D9",
+          "w": 0.3892
+        },
+        {
+          "hex": "#38474B",
+          "w": 0.3155
+        },
+        {
+          "hex": "#0C1519",
+          "w": 0.2953
+        }
+      ]
+    },
+    {
+      "id": "Tz1pnDPfp6Q",
+      "small": "https://images.unsplash.com/photo-1543431615-92427c3973a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1543431615-92427c3973a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LJF6nJ-59F.T9wDhV?Nx8^IAtln$",
+      "color": "#404040",
+      "alt": "white door near glass mirror during daytime",
+      "author": "Jacek Dylag",
+      "authorUrl": "https://unsplash.com/@dylu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-door-near-glass-mirror-during-daytime-Tz1pnDPfp6Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5A5D55",
+          "w": 0.405
+        },
+        {
+          "hex": "#909895",
+          "w": 0.3642
+        },
+        {
+          "hex": "#B2E2F0",
+          "w": 0.2308
+        }
+      ]
+    },
+    {
+      "id": "16hlvscuHeE",
+      "small": "https://images.unsplash.com/photo-1736593319421-250e17bb2f11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1736593319421-250e17bb2f11?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LHE3I*xb9FDiXMogNHV[4TRQoJxu",
+      "color": "#595940",
+      "alt": "A bed sitting under three windows in a bedroom",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bed-sitting-under-three-windows-in-a-bedroom-16hlvscuHeE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C5541",
+          "w": 0.6495
+        },
+        {
+          "hex": "#899773",
+          "w": 0.2012
+        },
+        {
+          "hex": "#D5DCCE",
+          "w": 0.1493
+        }
+      ]
+    },
+    {
+      "id": "Dsms8jjMVQo",
+      "small": "https://images.unsplash.com/photo-1564327481459-8bcd5561cf86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1564327481459-8bcd5561cf86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbHVtaW51bSUyMHdpbmRvdyUyMGZyYW1lc3xlbnwxfDB8fHwxNzkyMTcyODAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LMDTLv.7IU%g~o%MRkj?t6j?WBax",
+      "color": "#264040",
+      "alt": "grey metal framed glass window closed",
+      "author": "Lai Man Nung",
+      "authorUrl": "https://unsplash.com/@kirklai?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grey-metal-framed-glass-window-closed-Dsms8jjMVQo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#49636D",
+          "w": 0.4024
+        },
+        {
+          "hex": "#1C363C",
+          "w": 0.3335
+        },
+        {
+          "hex": "#8A9492",
+          "w": 0.2642
+        }
+      ]
+    }
+  ]
+}

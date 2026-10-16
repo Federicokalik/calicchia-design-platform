@@ -1,0 +1,327 @@
+{
+  "slug": "installatori-climatizzatori",
+  "queries": [
+    "white air conditioner",
+    "air conditioning vents",
+    "outdoor condenser unit"
+  ],
+  "generatedAt": "2026-10-16T17:47:04.511Z",
+  "photos": [
+    {
+      "id": "I17-Jb0zuwQ",
+      "small": "https://images.unsplash.com/photo-1782981617015-aed9159180c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782981617015-aed9159180c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4912,
+      "height": 3264,
+      "blurHash": "LvOp*|t7Rjof~qWBofayM{WBj[ay",
+      "color": "#f3f3f3",
+      "alt": "Monochromatic building with a zigzag checkerboard pattern and windows",
+      "author": "la la",
+      "authorUrl": "https://unsplash.com/@crj79827982?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/monochromatic-building-with-a-zigzag-checkerboard-pattern-and-windows-I17-Jb0zuwQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F3F3",
+          "w": 0.6197
+        },
+        {
+          "hex": "#BEBEBE",
+          "w": 0.2231
+        },
+        {
+          "hex": "#929292",
+          "w": 0.1572
+        }
+      ]
+    },
+    {
+      "id": "OGV99Jhhvro",
+      "small": "https://images.unsplash.com/photo-1610680081567-d4aa2d34cd63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1610680081567-d4aa2d34cd63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5936,
+      "height": 3943,
+      "blurHash": "L5Q].--;~qt7-;j[ofj[_3WB4nt7",
+      "color": "#f3f3f3",
+      "alt": "white and gray air vent",
+      "author": "Khara Woods",
+      "authorUrl": "https://unsplash.com/@kharaoke?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-gray-air-vent-OGV99Jhhvro?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBEDEE",
+          "w": 1
+        }
+      ]
+    },
+    {
+      "id": "7OJs6An6H3Y",
+      "small": "https://images.unsplash.com/photo-1760962438883-e9c0116ebf59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760962438883-e9c0116ebf59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5776,
+      "height": 4336,
+      "blurHash": "LHHLl1WBD%t7%MofWBt700Rjt7t7",
+      "color": "#737373",
+      "alt": "Apartment building balconies with air conditioning units",
+      "author": "Eliezer Muller",
+      "authorUrl": "https://unsplash.com/@eliiezer?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/apartment-building-balconies-with-air-conditioning-units-7OJs6An6H3Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5F5F5F",
+          "w": 0.3447
+        },
+        {
+          "hex": "#989898",
+          "w": 0.337
+        },
+        {
+          "hex": "#D3D3D3",
+          "w": 0.3183
+        }
+      ]
+    },
+    {
+      "id": "VtJK7RdfBpM",
+      "small": "https://images.unsplash.com/photo-1777177966843-77c64a83d9a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777177966843-77c64a83d9a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aGl0ZSUyMGFpciUyMGNvbmRpdGlvbmVyfGVufDF8MHx8fDE3OTIxNzI4MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L2CsT;O]kW9a=_4o-pRkIVIB?a4:",
+      "color": "#8c8c73",
+      "alt": "Apartment building exterior with many air conditioning units",
+      "author": "Danish Prakash",
+      "authorUrl": "https://unsplash.com/@danishprakash?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/apartment-building-exterior-with-many-air-conditioning-units-VtJK7RdfBpM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#968D72",
+          "w": 0.3994
+        },
+        {
+          "hex": "#676556",
+          "w": 0.3078
+        },
+        {
+          "hex": "#3F3C30",
+          "w": 0.2928
+        }
+      ]
+    },
+    {
+      "id": "yZmHFF-g-W0",
+      "small": "https://images.unsplash.com/photo-1615309662243-70f6df917b59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1615309662243-70f6df917b59?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2963,
+      "blurHash": "LGGIcb0K00-pxYRkIos:_NI9M_Mx",
+      "color": "#404040",
+      "alt": "black and gray metal pipe",
+      "author": "Compagnons",
+      "authorUrl": "https://unsplash.com/@sigmund?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-metal-pipe-yZmHFF-g-W0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C4C2C4",
+          "w": 0.4185
+        },
+        {
+          "hex": "#3C3635",
+          "w": 0.3092
+        },
+        {
+          "hex": "#665C59",
+          "w": 0.2724
+        }
+      ]
+    },
+    {
+      "id": "zx7VUt9txos",
+      "small": "https://images.unsplash.com/photo-1614447413576-b346c641c128?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614447413576-b346c641c128?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6621,
+      "height": 4419,
+      "blurHash": "L2I=Mqxu_3M{004n%May?bxuRj%M",
+      "color": "#a6a6a6",
+      "alt": "grayscale photo of round metal frame",
+      "author": "Elimende Inagella",
+      "authorUrl": "https://unsplash.com/@elimendeinagella?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-round-metal-frame-zx7VUt9txos?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9D9D9D",
+          "w": 0.5693
+        },
+        {
+          "hex": "#B9B9B9",
+          "w": 0.3688
+        },
+        {
+          "hex": "#343434",
+          "w": 0.0619
+        }
+      ]
+    },
+    {
+      "id": "ItJsBJlf5Qw",
+      "small": "https://images.unsplash.com/photo-1757219525975-03b5984bc6e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1757219525975-03b5984bc6e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LOHxmLRi%L-;01t7a#RjtSayRjRj",
+      "color": "#737373",
+      "alt": "An air conditioning unit mounted on a wall",
+      "author": "Andrianto Cahyono Putro",
+      "authorUrl": "https://unsplash.com/@andrianspace?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-air-conditioning-unit-mounted-on-a-wall-ItJsBJlf5Qw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A49E98",
+          "w": 0.3897
+        },
+        {
+          "hex": "#7B797A",
+          "w": 0.3267
+        },
+        {
+          "hex": "#C2BDBC",
+          "w": 0.2835
+        }
+      ]
+    },
+    {
+      "id": "IUuVB1nLsQU",
+      "small": "https://images.unsplash.com/photo-1635604866833-70844856de75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635604866833-70844856de75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhaXIlMjBjb25kaXRpb25pbmclMjB2ZW50c3xlbnwxfDB8fHwxNzkyMTcyODE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3406,
+      "height": 2404,
+      "blurHash": "LMF=H$o#xVSi}YV?j[kWRNrqWXt7",
+      "color": "#26400c",
+      "alt": "a building with a bunch of pipes on the side of it",
+      "author": "Vadim Babenko",
+      "authorUrl": "https://unsplash.com/@vakerbv?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-building-with-a-bunch-of-pipes-on-the-side-of-it-IUuVB1nLsQU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A66C4A",
+          "w": 0.4411
+        },
+        {
+          "hex": "#514B23",
+          "w": 0.3024
+        },
+        {
+          "hex": "#B1B5B8",
+          "w": 0.2564
+        }
+      ]
+    },
+    {
+      "id": "Al9lWh3XKGM",
+      "small": "https://images.unsplash.com/photo-1758798157512-f0a864c696c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758798157512-f0a864c696c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5362,
+      "height": 3649,
+      "blurHash": "LDC6V[^+9G4otRtRxtIU0LRP%1xu",
+      "color": "#262626",
+      "alt": "Close-up of an air conditioning unit on a sunny day",
+      "author": "Khanh Do",
+      "authorUrl": "https://unsplash.com/@donguyenkhanhs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-an-air-conditioning-unit-on-a-sunny-day-Al9lWh3XKGM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#251F16",
+          "w": 0.449
+        },
+        {
+          "hex": "#564631",
+          "w": 0.3918
+        },
+        {
+          "hex": "#988266",
+          "w": 0.1592
+        }
+      ]
+    },
+    {
+      "id": "6LW2zctJ8TU",
+      "small": "https://images.unsplash.com/photo-1659205212610-b941b3048b68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659205212610-b941b3048b68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "L7FY}HIU0KERzND$$,_2#bxaTBMy",
+      "color": "#595940",
+      "alt": "a bird feeder in a garden",
+      "author": "Meg Jenson",
+      "authorUrl": "https://unsplash.com/@megjenson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bird-feeder-in-a-garden-6LW2zctJ8TU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6C6E48",
+          "w": 0.3863
+        },
+        {
+          "hex": "#909865",
+          "w": 0.3859
+        },
+        {
+          "hex": "#BBC996",
+          "w": 0.2278
+        }
+      ]
+    },
+    {
+      "id": "SiRHTf1t-xg",
+      "small": "https://images.unsplash.com/photo-1766201926837-6b8cb0383de8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766201926837-6b8cb0383de8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LUI}|lxt4.Rj~qbHIUWBt7aet7ay",
+      "color": "#f3f3f3",
+      "alt": "Air conditioner unit below large windows with green curtains",
+      "author": "雙 film",
+      "authorUrl": "https://unsplash.com/@film002?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/air-conditioner-unit-below-large-windows-with-green-curtains-SiRHTf1t-xg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFE0D7",
+          "w": 0.3738
+        },
+        {
+          "hex": "#9DA591",
+          "w": 0.32
+        },
+        {
+          "hex": "#61755F",
+          "w": 0.3062
+        }
+      ]
+    },
+    {
+      "id": "nAnDxXWEatk",
+      "small": "https://images.unsplash.com/photo-1760243875486-0a362cab9021?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760243875486-0a362cab9021?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxvdXRkb29yJTIwY29uZGVuc2VyJTIwdW5pdHxlbnwxfDB8fHwxNzkyMTcyODIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3264,
+      "blurHash": "LOEMRMacjFRQ0fRPadj]-?aJRPoz",
+      "color": "#260c0c",
+      "alt": "Corrugated metal wall with overgrown plants and air conditioner",
+      "author": "PJH",
+      "authorUrl": "https://unsplash.com/@dokae?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/corrugated-metal-wall-with-overgrown-plants-and-air-conditioner-nAnDxXWEatk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A8ABA8",
+          "w": 0.4133
+        },
+        {
+          "hex": "#84815D",
+          "w": 0.3618
+        },
+        {
+          "hex": "#1F1912",
+          "w": 0.2249
+        }
+      ]
+    }
+  ]
+}
