@@ -1,0 +1,254 @@
+{
+  "slug": "interior-designer",
+  "queries": [
+    "interior design moodboard",
+    "fabric swatches table",
+    "material samples desk"
+  ],
+  "generatedAt": "2026-10-16T16:26:54.541Z",
+  "photos": [
+    {
+      "id": "D6mlvnGbAVg",
+      "small": "https://images.unsplash.com/photo-1664638413302-d1ca29ac885b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1664638413302-d1ca29ac885b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5402,
+      "height": 3929,
+      "blurHash": "LIOM]OpI-p-oIs8^x]_39a8_-oyD",
+      "color": "#f3f3f3",
+      "alt": "A person holding an orange material sample over a white desk with design swatches",
+      "author": "Mohammad Lotfian",
+      "authorUrl": "https://unsplash.com/@mohalotfi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-orange-material-sample-D6mlvnGbAVg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F2F1F0",
+          "w": 0.5909
+        },
+        {
+          "hex": "#CAAB97",
+          "w": 0.2451
+        },
+        {
+          "hex": "#635A51",
+          "w": 0.164
+        }
+      ]
+    },
+    {
+      "id": "reMQWo7TTxw",
+      "small": "https://images.unsplash.com/photo-1664638413509-6aa486866f9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1664638413509-6aa486866f9a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4041,
+      "blurHash": "LOMtElxF0e.9,nMx%g-;9Z.8nhI9",
+      "color": "#f3f3f3",
+      "alt": "a person writing on paper",
+      "author": "Mohammad Lotfian",
+      "authorUrl": "https://unsplash.com/@mohalotfi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-writing-on-paper-reMQWo7TTxw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EEECEB",
+          "w": 0.4844
+        },
+        {
+          "hex": "#CFAE97",
+          "w": 0.3545
+        },
+        {
+          "hex": "#71665F",
+          "w": 0.1611
+        }
+      ]
+    },
+    {
+      "id": "DGRixfygKvE",
+      "small": "https://images.unsplash.com/photo-1664638413739-d571590cb51b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1664638413739-d571590cb51b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LZM@TBDiN_.8Z}s.XS9F00WERjRP",
+      "color": "#f3f3f3",
+      "alt": "a person making a puzzle",
+      "author": "Mohammad Lotfian",
+      "authorUrl": "https://unsplash.com/@mohalotfi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-making-a-puzzle-DGRixfygKvE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F0EEED",
+          "w": 0.5386
+        },
+        {
+          "hex": "#CCB5A2",
+          "w": 0.2424
+        },
+        {
+          "hex": "#1A191D",
+          "w": 0.219
+        }
+      ]
+    },
+    {
+      "id": "ZLivh64UZt8",
+      "small": "https://images.unsplash.com/photo-1601464723270-8867f191b1bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1601464723270-8867f191b1bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnRlcmlvciUyMGRlc2lnbiUyMG1vb2Rib2FyZHxlbnwxfDB8fHwxNzkyMTY4MDA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LKGbu68^4.IVH?xv%MR%NeM{%Lxu",
+      "color": "#c0c0c0",
+      "alt": "white ceramic bowl on brown wooden tray",
+      "author": "Karolina De Costa",
+      "authorUrl": "https://unsplash.com/@rowespurling?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ceramic-bowl-on-brown-wooden-tray-ZLivh64UZt8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBBBB7",
+          "w": 0.532
+        },
+        {
+          "hex": "#888278",
+          "w": 0.2608
+        },
+        {
+          "hex": "#181713",
+          "w": 0.2072
+        }
+      ]
+    },
+    {
+      "id": "wcdHwuFJfn4",
+      "small": "https://images.unsplash.com/photo-1624516268152-1e48624026ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624516268152-1e48624026ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LdJP}KwiE2Ro~8%0jJWY9b%JT0oH",
+      "color": "#402626",
+      "alt": "multi colored striped textile on brown wooden table",
+      "author": "Ekaterina Grosheva",
+      "authorUrl": "https://unsplash.com/@kitkat93?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/multi-colored-striped-textile-on-brown-wooden-table-wcdHwuFJfn4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E7B750",
+          "w": 0.407
+        },
+        {
+          "hex": "#501A3D",
+          "w": 0.3292
+        },
+        {
+          "hex": "#CF4D38",
+          "w": 0.2638
+        }
+      ]
+    },
+    {
+      "id": "Z2QUe2JxT9U",
+      "small": "https://images.unsplash.com/photo-1702838646785-1e2379337b12?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1702838646785-1e2379337b12?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LxMQn#_4%g%KjZWpoMj[WBjYa}a|",
+      "color": "#f3f3f3",
+      "alt": "a close up of a number of different colored papers",
+      "author": "Pierre Bamin",
+      "authorUrl": "https://unsplash.com/@bamin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-number-of-different-colored-papers-Z2QUe2JxT9U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A59995",
+          "w": 0.3889
+        },
+        {
+          "hex": "#C4BFC1",
+          "w": 0.3746
+        },
+        {
+          "hex": "#F4F6F6",
+          "w": 0.2365
+        }
+      ]
+    },
+    {
+      "id": "SLipZqBFLHU",
+      "small": "https://images.unsplash.com/photo-1633655442427-91c6b69561b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633655442427-91c6b69561b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3091,
+      "height": 2048,
+      "blurHash": "LJHw[V3X}rxs0$kD-UJ7rWK5W;s9",
+      "color": "#c07340",
+      "alt": "a close up of a mouse on a table",
+      "author": "Yasamine June",
+      "authorUrl": "https://unsplash.com/@yasamine?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-mouse-on-a-table-SLipZqBFLHU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#585D53",
+          "w": 0.4194
+        },
+        {
+          "hex": "#C4865C",
+          "w": 0.3808
+        },
+        {
+          "hex": "#272A14",
+          "w": 0.1998
+        }
+      ]
+    },
+    {
+      "id": "QebtabTb30Y",
+      "small": "https://images.unsplash.com/photo-1624022086093-5ca1868e3670?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624022086093-5ca1868e3670?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYWJyaWMlMjBzd2F0Y2hlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxNjgwMTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LSLp%L}8IUTdF:JPVtV[M$IWR7n5",
+      "color": "#d9d9d9",
+      "alt": "white red yellow and green papers",
+      "author": "Ekaterina Grosheva",
+      "authorUrl": "https://unsplash.com/@kitkat93?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-red-yellow-and-green-papers-QebtabTb30Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D2CE",
+          "w": 0.5094
+        },
+        {
+          "hex": "#C99788",
+          "w": 0.3322
+        },
+        {
+          "hex": "#9F4D67",
+          "w": 0.1584
+        }
+      ]
+    },
+    {
+      "id": "HWqjC6MJaWM",
+      "small": "https://images.unsplash.com/photo-1781888696890-3c4fa53cf98e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYXRlcmlhbCUyMHNhbXBsZXMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781888696890-3c4fa53cf98e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYXRlcmlhbCUyMHNhbXBsZXMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7600,
+      "height": 5069,
+      "blurHash": "LMHnQg01T0IUIUIVX8xto}NIg3kC",
+      "color": "#c0a68c",
+      "alt": "A woman organizing items on a desk with a laptop",
+      "author": "Jonathan Borba",
+      "authorUrl": "https://unsplash.com/@jonathanborba?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-organizing-items-on-a-desk-with-a-laptop-HWqjC6MJaWM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A5325",
+          "w": 0.3758
+        },
+        {
+          "hex": "#C9B097",
+          "w": 0.3401
+        },
+        {
+          "hex": "#A88769",
+          "w": 0.2841
+        }
+      ]
+    }
+  ]
+}

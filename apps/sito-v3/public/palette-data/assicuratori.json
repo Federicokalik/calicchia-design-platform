@@ -1,0 +1,331 @@
+{
+  "slug": "assicuratori",
+  "queries": [
+    "insurance documents desk",
+    "car keys paperwork",
+    "home front door"
+  ],
+  "generatedAt": "2026-10-16T16:27:19.166Z",
+  "photos": [
+    {
+      "id": "mCqi3MljC4E",
+      "small": "https://images.unsplash.com/photo-1637763723578-79a4ca9225f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1637763723578-79a4ca9225f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6032,
+      "height": 4021,
+      "blurHash": "LNQ0N;_4-;WBxvIA%N%MRPNGoz%M",
+      "color": "#f3f3f3",
+      "alt": "a magnifying glass sitting on top of a piece of paper",
+      "author": "Vlad Deep",
+      "authorUrl": "https://unsplash.com/@vladdeep?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-magnifying-glass-sitting-on-top-of-a-piece-of-paper-mCqi3MljC4E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F2EEEA",
+          "w": 0.77
+        },
+        {
+          "hex": "#C3B9AF",
+          "w": 0.1492
+        },
+        {
+          "hex": "#7C7168",
+          "w": 0.0808
+        }
+      ]
+    },
+    {
+      "id": "snNHKZ-mGfE",
+      "small": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHI=0=MvD%Rk~qaKD%x[xbozM{D%",
+      "color": "#c0c0c0",
+      "alt": "stacks of paper documents and file folders",
+      "author": "Wesley Tingey",
+      "authorUrl": "https://unsplash.com/@wesleyphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stacks-of-paper-documents-and-file-folders-snNHKZ-mGfE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A9A297",
+          "w": 0.424
+        },
+        {
+          "hex": "#CBC7C5",
+          "w": 0.3128
+        },
+        {
+          "hex": "#83745F",
+          "w": 0.2632
+        }
+      ]
+    },
+    {
+      "id": "ZH4FUYiaczY",
+      "small": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LQ9Q:ZRjIAs:Mwogt7WB8^ofx]WC",
+      "color": "#a6a6c0",
+      "alt": "a woman sitting at a table with lots of papers",
+      "author": "Dimitri Karastelev",
+      "authorUrl": "https://unsplash.com/@dkfra19?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-sitting-at-a-table-with-lots-of-papers-ZH4FUYiaczY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100F12",
+          "w": 0.371
+        },
+        {
+          "hex": "#010101",
+          "w": 0.321
+        },
+        {
+          "hex": "#92A0B4",
+          "w": 0.308
+        }
+      ]
+    },
+    {
+      "id": "spScdgWY-_c",
+      "small": "https://images.unsplash.com/photo-1631651693480-97f1132e333d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631651693480-97f1132e333d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnN1cmFuY2UlMjBkb2N1bWVudHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3576,
+      "height": 2384,
+      "blurHash": "LsMaIr4TIAIAt7ayV@t7IAayt7xu",
+      "color": "#f3f3f3",
+      "alt": "a wooden table topped with papers and a pen",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-papers-and-a-pen-spScdgWY-_c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8ECEF",
+          "w": 0.6624
+        },
+        {
+          "hex": "#803B19",
+          "w": 0.1977
+        },
+        {
+          "hex": "#511500",
+          "w": 0.1399
+        }
+      ]
+    },
+    {
+      "id": "0A_Yx4qwSb8",
+      "small": "https://images.unsplash.com/photo-1710006548781-eff5670376fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1710006548781-eff5670376fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LNQ9=xof~qRjIUWVRjxu~qj[4nof",
+      "color": "#f3f3f3",
+      "alt": "a car key with a remote control attached to it",
+      "author": "Barry A",
+      "authorUrl": "https://unsplash.com/@barryalbert24?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-car-key-with-a-remote-control-attached-to-it-0A_Yx4qwSb8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECECEC",
+          "w": 0.918
+        },
+        {
+          "hex": "#181516",
+          "w": 0.082
+        }
+      ]
+    },
+    {
+      "id": "fTh4nZFYi3E",
+      "small": "https://images.unsplash.com/photo-1585336261176-3e8d838e86e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585336261176-3e8d838e86e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LKGmf64n?^tR.8kVMxRPyDjuMdkC",
+      "color": "#a6c0c0",
+      "alt": "black and white smartphone on white table",
+      "author": "Liviu C.",
+      "authorUrl": "https://unsplash.com/@liviu_c?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-smartphone-on-white-table-fTh4nZFYi3E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2C6C6",
+          "w": 0.5123
+        },
+        {
+          "hex": "#85AEAF",
+          "w": 0.3946
+        },
+        {
+          "hex": "#070808",
+          "w": 0.0931
+        }
+      ]
+    },
+    {
+      "id": "EYS24QX2ERY",
+      "small": "https://images.unsplash.com/photo-1750558222639-3573a142508d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1750558222639-3573a142508d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 12000,
+      "height": 7998,
+      "blurHash": "LDECk3^,%2xt~UxWRit7t7kDR.WV",
+      "color": "#595959",
+      "alt": "A car key lies next to a notebook",
+      "author": "Prince Prajapati",
+      "authorUrl": "https://unsplash.com/@princeprajapati?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-car-key-lies-next-to-a-notebook-EYS24QX2ERY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#847F77",
+          "w": 0.4659
+        },
+        {
+          "hex": "#5C5957",
+          "w": 0.3596
+        },
+        {
+          "hex": "#A3A1A1",
+          "w": 0.1745
+        }
+      ]
+    },
+    {
+      "id": "iRBbm4baWGI",
+      "small": "https://images.unsplash.com/photo-1781429617883-a2035ce6310d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781429617883-a2035ce6310d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBrZXlzJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjgwMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "L868Nwoc4TR+Mvofo~WBD%Rj%Mxt",
+      "color": "#597373",
+      "alt": "Phone and car keys on a car trunk at sunset",
+      "author": "Ehsan Hashimi",
+      "authorUrl": "https://unsplash.com/@ehsan_fotograf?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/phone-and-car-keys-on-a-car-trunk-at-sunset-iRBbm4baWGI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070705",
+          "w": 0.5248
+        },
+        {
+          "hex": "#666D70",
+          "w": 0.2393
+        },
+        {
+          "hex": "#191A16",
+          "w": 0.2359
+        }
+      ]
+    },
+    {
+      "id": "y8pxowXGKTE",
+      "small": "https://images.unsplash.com/photo-1668911494256-becf9fea265b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668911494256-becf9fea265b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6718,
+      "height": 4479,
+      "blurHash": "LUGutEMxMxs+0Lx^x]ng_3RPxaRO",
+      "color": "#404040",
+      "alt": "a building with glass windows",
+      "author": "Point3D Commercial Imaging Ltd.",
+      "authorUrl": "https://unsplash.com/@3dottawa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-building-with-glass-windows-y8pxowXGKTE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A4A09D",
+          "w": 0.391
+        },
+        {
+          "hex": "#67625F",
+          "w": 0.3476
+        },
+        {
+          "hex": "#3A3331",
+          "w": 0.2614
+        }
+      ]
+    },
+    {
+      "id": "NfyeP5Bcvd8",
+      "small": "https://images.unsplash.com/photo-1771354959667-96360bf59eab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771354959667-96360bf59eab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3334,
+      "height": 2223,
+      "blurHash": "LMIhELRP0KM{?wIUMxRjR4tQx]WB",
+      "color": "#a6a68c",
+      "alt": "A cozy entryway with wooden stairs and a glass door",
+      "author": "Clay Banks",
+      "authorUrl": "https://unsplash.com/@claybanks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-cozy-entryway-with-wooden-stairs-and-a-glass-door-NfyeP5Bcvd8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADA191",
+          "w": 0.4119
+        },
+        {
+          "hex": "#8D7255",
+          "w": 0.366
+        },
+        {
+          "hex": "#D4CFC5",
+          "w": 0.2221
+        }
+      ]
+    },
+    {
+      "id": "5x_JYiq5PHk",
+      "small": "https://images.unsplash.com/photo-1765211744521-7c9d0c9299e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1765211744521-7c9d0c9299e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3004,
+      "height": 2304,
+      "blurHash": "LBDcXHtK.A9k~SRi9HD+4oIVRO%F",
+      "color": "#737359",
+      "alt": "Two colorful doors on brick houses with stairs",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-colorful-doors-on-brick-houses-with-stairs-5x_JYiq5PHk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6A6558",
+          "w": 0.4599
+        },
+        {
+          "hex": "#BABEA2",
+          "w": 0.2943
+        },
+        {
+          "hex": "#2B3137",
+          "w": 0.2458
+        }
+      ]
+    },
+    {
+      "id": "2U39E2DlBhA",
+      "small": "https://images.unsplash.com/photo-1646186067288-3a27c9afb66b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1646186067288-3a27c9afb66b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxob21lJTIwZnJvbnQlMjBkb29yfGVufDF8MHx8fDE3OTIxNjgwMzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3130,
+      "height": 2075,
+      "blurHash": "LQFPj2ne_N8_OSNFNFx]EME2M{%L",
+      "color": "#a6c0c0",
+      "alt": "a light that is on above a door",
+      "author": "Hannah Smith",
+      "authorUrl": "https://unsplash.com/@hannahcsmithcurio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-light-that-is-on-above-a-door-2U39E2DlBhA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6C2B4",
+          "w": 0.4011
+        },
+        {
+          "hex": "#768161",
+          "w": 0.3237
+        },
+        {
+          "hex": "#494335",
+          "w": 0.2752
+        }
+      ]
+    }
+  ]
+}

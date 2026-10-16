@@ -1,0 +1,335 @@
+{
+  "slug": "ingegneri",
+  "queries": [
+    "steel bridge structure",
+    "engineering drawings desk",
+    "industrial pipes interior"
+  ],
+  "generatedAt": "2026-10-16T16:26:48.262Z",
+  "photos": [
+    {
+      "id": "P_qvsF7Yodw",
+      "small": "https://images.unsplash.com/photo-1493476523860-a6de6ce1b0c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1493476523860-a6de6ce1b0c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "L6Aug8105TSz$#^3af5nEOoxs,NI",
+      "color": "#260c0c",
+      "alt": "Orange illuminated steel girders of Tokyo Tower against a dark night sky",
+      "author": "Alain Pham",
+      "authorUrl": "https://unsplash.com/@alain_pham?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/tokyo-tower-steel-girders-at-night-P_qvsF7Yodw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#120804",
+          "w": 0.5301
+        },
+        {
+          "hex": "#773C03",
+          "w": 0.2417
+        },
+        {
+          "hex": "#431C00",
+          "w": 0.2283
+        }
+      ]
+    },
+    {
+      "id": "uQR1eEZBMYY",
+      "small": "https://images.unsplash.com/photo-1609627016501-b862497c7294?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1609627016501-b862497c7294?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L99%kzH=.9E20L%gjD-oE3ozROxa",
+      "color": "#262626",
+      "alt": "yellow metal tower with yellow metal frame",
+      "author": "Luca Upper",
+      "authorUrl": "https://unsplash.com/@lucaupper?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-metal-tower-with-yellow-metal-frame-uQR1eEZBMYY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#373330",
+          "w": 0.3754
+        },
+        {
+          "hex": "#0B0A0A",
+          "w": 0.3732
+        },
+        {
+          "hex": "#6A6156",
+          "w": 0.2514
+        }
+      ]
+    },
+    {
+      "id": "i741VqH36mQ",
+      "small": "https://images.unsplash.com/photo-1700170554599-50c74065ecdd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700170554599-50c74065ecdd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "L+Jb8LxZRkf+_NjYWCa}bcaxa}fP",
+      "color": "#d9d9d9",
+      "alt": "a bridge that is over a body of water",
+      "author": "Rowan Heuvel",
+      "authorUrl": "https://unsplash.com/@insolitus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bridge-that-is-over-a-body-of-water-i741VqH36mQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6D7DA",
+          "w": 0.5025
+        },
+        {
+          "hex": "#98928C",
+          "w": 0.2596
+        },
+        {
+          "hex": "#57524C",
+          "w": 0.2379
+        }
+      ]
+    },
+    {
+      "id": "poPTI5BszZg",
+      "small": "https://images.unsplash.com/photo-1415697676195-edc2ab6d40ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1415697676195-edc2ab6d40ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGVlbCUyMGJyaWRnZSUyMHN0cnVjdHVyZXxlbnwxfDB8fHwxNzkyMTY4MDAxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2048,
+      "blurHash": "LWDJ|}xUo#s+cIs*%Ms,o$t7WXs:",
+      "color": "#a6a6a6",
+      "alt": "grey suspension bridge",
+      "author": "Ta-Ching Chen",
+      "authorUrl": "https://unsplash.com/@life1347?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grey-suspension-bridge-poPTI5BszZg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#61768A",
+          "w": 0.4574
+        },
+        {
+          "hex": "#9B9FA4",
+          "w": 0.2789
+        },
+        {
+          "hex": "#435059",
+          "w": 0.2637
+        }
+      ]
+    },
+    {
+      "id": "WDCE0T4khsE",
+      "small": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581092160562-40aa08e78837?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LZMH7Dt7_3IToHD%D%t74mWBx]bI",
+      "color": "#d9d9d9",
+      "alt": "A person using a caliper to measure technical engineering drawings on a desk",
+      "author": "ThisisEngineering",
+      "authorUrl": "https://unsplash.com/@thisisengineering?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/engineer-measuring-technical-drawings-on-desk-WDCE0T4khsE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD6D8",
+          "w": 0.6852
+        },
+        {
+          "hex": "#241C18",
+          "w": 0.1985
+        },
+        {
+          "hex": "#6C6C68",
+          "w": 0.1164
+        }
+      ]
+    },
+    {
+      "id": "fteR0e2BzKo",
+      "small": "https://images.unsplash.com/photo-1542621334-a254cf47733d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1542621334-a254cf47733d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LCIX~v_4EMR*4T8_x]tS-;o0D$bc",
+      "color": "#8c8c8c",
+      "alt": "brown pencil on white printing paper",
+      "author": "Sven Mieke",
+      "authorUrl": "https://unsplash.com/@sxoxm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-pencil-on-white-printing-paper-fteR0e2BzKo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#908D8C",
+          "w": 0.4345
+        },
+        {
+          "hex": "#A4A2A2",
+          "w": 0.4044
+        },
+        {
+          "hex": "#D9DADB",
+          "w": 0.1611
+        }
+      ]
+    },
+    {
+      "id": "Yn8D5B8C-eY",
+      "small": "https://images.unsplash.com/photo-1603901622056-0a5bee231395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603901622056-0a5bee231395?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7111,
+      "height": 4785,
+      "blurHash": "LHEo_Oof00V@IUt7xuIU00fkxuRj",
+      "color": "#737373",
+      "alt": "Architectural blueprints with drafting pencils, a metal ruler, and a storage tube",
+      "author": "Lucas Kepner",
+      "authorUrl": "https://unsplash.com/@lucaskphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/architectural-blueprints-with-drafting-tools-Yn8D5B8C-eY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A8AAA8",
+          "w": 0.4328
+        },
+        {
+          "hex": "#797A78",
+          "w": 0.3684
+        },
+        {
+          "hex": "#50504D",
+          "w": 0.1988
+        }
+      ]
+    },
+    {
+      "id": "Na86iQQOAOQ",
+      "small": "https://images.unsplash.com/photo-1581092335331-5e00ac65e934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581092335331-5e00ac65e934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbmdpbmVlcmluZyUyMGRyYXdpbmdzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDAzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LMOp=H~q9E-;~pD%%MIUD$o0ITR*",
+      "color": "#d9d9d9",
+      "alt": "white printer paper with musical notes",
+      "author": "ThisisEngineering",
+      "authorUrl": "https://unsplash.com/@thisisengineering?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-printer-paper-with-musical-notes-Na86iQQOAOQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1E3E7",
+          "w": 0.8122
+        },
+        {
+          "hex": "#C7C9CC",
+          "w": 0.1296
+        },
+        {
+          "hex": "#005241",
+          "w": 0.0583
+        }
+      ]
+    },
+    {
+      "id": "3M9ZErOt3Rs",
+      "small": "https://images.unsplash.com/photo-1582489851557-810dd5ce437a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1582489851557-810dd5ce437a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3936,
+      "height": 2624,
+      "blurHash": "LDAw0dM{S6R+4mt7jZogI:NGjYxZ",
+      "color": "#262626",
+      "alt": "black metal frame on brown wooden table",
+      "author": "Ümit Yıldırım",
+      "authorUrl": "https://unsplash.com/@umityildirim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-metal-frame-on-brown-wooden-table-3M9ZErOt3Rs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1B22",
+          "w": 0.4361
+        },
+        {
+          "hex": "#3E3B44",
+          "w": 0.3491
+        },
+        {
+          "hex": "#6C6871",
+          "w": 0.2148
+        }
+      ]
+    },
+    {
+      "id": "3JUg2NLkMfc",
+      "small": "https://images.unsplash.com/photo-1781330169385-8df0629c99b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781330169385-8df0629c99b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 2592,
+      "blurHash": "L14.0i~W%L-p?G-:?H-;%2ogoJt7",
+      "color": "#262626",
+      "alt": "Network of industrial pipes, valves, and gauges",
+      "author": "Daniel Miksha",
+      "authorUrl": "https://unsplash.com/@danielmiksha?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/network-of-industrial-pipes-valves-and-gauges-3JUg2NLkMfc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C0907",
+          "w": 0.4183
+        },
+        {
+          "hex": "#1C1A18",
+          "w": 0.3522
+        },
+        {
+          "hex": "#363330",
+          "w": 0.2295
+        }
+      ]
+    },
+    {
+      "id": "atglB161N28",
+      "small": "https://images.unsplash.com/photo-1776524039930-ea1ed83b0f97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1776524039930-ea1ed83b0f97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6739,
+      "height": 4483,
+      "blurHash": "LVE_aIRjE2xu}@xZRlNHaK%1t7M|",
+      "color": "#262626",
+      "alt": "Industrial interior with pipes and machinery",
+      "author": "Peter Herrmann",
+      "authorUrl": "https://unsplash.com/@tama66?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/industrial-interior-with-pipes-and-machinery-atglB161N28?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1619",
+          "w": 0.3623
+        },
+        {
+          "hex": "#573839",
+          "w": 0.3446
+        },
+        {
+          "hex": "#996858",
+          "w": 0.2931
+        }
+      ]
+    },
+    {
+      "id": "8heCn7nexZc",
+      "small": "https://images.unsplash.com/photo-1773517459442-f6f4a69b4bce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773517459442-f6f4a69b4bce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbmR1c3RyaWFsJTIwcGlwZXMlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkyMTY4MDA1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "L67^}W9F00_3-;M{D%t700%M-;M{",
+      "color": "#262626",
+      "alt": "Industrial pipes and machinery in a factory setting",
+      "author": "Dave Meckler",
+      "authorUrl": "https://unsplash.com/@phosphorvs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/industrial-pipes-and-machinery-in-a-factory-setting-8heCn7nexZc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181818",
+          "w": 0.4729
+        },
+        {
+          "hex": "#363636",
+          "w": 0.3222
+        },
+        {
+          "hex": "#616161",
+          "w": 0.205
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "geologi",
+  "queries": [
+    "rock strata cliff",
+    "geological rock samples",
+    "river gravel bed"
+  ],
+  "generatedAt": "2026-10-16T16:27:49.451Z",
+  "photos": [
+    {
+      "id": "nOZud8WteQo",
+      "small": "https://images.unsplash.com/photo-1779636764159-4a42888a5b27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779636764159-4a42888a5b27?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4032,
+      "blurHash": "L=CH=:o#fhjYu6j^aeaycGa{aybH",
+      "color": "#73d9f3",
+      "alt": "Rocky hillside with dark and light rocks and green foliage",
+      "author": "Y",
+      "authorUrl": "https://unsplash.com/@yi2026?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rocky-hillside-with-dark-and-light-rocks-and-green-foliage-nOZud8WteQo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#79915F",
+          "w": 0.3671
+        },
+        {
+          "hex": "#6FD1FB",
+          "w": 0.3393
+        },
+        {
+          "hex": "#4E5446",
+          "w": 0.2937
+        }
+      ]
+    },
+    {
+      "id": "SjP9XH8hSVk",
+      "small": "https://images.unsplash.com/photo-1786666340369-49afae747a80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786666340369-49afae747a80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "L6FiPxM{xu?b?b?bM{9F9F00-;-;",
+      "color": "#8c8c8c",
+      "alt": "A large grey sandstone cliff face with deep fissures and angular rock formations",
+      "author": "Martin Casagrand",
+      "authorUrl": "https://unsplash.com/@martincasagrand?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grey-sandstone-cliff-with-angular-rocks-SjP9XH8hSVk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8E8E8E",
+          "w": 0.4405
+        },
+        {
+          "hex": "#737373",
+          "w": 0.3249
+        },
+        {
+          "hex": "#AEAEAE",
+          "w": 0.2346
+        }
+      ]
+    },
+    {
+      "id": "q4mMlzTKOSc",
+      "small": "https://images.unsplash.com/photo-1779731874338-1ac37260b7ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779731874338-1ac37260b7ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L*F~p.R+j[ay.AWEayjt%ia~azay",
+      "color": "#c0d9f3",
+      "alt": "Rocky mountainside with sparse green vegetation under a clear sky",
+      "author": "Giorgos Giannatos",
+      "authorUrl": "https://unsplash.com/@giorgos7850?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rocky-mountainside-with-sparse-green-vegetation-under-a-clear-sky-q4mMlzTKOSc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6F5D47",
+          "w": 0.3896
+        },
+        {
+          "hex": "#BCDAFF",
+          "w": 0.3094
+        },
+        {
+          "hex": "#4C3622",
+          "w": 0.301
+        }
+      ]
+    },
+    {
+      "id": "P71RaRZ-yGo",
+      "small": "https://images.unsplash.com/photo-1763222207578-a3a653b35d58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763222207578-a3a653b35d58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyb2NrJTIwc3RyYXRhJTIwY2xpZmZ8ZW58MXwwfHx8MTc5MjE2ODA2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2048,
+      "blurHash": "L9Dl~70N0KMwbEtSodt7_NM{j[bI",
+      "color": "#8c8c8c",
+      "alt": "Close-up of a textured rock face with varied colors",
+      "author": "SG Photography",
+      "authorUrl": "https://unsplash.com/@saharg6683?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-textured-rock-face-with-varied-colors-P71RaRZ-yGo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#82817B",
+          "w": 0.4197
+        },
+        {
+          "hex": "#ABAAA7",
+          "w": 0.2949
+        },
+        {
+          "hex": "#5B5B54",
+          "w": 0.2855
+        }
+      ]
+    },
+    {
+      "id": "Tp8a7myS0ac",
+      "small": "https://images.unsplash.com/photo-1676721492346-90bf798b6c34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676721492346-90bf798b6c34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5280,
+      "height": 3520,
+      "blurHash": "LdGb*Vax9FWB~qWBM{og.8Rjfit7",
+      "color": "#d9d9d9",
+      "alt": "a bunch of rocks that are on a table",
+      "author": "Takemaru Hirai",
+      "authorUrl": "https://unsplash.com/@takemaru?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-rocks-that-are-on-a-table-Tp8a7myS0ac?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5B5C59",
+          "w": 0.4199
+        },
+        {
+          "hex": "#D7D8D6",
+          "w": 0.3328
+        },
+        {
+          "hex": "#969892",
+          "w": 0.2473
+        }
+      ]
+    },
+    {
+      "id": "IKrc9YmbGp4",
+      "small": "https://images.unsplash.com/photo-1676721603786-acf29e5a43a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676721603786-acf29e5a43a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5280,
+      "height": 3520,
+      "blurHash": "LUI};ZM_Di%M00IUSOtR%#RkoyWA",
+      "color": "#f3f3f3",
+      "alt": "a bunch of different colored rocks on a table",
+      "author": "Takemaru Hirai",
+      "authorUrl": "https://unsplash.com/@takemaru?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colored-rocks-on-a-table-IKrc9YmbGp4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A4A4A1",
+          "w": 0.4057
+        },
+        {
+          "hex": "#DEDFE1",
+          "w": 0.3177
+        },
+        {
+          "hex": "#666464",
+          "w": 0.2766
+        }
+      ]
+    },
+    {
+      "id": "HYCds8kp0Bk",
+      "small": "https://images.unsplash.com/photo-1676721498911-6905ab007a35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676721498911-6905ab007a35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5280,
+      "height": 3520,
+      "blurHash": "LYJbHftRbCNL~qk9NHjE%gV[M{oc",
+      "color": "#d9d9d9",
+      "alt": "a bunch of different colored rocks in a glass case",
+      "author": "Takemaru Hirai",
+      "authorUrl": "https://unsplash.com/@takemaru?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-different-colored-rocks-in-a-glass-case-HYCds8kp0Bk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4D6D2",
+          "w": 0.4592
+        },
+        {
+          "hex": "#959D97",
+          "w": 0.359
+        },
+        {
+          "hex": "#686B6E",
+          "w": 0.1819
+        }
+      ]
+    },
+    {
+      "id": "l8pIKnX3kJ0",
+      "small": "https://images.unsplash.com/photo-1693479291064-8e916a748893?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1693479291064-8e916a748893?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZW9sb2dpY2FsJTIwcm9jayUyMHNhbXBsZXN8ZW58MXwwfHx8MTc5MjE2ODA2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5223,
+      "height": 3482,
+      "blurHash": "LLGIMx-UW?MzK?o#xGxH1WW=xDxb",
+      "color": "#598c0c",
+      "alt": "a bunch of rocks sitting on top of a wooden table",
+      "author": "Tassilo Gröper",
+      "authorUrl": "https://unsplash.com/@tassilogroeper?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-rocks-sitting-on-top-of-a-wooden-table-l8pIKnX3kJ0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8B6E67",
+          "w": 0.4171
+        },
+        {
+          "hex": "#538500",
+          "w": 0.3112
+        },
+        {
+          "hex": "#CEA199",
+          "w": 0.2717
+        }
+      ]
+    },
+    {
+      "id": "f81VZFRDPCc",
+      "small": "https://images.unsplash.com/photo-1536733203354-a125031aa773?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1536733203354-a125031aa773?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LqI=Y}aet7WB00WUayfRD%j[axae",
+      "color": "#d9d9d9",
+      "alt": "gray and brown rocks",
+      "author": "Markus Spiske",
+      "authorUrl": "https://unsplash.com/@markusspiske?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-and-brown-rocks-f81VZFRDPCc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4D7D5",
+          "w": 0.5308
+        },
+        {
+          "hex": "#282F29",
+          "w": 0.3335
+        },
+        {
+          "hex": "#A3A29D",
+          "w": 0.1357
+        }
+      ]
+    },
+    {
+      "id": "cyOmMQNKnxo",
+      "small": "https://images.unsplash.com/photo-1779631686125-6477c7e2ae3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779631686125-6477c7e2ae3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4032,
+      "blurHash": "LBBe{m-o0gRk-n-nkCNHEMkB%1ay",
+      "color": "#40260c",
+      "alt": "Small rocks scattered on wet, reddish-brown ground",
+      "author": "Y",
+      "authorUrl": "https://unsplash.com/@yi2026?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/small-rocks-scattered-on-wet-reddish-brown-ground-cyOmMQNKnxo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#775435",
+          "w": 0.3688
+        },
+        {
+          "hex": "#573315",
+          "w": 0.3288
+        },
+        {
+          "hex": "#391C01",
+          "w": 0.3025
+        }
+      ]
+    },
+    {
+      "id": "TfHqCkxul8w",
+      "small": "https://images.unsplash.com/photo-1775202655677-ac3b20cead6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775202655677-ac3b20cead6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LNFYld~qE2IU%Mt7WARjM|WBofof",
+      "color": "#a6a6a6",
+      "alt": "Small rocks and sand on a beach with shallow water",
+      "author": "Elena Golubeva",
+      "authorUrl": "https://unsplash.com/@elenagolubeva?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/small-rocks-and-sand-on-a-beach-with-shallow-water-TfHqCkxul8w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#746C61",
+          "w": 0.3749
+        },
+        {
+          "hex": "#B1ADAC",
+          "w": 0.3185
+        },
+        {
+          "hex": "#544D42",
+          "w": 0.3066
+        }
+      ]
+    },
+    {
+      "id": "phvqsMbxtTY",
+      "small": "https://images.unsplash.com/photo-1563510300954-f9593670eaf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1563510300954-f9593670eaf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyaXZlciUyMGdyYXZlbCUyMGJlZHxlbnwxfDB8fHwxNzkyMTY4MDY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "L,L}Nk-;IUt7~qt7Rjt7M_Rjofaz",
+      "color": "#f3f3f3",
+      "alt": "stacked stones by the beach",
+      "author": "Markus Spiske",
+      "authorUrl": "https://unsplash.com/@markusspiske?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stacked-stones-by-the-beach-phvqsMbxtTY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EFF2F2",
+          "w": 0.5973
+        },
+        {
+          "hex": "#A2A6A7",
+          "w": 0.2041
+        },
+        {
+          "hex": "#6C6B67",
+          "w": 0.1986
+        }
+      ]
+    }
+  ]
+}

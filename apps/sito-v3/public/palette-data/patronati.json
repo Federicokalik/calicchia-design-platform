@@ -1,0 +1,308 @@
+{
+  "slug": "patronati",
+  "queries": [
+    "pension paperwork help",
+    "office reception desk",
+    "document folders shelf"
+  ],
+  "generatedAt": "2026-10-16T16:27:41.781Z",
+  "photos": [
+    {
+      "id": "zJbdqZklZhE",
+      "small": "https://images.unsplash.com/photo-1758686254415-9348b5b5df01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758686254415-9348b5b5df01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LFF=jn~V56RO?ExttSwc.RyDMyv}",
+      "color": "#8c8c8c",
+      "alt": "Elderly couple managing finances at home",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elderly-couple-managing-finances-at-home-zJbdqZklZhE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9A8168",
+          "w": 0.4151
+        },
+        {
+          "hex": "#6D503D",
+          "w": 0.3191
+        },
+        {
+          "hex": "#BCB5AC",
+          "w": 0.2658
+        }
+      ]
+    },
+    {
+      "id": "PUd6C90Isp0",
+      "small": "https://images.unsplash.com/photo-1631557776808-91908aba7ca0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631557776808-91908aba7ca0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2384,
+      "blurHash": "LbLq%]D$NGj]4TM{xtozWpx]t7j[",
+      "color": "#d9f3f3",
+      "alt": "a pen sitting on top of a pile of papers",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pen-sitting-on-top-of-a-pile-of-papers-PUd6C90Isp0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBE4E7",
+          "w": 0.7471
+        },
+        {
+          "hex": "#431B0B",
+          "w": 0.1931
+        },
+        {
+          "hex": "#130807",
+          "w": 0.0598
+        }
+      ]
+    },
+    {
+      "id": "_nl1owGBorc",
+      "small": "https://images.unsplash.com/photo-1758686254493-d73c9c2a3049?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758686254493-d73c9c2a3049?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "L7GbL^}=0K5R+D%J^*Kk_K%~DONK",
+      "color": "#c0c0c0",
+      "alt": "Elderly couple looking at bills and phone",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elderly-couple-looking-at-bills-and-phone-_nl1owGBorc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A3886C",
+          "w": 0.3985
+        },
+        {
+          "hex": "#6B5C53",
+          "w": 0.3535
+        },
+        {
+          "hex": "#BFBAB2",
+          "w": 0.248
+        }
+      ]
+    },
+    {
+      "id": "8DEDp6S93Po",
+      "small": "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZW5zaW9uJTIwcGFwZXJ3b3JrJTIwaGVscHxlbnwxfDB8fHwxNzkyMTY4MDU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4965,
+      "height": 3490,
+      "blurHash": "LRD0M-jY4nkDIUj]t7WB00WB-;oe",
+      "color": "#c0c0c0",
+      "alt": "Tax forms, a pen, and a coffee mug on a dark desk",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/tax-forms-and-coffee-on-desk-8DEDp6S93Po?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0B3B7",
+          "w": 0.4049
+        },
+        {
+          "hex": "#191910",
+          "w": 0.3275
+        },
+        {
+          "hex": "#090904",
+          "w": 0.2676
+        }
+      ]
+    },
+    {
+      "id": "FDcydLvV7Io",
+      "small": "https://images.unsplash.com/photo-1543325042-c67825847491?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1543325042-c67825847491?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7682,
+      "height": 5189,
+      "blurHash": "LWGSAYt6IUxu~qj[Rjt7D%R*oeRj",
+      "color": "#262626",
+      "alt": "white and brown table",
+      "author": "Random Institute",
+      "authorUrl": "https://unsplash.com/@randominstitute?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-table-FDcydLvV7Io?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2A19F",
+          "w": 0.4173
+        },
+        {
+          "hex": "#302D2E",
+          "w": 0.352
+        },
+        {
+          "hex": "#CFCECC",
+          "w": 0.2307
+        }
+      ]
+    },
+    {
+      "id": "IApne9_bauM",
+      "small": "https://images.unsplash.com/photo-1643292710805-0c32e5ca2a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643292710805-0c32e5ca2a2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2384,
+      "blurHash": "LgG*vQS40LxZRjt7t7WBD*t6xuRj",
+      "color": "#8c7359",
+      "alt": "a potted plant sitting on top of a wooden counter",
+      "author": "Brian J. Tromp",
+      "authorUrl": "https://unsplash.com/@brianjtromp?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-potted-plant-sitting-on-top-of-a-wooden-counter-IApne9_bauM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B49576",
+          "w": 0.3741
+        },
+        {
+          "hex": "#816546",
+          "w": 0.3509
+        },
+        {
+          "hex": "#362B12",
+          "w": 0.275
+        }
+      ]
+    },
+    {
+      "id": "-1_q0o5I5D8",
+      "small": "https://images.unsplash.com/photo-1771918521550-13c68e5d2173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771918521550-13c68e5d2173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LcG*yd?bSP%1~Vt7M|j[E3RjadWX",
+      "color": "#260c26",
+      "alt": "A reception desk with artwork on the wall",
+      "author": "Wafiq Raza",
+      "authorUrl": "https://unsplash.com/@wafiqraza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-reception-desk-with-artwork-on-the-wall--1_q0o5I5D8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C131B",
+          "w": 0.4261
+        },
+        {
+          "hex": "#D2BEAA",
+          "w": 0.2959
+        },
+        {
+          "hex": "#A48E7B",
+          "w": 0.278
+        }
+      ]
+    },
+    {
+      "id": "QpjyqYy5R-U",
+      "small": "https://images.unsplash.com/photo-1553369728-15ec6971afaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1553369728-15ec6971afaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjByZWNlcHRpb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LhI||44TtRM|%hIoM{s:t7aybHfR",
+      "color": "#a65940",
+      "alt": "man standing beside counter",
+      "author": "Helena Lopes",
+      "authorUrl": "https://unsplash.com/@helenalopesph?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-standing-beside-counter-QpjyqYy5R-U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B16A44",
+          "w": 0.3673
+        },
+        {
+          "hex": "#E1D3D5",
+          "w": 0.3665
+        },
+        {
+          "hex": "#794A33",
+          "w": 0.2662
+        }
+      ]
+    },
+    {
+      "id": "vT7r4YYbX0w",
+      "small": "https://images.unsplash.com/photo-1768158989131-64cbff67f292?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768158989131-64cbff67f292?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4376,
+      "height": 3282,
+      "blurHash": "L4E.z?N4J6~o$^xsbvRP0J9ZMxVX",
+      "color": "#a68c73",
+      "alt": "Shelves filled with colorful binders and folders",
+      "author": "Richard Heinen",
+      "authorUrl": "https://unsplash.com/@richard_he?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shelves-filled-with-colorful-binders-and-folders-vT7r4YYbX0w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#907E68",
+          "w": 0.4484
+        },
+        {
+          "hex": "#564E4C",
+          "w": 0.3174
+        },
+        {
+          "hex": "#B4B5B9",
+          "w": 0.2342
+        }
+      ]
+    },
+    {
+      "id": "cwKwug-yyXM",
+      "small": "https://images.unsplash.com/photo-1786911354420-3495e4728c03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786911354420-3495e4728c03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11648,
+      "height": 8736,
+      "blurHash": "LCEL?9wE0M-qE3%L%0M{R#S8aJfh",
+      "color": "#8c8c8c",
+      "alt": "A dense row of colorful paper documents standing upright on a white shelf",
+      "author": "Hansheng Zhao",
+      "authorUrl": "https://unsplash.com/@co?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/paper-documents-on-white-shelf-cwKwug-yyXM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#826D56",
+          "w": 0.3975
+        },
+        {
+          "hex": "#95908C",
+          "w": 0.3502
+        },
+        {
+          "hex": "#5B4E43",
+          "w": 0.2523
+        }
+      ]
+    },
+    {
+      "id": "nKM7Z36eGY4",
+      "small": "https://images.unsplash.com/photo-1780394799229-ee29ad4b0900?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780394799229-ee29ad4b0900?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb2N1bWVudCUyMGZvbGRlcnMlMjBzaGVsZnxlbnwxfDB8fHwxNzkyMTY4MDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5000,
+      "height": 4000,
+      "blurHash": "LBAdN0%gNGV?MxNGWBs:0KM{n$fl",
+      "color": "#0c2626",
+      "alt": "A row of old, worn binders on a dusty shelf",
+      "author": "Mota Ehdaei",
+      "authorUrl": "https://unsplash.com/@motaehdaei?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-old-worn-binders-on-a-dusty-shelf-nKM7Z36eGY4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#162024",
+          "w": 0.3413
+        },
+        {
+          "hex": "#354146",
+          "w": 0.3308
+        },
+        {
+          "hex": "#8E9192",
+          "w": 0.3279
+        }
+      ]
+    }
+  ]
+}

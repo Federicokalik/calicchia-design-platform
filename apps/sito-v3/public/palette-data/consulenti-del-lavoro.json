@@ -1,0 +1,331 @@
+{
+  "slug": "consulenti-del-lavoro",
+  "queries": [
+    "office desk paperwork",
+    "stacked paper folders",
+    "calculator documents desk"
+  ],
+  "generatedAt": "2026-10-16T16:26:40.653Z",
+  "photos": [
+    {
+      "id": "cckf4TsHAuw",
+      "small": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LZHUwl_ND%D$Ip-o?btRozt7sms:",
+      "color": "#f3f3f3",
+      "alt": "MacBook Pro, white ceramic mug,and black smartphone on table",
+      "author": "Andrew Neel",
+      "authorUrl": "https://unsplash.com/@andrewtneel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/macbook-pro-white-ceramic-mugand-black-smartphone-on-table-cckf4TsHAuw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3DFDD",
+          "w": 0.389
+        },
+        {
+          "hex": "#3F3832",
+          "w": 0.3386
+        },
+        {
+          "hex": "#A46532",
+          "w": 0.2725
+        }
+      ]
+    },
+    {
+      "id": "3q4V539j_bw",
+      "small": "https://images.unsplash.com/photo-1631557777232-a2632ae3c67d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631557777232-a2632ae3c67d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2384,
+      "blurHash": "LaJRaL8_xuIUIUMxoJt84T%MoLRj",
+      "color": "#d9d9d9",
+      "alt": "a laptop computer sitting on top of a wooden desk",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-desk-3q4V539j_bw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DADFE0",
+          "w": 0.5066
+        },
+        {
+          "hex": "#73442D",
+          "w": 0.3314
+        },
+        {
+          "hex": "#99948E",
+          "w": 0.1619
+        }
+      ]
+    },
+    {
+      "id": "VnK5iT01HYQ",
+      "small": "https://images.unsplash.com/photo-1632152133952-98b268dc4b86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1632152133952-98b268dc4b86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3515,
+      "height": 2344,
+      "blurHash": "LgHUkJ4TIU?vt7WAozWBIAxvt7RP",
+      "color": "#d9d9d9",
+      "alt": "a wooden table topped with papers and a pen",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-papers-and-a-pen-VnK5iT01HYQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7B3207",
+          "w": 0.4256
+        },
+        {
+          "hex": "#D9DDE1",
+          "w": 0.3482
+        },
+        {
+          "hex": "#4B1900",
+          "w": 0.2261
+        }
+      ]
+    },
+    {
+      "id": "bI59mOupMYE",
+      "small": "https://images.unsplash.com/photo-1631557777150-452c4568cc14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631557777150-452c4568cc14?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjBkZXNrJTIwcGFwZXJ3b3JrfGVufDF8MHx8fDE3OTIxNjc5OTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4165,
+      "height": 2342,
+      "blurHash": "LWJkfj4n?^tlQ-IAX8RjDNxuD%WB",
+      "color": "#f3f3f3",
+      "alt": "a laptop computer sitting on top of a wooden desk",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-desk-bI59mOupMYE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAE1E2",
+          "w": 0.3816
+        },
+        {
+          "hex": "#A5A09A",
+          "w": 0.3121
+        },
+        {
+          "hex": "#8B5539",
+          "w": 0.3063
+        }
+      ]
+    },
+    {
+      "id": "snNHKZ-mGfE",
+      "small": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHI=0=MvD%Rk~qaKD%x[xbozM{D%",
+      "color": "#c0c0c0",
+      "alt": "stacks of paper documents and file folders",
+      "author": "Wesley Tingey",
+      "authorUrl": "https://unsplash.com/@wesleyphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stacks-of-paper-documents-and-file-folders-snNHKZ-mGfE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A9A297",
+          "w": 0.424
+        },
+        {
+          "hex": "#CBC7C5",
+          "w": 0.3128
+        },
+        {
+          "hex": "#83745F",
+          "w": 0.2632
+        }
+      ]
+    },
+    {
+      "id": "V29UWcALNko",
+      "small": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2996,
+      "height": 2104,
+      "blurHash": "LgODqR8_-;Rj-;ayRjof~q%MIUa{",
+      "color": "#f3f3f3",
+      "alt": "stack of papers",
+      "author": "ron dyar",
+      "authorUrl": "https://unsplash.com/@prolabprints?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-papers-V29UWcALNko?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F6F6F6",
+          "w": 0.5419
+        },
+        {
+          "hex": "#959595",
+          "w": 0.2446
+        },
+        {
+          "hex": "#D0D0D0",
+          "w": 0.2136
+        }
+      ]
+    },
+    {
+      "id": "K-ZsC7YdJ6Y",
+      "small": "https://images.unsplash.com/photo-1526656001029-20a71b17f7ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1526656001029-20a71b17f7ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4160,
+      "height": 3120,
+      "blurHash": "LGFYrv9Fbv%M8^IURjae%L%MaeRi",
+      "color": "#8c8c8c",
+      "alt": "brown binder lot",
+      "author": "Sear Greyson",
+      "authorUrl": "https://unsplash.com/@seargreyson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-binder-lot-K-ZsC7YdJ6Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8D8982",
+          "w": 0.4206
+        },
+        {
+          "hex": "#B8B8B6",
+          "w": 0.3181
+        },
+        {
+          "hex": "#5C554E",
+          "w": 0.2613
+        }
+      ]
+    },
+    {
+      "id": "XN4T2PVUUgk",
+      "small": "https://images.unsplash.com/photo-1468779036391-52341f60b55d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1468779036391-52341f60b55d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwcGFwZXIlMjBmb2xkZXJzfGVufDF8MHx8fDE3OTIxNjc5OTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 2677,
+      "blurHash": "LPP%R_~qE1RiD*IUofofRjM{ayof",
+      "color": "#f3f3f3",
+      "alt": "A stack of thick folders on a white surface",
+      "author": "Beatriz Pérez Moya",
+      "authorUrl": "https://unsplash.com/@beatriz_perez?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-stack-of-thick-folders-on-a-white-surface-XN4T2PVUUgk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8DADA",
+          "w": 0.4811
+        },
+        {
+          "hex": "#F6F6F6",
+          "w": 0.4513
+        },
+        {
+          "hex": "#9EA0A0",
+          "w": 0.0676
+        }
+      ]
+    },
+    {
+      "id": "I3HPUolh5hA",
+      "small": "https://images.unsplash.com/photo-1625225233840-695456021cde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625225233840-695456021cde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHN-Zc_NE28_%MWCIU-;9Fxut7Mx",
+      "color": "#d9f3f3",
+      "alt": "black calculator beside black pen on white printer paper",
+      "author": "Mediamodifier",
+      "authorUrl": "https://unsplash.com/@mediamodifier?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-calculator-beside-black-pen-on-white-printer-paper-I3HPUolh5hA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAE4E9",
+          "w": 0.9417
+        },
+        {
+          "hex": "#38423F",
+          "w": 0.0583
+        }
+      ]
+    },
+    {
+      "id": "LNnmSumlwO4",
+      "small": "https://images.unsplash.com/photo-1707902665498-a202981fb5ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707902665498-a202981fb5ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3073,
+      "height": 2050,
+      "blurHash": "LSF5?VjYRjD*0Ks.tRt7D*o~jEs:",
+      "color": "#8c8c8c",
+      "alt": "a person sitting at a desk with a calculator and a notebook",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-sitting-at-a-desk-with-a-calculator-and-a-notebook-LNnmSumlwO4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F8783",
+          "w": 0.4146
+        },
+        {
+          "hex": "#101619",
+          "w": 0.2967
+        },
+        {
+          "hex": "#4A4E49",
+          "w": 0.2887
+        }
+      ]
+    },
+    {
+      "id": "heiYgqp0Tsk",
+      "small": "https://images.unsplash.com/photo-1707157284454-553ef0a4ed0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1707157284454-553ef0a4ed0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3148,
+      "height": 2100,
+      "blurHash": "LiG+grRikCRQ00t7ofagRlozaxjs",
+      "color": "#c0c0c0",
+      "alt": "office desk with smartphone and financial charts",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/office-desk-with-smartphone-and-financial-charts-heiYgqp0Tsk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C5C8CB",
+          "w": 0.497
+        },
+        {
+          "hex": "#848983",
+          "w": 0.2525
+        },
+        {
+          "hex": "#0D0C08",
+          "w": 0.2505
+        }
+      ]
+    },
+    {
+      "id": "0rHxkbcvQAE",
+      "small": "https://images.unsplash.com/photo-1649209979970-f01d950cc5ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1649209979970-f01d950cc5ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWxjdWxhdG9yJTIwZG9jdW1lbnRzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY3OTk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4425,
+      "height": 3468,
+      "blurHash": "LDA,zc^jDj01NIS5MdnNIVIVsl?a",
+      "color": "#260c0c",
+      "alt": "a calculator sitting on top of a wooden table",
+      "author": "FIN",
+      "authorUrl": "https://unsplash.com/@fin21?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-calculator-sitting-on-top-of-a-wooden-table-0rHxkbcvQAE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#422924",
+          "w": 0.3629
+        },
+        {
+          "hex": "#6D7268",
+          "w": 0.3489
+        },
+        {
+          "hex": "#1A0E0D",
+          "w": 0.2882
+        }
+      ]
+    }
+  ]
+}

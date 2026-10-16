@@ -1,0 +1,331 @@
+{
+  "slug": "periti",
+  "queries": [
+    "measuring tape on desk",
+    "magnifying glass documents",
+    "clipboard inspection"
+  ],
+  "generatedAt": "2026-10-16T16:27:55.542Z",
+  "photos": [
+    {
+      "id": "xnUQO2DwXOo",
+      "small": "https://images.unsplash.com/photo-1502043150060-b01aa3030556?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1502043150060-b01aa3030556?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LNH2D$~qozRjOt?GRjM|-;bxf6NG",
+      "color": "#595959",
+      "alt": "brown wooden ruler",
+      "author": "Christian Kaindl",
+      "authorUrl": "https://unsplash.com/@christiankaindl?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-ruler-xnUQO2DwXOo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5A5B5C",
+          "w": 0.5521
+        },
+        {
+          "hex": "#D6CBBD",
+          "w": 0.2288
+        },
+        {
+          "hex": "#B29C81",
+          "w": 0.219
+        }
+      ]
+    },
+    {
+      "id": "Gq1vjmJfwuA",
+      "small": "https://images.unsplash.com/photo-1620893749736-346f4a8fe866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1620893749736-346f4a8fe866?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2333,
+      "blurHash": "LYKn-wMxI9og.TkBtRj]nhj[WWoz",
+      "color": "#c0d9d9",
+      "alt": "silver macbook on brown wooden table",
+      "author": "Markus Spiske",
+      "authorUrl": "https://unsplash.com/@markusspiske?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/silver-macbook-on-brown-wooden-table-Gq1vjmJfwuA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6D1D6",
+          "w": 0.5332
+        },
+        {
+          "hex": "#B0B0AD",
+          "w": 0.2519
+        },
+        {
+          "hex": "#8B8277",
+          "w": 0.2149
+        }
+      ]
+    },
+    {
+      "id": "5OkMLoavZZM",
+      "small": "https://images.unsplash.com/photo-1634245482247-944042ae8026?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1634245482247-944042ae8026?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "L98W$}E2=|?GIp=|ofIo0fs:IoNG",
+      "color": "#262626",
+      "alt": "a woman is holding a pencil and a ruler",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-holding-a-pencil-and-a-ruler-5OkMLoavZZM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0F110E",
+          "w": 0.5969
+        },
+        {
+          "hex": "#25231F",
+          "w": 0.328
+        },
+        {
+          "hex": "#D0A78F",
+          "w": 0.0751
+        }
+      ]
+    },
+    {
+      "id": "UaH9sH5GQwQ",
+      "small": "https://images.unsplash.com/photo-1642239667157-575fb4ce3851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1642239667157-575fb4ce3851?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWFzdXJpbmclMjB0YXBlJTIwb24lMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LAFY0{|X8wxb%yN^-B#R=eRjW.NG",
+      "color": "#734026",
+      "alt": "a person holding a pair of scissors over a piece of paper",
+      "author": "Mukul Joshi",
+      "authorUrl": "https://unsplash.com/@muk_l_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-pair-of-scissors-over-a-piece-of-paper-UaH9sH5GQwQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#693C24",
+          "w": 0.3858
+        },
+        {
+          "hex": "#9D6E4E",
+          "w": 0.3352
+        },
+        {
+          "hex": "#C1B9AE",
+          "w": 0.279
+        }
+      ]
+    },
+    {
+      "id": "afW1hht0NSs",
+      "small": "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1586769852836-bc069f19e1b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3999,
+      "height": 2666,
+      "blurHash": "LAErka[-_2F}?wyDtRWAIpIUnN%0",
+      "color": "#73c0d9",
+      "alt": "magnifying glass on white table",
+      "author": "Markus Winkler",
+      "authorUrl": "https://unsplash.com/@markuswinkler?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/magnifying-glass-on-white-table-afW1hht0NSs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6DC5E9",
+          "w": 0.6743
+        },
+        {
+          "hex": "#97D7F5",
+          "w": 0.2326
+        },
+        {
+          "hex": "#4FA1C6",
+          "w": 0.0931
+        }
+      ]
+    },
+    {
+      "id": "P_5mirRrg0k",
+      "small": "https://images.unsplash.com/photo-1743796055664-3473eedab36e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1743796055664-3473eedab36e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LDL;pl4m_4Rij?~Xt6IU-;%MIUD%",
+      "color": "#c0c0c0",
+      "alt": "Magnifying glass sits near a laptop on a table",
+      "author": "MJ Duford",
+      "authorUrl": "https://unsplash.com/@duforddigital?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/magnifying-glass-sits-near-a-laptop-on-a-table-P_5mirRrg0k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D4D4",
+          "w": 0.444
+        },
+        {
+          "hex": "#B8BAB8",
+          "w": 0.4183
+        },
+        {
+          "hex": "#91928F",
+          "w": 0.1377
+        }
+      ]
+    },
+    {
+      "id": "eQ2Z9ay9Wws",
+      "small": "https://images.unsplash.com/photo-1554696468-19f8c7a71ad5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554696468-19f8c7a71ad5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LQI|mt~A58s.%Lt6WBofxZIpWBR*",
+      "color": "#c0a673",
+      "alt": "person holding magnifying glass",
+      "author": "Mick Haupt",
+      "authorUrl": "https://unsplash.com/@rocinante_11?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-magnifying-glass-eQ2Z9ay9Wws?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BEA378",
+          "w": 0.4978
+        },
+        {
+          "hex": "#9D8158",
+          "w": 0.3479
+        },
+        {
+          "hex": "#2A1703",
+          "w": 0.1543
+        }
+      ]
+    },
+    {
+      "id": "pCwb5OuObls",
+      "small": "https://images.unsplash.com/photo-1773047747721-f75d546d7290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773047747721-f75d546d7290?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYWduaWZ5aW5nJTIwZ2xhc3MlMjBkb2N1bWVudHN8ZW58MXwwfHx8MTc5MjE2ODA3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9119,
+      "height": 3744,
+      "blurHash": "L64pp#.mR4RkL}WEV@aeMdV@tRoz",
+      "color": "#265959",
+      "alt": "A magnifying glass rests on a textured surface",
+      "author": "Sasun Bughdaryan",
+      "authorUrl": "https://unsplash.com/@sasun1990?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-magnifying-glass-rests-on-a-textured-surface-pCwb5OuObls?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F5562",
+          "w": 0.6023
+        },
+        {
+          "hex": "#083640",
+          "w": 0.2199
+        },
+        {
+          "hex": "#467883",
+          "w": 0.1778
+        }
+      ]
+    },
+    {
+      "id": "UEQedPdLXVU",
+      "small": "https://images.unsplash.com/photo-1651760680066-db9d32bd0357?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1651760680066-db9d32bd0357?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "L3Qvzb?bbdIU-;WBt8t700Rj~qxu",
+      "color": "#f3f3f3",
+      "alt": "a white framed picture",
+      "author": "mockupbee",
+      "authorUrl": "https://unsplash.com/@mockupbee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-framed-picture-UEQedPdLXVU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDEDED",
+          "w": 0.9443
+        },
+        {
+          "hex": "#D0CFCE",
+          "w": 0.0557
+        }
+      ]
+    },
+    {
+      "id": "eXcF6L9pEug",
+      "small": "https://images.unsplash.com/photo-1761558794306-466448dab4bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761558794306-466448dab4bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LUHBxdTK0L%1ENxaM|%M9FIV-pM|",
+      "color": "#262626",
+      "alt": "Hand holding pen over a blue clipboard",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-pen-over-a-blue-clipboard-eXcF6L9pEug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#161A1B",
+          "w": 0.3817
+        },
+        {
+          "hex": "#E0D9CF",
+          "w": 0.3217
+        },
+        {
+          "hex": "#AA9D90",
+          "w": 0.2966
+        }
+      ]
+    },
+    {
+      "id": "zQCDJZLS-Ms",
+      "small": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LVGbYT={DNoJV?WWt7ofDhj[yDfQ",
+      "color": "#594026",
+      "alt": "Clipboard, pencil, and pen on a wooden surface",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clipboard-pencil-and-pen-on-a-wooden-surface-zQCDJZLS-Ms?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B1BBC1",
+          "w": 0.3924
+        },
+        {
+          "hex": "#67431F",
+          "w": 0.3616
+        },
+        {
+          "hex": "#A27B4E",
+          "w": 0.246
+        }
+      ]
+    },
+    {
+      "id": "WlL8aHeMcVM",
+      "small": "https://images.unsplash.com/photo-1618690258620-b54c1cbeb54b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618690258620-b54c1cbeb54b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGlwYm9hcmQlMjBpbnNwZWN0aW9ufGVufDF8MHx8fDE3OTIxNjgwNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LHBWY.x^8^ITMwV@x^j[MxRioztR",
+      "color": "#594040",
+      "alt": "white and brown wooden door",
+      "author": "Luba Ertel",
+      "authorUrl": "https://unsplash.com/@ertelier?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-door-WlL8aHeMcVM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#453930",
+          "w": 0.3467
+        },
+        {
+          "hex": "#8D939E",
+          "w": 0.3286
+        },
+        {
+          "hex": "#59504B",
+          "w": 0.3247
+        }
+      ]
+    }
+  ]
+}
