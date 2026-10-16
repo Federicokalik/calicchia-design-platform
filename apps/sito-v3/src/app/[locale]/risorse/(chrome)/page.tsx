@@ -6,7 +6,7 @@ import { StructuredData } from '@/components/seo/StructuredData';
 import { collectionPageSchema, breadcrumbSchema } from '@/data/structured-data';
 import { buildCanonical, buildI18nAlternates, buildOgLocale } from '@/lib/canonical';
 import { buildOgImage, buildTwitterCard } from '@/lib/og-image';
-import type { Locale } from '@/lib/i18n';
+import { localizedPath, type Locale } from '@/lib/i18n';
 import { listResources } from '@/data/risorse';
 
 const PATH = '/risorse';
@@ -15,16 +15,16 @@ const META: Record<Locale, { title: string; description: string; eyebrow: string
   it: {
     title: 'Risorse — Calicchia Design',
     description:
-      'Risorse curate su web design, SEO, GEO ed e-commerce: white paper e glossari pensati per chi commissiona un progetto e vuole capire cosa sta comprando.',
+      'Risorse curate su web design, SEO, GEO ed e-commerce: white paper, glossari e strumenti gratuiti pensati per chi commissiona un progetto e vuole capire cosa sta comprando.',
     eyebrow: 'Risorse',
-    lead: 'White paper e glossari curati: contenuti evergreen per capire web design, SEO, GEO ed e-commerce senza gergo da vendere.',
+    lead: 'White paper, glossari e strumenti gratuiti: contenuti evergreen per capire web design, SEO, GEO ed e-commerce senza gergo da vendere.',
   },
   en: {
     title: 'Resources — Calicchia Design',
     description:
-      'Curated resources on web design, SEO, GEO and e-commerce: white papers and glossaries for whoever commissions a project and wants to understand what they are buying.',
+      'Curated resources on web design, SEO, GEO and e-commerce: white papers, glossaries and free tools for whoever commissions a project and wants to understand what they are buying.',
     eyebrow: 'Resources',
-    lead: 'Curated white papers and glossaries: evergreen content to understand web design, SEO, GEO and e-commerce without the sales jargon.',
+    lead: 'White papers, glossaries and free tools: evergreen content to understand web design, SEO, GEO and e-commerce without the sales jargon.',
   },
 };
 
@@ -50,7 +50,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RisorseHubPage() {
   const locale = (await getLocale()) as Locale;
   const m = META[locale];
-  const resources = listResources();
+  const all = listResources();
+  const tools = all.filter((r) => r.kind === 'tool');
+  const resources = all.filter((r) => r.kind !== 'tool');
 
   const breadcrumbs = [
     { name: 'Home', url: '/' },
@@ -65,7 +67,8 @@ export default async function RisorseHubPage() {
             name: m.eyebrow,
             description: m.lead,
             url: buildCanonical(PATH, locale),
-            items: resources.map((r) => ({ name: r.title[locale], url: r.path })),
+            // URL nella lingua della pagina: in EN /en/risorse/..., non il path IT.
+            items: all.map((r) => ({ name: r.title[locale], url: localizedPath(r.path, locale) })),
             locale,
           }),
           breadcrumbSchema(breadcrumbs),
@@ -75,27 +78,31 @@ export default async function RisorseHubPage() {
       <PageHero breadcrumbs={breadcrumbs} eyebrow={m.eyebrow} title={m.eyebrow} intro={m.lead} />
 
       <section className="px-6 md:px-10 lg:px-14 max-w-[1400px] mx-auto">
-        <Link
-          href="/audit-geo"
-          className="group mb-px flex flex-col gap-3 p-8 md:p-10 transition-colors hover:bg-[var(--color-surface)]"
-          style={{ border: '1px solid var(--color-line)' }}
-        >
-          <span className="font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: 'var(--color-accent)' }}>
-            {locale === 'en' ? 'Free tool' : 'Strumento gratuito'}
-          </span>
-          <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-4xl" style={{ fontWeight: 600, letterSpacing: '-0.02em' }}>
-            {locale === 'en' ? 'GEO Audit: is your site ready for AI engines?' : 'GEO Audit: il tuo sito è pronto per i motori AI?'}
-          </h2>
-          <p className="text-base leading-relaxed max-w-[52ch]" style={{ color: 'var(--color-ink-muted)' }}>
-            {locale === 'en'
-              ? 'Enter your URL and get an instant GEO score with the actions to improve it — based on the white paper.'
-              : 'Inserisci l’URL e ottieni subito uno score GEO con le azioni per migliorarlo — basato sul white paper.'}
-          </p>
-          <span className="mt-2 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] group-hover:gap-3 transition-all" style={{ color: 'var(--color-ink)' }}>
-            {locale === 'en' ? 'Analyze my site' : 'Analizza il mio sito'}
-            <span aria-hidden>→</span>
-          </span>
-        </Link>
+        <ul role="list" className="mb-px grid grid-cols-1 gap-px md:grid-cols-2" style={{ background: 'var(--color-line)' }}>
+          {tools.map((r) => (
+            <li key={r.key} style={{ background: 'var(--color-bg)' }}>
+              <Link
+                href={r.path}
+                className="group flex h-full flex-col gap-3 p-8 md:p-10 transition-colors hover:bg-[var(--color-surface)]"
+                style={{ border: '1px solid var(--color-line)' }}
+              >
+                <span className="font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: 'var(--color-accent)' }}>
+                  {r.meta[locale]}
+                </span>
+                <h2 className="font-[family-name:var(--font-display)] text-3xl md:text-4xl" style={{ fontWeight: 600, letterSpacing: '-0.02em' }}>
+                  {r.title[locale]}
+                </h2>
+                <p className="text-base leading-relaxed max-w-[52ch]" style={{ color: 'var(--color-ink-muted)' }}>
+                  {r.description[locale]}
+                </p>
+                <span className="mt-auto inline-flex items-center gap-2 pt-2 font-mono text-xs uppercase tracking-[0.18em] group-hover:gap-3 transition-all" style={{ color: 'var(--color-ink)' }}>
+                  {r.cta?.[locale] ?? (locale === 'en' ? 'Open' : 'Apri')}
+                  <span aria-hidden>→</span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="px-6 md:px-10 lg:px-14 pb-32 max-w-[1400px] mx-auto">
@@ -128,7 +135,7 @@ export default async function RisorseHubPage() {
                   className="mt-auto inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] group-hover:gap-3 transition-all"
                   style={{ color: 'var(--color-ink)' }}
                 >
-                  {locale === 'en' ? 'Open' : 'Apri'}
+                  {r.cta?.[locale] ?? (locale === 'en' ? 'Open' : 'Apri')}
                   <span aria-hidden>→</span>
                 </span>
               </Link>

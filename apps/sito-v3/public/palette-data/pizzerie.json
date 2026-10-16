@@ -1,0 +1,335 @@
+{
+  "slug": "pizzerie",
+  "queries": [
+    "wood fired pizza oven",
+    "tomato basil mozzarella",
+    "pizzeria interior"
+  ],
+  "generatedAt": "2026-10-12T18:41:44.464Z",
+  "photos": [
+    {
+      "id": "40OJLYVWeeM",
+      "small": "https://images.unsplash.com/photo-1579751626657-72bc17010498?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1579751626657-72bc17010498?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2768,
+      "height": 1848,
+      "blurHash": "LCCi2Di_0#Ek0LxFNHELEN={xuEj",
+      "color": "#260c0c",
+      "alt": "pizza on brown wooden table",
+      "author": "Nik Owens",
+      "authorUrl": "https://unsplash.com/@nik_owens?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pizza-on-brown-wooden-table-40OJLYVWeeM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#060203",
+          "w": 0.4483
+        },
+        {
+          "hex": "#C68F64",
+          "w": 0.2961
+        },
+        {
+          "hex": "#3E1E14",
+          "w": 0.2556
+        }
+      ]
+    },
+    {
+      "id": "vHRFraV4U00",
+      "small": "https://images.unsplash.com/photo-1622880833523-7cf1c0bd4296?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1622880833523-7cf1c0bd4296?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LhGQn9Nb0gof%0R+IqxZJ7jGsoxZ",
+      "color": "#260c0c",
+      "alt": "A pizza with melted cheese and tomato sauce baking in a wood-fired oven",
+      "author": "Fabrizio Pullara",
+      "authorUrl": "https://unsplash.com/@fabrizio_photopf?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pizza-baking-in-wood-fired-oven-vHRFraV4U00?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#190F0D",
+          "w": 0.4134
+        },
+        {
+          "hex": "#C76936",
+          "w": 0.2987
+        },
+        {
+          "hex": "#7B2802",
+          "w": 0.2879
+        }
+      ]
+    },
+    {
+      "id": "CzWpZKP--kw",
+      "small": "https://images.unsplash.com/photo-1590234229790-b210b3dcd422?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1590234229790-b210b3dcd422?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4895,
+      "height": 3916,
+      "blurHash": "LD7w4xNH9]of0#t6-UWB-UWCRkoe",
+      "color": "#260c0c",
+      "alt": "pizza on white ceramic plate",
+      "author": "SHOT",
+      "authorUrl": "https://unsplash.com/@shotgram?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pizza-on-white-ceramic-plate-CzWpZKP--kw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070505",
+          "w": 0.7192
+        },
+        {
+          "hex": "#2A1710",
+          "w": 0.199
+        },
+        {
+          "hex": "#834C2A",
+          "w": 0.0818
+        }
+      ]
+    },
+    {
+      "id": "-9LB0GKPF0o",
+      "small": "https://images.unsplash.com/photo-1612692177120-847e15b2815d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1612692177120-847e15b2815d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kJTIwZmlyZWQlMjBwaXp6YSUyMG92ZW58ZW58MXwwfHx8MTc5MTgzMDQ5N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LuIoqKkCEMWB}?kCNGaeS~s:nijF",
+      "color": "#260c0c",
+      "alt": "brown and black dried fish on brown wooden table",
+      "author": "serjan midili",
+      "authorUrl": "https://unsplash.com/@s_midili?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-black-dried-fish-on-brown-wooden-table--9LB0GKPF0o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#24100B",
+          "w": 0.3465
+        },
+        {
+          "hex": "#C65916",
+          "w": 0.3453
+        },
+        {
+          "hex": "#7E2709",
+          "w": 0.3082
+        }
+      ]
+    },
+    {
+      "id": "XtLPfib7OuM",
+      "small": "https://images.unsplash.com/photo-1598023696416-0193a0bcd302?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598023696416-0193a0bcd302?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5980,
+      "height": 3709,
+      "blurHash": "LZJjuG-TyExs_NkDkXWryYt7W?WC",
+      "color": "#c0a673",
+      "alt": "pizza with green leaves and red sauce",
+      "author": "amirali mirhashemian",
+      "authorUrl": "https://unsplash.com/@amir_v_ali?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pizza-with-green-leaves-and-red-sauce-XtLPfib7OuM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C19156",
+          "w": 0.4151
+        },
+        {
+          "hex": "#9B591E",
+          "w": 0.4006
+        },
+        {
+          "hex": "#DADAD2",
+          "w": 0.1843
+        }
+      ]
+    },
+    {
+      "id": "_YzBeAcw-z0",
+      "small": "https://images.unsplash.com/photo-1676300185089-8781af127fee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676300185089-8781af127fee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LRL:}%V@?wxa.8WVsps:.Tt7MxW;",
+      "color": "#d9d9c0",
+      "alt": "a white plate topped with sliced tomatoes and mozzarella",
+      "author": "Orkun Orcan",
+      "authorUrl": "https://unsplash.com/@orkunorcan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-plate-topped-with-sliced-tomatoes-and-mozzarella-_YzBeAcw-z0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2CDC3",
+          "w": 0.5314
+        },
+        {
+          "hex": "#A26B3A",
+          "w": 0.25
+        },
+        {
+          "hex": "#BB9F80",
+          "w": 0.2186
+        }
+      ]
+    },
+    {
+      "id": "PemzfitK1Zg",
+      "small": "https://images.unsplash.com/photo-1660950185000-294b2e3b002e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660950185000-294b2e3b002e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6982,
+      "height": 4660,
+      "blurHash": "LkODRhR*?wof-;j[Ria}%hj[ITWV",
+      "color": "#d9d9d9",
+      "alt": "a pizza with basil on top",
+      "author": "Blake Wisz",
+      "authorUrl": "https://unsplash.com/@blakewisz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pizza-with-basil-on-top-PemzfitK1Zg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4E1E2",
+          "w": 0.7525
+        },
+        {
+          "hex": "#8F6224",
+          "w": 0.1367
+        },
+        {
+          "hex": "#C79665",
+          "w": 0.1107
+        }
+      ]
+    },
+    {
+      "id": "h9uJ97spfzE",
+      "small": "https://images.unsplash.com/photo-1561363268-f17491a094bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1561363268-f17491a094bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b21hdG8lMjBiYXNpbCUyMG1venphcmVsbGF8ZW58MXwwfHx8MTc5MTgzMDUwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LAGReyxGTdtl~VsnWURj-;NG9Fxu",
+      "color": "#a6c0c0",
+      "alt": "plate of vegetables",
+      "author": "Claudio Schwarz",
+      "authorUrl": "https://unsplash.com/@purzlbaum?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/plate-of-vegetables-h9uJ97spfzE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B5B2B2",
+          "w": 0.4177
+        },
+        {
+          "hex": "#763A1D",
+          "w": 0.3043
+        },
+        {
+          "hex": "#A56B52",
+          "w": 0.278
+        }
+      ]
+    },
+    {
+      "id": "noFWRTW_dC4",
+      "small": "https://images.unsplash.com/photo-1685397067025-d293a18099ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1685397067025-d293a18099ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6864,
+      "height": 5152,
+      "blurHash": "LPFhw=x]bvS4~B%MxutQ4;%1%Lxt",
+      "color": "#737359",
+      "alt": "a restaurant with a red light hanging from the ceiling",
+      "author": "Oliver Stahl",
+      "authorUrl": "https://unsplash.com/@olstahl?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-restaurant-with-a-red-light-hanging-from-the-ceiling-noFWRTW_dC4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F1710",
+          "w": 0.3775
+        },
+        {
+          "hex": "#887759",
+          "w": 0.3154
+        },
+        {
+          "hex": "#CCBB96",
+          "w": 0.3072
+        }
+      ]
+    },
+    {
+      "id": "6aJMdmOWO1I",
+      "small": "https://images.unsplash.com/photo-1738113943341-75320ea86cb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1738113943341-75320ea86cb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LIBo~qs+0fxuW=E3M|=_E2a#xaWB",
+      "color": "#262626",
+      "alt": "A couple of lights that are on a wall",
+      "author": "Nicholas Sancenito",
+      "authorUrl": "https://unsplash.com/@thefilmjournal?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-couple-of-lights-that-are-on-a-wall-6aJMdmOWO1I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#292B2C",
+          "w": 0.3647
+        },
+        {
+          "hex": "#0A0A09",
+          "w": 0.3549
+        },
+        {
+          "hex": "#CFA776",
+          "w": 0.2805
+        }
+      ]
+    },
+    {
+      "id": "AEBruomjN80",
+      "small": "https://images.unsplash.com/photo-1740479783022-1006a2138849?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740479783022-1006a2138849?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 10920,
+      "height": 7278,
+      "blurHash": "LPGb0BE20Ms;AwWAnhxbWCbFIpxt",
+      "color": "#26260c",
+      "alt": "Two pizzas sitting on top of a counter next to a pizza oven",
+      "author": "Revolve Pizza Oven",
+      "authorUrl": "https://unsplash.com/@revolvepizzaoven?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-pizzas-sitting-on-top-of-a-counter-next-to-a-pizza-oven-AEBruomjN80?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#57554A",
+          "w": 0.3681
+        },
+        {
+          "hex": "#A08663",
+          "w": 0.3403
+        },
+        {
+          "hex": "#DABD95",
+          "w": 0.2916
+        }
+      ]
+    },
+    {
+      "id": "3BmMQU4jqaY",
+      "small": "https://images.unsplash.com/photo-1618232648030-3ada84c0f025?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618232648030-3ada84c0f025?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaXp6ZXJpYSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTE4MzA1MDJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3089,
+      "height": 2048,
+      "blurHash": "LIFY6m9gVurX0P-kbbX94rxVJBtQ",
+      "color": "#594026",
+      "alt": "green indoor plant on brown wooden table",
+      "author": "Sergei Sviridov",
+      "authorUrl": "https://unsplash.com/@vinchesko?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-indoor-plant-on-brown-wooden-table-3BmMQU4jqaY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#745116",
+          "w": 0.3548
+        },
+        {
+          "hex": "#372E28",
+          "w": 0.3417
+        },
+        {
+          "hex": "#997C1D",
+          "w": 0.3035
+        }
+      ]
+    }
+  ]
+}

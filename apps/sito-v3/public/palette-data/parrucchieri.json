@@ -1,0 +1,335 @@
+{
+  "slug": "parrucchieri",
+  "queries": [
+    "hair salon interior",
+    "hairdresser styling hair",
+    "salon mirror pastel"
+  ],
+  "generatedAt": "2026-10-12T18:42:02.967Z",
+  "photos": [
+    {
+      "id": "jsuWg7IXx1k",
+      "small": "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600948836101-f9ffda59d250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5761,
+      "height": 4000,
+      "blurHash": "LeF=]t00-;M{9Ft7ozoLt7xuM{t7",
+      "color": "#0c2626",
+      "alt": "Three black salon chairs facing circular mirrors on a dark wall in a salon",
+      "author": "Greg Trowman",
+      "authorUrl": "https://unsplash.com/@gregtrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/salon-chairs-with-mirrors-and-products-jsuWg7IXx1k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#11191A",
+          "w": 0.5093
+        },
+        {
+          "hex": "#D3D1D0",
+          "w": 0.3189
+        },
+        {
+          "hex": "#989996",
+          "w": 0.1718
+        }
+      ]
+    },
+    {
+      "id": "gI9rvJK61L8",
+      "small": "https://images.unsplash.com/photo-1626379501846-0df4067b8bb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1626379501846-0df4067b8bb9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LDN,xe?FNJ01%%sk?bSixaD%M{%M",
+      "color": "#d9d9d9",
+      "alt": "black and silver office rolling chair beside mirror",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-office-rolling-chair-beside-mirror-gI9rvJK61L8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E7DFD7",
+          "w": 0.6458
+        },
+        {
+          "hex": "#C4BAB0",
+          "w": 0.2219
+        },
+        {
+          "hex": "#8B8176",
+          "w": 0.1323
+        }
+      ]
+    },
+    {
+      "id": "OKXwmdbdXkk",
+      "small": "https://images.unsplash.com/photo-1626383137804-ff908d2753a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1626383137804-ff908d2753a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LkKK$iRjDiM{~pkCM{axRkayt6j@",
+      "color": "#f3f3f3",
+      "alt": "woman in white shirt standing near black leather chairs",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-white-shirt-standing-near-black-leather-chairs-OKXwmdbdXkk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E6E5E1",
+          "w": 0.433
+        },
+        {
+          "hex": "#B3AEA7",
+          "w": 0.3224
+        },
+        {
+          "hex": "#6E6765",
+          "w": 0.2446
+        }
+      ]
+    },
+    {
+      "id": "T9u-Xr30FY8",
+      "small": "https://images.unsplash.com/photo-1626383120723-2a941488860d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1626383120723-2a941488860d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWlyJTIwc2Fsb24lMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTE2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LpLENSE0D%IU~qM{ayWBM_s:t7t7",
+      "color": "#f3f3f3",
+      "alt": "black and gray chair beside white wall",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-chair-beside-white-wall-T9u-Xr30FY8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EAEBEB",
+          "w": 0.5527
+        },
+        {
+          "hex": "#78756B",
+          "w": 0.2335
+        },
+        {
+          "hex": "#3D4033",
+          "w": 0.2139
+        }
+      ]
+    },
+    {
+      "id": "Md_DhaFsnCQ",
+      "small": "https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1634449571010-02389ed0f9b0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LEA0g$t70KNGD$j[xvaeNbRjnhs:",
+      "color": "#260c0c",
+      "alt": "a woman getting her hair cut by a hair stylist",
+      "author": "Lindsay Cash",
+      "authorUrl": "https://unsplash.com/@lindsayrc81?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-getting-her-hair-cut-by-a-hair-stylist-Md_DhaFsnCQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#130C07",
+          "w": 0.5331
+        },
+        {
+          "hex": "#716761",
+          "w": 0.2669
+        },
+        {
+          "hex": "#44372D",
+          "w": 0.1999
+        }
+      ]
+    },
+    {
+      "id": "FkAZqQJTbXM",
+      "small": "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LdI;^v?H~qV[?vIVo}RkR*n~RPxa",
+      "color": "#d9d9d9",
+      "alt": "A hairstylist using a blow dryer and round brush on a client's hair",
+      "author": "Adam Winger",
+      "authorUrl": "https://unsplash.com/@awcreativeut?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hairstylist-blow-drying-client-hair-FkAZqQJTbXM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD2CA",
+          "w": 0.464
+        },
+        {
+          "hex": "#260802",
+          "w": 0.3104
+        },
+        {
+          "hex": "#583A27",
+          "w": 0.2257
+        }
+      ]
+    },
+    {
+      "id": "WXmHwPcFamo",
+      "small": "https://images.unsplash.com/photo-1562322140-8baeececf3df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562322140-8baeececf3df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LoMaLtt7%gIT_NRjWBRiozxtoJ%M",
+      "color": "#f3f3f3",
+      "alt": "woman holding hair dryer",
+      "author": "Adam Winger",
+      "authorUrl": "https://unsplash.com/@awcreativeut?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-holding-hair-dryer-WXmHwPcFamo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDEDE9",
+          "w": 0.5916
+        },
+        {
+          "hex": "#6C5840",
+          "w": 0.2367
+        },
+        {
+          "hex": "#AF9F8E",
+          "w": 0.1717
+        }
+      ]
+    },
+    {
+      "id": "wSpkThmoZQc",
+      "small": "https://images.unsplash.com/photo-1629397685944-7073f5589754?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1629397685944-7073f5589754?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWlyZHJlc3NlciUyMHN0eWxpbmclMjBoYWlyfGVufDF8MHx8fDE3OTE4MzA1MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LdH1}M~q-;oz%Ms:RPRPg4WCRjM{",
+      "color": "#262626",
+      "alt": "A hairstylist using a curling iron on a client in a salon",
+      "author": "Giorgio Trovato",
+      "authorUrl": "https://unsplash.com/@giorgiotrovato?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hairstylist-curling-hair-in-salon-wSpkThmoZQc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#322923",
+          "w": 0.3861
+        },
+        {
+          "hex": "#745640",
+          "w": 0.3563
+        },
+        {
+          "hex": "#DCD3CB",
+          "w": 0.2576
+        }
+      ]
+    },
+    {
+      "id": "LGXN4OSQSa4",
+      "small": "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4002,
+      "blurHash": "LPH.ZySix]tQ~qj[WVt7MxRPWBWB",
+      "color": "#a6a6a6",
+      "alt": "A modern hair salon with black chairs, round mirrors, and a brick wall",
+      "author": "Benyamin Bohlouli",
+      "authorUrl": "https://unsplash.com/@benyamin_bohlouli?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-hair-salon-with-black-chairs-LGXN4OSQSa4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2A3A1",
+          "w": 0.5459
+        },
+        {
+          "hex": "#616363",
+          "w": 0.255
+        },
+        {
+          "hex": "#C8CBCA",
+          "w": 0.1991
+        }
+      ]
+    },
+    {
+      "id": "PtOfbGkU3uI",
+      "small": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4038,
+      "height": 2692,
+      "blurHash": "LbK1tH?bIUs:~qt7t7oftRbHWBay",
+      "color": "#d9d9d9",
+      "alt": "Three maroon salon chairs facing a long white counter with a large mirror",
+      "author": "Guilherme Petri",
+      "authorUrl": "https://unsplash.com/@guipetri?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/salon-chairs-at-white-vanity-PtOfbGkU3uI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4D3D3",
+          "w": 0.4643
+        },
+        {
+          "hex": "#ABA7A8",
+          "w": 0.3397
+        },
+        {
+          "hex": "#817577",
+          "w": 0.196
+        }
+      ]
+    },
+    {
+      "id": "pb1Ajy_QUeE",
+      "small": "https://images.unsplash.com/photo-1706629503650-cade709d15e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706629503650-cade709d15e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6144,
+      "height": 4098,
+      "blurHash": "LFIX{d~qM|M|_1IUoztR?c-;xuoJ",
+      "color": "#a6a68c",
+      "alt": "a hair salon with chairs and mirrors",
+      "author": "Tile Merchant Ireland",
+      "authorUrl": "https://unsplash.com/@tilemerchant?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hair-salon-with-chairs-and-mirrors-pb1Ajy_QUeE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAA59B",
+          "w": 0.4165
+        },
+        {
+          "hex": "#7E766C",
+          "w": 0.3226
+        },
+        {
+          "hex": "#D1CEC8",
+          "w": 0.2609
+        }
+      ]
+    },
+    {
+      "id": "g2u8gq5XcwE",
+      "small": "https://images.unsplash.com/photo-1706629504952-ab5e50f5c179?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706629504952-ab5e50f5c179?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzYWxvbiUyMG1pcnJvciUyMHBhc3RlbHxlbnwxfDB8fHwxNzkxODMwNTIxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6144,
+      "height": 4098,
+      "blurHash": "LFJRN$_2IB^+-:M{xuM{?wxtRjx]",
+      "color": "#c0c0a6",
+      "alt": "a room with a bunch of chairs and mirrors",
+      "author": "Tile Merchant Ireland",
+      "authorUrl": "https://unsplash.com/@tilemerchant?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-bunch-of-chairs-and-mirrors-g2u8gq5XcwE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B2AB9F",
+          "w": 0.463
+        },
+        {
+          "hex": "#8E8375",
+          "w": 0.2976
+        },
+        {
+          "hex": "#D8D4CE",
+          "w": 0.2394
+        }
+      ]
+    }
+  ]
+}

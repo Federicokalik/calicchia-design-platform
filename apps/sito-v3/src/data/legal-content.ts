@@ -17,6 +17,8 @@ export type LegalDocument = {
 
 export const TITOLARE_EMAIL = 'mail@calicchia.design';
 export const LAST_LEGAL_UPDATE = '2026-05-24';
+/** Cookie e privacy policy: aggiunte le foto Unsplash della Palette di settore. */
+const PRIVACY_DOCS_UPDATE = '2026-10-12';
 
 /**
  * Major version dei documenti gating-ati nel portale clienti (T&C + DPA).
@@ -39,7 +41,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
     title: 'Cookie Policy',
     intro:
       'Informativa sull’uso di cookie e tecnologie simili,\naggiornata allo stack corrente del sito.',
-    lastUpdated: LAST_LEGAL_UPDATE,
+    lastUpdated: PRIVACY_DOCS_UPDATE,
     sections: [
       {
         id: 'cosa-sono-cookie',
@@ -131,8 +133,20 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
             ]
           },
           {
-            id: 'servizi-rimossi',
+            id: 'immagini-unsplash',
             number: '02.07',
+            heading: 'Foto di Unsplash nello strumento Palette di settore',
+            paragraphs: [
+              'Lo strumento Palette di settore mostra foto ospitate da Unsplash, caricate direttamente dai suoi server come chiedono le linee guida dell’API Unsplash (niente copie sul nostro server).\nQuando apri lo strumento o una pagina di settore, il browser comunica a Unsplash l’indirizzo IP e i dati tecnici della richiesta (user-agent, data e ora).',
+              'Il sito non legge, non salva e non incrocia dati da queste immagini.\nLogo e foto che carichi nello strumento restano nel tuo browser e non vengono inviati a nessun server.'
+            ],
+            list: [
+              'Unsplash Inc. (gruppo Getty Images): fornitura delle immagini da images.unsplash.com. Tratta IP e dati tecnici della richiesta secondo la propria privacy policy; l’infrastruttura di distribuzione comprende server fuori dallo Spazio Economico Europeo, anche negli Stati Uniti.'
+            ]
+          },
+          {
+            id: 'servizi-rimossi',
+            number: '02.08',
             heading: 'Servizi non utilizzati',
             paragraphs: [
               'Il sito non carica embed di prenotazione di terze parti.\nLa prenotazione, quando disponibile, viene gestita con stack proprietario o link interni.'
@@ -194,7 +208,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
     title: 'Privacy Policy',
     intro:
       'Informativa sul trattamento dei dati personali\nai sensi degli artt. 13 e 14 del GDPR.',
-    lastUpdated: LAST_LEGAL_UPDATE,
+    lastUpdated: PRIVACY_DOCS_UPDATE,
     sections: [
       {
         id: 'titolare-trattamento',
@@ -218,7 +232,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Dati newsletter, se il servizio viene attivato: email, nome facoltativo, IP e user-agent al momento dell’iscrizione e della conferma (prova del consenso).',
           'Dati area clienti: nome, email, ragione sociale, indirizzo di fatturazione, telefono, documenti e informazioni di progetto.',
           'Comunicazioni WhatsApp con clienti e contatti commerciali: numero di telefono, contenuto dei messaggi scambiati, metadati tecnici (timestamp, stato lettura), preferenze di comunicazione e relativi opt-in/opt-out.',
-          'Cookie e tecnologie simili: dettagli nella Cookie Policy.'
+          'Cookie e tecnologie simili: dettagli nella Cookie Policy.',
+          'Strumento Palette di settore: logo e foto caricati vengono elaborati solo nel browser e non sono raccolti; le ricerche libere arrivano al server come testo normalizzato, senza dati identificativi.'
         ]
       },
       {
@@ -233,6 +248,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Misurare traffico e uso del sito con strumenti aggregati, se attivi: art. 6(1)(a) GDPR, consenso.',
           'Garantire sicurezza, prevenzione abusi e protezione anti-bot: art. 6(1)(f) GDPR, interesse legittimo.',
           'Diagnosticare errori tecnici e garantire la stabilità del sito tramite error tracking self-hosted, con PII filtrate lato client prima dell\'invio: art. 6(1)(f) GDPR, interesse legittimo.',
+          'Mostrare le foto dello strumento Palette di settore caricandole direttamente da Unsplash, che riceve l’indirizzo IP del visitatore: art. 6(1)(f) GDPR, interesse legittimo a fornire lo strumento richiesto.',
           'Inviare comunicazioni WhatsApp transazionali (fatture, scadenze, avvisi di sicurezza) a clienti contrattualizzati: art. 6(1)(b) GDPR, esecuzione del contratto.',
           'Inviare comunicazioni WhatsApp operative (reminder appuntamenti, follow-up progetti) con possibilità di opt-out granulare: art. 6(1)(f) GDPR, interesse legittimo.',
           'Inviare comunicazioni WhatsApp di marketing solo su consenso esplicito e revocabile (default OFF): art. 6(1)(a) GDPR, consenso.',
@@ -301,6 +317,7 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
           'Resend o provider email equivalente: invio email transazionali e notifiche.',
           'Stripe e PayPal: pagamenti e fatturazione quando usati nei servizi contrattualizzati.',
           'Google Maps: mappa nel footer, caricata solo previo consenso ai contenuti di terze parti.',
+          'Unsplash Inc.: foto dello strumento Palette di settore, caricate direttamente da images.unsplash.com (hotlink richiesto dalle linee guida Unsplash). Riceve indirizzo IP e dati tecnici della richiesta del browser.',
           'TrustIndex: recensioni e analytics aggregato del widget, se attivo.',
           'Google Analytics 4 e Mouseflow: misurazione aggregata e analisi di usabilità, caricati solo previo consenso analytics.',
           'Bugsink (self-hosted): error tracking tecnico su base di interesse legittimo, con PII filtrate prima dell\'invio.',
@@ -313,7 +330,8 @@ export const LEGAL_CONTENT: Record<LegalDocument['slug'], LegalDocument> = {
         heading: 'Trasferimenti extra UE',
         paragraphs: [
           'Alcuni fornitori tecnici possono avere sede o infrastrutture fuori dallo Spazio Economico Europeo.\nIn questi casi il trasferimento avviene sulla base di garanzie adeguate,\ncome EU-US Data Privacy Framework ove applicabile o Standard Contractual Clauses approvate dalla Commissione Europea.',
-          'In particolare Meta Platforms (WhatsApp) e Google aderiscono all\'EU-US Data Privacy Framework; Mouseflow ha sede in Danimarca (UE).'
+          'In particolare Meta Platforms (WhatsApp) e Google aderiscono all\'EU-US Data Privacy Framework; Mouseflow ha sede in Danimarca (UE).',
+          'Le foto dello strumento Palette di settore sono servite da Unsplash, la cui infrastruttura comprende server fuori dallo SEE, anche negli Stati Uniti: il trasferimento riguarda indirizzo IP e dati tecnici della richiesta ed è limitato a chi usa lo strumento.'
         ]
       },
       {

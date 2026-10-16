@@ -16,7 +16,13 @@ let css = src
   .replace(/(["'])Funnel Display\1/g, 'var(--font-display)')
   .replace(/(["'])Funnel Sans\1/g, 'var(--font-sans)')
   // strip CSS comments (their commas/braces break the scoper; not needed shipped)
-  .replace(/\/\*[\s\S]*?\*\//g, '');
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  // Contrasto: testo scuro sull'accento (bianco su #F57F44 = 2,6:1, come
+  // --color-accent-ink del sito). Senza questa regola la rigenerazione la perde.
+  .replace(
+    /(button:hover\s*\{\s*background:\s*var\(--red\);\s*border-color:\s*var\(--red\))\s*;?\s*\}/,
+    '$1;color:var(--ink)}',
+  );
 
 // --- scope every selector under `.geo-wp` so the whitepaper CSS never leaks
 // into the site chrome (header/footer/global tags). ---

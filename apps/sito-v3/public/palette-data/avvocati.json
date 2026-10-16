@@ -1,0 +1,335 @@
+{
+  "slug": "avvocati",
+  "queries": [
+    "law office books",
+    "leather wood desk",
+    "courthouse columns"
+  ],
+  "generatedAt": "2026-10-12T18:42:32.612Z",
+  "photos": [
+    {
+      "id": "0y2FXSJ70sc",
+      "small": "https://images.unsplash.com/photo-1775144657626-29ff0a46ca90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775144657626-29ff0a46ca90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LFD90K~BIV?^^jxZaetR4nM|t7D%",
+      "color": "#260c0c",
+      "alt": "Grand office with flags and bookshelves",
+      "author": "Magic Fan",
+      "authorUrl": "https://unsplash.com/@magicunsplash?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grand-office-with-flags-and-bookshelves-0y2FXSJ70sc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#311303",
+          "w": 0.4378
+        },
+        {
+          "hex": "#613920",
+          "w": 0.3444
+        },
+        {
+          "hex": "#9C6A4D",
+          "w": 0.2178
+        }
+      ]
+    },
+    {
+      "id": "n4CLHNL5n6Y",
+      "small": "https://images.unsplash.com/photo-1584556326561-c8746083993b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584556326561-c8746083993b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5607,
+      "height": 3154,
+      "blurHash": "LUCY]v~ArVROERE3IVWBITNGpItR",
+      "color": "#260c0c",
+      "alt": "person using black laptop computer",
+      "author": "Mateus Campos Felipe",
+      "authorUrl": "https://unsplash.com/@matcfelipe?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-using-black-laptop-computer-n4CLHNL5n6Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0604",
+          "w": 0.5731
+        },
+        {
+          "hex": "#502E10",
+          "w": 0.2246
+        },
+        {
+          "hex": "#BFC7C3",
+          "w": 0.2024
+        }
+      ]
+    },
+    {
+      "id": "qY_Kdc-Xi40",
+      "small": "https://images.unsplash.com/photo-1775144657610-9a6f171e522f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775144657610-9a6f171e522f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGHnHQ-pTK%1^jNJT0xZ0KjZIU-p",
+      "color": "#40260c",
+      "alt": "Ornate office with american flag and antique furniture",
+      "author": "Magic Fan",
+      "authorUrl": "https://unsplash.com/@magicunsplash?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ornate-office-with-american-flag-and-antique-furniture-qY_Kdc-Xi40?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#784425",
+          "w": 0.387
+        },
+        {
+          "hex": "#B58062",
+          "w": 0.3572
+        },
+        {
+          "hex": "#431E07",
+          "w": 0.2558
+        }
+      ]
+    },
+    {
+      "id": "bEAvHnaC64s",
+      "small": "https://images.unsplash.com/photo-1775144657566-e5b093073baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775144657566-e5b093073baf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsYXclMjBvZmZpY2UlMjBib29rc3xlbnwxfDB8fHwxNzkxODMwNTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJHd$_$f0zMx~BM{NHSh4nR-R*Na",
+      "color": "#59260c",
+      "alt": "Elegant office with american flag and presidential desk",
+      "author": "Magic Fan",
+      "authorUrl": "https://unsplash.com/@magicunsplash?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elegant-office-with-american-flag-and-presidential-desk-bEAvHnaC64s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#84563A",
+          "w": 0.3534
+        },
+        {
+          "hex": "#50260B",
+          "w": 0.3376
+        },
+        {
+          "hex": "#C2947A",
+          "w": 0.309
+        }
+      ]
+    },
+    {
+      "id": "YShGGg3iKuQ",
+      "small": "https://images.unsplash.com/photo-1679309981674-cef0e23a7864?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1679309981674-cef0e23a7864?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6556,
+      "height": 4320,
+      "blurHash": "LJLp~yWCjZt7Y8xtt7ay~Vt6j?j[",
+      "color": "#c0c0c0",
+      "alt": "a desk with a glass top and wooden legs",
+      "author": "Jesse Kojo Kuntoh",
+      "authorUrl": "https://unsplash.com/@jesse_k?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-desk-with-a-glass-top-and-wooden-legs-YShGGg3iKuQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9C1B9",
+          "w": 0.5659
+        },
+        {
+          "hex": "#C4AE98",
+          "w": 0.2988
+        },
+        {
+          "hex": "#644536",
+          "w": 0.1353
+        }
+      ]
+    },
+    {
+      "id": "8z2Q6XWLYa4",
+      "small": "https://images.unsplash.com/photo-1416339158484-9637228cc908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1416339158484-9637228cc908?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LMIqZH~W0L9FEjM{-pt7ELD%NHjF",
+      "color": "#f3d9d9",
+      "alt": "gray steel drawing compass near brown leather case",
+      "author": "Jeff Sheldon",
+      "authorUrl": "https://unsplash.com/@ugmonk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-steel-drawing-compass-near-brown-leather-case-8z2Q6XWLYa4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1C3B5",
+          "w": 0.4195
+        },
+        {
+          "hex": "#9D826D",
+          "w": 0.3066
+        },
+        {
+          "hex": "#67503C",
+          "w": 0.2739
+        }
+      ]
+    },
+    {
+      "id": "k_lC6Cl6ZwI",
+      "small": "https://images.unsplash.com/flagged/photo-1576697010744-a40aedd2dcca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/flagged/photo-1576697010744-a40aedd2dcca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2736,
+      "blurHash": "LVFi7400%gRO-;M{xtR*IpoeR+Wq",
+      "color": "#735940",
+      "alt": "shallow focus photo of gray laptop computer on brown wooden table",
+      "author": "Workperch",
+      "authorUrl": "https://unsplash.com/@workperch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-gray-laptop-computer-on-brown-wooden-table-k_lC6Cl6ZwI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#695846",
+          "w": 0.4788
+        },
+        {
+          "hex": "#A4907E",
+          "w": 0.2997
+        },
+        {
+          "hex": "#211A15",
+          "w": 0.2215
+        }
+      ]
+    },
+    {
+      "id": "nXxQGd1fZxk",
+      "small": "https://images.unsplash.com/photo-1641247456497-a0f3bde00e45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1641247456497-a0f3bde00e45?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsZWF0aGVyJTIwd29vZCUyMGRlc2t8ZW58MXwwfHx8MTc5MTgzMDU0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LRLW-F?bt2V@Pqxvt7kC?a%LIUxu",
+      "color": "#d9d9d9",
+      "alt": "a laptop computer sitting on top of a wooden desk",
+      "author": "Workperch",
+      "authorUrl": "https://unsplash.com/@workperch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-desk-nXxQGd1fZxk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7D5D2",
+          "w": 0.4551
+        },
+        {
+          "hex": "#C99975",
+          "w": 0.3678
+        },
+        {
+          "hex": "#8C6A53",
+          "w": 0.1771
+        }
+      ]
+    },
+    {
+      "id": "SlyYm_CJW8E",
+      "small": "https://images.unsplash.com/photo-1496361945947-d0250d31222a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1496361945947-d0250d31222a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4315,
+      "height": 3456,
+      "blurHash": "LJDJ*lMxM|oL5eRit6WBkEWBadj[",
+      "color": "#4073a6",
+      "alt": "white concrete building",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-concrete-building-SlyYm_CJW8E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4F79B5",
+          "w": 0.4798
+        },
+        {
+          "hex": "#7A797C",
+          "w": 0.4061
+        },
+        {
+          "hex": "#BBBBBB",
+          "w": 0.114
+        }
+      ]
+    },
+    {
+      "id": "YL5dq3CXNII",
+      "small": "https://images.unsplash.com/photo-1773544015678-58d09366ad6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773544015678-58d09366ad6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5421,
+      "height": 3630,
+      "blurHash": "LAC6+9xu00t7t7WB9FRjD%ofj[j[",
+      "color": "#737373",
+      "alt": "Ornate classical building facade with columns and windows",
+      "author": "Miles Smith",
+      "authorUrl": "https://unsplash.com/@msmith0912?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ornate-classical-building-facade-with-columns-and-windows-YL5dq3CXNII?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B6B6B",
+          "w": 0.5699
+        },
+        {
+          "hex": "#A1A1A1",
+          "w": 0.2614
+        },
+        {
+          "hex": "#000000",
+          "w": 0.1687
+        }
+      ]
+    },
+    {
+      "id": "58zAWlD7mVk",
+      "small": "https://images.unsplash.com/photo-1753802025168-e55ca6e8e1c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1753802025168-e55ca6e8e1c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5113,
+      "height": 3288,
+      "blurHash": "LRQ9_@ayt7j[~qt7WBj[ofRjRjay",
+      "color": "#f3f3f3",
+      "alt": "Grand neoclassical building with a long colonnade",
+      "author": "The New York Public Library",
+      "authorUrl": "https://unsplash.com/@nypl?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grand-neoclassical-building-with-a-long-colonnade-58zAWlD7mVk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F3F3",
+          "w": 0.5506
+        },
+        {
+          "hex": "#DFDFDF",
+          "w": 0.2563
+        },
+        {
+          "hex": "#CDCDCD",
+          "w": 0.1931
+        }
+      ]
+    },
+    {
+      "id": "dTIS-w53-MQ",
+      "small": "https://images.unsplash.com/photo-1753802025011-17674dbd7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1753802025011-17674dbd7019?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3VydGhvdXNlJTIwY29sdW1uc3xlbnwxfDB8fHwxNzkxODMwNTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6262,
+      "height": 3558,
+      "blurHash": "LDRfkBxu-;t7%Mj[Rjj[~qWBD%j[",
+      "color": "#f3f3f3",
+      "alt": "Pencil sketch of a grand neoclassical building with columns",
+      "author": "The New York Public Library",
+      "authorUrl": "https://unsplash.com/@nypl?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pencil-sketch-of-a-grand-neoclassical-building-with-columns-dTIS-w53-MQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F3F3",
+          "w": 0.8265
+        },
+        {
+          "hex": "#C4C4C4",
+          "w": 0.0951
+        },
+        {
+          "hex": "#D5D5D5",
+          "w": 0.0785
+        }
+      ]
+    }
+  ]
+}

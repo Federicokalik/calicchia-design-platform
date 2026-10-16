@@ -1,0 +1,335 @@
+{
+  "slug": "gelaterie",
+  "queries": [
+    "gelato display",
+    "pistachio strawberry ice cream",
+    "ice cream shop interior"
+  ],
+  "generatedAt": "2026-10-12T18:43:01.292Z",
+  "photos": [
+    {
+      "id": "4Q0XpCPs5Us",
+      "small": "https://images.unsplash.com/photo-1791070536948-0a0f7ee457e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1791070536948-0a0f7ee457e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LKF=]mPCM{cE0M%1tSxu9_M|Vrnh",
+      "color": "#262626",
+      "alt": "A glass display case filled with various flavors of gelato in metal containers",
+      "author": "Rafaëlla Waasdorp",
+      "authorUrl": "https://unsplash.com/@krafaella_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gelato-display-case-with-various-flavors-4Q0XpCPs5Us?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#91897B",
+          "w": 0.3708
+        },
+        {
+          "hex": "#BDBDB4",
+          "w": 0.3354
+        },
+        {
+          "hex": "#565955",
+          "w": 0.2938
+        }
+      ]
+    },
+    {
+      "id": "Ix5gapaze_E",
+      "small": "https://images.unsplash.com/photo-1764337008605-44abfb0f3816?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1764337008605-44abfb0f3816?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11648,
+      "height": 8736,
+      "blurHash": "LGDlv7Mm0MWRIASvt8s;4:WVxsxb",
+      "color": "#262626",
+      "alt": "Various flavors of gelato in a display case",
+      "author": "Haberdoedas",
+      "authorUrl": "https://unsplash.com/@haberdoedas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/various-flavors-of-gelato-in-a-display-case-Ix5gapaze_E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#837A4D",
+          "w": 0.3983
+        },
+        {
+          "hex": "#574F32",
+          "w": 0.3382
+        },
+        {
+          "hex": "#302C22",
+          "w": 0.2635
+        }
+      ]
+    },
+    {
+      "id": "RWJ4Qkf0AVE",
+      "small": "https://images.unsplash.com/photo-1752962638413-a2f2432b67f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1752962638413-a2f2432b67f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "LNH^;P9Z0#wJ#=9ax[$iiw-:o|Vs",
+      "color": "#40260c",
+      "alt": "Various ice cream flavors displayed in containers",
+      "author": "Zed Can",
+      "authorUrl": "https://unsplash.com/@zedcan77?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/various-ice-cream-flavors-displayed-in-containers-RWJ4Qkf0AVE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1AF8F",
+          "w": 0.3883
+        },
+        {
+          "hex": "#B27D62",
+          "w": 0.3666
+        },
+        {
+          "hex": "#6C4D33",
+          "w": 0.2451
+        }
+      ]
+    },
+    {
+      "id": "HGf0VBj4Emg",
+      "small": "https://images.unsplash.com/photo-1752962641819-f5ac83fd213d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1752962641819-f5ac83fd213d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZWxhdG8lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTE4MzA1NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "LQLpstAC029b$*ELnONZxcNG={kA",
+      "color": "#d9d9c0",
+      "alt": "Here are a few options: * variety of ice cream flavors in metal containers. * many flavors of ice cream are displayed",
+      "author": "Zed Can",
+      "authorUrl": "https://unsplash.com/@zedcan77?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/here-are-a-few-options-variety-of-ice-cream-flavors-in-metal-containers-many-flavors-of-ice-cream-are-displayed-HGf0VBj4Emg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EECDA2",
+          "w": 0.4127
+        },
+        {
+          "hex": "#C9AC85",
+          "w": 0.3486
+        },
+        {
+          "hex": "#997A50",
+          "w": 0.2387
+        }
+      ]
+    },
+    {
+      "id": "PnIHvHZsH4Q",
+      "small": "https://images.unsplash.com/photo-1603736029103-dafad0eb0906?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603736029103-dafad0eb0906?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3285,
+      "blurHash": "LDI56+0LIf?G?v%0RjRoa7-oNDWB",
+      "color": "#a6a6a6",
+      "alt": "ice cream in clear glass bowl",
+      "author": "Jason Richard",
+      "authorUrl": "https://unsplash.com/@jasonthedesigner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/ice-cream-in-clear-glass-bowl-PnIHvHZsH4Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9686",
+          "w": 0.372
+        },
+        {
+          "hex": "#B5B0A2",
+          "w": 0.3569
+        },
+        {
+          "hex": "#827862",
+          "w": 0.2712
+        }
+      ]
+    },
+    {
+      "id": "VTt_Jn1LrOg",
+      "small": "https://images.unsplash.com/photo-1515037028865-0a2a82603f7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1515037028865-0a2a82603f7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4351,
+      "height": 3020,
+      "blurHash": "LHBpwiDj02%L%2Rkf~RkIUbboeoL",
+      "color": "#262626",
+      "alt": "four ice creams on cups",
+      "author": "Michelle Tsang",
+      "authorUrl": "https://unsplash.com/@petitesweetsnz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/four-ice-creams-on-cups-VTt_Jn1LrOg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#323736",
+          "w": 0.4006
+        },
+        {
+          "hex": "#646965",
+          "w": 0.3807
+        },
+        {
+          "hex": "#B6B798",
+          "w": 0.2187
+        }
+      ]
+    },
+    {
+      "id": "MeGx6pA1zGA",
+      "small": "https://images.unsplash.com/photo-1599038064230-17a52bd8f2f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599038064230-17a52bd8f2f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4185,
+      "height": 3203,
+      "blurHash": "LGEx;W%f0|_3DOOYXmv~I@RQMdV@",
+      "color": "#a6c0c0",
+      "alt": "pink ice cream on white ceramic bowl",
+      "author": "Umesh Soni",
+      "authorUrl": "https://unsplash.com/@umeshsonii?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-ice-cream-on-white-ceramic-bowl-MeGx6pA1zGA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#936F71",
+          "w": 0.3565
+        },
+        {
+          "hex": "#090505",
+          "w": 0.3317
+        },
+        {
+          "hex": "#B8ACB1",
+          "w": 0.3118
+        }
+      ]
+    },
+    {
+      "id": "MN6bVE7X5mE",
+      "small": "https://images.unsplash.com/photo-1566746878854-d4f4fbd11941?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1566746878854-d4f4fbd11941?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaXN0YWNoaW8lMjBzdHJhd2JlcnJ5JTIwaWNlJTIwY3JlYW18ZW58MXwwfHx8MTc5MTgzMDU3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4754,
+      "height": 3149,
+      "blurHash": "LXN0C$R5_Mg2?as:MyIAx[WAMxn$",
+      "color": "#d9d9c0",
+      "alt": "bowl of ice cream",
+      "author": "Elena Oparina",
+      "authorUrl": "https://unsplash.com/@elenaoparina?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bowl-of-ice-cream-MN6bVE7X5mE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E2D2C1",
+          "w": 0.5377
+        },
+        {
+          "hex": "#A8533A",
+          "w": 0.2415
+        },
+        {
+          "hex": "#CDA285",
+          "w": 0.2208
+        }
+      ]
+    },
+    {
+      "id": "gdUSE2gJx14",
+      "small": "https://images.unsplash.com/photo-1599470052171-45d8bfb08ef0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599470052171-45d8bfb08ef0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LMFFdCt7%hM{?wR%tSRjRlxas:t7",
+      "color": "#a6c0c0",
+      "alt": "brown and white ice cream cone",
+      "author": "Alp Allen Altiner",
+      "authorUrl": "https://unsplash.com/@alpallenaltiner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-white-ice-cream-cone-gdUSE2gJx14?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ABACAD",
+          "w": 0.367
+        },
+        {
+          "hex": "#8C7F76",
+          "w": 0.3649
+        },
+        {
+          "hex": "#372012",
+          "w": 0.2681
+        }
+      ]
+    },
+    {
+      "id": "rS4q6pw-8z8",
+      "small": "https://images.unsplash.com/photo-1680448934566-f3021ce20c91?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1680448934566-f3021ce20c91?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5800,
+      "height": 3866,
+      "blurHash": "LGDvJ?aeDjaK%2WCxYay00bbkDkD",
+      "color": "#260c0c",
+      "alt": "a restaurant with a checkered floor and a checkered floor",
+      "author": "Spencer Scott Pugh",
+      "authorUrl": "https://unsplash.com/@spencerscottpugh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-restaurant-with-a-checkered-floor-and-a-checkered-floor-rS4q6pw-8z8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8E846B",
+          "w": 0.3929
+        },
+        {
+          "hex": "#2B1C05",
+          "w": 0.3089
+        },
+        {
+          "hex": "#5A5239",
+          "w": 0.2983
+        }
+      ]
+    },
+    {
+      "id": "b2KICYFsqLQ",
+      "small": "https://images.unsplash.com/photo-1789472786322-f74cab761535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789472786322-f74cab761535?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3880,
+      "height": 2910,
+      "blurHash": "LDE2k10Lt70f?GVsS$WVAIxuM{xa",
+      "color": "#735940",
+      "alt": "Three people sitting at small marble tables in a gelato shop with a menu",
+      "author": "Brayden Goh",
+      "authorUrl": "https://unsplash.com/@gohkailoon96?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-sitting-in-gelato-shop-b2KICYFsqLQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#80684F",
+          "w": 0.539
+        },
+        {
+          "hex": "#53412B",
+          "w": 0.271
+        },
+        {
+          "hex": "#B19A84",
+          "w": 0.19
+        }
+      ]
+    },
+    {
+      "id": "3bdEdcf0Tkg",
+      "small": "https://images.unsplash.com/photo-1723248954986-5c24d9333f94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1723248954986-5c24d9333f94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpY2UlMjBjcmVhbSUyMHNob3AlMjBpbnRlcmlvcnxlbnwxfDB8fHwxNzkxODMwNTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L8EVTl9aJ8$+9E4:WC%g0fkUn5xV",
+      "color": "#594026",
+      "alt": "A man and a woman holding an ice cream cone",
+      "author": "Green Liu",
+      "authorUrl": "https://unsplash.com/@greenliustudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-and-a-woman-holding-an-ice-cream-cone-3bdEdcf0Tkg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#654A38",
+          "w": 0.4101
+        },
+        {
+          "hex": "#8F7664",
+          "w": 0.4002
+        },
+        {
+          "hex": "#B4AEA4",
+          "w": 0.1897
+        }
+      ]
+    }
+  ]
+}
