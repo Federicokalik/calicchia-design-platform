@@ -31,6 +31,8 @@ import { useRuntimeConfig } from '@/lib/runtime-config';
 import { reportEvent } from '@/instrumentation-client';
 // Audit C-013/C-014: contact email via useSiteConfig().
 import { useSiteConfig } from '@/lib/use-site-config';
+// Solo la mappa slug → etichetta EN (5 KB), non seo-professions.ts.
+import { PROFESSION_LABELS_EN } from '@/data/seo-professions-labels-en';
 import {
   decodeSharedPalette,
   PRESETS,
@@ -56,6 +58,16 @@ function humanizeSlug(s: string) {
 }
 
 /**
+ * `?profession=` porta sempre lo slug italiano (matrice e Palette di settore):
+ * in EN lo slug umanizzato resterebbe in italiano ("Avvocati"), quindi si usa
+ * l'etichetta inglese quando c'è.
+ */
+function professionLabel(slug: string, locale: string): string {
+  if (locale === 'en') return PROFESSION_LABELS_EN[slug] ?? humanizeSlug(slug);
+  return humanizeSlug(slug);
+}
+
+/**
  * Palette dal link del tool "Palette di settore": `?palette=` contiene la
  * querystring di encodeSharedPalette() codificata con encodeURIComponent
  * (searchParams.get la decodifica già). Null se assente o non valida.
@@ -73,7 +85,8 @@ function readSharedPalette(params: URLSearchParams): SharedPalette | null {
 function buildPrefillMessage(
   params: URLSearchParams,
   t: FormTranslate,
-  palette: SharedPalette | null
+  palette: SharedPalette | null,
+  locale: string
 ): string {
   const service = params.get('service');
   const plan = params.get('plan');
@@ -101,7 +114,7 @@ function buildPrefillMessage(
   }
   if (profession || city) {
     const ctxBits: string[] = [];
-    if (profession) ctxBits.push(humanizeSlug(profession));
+    if (profession) ctxBits.push(professionLabel(profession, locale));
     if (city) ctxBits.push(humanizeSlug(city));
     parts.push(t('prefill.context', { context: ctxBits.join(' · ') }));
   }
@@ -146,9 +159,10 @@ export function ContactFormClient() {
       buildPrefillMessage(
         new URLSearchParams(searchParams.toString()),
         t as FormTranslate,
-        sharedPalette
+        sharedPalette,
+        locale
       ),
-    [searchParams, t, sharedPalette]
+    [searchParams, t, sharedPalette, locale]
   );
   const validationMessages = useMemo(
     () =>
