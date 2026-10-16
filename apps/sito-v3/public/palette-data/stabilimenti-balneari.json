@@ -1,0 +1,335 @@
+{
+  "slug": "stabilimenti-balneari",
+  "queries": [
+    "beach umbrellas sand",
+    "sun loungers beach",
+    "wooden beach cabanas"
+  ],
+  "generatedAt": "2026-10-16T19:53:12.897Z",
+  "photos": [
+    {
+      "id": "hlmuzhcpCkY",
+      "small": "https://images.unsplash.com/photo-1498558518643-e15396efbf68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1498558518643-e15396efbf68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3444,
+      "blurHash": "L1DT0M~oM0%dvJ-g%KZgDjMwVBX9",
+      "color": "#264059",
+      "alt": "aerial photography of blue-and-white patio umbrellas",
+      "author": "Ricardo Gomez Angel",
+      "authorUrl": "https://unsplash.com/@rgaleriacom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/aerial-photography-of-blue-and-white-patio-umbrellas-hlmuzhcpCkY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F8B90",
+          "w": 0.3898
+        },
+        {
+          "hex": "#ABABBA",
+          "w": 0.3701
+        },
+        {
+          "hex": "#5D606F",
+          "w": 0.2401
+        }
+      ]
+    },
+    {
+      "id": "R5Bq8coqA94",
+      "small": "https://images.unsplash.com/photo-1598786962125-34d70c6830b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598786962125-34d70c6830b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3910,
+      "height": 2444,
+      "blurHash": "L,H:LIR+WVj[0ojsjsayr@oefkj[",
+      "color": "#d9d9d9",
+      "alt": "person holding white umbrella walking on beach during daytime",
+      "author": "Rod Long",
+      "authorUrl": "https://unsplash.com/@rodlong?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-white-umbrella-walking-on-beach-during-daytime-R5Bq8coqA94?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7D2CF",
+          "w": 0.4864
+        },
+        {
+          "hex": "#007ECD",
+          "w": 0.2692
+        },
+        {
+          "hex": "#22A1E5",
+          "w": 0.2444
+        }
+      ]
+    },
+    {
+      "id": "rkl4Es1T9gI",
+      "small": "https://images.unsplash.com/photo-1643648659789-f1abcf37e651?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643648659789-f1abcf37e651?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3261,
+      "height": 2160,
+      "blurHash": "LXDTCeNHkCRj%%NHoeWBNfWXxZWX",
+      "color": "#738ca6",
+      "alt": "a couple of lawn chairs sitting on top of a sandy beach",
+      "author": "Steve Adams",
+      "authorUrl": "https://unsplash.com/@sradams57?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-couple-of-lawn-chairs-sitting-on-top-of-a-sandy-beach-rkl4Es1T9gI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#71828C",
+          "w": 0.4856
+        },
+        {
+          "hex": "#ABB0AE",
+          "w": 0.2893
+        },
+        {
+          "hex": "#4D4439",
+          "w": 0.2251
+        }
+      ]
+    },
+    {
+      "id": "Sl-TkCIEWJI",
+      "small": "https://images.unsplash.com/photo-1594444088593-656f0965712d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1594444088593-656f0965712d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWFjaCUyMHVtYnJlbGxhcyUyMHNhbmR8ZW58MXwwfHx8MTc5MjE4MDM4Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LsKKTVE1soay?wRkkBjZNgt7j?ax",
+      "color": "#d9d9d9",
+      "alt": "yellow and green umbrella on beach during daytime",
+      "author": "Celeste Shepherd",
+      "authorUrl": "https://unsplash.com/@celebelle?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-and-green-umbrella-on-beach-during-daytime-Sl-TkCIEWJI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B9B0A1",
+          "w": 0.4522
+        },
+        {
+          "hex": "#9F713F",
+          "w": 0.2853
+        },
+        {
+          "hex": "#DCD5CF",
+          "w": 0.2625
+        }
+      ]
+    },
+    {
+      "id": "RwvA27JLXDc",
+      "small": "https://images.unsplash.com/photo-1627232343011-c27052448dcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627232343011-c27052448dcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LAD];%IBE1NGDgIAtRWYSPozofWB",
+      "color": "#8c8c8c",
+      "alt": "white plastic chairs with white umbrella",
+      "author": "Dmytro Glazunov",
+      "authorUrl": "https://unsplash.com/@d_glazun0v?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-chairs-with-white-umbrella-RwvA27JLXDc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A9497",
+          "w": 0.5401
+        },
+        {
+          "hex": "#7D807C",
+          "w": 0.3175
+        },
+        {
+          "hex": "#4F524E",
+          "w": 0.1424
+        }
+      ]
+    },
+    {
+      "id": "wow8xaTNeuE",
+      "small": "https://images.unsplash.com/photo-1627232343290-b992cf13fddf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627232343290-b992cf13fddf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LeFO[gR%NGay~BWBRjaz-:t6f7WB",
+      "color": "#c0a6a6",
+      "alt": "white and orange boat on sea dock during daytime",
+      "author": "Dmytro Glazunov",
+      "authorUrl": "https://unsplash.com/@d_glazun0v?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-orange-boat-on-sea-dock-during-daytime-wow8xaTNeuE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1AC9A",
+          "w": 0.437
+        },
+        {
+          "hex": "#4A4B4E",
+          "w": 0.2967
+        },
+        {
+          "hex": "#65717C",
+          "w": 0.2663
+        }
+      ]
+    },
+    {
+      "id": "dpHAcrOEdRA",
+      "small": "https://images.unsplash.com/photo-1627232343146-3142240e9911?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627232343146-3142240e9911?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LGEyuf?v4Tx]MwROt8tR-=WYjFae",
+      "color": "#a6a6a6",
+      "alt": "white plastic chairs on white sand beach during daytime",
+      "author": "Dmytro Glazunov",
+      "authorUrl": "https://unsplash.com/@d_glazun0v?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-chairs-on-white-sand-beach-during-daytime-dpHAcrOEdRA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9DA5A7",
+          "w": 0.6529
+        },
+        {
+          "hex": "#474944",
+          "w": 0.1845
+        },
+        {
+          "hex": "#70716B",
+          "w": 0.1625
+        }
+      ]
+    },
+    {
+      "id": "xd1jSMeDYIQ",
+      "small": "https://images.unsplash.com/photo-1589948770183-c8eb3422f78b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1589948770183-c8eb3422f78b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdW4lMjBsb3VuZ2VycyUyMGJlYWNofGVufDF8MHx8fDE3OTIxODAzODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3264,
+      "height": 2448,
+      "blurHash": "LQF?CUDjM_xtt:M|jYoKR4Rlt7WB",
+      "color": "#40598c",
+      "alt": "blue and white boat on beach during daytime",
+      "author": "Stephanie Klepacki",
+      "authorUrl": "https://unsplash.com/@sklepacki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-white-boat-on-beach-during-daytime-xd1jSMeDYIQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#818282",
+          "w": 0.4212
+        },
+        {
+          "hex": "#ACB3BB",
+          "w": 0.3729
+        },
+        {
+          "hex": "#505C7D",
+          "w": 0.2059
+        }
+      ]
+    },
+    {
+      "id": "neCs1Bzdzkg",
+      "small": "https://images.unsplash.com/photo-1596016155846-4b615fcd32f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596016155846-4b615fcd32f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4008,
+      "height": 3006,
+      "blurHash": "LYG+XB$,RkX+B@S6fhjs$mO9skn6",
+      "color": "#738ca6",
+      "alt": "blue and green wooden house under blue sky during daytime",
+      "author": "Wee Ping Khoo",
+      "authorUrl": "https://unsplash.com/@pingsterrrr?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-green-wooden-house-under-blue-sky-during-daytime-neCs1Bzdzkg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5A050",
+          "w": 0.4683
+        },
+        {
+          "hex": "#85A0BA",
+          "w": 0.3552
+        },
+        {
+          "hex": "#826742",
+          "w": 0.1765
+        }
+      ]
+    },
+    {
+      "id": "Lu3t4_sTsmc",
+      "small": "https://images.unsplash.com/photo-1669022310172-93352d62b4cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1669022310172-93352d62b4cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4423,
+      "height": 3096,
+      "blurHash": "LuJlNxxvM{ROyZX8ogoeR:n~t8oz",
+      "color": "#a6d9f3",
+      "alt": "a person sitting on a chair outside a small yellow and blue building",
+      "author": "Natasha Jenny",
+      "authorUrl": "https://unsplash.com/@natashajenny?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-sitting-on-a-chair-outside-a-small-yellow-and-blue-building-Lu3t4_sTsmc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C8E6F5",
+          "w": 0.5501
+        },
+        {
+          "hex": "#A7AEB5",
+          "w": 0.2646
+        },
+        {
+          "hex": "#686D73",
+          "w": 0.1852
+        }
+      ]
+    },
+    {
+      "id": "tteYO-tACI4",
+      "small": "https://images.unsplash.com/photo-1564948425973-5439c53be7b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1564948425973-5439c53be7b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5069,
+      "height": 3802,
+      "blurHash": "LLI5DA.8tSMx0$M{RPbbt-IoNGxa",
+      "color": "#c0c0c0",
+      "alt": "white and blue stripe shelf",
+      "author": "Krzysztof Kowalik",
+      "authorUrl": "https://unsplash.com/@kowalikus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-blue-stripe-shelf-tteYO-tACI4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BCB4B0",
+          "w": 0.4796
+        },
+        {
+          "hex": "#929192",
+          "w": 0.3199
+        },
+        {
+          "hex": "#74554A",
+          "w": 0.2005
+        }
+      ]
+    },
+    {
+      "id": "G8NGM389OH8",
+      "small": "https://images.unsplash.com/photo-1602762866694-0a65aa11f53d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1602762866694-0a65aa11f53d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjBiZWFjaCUyMGNhYmFuYXN8ZW58MXwwfHx8MTc5MjE4MDM5MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LuL4sd%MNG%M_NofRjj[?bs:NGjZ",
+      "color": "#f3f3f3",
+      "alt": "brown wooden chairs on beach during daytime",
+      "author": "Espen Prenzyna",
+      "authorUrl": "https://unsplash.com/@espen_p?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-chairs-on-beach-during-daytime-G8NGM389OH8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AFABA8",
+          "w": 0.4773
+        },
+        {
+          "hex": "#F7F9FA",
+          "w": 0.3472
+        },
+        {
+          "hex": "#41322D",
+          "w": 0.1755
+        }
+      ]
+    }
+  ]
+}

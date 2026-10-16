@@ -1,0 +1,254 @@
+{
+  "slug": "elettrodomestici",
+  "queries": [
+    "appliance store showroom",
+    "kitchen appliances display",
+    "washing machine store"
+  ],
+  "generatedAt": "2026-10-16T19:54:15.330Z",
+  "photos": [
+    {
+      "id": "Hafhe2KkG-E",
+      "small": "https://images.unsplash.com/photo-1785741393025-d6b6ba1d1eee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcHBsaWFuY2UlMjBzdG9yZSUyMHNob3dyb29tfGVufDF8MHx8fDE3OTIxODA0NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785741393025-d6b6ba1d1eee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcHBsaWFuY2UlMjBzdG9yZSUyMHNob3dyb29tfGVufDF8MHx8fDE3OTIxODA0NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9365,
+      "height": 6264,
+      "blurHash": "LJHL0Zj[8^jZxcfRIoaznMWVbIfR",
+      "color": "#735940",
+      "alt": "Contemporary store interior with pillars and circular skylight",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/contemporary-store-interior-with-pillars-and-circular-skylight-Hafhe2KkG-E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2907B",
+          "w": 0.4431
+        },
+        {
+          "hex": "#815E43",
+          "w": 0.4183
+        },
+        {
+          "hex": "#5E4531",
+          "w": 0.1386
+        }
+      ]
+    },
+    {
+      "id": "KGDAMKJZ0G8",
+      "small": "https://images.unsplash.com/photo-1740803292822-a742c6a4fef0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740803292822-a742c6a4fef0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8160,
+      "height": 5609,
+      "blurHash": "L5Ey9}E49EE2InkDtRt74TVst8%L",
+      "color": "#404040",
+      "alt": "A bunch of microwaves that are on a shelf",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-microwaves-that-are-on-a-shelf-KGDAMKJZ0G8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#81766E",
+          "w": 0.377
+        },
+        {
+          "hex": "#4D433C",
+          "w": 0.3562
+        },
+        {
+          "hex": "#C3BBB6",
+          "w": 0.2668
+        }
+      ]
+    },
+    {
+      "id": "q2Cri6LS8iI",
+      "small": "https://images.unsplash.com/photo-1740803292374-1b167c1558b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740803292374-1b167c1558b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8160,
+      "height": 5341,
+      "blurHash": "L6FFKhE3ITIptkogofof4TV?o#%2",
+      "color": "#262626",
+      "alt": "A room filled with lots of different types of microwaves",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-filled-with-lots-of-different-types-of-microwaves-q2Cri6LS8iI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#58473F",
+          "w": 0.3833
+        },
+        {
+          "hex": "#887B74",
+          "w": 0.3818
+        },
+        {
+          "hex": "#C9C0BB",
+          "w": 0.2349
+        }
+      ]
+    },
+    {
+      "id": "uDYtyG_uHkk",
+      "small": "https://images.unsplash.com/photo-1740803292814-13d2e35924c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740803292814-13d2e35924c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8160,
+      "height": 5406,
+      "blurHash": "LIG8vAxu00t68_NGozxu-;jaIoax",
+      "color": "#262626",
+      "alt": "A bunch of toasters that are on a shelf",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-toasters-that-are-on-a-shelf-uDYtyG_uHkk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8C7F79",
+          "w": 0.3554
+        },
+        {
+          "hex": "#D5CCC7",
+          "w": 0.3258
+        },
+        {
+          "hex": "#554742",
+          "w": 0.3188
+        }
+      ]
+    },
+    {
+      "id": "ljXc9exxbEs",
+      "small": "https://images.unsplash.com/photo-1735022591081-b371c9fc66a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1735022591081-b371c9fc66a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxraXRjaGVuJTIwYXBwbGlhbmNlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "LHJHU4?^1J9Z^*IoS4?ani%f9GMd",
+      "color": "#d9d9d9",
+      "alt": "A kitchen filled with lots of wooden cabinets",
+      "author": "blue sky",
+      "authorUrl": "https://unsplash.com/@bluext?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-filled-with-lots-of-wooden-cabinets-ljXc9exxbEs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2C9BA",
+          "w": 0.4059
+        },
+        {
+          "hex": "#B18E70",
+          "w": 0.3528
+        },
+        {
+          "hex": "#83552E",
+          "w": 0.2413
+        }
+      ]
+    },
+    {
+      "id": "f4jsI88K7ds",
+      "small": "https://images.unsplash.com/photo-1604335398980-ededcadcc37d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604335398980-ededcadcc37d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LMDTL.xZIUV@_4jYoeoJ.8tRRiof",
+      "color": "#738c8c",
+      "alt": "white front load washing machines",
+      "author": "Oli Woodman",
+      "authorUrl": "https://unsplash.com/@braintax?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-front-load-washing-machines-f4jsI88K7ds?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7C8792",
+          "w": 0.5411
+        },
+        {
+          "hex": "#404C57",
+          "w": 0.3115
+        },
+        {
+          "hex": "#BCC4CD",
+          "w": 0.1474
+        }
+      ]
+    },
+    {
+      "id": "nUL_PP69IPA",
+      "small": "https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5953,
+      "height": 3969,
+      "blurHash": "LDDm8fDi4ToK?w%Mt7az-=xujZof",
+      "color": "#a6a6a6",
+      "alt": "white front load washing machine",
+      "author": "Oli Woodman",
+      "authorUrl": "https://unsplash.com/@braintax?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-front-load-washing-machine-nUL_PP69IPA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAAEB5",
+          "w": 0.4354
+        },
+        {
+          "hex": "#70747B",
+          "w": 0.2947
+        },
+        {
+          "hex": "#3B3C40",
+          "w": 0.27
+        }
+      ]
+    },
+    {
+      "id": "lgrM1t4rxWQ",
+      "small": "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1545173168-9f1947eebb7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3353,
+      "height": 2235,
+      "blurHash": "LJI5Yv~p00IU?v%MM{D%?GM{NFad",
+      "color": "#d9d9d9",
+      "alt": "shallow focus photo of washing machines",
+      "author": "Jeremy Sallee",
+      "authorUrl": "https://unsplash.com/@jeremysallee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shallow-focus-photo-of-washing-machines-lgrM1t4rxWQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4D6CC",
+          "w": 0.4565
+        },
+        {
+          "hex": "#94937A",
+          "w": 0.3045
+        },
+        {
+          "hex": "#5A524A",
+          "w": 0.239
+        }
+      ]
+    },
+    {
+      "id": "R5NdfEnbcYo",
+      "small": "https://images.unsplash.com/photo-1657064575960-efefbe831c2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1657064575960-efefbe831c2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXNoaW5nJTIwbWFjaGluZSUyMHN0b3JlfGVufDF8MHx8fDE3OTIxODA0NTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LAHLl1t7D%D%~qofofayD%ofM{t7",
+      "color": "#a6a6a6",
+      "alt": "a row of washing machines",
+      "author": "Yun Cho",
+      "authorUrl": "https://unsplash.com/@yunw?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-washing-machines-R5NdfEnbcYo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9E9E",
+          "w": 0.7053
+        },
+        {
+          "hex": "#BFBFBF",
+          "w": 0.1573
+        },
+        {
+          "hex": "#151515",
+          "w": 0.1375
+        }
+      ]
+    }
+  ]
+}

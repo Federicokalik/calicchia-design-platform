@@ -1,0 +1,335 @@
+{
+  "slug": "fiorai",
+  "queries": [
+    "flower shop buckets",
+    "florist arranging bouquet",
+    "fresh roses close up"
+  ],
+  "generatedAt": "2026-10-16T19:54:01.187Z",
+  "photos": [
+    {
+      "id": "D4Blldtly00",
+      "small": "https://images.unsplash.com/photo-1589244159943-460088ed5c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1589244159943-460088ed5c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5705,
+      "height": 3719,
+      "blurHash": "LFCFq?tOEyRP0KRk%1S4Xmaiwfog",
+      "color": "#26260c",
+      "alt": "pink flowers in gray steel bucket",
+      "author": "Alisa Anton",
+      "authorUrl": "https://unsplash.com/@alisaanton?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-flowers-in-gray-steel-bucket-D4Blldtly00?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#553D2D",
+          "w": 0.4203
+        },
+        {
+          "hex": "#2E2110",
+          "w": 0.3324
+        },
+        {
+          "hex": "#846259",
+          "w": 0.2472
+        }
+      ]
+    },
+    {
+      "id": "TtKZyFJ7XC0",
+      "small": "https://images.unsplash.com/photo-1567696153410-7ae55f32e4dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1567696153410-7ae55f32e4dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LWNTXbIUkCNG~WjFWVbHSioeofj[",
+      "color": "#f3f3f3",
+      "alt": "flowers on baskets",
+      "author": "Carrie Beth Williams",
+      "authorUrl": "https://unsplash.com/@caribou15?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/flowers-on-baskets-TtKZyFJ7XC0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0DEDC",
+          "w": 0.5559
+        },
+        {
+          "hex": "#AFA489",
+          "w": 0.2646
+        },
+        {
+          "hex": "#74684B",
+          "w": 0.1795
+        }
+      ]
+    },
+    {
+      "id": "BKNFx3nUHQo",
+      "small": "https://images.unsplash.com/photo-1510885428963-8362ed9167ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510885428963-8362ed9167ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 2688,
+      "blurHash": "LGH2Ax4=IUI;8^EM%MM_16-TxsRO",
+      "color": "#a6a6a6",
+      "alt": "assorted-colored petaled flowers",
+      "author": "Kaitlyn Chow",
+      "authorUrl": "https://unsplash.com/@kaitlynraeann?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-colored-petaled-flowers-BKNFx3nUHQo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#93887F",
+          "w": 0.3917
+        },
+        {
+          "hex": "#C1B9B0",
+          "w": 0.3666
+        },
+        {
+          "hex": "#635B53",
+          "w": 0.2416
+        }
+      ]
+    },
+    {
+      "id": "hqPJfPc45Fo",
+      "small": "https://images.unsplash.com/photo-1506094898237-719a84070f2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1506094898237-719a84070f2c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbG93ZXIlMjBzaG9wJTIwYnVja2V0c3xlbnwxfDB8fHwxNzkyMTgwNDM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LDJt|^9$DiM^q?M{xsX4~C^+b^$%",
+      "color": "#c0c0c0",
+      "alt": "assorted flowers in stainless steel pots",
+      "author": "Katy Anne",
+      "authorUrl": "https://unsplash.com/@katy_anne?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-flowers-in-stainless-steel-pots-hqPJfPc45Fo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B2ACA0",
+          "w": 0.4593
+        },
+        {
+          "hex": "#DEDAD3",
+          "w": 0.2864
+        },
+        {
+          "hex": "#79786E",
+          "w": 0.2543
+        }
+      ]
+    },
+    {
+      "id": "p1P9XrEg8Rs",
+      "small": "https://images.unsplash.com/photo-1782038522784-ff40103903e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782038522784-ff40103903e2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LQIN~v4TXU%L~p4n-p%L58IoxaNG",
+      "color": "#f3f3f3",
+      "alt": "Young woman arranging pink flowers in a lush garden",
+      "author": "Volodymyr Lymariev",
+      "authorUrl": "https://unsplash.com/@vlmrv?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/young-woman-arranging-pink-flowers-in-a-lush-garden-p1P9XrEg8Rs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#79604A",
+          "w": 0.4217
+        },
+        {
+          "hex": "#3C2819",
+          "w": 0.3048
+        },
+        {
+          "hex": "#EFE0D2",
+          "w": 0.2735
+        }
+      ]
+    },
+    {
+      "id": "9L9GZJvIcrM",
+      "small": "https://images.unsplash.com/photo-1782038522371-a9c8455d6c3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782038522371-a9c8455d6c3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3639,
+      "height": 2439,
+      "blurHash": "LSHT~w^+0fV@?HI:9Zs:IWRQSdbb",
+      "color": "#260c0c",
+      "alt": "Hand holding a beautiful white peony amongst many pink flowers",
+      "author": "Volodymyr Lymariev",
+      "authorUrl": "https://unsplash.com/@vlmrv?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-a-beautiful-white-peony-amongst-many-pink-flowers-9L9GZJvIcrM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCB8A8",
+          "w": 0.3541
+        },
+        {
+          "hex": "#AF7365",
+          "w": 0.3321
+        },
+        {
+          "hex": "#6B4132",
+          "w": 0.3138
+        }
+      ]
+    },
+    {
+      "id": "1dZNNaL7iOc",
+      "small": "https://images.unsplash.com/photo-1782038522292-33d16c092c70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782038522292-33d16c092c70?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3860,
+      "height": 2573,
+      "blurHash": "LwK+}~E2R*xa~BWBoMa#Rkxat7js",
+      "color": "#594040",
+      "alt": "Hands holding delicate pink roses with a ring",
+      "author": "Volodymyr Lymariev",
+      "authorUrl": "https://unsplash.com/@vlmrv?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hands-holding-delicate-pink-roses-with-a-ring-1dZNNaL7iOc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EEB6AC",
+          "w": 0.3813
+        },
+        {
+          "hex": "#5B363D",
+          "w": 0.3495
+        },
+        {
+          "hex": "#CA9186",
+          "w": 0.2691
+        }
+      ]
+    },
+    {
+      "id": "20CNNRIZ6Gg",
+      "small": "https://images.unsplash.com/photo-1782038522723-f3ab645f9ae3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782038522723-f3ab645f9ae3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmbG9yaXN0JTIwYXJyYW5naW5nJTIwYm91cXVldHxlbnwxfDB8fHwxNzkyMTgwNDM3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5333,
+      "height": 4000,
+      "blurHash": "LoIhgQR*4mxu^*M{M{jYW9WAt7a}",
+      "color": "#f3f3f3",
+      "alt": "Floristry tools and ribbons arranged on a white table",
+      "author": "Volodymyr Lymariev",
+      "authorUrl": "https://unsplash.com/@vlmrv?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/floristry-tools-and-ribbons-arranged-on-a-white-table-20CNNRIZ6Gg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C5756",
+          "w": 0.357
+        },
+        {
+          "hex": "#E5E2E9",
+          "w": 0.336
+        },
+        {
+          "hex": "#989591",
+          "w": 0.3071
+        }
+      ]
+    },
+    {
+      "id": "sycOtFg3SBc",
+      "small": "https://images.unsplash.com/photo-1556712691-5c39e0e32a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1556712691-5c39e0e32a8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LCO,7F?sok5A{I9H0i%1u1E,9IxY",
+      "color": "#c00c26",
+      "alt": "orange, red, and pink rose flower",
+      "author": "Waldemar Brandt",
+      "authorUrl": "https://unsplash.com/@waldemarbrandt67w?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/orange-red-and-pink-rose-flower-sycOtFg3SBc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F46E41",
+          "w": 0.3779
+        },
+        {
+          "hex": "#C01727",
+          "w": 0.3473
+        },
+        {
+          "hex": "#FFAB72",
+          "w": 0.2748
+        }
+      ]
+    },
+    {
+      "id": "_OopvJHRz3c",
+      "small": "https://images.unsplash.com/photo-1708901140258-858ebb2493ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1708901140258-858ebb2493ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3824,
+      "height": 2448,
+      "blurHash": "LMCqc8-B1JS3S0S0axsoAZsp=KsT",
+      "color": "#26260c",
+      "alt": "a close up of a pink rose with other flowers in the background",
+      "author": "Wiktoria Skrzekotowska",
+      "authorUrl": "https://unsplash.com/@wswierzgon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pink-rose-with-other-flowers-in-the-background-_OopvJHRz3c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1A14",
+          "w": 0.6328
+        },
+        {
+          "hex": "#A83426",
+          "w": 0.1969
+        },
+        {
+          "hex": "#C35548",
+          "w": 0.1702
+        }
+      ]
+    },
+    {
+      "id": "pkFo3Lm-d0s",
+      "small": "https://images.unsplash.com/photo-1524835391568-32c8f7016d73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1524835391568-32c8f7016d73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4592,
+      "height": 3448,
+      "blurHash": "L8PP7Y.94UMx-.xuxut74TRjxuRk",
+      "color": "#d9c0c0",
+      "alt": "white flower lot",
+      "author": "Lauza Loistl",
+      "authorUrl": "https://unsplash.com/@prettyspecial?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-flower-lot-pkFo3Lm-d0s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EED0CA",
+          "w": 0.4627
+        },
+        {
+          "hex": "#DDB9B2",
+          "w": 0.4046
+        },
+        {
+          "hex": "#C49C93",
+          "w": 0.1327
+        }
+      ]
+    },
+    {
+      "id": "2DkWp2j1dfU",
+      "small": "https://images.unsplash.com/photo-1618741196494-bc8434f9bf96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618741196494-bc8434f9bf96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaCUyMHJvc2VzJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTgwNDM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5942,
+      "height": 3826,
+      "blurHash": "L8PCUD-o9wR6}?IVKh$QbJV[63=_",
+      "color": "#f37340",
+      "alt": "pink and white roses bouquet",
+      "author": "Waldemar Brandt",
+      "authorUrl": "https://unsplash.com/@waldemarbrandt67w?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-and-white-roses-bouquet-2DkWp2j1dfU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D76130",
+          "w": 0.4983
+        },
+        {
+          "hex": "#EB895B",
+          "w": 0.258
+        },
+        {
+          "hex": "#A84C23",
+          "w": 0.2438
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "wine-bar",
+  "queries": [
+    "wine bar counter",
+    "wine glasses table",
+    "wine bottles shelves"
+  ],
+  "generatedAt": "2026-10-16T19:53:21.082Z",
+  "photos": [
+    {
+      "id": "qRfjRzzily0",
+      "small": "https://images.unsplash.com/photo-1662738221342-8106801cee08?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1662738221342-8106801cee08?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7671,
+      "height": 5117,
+      "blurHash": "L67-1l-;0hr;-oR.M}$y-TkDNeod",
+      "color": "#262626",
+      "alt": "a group of glasses with liquid in them",
+      "author": "Ambitious Studio* | Rick Barrett",
+      "authorUrl": "https://unsplash.com/@weareambitious?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-glasses-with-liquid-in-them-qRfjRzzily0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181818",
+          "w": 0.6231
+        },
+        {
+          "hex": "#433935",
+          "w": 0.2311
+        },
+        {
+          "hex": "#6A5E57",
+          "w": 0.1459
+        }
+      ]
+    },
+    {
+      "id": "udPv6ANWQhU",
+      "small": "https://images.unsplash.com/photo-1758247706694-7830caadea8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758247706694-7830caadea8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LE9~~INHniof~AR*jFoeaeR+s.j[",
+      "color": "#260c0c",
+      "alt": "A dimly lit bar with bottles and glasses on shelves",
+      "author": "Kenneth Running",
+      "authorUrl": "https://unsplash.com/@kennysgarden?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dimly-lit-bar-with-bottles-and-glasses-on-shelves-udPv6ANWQhU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0B0402",
+          "w": 0.4265
+        },
+        {
+          "hex": "#3F210F",
+          "w": 0.3485
+        },
+        {
+          "hex": "#775033",
+          "w": 0.2249
+        }
+      ]
+    },
+    {
+      "id": "IstwV4SguAI",
+      "small": "https://images.unsplash.com/photo-1705888608758-4cc317908070?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1705888608758-4cc317908070?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LGBo~xW=56juyER*RPof10RkxCof",
+      "color": "#260c0c",
+      "alt": "a bar filled with lots of bottles and glasses",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bar-filled-with-lots-of-bottles-and-glasses-IstwV4SguAI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#170F0B",
+          "w": 0.3685
+        },
+        {
+          "hex": "#826250",
+          "w": 0.3604
+        },
+        {
+          "hex": "#4A352A",
+          "w": 0.2711
+        }
+      ]
+    },
+    {
+      "id": "15hzO5HVhoY",
+      "small": "https://images.unsplash.com/photo-1779591211987-f82cbbacc94b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779591211987-f82cbbacc94b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYmFyJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzkzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 2731,
+      "blurHash": "LDF5d8o|K4E04:%NxuXT0NnOsqof",
+      "color": "#260c0c",
+      "alt": "A well-stocked bar with many bottles and hanging glasses",
+      "author": "Lens Fables",
+      "authorUrl": "https://unsplash.com/@lensfables?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-well-stocked-bar-with-many-bottles-and-hanging-glasses-15hzO5HVhoY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#54452D",
+          "w": 0.337
+        },
+        {
+          "hex": "#897556",
+          "w": 0.337
+        },
+        {
+          "hex": "#BDA98B",
+          "w": 0.326
+        }
+      ]
+    },
+    {
+      "id": "-SFs8RmpnHQ",
+      "small": "https://images.unsplash.com/photo-1558670426-931963635470?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558670426-931963635470?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5632,
+      "height": 3168,
+      "blurHash": "LJH2TH?aIox]El4Ts,t6x]oKxuV@",
+      "color": "#c0c0a6",
+      "alt": "clear long-stem wine glasses on table",
+      "author": "Caroline Attwood",
+      "authorUrl": "https://unsplash.com/@_carolineattwood?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clear-long-stem-wine-glasses-on-table--SFs8RmpnHQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#615B4D",
+          "w": 0.3647
+        },
+        {
+          "hex": "#9C988A",
+          "w": 0.3298
+        },
+        {
+          "hex": "#D0CCBD",
+          "w": 0.3054
+        }
+      ]
+    },
+    {
+      "id": "gVkAiPchYhY",
+      "small": "https://images.unsplash.com/photo-1562713682-cde79058b2b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562713682-cde79058b2b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LcI5Y-M{D%M{00j[ofWBM{WBxuRj",
+      "color": "#c0c0c0",
+      "alt": "two clear wine glasses",
+      "author": "Michael Wave",
+      "authorUrl": "https://unsplash.com/@michaelwave?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-clear-wine-glasses-gVkAiPchYhY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBCBCB",
+          "w": 0.56
+        },
+        {
+          "hex": "#414141",
+          "w": 0.2467
+        },
+        {
+          "hex": "#979797",
+          "w": 0.1933
+        }
+      ]
+    },
+    {
+      "id": "tnqsbxZvL40",
+      "small": "https://images.unsplash.com/photo-1690715455230-d3aafc7bec00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1690715455230-d3aafc7bec00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKBDKCbvIUo001Rjt7ofNHt7t7Wq",
+      "color": "#262626",
+      "alt": "a close up of a table with glasses on it",
+      "author": "Bhuwan Bansal",
+      "authorUrl": "https://unsplash.com/@bhuwan_bansal?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-table-with-glasses-on-it-tnqsbxZvL40?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181510",
+          "w": 0.5631
+        },
+        {
+          "hex": "#443E35",
+          "w": 0.219
+        },
+        {
+          "hex": "#777267",
+          "w": 0.2179
+        }
+      ]
+    },
+    {
+      "id": "Lj4BosV0wwE",
+      "small": "https://images.unsplash.com/photo-1570657854607-67ed08894c4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1570657854607-67ed08894c4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzOTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LCB|HO?aS%Io_NWC%Mxt4:R,%1xu",
+      "color": "#262626",
+      "alt": "wine glasses",
+      "author": "Ed Dy",
+      "authorUrl": "https://unsplash.com/@eddy0505?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/wine-glasses-Lj4BosV0wwE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#211F1F",
+          "w": 0.4215
+        },
+        {
+          "hex": "#777470",
+          "w": 0.3278
+        },
+        {
+          "hex": "#474542",
+          "w": 0.2507
+        }
+      ]
+    },
+    {
+      "id": "aK6WGqxyHFw",
+      "small": "https://images.unsplash.com/photo-1562601579-599dec564e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562601579-599dec564e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBATfp9F0Kxu9ZM{?bM{?bV?IU%g",
+      "color": "#26260c",
+      "alt": "selective focus photography of bottles",
+      "author": "Hermes Rivera",
+      "authorUrl": "https://unsplash.com/@hermez777?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-bottles-aK6WGqxyHFw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100D06",
+          "w": 0.5127
+        },
+        {
+          "hex": "#3E3722",
+          "w": 0.3007
+        },
+        {
+          "hex": "#736F60",
+          "w": 0.1865
+        }
+      ]
+    },
+    {
+      "id": "jDU4yYk5Kgs",
+      "small": "https://images.unsplash.com/photo-1611575189074-9dfbbceb258a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611575189074-9dfbbceb258a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "L5CFbL-obd$$01D*58EMDj=w={%L",
+      "color": "#260c0c",
+      "alt": "black and white bottles on brown wooden shelf",
+      "author": "Javier Balseiro",
+      "authorUrl": "https://unsplash.com/@javier_balseiro?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-bottles-on-brown-wooden-shelf-jDU4yYk5Kgs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0402",
+          "w": 0.5793
+        },
+        {
+          "hex": "#402816",
+          "w": 0.214
+        },
+        {
+          "hex": "#8D603C",
+          "w": 0.2067
+        }
+      ]
+    },
+    {
+      "id": "IGJ_21drT3g",
+      "small": "https://images.unsplash.com/photo-1548025396-689d647d00c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1548025396-689d647d00c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "L02PDFH=baaeofV@ogj[Mwt8aeoz",
+      "color": "#262626",
+      "alt": "close-up photography of glass bottles with lid",
+      "author": "Biljana Martinić",
+      "authorUrl": "https://unsplash.com/@biljaminai?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-photography-of-glass-bottles-with-lid-IGJ_21drT3g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070608",
+          "w": 0.8046
+        },
+        {
+          "hex": "#22272D",
+          "w": 0.0986
+        },
+        {
+          "hex": "#010103",
+          "w": 0.0968
+        }
+      ]
+    },
+    {
+      "id": "h4AGlo55tTA",
+      "small": "https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYm90dGxlcyUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDM5OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LVHxvh8^xuD%NHE2x]Rj0KX9ofkC",
+      "color": "#0c2626",
+      "alt": "organized bottles on shelf",
+      "author": "Scott Warman",
+      "authorUrl": "https://unsplash.com/@scottiewarman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/organized-bottles-on-shelf-h4AGlo55tTA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAA096",
+          "w": 0.3393
+        },
+        {
+          "hex": "#D9DAD8",
+          "w": 0.3313
+        },
+        {
+          "hex": "#162225",
+          "w": 0.3294
+        }
+      ]
+    }
+  ]
+}

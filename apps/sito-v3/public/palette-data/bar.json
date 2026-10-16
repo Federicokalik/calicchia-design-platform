@@ -1,0 +1,335 @@
+{
+  "slug": "bar",
+  "queries": [
+    "espresso machine counter",
+    "cafe tables sunlight",
+    "coffee cups counter"
+  ],
+  "generatedAt": "2026-10-16T19:52:35.636Z",
+  "photos": [
+    {
+      "id": "BBFRIGifYQ8",
+      "small": "https://images.unsplash.com/photo-1558416165-5fb04b79b0e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558416165-5fb04b79b0e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5110,
+      "height": 3405,
+      "blurHash": "L69?:y0f4:=|4;R*$%o#El%1v|OF",
+      "color": "#262626",
+      "alt": "espresso cups on espresso maker",
+      "author": "Kevin Butz",
+      "authorUrl": "https://unsplash.com/@kevin_butz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/espresso-cups-on-espresso-maker-BBFRIGifYQ8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#433835",
+          "w": 0.3969
+        },
+        {
+          "hex": "#1D1A19",
+          "w": 0.3053
+        },
+        {
+          "hex": "#64574F",
+          "w": 0.2978
+        }
+      ]
+    },
+    {
+      "id": "9rTEwV_G0Do",
+      "small": "https://images.unsplash.com/photo-1461988091159-192b6df7054f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1461988091159-192b6df7054f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2662,
+      "blurHash": "L7FE_qD*0f9b?Z-:9b$%#%9aXSNK",
+      "color": "#262626",
+      "alt": "photo of espresso machine",
+      "author": "Crew",
+      "authorUrl": "https://unsplash.com/@crew?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/photo-of-espresso-machine-9rTEwV_G0Do?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B4A2E",
+          "w": 0.3811
+        },
+        {
+          "hex": "#9F7A5B",
+          "w": 0.3098
+        },
+        {
+          "hex": "#322721",
+          "w": 0.3091
+        }
+      ]
+    },
+    {
+      "id": "Iiqo64hiwZo",
+      "small": "https://images.unsplash.com/photo-1536319229365-83318cdc7b83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1536319229365-83318cdc7b83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LZI};W4T%fxus;WXV@t7ozxuRPog",
+      "color": "#d9d9d9",
+      "alt": "person holding white mug brewing coffee",
+      "author": "Peter Pivák",
+      "authorUrl": "https://unsplash.com/@pivievic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-white-mug-brewing-coffee-Iiqo64hiwZo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CED5D4",
+          "w": 0.4775
+        },
+        {
+          "hex": "#A29E99",
+          "w": 0.2799
+        },
+        {
+          "hex": "#6D564A",
+          "w": 0.2426
+        }
+      ]
+    },
+    {
+      "id": "klub_Ke-268",
+      "small": "https://images.unsplash.com/photo-1496582490020-60c1344c64aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1496582490020-60c1344c64aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlc3ByZXNzbyUyMG1hY2hpbmUlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODAzNDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6210,
+      "height": 4091,
+      "blurHash": "L696~|5600o}-pI:RP-;9Zae_3IU",
+      "color": "#260c0c",
+      "alt": "close-up photography of filling clear drinking glass with dispenser",
+      "author": "Jason Betz",
+      "authorUrl": "https://unsplash.com/@jason_betz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-photography-of-filling-clear-drinking-glass-with-dispenser-klub_Ke-268?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B1411",
+          "w": 0.6014
+        },
+        {
+          "hex": "#43302B",
+          "w": 0.2667
+        },
+        {
+          "hex": "#7C635C",
+          "w": 0.1319
+        }
+      ]
+    },
+    {
+      "id": "izKYTPdJRjo",
+      "small": "https://images.unsplash.com/photo-1645535956958-2ef0ba30566b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1645535956958-2ef0ba30566b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4736,
+      "height": 3552,
+      "blurHash": "LEE{X#n,X89FxH?G01W=xHRPIoNH",
+      "color": "#a6a6a6",
+      "alt": "a glass with a straw in it sitting on a table",
+      "author": "Hyoshin Choi",
+      "authorUrl": "https://unsplash.com/@hyoshining?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-glass-with-a-straw-in-it-sitting-on-a-table-izKYTPdJRjo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6B1A3",
+          "w": 0.4165
+        },
+        {
+          "hex": "#454237",
+          "w": 0.3121
+        },
+        {
+          "hex": "#100F06",
+          "w": 0.2714
+        }
+      ]
+    },
+    {
+      "id": "zhfTiQ3C-Hw",
+      "small": "https://images.unsplash.com/photo-1788773351594-86d16ac27ca6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788773351594-86d16ac27ca6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5946,
+      "height": 3964,
+      "blurHash": "LEC%ESIXD$Ro_NogITWZ-?j;Mxxu",
+      "color": "#595959",
+      "alt": "A black metal chair and small round table on a paved patio",
+      "author": "Egor Myznik",
+      "authorUrl": "https://unsplash.com/@vonshnauzer?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-metal-chair-and-patio-table-zhfTiQ3C-Hw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#575752",
+          "w": 0.4745
+        },
+        {
+          "hex": "#777870",
+          "w": 0.3838
+        },
+        {
+          "hex": "#B1B5B1",
+          "w": 0.1417
+        }
+      ]
+    },
+    {
+      "id": "Bz89y0tvie8",
+      "small": "https://images.unsplash.com/photo-1728210062472-8f2e73ec5ad7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1728210062472-8f2e73ec5ad7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 5152,
+      "blurHash": "L59QK#~W56?HIU-p~VoJ=_RiE1-p",
+      "color": "#262626",
+      "alt": "A row of tables sitting on the side of a street",
+      "author": "Haberdoedas",
+      "authorUrl": "https://unsplash.com/@haberdoedas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-tables-sitting-on-the-side-of-a-street-Bz89y0tvie8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#423938",
+          "w": 0.482
+        },
+        {
+          "hex": "#1A1615",
+          "w": 0.3857
+        },
+        {
+          "hex": "#685E5F",
+          "w": 0.1323
+        }
+      ]
+    },
+    {
+      "id": "NvEuobv5z6Q",
+      "small": "https://images.unsplash.com/photo-1774597998605-2897fc12b11c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774597998605-2897fc12b11c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWZlJTIwdGFibGVzJTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8972,
+      "height": 5971,
+      "blurHash": "LDAm;eD+02R$A8RQ-roc?tRRD*t6",
+      "color": "#26260c",
+      "alt": "Outdoor dining area surrounded by lush green trees and foliage",
+      "author": "Adrien Olichon",
+      "authorUrl": "https://unsplash.com/@adrienolichon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/outdoor-dining-area-surrounded-by-lush-green-trees-and-foliage-NvEuobv5z6Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0A0B05",
+          "w": 0.3637
+        },
+        {
+          "hex": "#373D20",
+          "w": 0.3302
+        },
+        {
+          "hex": "#697A42",
+          "w": 0.306
+        }
+      ]
+    },
+    {
+      "id": "6ymKo1HVSPY",
+      "small": "https://images.unsplash.com/photo-1781701894352-70c1bab02c01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781701894352-70c1bab02c01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBEVQd~q9bs.X._3~VRkx[%fxuWC",
+      "color": "#594040",
+      "alt": "Modern coffee shop interior with a large percent sign logo",
+      "author": "Yanhao Fang",
+      "authorUrl": "https://unsplash.com/@alamanga?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-coffee-shop-interior-with-a-large-percent-sign-logo-6ymKo1HVSPY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#513E31",
+          "w": 0.3636
+        },
+        {
+          "hex": "#74675D",
+          "w": 0.3514
+        },
+        {
+          "hex": "#9F8A7A",
+          "w": 0.285
+        }
+      ]
+    },
+    {
+      "id": "X6FQqUDgpWo",
+      "small": "https://images.unsplash.com/photo-1780663685402-130d1cf0310c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780663685402-130d1cf0310c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LPC?lvRkD%tR~qWXIUxuxuWCayt6",
+      "color": "#262626",
+      "alt": "A coffee bar with an espresso machine and various cups",
+      "author": "AJ Alao",
+      "authorUrl": "https://unsplash.com/@ajalao?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-coffee-bar-with-an-espresso-machine-and-various-cups-X6FQqUDgpWo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#403E3E",
+          "w": 0.3572
+        },
+        {
+          "hex": "#7F7B78",
+          "w": 0.3222
+        },
+        {
+          "hex": "#121111",
+          "w": 0.3206
+        }
+      ]
+    },
+    {
+      "id": "a3itQGXop8A",
+      "small": "https://images.unsplash.com/photo-1767458770652-aa6cdc6fd316?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1767458770652-aa6cdc6fd316?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LQE_jNIp0gW;V{bbbFV@XQofRkad",
+      "color": "#40260c",
+      "alt": "A % arabica coffee shop counter with espresso machine",
+      "author": "F aint",
+      "authorUrl": "https://unsplash.com/@faintsam?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-arabica-coffee-shop-counter-with-espresso-machine-a3itQGXop8A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E440C",
+          "w": 0.3821
+        },
+        {
+          "hex": "#A27429",
+          "w": 0.3795
+        },
+        {
+          "hex": "#361D00",
+          "w": 0.2385
+        }
+      ]
+    },
+    {
+      "id": "Jwh5u0rPbhI",
+      "small": "https://images.unsplash.com/photo-1771333228939-772d0d355a94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771333228939-772d0d355a94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb2ZmZWUlMjBjdXBzJTIwY291bnRlcnxlbnwxfDB8fHwxNzkyMTgwMzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8306,
+      "height": 6230,
+      "blurHash": "L6Av:}nN9GO@~qbcIUtR5UR*V@%1",
+      "color": "#262626",
+      "alt": "Coffee shop counter with espresso machine and shelves",
+      "author": "Haberdoedas",
+      "authorUrl": "https://unsplash.com/@haberdoedas?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/coffee-shop-counter-with-espresso-machine-and-shelves-Jwh5u0rPbhI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#272122",
+          "w": 0.4492
+        },
+        {
+          "hex": "#483F3E",
+          "w": 0.3225
+        },
+        {
+          "hex": "#736764",
+          "w": 0.2283
+        }
+      ]
+    }
+  ]
+}

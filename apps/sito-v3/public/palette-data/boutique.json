@@ -1,0 +1,327 @@
+{
+  "slug": "boutique",
+  "queries": [
+    "boutique display window",
+    "silk garments hanger",
+    "perfume bottles shelf"
+  ],
+  "generatedAt": "2026-10-16T19:54:21.766Z",
+  "photos": [
+    {
+      "id": "Rmjq07KI20U",
+      "small": "https://images.unsplash.com/photo-1605513524006-063ed6ed31e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1605513524006-063ed6ed31e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 3160,
+      "blurHash": "L384b?9Z-;0K9FxuxuWB9FxtRj-;",
+      "color": "#262626",
+      "alt": "white dress shirt hanging on brown wooden cabinet",
+      "author": "the blowup",
+      "authorUrl": "https://unsplash.com/@theblowup?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-dress-shirt-hanging-on-brown-wooden-cabinet-Rmjq07KI20U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#282423",
+          "w": 0.4014
+        },
+        {
+          "hex": "#060302",
+          "w": 0.3718
+        },
+        {
+          "hex": "#53504F",
+          "w": 0.2268
+        }
+      ]
+    },
+    {
+      "id": "nlfOuHQlO7c",
+      "small": "https://images.unsplash.com/photo-1627061560899-1c36a3d1657e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627061560899-1c36a3d1657e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5575,
+      "height": 3310,
+      "blurHash": "LD9a54%gNIxZ00MxxZR+o#WBNGbH",
+      "color": "#262626",
+      "alt": "group of people in white robe standing on white floor tiles",
+      "author": "Osarugue Igbinoba",
+      "authorUrl": "https://unsplash.com/@osarugue?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/group-of-people-in-white-robe-standing-on-white-floor-tiles-nlfOuHQlO7c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#171910",
+          "w": 0.5472
+        },
+        {
+          "hex": "#3B3D30",
+          "w": 0.2655
+        },
+        {
+          "hex": "#7A766C",
+          "w": 0.1873
+        }
+      ]
+    },
+    {
+      "id": "rgTvdYnlMBA",
+      "small": "https://images.unsplash.com/photo-1645937464657-4106e824fb15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1645937464657-4106e824fb15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8000,
+      "height": 6000,
+      "blurHash": "LEK0ZkK,Ff0f^g9GIonO?aS$I[Ne",
+      "color": "#a67340",
+      "alt": "a display of mannequins in a store window",
+      "author": "Eris Marasigan",
+      "authorUrl": "https://unsplash.com/@eris_m?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-display-of-mannequins-in-a-store-window-rgTvdYnlMBA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B68B55",
+          "w": 0.3933
+        },
+        {
+          "hex": "#95642E",
+          "w": 0.3054
+        },
+        {
+          "hex": "#DCB376",
+          "w": 0.3013
+        }
+      ]
+    },
+    {
+      "id": "qGlYIDIYE_o",
+      "small": "https://images.unsplash.com/photo-1696409461620-f5d0f5991504?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1696409461620-f5d0f5991504?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib3V0aXF1ZSUyMGRpc3BsYXklMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQ1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4889,
+      "height": 3258,
+      "blurHash": "LAEo*?9vI9WZ4TIptSnhOur=M{xu",
+      "color": "#404040",
+      "alt": "a window display of mannequins in a store",
+      "author": "Eric Prouzet",
+      "authorUrl": "https://unsplash.com/@eprouzet?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-window-display-of-mannequins-in-a-store-qGlYIDIYE_o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#474442",
+          "w": 0.3506
+        },
+        {
+          "hex": "#706A61",
+          "w": 0.345
+        },
+        {
+          "hex": "#908D88",
+          "w": 0.3044
+        }
+      ]
+    },
+    {
+      "id": "Vl5LFBEsSF0",
+      "small": "https://images.unsplash.com/photo-1689887883155-ea1e241b34d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1689887883155-ea1e241b34d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L8Pihqt7D*o0~qoeMxoMRlaxMxkC",
+      "color": "#d9c0c0",
+      "alt": "a wooden hanger with a hook on a white wall",
+      "author": "Luna Dai",
+      "authorUrl": "https://unsplash.com/@coconuat?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-hanger-with-a-hook-on-a-white-wall-Vl5LFBEsSF0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0CEC7",
+          "w": 1
+        }
+      ]
+    },
+    {
+      "id": "Fex1kzAI2VQ",
+      "small": "https://images.unsplash.com/photo-1531185540915-ad82395cd7d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1531185540915-ad82395cd7d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LHO:;Lx[%MIU4UR%-;IU8{M{WUj[",
+      "color": "#d9d9d9",
+      "alt": "two black and purple plastic clothes hangers",
+      "author": "H&CO",
+      "authorUrl": "https://unsplash.com/@hngstrm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-black-and-purple-plastic-clothes-hangers-Fex1kzAI2VQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E2E3",
+          "w": 0.8842
+        },
+        {
+          "hex": "#583659",
+          "w": 0.0618
+        },
+        {
+          "hex": "#9E8A9F",
+          "w": 0.054
+        }
+      ]
+    },
+    {
+      "id": "cp-VMJ-mdKs",
+      "small": "https://images.unsplash.com/photo-1519554318711-aaf73ece6ff9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1519554318711-aaf73ece6ff9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LRL}BFaz_3-;~q%M9FM{kBWBRjWB",
+      "color": "#d9d9d9",
+      "alt": "black sleeveless top hanging on wardrobe",
+      "author": "H&CO",
+      "authorUrl": "https://unsplash.com/@hngstrm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-sleeveless-top-hanging-on-wardrobe-cp-VMJ-mdKs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9D9D9",
+          "w": 0.5791
+        },
+        {
+          "hex": "#BCBBBC",
+          "w": 0.2255
+        },
+        {
+          "hex": "#323039",
+          "w": 0.1954
+        }
+      ]
+    },
+    {
+      "id": "ojJAoOXupyI",
+      "small": "https://images.unsplash.com/photo-1633700669374-2f132602281d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633700669374-2f132602281d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzaWxrJTIwZ2FybWVudHMlMjBoYW5nZXJ8ZW58MXwwfHx8MTc5MjE4MDQ1OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5640,
+      "height": 4012,
+      "blurHash": "LBDvJ~019Za}RiWVWB%2E1j[Rjof",
+      "color": "#737373",
+      "alt": "a row of clothes hanging on a clothes line",
+      "author": "hidefumi ohmichi",
+      "authorUrl": "https://unsplash.com/@hidefu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-clothes-hanging-on-a-clothes-line-ojJAoOXupyI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7E7771",
+          "w": 0.5312
+        },
+        {
+          "hex": "#4C4640",
+          "w": 0.2699
+        },
+        {
+          "hex": "#26211C",
+          "w": 0.1989
+        }
+      ]
+    },
+    {
+      "id": "UmBW3Bam-tg",
+      "small": "https://images.unsplash.com/photo-1659450013573-b2d6b39f916a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659450013573-b2d6b39f916a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3986,
+      "height": 3000,
+      "blurHash": "LFF~mkjc01t0RjxuoeWEnPo#V@ad",
+      "color": "#c0c0c0",
+      "alt": "a collection of vases and pots",
+      "author": "Madalina Zamfira",
+      "authorUrl": "https://unsplash.com/@madalinaz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-collection-of-vases-and-pots-UmBW3Bam-tg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BFC1B9",
+          "w": 0.3735
+        },
+        {
+          "hex": "#8D8F82",
+          "w": 0.317
+        },
+        {
+          "hex": "#54574B",
+          "w": 0.3095
+        }
+      ]
+    },
+    {
+      "id": "2PMTtlJ8pIA",
+      "small": "https://images.unsplash.com/photo-1598207548924-fcab47e9b272?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598207548924-fcab47e9b272?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LMINs[tl?Gbw~Boxoeoc4na#s;f6",
+      "color": "#260c0c",
+      "alt": "a shelf filled with lots of bottles of liquor",
+      "author": "Omkar Jadhav",
+      "authorUrl": "https://unsplash.com/@jadhav24omkar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-filled-with-lots-of-bottles-of-liquor-2PMTtlJ8pIA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D4C4C0",
+          "w": 0.4095
+        },
+        {
+          "hex": "#B27C5A",
+          "w": 0.3073
+        },
+        {
+          "hex": "#703D2D",
+          "w": 0.2832
+        }
+      ]
+    },
+    {
+      "id": "TUUY5yORBc0",
+      "small": "https://images.unsplash.com/photo-1629881604792-7313167e39f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1629881604792-7313167e39f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5976,
+      "height": 3992,
+      "blurHash": "LHE_T.^i0gR*^iIpNH%19uIqW=NH",
+      "color": "#260c0c",
+      "alt": "clear glass bottles on brown wooden shelf",
+      "author": "jay huang",
+      "authorUrl": "https://unsplash.com/@uiing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clear-glass-bottles-on-brown-wooden-shelf-TUUY5yORBc0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#180000",
+          "w": 0.3719
+        },
+        {
+          "hex": "#9B6837",
+          "w": 0.3249
+        },
+        {
+          "hex": "#D1A374",
+          "w": 0.3033
+        }
+      ]
+    },
+    {
+      "id": "Psu25Amqv8k",
+      "small": "https://images.unsplash.com/photo-1598193681146-3835eeaea11f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598193681146-3835eeaea11f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZXJmdW1lJTIwYm90dGxlcyUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0NjB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3264,
+      "height": 2448,
+      "blurHash": "LFIq}j?t?F~W?Fozn$%M02t8xuk8",
+      "color": "#d9d9c0",
+      "alt": "bottles on brown wooden shelf",
+      "author": "Omkar Jadhav",
+      "authorUrl": "https://unsplash.com/@jadhav24omkar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bottles-on-brown-wooden-shelf-Psu25Amqv8k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7D3B7",
+          "w": 0.4631
+        },
+        {
+          "hex": "#A89B74",
+          "w": 0.2899
+        },
+        {
+          "hex": "#604A2B",
+          "w": 0.247
+        }
+      ]
+    }
+  ]
+}
