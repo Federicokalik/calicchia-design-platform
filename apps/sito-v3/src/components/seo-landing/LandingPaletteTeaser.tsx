@@ -1,5 +1,6 @@
 import { getLocale } from 'next-intl/server';
 import { hasPaletteSector } from '@/data/risorse/palette/sectors/slugs';
+import { readSectorPhotoSet } from '@/data/risorse/palette';
 import type { Locale } from '@/lib/i18n';
 import { Body } from '@/components/ui/Body';
 import { Button } from '@/components/ui/Button';
@@ -31,13 +32,14 @@ const COPY: Record<Locale, { eyebrow: string; title: string; body: string; butto
 
 /**
  * Box promozionale del tool "Palette di settore" nelle landing della matrice.
- * Compare solo se esiste il settore curato con lo slug della professione:
- * legge l'elenco leggero degli slug, mai i testi dei settori.
+ * Compare solo se la pagina del settore esiste: settore curato con lo slug
+ * della professione e foto pre-calcolate (stessa regola di
+ * listSectorPageSlugs). Senza foto la pagina è un 404 e il box sparisce.
  * Il link usa lo slug IT anche in EN (le pagine settore hanno lo stesso slug);
  * il Link di next-intl aggiunge il prefisso /en.
  */
 export async function LandingPaletteTeaser({ professionSlug, professionLabel }: LandingPaletteTeaserProps) {
-  if (!hasPaletteSector(professionSlug)) return null;
+  if (!hasPaletteSector(professionSlug) || !readSectorPhotoSet(professionSlug)) return null;
   const locale = (await getLocale()) as Locale;
   const t = COPY[locale] ?? COPY.it;
 
