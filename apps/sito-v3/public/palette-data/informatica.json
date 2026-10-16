@@ -1,0 +1,335 @@
+{
+  "slug": "informatica",
+  "queries": [
+    "computer repair workshop",
+    "laptop display shop",
+    "keyboards and mice desk"
+  ],
+  "generatedAt": "2026-10-16T20:56:08.002Z",
+  "photos": [
+    {
+      "id": "vx9PRVosHhs",
+      "small": "https://images.unsplash.com/photo-1580835916901-40770720c505?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580835916901-40770720c505?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7209,
+      "height": 4808,
+      "blurHash": "LMEyGGngR$M_?aoet7jF0KR.t8t7",
+      "color": "#737373",
+      "alt": "man in black t-shirt and blue denim jeans standing in front of blue plastic container",
+      "author": "ThisisEngineering",
+      "authorUrl": "https://unsplash.com/@thisisengineering?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-black-t-shirt-and-blue-denim-jeans-standing-in-front-of-blue-plastic-container-vx9PRVosHhs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#78706D",
+          "w": 0.515
+        },
+        {
+          "hex": "#434248",
+          "w": 0.2629
+        },
+        {
+          "hex": "#D3C9BE",
+          "w": 0.2221
+        }
+      ]
+    },
+    {
+      "id": "M_NvKwSOkug",
+      "small": "https://images.unsplash.com/photo-1581093806997-124204d9fa9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581093806997-124204d9fa9d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LtMjEhIVM_WE$zM|ENj[DNWro#WC",
+      "color": "#f3f3f3",
+      "alt": "black and red click pen on white printer paper",
+      "author": "ThisisEngineering",
+      "authorUrl": "https://unsplash.com/@thisisengineering?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-click-pen-on-white-printer-paper-M_NvKwSOkug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E2B16B",
+          "w": 0.4249
+        },
+        {
+          "hex": "#E2E3E4",
+          "w": 0.3917
+        },
+        {
+          "hex": "#1D1814",
+          "w": 0.1834
+        }
+      ]
+    },
+    {
+      "id": "YXdbaTRcQzA",
+      "small": "https://images.unsplash.com/photo-1581090466619-e945d2e2980e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581090466619-e945d2e2980e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LFCF#D~AOtESPW9]?G^*~B-TWYNf",
+      "color": "#8c8c8c",
+      "alt": "man in black jacket holding black and silver microphone",
+      "author": "ThisisEngineering",
+      "authorUrl": "https://unsplash.com/@thisisengineering?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-black-jacket-holding-black-and-silver-microphone-YXdbaTRcQzA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#08080C",
+          "w": 0.4267
+        },
+        {
+          "hex": "#4E382C",
+          "w": 0.3229
+        },
+        {
+          "hex": "#85746E",
+          "w": 0.2504
+        }
+      ]
+    },
+    {
+      "id": "cacpYWjYEt0",
+      "small": "https://images.unsplash.com/photo-1604330496257-4d5a07210f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604330496257-4d5a07210f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb21wdXRlciUyMHJlcGFpciUyMHdvcmtzaG9wfGVufDF8MHx8fDE3OTIxODQxNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L6Ciz9D%-:%1~q~B9ZD*VYK6Dix]",
+      "color": "#262626",
+      "alt": "man in blue shirt using black laptop computer",
+      "author": "Sajad Nori",
+      "authorUrl": "https://unsplash.com/@sajadnori?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-blue-shirt-using-black-laptop-computer-cacpYWjYEt0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A7067",
+          "w": 0.3658
+        },
+        {
+          "hex": "#262421",
+          "w": 0.3506
+        },
+        {
+          "hex": "#4E4742",
+          "w": 0.2836
+        }
+      ]
+    },
+    {
+      "id": "Uar8mh_f0kA",
+      "small": "https://images.unsplash.com/photo-1552857131-0afaed1953f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1552857131-0afaed1953f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LVPGQ*t7.mMwIAt7o}RjyEoKMdWX",
+      "color": "#f3f3f3",
+      "alt": "gray laptop computer",
+      "author": "Jose Gil",
+      "authorUrl": "https://unsplash.com/@jagg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-laptop-computer-Uar8mh_f0kA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECEEEE",
+          "w": 0.5249
+        },
+        {
+          "hex": "#D9D7D5",
+          "w": 0.3159
+        },
+        {
+          "hex": "#C7947A",
+          "w": 0.1592
+        }
+      ]
+    },
+    {
+      "id": "C0drYfLjPBE",
+      "small": "https://images.unsplash.com/photo-1706101126602-5a6132b98b8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706101126602-5a6132b98b8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUGut3xYD*IU0LIVxtozR+oej=t6",
+      "color": "#262626",
+      "alt": "two laptops are sitting on a table in a store",
+      "author": "Revendo",
+      "authorUrl": "https://unsplash.com/@revendo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-laptops-are-sitting-on-a-table-in-a-store-C0drYfLjPBE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F1E1E",
+          "w": 0.3406
+        },
+        {
+          "hex": "#CEC6B5",
+          "w": 0.3386
+        },
+        {
+          "hex": "#9D978B",
+          "w": 0.3208
+        }
+      ]
+    },
+    {
+      "id": "pt_Ciwikir8",
+      "small": "https://images.unsplash.com/photo-1697124904055-79fbf576cae7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1697124904055-79fbf576cae7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4002,
+      "blurHash": "LKHoE-_3E0IA0L.7?bD*E0IUMzbJ",
+      "color": "#c0c0c0",
+      "alt": "a person's hand on top of a laptop computer",
+      "author": "Revendo",
+      "authorUrl": "https://unsplash.com/@revendo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-persons-hand-on-top-of-a-laptop-computer-pt_Ciwikir8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C5C6B6",
+          "w": 0.5152
+        },
+        {
+          "hex": "#8C8779",
+          "w": 0.2554
+        },
+        {
+          "hex": "#0A0908",
+          "w": 0.2295
+        }
+      ]
+    },
+    {
+      "id": "vaBBmzNosOY",
+      "small": "https://images.unsplash.com/photo-1571854003494-ab1b14c21249?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571854003494-ab1b14c21249?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsYXB0b3AlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LQHAk9r=0#xt-5-nR+M|J-oLi_NH",
+      "color": "#d98c40",
+      "alt": "brown wooden display cabinet",
+      "author": "Jason Leung",
+      "authorUrl": "https://unsplash.com/@ninjason?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-display-cabinet-vaBBmzNosOY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A56B2F",
+          "w": 0.3763
+        },
+        {
+          "hex": "#DA984F",
+          "w": 0.3447
+        },
+        {
+          "hex": "#6E4720",
+          "w": 0.279
+        }
+      ]
+    },
+    {
+      "id": "szrJ3wjzOMg",
+      "small": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LCO3|Mx84?Iu0L%E9eIonJs#IqM^",
+      "color": "#d9d9c0",
+      "alt": "a keyboard and a mouse on a desk",
+      "author": "Amy Hirschi",
+      "authorUrl": "https://unsplash.com/@amyhirschi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-keyboard-and-a-mouse-on-a-desk-szrJ3wjzOMg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFDACD",
+          "w": 0.6902
+        },
+        {
+          "hex": "#C4C5CC",
+          "w": 0.2415
+        },
+        {
+          "hex": "#909382",
+          "w": 0.0683
+        }
+      ]
+    },
+    {
+      "id": "-RBuQ2PK_L8",
+      "small": "https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1493723843671-1d655e66ac1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGP?O7zVo|WC}[VtTdnOI.X8nikC",
+      "color": "#f3d9d9",
+      "alt": "white Apple Magic Mouse beside of Magic Keyboard and headphones",
+      "author": "LUM3N",
+      "authorUrl": "https://unsplash.com/@lum3n?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-apple-magic-mouse-beside-of-magic-keyboard-and-headphones--RBuQ2PK_L8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E7CCCD",
+          "w": 0.7096
+        },
+        {
+          "hex": "#DFE9E9",
+          "w": 0.2367
+        },
+        {
+          "hex": "#C1B3B1",
+          "w": 0.0537
+        }
+      ]
+    },
+    {
+      "id": "fq-Ks10WtWI",
+      "small": "https://images.unsplash.com/photo-1584727151652-d09b17ebf23f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584727151652-d09b17ebf23f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5512,
+      "height": 3513,
+      "blurHash": "L58XUo4UNds.Diogt7jY~AM{R+oJ",
+      "color": "#405959",
+      "alt": "black computer keyboard on brown wooden table",
+      "author": "Jessica Lam",
+      "authorUrl": "https://unsplash.com/@lovelle?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-computer-keyboard-on-brown-wooden-table-fq-Ks10WtWI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#51514C",
+          "w": 0.4419
+        },
+        {
+          "hex": "#32322E",
+          "w": 0.2883
+        },
+        {
+          "hex": "#69777A",
+          "w": 0.2698
+        }
+      ]
+    },
+    {
+      "id": "yEF7MFfVbp8",
+      "small": "https://images.unsplash.com/photo-1584727129739-cd30984745bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584727129739-cd30984745bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxrZXlib2FyZHMlMjBhbmQlMjBtaWNlJTIwZGVza3xlbnwxfDB8fHwxNzkyMTg0MTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4643,
+      "height": 3132,
+      "blurHash": "LDAwYa00%MRj%Li_tSM|%2o#M{s:",
+      "color": "#264040",
+      "alt": "black computer keyboard on gray table",
+      "author": "Jessica Lam",
+      "authorUrl": "https://unsplash.com/@lovelle?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-computer-keyboard-on-gray-table-yEF7MFfVbp8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#60615E",
+          "w": 0.4223
+        },
+        {
+          "hex": "#353937",
+          "w": 0.3187
+        },
+        {
+          "hex": "#889293",
+          "w": 0.259
+        }
+      ]
+    }
+  ]
+}

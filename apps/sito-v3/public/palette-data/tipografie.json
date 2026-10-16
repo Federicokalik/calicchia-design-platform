@@ -1,0 +1,335 @@
+{
+  "slug": "tipografie",
+  "queries": [
+    "printing press industrial",
+    "printed posters stack",
+    "offset press ink rollers"
+  ],
+  "generatedAt": "2026-10-16T20:56:18.683Z",
+  "photos": [
+    {
+      "id": "Tzm3Oyu_6sk",
+      "small": "https://images.unsplash.com/photo-1503694978374-8a2fa686963a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1503694978374-8a2fa686963a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LEF$R=D$D%IU4T.8xvt64ns:xv%M",
+      "color": "#595959",
+      "alt": "printing machine",
+      "author": "Bank Phrom",
+      "authorUrl": "https://unsplash.com/@bank_phrom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/printing-machine-Tzm3Oyu_6sk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#64605D",
+          "w": 0.4168
+        },
+        {
+          "hex": "#93908D",
+          "w": 0.3311
+        },
+        {
+          "hex": "#CACBCA",
+          "w": 0.2521
+        }
+      ]
+    },
+    {
+      "id": "EgB66PkGZbQ",
+      "small": "https://images.unsplash.com/photo-1581508512961-0e3b9524db40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581508512961-0e3b9524db40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LUEyPeD$%M9F~pWAWBaexuaxRjof",
+      "color": "#f3f3f3",
+      "alt": "black and brown industrial machine",
+      "author": "Lennert Naessens",
+      "authorUrl": "https://unsplash.com/@lennert_n?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-brown-industrial-machine-EgB66PkGZbQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181311",
+          "w": 0.4118
+        },
+        {
+          "hex": "#938D85",
+          "w": 0.331
+        },
+        {
+          "hex": "#524942",
+          "w": 0.2572
+        }
+      ]
+    },
+    {
+      "id": "Wq4lqogZKMY",
+      "small": "https://images.unsplash.com/photo-1625820104062-387167dd655b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625820104062-387167dd655b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3766,
+      "blurHash": "LDF$hfRj4nofR~oft7of_4WBj?of",
+      "color": "#404040",
+      "alt": "black and white metal frame",
+      "author": "Srdjan Ivankovic",
+      "authorUrl": "https://unsplash.com/@s4ke?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-metal-frame-Wq4lqogZKMY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9A9BA8",
+          "w": 0.3608
+        },
+        {
+          "hex": "#656571",
+          "w": 0.3576
+        },
+        {
+          "hex": "#3D383C",
+          "w": 0.2815
+        }
+      ]
+    },
+    {
+      "id": "HFYczZkqCoE",
+      "small": "https://images.unsplash.com/photo-1562155695-fb6e1f95fcfd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562155695-fb6e1f95fcfd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGluZyUyMHByZXNzJTIwaW5kdXN0cmlhbHxlbnwxfDB8fHwxNzkyMTg0MTcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3681,
+      "height": 2926,
+      "blurHash": "LBEC,#D*9F00-;Rjxuof_39Fozxu",
+      "color": "#262626",
+      "alt": "grayscale photography of man using machine",
+      "author": "NOAA",
+      "authorUrl": "https://unsplash.com/@noaa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photography-of-man-using-machine-HFYczZkqCoE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A7D7D",
+          "w": 0.3415
+        },
+        {
+          "hex": "#ABAEAD",
+          "w": 0.3411
+        },
+        {
+          "hex": "#4E5251",
+          "w": 0.3173
+        }
+      ]
+    },
+    {
+      "id": "im08hUXmedQ",
+      "small": "https://images.unsplash.com/photo-1631270314738-e6f6827f8d9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631270314738-e6f6827f8d9f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5730,
+      "height": 3820,
+      "blurHash": "LMHoOUROE1%MRO4n4n?b_N-;o#IT",
+      "color": "#d9d9d9",
+      "alt": "white printer paper on black table",
+      "author": "Julian Hochgesang",
+      "authorUrl": "https://unsplash.com/@julianhochgesang?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-printer-paper-on-black-table-im08hUXmedQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2D4DD",
+          "w": 0.4429
+        },
+        {
+          "hex": "#4F5055",
+          "w": 0.3708
+        },
+        {
+          "hex": "#8C909A",
+          "w": 0.1863
+        }
+      ]
+    },
+    {
+      "id": "V29UWcALNko",
+      "small": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2996,
+      "height": 2104,
+      "blurHash": "LgODqR8_-;Rj-;ayRjof~q%MIUa{",
+      "color": "#f3f3f3",
+      "alt": "stack of papers",
+      "author": "ron dyar",
+      "authorUrl": "https://unsplash.com/@prolabprints?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-papers-V29UWcALNko?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F6F6F6",
+          "w": 0.5419
+        },
+        {
+          "hex": "#959595",
+          "w": 0.2446
+        },
+        {
+          "hex": "#D0D0D0",
+          "w": 0.2136
+        }
+      ]
+    },
+    {
+      "id": "6-RhsUzKO6g",
+      "small": "https://images.unsplash.com/photo-1422036306541-00138cae4dbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1422036306541-00138cae4dbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2309,
+      "height": 1299,
+      "blurHash": "LmK,jh$*Vtof?^X8rso3OAW-n~oN",
+      "color": "#c04040",
+      "alt": "a close up of many different colored papers",
+      "author": "Andrew Pons",
+      "authorUrl": "https://unsplash.com/@imandrewpons?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-many-different-colored-papers-6-RhsUzKO6g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2CAC4",
+          "w": 0.4653
+        },
+        {
+          "hex": "#B03A4C",
+          "w": 0.3003
+        },
+        {
+          "hex": "#BC9385",
+          "w": 0.2344
+        }
+      ]
+    },
+    {
+      "id": "29n7XP1K2B0",
+      "small": "https://images.unsplash.com/photo-1616696269349-2d8821da8c2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1616696269349-2d8821da8c2b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGVkJTIwcG9zdGVycyUyMHN0YWNrfGVufDF8MHx8fDE3OTIxODQxNzR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LJGIM[?b4TVYs9%#x]Q-IAMx%1%2",
+      "color": "#262626",
+      "alt": "white printer paper on brown wooden table",
+      "author": "Erik Mclean",
+      "authorUrl": "https://unsplash.com/@introspectivedsgn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-printer-paper-on-brown-wooden-table-29n7XP1K2B0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#835234",
+          "w": 0.3934
+        },
+        {
+          "hex": "#332D25",
+          "w": 0.3132
+        },
+        {
+          "hex": "#959894",
+          "w": 0.2934
+        }
+      ]
+    },
+    {
+      "id": "eVhc4EojmlY",
+      "small": "https://images.unsplash.com/photo-1703950104186-aeb81511cfd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1703950104186-aeb81511cfd2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LaPi^$E3.S-ix@%2agIU?ws,I9NM",
+      "color": "#f3f3f3",
+      "alt": "a row of different colored bottles sitting next to each other",
+      "author": "A J.",
+      "authorUrl": "https://unsplash.com/@antoinejulien?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-different-colored-bottles-sitting-next-to-each-other-eVhc4EojmlY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3EEE6",
+          "w": 0.7739
+        },
+        {
+          "hex": "#1D294E",
+          "w": 0.1202
+        },
+        {
+          "hex": "#879FB5",
+          "w": 0.1059
+        }
+      ]
+    },
+    {
+      "id": "RDFuXgo2mzE",
+      "small": "https://images.unsplash.com/photo-1624698971296-b8b01fd1aab9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624698971296-b8b01fd1aab9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7133,
+      "height": 4919,
+      "blurHash": "LID,Aq=|D%M|DNH?oz%gDO?bxuM{",
+      "color": "#262626",
+      "alt": "black and silver exercise equipment",
+      "author": "omid roshan",
+      "authorUrl": "https://unsplash.com/@oommiidd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-exercise-equipment-RDFuXgo2mzE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B5C57",
+          "w": 0.3699
+        },
+        {
+          "hex": "#3F4041",
+          "w": 0.3283
+        },
+        {
+          "hex": "#CBD3D8",
+          "w": 0.3018
+        }
+      ]
+    },
+    {
+      "id": "JDMsfYSgLcs",
+      "small": "https://images.unsplash.com/photo-1727517786578-ff2bb896b852?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1727517786578-ff2bb896b852?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2842,
+      "height": 1958,
+      "blurHash": "LCBM[A~p%Ma#D*%Mxu%MRjWB%LIV",
+      "color": "#262626",
+      "alt": "Workers operate large machinery in a factory setting",
+      "author": "The Oregon State University Collections and Archives",
+      "authorUrl": "https://unsplash.com/@oregonstateuni?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/workers-operate-large-machinery-in-a-factory-setting-JDMsfYSgLcs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3D3D37",
+          "w": 0.418
+        },
+        {
+          "hex": "#12120D",
+          "w": 0.3057
+        },
+        {
+          "hex": "#6F6E67",
+          "w": 0.2763
+        }
+      ]
+    },
+    {
+      "id": "y5ikqY1_gLo",
+      "small": "https://images.unsplash.com/photo-1676474508989-40ddb421e426?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676474508989-40ddb421e426?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxvZmZzZXQlMjBwcmVzcyUyMGluayUyMHJvbGxlcnN8ZW58MXwwfHx8MTc5MjE4NDE3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LJGu?ynhMxt8_NbwIUs:S%o}M{sl",
+      "color": "#8c8c8c",
+      "alt": "a large machine that is sitting in a room",
+      "author": "Fancy Walls | Premium Wallpaper Printed On Demand",
+      "authorUrl": "https://unsplash.com/@fancywalls?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-machine-that-is-sitting-in-a-room-y5ikqY1_gLo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#91928D",
+          "w": 0.4143
+        },
+        {
+          "hex": "#6B6A64",
+          "w": 0.3093
+        },
+        {
+          "hex": "#C0C5C3",
+          "w": 0.2764
+        }
+      ]
+    }
+  ]
+}

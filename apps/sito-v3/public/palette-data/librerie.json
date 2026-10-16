@@ -1,0 +1,335 @@
+{
+  "slug": "librerie",
+  "queries": [
+    "bookshop interior shelves",
+    "stacked books table",
+    "reading nook armchair"
+  ],
+  "generatedAt": "2026-10-16T20:55:45.303Z",
+  "photos": [
+    {
+      "id": "jedKD4yaTvk",
+      "small": "https://images.unsplash.com/photo-1593061231114-1798846fd643?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1593061231114-1798846fd643?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LF9sk+t80gRQ^joeE2WC%0j?RjWC",
+      "color": "#260c0c",
+      "alt": "books on brown wooden shelf",
+      "author": "Rudy Issa",
+      "authorUrl": "https://unsplash.com/@rudy_issa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/books-on-brown-wooden-shelf-jedKD4yaTvk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A0705",
+          "w": 0.3823
+        },
+        {
+          "hex": "#412619",
+          "w": 0.3472
+        },
+        {
+          "hex": "#72513A",
+          "w": 0.2705
+        }
+      ]
+    },
+    {
+      "id": "sHF_JHb2q3s",
+      "small": "https://images.unsplash.com/photo-1724825918953-f1632b74d2a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1724825918953-f1632b74d2a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11656,
+      "height": 8742,
+      "blurHash": "LFE-]g~U^*%1?GoMxaRln4Rkf*jY",
+      "color": "#40260c",
+      "alt": "A long library with a clock on the wall",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-long-library-with-a-clock-on-the-wall-sHF_JHb2q3s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#683F25",
+          "w": 0.4071
+        },
+        {
+          "hex": "#926746",
+          "w": 0.3
+        },
+        {
+          "hex": "#381705",
+          "w": 0.2929
+        }
+      ]
+    },
+    {
+      "id": "AxUvUnHq79o",
+      "small": "https://images.unsplash.com/photo-1725781761544-ffeec5eafcc9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725781761544-ffeec5eafcc9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11656,
+      "height": 8742,
+      "blurHash": "LJHBYoEQ0K#Sx[RPV@tR9ZIAo2tl",
+      "color": "#404026",
+      "alt": "A woman looking at a book on a shelf in a library",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-looking-at-a-book-on-a-shelf-in-a-library-AxUvUnHq79o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#72573E",
+          "w": 0.3391
+        },
+        {
+          "hex": "#A88C6E",
+          "w": 0.3354
+        },
+        {
+          "hex": "#412E1C",
+          "w": 0.3255
+        }
+      ]
+    },
+    {
+      "id": "UiCjeZm9C3U",
+      "small": "https://images.unsplash.com/photo-1599901723404-e38e7192b930?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599901723404-e38e7192b930?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib29rc2hvcCUyMGludGVyaW9yJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTg0MTM5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LEJswT|_=^EN-BNHIo$M}?xtw_V@",
+      "color": "#c08c59",
+      "alt": "a book shelf in a library filled with books",
+      "author": "Arnold Antoo",
+      "authorUrl": "https://unsplash.com/@arnold_antoo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-book-shelf-in-a-library-filled-with-books-UiCjeZm9C3U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AD845C",
+          "w": 0.3646
+        },
+        {
+          "hex": "#856944",
+          "w": 0.3354
+        },
+        {
+          "hex": "#D4AB80",
+          "w": 0.3
+        }
+      ]
+    },
+    {
+      "id": "eMP4sYPJ9x0",
+      "small": "https://images.unsplash.com/photo-1516979187457-637abb4f9353?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516979187457-637abb4f9353?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LiL4.@_N9FM{-;xuM{j[M{WBkCjt",
+      "color": "#d9d9d9",
+      "alt": "assorted books on wooden table",
+      "author": "Alexander Grey",
+      "authorUrl": "https://unsplash.com/@sharonmccutcheon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-books-on-wooden-table-eMP4sYPJ9x0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DEE3E2",
+          "w": 0.4872
+        },
+        {
+          "hex": "#BCBFB7",
+          "w": 0.2941
+        },
+        {
+          "hex": "#979383",
+          "w": 0.2187
+        }
+      ]
+    },
+    {
+      "id": "ERb-JXVwAfo",
+      "small": "https://images.unsplash.com/photo-1521056787327-165dc2a32836?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1521056787327-165dc2a32836?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3750,
+      "height": 3000,
+      "blurHash": "LfOg4xMxogt7_Nt7aet7RkofWBRj",
+      "color": "#d9d9d9",
+      "alt": "white ceramic pencil organizer on top of stack of books",
+      "author": "Debby Hudson",
+      "authorUrl": "https://unsplash.com/@hudsoncrafted?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ceramic-pencil-organizer-on-top-of-stack-of-books-ERb-JXVwAfo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E9E3DD",
+          "w": 0.6549
+        },
+        {
+          "hex": "#C7BBB1",
+          "w": 0.2511
+        },
+        {
+          "hex": "#83766A",
+          "w": 0.094
+        }
+      ]
+    },
+    {
+      "id": "S4sEHI2B0dU",
+      "small": "https://images.unsplash.com/photo-1589367046123-21af8a04a826?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1589367046123-21af8a04a826?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8640,
+      "height": 5760,
+      "blurHash": "LRN0xY.9.9%NITRiIUt7?wkCROWA",
+      "color": "#c0c0c0",
+      "alt": "brown hardbound books on black book",
+      "author": "Monika Sojčáková",
+      "authorUrl": "https://unsplash.com/@white_on_white?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-hardbound-books-on-black-book-S4sEHI2B0dU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CABFC0",
+          "w": 0.4806
+        },
+        {
+          "hex": "#E8E1EB",
+          "w": 0.2845
+        },
+        {
+          "hex": "#A88672",
+          "w": 0.2349
+        }
+      ]
+    },
+    {
+      "id": "HPzHACcnOSQ",
+      "small": "https://images.unsplash.com/photo-1576496070382-7e333217445b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1576496070382-7e333217445b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwYm9va3MlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTg0MTQxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3300,
+      "height": 2200,
+      "blurHash": "LiL4.@_N9FM{-;xuM{j@M{WBkCjt",
+      "color": "#d9d9d9",
+      "alt": "pile of books on top of wooden table",
+      "author": "Carlos John",
+      "authorUrl": "https://unsplash.com/@damyan009?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pile-of-books-on-top-of-wooden-table-HPzHACcnOSQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DADFDE",
+          "w": 0.535
+        },
+        {
+          "hex": "#B0B1A5",
+          "w": 0.2945
+        },
+        {
+          "hex": "#817E6F",
+          "w": 0.1706
+        }
+      ]
+    },
+    {
+      "id": "UPnF1esOuWw",
+      "small": "https://images.unsplash.com/photo-1782243206283-f0973fffedfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782243206283-f0973fffedfc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4000,
+      "blurHash": "L9Dl4h4:M{Io~BELNG9b$xIWRPtR",
+      "color": "#260c0c",
+      "alt": "Elegant wooden desk and leather armchair in a classic study",
+      "author": "Michal Kučera",
+      "authorUrl": "https://unsplash.com/@m_kucera_12?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elegant-wooden-desk-and-leather-armchair-in-a-classic-study-UPnF1esOuWw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#846046",
+          "w": 0.3571
+        },
+        {
+          "hex": "#522E1E",
+          "w": 0.3319
+        },
+        {
+          "hex": "#220A04",
+          "w": 0.311
+        }
+      ]
+    },
+    {
+      "id": "qNK29Ru5GNw",
+      "small": "https://images.unsplash.com/photo-1759448867521-08b5f26d32bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759448867521-08b5f26d32bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LSFYiXNe0K%M.So#RQkD%MxukCV@",
+      "color": "#260c0c",
+      "alt": "Two chairs and a small table by the window",
+      "author": "lee seunghyub",
+      "authorUrl": "https://unsplash.com/@sobalc?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-chairs-and-a-small-table-by-the-window-qNK29Ru5GNw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1E110C",
+          "w": 0.3725
+        },
+        {
+          "hex": "#563724",
+          "w": 0.3419
+        },
+        {
+          "hex": "#DCDCD8",
+          "w": 0.2856
+        }
+      ]
+    },
+    {
+      "id": "jDl18VbHwUY",
+      "small": "https://images.unsplash.com/photo-1762280237553-e58441808e0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762280237553-e58441808e0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LYMZgn%L4otm.8S5i^RP~ps,WBV[",
+      "color": "#f3d9d9",
+      "alt": "Armchair with blanket and stool on rug",
+      "author": "Samuell Morgenstern",
+      "authorUrl": "https://unsplash.com/@photos_muka?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/armchair-with-blanket-and-stool-on-rug-jDl18VbHwUY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E5D9CF",
+          "w": 0.4022
+        },
+        {
+          "hex": "#DDB78C",
+          "w": 0.3209
+        },
+        {
+          "hex": "#A17A61",
+          "w": 0.2769
+        }
+      ]
+    },
+    {
+      "id": "Z13vojkL8Us",
+      "small": "https://images.unsplash.com/photo-1714138076694-0ff65875fc23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1714138076694-0ff65875fc23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZWFkaW5nJTIwbm9vayUyMGFybWNoYWlyfGVufDF8MHx8fDE3OTIxODQxNDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3200,
+      "height": 2133,
+      "blurHash": "LFCZU^^*={~VMwxuE3tSo$NG-nM_",
+      "color": "#0c2626",
+      "alt": "a blue chair sitting in front of a window",
+      "author": "Clay Banks",
+      "authorUrl": "https://unsplash.com/@claybanks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-blue-chair-sitting-in-front-of-a-window-Z13vojkL8Us?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0E1213",
+          "w": 0.4013
+        },
+        {
+          "hex": "#797B74",
+          "w": 0.3057
+        },
+        {
+          "hex": "#3E3D39",
+          "w": 0.293
+        }
+      ]
+    }
+  ]
+}

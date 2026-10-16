@@ -1,0 +1,335 @@
+{
+  "slug": "cartolerie",
+  "queries": [
+    "stationery shop shelves",
+    "notebooks display shop",
+    "pens and pencils close up"
+  ],
+  "generatedAt": "2026-10-16T20:55:38.266Z",
+  "photos": [
+    {
+      "id": "LoelYE8uw7I",
+      "small": "https://images.unsplash.com/photo-1580674287405-80cd77a2fee2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580674287405-80cd77a2fee2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "L7Ac}G?a00^+-pV@jroL0LNH%2NG",
+      "color": "#262626",
+      "alt": "woman in black shirt walking on market",
+      "author": "Claudio Schwarz",
+      "authorUrl": "https://unsplash.com/@purzlbaum?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-black-shirt-walking-on-market-LoelYE8uw7I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3D4141",
+          "w": 0.4015
+        },
+        {
+          "hex": "#6F6B69",
+          "w": 0.3038
+        },
+        {
+          "hex": "#171717",
+          "w": 0.2946
+        }
+      ]
+    },
+    {
+      "id": "KzT5IWf0yHQ",
+      "small": "https://images.unsplash.com/photo-1631856954913-c751a44490ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631856954913-c751a44490ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7571,
+      "height": 5050,
+      "blurHash": "L7GHuEBp2?xbE*#q%2R,D*X7jJR*",
+      "color": "#737359",
+      "alt": "a store shelf filled with lots of different items",
+      "author": "Oxana Melis",
+      "authorUrl": "https://unsplash.com/@oksdesign?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-store-shelf-filled-with-lots-of-different-items-KzT5IWf0yHQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F704C",
+          "w": 0.4129
+        },
+        {
+          "hex": "#664B2E",
+          "w": 0.3247
+        },
+        {
+          "hex": "#BCA07C",
+          "w": 0.2624
+        }
+      ]
+    },
+    {
+      "id": "pSz3JFTDZMA",
+      "small": "https://images.unsplash.com/photo-1568871391149-449702439177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1568871391149-449702439177?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3245,
+      "height": 2056,
+      "blurHash": "LBJaWL#*O8lS~WMx9ZEe#ZY4Ri+H",
+      "color": "#a68c8c",
+      "alt": "assorted-color pencil lot",
+      "author": "LumenSoft Technologies",
+      "authorUrl": "https://unsplash.com/@candelarms?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-pencil-lot-pSz3JFTDZMA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B59684",
+          "w": 0.3983
+        },
+        {
+          "hex": "#CDC596",
+          "w": 0.3045
+        },
+        {
+          "hex": "#8E696A",
+          "w": 0.2973
+        }
+      ]
+    },
+    {
+      "id": "7JpFEW-8ySk",
+      "small": "https://images.unsplash.com/photo-1598305762558-328f599df683?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1598305762558-328f599df683?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGF0aW9uZXJ5JTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4NDEzMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LVI}q:4m%gMy?HMxtQM|WCM{oMt7",
+      "color": "#f3f3f3",
+      "alt": "white wooden shelf with assorted items",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-wooden-shelf-with-assorted-items-7JpFEW-8ySk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9596",
+          "w": 0.3993
+        },
+        {
+          "hex": "#736A65",
+          "w": 0.3509
+        },
+        {
+          "hex": "#D8D8DB",
+          "w": 0.2498
+        }
+      ]
+    },
+    {
+      "id": "trtI6jLPKro",
+      "small": "https://images.unsplash.com/photo-1733382077772-d7d0d86079e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1733382077772-d7d0d86079e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2001,
+      "blurHash": "LQMj5ELN^$nh~VKR$z$zH?MyIBxs",
+      "color": "#d9d9d9",
+      "alt": "A person holding a cell phone in front of a laptop",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-cell-phone-in-front-of-a-laptop-trtI6jLPKro?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBD09E",
+          "w": 0.4642
+        },
+        {
+          "hex": "#BBA07F",
+          "w": 0.3451
+        },
+        {
+          "hex": "#886247",
+          "w": 0.1907
+        }
+      ]
+    },
+    {
+      "id": "6f-dCqHDqNU",
+      "small": "https://images.unsplash.com/photo-1779684998897-ce5de594a5ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779684998897-ce5de594a5ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDINXBUH%NE*~pxuf+RkIoslniV@",
+      "color": "#a68c73",
+      "alt": "Colorful products on display in a well-stocked stationery store",
+      "author": "Caroline",
+      "authorUrl": "https://unsplash.com/@carolinentmt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/colorful-products-on-display-in-a-well-stocked-stationery-store-6f-dCqHDqNU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A87C60",
+          "w": 0.4514
+        },
+        {
+          "hex": "#835139",
+          "w": 0.279
+        },
+        {
+          "hex": "#CBA794",
+          "w": 0.2696
+        }
+      ]
+    },
+    {
+      "id": "MowiDsH3f2I",
+      "small": "https://images.unsplash.com/photo-1787432301766-263fe617c185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787432301766-263fe617c185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9974,
+      "height": 6710,
+      "blurHash": "LXIqP~afrsW;?HaeaejZ_MayWVoL",
+      "color": "#d9c0c0",
+      "alt": "A storefront with a red facade and windows displaying toys and a bicycle",
+      "author": "Kevin Musumbu",
+      "authorUrl": "https://unsplash.com/@musumbukevin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/storefront-with-red-facade-and-toys-MowiDsH3f2I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBBEB8",
+          "w": 0.4611
+        },
+        {
+          "hex": "#B37D78",
+          "w": 0.2964
+        },
+        {
+          "hex": "#1F130F",
+          "w": 0.2424
+        }
+      ]
+    },
+    {
+      "id": "SVD89W4kIO0",
+      "small": "https://images.unsplash.com/photo-1779684998915-c2ac20725a82?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779684998915-c2ac20725a82?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxub3RlYm9va3MlMjBkaXNwbGF5JTIwc2hvcHxlbnwxfDB8fHwxNzkyMTg0MTMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L9H1VsR44nIp%~nNxDD*_4E2IUV?",
+      "color": "#8c7359",
+      "alt": "Numerous books and notebooks displayed on wooden shelves",
+      "author": "Caroline",
+      "authorUrl": "https://unsplash.com/@carolinentmt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/numerous-books-and-notebooks-displayed-on-wooden-shelves-SVD89W4kIO0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F765B",
+          "w": 0.355
+        },
+        {
+          "hex": "#7C5335",
+          "w": 0.3518
+        },
+        {
+          "hex": "#C9A794",
+          "w": 0.2932
+        }
+      ]
+    },
+    {
+      "id": "wZGhMeZDCfk",
+      "small": "https://images.unsplash.com/photo-1624258395756-c7efa8c9c111?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624258395756-c7efa8c9c111?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5464,
+      "blurHash": "LJGi_T10R*R-1gWVR+j[xZ$h$hWX",
+      "color": "#a6590c",
+      "alt": "white pen on brown wooden table",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-pen-on-brown-wooden-table-wZGhMeZDCfk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AD5D1B",
+          "w": 0.6156
+        },
+        {
+          "hex": "#874814",
+          "w": 0.226
+        },
+        {
+          "hex": "#2F1706",
+          "w": 0.1584
+        }
+      ]
+    },
+    {
+      "id": "6kBp4SQ9GU0",
+      "small": "https://images.unsplash.com/photo-1645389765401-de9b9b3cac7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1645389765401-de9b9b3cac7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LHI4OtMaD;FO.g9$X:rW#iF}=_R:",
+      "color": "#8c590c",
+      "alt": "a row of colored pencils sitting on top of a wooden table",
+      "author": "Ahmad Mohammadnejad",
+      "authorUrl": "https://unsplash.com/@sisyphus_sosorakis?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-colored-pencils-sitting-on-top-of-a-wooden-table-6kBp4SQ9GU0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A0651B",
+          "w": 0.3943
+        },
+        {
+          "hex": "#C5AE6C",
+          "w": 0.3822
+        },
+        {
+          "hex": "#403D43",
+          "w": 0.2235
+        }
+      ]
+    },
+    {
+      "id": "NRc0IsgvAWg",
+      "small": "https://images.unsplash.com/photo-1730201623397-9810f99fa739?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1730201623397-9810f99fa739?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "L78:hvd=IUV@bds9jYWV00t7%Mt7",
+      "color": "#400c0c",
+      "alt": "A close up of a pencil with a blurry background",
+      "author": "Mohamed Marey",
+      "authorUrl": "https://unsplash.com/@abushihabmarey?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pencil-with-a-blurry-background-NRc0IsgvAWg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3F0007",
+          "w": 0.6204
+        },
+        {
+          "hex": "#332427",
+          "w": 0.2104
+        },
+        {
+          "hex": "#574A49",
+          "w": 0.1691
+        }
+      ]
+    },
+    {
+      "id": "cPZ3elwpb10",
+      "small": "https://images.unsplash.com/photo-1730201623502-11031bb4de85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1730201623502-11031bb4de85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZW5zJTIwYW5kJTIwcGVuY2lscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDEzNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "L8EB,3-6ITad~qw[RPaerCX8xuog",
+      "color": "#735940",
+      "alt": "A close up of a pen with a red tip",
+      "author": "Mohamed Marey",
+      "authorUrl": "https://unsplash.com/@abushihabmarey?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pen-with-a-red-tip-cPZ3elwpb10?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6C4D3D",
+          "w": 0.5267
+        },
+        {
+          "hex": "#886555",
+          "w": 0.3722
+        },
+        {
+          "hex": "#8E8280",
+          "w": 0.1011
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "ricamifici",
+  "queries": [
+    "embroidery machine thread",
+    "embroidered fabric close up",
+    "sewing threads spools"
+  ],
+  "generatedAt": "2026-10-16T20:56:25.377Z",
+  "photos": [
+    {
+      "id": "Nh6NsnqYVsI",
+      "small": "https://images.unsplash.com/photo-1542044801-30d3e45ae49a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1542044801-30d3e45ae49a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4800,
+      "height": 3200,
+      "blurHash": "LCG84evz3B-XC7Iq$mM}IAOYXlRO",
+      "color": "#40260c",
+      "alt": "assorted color thread lot",
+      "author": "Héctor J. Rivas",
+      "authorUrl": "https://unsplash.com/@hjrc33?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-thread-lot-Nh6NsnqYVsI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F6B5D",
+          "w": 0.3632
+        },
+        {
+          "hex": "#684131",
+          "w": 0.3478
+        },
+        {
+          "hex": "#CFA79E",
+          "w": 0.289
+        }
+      ]
+    },
+    {
+      "id": "1mnXGDl3iRY",
+      "small": "https://images.unsplash.com/photo-1526290766257-c015850e4629?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1526290766257-c015850e4629?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "L8Dv$RpHogxa~W-;9FRk4n009F%g",
+      "color": "#8c8c8c",
+      "alt": "white sewing machine",
+      "author": "Agto Nugroho",
+      "authorUrl": "https://unsplash.com/@agto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-sewing-machine-1mnXGDl3iRY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#848981",
+          "w": 0.4589
+        },
+        {
+          "hex": "#585D55",
+          "w": 0.3222
+        },
+        {
+          "hex": "#2B2F2C",
+          "w": 0.2189
+        }
+      ]
+    },
+    {
+      "id": "uyT9b-FT_zk",
+      "small": "https://images.unsplash.com/photo-1557462987-dd1c191266f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1557462987-dd1c191266f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3072,
+      "blurHash": "LmJj0x0xX-R4L1rsnPbFXlobSeS~",
+      "color": "#d9d9d9",
+      "alt": "white sewing machine",
+      "author": "Mohd Fikri",
+      "authorUrl": "https://unsplash.com/@fikri_sifuprint?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-sewing-machine-uyT9b-FT_zk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DA3B46",
+          "w": 0.4763
+        },
+        {
+          "hex": "#668466",
+          "w": 0.289
+        },
+        {
+          "hex": "#452A23",
+          "w": 0.2347
+        }
+      ]
+    },
+    {
+      "id": "0R8guO8uJaI",
+      "small": "https://images.unsplash.com/photo-1736281957869-7f80909c3b2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1736281957869-7f80909c3b2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbWJyb2lkZXJ5JTIwbWFjaGluZSUyMHRocmVhZHxlbnwxfDB8fHwxNzkyMTg0MTc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LgF}.j-=t8-V~UtRWBoc-QIVM{xZ",
+      "color": "#260c0c",
+      "alt": "A machine that is sitting on a table",
+      "author": "ibh",
+      "authorUrl": "https://unsplash.com/@just_ibh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-machine-that-is-sitting-on-a-table-0R8guO8uJaI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0F0703",
+          "w": 0.5535
+        },
+        {
+          "hex": "#F5D1AB",
+          "w": 0.2542
+        },
+        {
+          "hex": "#A4846D",
+          "w": 0.1923
+        }
+      ]
+    },
+    {
+      "id": "l4h_BJzHKdk",
+      "small": "https://images.unsplash.com/photo-1680034976848-d9fe95466aba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1680034976848-d9fe95466aba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4967,
+      "height": 3313,
+      "blurHash": "LAHnvuxu?bRP^,R*M{n%~qV@IUn~",
+      "color": "#a68c8c",
+      "alt": "a close up of a embroidered object on a cloth",
+      "author": "Compagnons",
+      "authorUrl": "https://unsplash.com/@sigmund?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-embroidered-object-on-a-cloth-l4h_BJzHKdk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9A8B85",
+          "w": 0.4518
+        },
+        {
+          "hex": "#B3A8A5",
+          "w": 0.3198
+        },
+        {
+          "hex": "#7B655C",
+          "w": 0.2284
+        }
+      ]
+    },
+    {
+      "id": "Vyj4Zs2UZIk",
+      "small": "https://images.unsplash.com/photo-1780147328529-907a99a1dda5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780147328529-907a99a1dda5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LYHL9s~V0Loexat7t6ofIoWBofRj",
+      "color": "#d9c0a6",
+      "alt": "Sunlight illuminates ancient stone carvings on a textured wall",
+      "author": "Seyed Amir Mohammad Tabatabaee",
+      "authorUrl": "https://unsplash.com/@itsseyed?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-illuminates-ancient-stone-carvings-on-a-textured-wall-Vyj4Zs2UZIk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CDBCA4",
+          "w": 0.4702
+        },
+        {
+          "hex": "#766F61",
+          "w": 0.3125
+        },
+        {
+          "hex": "#050403",
+          "w": 0.2173
+        }
+      ]
+    },
+    {
+      "id": "2LKrTBSKKXc",
+      "small": "https://images.unsplash.com/photo-1659767151200-f2543af40c44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659767151200-f2543af40c44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LHINER#l0No{xto1R*NHRkWCf8oJ",
+      "color": "#26260c",
+      "alt": "a close up of a bunch of colored pencils",
+      "author": "Bernd 📷 Dittrich",
+      "authorUrl": "https://unsplash.com/@hdbernd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-colored-pencils-2LKrTBSKKXc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B37F45",
+          "w": 0.384
+        },
+        {
+          "hex": "#7E4E33",
+          "w": 0.3463
+        },
+        {
+          "hex": "#D8B97F",
+          "w": 0.2697
+        }
+      ]
+    },
+    {
+      "id": "HYFwa8SZXes",
+      "small": "https://images.unsplash.com/photo-1663782464052-d4f9a77b24a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1663782464052-d4f9a77b24a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbWJyb2lkZXJlZCUyMGZhYnJpYyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MjE4NDE4MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5820,
+      "height": 3880,
+      "blurHash": "LPGv5~MyyCxtbpRi%2t6_4Ri%3t7",
+      "color": "#738c59",
+      "alt": "a close-up of a microscope",
+      "author": "Carlos Felipe Ramírez Mesa",
+      "authorUrl": "https://unsplash.com/@cafera13?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-microscope-HYFwa8SZXes?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F986E",
+          "w": 0.4776
+        },
+        {
+          "hex": "#65744A",
+          "w": 0.3114
+        },
+        {
+          "hex": "#CDD0C7",
+          "w": 0.211
+        }
+      ]
+    },
+    {
+      "id": "wiwhYQtjWQE",
+      "small": "https://images.unsplash.com/photo-1660733101195-f688256c8854?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660733101195-f688256c8854?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LLDSd%MeOsS$h{x[E#odPCV?r@of",
+      "color": "#262626",
+      "alt": "a group of different colored rolls",
+      "author": "Bozhin Karaivanov",
+      "authorUrl": "https://unsplash.com/@bkaraivanov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-different-colored-rolls-wiwhYQtjWQE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#90534F",
+          "w": 0.4636
+        },
+        {
+          "hex": "#8FB3C0",
+          "w": 0.2729
+        },
+        {
+          "hex": "#453532",
+          "w": 0.2635
+        }
+      ]
+    },
+    {
+      "id": "5obYWU5UXdI",
+      "small": "https://images.unsplash.com/photo-1512909315288-c1bcb1ebb9da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1512909315288-c1bcb1ebb9da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2666,
+      "blurHash": "LAJR8TV?_3bc00%LJSR*tSxaXmn4",
+      "color": "#d9d9d9",
+      "alt": "assorted-color threads in white box",
+      "author": "Fleur",
+      "authorUrl": "https://unsplash.com/@yer_a_wizard?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-threads-in-white-box-5obYWU5UXdI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A7968D",
+          "w": 0.4196
+        },
+        {
+          "hex": "#D5D1CC",
+          "w": 0.3226
+        },
+        {
+          "hex": "#75584D",
+          "w": 0.2578
+        }
+      ]
+    },
+    {
+      "id": "H1FIwFDFV24",
+      "small": "https://images.unsplash.com/photo-1622164187693-91da7b2cbb44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1622164187693-91da7b2cbb44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LTJZVu,uFy6J2bz:FsE|xZTK,]$N",
+      "color": "#f3c0c0",
+      "alt": "blue pink and green thread",
+      "author": "Brandy Calderón",
+      "authorUrl": "https://unsplash.com/@cbrandyng?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-pink-and-green-thread-H1FIwFDFV24?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3A589",
+          "w": 0.3656
+        },
+        {
+          "hex": "#D52C3C",
+          "w": 0.3548
+        },
+        {
+          "hex": "#443A1E",
+          "w": 0.2796
+        }
+      ]
+    },
+    {
+      "id": "76egUOMEOrg",
+      "small": "https://images.unsplash.com/photo-1663612619657-f876bfca791e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1663612619657-f876bfca791e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxzZXdpbmclMjB0aHJlYWRzJTIwc3Bvb2xzfGVufDF8MHx8fDE3OTIxODQxODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "LHN14VExK-Y4}O;19%KIxl-,#Y^6",
+      "color": "#f3f3f3",
+      "alt": "a person's hand holding a pair of scissors and a pair of glasses",
+      "author": "Matt Benson",
+      "authorUrl": "https://unsplash.com/@mattgyver?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-persons-hand-holding-a-pair-of-scissors-and-a-pair-of-glasses-76egUOMEOrg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DEDFDE",
+          "w": 0.5337
+        },
+        {
+          "hex": "#9DBFCC",
+          "w": 0.3203
+        },
+        {
+          "hex": "#F269A1",
+          "w": 0.146
+        }
+      ]
+    }
+  ]
+}

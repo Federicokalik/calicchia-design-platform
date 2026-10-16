@@ -1,0 +1,335 @@
+{
+  "slug": "videomaker",
+  "queries": [
+    "video camera on set",
+    "drone flying over coast",
+    "editing suite screens"
+  ],
+  "generatedAt": "2026-10-16T20:56:46.035Z",
+  "photos": [
+    {
+      "id": "KieCLNzKoBo",
+      "small": "https://images.unsplash.com/photo-1497015289639-54688650d173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQxOTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1497015289639-54688650d173?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQxOTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3240,
+      "blurHash": "LECZ94~U0eNG%ztRM|IUbbWCV[My",
+      "color": "#26260c",
+      "alt": "person sitting in front bookshelf",
+      "author": "Sam McGhee",
+      "authorUrl": "https://unsplash.com/@sammcghee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-sitting-in-front-bookshelf-KieCLNzKoBo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#211B07",
+          "w": 0.4562
+        },
+        {
+          "hex": "#4E3F24",
+          "w": 0.2978
+        },
+        {
+          "hex": "#C6B38E",
+          "w": 0.246
+        }
+      ]
+    },
+    {
+      "id": "NLYW63t_bV4",
+      "small": "https://images.unsplash.com/photo-1553166272-e69910ab5ae1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQxOTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1553166272-e69910ab5ae1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQxOTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LhF65?~Xxujs~q?IayWB%LoeM{Rj",
+      "color": "#262626",
+      "alt": "black video camera on rock",
+      "author": "Jakob Owens",
+      "authorUrl": "https://unsplash.com/@jakobowens1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-video-camera-on-rock-NLYW63t_bV4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#323333",
+          "w": 0.5898
+        },
+        {
+          "hex": "#5C5F60",
+          "w": 0.2069
+        },
+        {
+          "hex": "#E8E4E6",
+          "w": 0.2033
+        }
+      ]
+    },
+    {
+      "id": "xKfS7Hll0Ck",
+      "small": "https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQyMDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1632187981988-40f3cbaeef5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQyMDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LBA0O79aIpxZ~BR-RjNGs;%1WBNG",
+      "color": "#262626",
+      "alt": "a group of people standing around a camera set up",
+      "author": "Jakob Owens",
+      "authorUrl": "https://unsplash.com/@jakobowens1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-standing-around-a-camera-set-up-xKfS7Hll0Ck?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#433530",
+          "w": 0.3379
+        },
+        {
+          "hex": "#705444",
+          "w": 0.3332
+        },
+        {
+          "hex": "#1A1513",
+          "w": 0.3289
+        }
+      ]
+    },
+    {
+      "id": "DqmXihYx5UE",
+      "small": "https://images.unsplash.com/photo-1611784728558-6c7d9b409cdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQyMDB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611784728558-6c7d9b409cdf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2aWRlbyUyMGNhbWVyYSUyMG9uJTIwc2V0fGVufDF8MHx8fDE3OTIxODQyMDB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2792,
+      "height": 1861,
+      "blurHash": "LIA]+|xu0Ken~qxa9FNG%gt7MxRP",
+      "color": "#260c0c",
+      "alt": "man in white t-shirt holding black video camera",
+      "author": "Kyle Loftus",
+      "authorUrl": "https://unsplash.com/@kyleloftusstudios?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-white-t-shirt-holding-black-video-camera-DqmXihYx5UE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181110",
+          "w": 0.5989
+        },
+        {
+          "hex": "#593533",
+          "w": 0.2641
+        },
+        {
+          "hex": "#BDBAB9",
+          "w": 0.137
+        }
+      ]
+    },
+    {
+      "id": "vMpT3NdwKWQ",
+      "small": "https://images.unsplash.com/photo-1659482158037-48603b236ba5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659482158037-48603b236ba5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8064,
+      "height": 6048,
+      "blurHash": "L64VRDa#IBax%%WCRPocpLjZoZoc",
+      "color": "#262626",
+      "alt": "a large green landscape",
+      "author": "Raphael Lopes",
+      "authorUrl": "https://unsplash.com/@raph_lopes?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-green-landscape-vMpT3NdwKWQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0F1311",
+          "w": 0.4473
+        },
+        {
+          "hex": "#1C241C",
+          "w": 0.3962
+        },
+        {
+          "hex": "#2E4134",
+          "w": 0.1566
+        }
+      ]
+    },
+    {
+      "id": "6NCfv6jtkbU",
+      "small": "https://images.unsplash.com/photo-1660848592714-6cde724ddc1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660848592714-6cde724ddc1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LT8X@1t6axoe%%jGR*azyFoeWCof",
+      "color": "#264026",
+      "alt": "a view of a lush green hillside",
+      "author": "Raphael Lopes",
+      "authorUrl": "https://unsplash.com/@raph_lopes?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-view-of-a-lush-green-hillside-6NCfv6jtkbU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2D442C",
+          "w": 0.4407
+        },
+        {
+          "hex": "#192218",
+          "w": 0.3197
+        },
+        {
+          "hex": "#4E653E",
+          "w": 0.2396
+        }
+      ]
+    },
+    {
+      "id": "kNxGbDI7MLE",
+      "small": "https://images.unsplash.com/photo-1660083797000-5cef852854a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1660083797000-5cef852854a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4001,
+      "height": 2251,
+      "blurHash": "LdE|l18^xuM{~qNHWAt7yDt8V@of",
+      "color": "#a6c0d9",
+      "alt": "a lake surrounded by mountains",
+      "author": "Raphael Lopes",
+      "authorUrl": "https://unsplash.com/@raph_lopes?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-lake-surrounded-by-mountains-kNxGbDI7MLE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ACC9D9",
+          "w": 0.4193
+        },
+        {
+          "hex": "#176C78",
+          "w": 0.328
+        },
+        {
+          "hex": "#5292A1",
+          "w": 0.2528
+        }
+      ]
+    },
+    {
+      "id": "JgDFkN8aR4c",
+      "small": "https://images.unsplash.com/photo-1580596532370-0ccb33e87c80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580596532370-0ccb33e87c80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcm9uZSUyMGZseWluZyUyMG92ZXIlMjBjb2FzdHxlbnwxfDB8fHwxNzkyMTg0MjAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4056,
+      "height": 3040,
+      "blurHash": "LM9tozw@W?f4?wWAbcs+NbR*ogoI",
+      "color": "#0c2626",
+      "alt": "aerial view of city near body of water during daytime",
+      "author": "Ryan De Hamer",
+      "authorUrl": "https://unsplash.com/@rdehamer?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/aerial-view-of-city-near-body-of-water-during-daytime-JgDFkN8aR4c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#062429",
+          "w": 0.3888
+        },
+        {
+          "hex": "#425056",
+          "w": 0.3059
+        },
+        {
+          "hex": "#687379",
+          "w": 0.3052
+        }
+      ]
+    },
+    {
+      "id": "u4bvBOOpZB4",
+      "small": "https://images.unsplash.com/photo-1614963326505-843868e1d83a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614963326505-843868e1d83a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L65=64Io4T-pwfM{o}%MouWqnnaK",
+      "color": "#262626",
+      "alt": "A computer monitor displaying video editing software with a timeline and preview window",
+      "author": "Sanjeev Nagaraj",
+      "authorUrl": "https://unsplash.com/@_sanjeev_ngrj_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/video-editing-software-on-monitor-u4bvBOOpZB4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#151415",
+          "w": 0.7642
+        },
+        {
+          "hex": "#3E3B3E",
+          "w": 0.1573
+        },
+        {
+          "hex": "#979CA0",
+          "w": 0.0785
+        }
+      ]
+    },
+    {
+      "id": "B4f_Kx5jvpg",
+      "small": "https://images.unsplash.com/photo-1607112812619-182cb1c7bb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1607112812619-182cb1c7bb61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6565,
+      "height": 4377,
+      "blurHash": "L79R8^62$x%Myp0e-;%gskt8?bIU",
+      "color": "#264040",
+      "alt": "black flat screen tv turned on displaying game",
+      "author": "Jakob Owens",
+      "authorUrl": "https://unsplash.com/@jakobowens1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-flat-screen-tv-turned-on-displaying-game-B4f_Kx5jvpg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2F4342",
+          "w": 0.4237
+        },
+        {
+          "hex": "#121D1E",
+          "w": 0.3242
+        },
+        {
+          "hex": "#41776F",
+          "w": 0.2522
+        }
+      ]
+    },
+    {
+      "id": "l82NzBSYbj0",
+      "small": "https://images.unsplash.com/photo-1502209877429-d7c6df9eb3f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1502209877429-d7c6df9eb3f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5443,
+      "height": 3648,
+      "blurHash": "L58qd04oH;ZM$eEN-=Q,-;R*RjM{",
+      "color": "#262626",
+      "alt": "black iMac, Apple Magic Keyboard, and Apple Magic Mouse",
+      "author": "Jakob Owens",
+      "authorUrl": "https://unsplash.com/@jakobowens1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-imac-apple-magic-keyboard-and-apple-magic-mouse-l82NzBSYbj0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#22241B",
+          "w": 0.4176
+        },
+        {
+          "hex": "#3E3F3A",
+          "w": 0.3285
+        },
+        {
+          "hex": "#6C7F87",
+          "w": 0.2539
+        }
+      ]
+    },
+    {
+      "id": "O2-EZNGZIyk",
+      "small": "https://images.unsplash.com/photo-1618329027137-a520b57c6606?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618329027137-a520b57c6606?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlZGl0aW5nJTIwc3VpdGUlMjBzY3JlZW5zfGVufDF8MHx8fDE3OTIxODQyMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LB8z}-WY4nMc_MskD+E2^mkV9sMx",
+      "color": "#262640",
+      "alt": "black flat screen computer monitor",
+      "author": "Onur Binay",
+      "authorUrl": "https://unsplash.com/@onurbinay?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-flat-screen-computer-monitor-O2-EZNGZIyk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A2138",
+          "w": 0.5542
+        },
+        {
+          "hex": "#3D3A70",
+          "w": 0.2926
+        },
+        {
+          "hex": "#737B88",
+          "w": 0.1532
+        }
+      ]
+    }
+  ]
+}

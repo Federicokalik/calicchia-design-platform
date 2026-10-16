@@ -1,0 +1,223 @@
+{
+  "slug": "materassi",
+  "queries": [
+    "mattress store showroom",
+    "white mattress display",
+    "bedroom linen bed"
+  ],
+  "generatedAt": "2026-10-16T20:55:55.555Z",
+  "photos": [
+    {
+      "id": "NjeK1fipLMM",
+      "small": "https://images.unsplash.com/photo-1671508191620-cb41b1da4f0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1671508191620-cb41b1da4f0c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9749,
+      "height": 4387,
+      "blurHash": "LIGIM}?bD%9Ft7IUxb%M01R+xuNG",
+      "color": "#737373",
+      "alt": "a display of mattresses in a store",
+      "author": "Edwin Petrus",
+      "authorUrl": "https://unsplash.com/@ep_petrus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-display-of-mattresses-in-a-store-NjeK1fipLMM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#928A8A",
+          "w": 0.4017
+        },
+        {
+          "hex": "#CAC2C2",
+          "w": 0.3411
+        },
+        {
+          "hex": "#5B5558",
+          "w": 0.2572
+        }
+      ]
+    },
+    {
+      "id": "flh0I0zlQiw",
+      "small": "https://images.unsplash.com/photo-1691703028663-c5ff8cbb07c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1691703028663-c5ff8cbb07c4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LbI5Y,%MIURj00ofRkRjD%WAayRj",
+      "color": "#c0c0c0",
+      "alt": "a man is working on a mattress in a warehouse",
+      "author": "DLX Mattress",
+      "authorUrl": "https://unsplash.com/@dlxmattress?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-is-working-on-a-mattress-in-a-warehouse-flh0I0zlQiw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3C3C1",
+          "w": 0.6179
+        },
+        {
+          "hex": "#1C1B1A",
+          "w": 0.2012
+        },
+        {
+          "hex": "#89898B",
+          "w": 0.1809
+        }
+      ]
+    },
+    {
+      "id": "OQ2gUsypxgE",
+      "small": "https://images.unsplash.com/photo-1644335498098-2eebf5d41c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1644335498098-2eebf5d41c5e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5869,
+      "height": 3913,
+      "blurHash": "LLDSp|IVIUW=01IV%Mof-;%2IUoL",
+      "color": "#26260c",
+      "alt": "a close up of a bunch of bread on a rack",
+      "author": "Kevin Wang",
+      "authorUrl": "https://unsplash.com/@kevin_w_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-bunch-of-bread-on-a-rack-OQ2gUsypxgE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1610",
+          "w": 0.4093
+        },
+        {
+          "hex": "#84776A",
+          "w": 0.3116
+        },
+        {
+          "hex": "#474037",
+          "w": 0.2792
+        }
+      ]
+    },
+    {
+      "id": "gGS3JxEdP0c",
+      "small": "https://images.unsplash.com/photo-1759176170879-6bd7073ab4f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759176170879-6bd7073ab4f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aGl0ZSUyMG1hdHRyZXNzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6891,
+      "height": 4594,
+      "blurHash": "L6MtaT-qIAxu~qkCM{ayMyt7t7of",
+      "color": "#c0c0c0",
+      "alt": "Close-up of a white quilted mattress texture",
+      "author": "Costa Live",
+      "authorUrl": "https://unsplash.com/@vendedorescostalive?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-a-white-quilted-mattress-texture-gGS3JxEdP0c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C7C6CB",
+          "w": 0.9368
+        },
+        {
+          "hex": "#AAABB0",
+          "w": 0.0632
+        }
+      ]
+    },
+    {
+      "id": "DE9MM2voqKc",
+      "small": "https://images.unsplash.com/photo-1552858725-2758b5fb1286?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1552858725-2758b5fb1286?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "L454${xZ0#ENEMR+$%s.9^WV=_xZ",
+      "color": "#260c0c",
+      "alt": "table lamp turned-on near bed",
+      "author": "Jp Valery",
+      "authorUrl": "https://unsplash.com/@jpvalery?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/table-lamp-turned-on-near-bed-DE9MM2voqKc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#161515",
+          "w": 0.6954
+        },
+        {
+          "hex": "#2C251E",
+          "w": 0.2327
+        },
+        {
+          "hex": "#5C452E",
+          "w": 0.0719
+        }
+      ]
+    },
+    {
+      "id": "aRT5UCf2MYY",
+      "small": "https://images.unsplash.com/flagged/photo-1556438758-8d49568ce18e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/flagged/photo-1556438758-8d49568ce18e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4288,
+      "height": 2848,
+      "blurHash": "LVLN_SM_MwjG~XsoS2R-IUbbWXxZ",
+      "color": "#d9d9d9",
+      "alt": "white bedspread and black wooden bed",
+      "author": "Steven Ungermann",
+      "authorUrl": "https://unsplash.com/@steveungermann?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-bedspread-and-black-wooden-bed-aRT5UCf2MYY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6D7D7",
+          "w": 0.5955
+        },
+        {
+          "hex": "#A8B0AF",
+          "w": 0.2598
+        },
+        {
+          "hex": "#608688",
+          "w": 0.1447
+        }
+      ]
+    },
+    {
+      "id": "ghPHKipv790",
+      "small": "https://images.unsplash.com/photo-1560185128-e173042f79dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1560185128-e173042f79dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3733,
+      "height": 2671,
+      "blurHash": "LTKAyVN#RjoM~SM{jYNKxsM{xvog",
+      "color": "#a68c73",
+      "alt": "beige bed with white mattress",
+      "author": "Francesca Tosolini",
+      "authorUrl": "https://unsplash.com/@fromitaly?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/beige-bed-with-white-mattress-ghPHKipv790?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AB987F",
+          "w": 0.504
+        },
+        {
+          "hex": "#D8C8A7",
+          "w": 0.291
+        },
+        {
+          "hex": "#7F664D",
+          "w": 0.205
+        }
+      ]
+    },
+    {
+      "id": "KencoynLgcQ",
+      "small": "https://images.unsplash.com/photo-1634208006171-6713e0c9a25e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1634208006171-6713e0c9a25e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWRyb29tJTIwbGluZW4lMjBiZWR8ZW58MXwwfHx8MTc5MjE4NDE1NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4800,
+      "blurHash": "LSN,oKvx%0skDgn+s.bIKQS6M|Wr",
+      "color": "#d9d9d9",
+      "alt": "a bed with a white comforter and pink pillows",
+      "author": "Mitchell Luo",
+      "authorUrl": "https://unsplash.com/@mitchel3uo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bed-with-a-white-comforter-and-pink-pillows-KencoynLgcQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DAD9DE",
+          "w": 0.4108
+        },
+        {
+          "hex": "#CFC2B9",
+          "w": 0.3883
+        },
+        {
+          "hex": "#C5AA95",
+          "w": 0.2009
+        }
+      ]
+    }
+  ]
+}

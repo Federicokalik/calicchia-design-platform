@@ -1,0 +1,335 @@
+{
+  "slug": "agenzie-viaggi",
+  "queries": [
+    "travel agency storefront",
+    "suitcases and maps",
+    "airport departures board"
+  ],
+  "generatedAt": "2026-10-16T20:57:02.190Z",
+  "photos": [
+    {
+      "id": "edZ_WxeUlWc",
+      "small": "https://images.unsplash.com/photo-1527368746281-798b65e1ac6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1527368746281-798b65e1ac6e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5341,
+      "height": 4000,
+      "blurHash": "LJJRN?NF%gD%MJo#R*t7~BkWIUWC",
+      "color": "#d9d9d9",
+      "alt": "black bicycle leaning on street post",
+      "author": "Sherzod Max",
+      "authorUrl": "https://unsplash.com/@sherzodmax?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-bicycle-leaning-on-street-post-edZ_WxeUlWc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2D0D0",
+          "w": 0.4406
+        },
+        {
+          "hex": "#A79895",
+          "w": 0.3696
+        },
+        {
+          "hex": "#5E6363",
+          "w": 0.1898
+        }
+      ]
+    },
+    {
+      "id": "8lr8RFHyyno",
+      "small": "https://images.unsplash.com/photo-1789610405327-8b18812e4329?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789610405327-8b18812e4329?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LcG]5ZXn?cI8%%xv%NMwM}kDWCxu",
+      "color": "#595940",
+      "alt": "People walking past a brick building with a red storefront in London",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-walking-past-london-brick-storefront-8lr8RFHyyno?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B9CDE5",
+          "w": 0.3764
+        },
+        {
+          "hex": "#5D5148",
+          "w": 0.3564
+        },
+        {
+          "hex": "#95857F",
+          "w": 0.2672
+        }
+      ]
+    },
+    {
+      "id": "kWomqh_SnTQ",
+      "small": "https://images.unsplash.com/photo-1778949344903-3c2ddaf39810?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778949344903-3c2ddaf39810?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3985,
+      "blurHash": "LCC~#SD%?HM{0Lt7xtt7n4xuShs:",
+      "color": "#260c0c",
+      "alt": "Old storefront with \"le comptoir des voyages\" sign",
+      "author": "Annie Spratt",
+      "authorUrl": "https://unsplash.com/@anniespratt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/old-storefront-with-le-comptoir-des-voyages-sign-kWomqh_SnTQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#473729",
+          "w": 0.385
+        },
+        {
+          "hex": "#A09187",
+          "w": 0.3276
+        },
+        {
+          "hex": "#7D6758",
+          "w": 0.2874
+        }
+      ]
+    },
+    {
+      "id": "tz0Hi5iIkdQ",
+      "small": "https://images.unsplash.com/photo-1773215792833-e7a68bf054a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773215792833-e7a68bf054a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmF2ZWwlMjBhZ2VuY3klMjBzdG9yZWZyb250fGVufDF8MHx8fDE3OTIxODQyMTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LBBDl%_1D*4o8#xtjYD*_0ahMzIp",
+      "color": "#8c8c59",
+      "alt": "A person walks past a costa coffee and flight centre",
+      "author": "atelierbyvineeth ...",
+      "authorUrl": "https://unsplash.com/@atelierbyvineeth?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-walks-past-a-costa-coffee-and-flight-centre-tz0Hi5iIkdQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0E110D",
+          "w": 0.3884
+        },
+        {
+          "hex": "#9CA277",
+          "w": 0.3096
+        },
+        {
+          "hex": "#676C46",
+          "w": 0.3021
+        }
+      ]
+    },
+    {
+      "id": "9G9vxsMzi18",
+      "small": "https://images.unsplash.com/photo-1510917181191-85abe24b5300?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510917181191-85abe24b5300?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4352,
+      "height": 2901,
+      "blurHash": "LNF~U4%g9FVr_3g3R%oM00IU%Mog",
+      "color": "#404040",
+      "alt": "black magnifying glass on map",
+      "author": "Francesca Tirico",
+      "authorUrl": "https://unsplash.com/@fra99?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-magnifying-glass-on-map-9G9vxsMzi18?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C0C1C0",
+          "w": 0.3903
+        },
+        {
+          "hex": "#403834",
+          "w": 0.3583
+        },
+        {
+          "hex": "#6C5B54",
+          "w": 0.2514
+        }
+      ]
+    },
+    {
+      "id": "o5GyxzEoBTU",
+      "small": "https://images.unsplash.com/photo-1635881032011-48299f137a56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635881032011-48299f137a56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LHATAvx[D%Rj-oofRjof0LNG%2xa",
+      "color": "#a68c8c",
+      "alt": "a map sitting on top of a piece of luggage",
+      "author": "Alexei Maridashvili",
+      "authorUrl": "https://unsplash.com/@lexoge?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-map-sitting-on-top-of-a-piece-of-luggage-o5GyxzEoBTU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030210",
+          "w": 0.4225
+        },
+        {
+          "hex": "#191824",
+          "w": 0.3545
+        },
+        {
+          "hex": "#B09A87",
+          "w": 0.223
+        }
+      ]
+    },
+    {
+      "id": "rBr9ak-YZfg",
+      "small": "https://images.unsplash.com/photo-1708454260824-c484d15fe92e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1708454260824-c484d15fe92e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4500,
+      "height": 2500,
+      "blurHash": "LWP~}54rNFM,u2RSV|%J~LtQt3xT",
+      "color": "#f3f373",
+      "alt": "a piece of paper, a box, and a pair of scissors on a yellow",
+      "author": "Mehdi Mirzaie",
+      "authorUrl": "https://unsplash.com/@mirzaie?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-piece-of-paper-a-box-and-a-pair-of-scissors-on-a-yellow-rBr9ak-YZfg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#FDF26E",
+          "w": 0.6426
+        },
+        {
+          "hex": "#DEBA80",
+          "w": 0.229
+        },
+        {
+          "hex": "#384F7E",
+          "w": 0.1284
+        }
+      ]
+    },
+    {
+      "id": "yY94VhCQ94M",
+      "small": "https://images.unsplash.com/photo-1708454261004-c62008efd848?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1708454261004-c62008efd848?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdWl0Y2FzZXMlMjBhbmQlMjBtYXBzfGVufDF8MHx8fDE3OTIxODQyMTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4500,
+      "height": 2500,
+      "blurHash": "LYOpFg~KIUafIR%LE9NIEAt1s-af",
+      "color": "#f3d959",
+      "alt": "a toy airplane sitting on top of a map",
+      "author": "Mehdi Mirzaie",
+      "authorUrl": "https://unsplash.com/@mirzaie?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-toy-airplane-sitting-on-top-of-a-map-yY94VhCQ94M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EFD95A",
+          "w": 0.6288
+        },
+        {
+          "hex": "#E7D7BD",
+          "w": 0.2227
+        },
+        {
+          "hex": "#989788",
+          "w": 0.1485
+        }
+      ]
+    },
+    {
+      "id": "EmqjMxS7IsY",
+      "small": "https://images.unsplash.com/photo-1664190426381-5f2cf0ea4ef4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1664190426381-5f2cf0ea4ef4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LQD,4YD%IUxu~qIURjt7M{t7WBRj",
+      "color": "#c0c0c0",
+      "alt": "a group of people in a room",
+      "author": "Joseph Bobadilla",
+      "authorUrl": "https://unsplash.com/@josephbobadilla?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-in-a-room-EmqjMxS7IsY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AFAFAF",
+          "w": 0.4056
+        },
+        {
+          "hex": "#111111",
+          "w": 0.3124
+        },
+        {
+          "hex": "#7C7C7C",
+          "w": 0.282
+        }
+      ]
+    },
+    {
+      "id": "7UgQsOUptPU",
+      "small": "https://images.unsplash.com/photo-1746125047145-d6698eef563a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1746125047145-d6698eef563a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9648,
+      "height": 7236,
+      "blurHash": "LJHV6i_3_N%2^jV@s+WB={f79Fay",
+      "color": "#737373",
+      "alt": "A retro airport flight information display board",
+      "author": "Lumin Osity",
+      "authorUrl": "https://unsplash.com/@lumin_osity?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-retro-airport-flight-information-display-board-7UgQsOUptPU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9C6BF",
+          "w": 0.3899
+        },
+        {
+          "hex": "#8F918C",
+          "w": 0.3314
+        },
+        {
+          "hex": "#6B6B67",
+          "w": 0.2787
+        }
+      ]
+    },
+    {
+      "id": "hhTfOpE_6uw",
+      "small": "https://images.unsplash.com/photo-1706711625046-93890d38c630?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706711625046-93890d38c630?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5142,
+      "height": 3428,
+      "blurHash": "LNE{^54TtQDQt+NGIA%N?bITIV%L",
+      "color": "#262626",
+      "alt": "a sign on a table next to a potted plant",
+      "author": "Dee",
+      "authorUrl": "https://unsplash.com/@copperandwild?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-sign-on-a-table-next-to-a-potted-plant-hhTfOpE_6uw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6C1B4",
+          "w": 0.4294
+        },
+        {
+          "hex": "#535245",
+          "w": 0.3265
+        },
+        {
+          "hex": "#232620",
+          "w": 0.2441
+        }
+      ]
+    },
+    {
+      "id": "ks8cTegHAUU",
+      "small": "https://images.unsplash.com/photo-1772466104938-d9e6b6197cdb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772466104938-d9e6b6197cdb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhaXJwb3J0JTIwZGVwYXJ0dXJlcyUyMGJvYXJkfGVufDF8MHx8fDE3OTIxODQyMTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LpG+%MQktl$%gjv|kDbcoNkWRjbc",
+      "color": "#73d9f3",
+      "alt": "Woman talking on phone near south terminal departure board",
+      "author": "Holiday Extras",
+      "authorUrl": "https://unsplash.com/@holidayextras?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-talking-on-phone-near-south-terminal-departure-board-ks8cTegHAUU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ACA069",
+          "w": 0.488
+        },
+        {
+          "hex": "#6D6F61",
+          "w": 0.2691
+        },
+        {
+          "hex": "#8CDDFB",
+          "w": 0.2428
+        }
+      ]
+    }
+  ]
+}
