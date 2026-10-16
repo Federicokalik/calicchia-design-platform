@@ -441,6 +441,8 @@ function unsubscribePage(ok: boolean): string {
 }
 
 palette.get('/unsubscribe', async (c) => {
+  // La CSP di default dell'API è deny-all e toglierebbe gli stili inline della pagina.
+  c.header('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'");
   const contactId = c.req.query('c') ?? '';
   if (!verifyPaletteUnsubscribe(contactId, c.req.query('t') ?? '')) return c.html(unsubscribePage(false), 400);
   try {
