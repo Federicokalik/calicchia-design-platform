@@ -82,8 +82,8 @@ function shareUrl(palette: BrandPalette): string {
   return `${siteUrl()}${palette.locale === 'en' ? '/en' : ''}/risorse/palette-di-settore/condividi?${qs}`;
 }
 
-export function paletteKitConfirmUrl(token: string): string {
-  return `${apiUrl()}/api/palette/kit/confirm?t=${encodeURIComponent(token)}`;
+export function paletteKitConfirmUrl(token: string, locale: 'it' | 'en' = 'it'): string {
+  return `${apiUrl()}/api/palette/kit/confirm?t=${encodeURIComponent(token)}${locale === 'en' ? '&l=en' : ''}`;
 }
 
 export async function ensureKitList(): Promise<string> {
@@ -155,7 +155,7 @@ export async function requestBrandKit(
        ${meta.ip}, ${meta.userAgent})
     RETURNING confirm_token`;
 
-  const mail = await renderPaletteKitConfirmEmail({ locale: req.locale, confirmUrl: paletteKitConfirmUrl(row.confirm_token) });
+  const mail = await renderPaletteKitConfirmEmail({ locale: req.locale, confirmUrl: paletteKitConfirmUrl(row.confirm_token, req.locale) });
   // 'critical' come le altre conferme di iscrizione: la prima email deve arrivare.
   const res = await mailer({ to: email, subject: mail.subject, html: mail.html, text: mail.text, transport: 'critical' });
   if (!res.success) log.warn({ err: res.error }, 'email di conferma del brand kit non inviata');

@@ -191,6 +191,18 @@ test('indirizzo in suppression o disiscritto: 202 ma niente email né richiesta'
   assert.equal(rows.length, 0);
 });
 
+test('richiesta in inglese: link con l=en e pagina di conferma in inglese', async () => {
+  sent.length = 0;
+  await api.post('/api/palette/kit', { body: body('inglese', { locale: 'en', sector_label: 'Dentists' }) });
+  assert.match(sent[0].html, /kit\/confirm\?t=[0-9a-f-]{36}&(amp;)?l=en/);
+  const token = tokenFrom(sent[0]);
+  const page = await api.get('/api/palette/kit/confirm', { query: { t: token, l: 'en' } });
+  assert.equal(page.status, 200);
+  assert.match(page.text, /lang="en"/);
+  assert.match(page.text, /Confirm my subscription/);
+  assert.match(page.text, /name="l" value="en"/);
+});
+
 test('token sconosciuto o malformato: 404 in GET e in POST', async () => {
   const get = await api.get('/api/palette/kit/confirm', { query: { t: 'non-un-token' } });
   assert.equal(get.status, 404);
