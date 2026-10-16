@@ -1,0 +1,331 @@
+{
+  "slug": "tipografi",
+  "queries": [
+    "letterpress printing workshop",
+    "typesetting metal letters",
+    "typography specimen print"
+  ],
+  "generatedAt": "2026-10-16T21:58:25.416Z",
+  "photos": [
+    {
+      "id": "EgB66PkGZbQ",
+      "small": "https://images.unsplash.com/photo-1581508512961-0e3b9524db40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581508512961-0e3b9524db40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LUEyPeD$%M9F~pWAWBaexuaxRjof",
+      "color": "#f3f3f3",
+      "alt": "black and brown industrial machine",
+      "author": "Lennert Naessens",
+      "authorUrl": "https://unsplash.com/@lennert_n?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-brown-industrial-machine-EgB66PkGZbQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#181311",
+          "w": 0.4118
+        },
+        {
+          "hex": "#938D85",
+          "w": 0.331
+        },
+        {
+          "hex": "#524942",
+          "w": 0.2572
+        }
+      ]
+    },
+    {
+      "id": "OhJmwB4XWLE",
+      "small": "https://images.unsplash.com/photo-1436918898788-ebce04d38e46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1436918898788-ebce04d38e46?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5279,
+      "height": 3519,
+      "blurHash": "L5AmF{?G4:IV~Vf,iv$fMwNHR+xu",
+      "color": "#262626",
+      "alt": "assorted wood stamps",
+      "author": "Bruno Martins",
+      "authorUrl": "https://unsplash.com/@brunus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-wood-stamps-OhJmwB4XWLE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#504440",
+          "w": 0.4287
+        },
+        {
+          "hex": "#776054",
+          "w": 0.3161
+        },
+        {
+          "hex": "#2C2725",
+          "w": 0.2553
+        }
+      ]
+    },
+    {
+      "id": "4cwf-iW6I1Q",
+      "small": "https://images.unsplash.com/photo-1603204254626-d0de8eb24cf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603204254626-d0de8eb24cf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3454,
+      "height": 2302,
+      "blurHash": "L79Z$O%1ahj[~Vs.w_soM{WCxDxE",
+      "color": "#262626",
+      "alt": "brown and black wooden cross",
+      "author": "Bruno Martins",
+      "authorUrl": "https://unsplash.com/@brunus?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-black-wooden-cross-4cwf-iW6I1Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#473E3A",
+          "w": 0.4208
+        },
+        {
+          "hex": "#675C56",
+          "w": 0.334
+        },
+        {
+          "hex": "#22211D",
+          "w": 0.2452
+        }
+      ]
+    },
+    {
+      "id": "RDFuXgo2mzE",
+      "small": "https://images.unsplash.com/photo-1624698971296-b8b01fd1aab9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624698971296-b8b01fd1aab9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsZXR0ZXJwcmVzcyUyMHByaW50aW5nJTIwd29ya3Nob3B8ZW58MXwwfHx8MTc5MjE4NzkwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7133,
+      "height": 4919,
+      "blurHash": "LID,Aq=|D%M|DNH?oz%gDO?bxuM{",
+      "color": "#262626",
+      "alt": "black and silver exercise equipment",
+      "author": "omid roshan",
+      "authorUrl": "https://unsplash.com/@oommiidd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-exercise-equipment-RDFuXgo2mzE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B5C57",
+          "w": 0.3699
+        },
+        {
+          "hex": "#3F4041",
+          "w": 0.3283
+        },
+        {
+          "hex": "#CBD3D8",
+          "w": 0.3018
+        }
+      ]
+    },
+    {
+      "id": "GkinCd2enIY",
+      "small": "https://images.unsplash.com/photo-1461958508236-9a742665a0d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1461958508236-9a742665a0d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L6BDH8~q0LIV4oD%%1WCVrIUNGt7",
+      "color": "#404040",
+      "alt": "closeup photo of cutout decors",
+      "author": "Raphael Schaller",
+      "authorUrl": "https://unsplash.com/@raphaelphotoch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/closeup-photo-of-cutout-decors-GkinCd2enIY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#413E3C",
+          "w": 0.4246
+        },
+        {
+          "hex": "#13100F",
+          "w": 0.2897
+        },
+        {
+          "hex": "#726D69",
+          "w": 0.2857
+        }
+      ]
+    },
+    {
+      "id": "BVyNlchWqzs",
+      "small": "https://images.unsplash.com/reserve/uZYSV4nuQeyq64azfVIn_15130980706_64134efc6e_o.jpg?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/reserve/uZYSV4nuQeyq64azfVIn_15130980706_64134efc6e_o.jpg?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "L4C%8S${nL$*0fXTIUIVDgMyk9%2",
+      "color": "#595973",
+      "alt": "letter wood stamp lot",
+      "author": "Amador Loureiro",
+      "authorUrl": "https://unsplash.com/@amadorloureiro?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/letter-wood-stamp-lot-BVyNlchWqzs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#737783",
+          "w": 0.447
+        },
+        {
+          "hex": "#505561",
+          "w": 0.3623
+        },
+        {
+          "hex": "#A8A2A3",
+          "w": 0.1907
+        }
+      ]
+    },
+    {
+      "id": "1mTm3gH5_Wk",
+      "small": "https://images.unsplash.com/photo-1448471393961-ad67a6405eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1448471393961-ad67a6405eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7320,
+      "height": 4500,
+      "blurHash": "LPQvwRof-;ofxufPWBaz~qj?D%ay",
+      "color": "#f3f3f3",
+      "alt": "black and gray plastic blocks",
+      "author": "Florian Klauer",
+      "authorUrl": "https://unsplash.com/@florianklauer?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-plastic-blocks-1mTm3gH5_Wk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F1F1F2",
+          "w": 0.8627
+        },
+        {
+          "hex": "#6E7074",
+          "w": 0.085
+        },
+        {
+          "hex": "#94969A",
+          "w": 0.0523
+        }
+      ]
+    },
+    {
+      "id": "Oxl_KBNqxGA",
+      "small": "https://images.unsplash.com/photo-1515325915697-9279b4f7effc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1515325915697-9279b4f7effc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHx0eXBlc2V0dGluZyUyMG1ldGFsJTIwbGV0dGVyc3xlbnwxfDB8fHwxNzkyMTg3OTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 2592,
+      "blurHash": "L39QaA%L0Kt7DhM{t7j?9GjaWBof",
+      "color": "#402626",
+      "alt": "gray assorted-letter jewelries in brown wooden organizer boxes",
+      "author": "Natalia Y.",
+      "authorUrl": "https://unsplash.com/@foxfox?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-assorted-letter-jewelries-in-brown-wooden-organizer-boxes-Oxl_KBNqxGA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#362E21",
+          "w": 0.4102
+        },
+        {
+          "hex": "#4E493D",
+          "w": 0.306
+        },
+        {
+          "hex": "#656156",
+          "w": 0.2838
+        }
+      ]
+    },
+    {
+      "id": "92-mTYj5oGs",
+      "small": "https://images.unsplash.com/photo-1609605348579-3123e3d40eb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1609605348579-3123e3d40eb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "LOI~0-?bR*M{_NM{ayWBR*R*R%WA",
+      "color": "#c0c0c0",
+      "alt": "text",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/text-92-mTYj5oGs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C7CBCC",
+          "w": 0.4607
+        },
+        {
+          "hex": "#A2A4A5",
+          "w": 0.3852
+        },
+        {
+          "hex": "#6F706F",
+          "w": 0.1541
+        }
+      ]
+    },
+    {
+      "id": "V9zInThgKa4",
+      "small": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1617050318658-a9a3175e34cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4898,
+      "height": 3265,
+      "blurHash": "LTPs-Tt7RjM{~qt7bHt7j[IUWVoL",
+      "color": "#f3f3f3",
+      "alt": "white and black box on white table",
+      "author": "Brands&People",
+      "authorUrl": "https://unsplash.com/@brandsandpeople?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-black-box-on-white-table-V9zInThgKa4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBEEEE",
+          "w": 0.8618
+        },
+        {
+          "hex": "#B9BBBA",
+          "w": 0.1382
+        }
+      ]
+    },
+    {
+      "id": "M9NVqELEtHU",
+      "small": "https://images.unsplash.com/photo-1610454059909-f9a5a6eb4e58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1610454059909-f9a5a6eb4e58?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "LA8;JgtRDibHRiVsj[of00V@tSjs",
+      "color": "#260c0c",
+      "alt": "black white and red textile",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-white-and-red-textile-M9NVqELEtHU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#191210",
+          "w": 0.6084
+        },
+        {
+          "hex": "#584E4D",
+          "w": 0.2146
+        },
+        {
+          "hex": "#949294",
+          "w": 0.177
+        }
+      ]
+    },
+    {
+      "id": "2X6bkiL0GDo",
+      "small": "https://images.unsplash.com/photo-1581080247486-57989c1f14ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581080247486-57989c1f14ab?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0eXBvZ3JhcGh5JTIwc3BlY2ltZW4lMjBwcmludHxlbnwxfDB8fHwxNzkyMTg3OTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LUKJb8t65Es,0-s,ayoK0nR-j?j@",
+      "color": "#d9a60c",
+      "alt": "yellow and blue labeled box",
+      "author": "Mika Baumeister",
+      "authorUrl": "https://unsplash.com/@kommumikation?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-and-blue-labeled-box-2X6bkiL0GDo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9A800",
+          "w": 0.5352
+        },
+        {
+          "hex": "#534E46",
+          "w": 0.2641
+        },
+        {
+          "hex": "#B98A00",
+          "w": 0.2007
+        }
+      ]
+    }
+  ]
+}
