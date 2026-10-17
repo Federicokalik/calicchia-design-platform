@@ -311,8 +311,37 @@ function shadowUpdate(s: SerializedObject, l: LedgerRow, t: TargetObject, target
   }
 }
 
+/**
+ * F4 (contratto f4-modules §5.6, riga nuova della tabella f3 §7.2): sorgente
+ * `derived` (righe derivate dalla proiezione inversa di una risorsa espansa).
+ * Le righe derivate non ricostruiscono la regola: mai una scrittura.
+ * Riga viva con lo stesso hash e la risorsa al suo posto → noop (adopt se
+ * l'etag è cambiato con lo stesso contenuto o se la riga va solo
+ * riallineata); hash diverso, nessuna riga del ledger o risorsa sparita →
+ * conflict:DERIVED_EDITED (forzabile: "mantieni la risorsa di Radicale",
+ * ledger riallineato senza scrivere; la modifica in PG si perde).
+ */
+function decideDerived(state: PlanState, s: SerializedObject, l: LedgerRow | null): Decision {
+  const coll = state.input.target.collections.get(s.calendar_id);
+  const t = coll?.objects.get(s.href) ?? null;
+  if (!coll || !coll.exists) return decision('conflict', { code: 'COLLECTION_MISSING', target: null });
+  if (!t) return decision('conflict', { code: 'DERIVED_EDITED', target: null });
+  if (l && l.intent_op) return decision('conflict', { code: 'UNTRACKED_TARGET', target: t });
+  if (!l || l.written_etag === null) return decision('conflict', { code: 'DERIVED_EDITED', target: t });
+  const hashSame = l.legacy_hash !== null && l.legacy_hash === s.legacy_hash;
+  if (!hashSame) return decision('conflict', { code: 'DERIVED_EDITED', target: t });
+  const etagSame = t.etag !== null && t.etag === l.written_etag;
+  if (etagSame) return decision('noop', { target: t });
+  const fpSame = t.fingerprint !== null && l.written_fingerprint !== null && t.fingerprint === l.written_fingerprint;
+  if (fpSame) return decision('adopt', { target: t });
+  // La risorsa è cambiata su Radicale dopo la ri-baseline (non dovrebbe accadere in mode postgres):
+  // le righe derivate restano quelle di prima, la decisione è dell'admin.
+  return decision('conflict', { code: 'DERIVED_EDITED', target: t });
+}
+
 /** Righe 1-11 e 17 per una chiave con l'oggetto voluto S (e la riga L della stessa collezione, se c'è). */
 function decideSource(state: PlanState, s: SerializedObject, l: LedgerRow | null): Decision {
+  if (s.legacy_snapshot.kind === 'derived') return decideDerived(state, s, l);
   const { mode, target } = state.input;
   const now = target.read_at;
   const coll = target.collections.get(s.calendar_id);
@@ -435,6 +464,9 @@ function applyForce(state: PlanState, item: PlanItem): PlanItem {
       const pending = state.pending.get(item);
       return pending ? { ...item, action: pending } : item;
     }
+    case 'DERIVED_EDITED':
+      // "Mantieni la risorsa di Radicale": nessuna scrittura, il ledger si riallinea allo snapshot corrente.
+      return item.source && item.target ? { ...item, action: 'adopt', patch: false } : item;
     default:
       return item;
   }

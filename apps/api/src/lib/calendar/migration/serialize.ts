@@ -131,6 +131,7 @@ import {
   type LedgerKind,
   type LedgerRow,
   type LegacyBookingSnapshot,
+  type LegacyDerivedSnapshot,
   type LegacyDetachedSnapshot,
   type LegacyEventRowSnapshot,
   type LegacyEventSnapshot,
@@ -170,6 +171,25 @@ export interface LegacySource {
   objectIds: ReadonlyMap<string, { calendar_id: string; href: string; recurrence_key: string; id: string; legacy_uid: string | null }>;
   /** Righe vive del ledger (riuso degli href). */
   ledger: readonly LedgerRow[];
+  /**
+   * F4 (contratto f4-modules §5.6): righe derivate dalla proiezione inversa
+   * (caldes_derived) raggruppate per risorsa d'origine. Non entrano in
+   * `events`: il serializer ne fa un oggetto `derived` (mai ricostruito).
+   * Assente o vuoto in mode postgres prima del primo cutover.
+   */
+  derived?: LegacyDerivedGroup[];
+}
+
+/** Righe derivate di una risorsa Radicale espansa (caldes_object_id), con la posizione nota della risorsa. */
+export interface LegacyDerivedGroup {
+  /** cal_object_ids.id della risorsa (recurrence_key ''). */
+  object_id: string;
+  calendar_id: string;
+  /** href e UID della risorsa da cal_object_ids (null se la posizione non è più nota). */
+  href: string | null;
+  uid: string | null;
+  /** Righe ordinate per start_time e id. */
+  rows: LegacyEventRowSnapshot[];
 }
 
 type SourceEventRow = LegacySource['events'][number];
@@ -374,7 +394,8 @@ function keyHref(key: LegacyKey): string {
 const EVENT_COLUMNS = `
   id::text AS id, uid, calendar_id::text AS calendar_id, summary, description, location, url,
   start_time, end_time, all_day, rrule, exdates, recurrence_id, recurrence_master_id::text AS recurrence_master_id,
-  source, source_id, status, created_at, updated_at
+  source, source_id, status, created_at, updated_at,
+  caldes_derived, caldes_object_id::text AS caldes_object_id
 `;
 
 /** Colonne del ledger nell'ordine di LedgerRow (int8 come testo). */
@@ -536,7 +557,8 @@ export async function loadLegacySource(
         SELECT ${columns} FROM calendar_events
         WHERE source <> 'ics_pull'
           AND (id = ANY(${masterIds}::uuid[]) OR recurrence_master_id = ANY(${masterIds}::uuid[])
-               OR (source = 'booking' AND source_id = ANY(${bookingKeys}::text[])))
+               OR (source = 'booking' AND source_id = ANY(${bookingKeys}::text[]))
+               OR (caldes_derived AND caldes_object_id = ANY(${masterIds}::uuid[])))
         ORDER BY id
       `];
       // Festività di sistema dello stesso calendario: servono per decidere la prima per data.
@@ -565,7 +587,35 @@ export async function loadLegacySource(
         ORDER BY e.id
       `];
     }
-    const events = eventRows.map(eventRowFromDb);
+    // Righe derivate dalla proiezione inversa (F4, contratto f4-modules §5.6): un gruppo per risorsa d'origine.
+    const derivedRows = eventRows.filter((r) => r.caldes_derived === true && typeof r.caldes_object_id === 'string');
+    const events = eventRows.filter((r) => !(r.caldes_derived === true && typeof r.caldes_object_id === 'string')).map(eventRowFromDb);
+    const derivedByObject = new Map<string, { calendar_id: string; rows: LegacyEventRowSnapshot[] }>();
+    for (const r of derivedRows) {
+      const objectId = String(r.caldes_object_id).toLowerCase();
+      const { created_at: _c, updated_at: _u, ...row } = eventRowFromDb(r);
+      const group = derivedByObject.get(objectId) ?? { calendar_id: row.calendar_id, rows: [] };
+      group.rows.push(row);
+      derivedByObject.set(objectId, group);
+    }
+    const derived: LegacyDerivedGroup[] = [];
+    if (derivedByObject.size) {
+      const positions = await tx<Array<{ id: string; href: string; uid: string | null }>>`
+        SELECT id::text AS id, href, uid FROM cal_object_ids
+        WHERE id = ANY(${[...derivedByObject.keys()]}::uuid[]) AND recurrence_key = ''
+      `;
+      const posById = new Map(positions.map((p) => [p.id.toLowerCase(), p]));
+      for (const [objectId, group] of [...derivedByObject.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+        const pos = posById.get(objectId) ?? null;
+        derived.push({
+          object_id: objectId,
+          calendar_id: group.calendar_id,
+          href: pos?.href ?? null,
+          uid: pos?.uid ?? null,
+          rows: group.rows.sort((a, b) => a.start_time.localeCompare(b.start_time) || a.id.localeCompare(b.id)),
+        });
+      }
+    }
 
     // Prenotazioni: solo se il calendario Prenotazioni è nell'ambito (o per le chiavi richieste).
     const projectionUids = [...new Set(events
@@ -657,6 +707,7 @@ export async function loadLegacySource(
       }
     }
     for (const b of bookings) keys.add(legacyKey('booking', b.uid));
+    for (const g of derived) keys.add(legacyKey('event', g.object_id));
     for (const k of opts.legacyKeys ?? []) keys.add(k);
     const ledger = await loadLedgerRows(tx, {
       calendarIds: keyMode ? [] : includedIds,
@@ -664,7 +715,7 @@ export async function loadLegacySource(
       detachedOfMasters: masterIds,
     });
 
-    return { read_at: readAt, calendars, events, bookings, objectIds, ledger };
+    return { read_at: readAt, calendars, events, bookings, objectIds, ledger, derived };
   });
 }
 
@@ -1109,6 +1160,9 @@ export function buildObjectFromSnapshot(snapshot: LegacySnapshot, ctx: { now: Da
       return buildDetachedObject(snapshot, ctx.now, ctx.stamps);
     case 'booking':
       return buildBookingObject(snapshot, ctx.now);
+    case 'derived':
+      // F4: le righe derivate non ricostruiscono la regola (contratto f4-modules §5.6).
+      throw new TypeError('le righe derivate dalla proiezione inversa non ricostruiscono la risorsa d\'origine');
     default:
       throw new TypeError('gli item dell\'archivio della Fase 0 non hanno una sorgente legacy da ricostruire');
   }
@@ -1357,7 +1411,78 @@ export function serializeLegacy(source: LegacySource, options: MigrationOptions,
   serializeBookings(sctx, projectionRows);
   flagPossibleDuplicates(sctx, masters);
 
-  return finalize(sctx);
+  return withDerivedObjects(sctx, finalize(sctx));
+}
+
+/**
+ * Oggetti `derived` (F4, contratto f4-modules §5.6): una risorsa Radicale
+ * espansa dalla proiezione inversa in righe singole derivate. Il testo non
+ * si ricostruisce (ics e fingerprint vuoti: nessuna PUT possibile, il piano
+ * dà solo noop o DERIVED_EDITED); snapshot e hash servono alla ri-baseline e
+ * al confronto con il ledger. href: la riga viva del ledger della stessa
+ * chiave, poi la posizione della risorsa in cal_object_ids, poi l'href della
+ * chiave (nessuna risorsa nota: il piano lo segnala come conflitto).
+ */
+function withDerivedObjects(sctx: SerializerContext, result: SerializationResult): SerializationResult {
+  const groups = sctx.source.derived ?? [];
+  if (groups.length === 0) return result;
+  const objects = [...result.objects];
+  const skipped = [...result.skipped];
+  const ledgerByCalKey = new Map<string, LedgerRow>();
+  for (const l of sctx.source.ledger) if (!l.deleted_at) ledgerByCalKey.set(`${l.calendar_id}|${l.legacy_key}`, l);
+  const taken = new Set(objects.map((o) => `${o.calendar_id}|${o.href}`));
+  const keysTaken = new Set(objects.map((o) => `${o.calendar_id}|${o.legacy_key}`));
+  for (const g of groups) {
+    const cal = sctx.calById.get(g.calendar_id);
+    if (!cal || g.rows.length === 0) continue;
+    const key = legacyKey('event', g.object_id);
+    const first = g.rows[0];
+    if (!cal.included || !cal.collection_name) {
+      skipped.push({ legacy_key: key, kind: 'event', calendar_id: cal.id, collection_name: cal.collection_name, code: 'EXCLUDED_CALENDAR', legacy_event_id: g.object_id, summary: first.summary });
+      continue;
+    }
+    if (keysTaken.has(`${cal.id}|${key}`)) continue; // chiave già prodotta da una riga master (non dovrebbe accadere)
+    const ledger = ledgerByCalKey.get(`${cal.id}|${key}`) ?? null;
+    const candidates = [ledger?.href, g.href, keyHref(key)].filter((h): h is string => typeof h === 'string' && isValidObjectName(h));
+    const href = candidates.find((h) => !taken.has(`${cal.id}|${h}`)) ?? keyHref(key);
+    taken.add(`${cal.id}|${href}`);
+    keysTaken.add(`${cal.id}|${key}`);
+    const snapshot: LegacyDerivedSnapshot = {
+      v: 1,
+      kind: 'derived',
+      calendar: calendarSnapshot(cal),
+      object_id: g.object_id,
+      rows: g.rows.map((r) => ({ ...r, exdates: [...r.exdates] })),
+    };
+    const uid = g.uid ?? first.uid.split('#')[0] ?? first.uid;
+    objects.push({
+      legacy_key: key,
+      kind: 'event',
+      calendar_id: cal.id,
+      collection_name: cal.collection_name,
+      href,
+      uid,
+      ics: '',
+      fingerprint: '',
+      legacy_snapshot: snapshot,
+      legacy_hash: legacyHash(snapshot),
+      legacy_event_id: g.object_id,
+      legacy_uid: null,
+      object_ids: [],
+      anomalies: [],
+      // Differenza attesa come gli orfani convertiti (contratto §5.6): nel feed legacy un evento per occorrenza.
+      expected_reasons: ['ORPHAN_CONVERTED'],
+      summary: first.summary,
+    });
+  }
+  objects.sort((a, b) => a.collection_name.localeCompare(b.collection_name) || a.href.localeCompare(b.href) || a.legacy_key.localeCompare(b.legacy_key));
+  skipped.sort((a, b) => a.legacy_key.localeCompare(b.legacy_key) || a.calendar_id.localeCompare(b.calendar_id));
+  return { ...result, objects, skipped };
+}
+
+/** true se l'oggetto serializzato è un gruppo di righe derivate (nessun testo da scrivere). */
+export function isDerivedObject(s: Pick<SerializedObject, 'legacy_snapshot'>): boolean {
+  return s.legacy_snapshot.kind === 'derived';
 }
 
 /** Data della festività: dal source_id it-holiday-YYYY-MM-DD, altrimenti la data locale dell'inizio. */

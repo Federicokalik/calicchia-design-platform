@@ -415,7 +415,13 @@ export interface ArchiveSnapshot {
   sha256: string;
 }
 
-export type LegacySnapshot = LegacyEventSnapshot | LegacyDetachedSnapshot | LegacyBookingSnapshot | ArchiveSnapshot;
+/**
+ * Ingresso canonico del serializer per una riga del ledger. LegacyDerivedSnapshot
+ * (F4, contratto f4-modules §5.6) è il gruppo delle righe derivate di una
+ * risorsa espansa dalla proiezione inversa: non si ricostruisce mai un
+ * oggetto da lì (il piano dà noop o DERIVED_EDITED).
+ */
+export type LegacySnapshot = LegacyEventSnapshot | LegacyDetachedSnapshot | LegacyBookingSnapshot | ArchiveSnapshot | LegacyDerivedSnapshot;
 
 // ─── Conflitti e salti del piano ────────────────────────────
 
@@ -450,6 +456,8 @@ export type ConflictCode = (typeof CONFLICT_CODES)[number];
 /** Conflitti che "forza" può risolvere scrivendo il contenuto del piano. COLLECTION_MISSING mai: serve l'init. */
 export const FORCEABLE_CONFLICTS: ReadonlySet<ConflictCode> = new Set<ConflictCode>([
   'TARGET_NEWER', 'BOTH_CHANGED', 'UNTRACKED_TARGET', 'DELETED_IN_TARGET', 'UID_AT_OTHER_HREF', 'REVALIDATION_REQUIRED',
+  // F4 (contratto f4-modules §5.6): "mantieni la risorsa di Radicale", l'unica forzatura senza scrittura.
+  'DERIVED_EDITED',
 ]);
 
 /** Sorgenti non migrate per scelta del design o delle opzioni (azione skip, nessuna scrittura). */
@@ -1974,9 +1982,8 @@ export interface ReverseProjectionHealthView {
 
 /**
  * Gruppo di righe derivate (caldes_derived) di una risorsa espansa dalla
- * proiezione inversa: base della ri-baseline e del conflitto DERIVED_EDITED.
- * Non è ancora nell'unione LegacySnapshot: la aggiunge il gruppo ROLLBACK
- * insieme al serializer (contratto f4-modules §6.4).
+ * proiezione inversa: base della ri-baseline e del conflitto DERIVED_EDITED
+ * (membro dell'unione LegacySnapshot, contratto f4-modules §5.6).
  */
 export interface LegacyDerivedSnapshot {
   v: 1;

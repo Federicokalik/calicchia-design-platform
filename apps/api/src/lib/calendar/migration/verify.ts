@@ -236,6 +236,13 @@ interface VerifyIndex {
   /** Ambito dei motivi "di occorrenza" per chiave (expectedReasonScopes), calcolato alla prima richiesta. */
   scopes: Map<string, Map<ExpectedDiffReason, ReasonScope>>;
   now: Date;
+  /**
+   * Run `rollback` e `rebaseline` (F4): una riga del ledger con `last_run_id`
+   * fra questi è stata ri-allineata alla risorsa di Radicale com'era al
+   * rollback (contratto f4-modules §5.3), che resta la verità per quel
+   * contenuto finché etag e riga legacy non cambiano.
+   */
+  rebaselineRunIds: ReadonlySet<string>;
 }
 
 function calHref(calendarId: string, href: string): string {
@@ -555,6 +562,9 @@ function verifyV2(idx: VerifyIndex, calendars: readonly MigrationCalendar[], out
       out.add({ ...base, code: 'PLAN_TARGET_MISSING', detail: { reason: null, uid: s.kind === 'booking' ? null : s.uid, legacy: { fingerprint: s.fingerprint, legacy_hash: s.legacy_hash }, target: null, message: 'Oggetto del piano assente su Radicale: serve un apply' } });
       continue;
     }
+    // F4 (contratto f4-modules §5.6): una sorgente derived non ricostruisce il testo della risorsa; le sue
+    // righe si confrontano per occorrenze (V3), non per contenuto.
+    if (s.legacy_snapshot.kind === 'derived') continue;
     const obj = parsedTarget(idx, s.calendar_id, s.href);
     if (!obj) {
       out.add({ ...base, code: 'TARGET_UNPARSABLE', detail: { reason: null, legacy: { fingerprint: s.fingerprint }, target: { href: t.href, etag: t.etag }, message: 'Testo su Radicale non leggibile' } });
@@ -567,6 +577,12 @@ function verifyV2(idx: VerifyIndex, calendars: readonly MigrationCalendar[], out
     const l = idx.ledgerByCalHref.get(calHref(s.calendar_id, s.href));
     // Righe adottate o derivate: solo i campi del piano (VALARM, ATTENDEE e X-* aggiunti dai device restano).
     if ((l?.adopted || l?.derived) && fields.length === 0) continue;
+    // F4: riga ri-allineata da un rollback o da una ri-baseline e non più toccata (stesso etag, stessa riga
+    // legacy). La riga legacy è la proiezione inversa della risorsa (un oggetto creato da un device nella
+    // finestra: DTSTART in UTC, senza STATUS né X-CALDES-*), non la sua sorgente: il serializer non ricostruisce
+    // quel testo e il confronto per campi darebbe un falso positivo. Le occorrenze restano confrontate da V3.
+    if (l?.adopted && l.last_run_id !== null && idx.rebaselineRunIds.has(l.last_run_id)
+      && l.written_etag !== null && l.written_etag === t.etag && l.legacy_hash === s.legacy_hash) continue;
     out.add({ ...base, code: 'CONTENT_MISMATCH', detail: { reason: null, legacy: { fingerprint: s.fingerprint, legacy_hash: s.legacy_hash }, target: { etag: t.etag, fingerprint: t.fingerprint, fields }, message: fields.length ? `Campi diversi dal piano: ${fields.slice(0, DETAIL_LIST_MAX).join(', ')}` : 'Proprietà diverse dal piano fuori dai campi dello strumento' } });
   }
   // Oggetti scritti dallo strumento la cui sorgente non è più nel piano: cancellazione in attesa.
@@ -611,10 +627,35 @@ function tzOfCal(idx: VerifyIndex, calendarId: string): string {
 }
 
 /** Oggetto e calendario di un'occorrenza legacy (gli override vanno nell'oggetto del master, gli orfani staccati nel proprio). */
+/**
+ * F4 (contratto f4-modules §5.6): righe derivate dalla proiezione inversa
+ * (caldes_derived) → chiave della risorsa d'origine (`event:<object_id>`),
+ * dalle sorgenti `derived` del serializer. Le righe derivate sono occorrenze
+ * singole: V3 le confronta con le occorrenze della risorsa su Radicale.
+ */
+const derivedKeysByIndex = new WeakMap<VerifyIndex, Map<string, { key: string; calendar_id: string }>>();
+function derivedRowKey(idx: VerifyIndex, rowId: string): { key: string; calendar_id: string } | null {
+  let map = derivedKeysByIndex.get(idx);
+  if (!map) {
+    map = new Map();
+    for (const s of idx.serialization.objects) {
+      if (s.legacy_snapshot.kind !== 'derived') continue;
+      for (const r of s.legacy_snapshot.rows) map.set(r.id, { key: s.legacy_key, calendar_id: s.calendar_id });
+    }
+    derivedKeysByIndex.set(idx, map);
+  }
+  return map.get(rowId) ?? null;
+}
+
 function attributeLegacy(idx: VerifyIndex, occ: CalendarEventOccurrence): { key: string; calendar_id: string; detached: boolean } {
   const row = idx.rowsById.get(occ.id);
   const calendarId = String(occ.calendar_id);
-  if (!row) return { key: `event:${occ.id}`, calendar_id: calendarId, detached: false };
+  if (!row) {
+    const derived = derivedRowKey(idx, occ.id);
+    // Occorrenza singola: l'istanza si confronta con il proprio inizio (come un override staccato).
+    if (derived) return { key: derived.key, calendar_id: derived.calendar_id, detached: true };
+    return { key: `event:${occ.id}`, calendar_id: calendarId, detached: false };
+  }
   if (row.recurrence_master_id) {
     const master = idx.rowsById.get(row.recurrence_master_id);
     const masterCal = master?.calendar_id ?? row.calendar_id;
@@ -1131,10 +1172,19 @@ async function verifyV5(idx: VerifyIndex, calendars: readonly MigrationCalendar[
     const suffix = `@${uidDomain}`;
     const rowsByUid = new Map<string, SourceRow>();
     for (const r of idx.source.events) if (r.calendar_id === cal.id && !rowsByUid.has(r.uid)) rowsByUid.set(r.uid, r);
+    // F4 (§5.6): le righe derivate (un evento per occorrenza nel feed legacy) appartengono alla risorsa d'origine.
+    const derivedByUid = new Map<string, string>();
+    for (const s of idx.serialization.objects) {
+      if (s.calendar_id !== cal.id || s.legacy_snapshot.kind !== 'derived') continue;
+      for (const r of s.legacy_snapshot.rows) if (!derivedByUid.has(r.uid)) derivedByUid.set(r.uid, s.legacy_key);
+    }
     const legacyKeyOf = (published: string): { key: string; override: boolean } => {
       const local = published.endsWith(suffix) ? published.slice(0, -suffix.length) : published;
       const row = rowsByUid.get(local);
-      if (!row) return { key: `feed:${published}`, override: false };
+      if (!row) {
+        const derivedKey = derivedByUid.get(local);
+        return { key: derivedKey ?? `feed:${published}`, override: false };
+      }
       if (row.recurrence_master_id) {
         const detached = `detached:${row.id}`;
         if (idx.sByKey.has(detached) || idx.skipByKey.has(detached)) return { key: detached, override: false };
@@ -1270,6 +1320,9 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
   const scopeIds = scope.calendar_ids?.length ? new Set(scope.calendar_ids) : null;
   const verified = scopeIds ? included.filter((c) => scopeIds.has(c.id)) : included;
   const ledger = await readLedger(ctx.db, {});
+  const rebaselineRuns = await ctx.db<Array<{ id: string }>>`
+    SELECT id::text AS id FROM cal_migration_runs WHERE kind IN ('rollback', 'rebaseline')
+  `;
   ctx.throwIfCancelled();
 
   await ctx.progress({ phase: 'read-target', message: 'Lettura delle collezioni di Radicale' });
@@ -1299,6 +1352,7 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
     parsed: new Map(),
     scopes: new Map(),
     now,
+    rebaselineRunIds: new Set(rebaselineRuns.map((r) => r.id)),
   };
 
   // Calendari che ricevono righe: quelli verificati e, senza ambito, quelli cancellati con righe nel ledger (V4 è globale: le sue righe vanno ai calendari con oggetti sovrapposti).

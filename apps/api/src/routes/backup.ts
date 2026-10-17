@@ -1,4 +1,4 @@
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { customAlphabet } from 'nanoid';
@@ -6,8 +6,10 @@ import { jsonb, sql, sqlv } from '../db';
 import {
   type BackendMode,
   type CalendarBackendState,
+  DEFAULT_PRINCIPAL,
   normalizeBackendState,
 } from '../lib/calendar/radicale/types';
+import { buildCalendarExportV2 } from '../lib/calendar/export-v2';
 
 type Env = { Variables: { user: { id: string; email?: string; role?: string } } };
 
@@ -111,6 +113,41 @@ const CALENDAR_TABLES: ReadonlySet<string> = new Set([
   'public.calendar_events_legacy',
   'public.calendar_subscriptions',
 ]);
+
+// ─── calendar_events come vista (design §16.2, F4) ──────────────────────────
+//
+// Dopo il finalize della F7 (migrazione 167) calendar_events diventa una vista
+// su calendar_events_legacy. Il formato v1 resta: l'export scrive le righe
+// della tabella legacy con il nome storico e l'import di un backup (anche di
+// prima del finalize) le carica nella tabella legacy, con i default per le
+// colonne che il backup non ha. Prima del finalize non cambia nulla.
+
+const EVENTS_KEY = 'public.calendar_events';
+const EVENTS_LEGACY_KEY = 'public.calendar_events_legacy';
+
+/** true se public.calendar_events è una vista (dopo la 167). */
+export async function calendarEventsIsView(db: Tx = sql): Promise<boolean> {
+  const rows = await db`
+    SELECT table_type FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'calendar_events'
+  ` as unknown as Array<{ table_type: string }>;
+  return rows[0]?.table_type === 'VIEW';
+}
+
+/** Nome con cui una tabella del database entra nel backup (calendar_events_legacy → calendar_events con la vista). */
+export function exportKeyOf(key: string, eventsIsView: boolean): string {
+  return eventsIsView && key === EVENTS_LEGACY_KEY ? EVENTS_KEY : key;
+}
+
+/**
+ * Tabella del database in cui si importano le righe di una tabella del backup:
+ * con la vista, calendar_events del backup → calendar_events_legacy (salvo un
+ * backup che porti già calendar_events_legacy, che vince).
+ */
+export function importKeyOf(key: string, eventsIsView: boolean, backupKeys: readonly string[]): string {
+  if (eventsIsView && key === EVENTS_KEY && !backupKeys.includes(EVENTS_LEGACY_KEY)) return EVENTS_LEGACY_KEY;
+  return key;
+}
 
 export function backupGroup(key: string): BackupGroup {
   if (STATE_TABLES.has(key) || STATE_TABLE_PREFIXES.some((p) => key.startsWith(p))) return 'state';
@@ -412,21 +449,24 @@ class RestoreIntegrityError extends Error {}
 async function buildSnapshot() {
   const tables = await listTables();
   const columnsByTable = await getAllColumns();
+  const eventsIsView = await calendarEventsIsView();
   const data: Record<string, unknown[]> = {};
   let totalRows = 0;
 
   for (const t of tables) {
     const cols = columnsByTable.get(tableKey(t)) ?? [];
     const writable = cols.filter((c) => c.is_generated !== 'ALWAYS');
+    // Con calendar_events vista (dopo la 167) la tabella legacy esce con il nome storico (formato v1 invariato).
+    const outKey = exportKeyOf(tableKey(t), eventsIsView);
     if (writable.length === 0) {
-      data[tableKey(t)] = [];
+      data[outKey] = [];
       continue;
     }
     const colList = writable.map((c) => ident(c.column_name)).join(', ');
     const rows = await sql.unsafe(
       `SELECT ${colList} FROM ${ident(t.schema)}.${ident(t.table)}`
     ) as unknown as Record<string, unknown>[];
-    data[tableKey(t)] = rows;
+    data[outKey] = rows;
     totalRows += rows.length;
   }
 
@@ -468,7 +508,62 @@ backup.get('/info', async (c) => {
   return c.json({ version: BACKUP_VERSION, tableCount: tables.length, totalRows, tables: stats, calendar });
 });
 
+/**
+ * Export v2 del calendario (GET /export?format=calendar-v2, design §16.2,
+ * contratto f4-modules §5.5): zip con un .ics per collezione Radicale più il
+ * manifest. Solo fuori da mode postgres (in postgres gli eventi stanno nel
+ * backup v1): 409 con l'indicazione di usare v1.
+ */
+async function exportCalendarV2(c: Context<Env>): Promise<Response> {
+  const read = await readCalendarBackend(sql);
+  if (read.kind !== 'ok') {
+    return c.json({ error: 'Stato del backend calendario non leggibile: export v2 non disponibile.', code: 'CALENDAR_STATE_UNREADABLE' }, 409);
+  }
+  if (read.state.mode === 'postgres') {
+    return c.json({
+      error: 'Il calendario è ancora servito da Postgres: usa l\'export v1 (JSON), che contiene già eventi e calendari.',
+      code: 'EXPORT_V2_NOT_AVAILABLE',
+      mode: read.state.mode,
+    }, 409);
+  }
+  const principal = process.env.RADICALE_PRINCIPAL?.trim() || DEFAULT_PRINCIPAL;
+  const exported = await buildCalendarExportV2(sql, {
+    principal,
+    state: { mode: read.state.mode, volume_id: read.state.volume_id, epoch: read.state.epoch },
+  });
+  const user = c.get('user');
+  await sql`
+    INSERT INTO audit_logs (
+      user_email, user_role, action, table_name, metadata
+    ) VALUES (
+      ${user?.email ?? null}, ${user?.role ?? null},
+      'EXPORT', 'backup',
+      ${sqlv({
+        source: 'api/backup',
+        format: 'calendar-v2',
+        mode: read.state.mode,
+        collections: exported.manifest.collections.length,
+        objects: exported.manifest.collections.reduce((a, col) => a + col.objects, 0),
+        skipped: exported.manifest.skipped.length,
+        bytes: exported.zip.length,
+      })}
+    )
+  `;
+  return new Response(new Uint8Array(exported.zip), {
+    headers: {
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="${exported.filename}"`,
+      'Content-Length': String(exported.zip.length),
+    },
+  });
+}
+
 backup.get('/export', async (c) => {
+  const format = c.req.query('format');
+  if (format === 'calendar-v2') return exportCalendarV2(c);
+  if (format !== undefined && format !== '' && format !== 'v1' && format !== 'json') {
+    return c.json({ error: `Formato di export non supportato: ${format.slice(0, 40)}. Formati: v1 (JSON, predefinito) e calendar-v2.` }, 400);
+  }
   const { snapshot, stats } = await buildSnapshot();
   const user = c.get('user');
 
@@ -937,7 +1032,14 @@ backup.post('/import', async (c) => {
   // Backup creati prima del fix contengono anche le partizioni di analytics:
   // le loro righe sono già nel padre, quindi si ignorano.
   const partitionKeys = await listPartitionKeys();
-  const incoming = Object.keys(tablesPayload).filter((k) => !partitionKeys.has(k));
+  // Con calendar_events vista (dopo la 167) le righe di calendar_events del
+  // backup vanno in calendar_events_legacy (design §16.2): un backup storico
+  // resta importabile.
+  const eventsIsView = await calendarEventsIsView();
+  const backupKeys = Object.keys(tablesPayload).filter((k) => !partitionKeys.has(k));
+  const sourceKeyOf = new Map<string, string>();
+  for (const k of backupKeys) sourceKeyOf.set(importKeyOf(k, eventsIsView, backupKeys), k);
+  const incoming = [...sourceKeyOf.keys()];
   // Il gruppo S non conta: non viene mai ripristinato, quindi non serve che esista.
   const unknownTables = incoming.filter((k) => backupGroup(k) !== 'state' && !liveKeys.includes(k));
   if (unknownTables.length > 0) {
@@ -951,7 +1053,7 @@ backup.post('/import', async (c) => {
   // 3) Restore inside a transaction with FK triggers disabled.
   const stats = { tablesRestored: 0, rowsInserted: 0, tablesSkipped: 0 };
   const rowsOf = (key: string): Record<string, unknown>[] => {
-    const rows = tablesPayload[key];
+    const rows = tablesPayload[sourceKeyOf.get(key) ?? key];
     return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
   };
 
