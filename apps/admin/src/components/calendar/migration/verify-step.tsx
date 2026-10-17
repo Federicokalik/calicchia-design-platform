@@ -75,7 +75,7 @@ export function VerifyStep({ state, step }: Props) {
     setSelected(new Set());
   }, [verifyId]);
 
-  const run = useRunMutation((_: void, key) => migrationApi.verify({ levels: VERIFY_LEVELS.filter((l) => levels.has(l)) }, key), { success: 'Verifica avviata' });
+  const run = useRunMutation((vars: { levels: VerifyLevel[] }, key) => migrationApi.verify({ levels: vars.levels }, key), { success: 'Verifica avviata' });
   const acceptMutation = useMutation({
     mutationFn: (vars: { target: AcceptTarget; confirm: string }) => {
       const t = vars.target;
@@ -121,7 +121,7 @@ export function VerifyStep({ state, step }: Props) {
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-          <ActionButton action={findAction(step, 'verify')} pending={run.isPending} disabled={levels.size === 0} onClick={() => run.mutate()}>
+          <ActionButton action={findAction(step, 'verify')} pending={run.isPending} disabled={levels.size === 0} onClick={() => run.mutate({ levels: VERIFY_LEVELS.filter((l) => levels.has(l)) })}>
             <ShieldCheck className="h-3.5 w-3.5" /> {levels.size === VERIFY_LEVELS.length ? 'Verifica V1-V5' : 'Verifica i livelli scelti'}
           </ActionButton>
           <ActionButton variant="outline" action={findAction(step, 'accept')} onClick={() => setAccept({ kind: 'all' })}>

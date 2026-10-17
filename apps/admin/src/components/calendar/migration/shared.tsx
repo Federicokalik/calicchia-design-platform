@@ -369,11 +369,13 @@ export function RunPanel({ run, compact }: { run: MigrationRunView; compact?: bo
  */
 export function ArchiveRunCounts({ summary }: { summary: Record<string, unknown> }) {
   const n = (key: string): number => (typeof summary[key] === 'number' ? (summary[key] as number) : 0);
-  const present = n('imported') + n('updated') + n('unchanged');
+  // Gli UID già importati da un archivio precedente con un altro nome contano come presenti nell'archivio.
+  const present = n('imported') + n('updated') + n('unchanged') + n('already_archived');
   const parts = [
     `${n('imported')} importati`,
     n('updated') > 0 ? `${n('updated')} aggiornati` : null,
     `${n('unchanged')} già presenti`,
+    n('already_archived') > 0 ? `${n('already_archived')} già archiviati con un altro nome` : null,
     `${n('invalid')} non validi`,
     n('duplicates') > 0 ? `${n('duplicates')} duplicati` : null,
     n('conflicts') > 0 ? `${n('conflicts')} conflitti` : null,

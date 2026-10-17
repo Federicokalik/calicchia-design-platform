@@ -22,9 +22,11 @@ import { CalendarTabs } from '@/components/layout/calendar-tabs';
 import { useTopbar } from '@/hooks/use-topbar';
 import { cn } from '@/lib/utils';
 import {
+  formatDateTime,
   IDENTITY_LABELS,
   isRunActive,
   migrationApi,
+  MigrationApiError,
   migrationErrorMessage,
   migrationKeys,
   RUN_KIND_LABELS,
@@ -55,6 +57,9 @@ export default function MigrazionePage() {
     queryKey: migrationKeys.state,
     queryFn: migrationApi.state,
     refetchInterval: (q) => (isRunActive((q.state.data as MigrationStateView | undefined)?.active_run) ? 2_000 : 5_000),
+    // Un riavvio dell'API (502 di nginx) dura qualche secondo: più tentativi con attesa crescente per i 5xx e la rete.
+    retry: (failures, err) => failures < 3 && (!(err instanceof MigrationApiError) || err.status >= 500),
+    retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
   });
   const state = stateQuery.data;
 
@@ -81,7 +86,9 @@ export default function MigrazionePage() {
   }, [activeId, queryClient]);
 
   if (stateQuery.isLoading) return <div className="space-y-6"><CalendarTabs /><LoadingState /></div>;
-  if (stateQuery.isError || !state) {
+  // Pannello d'errore bloccante solo senza dati: un errore transitorio del polling (502 durante un riavvio o un deploy
+  // dell'API) non smonta passi e dialog aperti (file scelto, frasi digitate, selezioni), resta un avviso sopra.
+  if (!state) {
     return (
       <div className="space-y-6">
         <CalendarTabs />
@@ -105,6 +112,16 @@ export default function MigrazionePage() {
   return (
     <div className="space-y-6">
       <CalendarTabs />
+
+      {stateQuery.isError && (
+        <div role="status" className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+          <span>
+            Stato non aggiornato da {formatDateTime(stateQuery.dataUpdatedAt ? new Date(stateQuery.dataUpdatedAt).toISOString() : null)}
+            {' '}({migrationErrorMessage(stateQuery.error)}): riprovo da solo.
+          </span>
+          <Button size="sm" variant="outline" onClick={() => stateQuery.refetch()}><RefreshCw className="h-3.5 w-3.5" /> Riprova</Button>
+        </div>
+      )}
 
       <StatusBar state={state} />
 

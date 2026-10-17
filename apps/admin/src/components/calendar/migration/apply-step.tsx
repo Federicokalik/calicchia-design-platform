@@ -80,18 +80,20 @@ export function ApplyStep({ state, step }: Props) {
     setForceCodes(new Set());
   }, [planId]);
 
+  // Le variabili contengono tutta la richiesta (piano, item e codici forzati): la chiave d'idempotenza cambia con loro.
   const run = useRunMutation(
-    (vars: { confirm: string; confirm_force: string | null }, key) => migrationApi.apply({
-      plan_run_id: planId as string,
-      expect_plan_hash: planSummary?.plan_hash ?? null,
-      force_item_ids: [...selected],
-      force_codes: [...forceCodes],
-      confirm: vars.confirm,
-      ...(vars.confirm_force ? { confirm_force: vars.confirm_force } : {}),
-    }, key),
+    (vars: { plan_run_id: string; expect_plan_hash: string | null; force_item_ids: string[]; force_codes: ConflictCode[]; confirm: string; confirm_force: string | null }, key) =>
+      migrationApi.apply({
+        plan_run_id: vars.plan_run_id,
+        expect_plan_hash: vars.expect_plan_hash,
+        force_item_ids: vars.force_item_ids,
+        force_codes: vars.force_codes,
+        confirm: vars.confirm,
+        ...(vars.confirm_force ? { confirm_force: vars.confirm_force } : {}),
+      }, key),
     { success: 'Apply avviato', onCreated: () => setOpen(false) },
   );
-  const replan = useRunMutation((_: void, key) => migrationApi.plan({ options: planSummary?.options, scope: planSummary?.scope }, key), {
+  const replan = useRunMutation((vars: Pick<Partial<PlanSummary>, 'options' | 'scope'>, key) => migrationApi.plan({ options: vars.options, scope: vars.scope }, key), {
     success: 'Nuova anteprima avviata: al termine applica di nuovo per verificare zero scritture',
     onCreated: (res) => setAwaitedPlanId(res.run.id),
   });
@@ -159,7 +161,7 @@ export function ApplyStep({ state, step }: Props) {
             size="sm"
             variant="outline"
             disabled={!planSummary || !!state.active_run || replan.isPending}
-            onClick={() => replan.mutate()}
+            onClick={() => replan.mutate({ options: planSummary?.options, scope: planSummary?.scope })}
             title="Per ripetere l'apply serve un'anteprima nuova: quella vecchia contiene le scritture già fatte"
           >
             <RefreshCw className="h-3.5 w-3.5" /> Nuova anteprima con le stesse opzioni
@@ -259,7 +261,14 @@ export function ApplyStep({ state, step }: Props) {
         error={run.isError ? migrationErrorMessage(run.error) : null}
         extraPhrase={forcing ? { phrase: MIGRATION_CONFIRMATIONS.force, label: `Stai forzando ${selected.size} conflitti e ${forceCodes.size} codici: digita` } : null}
         disabled={!planSummary || waitingForPlan}
-        onConfirm={({ phrase, extra }) => run.mutate({ confirm: phrase, confirm_force: extra })}
+        onConfirm={({ phrase, extra }) => run.mutate({
+          plan_run_id: planId as string,
+          expect_plan_hash: planSummary?.plan_hash ?? null,
+          force_item_ids: [...selected],
+          force_codes: [...forceCodes],
+          confirm: phrase,
+          confirm_force: extra,
+        })}
         description={
           <>
             <p>Scrive su Radicale gli oggetti dell'anteprima ({planSummary?.writes ?? 0} scritture previste). Postgres non cambia e resta autorevole; i device restano in sola lettura.</p>

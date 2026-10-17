@@ -4,13 +4,15 @@
  * chiave d'idempotenza stabile, nomi dei calendari per le tabelle.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { createIdempotencyKeyTracker } from './idempotency-key';
 import {
   isRunActive,
   migrationApi,
   migrationErrorMessage,
+  MigrationApiError,
   migrationKeys,
   newIdempotencyKey,
   RUN_KIND_LABELS,
@@ -20,28 +22,49 @@ import {
 } from '@/lib/calendar-migration-api';
 
 /**
+ * Errori che garantiscono che la richiesta non ha creato un run: dopo uno di
+ * questi la chiave d'idempotenza si rigenera (IDEMPOTENCY_KEY_REUSED compreso:
+ * la chiave è già legata a una richiesta diversa, riusarla darebbe sempre 409).
+ */
+const KEY_RESET_CODES = new Set([
+  'IDEMPOTENCY_KEY_REUSED',
+  'VALIDATION_FAILED',
+  'CONFIRMATION_REQUIRED',
+  'PRECONDITION_FAILED',
+  'MIGRATION_BUSY',
+  'PAYLOAD_TOO_LARGE',
+]);
+
+const noRunCreated = (err: unknown): boolean => err instanceof MigrationApiError && err.code !== null && KEY_RESET_CODES.has(err.code);
+
+/**
  * Mutazione che crea un run: toast con l'esito della richiesta, invalidazione
  * delle query della pagina (lo stato mostra subito il run in coda) e chiave
- * d'idempotenza stabile finché la richiesta non riesce (un nuovo tentativo
- * dopo un errore di rete non crea un secondo run).
+ * d'idempotenza legata alla richiesta (createIdempotencyKeyTracker): un nuovo
+ * tentativo identico dopo un errore di rete non crea un secondo run, uno
+ * modificato usa una chiave nuova.
  */
 export function useRunMutation<V>(
   fn: (vars: V, idempotencyKey: string) => Promise<RunCreatedResponse>,
   opts: { success?: string; onCreated?: (res: RunCreatedResponse) => void } = {},
 ) {
   const queryClient = useQueryClient();
-  const [key, setKey] = useState(newIdempotencyKey);
+  const tracker = useRef<ReturnType<typeof createIdempotencyKeyTracker> | null>(null);
+  if (tracker.current === null) tracker.current = createIdempotencyKeyTracker({ generate: newIdempotencyKey, noRunCreated });
   return useMutation({
-    mutationFn: (vars: V) => fn(vars, key),
+    mutationFn: (vars: V) => fn(vars, (tracker.current as ReturnType<typeof createIdempotencyKeyTracker>).keyFor(vars)),
     onSuccess: (res) => {
-      setKey(newIdempotencyKey());
+      tracker.current?.succeeded();
       queryClient.setQueryData(migrationKeys.run(res.run.id), res.run);
       void queryClient.invalidateQueries({ queryKey: migrationKeys.all });
       if (res.replayed) toast.info('Richiesta già ricevuta: mostro il run esistente');
       else toast.success(opts.success ?? `${RUN_KIND_LABELS[res.run.kind]}: run avviato`);
       opts.onCreated?.(res);
     },
-    onError: (err) => toast.error(migrationErrorMessage(err)),
+    onError: (err) => {
+      tracker.current?.failed(err);
+      toast.error(migrationErrorMessage(err));
+    },
   });
 }
 
