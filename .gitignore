@@ -206,6 +206,12 @@ private-uploads/
 .playwright-mcp/
 
 # =====================================================
+# E2E ADMIN (Playwright, apps/admin/e2e)
+# =====================================================
+test-results/
+playwright-report/
+
+# =====================================================
 # DESIGN REFERENCES & SCREENSHOTS
 # =====================================================
 insp/
