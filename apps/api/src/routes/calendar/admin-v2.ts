@@ -151,21 +151,21 @@ calendarAdminV2.delete('/objects/:id', async (c) => {
   await assertV2ObjectsAvailable();
   const ifMatch = c.req.header('If-Match') ?? '';
   requireIfMatch(ifMatch);
-  const recurrenceKey = c.req.query('recurrence_key') ?? '';
+  // Senza recurrence_key vale il componente indicato dall'id (un id di override ha come target quell'override);
+  // senza scope lo decide deleteObjectV2: "tutto" solo per il master, per un'istanza va scelto.
+  const recurrenceKey = c.req.query('recurrence_key');
   const scopeParam = c.req.query('scope');
-  let scope: CalV2Scope;
-  if (scopeParam === undefined) {
-    // Senza scope vale "tutto", ma solo per l'evento intero: per un'istanza va scelto.
-    if (recurrenceKey !== '') throw invalidValue('Indica lo scope (this, this_and_future o all) per eliminare un\'occorrenza', 'scope');
-    scope = 'all';
-  } else if ((CAL_V2_SCOPES as readonly string[]).includes(scopeParam)) {
-    scope = scopeParam as CalV2Scope;
-  } else {
+  if (scopeParam !== undefined && !(CAL_V2_SCOPES as readonly string[]).includes(scopeParam)) {
     throw new CalendarV2Error('SCOPE_INVALID', 400, 'scope non valido');
   }
   const dry = c.req.query('dry_run');
   const dryRun = dry === '1' || dry === 'true';
-  const res = await deleteObjectV2(c.req.param('id'), ifMatch, { scope, recurrenceKey, dryRun }, actorOf(c));
+  const res = await deleteObjectV2(
+    c.req.param('id'),
+    ifMatch,
+    { scope: scopeParam === undefined ? undefined : (scopeParam as CalV2Scope), recurrenceKey, dryRun },
+    actorOf(c),
+  );
   if (res.etag) c.header('ETag', res.etag);
   return c.json(res);
 });

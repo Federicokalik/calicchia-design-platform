@@ -616,6 +616,47 @@ describe('API admin v2 contro Radicale reale', { skip: radicale.skip }, () => {
     ]);
   });
 
+  test('DELETE di un id di override senza parametri: 400 sullo scope e serie intatta; con scope=this esclude solo quell\'occorrenza', async () => {
+    const created = await create({
+      summary: fx.name('Serie con override'), start: rome('2027-05-03', 9), end: rome('2027-05-03', 10), rrule: 'FREQ=WEEKLY;COUNT=4;BYDAY=MO',
+    });
+    const id = created.object?.id as string;
+    const href = `${created.object?.uid}.ics`;
+    const del = (ref: string, etag: string, query: Record<string, string> = {}) =>
+      api.delete<CalV2WriteResult & { code?: string; details?: { issues?: Array<{ property?: string }> } }>(`${BASE}/objects/${ref}`, { auth: 'admin', headers: { 'If-Match': etag }, query });
+
+    // Override del 10/5 (lunedì 09:00 CEST = 07:00Z).
+    const occurrence = await read(id, { recurrence_key: '20270510T070000Z' });
+    const patched = await patch(id, occurrence.etag as string, patchBody(occurrence, [set('summary', 'Solo questa')], { scope: 'this' }));
+    assert.equal(patched.status, 200, patched.text);
+    const overrideId = patched.json.object?.target?.component_id as string;
+    assert.ok(overrideId && overrideId !== id, 'l\'override ha il suo id');
+    const before = (await textOf(cal, href))?.body ?? '';
+
+    // L'id dell'override senza recurrence_key né scope ha come target quell'override: lo scope va scelto.
+    const refused = await del(overrideId, patched.json.etag as string);
+    assert.equal(refused.status, 400, refused.text);
+    assert.equal(refused.json.code, 'VALIDATION_FAILED');
+    assert.equal(refused.json.details?.issues?.[0]?.property, 'scope');
+    assert.equal((await textOf(cal, href))?.body, before, 'la serie è intatta');
+    assert.equal((await api.get(`${BASE}/objects/${id}`, { auth: 'admin' })).status, 200, 'la serie esiste ancora');
+
+    // Stessa regola con recurrence_key esplicita su un'istanza: senza scope non si elimina nulla.
+    const noScope = await del(id, (await read(id)).etag as string, { recurrence_key: '20270517T070000Z' });
+    assert.equal(noScope.status, 400, noScope.text);
+    assert.equal(noScope.json.details?.issues?.[0]?.property, 'scope');
+    assert.equal((await textOf(cal, href))?.body, before, 'la serie è intatta');
+
+    // Con scope=this esclude solo quell'occorrenza (EXDATE; l'override sparisce), il resto della serie resta.
+    const ok = await del(overrideId, (await read(id)).etag as string, { scope: 'this' });
+    assert.equal(ok.status, 200, ok.text);
+    assert.ok(ok.json.object, 'la risorsa resta');
+    const after = unfold((await textOf(cal, href))?.body ?? '');
+    assert.match(after, /EXDATE;TZID=Europe\/Rome:20270510T090000/);
+    assert.doesNotMatch(after, /RECURRENCE-ID/);
+    assert.match(after, /RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO/);
+  });
+
   test('prima istanza con questa e le successive: elimina la risorsa', async () => {
     const created = await create({ summary: fx.name('Prima'), start: rome('2027-04-05', 9), end: rome('2027-04-05', 10), rrule: 'FREQ=DAILY;COUNT=3' });
     const view = await read(created.object?.id as string);
@@ -828,6 +869,41 @@ describe('API admin v2 contro Radicale reale', { skip: radicale.skip }, () => {
 
     const missing = await patch(sv.id, sv.etag as string, patchBody(sv, [set('summary', 'x')], { move_to_calendar_id: randomUUID() }));
     assert.equal(missing.status, 404);
+  });
+
+  test('solo spostamento di calendario (ops vuote): 200 con changed [calendar_id]; ETag vecchio → 412; senza move → 400', async () => {
+    const created = await create({ summary: 'Solo calendario', start: rome('2028-02-07', 9), end: rome('2028-02-07', 10) });
+    const id = created.object?.id as string;
+    const href = `${created.object?.uid}.ics`;
+
+    const view = await read(id);
+    const res = await patch(id, view.etag as string, patchBody(view, [], { move_to_calendar_id: other.id }));
+    assert.equal(res.status, 200, res.text);
+    assert.equal(res.json.noop, false, 'lo spostamento non è un noop');
+    assert.deepEqual(res.json.changed, ['calendar_id']);
+    assert.equal(res.json.object?.id, id, 'il MOVE conserva l\'id');
+    assert.equal(res.json.object?.calendar_id, other.id);
+    assert.equal(await textOf(cal, href), null, 'la risorsa lascia il calendario di origine');
+    assert.match((await textOf(other, href))?.body ?? '', /SUMMARY:Solo calendario/, 'la risorsa è nella destinazione, con il testo invariato');
+    assert.equal((await read(id)).calendar_id, other.id);
+
+    // ETag vecchio: senza op non c'è nulla da fondere, quindi serve l'ETag esatto (412 come la DELETE).
+    const second = await create({ summary: 'Ancora ferma', start: rome('2028-02-08', 9), end: rome('2028-02-08', 10) });
+    const secondHref = `${second.object?.uid}.ics`;
+    const stale = await read(second.object?.id as string);
+    await deviceEdit(cal, secondHref, (t) => t.replace(/SUMMARY:Ancora ferma/, 'SUMMARY:Dal device'));
+    const refused = await patch(stale.id, stale.etag as string, patchBody(stale, [], { move_to_calendar_id: other.id }));
+    assert.equal(refused.status, 412, refused.text);
+    assert.equal(refused.json.code, 'PRECONDITION_FAILED');
+    assert.deepEqual(refused.json.conflicts, []);
+    assert.ok(refused.json.current?.id);
+    assert.match((await textOf(cal, secondHref))?.body ?? '', /SUMMARY:Dal device/, 'nessuno spostamento con ETag vecchio');
+    assert.equal(await textOf(other, secondHref), null);
+
+    // Nessuna op e nessuno spostamento: la richiesta non chiede nulla.
+    const none = await patch(id, (await read(id)).etag as string, patchBody(view, []));
+    assert.equal(none.status, 400, none.text);
+    assert.equal(none.json.code, 'VALIDATION_FAILED');
   });
 
   // ── Proprietà non tipizzate e audit ──

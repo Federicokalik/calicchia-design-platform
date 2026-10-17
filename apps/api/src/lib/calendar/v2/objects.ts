@@ -270,7 +270,8 @@ const opSchema = z
 
 const opsSchema = z
   .array(opSchema)
-  .min(1, 'almeno una modifica')
+  // Zero op solo con move_to_calendar_id: il controllo "almeno una modifica" è su patchRequestSchema.
+  .min(0)
   .max(MAX_OPS, `al massimo ${MAX_OPS} modifiche`)
   .superRefine((ops, ctx) => {
     const seen = new Set<string>();
@@ -290,7 +291,12 @@ const patchRequestSchema = z
     move_to_calendar_id: z.string().max(64).optional(),
     dryRun: z.boolean().optional(),
   })
-  .strict();
+  .strict()
+  .superRefine((r, ctx) => {
+    if (r.ops.length === 0 && r.move_to_calendar_id === undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['ops'], message: 'almeno una modifica' });
+    }
+  });
 
 const rawPropertiesSchema = z
   .record(z.string().max(100), z.array(propertySchema).max(MAX_PROPERTIES_PER_NAME))
@@ -756,6 +762,8 @@ function decidePatch(current: CurrentObject, input: PatchInput): PatchDecision {
   const ctx = { tz, now };
   let merged = false;
   try {
+    // Uno spostamento senza modifiche ai campi chiede l'ETag esatto, come la DELETE, e non passa per la fusione.
+    if (input.req.ops.length === 0 && normalizeEtag(current.etag) !== input.ifMatch) throw new PreconditionMarker([]);
     if (normalizeEtag(current.etag) !== input.ifMatch) {
       const conflicts = conflictingKeys(obj, input.key, input.scope, input.req.ops, input.req.base, ctx);
       if (conflicts.length > 0) throw new PreconditionMarker(conflicts);
@@ -1242,27 +1250,31 @@ function decideDelete(current: CurrentObject, cal: SidecarRow, scope: CalV2Scope
 export async function deleteObjectV2(
   ref: string,
   ifMatch: string,
-  req: { scope: CalV2Scope; recurrenceKey: string; dryRun: boolean },
+  req: { scope?: CalV2Scope; recurrenceKey?: string; dryRun: boolean },
   actor: AdminActor,
 ): Promise<CalV2WriteResult> {
   await assertV2ObjectsAvailable();
   const ifm = requireIfMatch(ifMatch);
-  if (!CAL_V2_SCOPES.includes(req.scope)) throw scopeInvalid('scope non valido');
-  if (req.recurrenceKey !== MASTER_RECURRENCE_KEY && !isRecurrenceKey(req.recurrenceKey)) throw invalidValue('recurrence_key non valida', 'recurrence_key');
+  if (req.scope !== undefined && !CAL_V2_SCOPES.includes(req.scope)) throw scopeInvalid('scope non valido');
   const resolved = await resolve(ref);
+  // Senza recurrence_key vale il componente indicato dall'id (§3.2): un id di override ha come target quell'override.
+  const key = req.recurrenceKey ?? resolved.recurrenceKey;
+  if (key !== MASTER_RECURRENCE_KEY && !isRecurrenceKey(key)) throw invalidValue('recurrence_key non valida', 'recurrence_key');
+  // Senza scope vale "tutto" solo per il master: per un'istanza va scelto.
+  const scope: CalV2Scope | null = req.scope ?? (key === MASTER_RECURRENCE_KEY ? 'all' : null);
+  if (!scope) throw invalidValue('Indica lo scope (this, this_and_future o all) per eliminare un\'occorrenza', 'scope');
   const cal = resolved.calendar;
   assertWritableCalendar(cal);
   if (await isActiveBookingProjection(cal, resolved.href)) {
     throw readOnly(ACTIVE_BOOKING_MESSAGE, 'booking_active');
   }
-  const key = req.recurrenceKey;
 
   if (req.dryRun) {
     const { client, principal } = requireRadicale();
     const current = await fetchCurrent(client, objectPath(principal, collectionNameOf(cal), resolved.href), 'l\'evento');
     if (!current) throw notFound();
     try {
-      const d = decideDelete(current, cal, req.scope, key, ifm, true);
+      const d = decideDelete(current, cal, scope, key, ifm, true);
       if (d.action === 'delete') return result({ object: null, etag: current.etag, dry_run: true });
       const snap: Snapshot = { resolved, raw: serialized(d.object as CalendarObject, current.raw), etag: current.etag, object: d.object as CalendarObject, parseError: null, source: 'radicale' };
       return result({ object: await viewOf(snap, null), etag: current.etag, changed: d.changed, dry_run: true, valid: d.valid, issues: d.issues });
@@ -1288,7 +1300,7 @@ export async function deleteObjectV2(
           missing = true;
           return { action: 'none' };
         }
-        const d = decideDelete(current, cal, req.scope, key, ifm, false);
+        const d = decideDelete(current, cal, scope, key, ifm, false);
         decision = d;
         if (d.action === 'delete') return { action: 'delete' };
         return { action: 'put', object: d.object as CalendarObject, previous: d.previous as CalendarObject, changed: d.changed };
@@ -1308,10 +1320,10 @@ export async function deleteObjectV2(
   }
   await writeThrough([cal.id], ACTOR);
   if (outcome.action === 'delete') {
-    await auditV2({ operation: 'v2.delete', action: 'DELETE', recordId, calendar: cal, href: resolved.href, etagBefore: outcome.etagBefore, etagAfter: null, changed: [], scope: req.scope, actor, ...(key !== MASTER_RECURRENCE_KEY ? { extra: { recurrence_key: key } } : {}) });
+    await auditV2({ operation: 'v2.delete', action: 'DELETE', recordId, calendar: cal, href: resolved.href, etagBefore: outcome.etagBefore, etagAfter: null, changed: [], scope, actor, ...(key !== MASTER_RECURRENCE_KEY ? { extra: { recurrence_key: key } } : {}) });
     return result({ object: null, etag: null });
   }
-  await auditV2({ operation: 'v2.delete', action: 'UPDATE', recordId, calendar: cal, href: resolved.href, etagBefore: outcome.etagBefore, etagAfter: outcome.etagAfter, changed: d.changed, scope: req.scope, actor, extra: { recurrence_key: key } });
+  await auditV2({ operation: 'v2.delete', action: 'UPDATE', recordId, calendar: cal, href: resolved.href, etagBefore: outcome.etagBefore, etagAfter: outcome.etagAfter, changed: d.changed, scope, actor, extra: { recurrence_key: key } });
   const snap: Snapshot = { resolved, raw: outcome.raw ?? '', etag: outcome.etagAfter, object: outcome.object, parseError: null, source: 'radicale' };
   return result({ object: await viewOf(snap, null), etag: outcome.etagAfter, changed: d.changed, sequence_bumped: true, issues: d.issues });
 }

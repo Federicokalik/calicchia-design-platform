@@ -90,7 +90,7 @@ Per un oggetto illeggibile (`parse_error` non nullo) la vista ha `master: null`,
 
 Header `If-Match`; corpo `CalV2PatchRequest`; risposta 200 `CalV2WriteResult` con header `ETag` (nuovo ETag; con `noop` quello corrente).
 
-Validazione della richiesta (400 `VALIDATION_FAILED` o `SCOPE_INVALID`): `ops` da 1 a 50; un campo al più una volta; `set_property` solo con nomi `^[A-Z][A-Z0-9-]*$` fuori da `CAL_V2_RESERVED_PROPERTIES` e con `properties[i].name` uguale a `name`; valori conformi ai tipi del §4 (schema zod lato API); limiti: 20 VALARM, 200 ATTENDEE, 50 proprietà per nome, testo di un campo ≤ 64 KB; scope ammessi dal §3.8.
+Validazione della richiesta (400 `VALIDATION_FAILED` o `SCOPE_INVALID`): `ops` da 1 a 50 (0 solo con `move_to_calendar_id`, che allora richiede `If-Match` esatto); un campo al più una volta; `set_property` solo con nomi `^[A-Z][A-Z0-9-]*$` fuori da `CAL_V2_RESERVED_PROPERTIES` e con `properties[i].name` uguale a `name`; valori conformi ai tipi del §4 (schema zod lato API); limiti: 20 VALARM, 200 ATTENDEE, 50 proprietà per nome, testo di un campo ≤ 64 KB; scope ammessi dal §3.8.
 
 Effetto: applica gli op al target con la semantica dello scope (§3.8), poi la validazione di calendar-core (`validateObject` con `previous`), poi PUT. `move_to_calendar_id` (solo con scope `all`): dopo la PUT (o subito se gli op sono un noop) MOVE con `Overwrite: F` sulla destinazione, che DEVE essere attiva, non `subscription`, non archivio e con VEVENT nel component-set (altrimenti 403 `READ_ONLY` o 400); href o UID già presenti → 409 `MOVE_CONFLICT`. Se la PUT è riuscita e la MOVE no, la risposta è 409 `MOVE_CONFLICT` con `details: { patched: true, etag }`.
 
@@ -108,6 +108,8 @@ Corpo `CalV2CreateRequest`; nessun `If-Match` (PUT interna con `If-None-Match: *
 ### 3.7 `DELETE /objects/:id?scope=&recurrence_key=&dry_run=1`
 
 Header `If-Match`. Risposta 200 `CalV2WriteResult` (`object: null` se la risorsa è stata eliminata, altrimenti la vista aggiornata con il nuovo `ETag`).
+
+Senza `recurrence_key` il target è il componente indicato dall'id (come nel §3.2: un id di override ha come target quell'override); `recurrence_key=` vuoto indica il master. Senza `scope` vale `all` solo se il target è il master o un evento singolo; per un'istanza lo scope va scelto (400 `VALIDATION_FAILED`, `property: scope`).
 
 | scope | evento singolo (chiave `''`) | serie, target K ≠ `''` |
 |---|---|---|

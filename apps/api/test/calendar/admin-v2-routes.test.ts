@@ -213,7 +213,7 @@ describe('validazione delle richieste con lo store Radicale', () => {
     }
   });
 
-  test('SCOPE_INVALID: scope sconosciuto, spostamento con scope diverso da all, DELETE di un\'istanza senza scope', async () => {
+  test('SCOPE_INVALID: scope sconosciuto, spostamento con scope diverso da all, DELETE con scope sconosciuto', async () => {
     overrideCalendarStore('radicale');
     try {
       const bad = await api.patch(`${BASE}/objects/${ANY_ID}`, { auth: 'admin', headers, body: patchBody({ scope: 'tutto' }) });
@@ -225,9 +225,8 @@ describe('validazione delle richieste con lo store Radicale', () => {
       const del = await api.delete(`${BASE}/objects/${ANY_ID}`, { auth: 'admin', headers, query: { scope: 'sempre' } });
       assert.equal(del.status, 400);
       assert.equal(del.json.code, 'SCOPE_INVALID');
-      const noScope = await api.delete(`${BASE}/objects/${ANY_ID}`, { auth: 'admin', headers, query: { recurrence_key: '20270406T080000Z' } });
-      assert.equal(noScope.status, 400);
-      assert.equal(noScope.json.code, 'VALIDATION_FAILED');
+      // La DELETE di un'istanza senza scope dipende dal componente indicato dall'id (un id di override ha come
+      // target l'override): richiede l'oggetto risolto ed è coperta in integration/admin-v2-radicale.test.ts.
     } finally {
       overrideCalendarStore(null);
     }
