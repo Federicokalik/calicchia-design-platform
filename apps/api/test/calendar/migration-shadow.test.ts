@@ -46,6 +46,7 @@ import {
   computeParityStreak,
   countOpenShadowConflicts,
   erasureOnlyExecutable,
+  GDPR_ERASURE_INCOMPLETE_ALERT,
   getParity,
   handleShadowMirror,
   inNightlyQuietWindow,
@@ -67,6 +68,7 @@ import {
 } from '../../src/lib/calendar/migration/shadow';
 import { MIGRATION_LOCK_KEY, MigrationError, type PlanItem } from '../../src/lib/calendar/migration/types';
 import { RadicaleClient } from '../../src/lib/calendar/radicale/client';
+import { onIndexAlert } from '../../src/lib/calendar/radicale/health';
 import { configureRadicaleRuntime } from '../../src/lib/calendar/radicale/sync';
 import { getPgLegacyStore } from '../../src/lib/calendar/store';
 import { logger } from '../../src/lib/logger';
@@ -241,6 +243,34 @@ describe('parità dello shadow: verifiche complete, giorni di calendario e fines
     assert.equal(parityDay(new Date('2026-10-10T22:30:00Z')), '2026-10-11', 'giorno di Roma, non UTC');
   });
 
+  test('parità per giorno di Roma ai cambi d\'ora: giorni di 25 ore (ottobre) e di 23 ore (marzo) senza buchi né giorni doppi', () => {
+    // Notturno alle 03:10 di Roma ogni giorno: in UTC 01:10Z con l'ora legale, 02:10Z con l'ora solare.
+    const romeHour = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Rome', hour: '2-digit', hour12: false });
+    const romeAt0310 = (y: number, mo: number, d: number) => {
+      const legal = new Date(Date.UTC(y, mo, d, 1, 10));
+      return romeHour.format(legal) === '03' ? legal : new Date(Date.UTC(y, mo, d, 2, 10));
+    };
+    for (const [label, y, mo, firstDay, change] of [['ottobre', 2026, 9, 20, '2026-10-25'], ['marzo', 2027, 2, 23, '2027-03-28']] as const) {
+      const since = new Date(Date.UTC(y, mo, firstDay - 1, 0, 0));
+      const days = Array.from({ length: 9 }, (_, i) => firstDay + i);
+      const runs = days.map((d) => sched(full, true, romeAt0310(y, mo, d)));
+      // Un giro per giorno di Roma, anche il giorno del cambio d'ora.
+      assert.equal(new Set(runs.map((r) => parityDay(r.finished_at))).size, days.length, `${label}: un giorno per giro`);
+      assert.ok(runs.some((r) => parityDay(r.finished_at) === change), `${label}: il giorno del cambio ha il suo giro`);
+      const rounds = parityRounds(runs);
+      const last = romeAt0310(y, mo, days[days.length - 1]).getTime();
+      // Dalla fine dell'ultimo notturno per le 24 ore dopo: sempre soddisfatta (la serie copre 8 giorni pieni).
+      for (let m = 0; m < 24 * 60; m += 7) {
+        const now = new Date(last + m * 60_000);
+        const streak = computeParityStreak(rounds, { now, shadowSince: since, requiredDays: 7 });
+        assert.equal(streak.satisfied, true, `${label}: soddisfatta alle ${now.toISOString()}`);
+      }
+      // Senza il notturno del giorno del cambio d'ora: buco.
+      const holed = parityRounds(runs.filter((r) => parityDay(r.finished_at) !== change));
+      assert.equal(computeParityStreak(holed, { now: new Date(last + 3_600_000), shadowSince: since, requiredDays: 7 }).satisfied, false, `${label}: buco nel giorno del cambio`);
+    }
+  });
+
   test('finestra del notturno: il giro orario non parte fra 02:55 e 03:15 (ora locale del cron)', () => {
     const at = (h: number, m: number) => new Date(2026, 9, 16, h, m, 0);
     assert.equal(inNightlyQuietWindow(at(2, 54)), false);
@@ -294,6 +324,31 @@ describe('giri programmati dello shadow', () => {
     assert.equal(await runShadowNightly({ retryDelayMs: 100, retryUntil: Date.now() + 50 }), 'skipped');
     await sql`DELETE FROM cal_jobs WHERE kind = 'migration_run'`;
     await sql`DELETE FROM cal_migration_runs`;
+  });
+
+  test('notturno in attesa di un nuovo tentativo: il giro orario resta fermo anche fuori dalla finestra', async () => {
+    await sql`DELETE FROM cal_migration_runs`;
+    configureRadicaleRuntime({ client: new RadicaleClient({ baseUrl: 'http://127.0.0.1:9', password: 'x', retries: 0 }), principal: 'federico', watch: 'off', identitySource: 'remote' });
+    await setState({ volume: VOLUME, shadow: true });
+    const [active] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, started_at, attempts)
+      VALUES ('verify', 'running', 'admin', 'admin:test', ${sql.json({ scope: {}, levels: ['V1'] } as never)}, now(), 1)
+      RETURNING id::text AS id
+    `;
+    try {
+      assert.equal(await runShadowNightly({ retryDelayMs: 60_000, retryUntil: Date.now() + 120_000 }), 'retry');
+      await sql`UPDATE cal_migration_runs SET status = 'succeeded', finished_at = now() WHERE id = ${active.id}::uuid`;
+      // Nessun run attivo e fuori dalla finestra (04:00), ma il notturno aspetta il suo tentativo: niente giro orario.
+      await runShadowHourlyParity({ now: new Date(2026, 9, 16, 4, 0) });
+      assert.equal((await sql`SELECT 1 FROM cal_migration_runs WHERE kind = 'verify' AND id <> ${active.id}::uuid`).length, 0);
+      cancelShadowNightlyRetry();
+      await runShadowHourlyParity({ now: new Date(2026, 9, 16, 4, 0) });
+      assert.equal((await sql`SELECT 1 FROM cal_migration_runs WHERE kind = 'verify' AND id <> ${active.id}::uuid`).length, 1, 'senza tentativi in attesa il giro orario riparte');
+    } finally {
+      cancelShadowNightlyRetry();
+      await sql`DELETE FROM cal_jobs WHERE kind = 'migration_run'`;
+      await sql`DELETE FROM cal_migration_runs`;
+    }
   });
 
   test('orario nella finestra del notturno: nessuna verifica accodata', async () => {
@@ -356,8 +411,19 @@ describe('handler del job shadow_mirror senza Radicale', () => {
     const erasure = await handleShadowMirror(fakeJob('booking:abc123', { erasure: true }), jobCtx);
     assert.equal((erasure as { result: { skipped: string } }).result.skipped, 'volume_not_initialized');
     await setState({ volume: VOLUME, shadow: true, mode: 'radicale' });
-    const radicale = await handleShadowMirror(fakeJob('booking:abc123'), jobCtx);
-    assert.equal((radicale as { result: { skipped: string } }).result.skipped, 'mode_not_postgres');
+    const alerts: Array<{ code: string; key: unknown }> = [];
+    const stop = onIndexAlert((code, details) => alerts.push({ code, key: details.key }));
+    try {
+      const radicale = await handleShadowMirror(fakeJob('booking:abc123'), jobCtx);
+      assert.equal((radicale as { result: { skipped: string } }).result.skipped, 'mode_not_postgres');
+      assert.equal(alerts.filter((a) => a.code === GDPR_ERASURE_INCOMPLETE_ALERT).length, 0, 'un job normale non è una cancellazione');
+      // Cancellazione accodata in mode postgres e saltata per un cambio di modo: avviso dedicato.
+      const erased = await handleShadowMirror(fakeJob('booking:abc124', { erasure: true }), jobCtx);
+      assert.equal((erased as { result: { skipped: string } }).result.skipped, 'mode_not_postgres');
+      assert.deepEqual(alerts.filter((a) => a.code === GDPR_ERASURE_INCOMPLETE_ALERT).map((a) => a.key), ['booking:abc124']);
+    } finally {
+      stop();
+    }
     await resetState();
   });
 

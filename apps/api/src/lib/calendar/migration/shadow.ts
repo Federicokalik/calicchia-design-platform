@@ -112,6 +112,16 @@ export const SHADOW_JOB_LEASE_MS = CAL_JOB_DEFAULTS.leaseMs;
 /** Codice dell'avviso di un conflitto dello shadow (raiseIndexAlert). */
 export const SHADOW_CONFLICT_ALERT = 'shadow-conflict';
 
+/**
+ * Codice dell'avviso di una cancellazione GDPR non completata su Radicale
+ * (contratto f3 §13.1 passo 5): job shadow_mirror con `payload.erasure` finito
+ * con un conflitto (intento pendente con esito ignoto, UNTRACKED_TARGET,
+ * TARGET_NEWER, COLLECTION_MISSING o collezione estranea), in dead letter o
+ * saltato per un cambio di modo. Nome e telefono possono essere ancora sul
+ * volume: la risposta della cancellazione lo annuncia nel seguito manuale.
+ */
+export const GDPR_ERASURE_INCOMPLETE_ALERT = 'gdpr-erasure-incomplete';
+
 /** Giri programmati elencati in ParityView.recent. */
 const PARITY_RECENT_LIMIT = 30;
 
@@ -159,6 +169,8 @@ export interface ShadowJobResult {
   erasure: boolean;
   items: ShadowItemResult[];
   conflicts: number;
+  /** Job di cancellazione GDPR: item non riscritti su Radicale (conflitti), che hanno alzato GDPR_ERASURE_INCOMPLETE_ALERT. */
+  erasure_incomplete?: number;
   /** Motivo per cui il job si è chiuso senza azione. */
   skipped?: string;
 }
@@ -314,7 +326,14 @@ export async function handleShadowMirror(
     throw new CalendarJobPermanentError(`chiave dello shadow mirror non valida: ${job.key.slice(0, 80)}`);
   }
   const erasure = asObject(job.payload).erasure === true;
-  const skipped = (reason: string): { result: ShadowJobResult } => ({ result: { legacy_key: key, erasure, items: [], conflicts: 0, skipped: reason } });
+  const skipped = (reason: string): { result: ShadowJobResult } => {
+    // Cancellazione GDPR accodata in mode postgres e saltata per un cambio di modo (transizione): la copia su Radicale
+    // non è stata riscritta.
+    if (erasure && reason === 'mode_not_postgres') {
+      raiseIndexAlert(GDPR_ERASURE_INCOMPLETE_ALERT, 'Cancellazione GDPR non riscritta su Radicale: il modo del calendario è cambiato prima del job, ripetere la cancellazione a transizione conclusa', { key, reason });
+    }
+    return { result: { legacy_key: key, erasure, items: [], conflicts: 0, skipped: reason } };
+  };
 
   // 1. Stato riletto senza cache.
   const before = await readMigrationStateFresh(sql);
@@ -343,7 +362,18 @@ export async function handleShadowMirror(
     }
     if (!state.shadow_enabled && !erasure) return skipped('shadow_off');
     // 4-5. Piano per la chiave ed esecuzione.
-    return { result: await mirrorKey(key, { erasure, shadowEnabled: state.shadow_enabled, client, principal, signal: ctx.signal, extendLease: ctx.extendLease, log: ctx.log }) };
+    return {
+      result: await mirrorKey(key, {
+        erasure,
+        shadowEnabled: state.shadow_enabled,
+        lastAttempt: job.attempts >= job.maxAttempts,
+        client,
+        principal,
+        signal: ctx.signal,
+        extendLease: ctx.extendLease,
+        log: ctx.log,
+      }),
+    };
   });
 }
 
@@ -353,6 +383,8 @@ async function mirrorKey(
   opts: {
     erasure: boolean;
     shadowEnabled: boolean;
+    /** Ultimo tentativo del job: un fallimento lo porta in dead letter. */
+    lastAttempt?: boolean;
     client: ExecuteContext['client'];
     principal: string;
     signal: AbortSignal;
@@ -443,10 +475,27 @@ async function mirrorKey(
   }
 
   const result: ShadowJobResult = { legacy_key: key, erasure: opts.erasure, items: results, conflicts };
+  // Cancellazione GDPR: un conflitto lascia sul volume il contenuto non redatto (contratto f3 §13.1 passo 5).
+  const erasureConflicts = opts.erasure ? results.filter((r) => r.outcome === 'conflict') : [];
+  if (erasureConflicts.length > 0) {
+    result.erasure_incomplete = erasureConflicts.length;
+    raiseIndexAlert(GDPR_ERASURE_INCOMPLETE_ALERT, 'Cancellazione GDPR non completata su Radicale: oggetto in conflitto, risolverlo dal wizard della migrazione (l\'apply riscrive il contenuto già redatto in PG)', {
+      key,
+      items: erasureConflicts.length,
+      codes: [...new Set(erasureConflicts.map((r) => r.code ?? 'conflict'))].sort().join(','),
+    });
+  }
   if (failures.length > 0) {
     // Un fallimento lascia l'eventuale intento pendente: il nuovo tentativo lo risolve con un GET (§4.3).
     const summary = failures.map((f) => `${f.item.href}:${f.executed.http_status ?? 'rete'}`).join(', ').slice(0, 500);
-    if (failures.every((f) => permanentFailure(f.executed))) {
+    const permanent = failures.every((f) => permanentFailure(f.executed));
+    if (opts.erasure && (permanent || opts.lastAttempt)) {
+      raiseIndexAlert(GDPR_ERASURE_INCOMPLETE_ALERT, 'Cancellazione GDPR non completata su Radicale: scrittura non riuscita, job in dead letter; il prossimo apply dal wizard riscrive il contenuto già redatto in PG', {
+        key,
+        items: failures.length,
+      });
+    }
+    if (permanent) {
       raiseIndexAlert('shadow-failed', 'Shadow mirror: scrittura rifiutata da Radicale, job in dead letter', { key, items: failures.length });
       throw new CalendarJobPermanentError(`shadow mirror ${key}: scritture rifiutate (${summary})`);
     }
@@ -693,10 +742,20 @@ export function inNightlyQuietWindow(now: Date): boolean {
   return delta < HOURLY_QUIET_AFTER_MIN || delta >= day - HOURLY_QUIET_BEFORE_MIN;
 }
 
-/** Cron orario: verifica V4 sui prossimi 14 giorni (giro orario della parità). */
+/**
+ * Cron orario: verifica V4 sui prossimi 14 giorni (giro orario della parità).
+ * Il blocco a favore del giro notturno vale sempre: nella finestra intorno
+ * all'ora del notturno e, oltre la finestra, finché il notturno aspetta un
+ * nuovo tentativo (un run lo ha fatto slittare): il giro orario non gli
+ * ruba il lock fra un tentativo e l'altro.
+ */
 export async function runShadowHourlyParity(opts: { now?: Date } = {}): Promise<void> {
   if (inNightlyQuietWindow(opts.now ?? new Date())) {
     log.info('parità oraria dello shadow: finestra del giro notturno, giro saltato');
+    return;
+  }
+  if (nightlyRetryTimer !== null) {
+    log.info('parità oraria dello shadow: giro notturno in attesa di un nuovo tentativo, giro saltato');
     return;
   }
   if ((await scheduledRunGate('parità oraria dello shadow')) !== 'ok') return;

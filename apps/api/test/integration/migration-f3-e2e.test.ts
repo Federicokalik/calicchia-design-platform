@@ -84,6 +84,7 @@ import { reapInterruptedRuns, registerMigrationRunJob, setMigrationRunHandlerOve
 import { registerShadowMirrorJob, runShadowHourlyParity, runShadowNightly } from '../../src/lib/calendar/migration/shadow';
 import {
   MIGRATION_CONFIRMATIONS,
+  MIGRATION_LIMITS,
   MIGRATION_LOCK_KEY,
   MIGRATION_RUN_JOB_KIND,
   type MigrationRunContext,
@@ -409,7 +410,9 @@ describe('criterio di uscita della F3 su una copia sintetica della produzione, c
 
     // Eccezioni DST della serie infinita (iniziata d'estate alle 07:00Z) salvate con l'ora UTC del
     // DTSTART in ora solare, come le scriveva il codice precedente al fix: 07:00Z = 08:00 di Roma.
-    const winterFrom = new Date(Math.max(Date.now() + 10 * DAY_MS, Date.parse('2026-10-26T12:00:00Z')));
+    // Sempre oltre la finestra del giro orario V4 (v4HourlyDays, più un margine): il giro orario del passo 5
+    // resta verde in qualunque giorno della settimana, mentre V3, V4 notturno (180 giorni) e feed le vedono.
+    const winterFrom = new Date(Math.max(Date.now() + (MIGRATION_LIMITS.v4HourlyDays + 3) * DAY_MS, Date.parse('2026-10-26T12:00:00Z')));
     const monday = winterWeekday(1, winterFrom);
     const thursday = winterWeekday(4, new Date(Date.parse(`${monday}T12:00:00Z`) + DAY_MS));
     dstExdate = `${monday}T07:00:00.000Z`;
@@ -815,8 +818,11 @@ describe('criterio di uscita della F3 su una copia sintetica della produzione, c
     // Giro notturno: apply completo (nessuna scrittura: non insegue il testo del device) e verifica V1-V5.
     await runShadowNightly();
     await drainJobs();
-    // Giro orario: V4 sui prossimi 14 giorni.
-    await runShadowHourlyParity();
+    // Giro orario: V4 sui prossimi 14 giorni. L'ora passata esplicitamente (mezzogiorno locale) tiene il giro fuori
+    // dalla finestra del notturno (02:55-03:15 locali), dove resta fermo: il test non dipende dall'ora in cui gira.
+    const noon = new Date();
+    noon.setHours(12, 0, 0, 0);
+    await runShadowHourlyParity({ now: noon });
     await drainJobs();
     const parity = (await api.get(`${BASE}/parity`, { auth: 'admin' })).json;
     assert.equal(parity.shadow_enabled, true);

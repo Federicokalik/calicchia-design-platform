@@ -75,6 +75,7 @@ import { ANONYMIZED_ATTENDEE_NAME, PROJECTED_BOOKING_STATUSES, RETAINED_PROJECTI
 import { CAL_JOB_KINDS, CAL_JOB_PRIORITY, enqueueCalendarJob } from './jobs';
 import { acceptedUploadDirs } from './migration/init';
 import { readMigrationStateFresh } from './migration/preflight';
+import { GDPR_ERASURE_INCOMPLETE_ALERT } from './migration/shadow';
 import { MIGRATION_LIMITS, parseLegacyKey, SHADOW_MIRROR_JOB_KIND, type LegacyKey } from './migration/types';
 import type { Db } from './radicale/policy';
 import { purgeVersionsForErasure } from './radicale/versions';
@@ -279,6 +280,10 @@ interface ErasureTxResult {
   archiveObjects: number;
   /** Transizione in corso (cutover o rollback): la destinazione si riscrive a transizione conclusa. */
   transition: string | null;
+  /** Mode postgres: chiavi con job shadow_mirror di cancellazione accodati. */
+  shadowJobs: number;
+  /** Chiavi accodate che hanno già un conflitto aperto o un intento pendente: il job potrebbe non riscriverle. */
+  blockedKeys: string[];
 }
 
 /**
@@ -316,6 +321,16 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
   if (txResult.transition) {
     report.manual_followup.push(
       `Transizione del calendario in corso (${txResult.transition}): ripetere la cancellazione a transizione conclusa per riscrivere anche Radicale.`,
+    );
+  }
+  if (txResult.shadowJobs > 0) {
+    report.manual_followup.push(
+      `Riscrittura su Radicale accodata per ${txResult.shadowJobs} oggetti (job shadow_mirror di cancellazione): l'esito arriva dopo questa risposta. Un oggetto in conflitto o un job in dead letter alza l'avviso "${GDPR_ERASURE_INCOMPLETE_ALERT}" (log, Bugsink, Telegram) e lascia nome e telefono sul volume finché il conflitto non si risolve dal wizard della migrazione (anteprima e apply, che riscrive il contenuto già redatto in PG).`,
+    );
+  }
+  if (txResult.blockedKeys.length > 0) {
+    report.manual_followup.push(
+      `Oggetti con un conflitto aperto o un intento pendente su Radicale (${txResult.blockedKeys.length}): la riscrittura accodata probabilmente non li toccherà, risolverli dal wizard della migrazione (chiavi: ${txResult.blockedKeys.slice(0, 20).join(', ')}).`,
     );
   }
   if (txResult.archiveObjects > 0) {
@@ -648,8 +663,12 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
 
   // 5. Destinazione (outbox: i job esistono solo dopo la COMMIT).
   let facadeUpdates = false;
+  let shadowJobs = 0;
+  let blockedKeys: string[] = [];
   if (state.mode === 'postgres') {
     if (state.volume_id) {
+      blockedKeys = await erasureBlockedKeys(tx, [...jobKeys]);
+      shadowJobs = jobKeys.size;
       for (const key of [...jobKeys].sort()) {
         await enqueueCalendarJob(SHADOW_MIRROR_JOB_KIND, key, { legacy_key: key, erasure: true }, {
           db: tx,
@@ -671,7 +690,37 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
     facadeUpdates = true;
   }
 
-  return { report, facadeUpdates, googleEvents, archiveObjects, transition: writesSuspendedInMode(state.mode) ? state.mode : null };
+  return {
+    report, facadeUpdates, googleEvents, archiveObjects, transition: writesSuspendedInMode(state.mode) ? state.mode : null, shadowJobs, blockedKeys,
+  };
+}
+
+/**
+ * Chiavi della cancellazione che lo shadow mirror probabilmente non riscriverà
+ * (contratto f3 §13.1 passo 5): intento pendente nel ledger (esito ignoto) o
+ * ultimo job shadow_mirror concluso con un conflitto. Solo chiavi (nessun dato
+ * personale), ordinate.
+ */
+async function erasureBlockedKeys(tx: Db, keys: string[]): Promise<string[]> {
+  if (keys.length === 0) return [];
+  const rows = await tx<Array<{ legacy_key: string }>>`
+    SELECT legacy_key FROM cal_migration_ledger
+    WHERE legacy_key = ANY(${keys}::text[]) AND deleted_at IS NULL AND intent_op IS NOT NULL
+    UNION
+    SELECT key AS legacy_key FROM (
+      SELECT DISTINCT ON (j.key) j.key, j.result
+      FROM cal_jobs j
+      WHERE j.kind = ${SHADOW_MIRROR_JOB_KIND} AND j.status = 'done' AND j.key = ANY(${keys}::text[])
+      ORDER BY j.key, j.finished_at DESC NULLS LAST
+    ) last
+    WHERE EXISTS (
+      SELECT 1 FROM jsonb_array_elements(
+        CASE WHEN jsonb_typeof(last.result->'items') = 'array' THEN last.result->'items' ELSE '[]'::jsonb END
+      ) it WHERE it->>'outcome' = 'conflict'
+    )
+    ORDER BY 1
+  `;
+  return rows.map((r) => r.legacy_key);
 }
 
 /**

@@ -33,6 +33,7 @@ import {
   type ItemSeverity,
   type MigrationItemType,
   type MigrationItemView,
+  MIGRATION_LIMITS,
   MigrationError,
   type MigrationProgress,
   type MigrationRunKind,
@@ -355,9 +356,11 @@ export async function acceptDiffs(
 
 /**
  * Ultima verifica completa riuscita (tutti i livelli V1-V5 su tutti i
- * calendari: quelle parziali, come il giro orario V4 dello shadow o una
- * verifica di un solo calendario, non attestano la migrazione) e i suoi
- * verdetti, per il wizard, lo shadow e i criteri del cutover.
+ * calendari, V4 su almeno MIGRATION_LIMITS.v4Days giorni: quelle parziali,
+ * come il giro orario V4 dello shadow, una verifica di un solo calendario o
+ * una V4 su pochi giorni, non attestano la migrazione; stesso criterio di
+ * isFullVerifyParams di shadow.ts) e i suoi verdetti, per il wizard, lo
+ * shadow e i criteri del cutover.
  */
 export async function latestVerifyVerdicts(db: Db): Promise<{ runId: string | null; verdicts: CalendarVerdict[]; acceptable: boolean; finished_at: Date | null }> {
   const rows = await db<Array<{ id: string }>>`
@@ -366,6 +369,12 @@ export async function latestVerifyVerdicts(db: Db): Promise<{ runId: string | nu
       AND (params->'levels' IS NULL OR jsonb_typeof(params->'levels') <> 'array' OR jsonb_array_length(params->'levels') = 0
            OR (params->'levels') ?& ${[...VERIFY_LEVELS]}::text[])
       AND COALESCE(jsonb_array_length(CASE WHEN jsonb_typeof(params->'scope'->'calendar_ids') = 'array' THEN params->'scope'->'calendar_ids' END), 0) = 0
+      AND CASE jsonb_typeof(params->'v4_days')
+            WHEN 'number' THEN (params->>'v4_days')::numeric >= ${MIGRATION_LIMITS.v4Days}
+            WHEN 'string' THEN CASE WHEN btrim(params->>'v4_days') ~ '^[0-9]+([.][0-9]+)?$'
+                                    THEN btrim(params->>'v4_days')::numeric >= ${MIGRATION_LIMITS.v4Days} ELSE false END
+            ELSE params->'v4_days' IS NULL OR jsonb_typeof(params->'v4_days') = 'null'
+          END
     ORDER BY finished_at DESC NULLS LAST, created_at DESC
     LIMIT 1
   `;

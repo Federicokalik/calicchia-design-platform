@@ -168,6 +168,14 @@ describe('calendarErase in mode postgres', () => {
              ('project_booking', ${confirmed.booking.uid}, '{}'::jsonb, 'dead', now(), now()),
              ('shadow_mirror', ${`event:${plain.id}`}, '{}'::jsonb, 'done', now(), now())
     `;
+    // Ultimo job dello shadow sull'evento con l'email concluso con un conflitto: la riscrittura accodata
+    // probabilmente non lo toccherà (seguito manuale con la chiave).
+    await sql`
+      INSERT INTO cal_jobs (kind, key, payload, result, status, run_after, finished_at)
+      VALUES ('shadow_mirror', ${`event:${withEmail.id}`}, '{}'::jsonb,
+              ${sql.json({ legacy_key: `event:${withEmail.id}`, erasure: false, conflicts: 1, items: [{ outcome: 'conflict', code: 'TARGET_NEWER' }] } as never)},
+              'done', now() - interval '1 hour', now() - interval '1 hour')
+    `;
 
     const report = await calendarErase(`  ${email.toUpperCase()} `, { actor: 'admin:test' });
     assert.equal(report.bookings, 2);
@@ -181,6 +189,11 @@ describe('calendarErase in mode postgres', () => {
     assert.equal(report.jobs_enqueued, 3, 'booking:<uid> per le due prenotazioni ed event:<master> per l\'evento');
     assert.ok(report.audit_logs_redacted >= 3);
     assert.ok(report.manual_followup.some((m) => m.includes('radicale-maint.sh purge-cache')));
+    // Esito asincrono della riscrittura su Radicale e chiavi già bloccate (contratto f3 §13.1 passo 5).
+    assert.ok(report.manual_followup.some((m) => m.includes('gdpr-erasure-incomplete') && m.includes('3 oggetti')), JSON.stringify(report.manual_followup));
+    const blocked = report.manual_followup.find((m) => m.includes('conflitto aperto'));
+    assert.ok(blocked?.includes(`event:${withEmail.id}`) && blocked.includes('(1)'), JSON.stringify(report.manual_followup));
+    assert.ok(!report.manual_followup.some((m) => m.includes(email)), 'nessuna email nel seguito manuale');
 
     // 1. Prenotazioni anonimizzate (la riga resta), promemoria redatti; l'altra persona intatta.
     const rows = await sql<Booking[]>`SELECT * FROM calendar_bookings WHERE id = ANY(${[confirmed.booking.id, cancelled.booking.id, untouched.booking.id]}::uuid[])`;
@@ -267,6 +280,7 @@ describe('calendarErase in mode postgres', () => {
     const report = await calendarErase(email, { actor: 'admin:test' });
     assert.equal(report.bookings, 1);
     assert.equal(report.jobs_enqueued, 0);
+    assert.ok(!report.manual_followup.some((m) => m.includes('gdpr-erasure-incomplete')), 'nessun job, nessun esito da attendere');
 
     await setState({ volume: VOLUME, shadow: true });
     const email2 = fx.email('gdpr-shadow');
