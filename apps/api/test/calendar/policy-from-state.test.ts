@@ -270,6 +270,23 @@ describe('policyFromState: readonly e hidden dal sidecar', () => {
     assert.deepEqual(p.hidden, ['_canary', 'in-cancellazione', 'in-creazione', 'sub-new']);
   });
 
+  test('archivio della Fase 0 (origin migration): in sola lettura in ogni mode, nascosto se non visibile (F4, §6.3)', () => {
+    const collections = [
+      collection('archivio-fase0', 'user', { origin: 'migration' }),
+      collection('c', 'user', { origin: 'admin' }),
+      collection('dal-telefono', 'user', { origin: 'device' }),
+      collection('lavoro'),
+    ];
+    for (const mode of ['postgres', 'radicale', 'finalized'] as const) {
+      const p = derive({ state: stateForMode(mode), collections });
+      assert.deepEqual(p.readonly, ['archivio-fase0'], `readonly in ${mode}`);
+      assert.deepEqual(p.hidden, [CANARY_COLLECTION], `hidden in ${mode}`);
+    }
+    const hidden = derive({ state: stateForMode('radicale'), collections: [collection('archivio-fase0', 'user', { origin: 'migration', device_visible: false })] });
+    assert.deepEqual(hidden.readonly, []);
+    assert.deepEqual(hidden.hidden, ['_canary', 'archivio-fase0']);
+  });
+
   test('_canary è sempre nascosta, anche senza calendari', () => {
     const p = derive({ collections: [] });
     assert.deepEqual(p.readonly, []);

@@ -249,6 +249,10 @@ export async function cleanupTestData(prefix: string, tracked: TrackedRows = {})
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia 166 della F4: un test che lascia il backend fuori da mode
+    // postgres non deve bloccare la propria pulizia (scrittore privilegiato,
+    // come la proiezione inversa).
+    await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
     const count = (table: string, rows: Array<{ id: string }>): void => {
       report[table] = (report[table] ?? 0) + rows.length;
     };
@@ -438,6 +442,10 @@ export async function resetCalendarBaseline(): Promise<void> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia 166 della F4: la baseline svuota calendar_events anche se un
+    // test ha lasciato il backend fuori da mode postgres (lo stato torna a
+    // postgres più sotto, nella stessa transazione).
+    await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
     // Guardia della matrice CALENDAR_BACKEND=radicale rimasta da un run
     // interrotto (helpers/calendar-backend.ts): la baseline non la conserva mai.
     await tx`DROP TRIGGER IF EXISTS caldes_test_matrix_guard ON calendar_events`;
@@ -489,6 +497,15 @@ export async function resetCalendarBaseline(): Promise<void> {
       SELECT to_regclass('public.cal_migration_runs') IS NOT NULL AS "hasMigration"
     `;
     if (hasMigration) {
+      // Transizioni, journal e stato della proiezione inversa (166, F4): il
+      // journal sparisce in cascata con le transizioni.
+      const [{ hasTransitions }]: Array<{ hasTransitions: boolean }> = await tx`
+        SELECT to_regclass('public.cal_migration_transitions') IS NOT NULL AS "hasTransitions"
+      `;
+      if (hasTransitions) {
+        await tx`DELETE FROM cal_migration_reverse_state`;
+        await tx`DELETE FROM cal_migration_transitions`;
+      }
       await tx`DELETE FROM cal_migration_ledger`;
       await tx`DELETE FROM cal_migration_runs`;
     }

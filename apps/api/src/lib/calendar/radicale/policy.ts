@@ -28,9 +28,11 @@ import type { Sql } from 'postgres';
 import {
   API_CONTROL_DIR_DEFAULT,
   CALENDAR_LIFECYCLES,
+  CALENDAR_ORIGINS,
   CALENDAR_ROLES,
   type CalendarBackendState,
   type CalendarLifecycle,
+  type CalendarOrigin,
   type CalendarRole,
   type CaldesPolicy,
   CONTROL_FILE_MAX_BYTES,
@@ -259,13 +261,15 @@ export async function readBackendState(db: Db): Promise<CalendarBackendState> {
 
 /**
  * Colonne del sidecar da cui dipendono readonly e hidden, per tutte le righe
- * di calendars. Un ruolo o un ciclo di vita fuori contratto (impossibile con i
+ * di calendars (con `origin`: l'archivio dello strumento di migrazione è in
+ * sola lettura per i device anche in live, contratto f4-modules §3.5). Un
+ * ruolo, un ciclo di vita o un'origine fuori contratto (impossibile con i
  * CHECK della 162) rende lo stato illeggibile invece di produrre una policy
  * con una collezione classificata a caso.
  */
 export async function readSidecarCollections(db: Db): Promise<SidecarCollection[]> {
-  const rows: Array<{ collection_name: string | null; role: string; lifecycle: string; device_visible: boolean }> = await db`
-    SELECT collection_name, role, lifecycle, device_visible
+  const rows: Array<{ collection_name: string | null; role: string; lifecycle: string; device_visible: boolean; origin: string }> = await db`
+    SELECT collection_name, role, lifecycle, device_visible, origin
     FROM calendars
     ORDER BY collection_name NULLS LAST, id
   `;
@@ -276,12 +280,16 @@ export async function readSidecarCollections(db: Db): Promise<SidecarCollection[
     if (!CALENDAR_LIFECYCLES.includes(row.lifecycle as CalendarLifecycle)) {
       throw new ControlPlaneFormatError(`calendars.lifecycle fuori contratto: ${JSON.stringify(row.lifecycle)}`);
     }
+    if (!CALENDAR_ORIGINS.includes(row.origin as CalendarOrigin)) {
+      throw new ControlPlaneFormatError(`calendars.origin fuori contratto: ${JSON.stringify(row.origin)}`);
+    }
     if (typeof row.device_visible !== 'boolean') throw new ControlPlaneFormatError('calendars.device_visible non booleano');
     return {
       collection_name: row.collection_name,
       role: row.role as CalendarRole,
       lifecycle: row.lifecycle as CalendarLifecycle,
       device_visible: row.device_visible,
+      origin: row.origin as CalendarOrigin,
     };
   });
 }

@@ -274,6 +274,17 @@ const F3_REVALIDATION_EVENTS: Readonly<Record<string, string>> = {
   'public.cal_migration_ledger': 'TRUNCATE OR INSERT OR DELETE',
 };
 
+/**
+ * Tabelle del gruppo S nate con la 166 (F4: transizioni, journal, stato della
+ * proiezione inversa): esportate, mai ripristinate né toccate dall'import
+ * (prefisso public.cal_migration_ in backup.ts).
+ */
+const F4_STATE_TABLES = [
+  'public.cal_migration_journal',
+  'public.cal_migration_reverse_state',
+  'public.cal_migration_transitions',
+];
+
 /** Trappole del gruppo S e di calendars, valide in ogni modalità. */
 const PROTECTED_ALWAYS = [
   { table: 'public.calendars', events: 'TRUNCATE OR DELETE' },
@@ -281,6 +292,7 @@ const PROTECTED_ALWAYS = [
   { table: PROBE, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' },
   ...F2_STATE_TABLES.map((table) => ({ table, events: F2_REBUILD_REQUEST_EVENTS[table] ?? 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
   ...F3_STATE_TABLES.map((table) => ({ table, events: F3_REVALIDATION_EVENTS[table] ?? 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
+  ...F4_STATE_TABLES.map((table) => ({ table, events: 'TRUNCATE OR INSERT OR UPDATE OR DELETE' })),
 ];
 
 /** Job index_rebuild accodati dagli import (requestIndexRebuild). */
@@ -726,7 +738,7 @@ describe('import del backup JSON', () => {
     assert.equal(res.status, 200, res.text);
     assert.deepEqual(
       res.json.skipped.state,
-      ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES, ...F3_STATE_TABLES].sort(),
+      ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES, ...F3_STATE_TABLES, ...F4_STATE_TABLES].sort(),
     );
     assert.deepEqual(res.json.calendar.kept, []);
 

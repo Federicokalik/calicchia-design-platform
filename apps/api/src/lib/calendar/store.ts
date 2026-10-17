@@ -22,12 +22,14 @@
  */
 
 import { sql } from '../../db';
+import { calendarApiLevelBlocked } from './api-level';
 import {
   type CalendarStoreKind,
   overrideStoreKind,
   readStoreKind,
   resolveWriteStoreKind,
 } from './backend-mode';
+import { CalendarStoreUnavailableError } from './errors';
 import type { ParsedEvent } from './ics-import';
 import * as calendarsPg from './legacy/calendars-pg';
 import * as eventsPg from './legacy/events-pg';
@@ -254,20 +256,37 @@ function storeOfKind(kind: CalendarStoreKind): CalendarStore {
 }
 
 /**
+ * Immagine dell'API con un livello inferiore ad api_min_version (design
+ * §16.6, contratto f4-modules §3.4): dopo il controllo d'avvio fallito il
+ * calendario non si serve, né in lettura né in scrittura (503
+ * 'store_not_available'). In mode postgres con api_min_version = 0 il blocco
+ * non scatta mai.
+ */
+function assertApiLevel(operation: 'read' | 'write'): void {
+  if (calendarApiLevelBlocked()) {
+    throw new CalendarStoreUnavailableError('api', 'level', `immagine dell'API sotto il livello richiesto dal database (api_min_version): calendario non servito (${operation})`);
+  }
+}
+
+/**
  * Store per le letture di visualizzazione (modo in cache per 2 s). Lancia
- * CalendarUnavailableError solo se lo stato non si è mai potuto leggere.
+ * CalendarUnavailableError solo se lo stato non si è mai potuto leggere o se
+ * il livello dell'immagine è insufficiente.
  */
 export async function calendarStore(): Promise<CalendarStore> {
+  assertApiLevel('read');
   if (instanceOverride) return instanceOverride;
   return storeOfKind(await readStoreKind());
 }
 
 /**
  * Store per le scritture: modo riletto senza cache; CalendarUnavailableError
- * (503) in cutover, rollback, con write_freeze sullo store Radicale o con lo
- * stato illeggibile. In mode postgres restituisce PgLegacyStore come oggi.
+ * (503) in cutover, rollback, con write_freeze sullo store Radicale, con lo
+ * stato illeggibile o con il livello dell'immagine insufficiente. In mode
+ * postgres restituisce PgLegacyStore come oggi.
  */
 export async function calendarStoreForWrite(): Promise<CalendarStore> {
+  assertApiLevel('write');
   if (instanceOverride) return instanceOverride;
   return storeOfKind(await resolveWriteStoreKind());
 }

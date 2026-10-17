@@ -326,11 +326,13 @@ Con `epoch = 0` l'identità vale sempre `uninitialized`, qualunque esito passi i
 ### 6.3 Collezioni
 
 - `hidden` = `{_canary}` ∪ collezioni con `lifecycle ≠ active` o `device_visible = false`;
-- `readonly` = collezioni attive e visibili con ruolo ∈ {`bookings`, `holidays`, `deadlines`, `subscription`}, tolte quelle in `hidden`;
+- `readonly` = collezioni attive e visibili con ruolo ∈ {`bookings`, `holidays`, `deadlines`, `subscription`} **oppure con `origin = migration`** (l'archivio della Fase 0 creato dallo strumento di migrazione, decisione 7: in sola lettura per i device anche in live), tolte quelle in `hidden`;
 - le righe con `collection_name` NULL o non valido si saltano;
 - entrambe le liste sono ordinate (`Array.prototype.sort`) e senza duplicati.
 
-Con i dati di produzione: `readonly = ["bookings", "f", "scadenze"]`, `hidden = ["_canary"]`; `c`, `lavoro` e `personale` seguono la modalità (sola lettura in shadow, scrittura in live).
+Con i dati di produzione: `readonly = ["bookings", "f", "scadenze"]` (più `archivio-fase0` se l'archivio esiste ed è visibile), `hidden = ["_canary"]`; `c`, `lavoro` e `personale` seguono la modalità (sola lettura in shadow, scrittura in live).
+
+Aggiornamento F4 (contratto f4-modules §3.5, questione aperta 1 della F3): `readSidecarCollections()` legge anche `calendars.origin` e `SidecarCollection` ha il campo `origin` (facoltativo per i chiamanti che costruiscono le righe a mano: assente vale come origine diversa da `migration`). Nessun ruolo nuovo, nessun CHECK da allargare, nessun cambio ai plugin: `caldes_rights` legge la lista `readonly`, non i ruoli. In mode `postgres` cambia solo il contenuto di `readonly` (l'archivio era già in sola lettura per la base `shadow`); il criterio `archive_readonly` del cutover verifica sulla policy derivata per il mode `radicale` che l'archivio sia in `readonly` o in `hidden`.
 
 ## 7. `heartbeat.json`
 

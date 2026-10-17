@@ -336,7 +336,14 @@ describe('165: vincoli allineati al contratto', () => {
       WHERE table_schema = 'public' AND table_name IN ('calendar_events', 'calendar_bookings')
         AND (column_name LIKE 'caldes\\_%' OR column_name LIKE '%shadow%' OR column_name LIKE 'migration%')
     `;
-    assert.deepEqual([...cols], [], 'la 165 non tocca le colonne delle tabelle legacy (i SELECT * del codice di oggi non cambiano forma)');
+    // Le sole colonne caldes_* sono quelle della guardia 166 (F4) su
+    // calendar_events, ignorate dal codice legacy (colonne esplicite): la 165
+    // non tocca le colonne delle tabelle legacy.
+    assert.deepEqual(
+      Array.from(cols, (c) => `${c.table_name}.${c.column_name}`).sort(),
+      ['calendar_events.caldes_derived', 'calendar_events.caldes_object_id'],
+      'la 165 non tocca le colonne delle tabelle legacy (i SELECT * del codice di oggi non cambiano forma)',
+    );
     const triggers = await sql<Array<{ tgname: string; table: string }>>`
       SELECT tgname, tgrelid::regclass::text AS table FROM pg_trigger
       WHERE tgrelid IN ('calendar_events'::regclass, 'calendar_bookings'::regclass)
@@ -625,8 +632,14 @@ describe('165: trigger dello shadow mirror', () => {
       await tx`DELETE FROM calendar_events WHERE id = ${id}`;
       assert.deepEqual(await shadowKeys(tx), [], 'shadow spento');
 
+      // Mode radicale: la guardia 166 (F4) rifiuta le scritture dirette; la
+      // cascata della delete di un calendario passa e non accoda nulla (lo
+      // shadow non esiste, c'è la proiezione inversa).
+      const tmp = await insertCalendar(tx, 'tst-shadow-radicale', 'Shadow in radicale');
+      await insertEvent(tx, { calendarId: tmp, uid: 'tst-shadow-radicale-ev', start: '2027-03-01T09:00:00Z', end: '2027-03-01T10:00:00Z' });
       await setState(tx, { shadow: true, mode: 'radicale' });
-      await ev('tst-shadow-radicale');
+      await expectSqlError(tx, (sp) => insertEvent(sp, { calendarId: lavoro.id, uid: 'tst-shadow-radicale', start: '2027-03-01T09:00:00Z', end: '2027-03-01T10:00:00Z' }), /sola lettura/);
+      await tx`DELETE FROM calendars WHERE id = ${tmp}`;
       assert.deepEqual(await shadowKeys(tx), [], 'mode radicale: lo shadow non esiste, c\'è la proiezione inversa (F4)');
 
       await setState(tx, { shadow: true, volume: false });

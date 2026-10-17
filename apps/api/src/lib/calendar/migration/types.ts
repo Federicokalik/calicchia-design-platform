@@ -42,16 +42,22 @@ import { CAL_LOCKS, INDEX_LIMITS } from '../index-model';
 /** Versione di questo contratto (cambia con una modifica incompatibile dei DTO REST). */
 export const MIGRATION_CONTRACT_VERSION = 1 as const;
 
-/** Fase del piano in cui gira questo codice: in F3 cutover, rollback e finalize non esistono. */
+/**
+ * Fase del piano in cui gira questo codice: in F3 cutover, rollback e
+ * finalize non esistono. La porta a 'F4' il gruppo UI della F4 insieme alle
+ * route e al wizard (contratto f4-modules §0 e §10).
+ */
 export const MIGRATION_PHASE = 'F3' as const;
 
 /**
  * Livello del protocollo calendario di questa build dell'API (design §16.6):
  * l'avvio confronta `calendar_backend_state.api_min_version` con questo
  * valore e, se il database chiede di più, non serve il calendario. Sale di uno
- * a ogni release che cambia il significato dello stato (F4: cutover).
+ * a ogni release che cambia il significato dello stato: 3 in F3, 4 dalla F4
+ * (guardia 166, proiezione inversa, righe derivate). Il cutover scrive questo
+ * valore in api_min_version (contratto f4-modules §3.4).
  */
-export const CALENDAR_API_LEVEL = 3 as const;
+export const CALENDAR_API_LEVEL = 4 as const;
 
 // ─── Lock, job e limiti ─────────────────────────────────────
 
@@ -175,6 +181,29 @@ export const MIGRATION_RUN_ERROR_CODES = [
   'CANCELLED',
   'INTERRUPTED',
   'INTERNAL',
+  // F4 (contratto f4-modules §9): transizioni, quiescenza, proiezione inversa.
+  /** Un'altra transizione è attiva, o lo stato non è quello che la transizione si aspetta. */
+  'TRANSITION_CONFLICT',
+  /** Gate cal-write esclusivo non ottenuto entro il tempo massimo (scritture in corso). */
+  'GATE_TIMEOUT',
+  /** Device non quiescenti: la PUT del probe su _canary non riceve 403, o le directory non si fermano. */
+  'QUIESCENCE_TIMEOUT',
+  /** Password di caldes-probe non disponibile: la quiescenza non è verificabile. */
+  'PROBE_UNAVAILABLE',
+  /** Control-plane non attivo o policy non scritta: lo stato non arriva ai device. */
+  'CONTROL_PLANE_UNAVAILABLE',
+  /** Marker del volume diverso da quello atteso nel passo d'epoch. */
+  'EPOCH_CONFLICT',
+  /** Cutover annullato prima del passo d'epoch (verifica rossa, conflitti del delta, richiesta dell'admin). */
+  'CUTOVER_ABORTED',
+  /** Rollback annullato prima del passo d'epoch (anteprima cambiata senza emergenza, richiesta dell'admin). */
+  'ROLLBACK_ABORTED',
+  /** Anteprima del rollback diversa da quella confermata (degradi o oggetti cambiati dopo la conferma). */
+  'PREVIEW_CHANGED',
+  /** Verifica del delta del cutover con differenze rosse. */
+  'VERIFY_RED',
+  /** Proiezione inversa con upsert non riusciti (REVERSE_FAILED) dove non ammessi. */
+  'REVERSE_FAILED',
 ] as const;
 export type MigrationRunErrorCode = (typeof MIGRATION_RUN_ERROR_CODES)[number];
 
@@ -764,6 +793,12 @@ export const MIGRATION_CONFIRMATIONS = Object.freeze({
   /** F4: mostrate nel wizard, rifiutate dalle route in F3. */
   cutover: 'PASSA A RADICALE',
   rollback: 'TORNA A POSTGRES',
+  /** F4: chiusura della finestra di rollback (finalize, design §13.13). */
+  finalize: 'CHIUDI LA FINESTRA',
+  /** F4: annullamento di un cutover non ancora oltre il passo d'epoch (ritorno a postgres). */
+  cutoverAbort: 'ANNULLA IL PASSAGGIO',
+  /** F4: rollback anche con l'anteprima cambiata o con la sync finale non riuscita (design §13.12, parità informativa). */
+  rollbackEmergency: 'ROLLBACK DI EMERGENZA',
 } as const);
 
 /**
@@ -1258,6 +1293,12 @@ export interface MigrationRunSummaryByKind {
   plan: PlanSummary;
   apply: ApplySummary;
   verify: VerifySummary;
+  // F4 (contratto f4-modules §2-§7).
+  cutover: CutoverSummary;
+  rollback_preview: RollbackPreviewSummary;
+  rollback: RollbackSummary;
+  rebaseline: RebaselineSummary;
+  finalize: FinalizeSummary;
 }
 
 export type MigrationRunSummary = MigrationRunSummaryByKind[keyof MigrationRunSummaryByKind];
@@ -1467,6 +1508,8 @@ export type WizardStepStatus = (typeof WIZARD_STEP_STATUSES)[number];
 export const WIZARD_ACTION_IDS = [
   'preflight', 'initialize', 'create_collections', 'archive', 'declare', 'identity_reassign',
   'inventory', 'plan', 'apply', 'verify', 'accept', 'shadow_on', 'shadow_off', 'cutover',
+  // F4 (contratto f4-modules §10.3).
+  'cutover_abort', 'transition_resume', 'rollback_preview', 'rollback', 'finalize', 'rebaseline', 'export_v2',
 ] as const;
 export type WizardActionId = (typeof WIZARD_ACTION_IDS)[number];
 
@@ -1491,14 +1534,24 @@ export interface WizardStepView {
 }
 
 export interface CutoverCriterion {
-  id: 'verify_acceptable' | 'shadow_parity' | 'device_matrix' | 'backup_recent' | 'no_open_conflicts';
+  /**
+   * F3: verify_acceptable, shadow_parity, device_matrix, backup_recent,
+   * no_open_conflicts. F4 (contratto f4-modules §3.2): backup_fresh (meno di
+   * 2 ore), identity_ok, control_plane, probe, no_revalidation,
+   * archive_readonly, no_active_transition.
+   */
+  id:
+    | 'verify_acceptable' | 'shadow_parity' | 'device_matrix' | 'backup_recent' | 'no_open_conflicts'
+    | 'backup_fresh' | 'identity_ok' | 'control_plane' | 'probe' | 'no_revalidation' | 'archive_readonly'
+    | 'no_active_transition';
   label: string;
   ok: boolean;
   detail: string | null;
 }
 
 export interface CutoverAvailability {
-  available: false;
+  /** In F3 sempre false; dalla F4 true quando tutti i criteri sono soddisfatti e il mode è postgres. */
+  available: boolean;
   phase: 'F4';
   reason: string;
   criteria: CutoverCriterion[];
@@ -1531,6 +1584,12 @@ export interface MigrationStateView {
   shadow_queue: { pending: number; running: number; dead: number };
   wizard: { current_step: WizardStepId; steps: WizardStepView[] };
   cutover: CutoverAvailability;
+  /** F4: transizione attiva o ultima conclusa (contratto f4-modules §10.2). Facoltativo finché il gruppo UI non lo valorizza. */
+  transition?: TransitionView | null;
+  /** F4: finestra di rollback dopo il cutover (null in mode postgres). */
+  rollback_window?: RollbackWindowView | null;
+  /** F4: salute della proiezione inversa (null fuori da mode radicale). */
+  reverse_projection?: ReverseProjectionHealthView | null;
 }
 
 // ─── Errori dell'API ────────────────────────────────────────
@@ -1550,6 +1609,8 @@ export const MIGRATION_ERROR_STATUS = Object.freeze({
   PHASE_NOT_AVAILABLE: 409,
   PLAN_CHANGED: 409,
   CANCELLED: 409,
+  /** F4: un'altra transizione è attiva (details.transition: TransitionView). */
+  TRANSITION_IN_PROGRESS: 409,
   RADICALE_NOT_CONFIGURED: 503,
   CALENDAR_UNAVAILABLE: 503,
   INTERNAL: 500,
@@ -1613,6 +1674,43 @@ export const PRECONDITION_REASONS = [
   'SHADOW_DISABLED',
   'IDENTITY_DIFF_CHANGED',
   'RUN_KIND_NOT_VERIFY',
+  // F4 (contratto f4-modules §9.2).
+  /** Rollback e finalize richiedono mode radicale. */
+  'MODE_NOT_RADICALE',
+  /** Un'altra transizione è attiva (anche ferma, da riprendere). */
+  'TRANSITION_ACTIVE',
+  /** Ripresa o annullamento richiesti senza una transizione attiva di quel tipo. */
+  'NO_ACTIVE_TRANSITION',
+  /** Annullamento del cutover dopo il passo d'epoch: resta solo il rollback. */
+  'TRANSITION_NOT_ABORTABLE',
+  /** Finestra di rollback scaduta (rollback_until passato). */
+  'ROLLBACK_WINDOW_EXPIRED',
+  /** Finalize prima dei 14 giorni dal cutover. */
+  'FINALIZE_TOO_EARLY',
+  /** Parità dello shadow non soddisfatta (7 giorni, o verifica dopo il rollback per un nuovo cutover). */
+  'SHADOW_PARITY_REQUIRED',
+  /** Matrice device non dichiarata o fallita. */
+  'DEVICE_MATRIX_REQUIRED',
+  /** Backup coordinato di più di 2 ore (cutover) o assente. */
+  'BACKUP_TOO_OLD',
+  /** Conflitti aperti dello shadow o del ledger. */
+  'OPEN_CONFLICTS',
+  /** Proiezione inversa con REVERSE_FAILED aperti. */
+  'REVERSE_FAILED_OPEN',
+  /** Job del calendario in dead letter. */
+  'DEAD_JOBS',
+  /** Salute del calendario non verde. */
+  'HEALTH_NOT_GREEN',
+  /** Rollback senza un'anteprima riuscita. */
+  'PREVIEW_REQUIRED',
+  /** Anteprima del rollback più vecchia del limite. */
+  'PREVIEW_STALE',
+  /** Password di caldes-probe assente: la quiescenza non è verificabile. */
+  'PROBE_UNAVAILABLE',
+  /** Control-plane non attivo nel processo: lo stato non arriverebbe ai device. */
+  'CONTROL_PLANE_UNAVAILABLE',
+  /** Archivio della Fase 0 scrivibile dai device dopo il cutover (questione aperta 1 della F3). */
+  'ARCHIVE_DEVICE_WRITABLE',
 ] as const;
 export type PreconditionReason = (typeof PRECONDITION_REASONS)[number];
 
@@ -1641,4 +1739,428 @@ export function emptyInventoryCounts(): InventoryCounts {
 /** true se `value` è una frase di conferma esatta. */
 export function confirmationMatches(value: unknown, expected: string): boolean {
   return typeof value === 'string' && value === expected;
+}
+
+// ─── F4: transizioni, proiezione inversa, rollback, finalize ─────────────────
+//
+// Contratto docs/calendar-radicale/contracts/f4-modules.md. Sezione aggiunta
+// dalla fondazione della F4: i quattro gruppi (CUTOVER, REVERSE, ROLLBACK, UI)
+// importano da qui codici, passi, parametri, riassunti e DTO; un campo nuovo
+// passa da un aggiornamento del contratto.
+
+/** SQLSTATE della guardia 166 su calendar_events (scrittura fuori da mode postgres senza caldes.reverse_sync). */
+export const CALENDAR_EVENTS_GUARD_SQLSTATE = 'CD166' as const;
+
+/** GUC degli scrittori privilegiati di calendar_events (proiezione inversa, erasure GDPR, delete di un calendario). */
+export const REVERSE_SYNC_GUC = 'caldes.reverse_sync' as const;
+
+/** Run della F4 (CHECK della 165): li creano le route del gruppo UI. */
+export const F4_RUN_KINDS: ReadonlySet<MigrationRunKind> = new Set<MigrationRunKind>([
+  'cutover', 'rollback_preview', 'rollback', 'rebaseline', 'finalize',
+]);
+
+/** Run della F4 che scrivono: conferma digitata e chiave d'idempotenza obbligatorie. */
+export const F4_WRITING_RUN_KINDS: ReadonlySet<MigrationRunKind> = new Set<MigrationRunKind>([
+  'cutover', 'rollback', 'rebaseline', 'finalize',
+]);
+
+/** Transizioni di stato journalizzate (cal_migration_transitions.kind). */
+export const TRANSITION_KINDS = ['cutover', 'rollback', 'finalize'] as const;
+export type TransitionKind = (typeof TRANSITION_KINDS)[number];
+
+/** active: in corso o da riprendere; completed; aborted: tornata al mode di partenza prima del passo d'epoch. */
+export const TRANSITION_STATUSES = ['active', 'completed', 'aborted'] as const;
+export type TransitionStatus = (typeof TRANSITION_STATUSES)[number];
+
+/** started: in corso o interrotto da un crash; done; skipped; failed: ultimo tentativo fallito (la ripresa lo ripete). */
+export const JOURNAL_STEP_STATUSES = ['started', 'done', 'skipped', 'failed'] as const;
+export type JournalStepStatus = (typeof JOURNAL_STEP_STATUSES)[number];
+
+/** Passi del cutover nell'ordine (design §13.10, contratto f4-modules §3.1). */
+export const CUTOVER_STEPS = [
+  'preflight', 'freeze', 'quiesce', 'delta_apply', 'delta_verify', 'epoch',
+  'control_plane', 'index_sync', 'reverse_start', 'bookings_reconcile', 'unfreeze', 'smoke',
+] as const;
+export type CutoverStep = (typeof CUTOVER_STEPS)[number];
+
+/** Passi del rollback nell'ordine (design §13.12, contratto f4-modules §5.1). */
+export const ROLLBACK_STEPS = [
+  'preflight', 'freeze', 'quiesce', 'index_sync', 'reverse_final', 'rebaseline', 'epoch', 'control_plane', 'cleanup',
+] as const;
+export type RollbackStep = (typeof ROLLBACK_STEPS)[number];
+
+/** Passi del finalize nell'ordine (design §13.13, contratto f4-modules §5.4). */
+export const FINALIZE_STEPS = ['preflight', 'stop_reverse', 'state', 'legacy_finalize'] as const;
+export type FinalizeStep = (typeof FINALIZE_STEPS)[number];
+
+/** Passo d'annullamento (cutover e rollback, solo prima del passo d'epoch): ritorno al mode di partenza. */
+export const TRANSITION_ABORT_STEP = 'abort' as const;
+
+/** Passi dopo i quali una transizione non si annulla più (il passo d'epoch ha cambiato il marker e lo stato). */
+export const POINT_OF_NO_RETURN_STEP = 'epoch' as const;
+
+/** Mode di partenza, mode intermedio (scritture sospese), mode d'arrivo e mode dell'annullamento. */
+export const TRANSITION_MODES: Readonly<Record<TransitionKind, { from: BackendMode; via: BackendMode | null; to: BackendMode; abort_to: BackendMode | null }>> = Object.freeze({
+  cutover: { from: 'postgres', via: 'cutover', to: 'radicale', abort_to: 'postgres' },
+  rollback: { from: 'radicale', via: 'rollback', to: 'postgres', abort_to: 'radicale' },
+  finalize: { from: 'radicale', via: null, to: 'finalized', abort_to: null },
+});
+
+export const F4_LIMITS = Object.freeze({
+  /** Finestra di rollback di default dopo il cutover (design §1 invariante 6). */
+  rollbackWindowDays: 30,
+  /** Finestra minima e massima ammessa dalla richiesta di cutover. */
+  rollbackWindowMinDays: 14,
+  rollbackWindowMaxDays: 90,
+  /** Finalize possibile dopo almeno 14 giorni dal cutover (design §13.13). */
+  finalizeMinDays: 14,
+  /** Backup coordinato richiesto dal cutover: meno di 2 ore (design §13.10 passo 1). */
+  cutoverBackupMaxAgeMinutes: 120,
+  /** Anteprima del rollback più vecchia di così: da rigenerare. */
+  rollbackPreviewMaxAgeMinutes: 60,
+  /** Attesa minima dopo la scrittura della policy (oltre il ricontrollo di 1 s dei plugin, design §13.9). */
+  quiescencePolicyGraceMs: 2_000,
+  /** PUT del probe su _canary: fino a 10 tentativi, a 1 s l'uno dall'altro. */
+  quiescenceProbeAttempts: 10,
+  quiescenceProbeIntervalMs: 1_000,
+  /** stat delle collezioni: due letture consecutive uguali a 1 s di distanza, al più 30 giri. */
+  quiescenceStatIntervalMs: 1_000,
+  quiescenceStatMaxRounds: 30,
+  /** Attesa del gate cal-write esclusivo (scritture in corso). */
+  exclusiveGateTimeoutMs: 30_000,
+  /** Margine delle prenotazioni riaccodate a fine cutover (scritture a cavallo del freeze). */
+  bookingsReconcileMarginMs: 5 * 60_000,
+  /** Tentativi del passo d'epoch con Radicale irraggiungibile prima di fallire il run (stato resta frozen). */
+  epochRetryAttempts: 5,
+});
+
+/** Esito della quiescenza (journal del passo 'quiesce'). */
+export interface QuiescenceReport {
+  /** Gate cal-write: attesa delle scritture in corso. */
+  gate: { drained_ms: number };
+  /** Policy dopo il giro del control-plane: mode atteso 'frozen'. */
+  policy: { mode: 'shadow' | 'live' | 'frozen' | null; version: number | null; reasons: string[]; written_at: string | null };
+  /** Attesa dopo la policy (≥ quiescencePolicyGraceMs). */
+  waited_ms: number;
+  /** PUT del probe su _canary: tentativi e stato finale (403 atteso). */
+  probe: { attempts: number; status: number };
+  /** stat delle collezioni: sorgente, giri fino a due letture uguali, collezioni osservate. */
+  stat: { source: 'mount' | 'remote'; rounds: number; collections: number };
+  finished_at: string;
+}
+
+/** Passo del journal (DTO, cal_migration_journal). */
+export interface JournalStepView {
+  step: string;
+  seq: number;
+  status: JournalStepStatus;
+  attempts: number;
+  run_id: string | null;
+  started_at: string;
+  finished_at: string | null;
+  error_code: string | null;
+  error: string | null;
+  data: Record<string, unknown>;
+}
+
+/** Transizione (DTO, cal_migration_transitions con i passi). */
+export interface TransitionView {
+  id: string;
+  kind: TransitionKind;
+  status: TransitionStatus;
+  from_mode: BackendMode;
+  target_mode: BackendMode;
+  run_id: string | null;
+  epoch_before: number;
+  epoch_after: number | null;
+  started_by: string;
+  started_at: string;
+  finished_at: string | null;
+  outcome_code: string | null;
+  outcome: string | null;
+  data: Record<string, unknown>;
+  steps: JournalStepView[];
+  /** Primo passo non concluso nell'ordine del tipo (null se concluso tutto). */
+  next_step: string | null;
+  /** Attiva senza un run in corso: si riprende dal wizard. */
+  resumable: boolean;
+  /** Attiva e prima del passo d'epoch: si può annullare (cutover e rollback). */
+  abortable: boolean;
+}
+
+/** Finestra di rollback (DTO del wizard dopo il cutover). */
+export interface RollbackWindowView {
+  cutover_at: string;
+  cutover_by: string | null;
+  rollback_until: string | null;
+  /** Giorni interi residui (0 a finestra scaduta). */
+  days_left: number;
+  expired: boolean;
+  /** Primo istante in cui il finalize è ammesso (cutover + finalizeMinDays). */
+  finalize_available_at: string;
+  finalize_ready: boolean;
+  finalize_blockers: PreconditionReason[];
+}
+
+// ─── F4: proiezione inversa (design §13.11) ──────────────────
+
+/**
+ * Classi dei degradi della proiezione inversa (cal_migration_items.code con
+ * item_type 'degradation', cal_migration_reverse_state.degradations):
+ * - REPR_LOSS_VALARM, REPR_LOSS_ATTENDEE: allarmi e invitati non rappresentabili in PG (restano nel volume);
+ * - REPR_LOSS_PROPERTY: altre proprietà senza colonna legacy (X-*, CATEGORIES, CLASS, ...);
+ * - SEMANTIC_EXPANDED: risorsa espansa in occorrenze singole derivate (caldes_derived);
+ * - SEMANTIC_TRANSP: TRANSP:TRANSPARENT reso come status 'tentative' (non blocca nemmeno nel legacy);
+ * - SANITIZED_UID, SANITIZED_DURATION, SANITIZED_SUMMARY, SANITIZED_STATUS: valori adattati ai vincoli legacy;
+ * - REVERSE_FAILED: upsert non riuscito (mai un job fallito in silenzio).
+ */
+export const DEGRADATION_CLASSES = [
+  'REPR_LOSS_VALARM',
+  'REPR_LOSS_ATTENDEE',
+  'REPR_LOSS_PROPERTY',
+  'SEMANTIC_EXPANDED',
+  'SEMANTIC_TRANSP',
+  'SANITIZED_UID',
+  'SANITIZED_DURATION',
+  'SANITIZED_SUMMARY',
+  'SANITIZED_STATUS',
+  'REVERSE_FAILED',
+] as const;
+export type DegradationClass = (typeof DEGRADATION_CLASSES)[number];
+
+/** Degrado di una risorsa (cal_migration_reverse_state.degradations): mai dati personali. */
+export interface DegradationRecord {
+  class: DegradationClass;
+  recurrence_key?: string | null;
+  detail?: Record<string, unknown>;
+}
+
+/** Stato della proiezione di una risorsa (cal_migration_reverse_state.status). */
+export const REVERSE_STATE_STATUSES = ['projected', 'degraded', 'failed', 'removed'] as const;
+export type ReverseStateStatus = (typeof REVERSE_STATE_STATUSES)[number];
+
+/** Riga di calendar_events scritta per una risorsa (cal_migration_reverse_state.rows). */
+export interface ReverseRowRef {
+  id: string;
+  recurrence_key: string;
+  role: 'master' | 'override' | 'derived' | 'projection';
+}
+
+/** Esito di una passata della proiezione inversa (completa o per collezione). */
+export interface ReverseApplySummary {
+  objects: number;
+  projected: number;
+  degraded: number;
+  failed: number;
+  removed: number;
+  unchanged: number;
+  rows: { inserted: number; updated: number; deleted: number };
+  by_class: Partial<Record<DegradationClass, number>>;
+  duration_ms: number;
+}
+
+/** Salute della proiezione inversa (DTO del wizard dopo il cutover). */
+export interface ReverseProjectionHealthView {
+  /** mode radicale e rollback_until nel futuro. */
+  active: boolean;
+  until: string | null;
+  objects: number;
+  by_status: Record<ReverseStateStatus, number>;
+  by_class: Partial<Record<DegradationClass, number>>;
+  derived_rows: number;
+  last_projected_at: string | null;
+  queue: { pending: number; running: number; dead: number };
+}
+
+/**
+ * Gruppo di righe derivate (caldes_derived) di una risorsa espansa dalla
+ * proiezione inversa: base della ri-baseline e del conflitto DERIVED_EDITED.
+ * Non è ancora nell'unione LegacySnapshot: la aggiunge il gruppo ROLLBACK
+ * insieme al serializer (contratto f4-modules §6.4).
+ */
+export interface LegacyDerivedSnapshot {
+  v: 1;
+  kind: 'derived';
+  calendar: CalendarSnapshot;
+  /** cal_object_ids.id della risorsa (recurrence_key ''). */
+  object_id: string;
+  /** Righe derivate ordinate per start_time e id. */
+  rows: LegacyEventRowSnapshot[];
+}
+
+// ─── F4: smoke del cutover (design §13.10 passo 7) ───────────
+
+/** SLOTS (slot pubblici), BOOKING_ROLLBACK (createBooking in tx annullata), FEED (feed per token), MCP_READ (tool in lettura), NO_SIDE_EFFECTS (nessuna prenotazione, job, email o workflow residuo). */
+export const SMOKE_CHECK_CODES = ['SLOTS', 'BOOKING_ROLLBACK', 'FEED', 'MCP_READ', 'NO_SIDE_EFFECTS'] as const;
+export type SmokeCheckCode = (typeof SMOKE_CHECK_CODES)[number];
+
+export interface SmokeCheck {
+  code: SmokeCheckCode;
+  ok: boolean;
+  ms: number;
+  /** Testo in italiano senza dati personali. */
+  detail: string | null;
+}
+
+export interface SmokeReport {
+  ok: boolean;
+  started_at: string;
+  finished_at: string;
+  checks: SmokeCheck[];
+}
+
+// ─── F4: parametri, richieste e riassunti dei run ────────────
+
+export interface CutoverParams {
+  /** start: nuova transizione; resume: riprende quella attiva; abort: annulla quella attiva (solo prima di 'epoch'). */
+  action: 'start' | 'resume' | 'abort';
+  /** Giorni della finestra di rollback (F4_LIMITS.rollbackWindowMinDays..rollbackWindowMaxDays). */
+  rollback_window_days: number;
+  /** Verifica completa (V1-V5) di riferimento dei criteri, vista dall'utente. */
+  verify_run_id: string | null;
+}
+
+export interface RollbackPreviewParams { scope: MigrationScope }
+
+export interface RollbackParams {
+  action: 'start' | 'resume' | 'abort';
+  /** Run rollback_preview confermato dall'utente. */
+  preview_run_id: string | null;
+  /** preview_hash dell'anteprima: dopo la quiescenza si ricalcola e, se diverso, il rollback si annulla (salvo emergenza). */
+  expect_preview_hash: string | null;
+  /** Rollback di emergenza: prosegue con l'anteprima cambiata o con la sync finale non riuscita (design §13.12). */
+  emergency: boolean;
+}
+
+export interface RebaselineParams {
+  scope: MigrationScope;
+  /** rollback: passo del rollback; manual: run di riparazione dal wizard (solo mode postgres). */
+  reason: 'rollback' | 'manual';
+}
+
+export interface FinalizeParams { action: 'start' | 'resume' }
+
+export interface CutoverRequest {
+  confirm: string;
+  rollback_window_days?: number;
+  verify_run_id?: string | null;
+}
+export interface CutoverAbortRequest { confirm: string }
+export interface TransitionResumeRequest { confirm: string }
+export interface RollbackPreviewRequest { scope?: MigrationScope }
+export interface RollbackRequest {
+  preview_run_id: string;
+  expect_preview_hash?: string | null;
+  confirm: string;
+  emergency?: boolean;
+  /** Obbligatoria con emergency: MIGRATION_CONFIRMATIONS.rollbackEmergency. */
+  confirm_emergency?: string;
+}
+export interface FinalizeRequest { confirm: string }
+export interface RebaselineRequest { scope?: MigrationScope; confirm: string }
+
+export interface CutoverSummary {
+  transition_id: string;
+  outcome: 'completed' | 'aborted';
+  abort_reason: string | null;
+  epoch_before: number;
+  epoch_after: number | null;
+  rollback_until: string | null;
+  quiescence: QuiescenceReport | null;
+  delta: ApplySummary | null;
+  verify: VerifySummary | null;
+  reverse: ReverseApplySummary | null;
+  bookings_reconciled: number;
+  /** Smoke non riusciti non annullano il cutover: il wizard propone il rollback. */
+  smoke: SmokeReport | null;
+  steps: JournalStepView[];
+}
+
+export interface RollbackPreviewSummary {
+  /** sha256 del JSON canonico di (oggetti, righe previste, degradi per oggetto, REVERSE_FAILED), ordinati. */
+  preview_hash: string;
+  generated_at: string;
+  cutover_at: string | null;
+  rollback_until: string | null;
+  /** Cambiamenti dal cutover (versioni dell'indice), per origine. */
+  changes_since_cutover: {
+    created: number;
+    updated: number;
+    deleted: number;
+    by_actor: Partial<Record<'device' | 'admin' | 'mcp' | 'agent' | 'system' | 'booking' | 'other', number>>;
+  };
+  objects: number;
+  derived_rows: number;
+  by_class: Partial<Record<DegradationClass, number>>;
+  reverse_failed: number;
+  /** Busy legacy dopo il rollback identico a quello di Radicale sull'orizzonte (null se non calcolato). */
+  busy_identical: boolean | null;
+  calendars: Array<{ calendar_id: string; collection_name: string; objects: number; degraded: number; failed: number; derived_rows: number }>;
+}
+
+export interface RebaselineSummary {
+  /** Righe del ledger considerate. */
+  rows: number;
+  /** Righe riallineate (href reale, legacy_snapshot e hash correnti, etag corrente, adopted). */
+  rebaselined: number;
+  /** Righe nuove (oggetti creati nella finestra: device, admin, MCP). */
+  created: number;
+  /** Righe ritirate (risorsa e sorgente sparite). */
+  retired: number;
+  /** Righe tolte dal ledger (risorsa senza righe legacy, es. REVERSE_FAILED): oggetto non tracciato, mai cancellato dal piano. */
+  untracked: number;
+  derived: number;
+  adopted: number;
+  skipped: number;
+  duration_ms: number;
+}
+
+export interface RollbackSummary {
+  transition_id: string;
+  outcome: 'completed' | 'aborted';
+  abort_reason: string | null;
+  emergency: boolean;
+  preview_hash: string | null;
+  final_preview_hash: string | null;
+  epoch_before: number;
+  epoch_after: number | null;
+  quiescence: QuiescenceReport | null;
+  index_sync: { collections: number; failed: number } | null;
+  reverse: ReverseApplySummary | null;
+  rebaseline: RebaselineSummary | null;
+  steps: JournalStepView[];
+}
+
+export interface FinalizeSummary {
+  transition_id: string;
+  finalized_at: string;
+  /** calendar_finalize_legacy() (migrazione 167, F7) eseguita; false se non ancora disponibile. */
+  legacy_finalized: boolean;
+  legacy_note: string | null;
+  reverse_jobs_dropped: number;
+  steps: JournalStepView[];
+}
+
+// ─── F4: export v2 del calendario (design §16.2) ─────────────
+
+/** manifest.json dello zip dell'export v2: un .ics per collezione. */
+export interface CalendarExportManifest {
+  format: 'caldes-calendar-export';
+  version: 2;
+  generated_at: string;
+  backend_mode: BackendMode;
+  volume_id: string | null;
+  epoch: number;
+  principal: string;
+  collections: Array<{
+    calendar_id: string;
+    collection_name: string;
+    name: string;
+    role: CalendarRole;
+    /** Percorso nello zip (`collections/<collection_name>.ics`). */
+    file: string;
+    objects: number;
+    sha256: string;
+  }>;
+  skipped: Array<{ calendar_id: string; collection_name: string | null; reason: string }>;
 }

@@ -70,6 +70,7 @@ import {
 } from '@calicchia/calendar-core';
 import { logger as rootLogger } from '../../logger';
 import { feedUidDomain, feedWindowAnchor, readBookingProjectionData } from '../feed-builder';
+import type { RadicaleClient } from '../radicale/client';
 import type { Db } from '../radicale/policy';
 import { getPgLegacyStore } from '../store';
 import type { CalendarEventOccurrence } from '../types';
@@ -1220,14 +1221,26 @@ type VerifyCtx = MigrationRunContext<VerifyParams>;
 
 /** V1-V5 sui calendari dell'ambito (§8); righe 'diff' con la firma; riporto delle accettazioni. */
 export async function runVerify(ctx: VerifyCtx): Promise<VerifySummary> {
-  return withMigrationRunLock(ctx.db, () => verifyLocked(ctx));
+  return withMigrationRunLock(ctx.db, () => verifyLocked(ctx, null));
 }
 
-async function verifyLocked(ctx: VerifyCtx): Promise<VerifyRunSummary> {
+/**
+ * Stesso calcolo di runVerify dentro una transizione (F4, passo delta_verify
+ * del cutover, contratto f4-modules §3.1): `guard` sostituisce
+ * assertMigrationWritable (che ammette solo mode postgres) e verifica mode
+ * della transizione e identità del volume; le righe 'diff' vanno nel run del
+ * contesto (il run della transizione) con il riporto delle accettazioni.
+ */
+export async function runVerifyWithGuard(ctx: VerifyCtx, guard: (opts: { client: RadicaleClient; principal: string }) => Promise<void>): Promise<VerifySummary> {
+  return withMigrationRunLock(ctx.db, () => verifyLocked(ctx, guard));
+}
+
+async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleClient; principal: string }) => Promise<void>) | null): Promise<VerifyRunSummary> {
   const params = normalizeVerifyParams(ctx.params);
   const { client, principal } = requireRadicale();
   // Una destinazione senza identità verificata non si confronta: sarebbe un volume estraneo.
-  await assertMigrationWritable({ db: ctx.db, client, principal });
+  if (guard) await guard({ client, principal });
+  else await assertMigrationWritable({ db: ctx.db, client, principal });
   const now = new Date();
   const options = await resolveVerifyOptions(ctx.db);
   ctx.throwIfCancelled();
