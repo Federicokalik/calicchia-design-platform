@@ -45,6 +45,7 @@ import {
 } from '../radicale/store';
 import { radicaleRuntime } from '../radicale/sync';
 import { isValidCollectionName } from '../radicale/types';
+import { withCalendarWriteGate } from '../radicale/write-gate';
 import { isValidTimeZone } from '../validation';
 import { assertV2ObjectsAvailable } from './capabilities';
 import { calendarNotEmpty, CalendarV2Error, invalidValue, readOnly, v2ErrorFrom, validationFailed } from './errors';
@@ -419,7 +420,8 @@ export async function rotateCalendarTokenV2(id: string, actor: AdminActor): Prom
   const cal = await requireCalendarRow(id);
   const readonly = readonlyReasonOf(cal);
   if (readonly) throw readOnly(READONLY_PATCH_MESSAGES[readonly], readonly, { fields: ['ics_feed_token'] });
-  const rotated = await getRadicaleStore().rotateFeedToken(cal.id);
+  // Anche la rotazione, che tocca solo il database, passa dal gate cal-write (503 con write_freeze o in rollback).
+  const rotated = await withCalendarWriteGate(() => getRadicaleStore().rotateFeedToken(cal.id), { expect: 'radicale' });
   if (!rotated) throw notFound('Calendario non trovato');
   await auditCalendarTokenRotation(cal.id, actorLabel(actor));
   return viewOf(cal.id);

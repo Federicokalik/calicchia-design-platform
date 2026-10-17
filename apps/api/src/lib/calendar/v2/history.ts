@@ -21,7 +21,9 @@
 import { createHash } from 'node:crypto';
 import {
   type CalendarObject,
+  type CalendarRole,
   cloneCalendarObject,
+  deriveProvenance,
   getProperties,
   getTextValue,
   type IcsComponent,
@@ -506,6 +508,13 @@ export async function listTrashV2(query: TrashQuery): Promise<CalV2TrashList> {
   const uids = page.map((r) => r.uid ?? (r.version_id ? parsedByVersion.get(r.version_id)?.uid : undefined)).filter((u): u is string => Boolean(u));
   const active = await activeUids(uids);
 
+  // Le proiezioni di prenotazione (booking-<uid>.ics in bookings) le cancella il proiettore: non si ripristinano a mano.
+  const calendarOf = (r: (typeof page)[number]): ReturnType<typeof calendarAccepts> => {
+    const accepts = calendarAccepts(r.calendar_name === null && r.lifecycle === null ? null : r);
+    if (accepts === 'ok' && deriveProvenance({ role: (r.role ?? 'user') as CalendarRole, href: r.href }).source === 'booking') return 'calendar_readonly';
+    return accepts;
+  };
+
   const items: CalV2TrashItem[] = page.map((r) => {
     const obj = r.version_id ? parsedByVersion.get(r.version_id) ?? null : null;
     const uid = r.uid ?? obj?.uid ?? null;
@@ -522,7 +531,7 @@ export async function listTrashV2(query: TrashQuery): Promise<CalV2TrashList> {
       hasVersion: r.version_id !== null,
       versionExpired,
       uidActive: uid !== null && active.has(uid),
-      calendar: calendarAccepts(r.calendar_name === null && r.lifecycle === null ? null : r),
+      calendar: calendarOf(r),
     });
     return {
       object_id: r.id,
@@ -574,6 +583,9 @@ export async function restoreFromTrashV2(objectId: string, req: CalV2TrashRestor
     if (!dest) throw notRestorable('calendar_gone');
   }
   if (dest.role === 'subscription' || dest.origin === 'migration' || !allowedComponents(dest).includes('VEVENT')) throw notRestorable('calendar_readonly');
+  // Una proiezione di prenotazione cancellata dal proiettore non torna a bloccare la disponibilità.
+  const original = await sidecarById(row.calendar_id, { activeOnly: false });
+  if (deriveProvenance({ role: (original?.role ?? 'user') as CalendarRole, href: row.href }).source === 'booking') throw notRestorable('calendar_readonly');
 
   // Versione: quella indicata (valida, dell'oggetto, non scaduta) o l'ultima valida.
   let version: CalObjectVersionRow | null;

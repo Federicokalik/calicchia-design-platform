@@ -429,6 +429,27 @@ describe('calendari con lo store Radicale', () => {
     assert.equal((await api.post(`${BASE}/calendars/${sub.id}/rotate-token`, { auth: 'admin', body: {} })).status, 403);
     assert.equal((await api.post(`${BASE}/calendars/${ANY_ID}/rotate-token`, { auth: 'admin', body: {} })).status, 404);
   });
+
+  test('write_freeze: PATCH solo database, PUT /calendars/order e rotate-token → 503, righe di calendars invariate', async () => {
+    await setup();
+    const snapshot = async (): Promise<string> =>
+      JSON.stringify(await sql`SELECT id, blocks_availability, device_visible, ics_feed_enabled, ics_feed_token, sort_order, needs_review FROM calendars ORDER BY id`);
+    const all = (await list()).map((c) => c.id);
+    await sql`UPDATE calendar_backend_state SET write_freeze = true WHERE id`;
+    invalidateBackendModeCache();
+    try {
+      const before = await snapshot();
+      const patch = await api.patch(`${BASE}/calendars/${user.id}`, { auth: 'admin', body: { blocks_availability: false } });
+      assert.equal(patch.status, 503, patch.text);
+      const order = await api.put(`${BASE}/calendars/order`, { auth: 'admin', body: { ids: [...all].reverse() } });
+      assert.equal(order.status, 503, order.text);
+      const rotate = await api.post(`${BASE}/calendars/${user.id}/rotate-token`, { auth: 'admin', body: {} });
+      assert.equal(rotate.status, 503, rotate.text);
+      assert.equal(await snapshot(), before, 'nessuna riga di calendars è cambiata');
+    } finally {
+      await setState('radicale');
+    }
+  });
 });
 
 describe('import: piano', () => {

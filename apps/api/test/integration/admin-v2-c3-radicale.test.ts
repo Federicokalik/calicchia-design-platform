@@ -35,6 +35,7 @@ import {
   type CalV2OccurrenceList,
   type CalV2SyncState,
 } from '@calicchia/shared';
+import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
 import { CAL_JOB_KINDS, runCalendarJobsOnce, unregisterCalendarJobHandler } from '../../src/lib/calendar/jobs';
 import { objectPath, RadicaleClient } from '../../src/lib/calendar/radicale/client';
 import { initializeVolume } from '../../src/lib/calendar/radicale/identity';
@@ -370,6 +371,62 @@ describe('API admin v2, passo C3, contro Radicale reale', { skip: radicale.skip 
     `;
     assert.ok(rows.length >= 5 + 1, `righe di audit: ${rows.length}`);
     assert.ok(!JSON.stringify(rows).includes('Titolo riservato'), 'nessun testo di evento nell\'audit');
+  });
+
+  test('applica con write_freeze: il job attende senza consumare tentativi né toccare l\'indice, poi completa', async () => {
+    const { cal, hrefs } = await populate('applica-freeze', 3);
+    await deleteAll(cal.collection_name as string, hrefs);
+    assert.equal((await sync(cal.id)).status, 'held');
+    const accepted = await commit('apply-deletions', cal.id, await plan('apply-deletions', cal.id));
+
+    const [prev] = await sql<Array<{ mode: string; write_freeze: boolean }>>`SELECT mode, write_freeze FROM calendar_backend_state WHERE id`;
+    await sql`UPDATE calendar_backend_state SET mode = 'radicale', write_freeze = true WHERE id`;
+    invalidateBackendModeCache();
+    try {
+      await runCalendarJobsOnce({ limit: 1 });
+      const [waiting] = await sql<Array<{ status: string; attempts: number }>>`SELECT status, attempts FROM cal_jobs WHERE id = ${accepted.job_id}::bigint`;
+      assert.equal(waiting.status, 'pending');
+      assert.equal(waiting.attempts, 0, 'l\'attesa non conta come tentativo');
+      assert.equal((await indexed(cal.id)).size, 3, 'nessuna riga tolta dall\'indice');
+      assert.equal((await holdOf(cal.id))?.health, 'hold');
+    } finally {
+      await sql`UPDATE calendar_backend_state SET mode = ${prev.mode}, write_freeze = ${prev.write_freeze} WHERE id`;
+      invalidateBackendModeCache();
+    }
+    await sql`UPDATE cal_jobs SET run_after = now() WHERE id = ${accepted.job_id}::bigint`;
+    const done = await runUntilClosed(accepted.job_id);
+    assert.equal(done.status, 'done', JSON.stringify(done));
+    assert.equal((done.result as { applied: number }).applied, 3);
+    assert.equal((await indexed(cal.id)).size, 0);
+  });
+
+  test('ricostruisci dopo applica: le voci cancellate dall\'admin non risorgono, tutte in failed con code changed', async () => {
+    const { cal, hrefs } = await populate('rebuild-dopo-apply', 4);
+    const slug = cal.collection_name as string;
+    await deleteAll(slug, hrefs);
+    assert.equal((await sync(cal.id)).status, 'held');
+
+    // Due piani in anteprima sulla stessa collezione, confermati in fila con chiavi diverse: i job sono asincroni.
+    const applyPlan = await plan('apply-deletions', cal.id);
+    const rebuildPlan = await plan('rebuild-from-index', cal.id);
+    const applyAccepted = await commit('apply-deletions', cal.id, applyPlan);
+    const rebuildAccepted = await commit('rebuild-from-index', cal.id, rebuildPlan);
+
+    // Prima il job applica, poi la ricostruzione.
+    const applied = await runUntilClosed(applyAccepted.job_id);
+    assert.equal(applied.status, 'done', JSON.stringify(applied));
+    assert.equal((await indexed(cal.id)).size, 0, 'indice ripulito dall\'applica');
+
+    const rebuilt = await runUntilClosed(rebuildAccepted.job_id);
+    assert.equal(rebuilt.status, 'done', JSON.stringify(rebuilt));
+    const result = rebuilt.result as { applied: number; skipped: number; failed: Array<{ href: string; code: string }> };
+    assert.equal(result.applied, 0, 'nessuna voce riscritta');
+    assert.equal(result.failed.length, 4, 'tutte le voci in failed');
+    assert.ok(result.failed.every((f) => f.code === 'changed'), JSON.stringify(result.failed));
+    assert.deepEqual(result.failed.map((f) => f.href).sort(), hrefs);
+
+    for (const href of hrefs) assert.equal(await textOf(slug, href), null, `${href}: non è ricomparsa su Radicale`);
+    assert.equal((await indexed(cal.id)).size, 0, 'l\'indice resta senza quegli oggetti');
   });
 
   test('ricostruisci: senza versione valida la voce è saltata e l\'hold resta per quella', async () => {

@@ -26,6 +26,7 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, before, describe, test } from 'node:test';
+import { bookingHref, bookingProjectionUid } from '@calicchia/calendar-core';
 import type { CalV2ObjectView, CalV2TrashList, CalV2VersionDetail, CalV2VersionList, CalV2WriteResult } from '@calicchia/shared';
 import { objectPath, RadicaleClient } from '../../src/lib/calendar/radicale/client';
 import { initializeVolume } from '../../src/lib/calendar/radicale/identity';
@@ -771,5 +772,42 @@ describe('API admin v2, passo C1, contro Radicale reale', { skip: radicale.skip 
     } while (cursor && pages < 20);
     assert.deepEqual(seen, all.items.map((i) => i.object_id), 'le pagine ricompongono l\'elenco senza buchi né doppioni');
     assert.ok(pages >= 2);
+  });
+
+  test('proiezione di prenotazione: lo spostamento è rifiutato (booking_active) e, cancellata, non si ripristina dal cestino', async () => {
+    const eventType = await fx.eventType({ key: 'tipo-v2-c1' });
+    const { booking } = await fx.booking({ eventType, start: '2027-10-04T08:00:00Z', project: false });
+    const bookings = (await sql<Array<{ id: string; collection_name: string }>>`SELECT id, collection_name FROM calendars WHERE role = 'bookings' AND lifecycle = 'active' LIMIT 1`)[0];
+    const href = bookingHref(booking.uid);
+    const path = objectPath(P, bookings.collection_name, href);
+    const text = [
+      'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Test//IT', 'BEGIN:VEVENT',
+      `UID:${bookingProjectionUid(booking.uid)}`, 'DTSTAMP:20271001T080000Z', 'DTSTART:20271004T080000Z', 'DTEND:20271004T083000Z', 'SUMMARY:Consulenza', 'END:VEVENT', 'END:VCALENDAR', '',
+    ].join('\r\n');
+    await svc.put(path, text, { ifNoneMatch: '*' });
+    await syncCollection(bookings.id, { reason: 'manual' });
+    const view = await read(bookingProjectionUid(booking.uid));
+
+    // Move: 403 READ_ONLY, anche in anteprima, e la proiezione resta dov'è.
+    for (const dryRun of [true, false]) {
+      const moved = await api.post(`${BASE}/objects/${view.id}/move`, { auth: 'admin', headers: { 'If-Match': view.etag as string }, body: { calendar_id: other.id, ...(dryRun ? { dryRun } : {}) } });
+      assert.equal(moved.status, 403, moved.text);
+      assert.equal(moved.json.code, 'READ_ONLY');
+      assert.equal(moved.json.details.reason, 'booking_active');
+    }
+    assert.ok((await svc.get(path)).body, 'proiezione intatta su Radicale');
+
+    // Cancellata dal proiettore (qui: DELETE del device + sync) finisce nel cestino ma non è ripristinabile.
+    const current = await svc.get(path);
+    await svc.delete(path, { ifMatch: current.etag as string });
+    await syncCollection(bookings.id, { reason: 'manual' });
+    const item = (await trash({ calendar_id: bookings.id })).items.find((i) => i.object_id === view.id);
+    assert.ok(item, 'la proiezione cancellata è nel cestino');
+    assert.equal(item.restorable, false);
+    assert.equal(item.not_restorable_reason, 'calendar_readonly');
+    const restore = await api.post(`${BASE}/trash/${view.id}/restore`, { auth: 'admin', body: {} });
+    assert.equal(restore.status, 409, restore.text);
+    assert.equal(restore.json.code, 'NOT_RESTORABLE');
+    await assert.rejects(svc.get(path), (err: unknown) => (err as { code?: string }).code === 'not_found', 'nessuna risorsa ricreata');
   });
 });

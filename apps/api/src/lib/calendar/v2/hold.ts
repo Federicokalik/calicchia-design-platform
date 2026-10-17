@@ -62,6 +62,7 @@ import type { Db } from '../radicale/policy';
 import { applyHeldDeletions, radicaleRuntime, syncCollection } from '../radicale/sync';
 import { audit, auditCalendarV2, collectionNameOf, sidecarById, type SidecarRow, writeObject } from '../radicale/store';
 import { getObjectVersion, lastValidVersions } from '../radicale/versions';
+import { withCalendarWriteGate } from '../radicale/write-gate';
 import { assertV2ObjectsAvailable } from './capabilities';
 import {
   CalendarV2Error,
@@ -437,7 +438,8 @@ export async function runHoldApplyJob(job: CalendarJob, ctx: CalendarJobContext)
   await saveState(job, state, total).catch(() => undefined);
 
   const before = await objectsByHref(cal.id, hrefs);
-  const res = await applyHeldDeletions(cal.id, { actor: actorLabel(payload.user_id), hrefs });
+  // Dentro il gate cal-write come import e rebuild: con write_freeze o in rollback il job attende (§9.1.1).
+  const res = await withCalendarWriteGate(() => applyHeldDeletions(cal.id, { actor: actorLabel(payload.user_id), hrefs }), { expect: 'radicale' });
   const after = await objectsByHref(cal.id, hrefs);
 
   // Tolte dall'indice: quelle che prima c'erano e ora no. Il resto è rientrato (o è in quarantena) e resta fuori dal conteggio.
@@ -533,8 +535,19 @@ async function rewriteItem(cal: SidecarRow, item: HoldJobItem): Promise<Rewritte
     href: item.href,
     what: 'l\'evento',
     maxAttempts: MAX_ATTEMPTS,
-    // Esiste già (tornata da sola, o ricreata da un device): non si sovrascrive.
-    plan: (current) => (current ? { action: 'none' } : { action: 'put', object, previous: null, text, changed: ['hold_rebuild'] }),
+    plan: async (current) => {
+      // Esiste già (tornata da sola, o ricreata da un device): non si sovrascrive.
+      if (current) return { action: 'none' };
+      // Riletto dentro il gate, subito prima della PUT: se nel frattempo l'admin ha applicato le cancellazioni
+      // (o la collezione è uscita dall'hold) la voce non va fatta risorgere (§9.1.1).
+      const hold = await readHold(cal.id);
+      if (!hold || !hold.pending.includes(item.href)) throw new ItemChanged('changed');
+      const [still] = await sql<Array<{ one: number }>>`
+        SELECT 1 AS one FROM cal_objects WHERE id = ${item.object_id}::uuid AND calendar_id = ${cal.id}::uuid AND href = ${item.href}
+      `;
+      if (!still) throw new ItemChanged('changed');
+      return { action: 'put', object, previous: null, text, changed: ['hold_rebuild'] };
+    },
   });
   if (outcome.action !== 'put') return null;
   return { etagAfter: outcome.etagAfter, objectId: item.object_id };

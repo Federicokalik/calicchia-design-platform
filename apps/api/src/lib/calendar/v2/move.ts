@@ -43,11 +43,13 @@ import { sql } from '../../../db';
 import { CalendarConflictError, EventValidationError } from '../errors';
 import { objectPath } from '../radicale/client';
 import {
+  ACTIVE_BOOKING_MESSAGE,
   allowedComponents,
   collectionNameOf,
   fetchCurrent,
   generateEventUid,
   hrefForUid,
+  isActiveBookingProjection,
   moveObject,
   positionId,
   preImage,
@@ -162,6 +164,8 @@ export async function moveObjectV2(ref: string, ifMatch: string, req: CalV2MoveR
   const resolved = await resolveObjectRef(ref);
   const cal = resolved.calendar;
   assertWritableCalendar(cal);
+  // Spostare la proiezione fuori da bookings equivale a cancellarla (il proiettore non la ritroverebbe): come DELETE.
+  if (await isActiveBookingProjection(cal, resolved.href)) throw readOnly(ACTIVE_BOOKING_MESSAGE, 'booking_active');
   const dest = await writableDestination(req.calendar_id);
 
   const { client, principal } = requireRadicale();

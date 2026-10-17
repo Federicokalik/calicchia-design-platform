@@ -3044,10 +3044,12 @@ export async function createCalendarV2(input: CreateCalendarV2Input, actor: stri
         log.warn({ err, calendarId: created.id }, 'dead prop role non aggiornata alla creazione: la riallinea la discovery');
       }
     }
-    await sql`
-      UPDATE calendars SET role = ${role}, device_visible = ${deviceVisible}, ics_feed_enabled = ${feedEnabled}
-      WHERE id = ${created.id}::uuid
-    `;
+    await withCalendarWriteGate(async () => {
+      await sql`
+        UPDATE calendars SET role = ${role}, device_visible = ${deviceVisible}, ics_feed_enabled = ${feedEnabled}
+        WHERE id = ${created.id}::uuid
+      `;
+    }, { expect: 'radicale' });
     if (role !== 'user' || !deviceVisible) await syncDevicePolicy();
   }
   await auditCalendarV2({
@@ -3105,21 +3107,24 @@ export async function updateCalendarV2(id: string, patch: CalendarPatchV2, actor
 
   const next = { ...cal, ...updates } as SidecarRow;
   const davChanged = ['name', 'description', 'color', 'timezone', 'role'].some((f) => changed.includes(f));
-  if (davChanged && cal.role !== 'subscription' && isValidCollectionName(cal.collection_name)) {
-    const { client, principal } = requireRadicale();
-    await withCalendarWriteGate(async (ctx) => {
+  const davWrite = davChanged && cal.role !== 'subscription' && isValidCollectionName(cal.collection_name);
+  // PROPPATCH e UPDATE del sidecar stanno nello stesso gate cal-write: con write_freeze o in rollback anche le
+  // modifiche solo database (blocks_availability, device_visible, ics_feed_enabled, needs_review) rispondono 503 (§9.1.1).
+  const radicaleTarget = davWrite ? requireRadicale() : null;
+  await withCalendarWriteGate(async (ctx) => {
+    if (radicaleTarget) {
+      // L'identità del volume serve solo se si scrive su Radicale: le modifiche solo database non dipendono da lui.
       await assertVolumeIdentity(ctx.state);
       const props = collectionDavProps(next);
       if (changed.includes('role')) props.set.push({ ...DAV_PROPS.role, value: next.role });
       try {
-        await client.proppatch(collectionPath(principal, cal.collection_name as string), { set: props.set, remove: props.remove });
+        await radicaleTarget.client.proppatch(collectionPath(radicaleTarget.principal, cal.collection_name as string), { set: props.set, remove: props.remove });
       } catch (err) {
         throw isRadicaleError(err) ? radicaleWriteError(err, 'la modifica del calendario') : err;
       }
-    }, { expect: 'radicale' });
-  }
-
-  await sql`UPDATE calendars SET ${sql(updates)} WHERE id = ${cal.id}::uuid`;
+    }
+    await sql`UPDATE calendars SET ${sql(updates)} WHERE id = ${cal.id}::uuid`;
+  }, { expect: 'radicale' });
   if (changed.includes('timezone')) {
     try {
       const { rematerializeCollection } = await import('./indexer');
@@ -3158,33 +3163,37 @@ export async function auditCalendarTokenRotation(id: string, actor: string): Pro
  * nel database e finisce nel log senza testo).
  */
 export async function applyCalendarOrder(ids: readonly string[], actor: string): Promise<{ changed: number; proppatchFailed: number }> {
-  const rows = await sql<Array<{ id: string; collection_name: string | null; role: string; sort_order: number }>>`
-    UPDATE calendars c SET sort_order = v.pos
-    FROM (SELECT t.id, (t.ord - 1)::int AS pos FROM unnest(${ids as string[]}::uuid[]) WITH ORDINALITY AS t(id, ord)) v
-    WHERE c.id = v.id AND c.sort_order IS DISTINCT FROM v.pos
-    RETURNING c.id, c.collection_name, c.role, c.sort_order
-  `;
   let proppatchFailed = 0;
-  const targets = rows.filter((r) => r.role !== 'subscription' && isValidCollectionName(r.collection_name));
-  if (targets.length > 0) {
+  // UPDATE e PROPPATCH nello stesso gate cal-write: un gate chiuso esce come 503 e l'ordine nel database non cambia.
+  const rows = await withCalendarWriteGate(async (ctx) => {
+    const updated = await sql<Array<{ id: string; collection_name: string | null; role: string; sort_order: number }>>`
+      UPDATE calendars c SET sort_order = v.pos
+      FROM (SELECT t.id, (t.ord - 1)::int AS pos FROM unnest(${ids as string[]}::uuid[]) WITH ORDINALITY AS t(id, ord)) v
+      WHERE c.id = v.id AND c.sort_order IS DISTINCT FROM v.pos
+      RETURNING c.id, c.collection_name, c.role, c.sort_order
+    `;
+    const targets = updated.filter((r) => r.role !== 'subscription' && isValidCollectionName(r.collection_name));
+    if (targets.length === 0) return updated;
+    let radicale: ReturnType<typeof requireRadicale>;
     try {
-      const { client, principal } = requireRadicale();
-      await withCalendarWriteGate(async (ctx) => {
-        await assertVolumeIdentity(ctx.state);
-        for (const r of targets) {
-          try {
-            await client.proppatch(collectionPath(principal, r.collection_name as string), { set: [{ ...DAV_PROPS.calendarOrder, value: String(r.sort_order) }] });
-          } catch (err) {
-            proppatchFailed++;
-            log.warn({ err, calendarId: r.id }, 'PROPPATCH di calendar-order non riuscita: l\'ordine resta valido nel database');
-          }
-        }
-      }, { expect: 'radicale' });
+      radicale = requireRadicale();
+      await assertVolumeIdentity(ctx.state);
     } catch (err) {
+      // Radicale non configurato o volume non verificabile: le PROPPATCH restano best effort, l'ordine è valido nel database.
       proppatchFailed = targets.length;
       log.warn({ err }, 'PROPPATCH di calendar-order non eseguite (Radicale non disponibile): l\'ordine resta valido nel database');
+      return updated;
     }
-  }
+    for (const r of targets) {
+      try {
+        await radicale.client.proppatch(collectionPath(radicale.principal, r.collection_name as string), { set: [{ ...DAV_PROPS.calendarOrder, value: String(r.sort_order) }] });
+      } catch (err) {
+        proppatchFailed++;
+        log.warn({ err, calendarId: r.id }, 'PROPPATCH di calendar-order non riuscita: l\'ordine resta valido nel database');
+      }
+    }
+    return updated;
+  }, { expect: 'radicale' });
   await auditCalendarV2({ action: 'UPDATE', recordId: null, operation: 'v2.calendar.order', changed: ['sort_order'], actor, extra: { calendars: ids.length, changed: rows.length, proppatch_failed: proppatchFailed } });
   return { changed: rows.length, proppatchFailed };
 }
