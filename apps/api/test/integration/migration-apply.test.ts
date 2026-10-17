@@ -130,7 +130,7 @@ interface LedgerLite { id: string; href: string; legacy_key: string; written_eta
 async function ledgerOf(key: string): Promise<LedgerLite[]> {
   return sql<LedgerLite[]>`
     SELECT id::text AS id, href, legacy_key, written_etag, written_fingerprint, intent_op, adopted, deleted_at, revalidate_reason, legacy_hash
-    FROM cal_migration_ledger WHERE legacy_key = ${key} ORDER BY id
+    FROM cal_migration_ledger WHERE legacy_key = ${key} ORDER BY cal_migration_ledger.id
   `;
 }
 
