@@ -57,6 +57,7 @@ import { calendarFeed } from './routes/calendar/feed';
 import { caldavBackend } from './routes/calendar/caldav-backend';
 import { calendarHealth } from './routes/calendar/health';
 import { calendarMigration } from './routes/calendar/migration';
+import { calendarAdminV2 } from './routes/calendar/admin-v2';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -535,6 +536,7 @@ app.route('/api/calcom', calcom);
 // Strumento di migrazione del calendario a Radicale (F3, contratto f3-modules
 // §10): montato PRIMA di /api/admin/calendar, stesso JWT admin (protectedPaths).
 app.route('/api/admin/calendar/migration', calendarMigration);
+app.route('/api/admin/calendar/v2', calendarAdminV2);
 app.route('/api/admin/calendar', calendarAdmin);
 app.route('/api/notifications', notifications);
 app.route('/api/dashboard', dashboard);

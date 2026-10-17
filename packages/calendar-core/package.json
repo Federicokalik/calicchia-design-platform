@@ -21,7 +21,8 @@
     "./patch": "./src/patch.ts",
     "./validate": "./src/validate.ts",
     "./fingerprint": "./src/fingerprint.ts",
-    "./feed-transform": "./src/feed-transform.ts"
+    "./feed-transform": "./src/feed-transform.ts",
+    "./rrule-summary": "./src/rrule-summary.ts"
   },
   "scripts": {
     "test": "tsx --test test/*.test.ts",

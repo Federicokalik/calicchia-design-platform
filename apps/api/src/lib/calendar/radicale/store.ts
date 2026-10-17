@@ -166,6 +166,7 @@ import type {
 } from '../types';
 import { enableSubscriptionIndex, pullSubscriptionToIndex, toLegacySyncResult } from '../subscriptions/pull';
 import { CALENDAR_SLUG_REGEX, isValidTimeZone } from '../validation';
+import { applyOpsToNewSeries } from '../v2/series';
 import { collectionPath, isValidObjectName, objectPath, type RadicaleClient } from './client';
 import { clark, DAV_PROPS, type DavPropName, type DavPropValue } from './dav-xml';
 import { isRadicaleError, type RadicaleError } from './errors';
@@ -660,6 +661,39 @@ async function positionId(calendarId: string, href: string, recurrenceKey: strin
   `;
   if (row) return row.id;
   return reserveObjectId(sql, { calendarId, href, recurrenceKey, uid });
+}
+
+/**
+ * Spostamento di calendario (design §8 "Sposta"): MOVE con Overwrite: F dopo
+ * il controllo dell'ETag (Radicale non valuta If-Match sulla MOVE).
+ * Restituisce l'ETag della risorsa nella destinazione (letto dopo la MOVE).
+ * Funzione di modulo dalla F6 (esportata per admin-v2); il metodo privato
+ * della classe delega.
+ */
+async function moveObject(from: SidecarRow, to: SidecarRow, href: string, expectedEtag: string | null): Promise<string | null> {
+  const { client, principal } = requireRadicale();
+  const src = objectPath(principal, collectionNameOf(from), href);
+  const dst = objectPath(principal, collectionNameOf(to), href);
+  return withCalendarWriteGate(async (ctx) => {
+    await assertVolumeIdentity(ctx.state);
+    const current = await fetchCurrent(client, src, 'l\'evento');
+    if (!current) throw new CalendarConflictError('L\'evento non esiste più: ricarica e riprova');
+    if (expectedEtag && current.etag && current.etag !== expectedEtag) {
+      throw new CalendarConflictError('L\'evento è stato modificato nel frattempo: ricarica e riprova');
+    }
+    // L'origine sparisce per mano dell'API: per la sync non è una cancellazione osservata.
+    expectCollectionDeletion(from.id, href);
+    try {
+      await client.move(src, dst, { overwrite: false });
+    } catch (err) {
+      if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(from.id, href);
+      if (isRadicaleError(err, 'precondition_failed')) throw new EventValidationError('Esiste già un evento con lo stesso nome nel calendario di destinazione');
+      if (isRadicaleError(err, 'uid_conflict')) throw new EventValidationError('UID già presente nel calendario di destinazione');
+      throw domainError(err, 'lo spostamento dell\'evento');
+    }
+    const moved = await fetchCurrent(client, dst, 'l\'evento');
+    return moved?.etag ?? null;
+  }, { expect: 'radicale' });
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1833,35 +1867,9 @@ class RadicaleStore implements CalendarStore {
     return eventFromObject(written, ref.recurrenceKey, finalId, meta) ?? this.getEvent(finalId);
   }
 
-  /**
-   * Spostamento di calendario (design §8 "Sposta"): MOVE con Overwrite: F
-   * dopo il controllo dell'ETag (Radicale non valuta If-Match sulla MOVE).
-   * Restituisce l'ETag della risorsa nella destinazione (letto dopo la MOVE).
-   */
-  private async moveObject(from: SidecarRow, to: SidecarRow, href: string, expectedEtag: string | null): Promise<string | null> {
-    const { client, principal } = requireRadicale();
-    const src = objectPath(principal, collectionNameOf(from), href);
-    const dst = objectPath(principal, collectionNameOf(to), href);
-    return withCalendarWriteGate(async (ctx) => {
-      await assertVolumeIdentity(ctx.state);
-      const current = await fetchCurrent(client, src, 'l\'evento');
-      if (!current) throw new CalendarConflictError('L\'evento non esiste più: ricarica e riprova');
-      if (expectedEtag && current.etag && current.etag !== expectedEtag) {
-        throw new CalendarConflictError('L\'evento è stato modificato nel frattempo: ricarica e riprova');
-      }
-      // L'origine sparisce per mano dell'API: per la sync non è una cancellazione osservata.
-      expectCollectionDeletion(from.id, href);
-      try {
-        await client.move(src, dst, { overwrite: false });
-      } catch (err) {
-        if (!(isRadicaleError(err) && err.outcomeUnknown)) forgetCollectionDeletion(from.id, href);
-        if (isRadicaleError(err, 'precondition_failed')) throw new EventValidationError('Esiste già un evento con lo stesso nome nel calendario di destinazione');
-        if (isRadicaleError(err, 'uid_conflict')) throw new EventValidationError('UID già presente nel calendario di destinazione');
-        throw domainError(err, 'lo spostamento dell\'evento');
-      }
-      const moved = await fetchCurrent(client, dst, 'l\'evento');
-      return moved?.etag ?? null;
-    }, { expect: 'radicale' });
+  /** Spostamento di calendario: delega alla funzione di modulo moveObject. */
+  private moveObject(from: SidecarRow, to: SidecarRow, href: string, expectedEtag: string | null): Promise<string | null> {
+    return moveObject(from, to, href, expectedEtag);
   }
 
   async deleteEvent(id: string): Promise<boolean> {
@@ -2491,6 +2499,41 @@ class RadicaleStore implements CalendarStore {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Primitive per admin-v2 (F6)
+// ═══════════════════════════════════════════════════════════════════
+
+/*
+ * Le scritture dell'API admin v2 (lib/calendar/v2/objects.ts) riusano la
+ * pipeline di questo modulo senza duplicarla: gate cal-write, GET, piano, PUT
+ * con precondizione, write-through e audit. Esportazione delle primitive
+ * esistenti, senza cambiarne semantica né firme (contratto f6-modules §5.7):
+ * le scritture v2 passano `maxAttempts: 3`. Sono esportati anche i piccoli
+ * helper che servono a validare e a leggere con le stesse regole.
+ */
+export {
+  allowedComponents,
+  assertEventWritable,
+  assertValidForWrite,
+  audit,
+  collectionNameOf,
+  componentFor,
+  eventTargetCalendar,
+  fetchCurrent,
+  generateEventUid,
+  isActiveBookingProjection,
+  moveObject,
+  positionId,
+  preImage,
+  requireRadicale,
+  resolveEvent,
+  safeTz,
+  sidecarById,
+  writeObject,
+  writeThrough,
+};
+export type { AuditEntry, CurrentObject, ObjectWriteRequest, ResolvedEvent, SidecarRow, WriteOutcome, WritePlan };
+
+// ═══════════════════════════════════════════════════════════════════
 // "Questa e le successive": saga recurrence_split (design §8)
 // ═══════════════════════════════════════════════════════════════════
 
@@ -2501,6 +2544,14 @@ export interface SplitRecurringEventInput {
   originalStartIso: string;
   /** Modifiche per la nuova serie, con la forma di updateEvent (calendar_id non ammesso). */
   changes?: UpdateEventInput;
+  /** F6: modifiche della nuova serie come op lossless (esclusivo con changes). */
+  ops?: PatchOp[];
+  /**
+   * F6: chiamato alla prima lettura del master dentro il gate, prima di
+   * qualsiasi scrittura della saga; lancia (es. CalendarV2PreconditionError)
+   * per fermarla. Riceve l'ETag e l'oggetto letti.
+   */
+  precheck?: (current: { etag: string | null; object: CalendarObject }) => void;
 }
 
 export interface SplitRecurringEventResult {
@@ -2553,6 +2604,7 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
   assertEventWritable(ref.calendar);
   if (ref.recurrenceKey !== MASTER_RECURRENCE_KEY) throw new EventValidationError('L\'evento non è ricorrente');
   if (input.changes?.calendar_id !== undefined) throw new EventValidationError('"Questa e le successive" non può cambiare calendario');
+  if (input.ops !== undefined && input.changes !== undefined) throw new EventValidationError('"ops" e "changes" sono alternativi');
   if (!Number.isFinite(Date.parse(input.originalStartIso))) throw new EventValidationError('original_start non valido');
   checkLegacyTimes(input.changes ?? {});
   const { client, principal } = requireRadicale();
@@ -2568,6 +2620,8 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
     if (!current) throw new EventValidationError('Master event non trovato');
     if (!current.object) throw new EventReadOnlyError(UNREADABLE_EVENT_MESSAGE);
     const obj = current.object;
+    // F6: il chiamante vede il master letto dentro il gate e può fermare la saga prima di ogni scrittura.
+    input.precheck?.({ etag: current.etag, object: obj });
     const now = new Date();
     let key: string;
     let split: ReturnType<typeof splitSeries>;
@@ -2583,7 +2637,13 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
     if (split.wholeSeries || !split.tail) return { whole: true as const };
 
     let tailObj = split.tail;
-    if (Object.keys(changes).length) {
+    if (input.ops?.length) {
+      try {
+        tailObj = applyOpsToNewSeries(tailObj, input.ops, { tz, now });
+      } catch (err) {
+        throw domainError(err, 'la nuova serie');
+      }
+    } else if (Object.keys(changes).length) {
       try {
         // Come updateEvent: uno spostamento di DTSTART sposta dello stesso Δ anche EXDATE, RDATE e override
         // della nuova serie (altrimenti le occorrenze escluse riapparirebbero e gli override diventerebbero orfani).
@@ -2677,6 +2737,12 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
   }, { expect: 'radicale' });
 
   if (outcome.whole) {
+    if (input.ops) {
+      // F6: con le op lossless il chiamante applica la modifica a tutta la serie con la propria pipeline (v2/objects.ts).
+      const current = await store.getEvent(ref.id);
+      if (!current) throw new EventValidationError('Master event non trovato');
+      return { wholeSeries: true, head: null, tail: current };
+    }
     const updated = await store.updateEvent(ref.id, input.changes ?? {});
     if (!updated) throw new EventValidationError('Master event non trovato');
     return { wholeSeries: true, head: null, tail: updated };
