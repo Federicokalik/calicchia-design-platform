@@ -419,6 +419,33 @@ describe('RadicaleStore contro Radicale reale', { skip: radicale.skip }, () => {
     assert.equal(await raw(cal, tail2), null);
   });
 
+  test('"questa e le successive" con spostamento orario: EXDATE e override della nuova serie seguono il Δ', async () => {
+    const series = await createEvent({
+      calendar_id: cal.id, summary: 'Corso spostato', start_time: '2027-07-05T08:00:00Z', end_time: '2027-07-05T09:00:00Z',
+      rrule: 'FREQ=DAILY;COUNT=8', exdates: ['2027-07-07T08:00:00Z', '2027-07-10T08:00:00Z'],
+    });
+    await createOccurrenceOverride({ masterEventId: series.id, originalStartIso: '2027-07-11T08:00:00.000Z', newSummary: 'Speciale' });
+    const res = await splitRecurringEvent({
+      masterEventId: series.id, originalStartIso: '2027-07-09T08:00:00.000Z',
+      changes: { start_time: '2027-07-09T09:00:00.000Z', end_time: '2027-07-09T10:00:00.000Z' },
+    });
+    assert.equal(res.wholeSeries, false);
+    const days = await listOccurrences({ calendarId: cal.id, fromIso: '2027-07-05T00:00:00Z', toIso: '2027-07-14T00:00:00Z' });
+    assert.deepEqual(days.filter((o) => o.summary === 'Corso spostato').map((o) => o.start_time), [
+      '2027-07-05T08:00:00.000Z',
+      '2027-07-06T08:00:00.000Z',
+      '2027-07-08T08:00:00.000Z',
+      '2027-07-09T09:00:00.000Z',
+      '2027-07-12T09:00:00.000Z',
+    ], 'il 10 resta escluso anche dopo lo spostamento (EXDATE spostato) e l\'11 è l\'override');
+    const special = days.filter((o) => o.summary === 'Speciale');
+    assert.equal(special.length, 1, 'override seguito alla nuova serie, una sola volta');
+    assert.ok(special[0].start_time.startsWith('2027-07-11'));
+    const tail = unfold((await raw(cal, hrefOf(res.tail))) ?? '');
+    assert.match(tail, /EXDATE[^\r\n]*:20270710T/, 'EXDATE della nuova serie');
+    assert.doesNotMatch(tail, /EXDATE[^\r\n]*T08(00)?00(Z|\r|\n)/, 'nessun EXDATE all\'orario vecchio');
+  });
+
   test('"tutta la serie": spostamento con Δ anche su override ed EXDATE, nessun doppione', async () => {
     await createOccurrenceOverride({ masterEventId: master.id, originalStartIso: '2027-03-05T08:00:00.000Z', newSummary: 'Venerdì speciale' });
     const shifted = await updateEvent(master.id, { start_time: '2027-03-01T09:00:00Z', end_time: '2027-03-01T10:00:00Z' });

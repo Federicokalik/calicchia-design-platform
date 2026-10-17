@@ -2585,7 +2585,9 @@ export async function splitRecurringEvent(input: SplitRecurringEventInput): Prom
     let tailObj = split.tail;
     if (Object.keys(changes).length) {
       try {
-        const res = applyLegacyUpdate(tailObj, MASTER_RECURRENCE_KEY, changes, { tz, now });
+        // Come updateEvent: uno spostamento di DTSTART sposta dello stesso Δ anche EXDATE, RDATE e override
+        // della nuova serie (altrimenti le occorrenze escluse riapparirebbero e gli override diventerebbero orfani).
+        const res = transformUpdate(tailObj, MASTER_RECURRENCE_KEY, changes, tz, now);
         if (!res.noop) tailObj = res.object;
       } catch (err) {
         throw domainError(err, 'la nuova serie');
