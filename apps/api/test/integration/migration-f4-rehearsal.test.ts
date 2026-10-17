@@ -139,21 +139,14 @@ const KILL = 'kill simulato del processo';
 const BUSY_FROM = new Date(Date.now() - DAY_MS).toISOString();
 const BUSY_TO = new Date(Date.now() + 170 * DAY_MS).toISOString();
 /**
- * Oggetti del caso A il cui UID pubblicato cambia per un degrado documentato
- * della proiezione inversa (SANITIZED_UID: UID duplicato → `<UID>@<collezione>`;
- * UID del device con '@': il feed legacy aggiunge sempre il dominio) o la cui
- * durata cambia (SANITIZED_DURATION: durata zero → +1 minuto). Nel confronto
- * dei feed contano solo gli inizi delle loro istanze nel calendario.
+ * Oggetti del caso A la cui durata cambia per un degrado documentato della
+ * proiezione inversa (SANITIZED_DURATION: durata zero → +1 minuto): nel
+ * confronto dei feed contano solo gli inizi delle loro istanze nel calendario.
+ * Gli UID invece sono sempre confrontati: il feed pubblica `<UID della riga>@
+ * <dominio>` come il feed legacy anche per le prenotazioni della finestra, gli
+ * UID dei device con '@' e gli UID sanificati (contratto F4 §13.5).
  */
-const LOOSE_SUMMARY = /Invito duplicato|Durata zero|UID con chiocciola/;
-/**
- * Prenotazioni prese nella finestra di rollback: la risorsa booking-<uid>.ics
- * ha UID `<uid>@caldes.it` e il feed dell'indice lo pubblica così; dopo il
- * rollback la riga legacy ha quell'UID e il feed legacy aggiunge sempre il
- * dominio (`<uid>@caldes.it@<dominio>`). Differenza nota, segnalata nel report
- * dell'integrazione F4 come questione aperta: contano solo gli inizi.
- */
-const looseUidPrefixes: string[] = [];
+const LOOSE_SUMMARY = /Durata zero/;
 
 function peersAvailable(): string | null {
   for (const address of [SVC_PEER, GATEWAY]) {
@@ -248,7 +241,7 @@ function feedView(body: string): FeedView {
       if ((o.status ?? '').toUpperCase() === 'CANCELLED') continue;
       const start = o.allDay && o.startDate ? `D${o.startDate}` : new Date(o.startUtc).toISOString();
       const end = o.allDay && o.endDate ? `D${o.endDate}` : new Date(o.endUtc).toISOString();
-      if (LOOSE_SUMMARY.test(summary) || (looseUidPrefixes.length > 0 && looseUidPrefixes.some((p) => obj.uid.startsWith(p)))) {
+      if (LOOSE_SUMMARY.test(summary)) {
         loose.push(start);
         continue;
       }
@@ -822,7 +815,6 @@ describe('prova generale della F4 dalle route del wizard, con Radicale reale e l
     const booked = await siteBooking('nella-finestra', [preBooking.start]);
     windowBooking.uid = booked.uid;
     windowBooking.start = booked.start;
-    looseUidPrefixes.push(booked.uid);
     const cancelled = await api.post(`/api/admin/calendar/bookings/${preBooking.uid}/cancel`, { auth: 'admin', body: { reason: 'Annullata nella finestra di rollback' } });
     assert.equal(cancelled.status, 200, cancelled.text);
     await drainJobs();
@@ -859,6 +851,16 @@ describe('prova generale della F4 dalle route del wizard, con Radicale reale e l
     assert.equal((await legacyRowOfBooking(windowBooking.uid))?.status, 'confirmed', 'prenotazione della finestra proiettata in PG');
 
     feedsBeforeRollback = await feedSnapshot();
+    // I tre UID che prima cambiavano al rollback (contratto F4 §13.5) sono nei feed con la formula legacy
+    // `<UID della riga>@<dominio>`: lo stesso confronto stretto dopo il rollback li verifica uguali.
+    const published = [...feedsBeforeRollback.values()].flatMap((v) => [...v.strict.keys()]);
+    for (const [what, pattern] of [
+      ['prenotazione della finestra', new RegExp(`^${windowBooking.uid}@caldes\\.it@[^@]+$`)],
+      ['UID del device con chiocciola', /^[^@]+@iphone\.test@[^@]+$/],
+      ['UID duplicato sanificato con il nome della collezione', new RegExp(`^${win.duplicateUid}@[^@]+@[^@]+$`)],
+    ] as const) {
+      assert.ok(published.some((uid) => pattern.test(uid)), `${what}: UID con dominio nel feed (${published.length} UID pubblicati)`);
+    }
   });
 
   // ─── 4. Rollback con kill e ripresa ───────────────────────────────
@@ -999,9 +1001,100 @@ describe('prova generale della F4 dalle route del wizard, con Radicale reale e l
     assertSameFeeds(feedsAfterRollback, await feedSnapshot(), 'feed dopo il nuovo passaggio');
   });
 
-  // ─── 6. Rollback d'immagine API simulato ───────────────────────────────
+  // ─── 6. «Questa e le successive» sullo store Radicale ───────────────────────────────
 
-  test('6. rollback d\'immagine simulato: heartbeat fermo → device frozen, scritture legacy bloccate, livello dell\'API', async () => {
+  /** Serie create dal test dello split, riusate da quello del rollback di emergenza. */
+  const splitSeries = { head: null as { id: string; uid: string } | null, tail: null as { id: string; uid: string } | null, deleted: null as { id: string; uid: string } | null };
+
+  test('6. «questa e le successive» (POST /events/:id/split) su Radicale: nuova serie con UID nuovo, master troncato, EXDATE seguono, saga chiusa; «elimina le successive»', async () => {
+    assert.ok(shape);
+    assert.equal((await backend()).mode, 'radicale');
+    const base = weekdayOnOrAfter(new Date(Date.now() + 50 * DAY_MS));
+    // Giorni di Roma delle occorrenze settimanali (mezzogiorno UTC: nessun effetto del cambio d'ora sulla data).
+    const day = (k: number): string => new Date(Date.parse(`${base}T12:00:00Z`) + 7 * k * DAY_MS).toISOString().slice(0, 10);
+    const list = async (summary: string, last: number): Promise<string[]> => {
+      const res = await api.get('/api/admin/calendar/events', {
+        auth: 'admin',
+        query: { calendar_id: shape!.c.id, from: new Date(Date.parse(`${base}T00:00:00Z`) - DAY_MS).toISOString(), to: new Date(Date.parse(`${day(last)}T23:59:59Z`) + DAY_MS).toISOString() },
+      });
+      assert.equal(res.status, 200, res.text);
+      return res.json.events
+        .filter((e: { summary: string }) => e.summary === summary)
+        .map((e: { start_time: string }) => new Date(e.start_time).toISOString())
+        .sort();
+    };
+    const hrefOfObject = async (id: string): Promise<string> => {
+      const [row] = await sql<Array<{ href: string }>>`SELECT href FROM cal_objects WHERE id = ${id}::uuid`;
+      assert.ok(row, `oggetto ${id} nell'indice`);
+      return row.href;
+    };
+    const createSeries = async (summary: string, rrule: string, exdates: string[]): Promise<{ id: string; uid: string }> => {
+      const created = await api.post('/api/admin/calendar/events', {
+        auth: 'admin',
+        body: { calendar_id: shape!.c.id, summary, start_time: romeIso(day(0), '09:00'), end_time: romeIso(day(0), '10:00'), rrule, exdates },
+      });
+      assert.equal(created.status, 200, created.text);
+      fx.track('eventIds', created.json.event.id);
+      return { id: created.json.event.id, uid: created.json.event.uid };
+    };
+
+    // Serie A: 6 settimane con due EXDATE; taglio alla quarta con orario spostato di un'ora (gli EXDATE dopo il taglio seguono lo spostamento).
+    const nameA = fx.name('Corso (split)');
+    const a = await createSeries(nameA, 'FREQ=WEEKLY;COUNT=6', [romeIso(day(1), '09:00'), romeIso(day(4), '09:00')]);
+    assert.deepEqual(await list(nameA, 5), [0, 2, 3, 5].map((k) => romeIso(day(k), '09:00')), 'serie prima del taglio');
+    const split = await api.post(`/api/admin/calendar/events/${a.id}/split`, {
+      auth: 'admin',
+      body: { original_start: romeIso(day(3), '09:00'), start_time: romeIso(day(3), '10:00'), end_time: romeIso(day(3), '11:00') },
+    });
+    assert.equal(split.status, 200, split.text);
+    assert.equal(split.json.whole_series, false);
+    assert.equal(split.json.head.id, a.id, 'il master troncato mantiene id e UID');
+    assert.equal(split.json.head.uid, a.uid);
+    assert.ok(split.json.tail && split.json.tail.id !== a.id && split.json.tail.uid !== a.uid, 'nuova serie con id e UID nuovi');
+    fx.track('eventIds', split.json.tail.id);
+    splitSeries.head = { id: a.id, uid: a.uid };
+    splitSeries.tail = { id: split.json.tail.id, uid: split.json.tail.uid };
+    await drainJobs();
+    await syncAllCollections({ reason: 'manual', actor: 'test' });
+    assert.deepEqual(
+      await list(nameA, 5),
+      [...[0, 2].map((k) => romeIso(day(k), '09:00')), ...[3, 5].map((k) => romeIso(day(k), '10:00'))],
+      'prime due occorrenze invariate; dalla quarta la nuova serie alle 10:00 con l\'EXDATE spostato (la quinta resta esclusa)',
+    );
+
+    // La verità è in Radicale: master con UNTIL/COUNT, nuova serie con RELATED-TO SIBLING, UID diversi.
+    const headRes = await svc!.get(objectPath(P, 'c', await hrefOfObject(a.id)));
+    const tailRes = await svc!.get(objectPath(P, 'c', await hrefOfObject(splitSeries.tail.id)));
+    assert.match(headRes.body, new RegExp(`UID:${a.uid}\\r?\\n`));
+    assert.match(headRes.body, /RRULE:[^\r\n]*(UNTIL|COUNT)=/, 'master troncato');
+    assert.ok(!headRes.body.includes(splitSeries.tail.uid), 'il master non conosce la nuova serie');
+    assert.match(tailRes.body, new RegExp(`UID:${splitSeries.tail.uid}\\r?\\n`));
+    assert.match(tailRes.body, /RELATED-TO;RELTYPE=SIBLING/, 'la nuova serie è legata alla vecchia');
+    // Saga conclusa: nessun job in coda o morto.
+    const [{ open }] = await sql`SELECT count(*)::int AS open FROM cal_jobs WHERE kind = 'recurrence_split' AND status IN ('pending', 'running', 'dead')`;
+    assert.equal(open, 0, 'job recurrence_split chiusi');
+
+    // Serie B: «elimina questa e le successive» lascia solo le occorrenze precedenti.
+    const nameB = fx.name('Corso eliminato (split)');
+    const b = await createSeries(nameB, 'FREQ=WEEKLY;COUNT=4', []);
+    const removed = await api.post(`/api/admin/calendar/events/${b.id}/split`, { auth: 'admin', body: { original_start: romeIso(day(2), '09:00'), delete: true } });
+    assert.equal(removed.status, 200, removed.text);
+    assert.equal(removed.json.whole_series, false);
+    assert.equal(removed.json.tail, null);
+    splitSeries.deleted = { id: b.id, uid: b.uid };
+    await drainJobs();
+    await syncAllCollections({ reason: 'manual', actor: 'test' });
+    assert.deepEqual(await list(nameB, 3), [0, 1].map((k) => romeIso(day(k), '09:00')), 'solo le occorrenze prima del taglio');
+    const [{ open: openAfter }] = await sql`SELECT count(*)::int AS open FROM cal_jobs WHERE kind = 'recurrence_split' AND status IN ('pending', 'running', 'dead')`;
+    assert.equal(openAfter, 0);
+    // Un original_start non valido è rifiutato senza toccare nulla.
+    const missing = await api.post(`/api/admin/calendar/events/${b.id}/split`, { auth: 'admin', body: { original_start: 'non-una-data' } });
+    assert.equal(missing.status, 400, missing.text);
+  });
+
+  // ─── 7. Rollback d'immagine API simulato ───────────────────────────────
+
+  test('7. rollback d\'immagine simulato: heartbeat fermo → device frozen, scritture legacy bloccate, livello dell\'API', async () => {
     assert.ok(shape);
     assert.equal(await deviceProbe('live'), 201, 'device live in mode radicale');
 
@@ -1045,5 +1138,115 @@ describe('prova generale della F4 dalle route del wizard, con Radicale reale e l
     // Token dei feed invariati in tutta la prova.
     const tokens = await sql<Array<{ slug: string; ics_feed_token: string }>>`SELECT slug, ics_feed_token FROM calendars WHERE role <> 'subscription' AND origin <> 'migration'`;
     for (const t of tokens) assert.equal(t.ics_feed_token, feedTokens.get(t.slug), `token del feed di ${t.slug} invariato`);
+  });
+
+  // ─── 8. Rollback di emergenza ───────────────────────────────
+
+  test('8. rollback di EMERGENZA dal wizard: Radicale giù alla sync finale e anteprima superata da una scrittura, l\'indice è la fonte', async () => {
+    assert.ok(shape);
+    assert.ok(splitSeries.head && splitSeries.tail && splitSeries.deleted, 'serie del test dello split');
+    assert.equal(await deviceProbe('prima-dell-emergenza'), 201, 'device live prima del rollback');
+    const preview = await runRouteOk('/rollback/preview', {});
+    const previewHash = preview.summary.preview_hash as string;
+    assert.match(previewHash, /^[0-9a-f]{64}$/);
+    assert.equal(preview.summary.busy_identical, true);
+
+    // Il rollback di emergenza richiede la seconda conferma digitata.
+    const noPhrase = await api.post(`${BASE}/rollback`, {
+      auth: 'admin',
+      body: { preview_run_id: preview.id, expect_preview_hash: previewHash, emergency: true, confirm: MIGRATION_CONFIRMATIONS.rollback },
+      headers: { 'Idempotency-Key': key('emergenza-senza-frase') },
+    });
+    assert.equal(noPhrase.status, 400, noPhrase.text);
+
+    // Dopo l'anteprima l'admin scrive ancora: l'hash ricalcolato dopo la quiescenza sarà diverso (senza emergenza il rollback si annullerebbe).
+    const lateDay = weekdayOnOrAfter(new Date(Date.now() + 25 * DAY_MS));
+    const late = await api.post('/api/admin/calendar/events', {
+      auth: 'admin',
+      body: { calendar_id: shape.lavoro.id, summary: fx.name('Dopo l\'anteprima'), start_time: romeIso(lateDay, '15:00'), end_time: romeIso(lateDay, '16:00') },
+    });
+    assert.equal(late.status, 200, late.text);
+    fx.track('eventIds', late.json.event.id);
+    await drainJobs();
+    await syncAllCollections({ reason: 'manual', actor: 'test' });
+
+    const stateBefore = await backend();
+    const indexBusy = await indexBusyRanges(sql, BUSY_FROM, BUSY_TO, { includeBookingProjections: true });
+    const feedsBefore = await feedSnapshot();
+
+    // Radicale non risponde durante la sync finale (poi torna): senza emergenza il passo fallirebbe e il rollback attenderebbe;
+    // con l'emergenza l'indice è la miglior conoscenza e il rollback prosegue fino all'epoch.
+    const deadClient = new RadicaleClient({ baseUrl: 'http://127.0.0.1:9', password: SVC_PASSWORD, timeoutMs: 2_000 });
+    const restoreRadicale = (): void => {
+      configureRadicaleRuntime({ client: svc!, principal: P, dataDir: rad.server.storageDir, watch: 'auto', identitySource: 'remote' });
+    };
+    const seen: string[] = [];
+    setTransitionTestHooks({
+      beforeStep: async (kind, step) => {
+        if (kind !== 'rollback') return;
+        seen.push(step);
+        if (step === 'index_sync') configureRadicaleRuntime({ client: deadClient, principal: P, dataDir: rad.server.storageDir, watch: 'off', identitySource: 'remote' });
+        if (step === 'reverse_final') restoreRadicale();
+      },
+    });
+    let run;
+    try {
+      run = await runRouteOk('/rollback', {
+        preview_run_id: preview.id,
+        expect_preview_hash: previewHash,
+        emergency: true,
+        confirm: MIGRATION_CONFIRMATIONS.rollback,
+        confirm_emergency: MIGRATION_CONFIRMATIONS.rollbackEmergency,
+      });
+    } finally {
+      setTransitionTestHooks(null);
+      restoreRadicale();
+      deadClient.close();
+    }
+    assert.ok(seen.includes('index_sync') && seen.includes('reverse_final'), `passi eseguiti: ${seen.join(', ')}`);
+    const summary = run.summary;
+    assert.equal(summary.outcome, 'completed', JSON.stringify(summary));
+    assert.equal(summary.emergency, true);
+    assert.ok(summary.index_sync.collections > 0 && summary.index_sync.failed === summary.index_sync.collections, `sync finale fallita su tutte le collezioni: ${JSON.stringify(summary.index_sync)}`);
+    assert.notEqual(summary.final_preview_hash, previewHash, 'anteprima ricalcolata diversa da quella confermata: l\'emergenza prosegue');
+    assert.equal(summary.reverse?.failed ?? 0, 0);
+    const transition = await api.get(`${BASE}/transition`, { auth: 'admin' });
+    assert.equal(transition.status, 200);
+    assert.notEqual(transition.json?.status, 'active', 'nessuna transizione attiva dopo il rollback');
+
+    // Stato finale come un rollback ordinario: postgres, epoch avanzato su Radicale e in PG, device in sola lettura, volume intatto.
+    const st = await backend();
+    assert.deepEqual({ mode: st.mode, write_freeze: st.write_freeze, epoch: st.epoch, rollback_until: st.rollback_until, cutover_at: st.cutover_at },
+      { mode: 'postgres', write_freeze: false, epoch: stateBefore.epoch + 1, rollback_until: null, cutover_at: null });
+    assert.equal(await markerEpoch(), stateBefore.epoch + 1);
+    await waitFor('policy shadow con il nuovo epoch', async () => {
+      const p = await policyNow();
+      return p?.mode === 'shadow' && p.epoch === stateBefore.epoch + 1;
+    });
+    await sleep(PLUGIN_RELOAD_MS);
+    assert.equal(await deviceProbe('dopo-l-emergenza'), 403, 'device di nuovo in sola lettura');
+    invalidateBackendModeCache();
+    assert.equal((await calendarStore()).kind, 'postgres');
+
+    // Le scritture dell'indice sono in PG: la scrittura dopo l'anteprima e le serie dello split (stessi id, UID di Radicale).
+    assert.ok(sameBusy(await legacyBusyRanges(BUSY_FROM, BUSY_TO), indexBusy), 'busy legacy dopo il rollback identico a quello dell\'indice');
+    const [lateRow] = await sql`SELECT summary FROM calendar_events WHERE id = ${late.json.event.id}::uuid`;
+    assert.ok(lateRow, 'scrittura dopo l\'anteprima proiettata in PG');
+    const split = await sql<Array<{ id: string; uid: string; rrule: string | null }>>`
+      SELECT id::text AS id, uid, rrule FROM calendar_events WHERE id IN (${splitSeries.head.id}::uuid, ${splitSeries.tail.id}::uuid, ${splitSeries.deleted.id}::uuid)
+    `;
+    const byId = new Map(split.map((r) => [r.id, r]));
+    assert.equal(byId.get(splitSeries.head.id)?.uid, splitSeries.head.uid, 'serie troncata in PG con il suo UID');
+    assert.equal(byId.get(splitSeries.tail.id)?.uid, splitSeries.tail.uid, 'nuova serie dello split in PG con il suo UID');
+    assert.match(byId.get(splitSeries.head.id)?.rrule ?? '', /(UNTIL|COUNT)=/);
+    assert.ok(byId.get(splitSeries.tail.id)?.rrule, 'nuova serie ricorrente');
+    assert.match(byId.get(splitSeries.deleted.id)?.rrule ?? '', /(UNTIL|COUNT)=/, 'serie con «elimina le successive» troncata in PG');
+    const [{ jobs }] = await sql`SELECT count(*)::int AS jobs FROM cal_jobs WHERE kind = 'reverse_projection' AND status = 'pending'`;
+    assert.equal(jobs, 0, 'proiezione inversa ferma');
+    // Stessi token, stessi UID e stesse istanze nei feed (formula legacy anche per le serie dello split).
+    assertSameFeeds(feedsBefore, await feedSnapshot(), 'feed dopo il rollback di emergenza (store legacy)');
+    for (const t of await sql<Array<{ slug: string; ics_feed_token: string }>>`SELECT slug, ics_feed_token FROM calendars WHERE role <> 'subscription' AND origin <> 'migration'`) {
+      assert.equal(t.ics_feed_token, feedTokens.get(t.slug), `token del feed di ${t.slug} invariato`);
+    }
   });
 });
