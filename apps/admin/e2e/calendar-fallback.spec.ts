@@ -55,9 +55,30 @@ test.describe('mode postgres', () => {
     await expect(page.getByTestId('cal-editor-v2')).toHaveCount(0);
     await page.getByRole('button', { name: 'Annulla' }).click();
 
-    // Le altre pagine del calendario non chiamano la v2 e il widget agenda usa la v1.
+    // Le altre pagine del calendario non chiamano la v2 e il widget agenda usa la v1: ogni pagina si attende
+    // fino al caricamento dei suoi dati, prima di contare le richieste.
+    const eventsLoaded = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/admin/calendar/events');
     await page.goto('/');
     await expect(page.getByTestId('cal-agenda-window-today')).toBeVisible();
+    await eventsLoaded;
+
+    const calendarsLoaded = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/admin/calendar/calendars');
+    await page.goto('/calendario/calendari');
+    await calendarsLoaded;
+    await expect(page.getByTestId('cal-calendar-row')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Nuovo calendario' })).toBeVisible();
+
+    await page.goto('/calendario/cestino');
+    await expect(page.getByText('Il cestino non è disponibile: richiede il calendario su Radicale.')).toBeVisible();
+
+    await page.goto('/calendario/salute');
+    await expect(page.getByText('Salute del calendario non disponibile')).toBeVisible();
+
+    const backupLoaded = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/backup/info');
+    await page.goto('/impostazioni');
+    await page.getByRole('button', { name: 'Backup', exact: true }).click();
+    await backupLoaded;
+    await expect(page.getByTestId('cal-backup-notice')).toHaveCount(0);
 
     expect([...v2Calls]).toEqual([`${V2}/capabilities`]);
     const caps = await (await request.get(`${V2}/capabilities`)).json();
@@ -79,10 +100,13 @@ test.describe('capacità lente', () => {
       await route.continue().catch(() => undefined);
     });
 
+    const startedAt = Date.now();
     await page.goto('/calendario');
     await expect(page.locator('.fc-view')).toBeVisible();
-    await expect(eventChip(page, title)).toBeVisible({ timeout: 11_000 });
+    // La v1 parte subito, senza attendere le capacità: il chip c'è molto prima dei 5 s del timeout.
+    await expect(eventChip(page, title)).toBeVisible({ timeout: 3_000 });
     await openAnyEditor(page, title);
+    expect(Date.now() - startedAt, 'l\'editor v1 doveva aprirsi prima dei 5 s del timeout delle capacità').toBeLessThan(5_000);
     expect(answered, 'l\'editor v1 doveva aprirsi prima della risposta di /capabilities').toBe(false);
     await expect(page.getByTestId('cal-editor-v2')).toHaveCount(0);
   });

@@ -180,6 +180,9 @@ async function getJson<T>(path: string): Promise<T> {
   return (await v2Fetch(path)).json() as Promise<T>;
 }
 
+/** Timeout largo per le operazioni lente per natura: eliminare un calendario con i suoi oggetti, anteprima di hold sull'intera collezione, ripristino dal cestino. */
+const CAL_V2_LONG_TIMEOUT_MS = 60_000;
+
 async function sendJson<T>(
   method: 'POST' | 'PATCH' | 'PUT',
   path: string,
@@ -193,21 +196,22 @@ async function sendJson<T>(
 // ─── Capacità ───────────────────────────────
 
 /**
- * Capacità dell'API v2 (§2). `caps` è `null` finché non sono lette e se non sono
- * leggibili (errore di rete, 404 di un'API più vecchia, 5xx): l'admin si
+ * Capacità dell'API v2 (§2). `caps` è `null` finché non sono lette e se la prima
+ * lettura non riesce (errore di rete, 404 di un'API più vecchia, 5xx): l'admin si
  * comporta come con `objects.read = false` e usa l'editor v1, così un deploy
  * disallineato non rompe nulla. In mode postgres la risposta è 200 con
  * `read: false` (nessun'altra chiamata v2).
  */
 export function useCalendarV2Capabilities(): { caps: CalV2Capabilities | null; isLoading: boolean } {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: calV2Keys.capabilities,
     queryFn: () => getJson<CalV2Capabilities>('/capabilities'),
     staleTime: 20_000,
     refetchOnWindowFocus: true,
     retry: false,
   });
-  return { caps: isError ? null : data ?? null, isLoading };
+  // Se un rinfresco fallisce react-query conserva l'ultimo `data` valido: la UI non torna alla v1 per un errore transitorio.
+  return { caps: data ?? null, isLoading };
 }
 
 // ─── Oggetti ───────────────────────────────
@@ -294,7 +298,7 @@ export function listTrashV2(q: { calendarId?: string; before?: string; limit?: n
 
 /** Ripristina un oggetto eliminato (201). Con `req.dryRun` solo valutazione. */
 export function restoreTrashV2(objectId: string, req: CalV2TrashRestoreRequest): Promise<CalV2WriteResult> {
-  return sendJson<CalV2WriteResult>('POST', `/trash/${encodeURIComponent(objectId)}/restore`, req);
+  return sendJson<CalV2WriteResult>('POST', `/trash/${encodeURIComponent(objectId)}/restore`, req, undefined, CAL_V2_LONG_TIMEOUT_MS);
 }
 
 // ─── Calendari, import ed export (A2) ───────────────────────────────
@@ -325,7 +329,8 @@ export function reorderCalendarsV2(ids: string[]): Promise<CalV2CalendarList> {
 /** Elimina un calendario; se non è vuoto serve `withObjects` (altrimenti 409 `CALENDAR_NOT_EMPTY`, `details.object_count`). */
 export async function deleteCalendarV2(id: string, opts: { withObjects?: boolean } = {}): Promise<{ deleted: true }> {
   const qs = opts.withObjects ? '?with_objects=1' : '';
-  return (await v2Fetch(`/calendars/${encodeURIComponent(id)}${qs}`, { method: 'DELETE' })).json() as Promise<{ deleted: true }>;
+  const timeoutMs = opts.withObjects ? CAL_V2_LONG_TIMEOUT_MS : undefined;
+  return (await v2Fetch(`/calendars/${encodeURIComponent(id)}${qs}`, { method: 'DELETE' }, true, timeoutMs)).json() as Promise<{ deleted: true }>;
 }
 
 /** Rigenera il token del feed ICS: il vecchio URL smette di funzionare. */
@@ -409,6 +414,8 @@ export function holdPreviewV2(calendarId: string, action: HoldAction, hrefs?: st
     'POST',
     `/collections/${encodeURIComponent(calendarId)}/${HOLD_PATH[action]}`,
     { mode: 'dry_run', ...(hrefs ? { hrefs } : {}) },
+    undefined,
+    CAL_V2_LONG_TIMEOUT_MS,
   );
 }
 
@@ -424,6 +431,7 @@ export function holdCommitV2(
     `/collections/${encodeURIComponent(calendarId)}/${HOLD_PATH[action]}`,
     { mode: 'commit', ...req },
     { 'Idempotency-Key': idempotencyKey },
+    CAL_V2_LONG_TIMEOUT_MS,
   );
 }
 

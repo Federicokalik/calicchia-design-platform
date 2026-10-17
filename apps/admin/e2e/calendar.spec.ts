@@ -71,8 +71,6 @@ test.describe('serie ricorrente: ambito della modifica', () => {
 });
 
 test.describe('eliminazione, cestino e cronologia', () => {
-  // Con il server vero la DELETE dell'admin (senza corpo) arriva a sameOriginWrites con un corpo
-  // "presente" ma senza Content-Type JSON e riceve 415: difetto dell'app, non dello scenario.
   test('elimina un evento dall\'editor e lo ripristina dal cestino con lo stesso id', async ({ page, request }) => {
     const title = uniq('Da cestinare');
     const created = await createEvent(request, { calendar: lavoro, title, day: romeToday() });

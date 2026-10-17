@@ -159,15 +159,11 @@ export async function createEvent(request: APIRequestContext, ev: NewEvent): Pro
 /** Testo iCalendar senza le righe ripiegate (RFC 5545 §3.1). */
 export const unfold = (text: string): string => text.replace(/\r?\n[ \t]/g, '');
 
-/**
- * Elimina un oggetto con l'API admin v2 (preparazione dei dati). Il tipo di
- * contenuto JSON è esplicito: vedi il difetto noto della difesa CSRF con
- * DELETE senza corpo, provato a parte dallo scenario di eliminazione dell'editor.
- */
+/** Elimina un oggetto con l'API admin v2 (preparazione dei dati), come fa il browser: DELETE senza corpo. */
 export async function deleteObject(request: APIRequestContext, created: Created): Promise<void> {
   const res = await request.delete(`${V2}/objects/${encodeURIComponent(created.id)}`, {
     params: { scope: 'all', recurrence_key: '' },
-    headers: { 'if-match': created.etag, 'content-type': 'application/json' },
+    headers: { 'if-match': created.etag },
   });
   expect(res.status(), await res.text()).toBe(200);
 }
@@ -238,7 +234,7 @@ export async function purgeWeek(request: APIRequestContext): Promise<void> {
       if (!etag) continue;
       await request.delete(`${V2}/objects/${encodeURIComponent(id)}`, {
         params: { scope: 'all', recurrence_key: '' },
-        headers: { 'if-match': etag, 'content-type': 'application/json' },
+        headers: { 'if-match': etag },
       });
     }
   } catch {

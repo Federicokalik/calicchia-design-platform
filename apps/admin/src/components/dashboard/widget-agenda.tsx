@@ -61,7 +61,7 @@ interface AgendaEvent {
 
 export function WidgetAgenda() {
   const { t, formatDate, formatDateTime } = useI18n();
-  const { caps, isLoading: capsLoading } = useCalendarV2Capabilities();
+  const { caps } = useCalendarV2Capabilities();
   // Con le occorrenze v2 gli eventi arrivano da /occurrences e /overlays, altrimenti da /events v1.
   const useOccurrences = !!caps?.occurrences;
   const [win, setWin] = useState<AgendaWindow>('today');
@@ -130,8 +130,6 @@ export function WidgetAgenda() {
           }));
       } catch { return []; }
     },
-    // Le capacità decidono la sorgente: finché non sono note non si parte con quella sbagliata.
-    enabled: !capsLoading,
     staleTime: 30_000,
   });
 

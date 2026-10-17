@@ -793,9 +793,17 @@ function CalendariV2Page({ caps }: { caps: CalV2Capabilities }) {
       variant: 'destructive',
     });
     if (!first) return;
+    // Un timeout non dice se il server ha finito: si rilegge l'elenco invece di dichiarare il fallimento.
+    const timedOut = (err: unknown): boolean => {
+      if (!(err instanceof CalV2ApiError) || err.code !== 'TIMEOUT') return false;
+      invalidateCalendarQueries(queryClient);
+      toast.info('Il server non ha risposto in tempo: controlla l\'elenco, l\'eliminazione potrebbe essere in corso');
+      return true;
+    };
     try {
       await deleteCalendarV2(cal.id);
     } catch (err) {
+      if (timedOut(err)) return;
       if (err instanceof CalV2ApiError && err.code === 'CALENDAR_NOT_EMPTY') {
         const raw = err.details?.object_count;
         const count = typeof raw === 'number' ? raw : cal.object_count;
@@ -809,7 +817,7 @@ function CalendariV2Page({ caps }: { caps: CalV2Capabilities }) {
         try {
           await deleteCalendarV2(cal.id, { withObjects: true });
         } catch (err2) {
-          toast.error(calV2ErrorMessage(err2));
+          if (!timedOut(err2)) toast.error(calV2ErrorMessage(err2));
           return;
         }
       } else {

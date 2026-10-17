@@ -438,7 +438,7 @@ export default function CalendarioPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   // Capacità dell'API v2: decidono quale editor aprire (nessun'altra chiamata v2 da questa pagina).
-  const { caps: v2Caps, isLoading: capsLoading } = useCalendarV2Capabilities();
+  const { caps: v2Caps } = useCalendarV2Capabilities();
   // Vista con le occorrenze v2 (`caps.occurrences`, che implica `objects.read`); senza il flag resta /events v1.
   const occMode = !!v2Caps?.occurrences;
   const canWriteV2 = occMode && !!v2Caps?.objects.write;
@@ -494,7 +494,7 @@ export default function CalendarioPage() {
   // Niente catch-che-svuota: un errore API deve mostrare il banner, non un
   // calendario vuoto identico a "nessun evento". keepPreviousData mantiene
   // visibili gli eventi dell'ultimo fetch riuscito durante errori transitori.
-  // Con `caps.occurrences` la sorgente sono le occorrenze v2; la v1 parte solo a capacità note e senza il flag.
+  // Con `caps.occurrences` la sorgente sono le occorrenze v2; la v1 parte subito (anche a capacità ignote, come prima della v2) e si ferma solo con il flag.
   const { data: eventsData, error: eventsV1Error, refetch: refetchEventsV1 } = useQuery({
     queryKey: ['admin-calendar-events', dateRange?.start, dateRange?.end],
     queryFn: async () => {
@@ -502,7 +502,7 @@ export default function CalendarioPage() {
       const params = new URLSearchParams({ from: dateRange.start, to: dateRange.end });
       return await apiFetch(`/api/admin/calendar/events?${params}`);
     },
-    enabled: !!dateRange && !capsLoading && !occMode,
+    enabled: !!dateRange && !occMode,
     retry: 1,
     placeholderData: keepPreviousData,
   });
