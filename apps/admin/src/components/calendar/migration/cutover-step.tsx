@@ -383,8 +383,11 @@ function RadicaleView({ state, step }: Props) {
   const rollbackAction = findAction(step, 'rollback');
   const finalizeAction = findAction(step, 'finalize');
   const exportAction = findAction(step, 'export_v2');
+  // L'ultima anteprima per esito (può essere fallita) e quella VALIDA che il server accetta con il rollback (F4R3-04):
+  // il riassunto mostrato e il rollback usano la seconda, la prima compare solo come avviso.
   const lastPreview = state.last_runs.rollback_preview ?? null;
-  const preview = useRun<RollbackPreviewSummary>(lastPreview?.id ?? null);
+  const validPreview = w?.preview?.ok && w.preview.run_id ? w.preview : null;
+  const preview = useRun<RollbackPreviewSummary>(validPreview?.run_id ?? null);
   const previewSummary = preview.data?.status === 'succeeded' ? preview.data.summary : null;
   const cutoverRun = useRun<CutoverSummary>(state.last_runs.cutover?.status === 'succeeded' ? state.last_runs.cutover.id : null);
   const cutoverSummary = cutoverRun.data?.status === 'succeeded' ? cutoverRun.data.summary : null;
@@ -394,9 +397,9 @@ function RadicaleView({ state, step }: Props) {
   const [emergency, setEmergency] = useState(false);
   const runPreview = useRunMutation((_: void, key) => migrationApi.rollbackPreview({}, key), { success: 'Anteprima del rollback avviata' });
   const rollback = useRunMutation(
-    (vars: { previewRunId: string; confirm: string; extra: string | null }, key) => migrationApi.rollback({
+    (vars: { previewRunId: string; previewHash: string | null; confirm: string; extra: string | null }, key) => migrationApi.rollback({
       preview_run_id: vars.previewRunId,
-      expect_preview_hash: previewSummary?.preview_hash ?? null,
+      expect_preview_hash: vars.previewHash,
       confirm: vars.confirm,
       ...(emergency ? { emergency: true, confirm_emergency: vars.extra ?? '' } : {}),
     }, key),
@@ -455,8 +458,12 @@ function RadicaleView({ state, step }: Props) {
         >
           <ActionReason action={previewAction} />
           {lastPreview && (lastPreview.status === 'failed' || lastPreview.status === 'interrupted' || lastPreview.status === 'cancelled') && (
-            <p className="text-xs text-red-600">Ultima anteprima non riuscita: {lastPreview.error?.message ?? lastPreview.status}</p>
+            <p className="text-xs text-red-600">
+              Ultima anteprima non riuscita: {lastPreview.error?.message ?? lastPreview.status}
+              {validPreview ? '. Il rollback usa l\'anteprima precedente, ancora valida.' : '.'}
+            </p>
           )}
+          {!validPreview && w?.preview?.message && <p className="text-xs text-muted-foreground">{w.preview.message}</p>}
           {previewSummary && <RollbackPreview summary={previewSummary} finishedAt={preview.data?.finished_at ?? null} calendarNames={calendarNames} />}
           <div className="flex flex-wrap gap-2">
             <ActionButton action={rollbackAction} variant="destructive" onClick={() => setDialog('rollback')} pending={rollback.isPending}>
@@ -503,10 +510,12 @@ function RadicaleView({ state, step }: Props) {
         confirmLabel={emergency ? 'Rollback di emergenza' : 'Torna a Postgres'}
         destructive
         pending={rollback.isPending}
-        disabled={!lastPreview}
+        disabled={!validPreview}
         error={rollback.error ? migrationErrorMessage(rollback.error) : null}
         extraPhrase={emergency ? { phrase: MIGRATION_CONFIRMATIONS.rollbackEmergency, label: 'Emergenza: digita anche' } : null}
-        onConfirm={({ phrase, extra }) => { if (lastPreview) rollback.mutate({ previewRunId: lastPreview.id, confirm: phrase, extra }); }}
+        onConfirm={({ phrase, extra }) => {
+          if (validPreview?.run_id) rollback.mutate({ previewRunId: validPreview.run_id, previewHash: validPreview.preview_hash, confirm: phrase, extra });
+        }}
       >
         <label className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-2.5 text-xs">
           <input type="checkbox" className="mt-0.5 h-3.5 w-3.5" checked={emergency} onChange={(e) => setEmergency(e.target.checked)} />
@@ -590,10 +599,22 @@ function RollbackPreview({ summary, finishedAt, calendarNames }: { summary: Roll
         {summary.busy_identical === false && <Badge variant="outline" className="text-[10px] text-red-700">busy diverso</Badge>}
         {summary.busy_identical === null && <Badge variant="outline" className="text-[10px]">busy non calcolato</Badge>}
       </div>
+      <p className="text-[11px] text-muted-foreground">Confronto del busy: iscrizioni escluse, il pull legacy le riscarica dopo il rollback.</p>
       <div className="flex flex-wrap gap-2">
         <Stat label="Risorse" value={summary.objects} />
         <Stat label="Righe espanse" value={summary.derived_rows} />
-        <Stat label="Non copiabili" value={summary.reverse_failed} tone={summary.reverse_failed ? 'bad' : 'ok'} />
+        <Stat
+          label="Non copiabili"
+          value={summary.reverse_failed}
+          tone={summary.reverse_failed ? 'bad' : 'ok'}
+          hint={summary.reverse_apply_failed ? `${summary.reverse_apply_failed} falliscono già nell'apply: il rollback li ritenterebbe` : undefined}
+        />
+        <Stat
+          label="Collezioni in hold"
+          value={summary.held_collections}
+          tone={summary.held_collections ? 'warn' : 'ok'}
+          hint="Cancellazioni dei device sospese: restano in Postgres e il passaggio successivo le ricrea"
+        />
         <Stat
           label="Modifiche dal passaggio"
           value={changes.created + changes.updated + changes.deleted}

@@ -394,6 +394,16 @@ export interface TransitionView {
   abortable: boolean;
 }
 
+/** Anteprima del rollback che il server accetta in POST /rollback (l'ultima riuscita, non scaduta). */
+export interface RollbackPreviewCheck {
+  ok: boolean;
+  reason: string | null;
+  message: string | null;
+  run_id: string | null;
+  preview_hash: string | null;
+  finished_at: string | null;
+}
+
 export interface RollbackWindowView {
   cutover_at: string;
   cutover_by: string | null;
@@ -403,6 +413,8 @@ export interface RollbackWindowView {
   finalize_available_at: string;
   finalize_ready: boolean;
   finalize_blockers: string[];
+  /** Ultima anteprima riuscita con la sua validità: quella da inviare con il rollback. */
+  preview: RollbackPreviewCheck;
 }
 
 export interface ReverseProjectionHealthView {
@@ -454,6 +466,10 @@ export interface RollbackPreviewSummary {
   derived_rows: number;
   by_class: Partial<Record<DegradationClass, number>>;
   reverse_failed: number;
+  /** Di reverse_failed: risorse che falliscono nell'apply e non si vedono nel piano puro (busy_identical è null). */
+  reverse_apply_failed: number;
+  /** Collezioni con le cancellazioni sospese. */
+  held_collections: number;
   busy_identical: boolean | null;
   calendars: Array<{ calendar_id: string; collection_name: string; objects: number; degraded: number; failed: number; derived_rows: number }>;
 }
@@ -860,6 +876,7 @@ export const PRECONDITION_REASON_LABELS: Readonly<Record<string, string>> = Obje
   PROBE_UNAVAILABLE: 'Password di caldes-probe assente',
   CONTROL_PLANE_UNAVAILABLE: 'Control-plane del calendario non attivo',
   ARCHIVE_DEVICE_WRITABLE: 'L\'archivio della Fase 0 sarebbe scrivibile dai device',
+  API_IMAGE_UNVERSIONED: 'L\'immagine dell\'API non ha una versione (sha-<short>): fissala prima del passaggio',
 });
 
 export function isRunActive(run: Pick<MigrationRunView, 'status'> | null | undefined): boolean {
