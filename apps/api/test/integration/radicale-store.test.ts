@@ -442,8 +442,10 @@ describe('RadicaleStore contro Radicale reale', { skip: radicale.skip }, () => {
     assert.equal(special.length, 1, 'override seguito alla nuova serie, una sola volta');
     assert.ok(special[0].start_time.startsWith('2027-07-11'));
     const tail = unfold((await raw(cal, hrefOf(res.tail))) ?? '');
-    assert.match(tail, /EXDATE[^\r\n]*:20270710T/, 'EXDATE della nuova serie');
-    assert.doesNotMatch(tail, /EXDATE[^\r\n]*T08(00)?00(Z|\r|\n)/, 'nessun EXDATE all\'orario vecchio');
+    // Il calendario è in Europe/Rome: gli EXDATE sono scritti con TZID in ora locale (10:00 il vecchio, 11:00 il nuovo),
+    // ma l'UTC (08:00 / 09:00) è coperto per non dipendere dalla forma di serializzazione.
+    assert.match(tail, /EXDATE[^\r\n]*:20270710T(?:110000(?![0-9Z])|090000Z)/, 'EXDATE della nuova serie spostato di +1h');
+    assert.doesNotMatch(tail, /EXDATE[^\r\n]*:20270710T(?:100000(?![0-9Z])|080000Z)/, 'nessun EXDATE all\'orario vecchio');
   });
 
   test('"tutta la serie": spostamento con Δ anche su override ed EXDATE, nessun doppione', async () => {
