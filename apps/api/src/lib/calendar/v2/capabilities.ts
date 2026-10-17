@@ -5,7 +5,8 @@
  * `readCalendarV2Capabilities` risponde sempre (anche in mode postgres e con il
  * livello API insufficiente): è la sola route che l'admin chiama in mode
  * postgres, e un errore qui lo fa tornare all'editor v1. Il modo si legge con
- * readBackendStateCached (cache di 2 s). I flag della tranche C sono false.
+ * readBackendStateCached (cache di 2 s). I flag della tranche C (§9.7) li accende
+ * ciascun passo, sempre in AND con `objects.read`.
  */
 
 import {
@@ -64,11 +65,16 @@ export async function readCalendarV2Capabilities(db: Db = sql): Promise<CalV2Cap
     mode: state.mode,
     store,
     objects: { read, write, dry_run: read, scopes: read ? [...CAL_V2_SCOPES] : [] },
+    // Tranche C (contratto §9.7): ogni passo accende il proprio flag, sempre
+    // in AND con `read`.
+    raw_edit: false,
+    object_tools: false,
     history: false,
     trash: false,
     import_export: false,
     calendar_properties: false,
     health_page: false,
+    occurrences: false,
     reasons,
   };
 }

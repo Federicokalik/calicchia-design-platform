@@ -122,11 +122,14 @@ describe('capacità per modo (§2)', () => {
       mode: 'postgres',
       store: 'postgres',
       objects: { read: false, write: false, dry_run: false, scopes: [] },
+      raw_edit: false,
+      object_tools: false,
       history: false,
       trash: false,
       import_export: false,
       calendar_properties: false,
       health_page: false,
+      occurrences: false,
       reasons: ['STORE_POSTGRES'],
     });
   });
