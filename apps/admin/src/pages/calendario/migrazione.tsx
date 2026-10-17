@@ -1,13 +1,16 @@
 /**
- * Strumento di migrazione del calendario a Radicale (fase F3; design §13.13;
- * contratto docs/calendar-radicale/contracts/f3-modules.md §11).
+ * Strumento di migrazione del calendario a Radicale (fasi F3 e F4; design
+ * §13.13; contratti docs/calendar-radicale/contracts/f3-modules.md §11 e
+ * f4-modules.md §6.3).
  *
  * Wizard a 6 passi: prerequisiti e inizializzazione, anteprima e opzioni,
- * apply, verifica, shadow e prova sui device, passaggio (disabilitato fino
- * alla F4). Lo stato dei passi lo calcola l'API (GET /state): la pagina lo
- * rilegge ogni 5 secondi, ogni 2 mentre un run è in corso, e dopo ogni azione;
- * alla fine di un run mostra l'esito e aggiorna tutto senza ricaricare.
- * Postgres resta autorevole per tutta la fase.
+ * apply, verifica, shadow e prova sui device, passaggio (cutover con la
+ * conferma digitata, poi finestra di rollback, ritorno a Postgres e chiusura
+ * della finestra). Lo stato dei passi lo calcola l'API (GET /state): la
+ * pagina lo rilegge ogni 5 secondi, ogni 2 mentre un run o una transizione
+ * sono in corso, e dopo ogni azione; alla fine di un run mostra l'esito e
+ * aggiorna tutto senza ricaricare. Postgres resta autorevole finché il
+ * passaggio non supera il passo d'epoch.
  */
 
 import { useEffect, useRef } from 'react';
@@ -22,6 +25,8 @@ import { CalendarTabs } from '@/components/layout/calendar-tabs';
 import { useTopbar } from '@/hooks/use-topbar';
 import { cn } from '@/lib/utils';
 import {
+  BACKEND_MODE_LABELS,
+  daysUntil,
   formatDateTime,
   IDENTITY_LABELS,
   isRunActive,
@@ -50,13 +55,17 @@ export default function MigrazionePage() {
 
   useTopbar({
     title: 'Migrazione a Radicale',
-    subtitle: 'Anteprima, apply idempotente, verifica e shadow — Postgres resta autorevole fino al passaggio',
+    subtitle: 'Anteprima, apply idempotente, verifica, shadow e passaggio — Postgres resta autorevole fino alla conferma',
   });
 
   const stateQuery = useQuery({
     queryKey: migrationKeys.state,
     queryFn: migrationApi.state,
-    refetchInterval: (q) => (isRunActive((q.state.data as MigrationStateView | undefined)?.active_run) ? 2_000 : 5_000),
+    refetchInterval: (q) => {
+      const data = q.state.data as MigrationStateView | undefined;
+      // Run in corso o transizione attiva (anche ferma): il journal e i criteri cambiano di secondo in secondo.
+      return isRunActive(data?.active_run) || data?.transition?.status === 'active' ? 2_000 : 5_000;
+    },
     // Un riavvio dell'API (502 di nginx) dura qualche secondo: più tentativi con attesa crescente per i 5xx e la rete.
     retry: (failures, err) => failures < 3 && (!(err instanceof MigrationApiError) || err.status >= 500),
     retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 8_000),
@@ -171,7 +180,14 @@ function StatusBar({ state }: { state: MigrationStateView }) {
   const b = state.backend;
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-card px-3 py-2 text-xs">
-      <span className="inline-flex items-center gap-1.5"><Database className="h-3.5 w-3.5 text-muted-foreground" /> Autorevole: <span className="font-medium">{b.mode === 'postgres' ? 'Postgres' : b.mode}</span></span>
+      <span className="inline-flex items-center gap-1.5"><Database className="h-3.5 w-3.5 text-muted-foreground" /> Autorevole: <span className="font-medium">{BACKEND_MODE_LABELS[b.mode] ?? b.mode}</span></span>
+      {b.mode === 'radicale' && b.rollback_until && (
+        <>
+          <span className="text-muted-foreground">·</span>
+          <span>Finestra di rollback: <span className="font-medium">{daysUntil(b.rollback_until)} giorni</span></span>
+        </>
+      )}
+      {state.transition?.status === 'active' && <Badge variant="outline" className="text-[10px] text-blue-700">Transizione in corso</Badge>}
       <span className="text-muted-foreground">·</span>
       <span className="inline-flex items-center gap-1.5">
         <Server className="h-3.5 w-3.5 text-muted-foreground" /> Radicale: <span className="font-medium">{state.radicale.configured ? 'configurato' : 'non configurato'}</span>

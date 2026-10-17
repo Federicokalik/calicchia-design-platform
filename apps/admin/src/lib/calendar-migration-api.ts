@@ -1,7 +1,9 @@
 /**
  * Client tipizzato dello strumento di migrazione del calendario a Radicale
- * (`/api/admin/calendar/migration`, fase F3; contratto
- * docs/calendar-radicale/contracts/f3-modules.md §10 e §11).
+ * (`/api/admin/calendar/migration`, fasi F3 e F4; contratti
+ * docs/calendar-radicale/contracts/f3-modules.md §10 e §11 e
+ * docs/calendar-radicale/contracts/f4-modules.md §6: passaggio, rollback,
+ * chiusura della finestra, proiezione inversa, export v2).
  *
  * I DTO sono copiati da apps/api/src/lib/calendar/migration/types.ts: il
  * contratto è il JSON delle risposte, non il codice dell'API. Chiavi
@@ -13,7 +15,7 @@
  * all'azione. Stessa autenticazione di apiFetch (cookie e refresh del JWT).
  */
 
-import { API_BASE, refreshAdminSession, sessionState } from './api';
+import { API_BASE, apiFetchRaw, refreshAdminSession, sessionState } from './api';
 import { getStoredAdminLocale, toIntlLocale } from './i18n-storage';
 
 const BASE = '/api/admin/calendar/migration';
@@ -41,7 +43,16 @@ export type WizardStepId = 'prerequisiti' | 'anteprima' | 'applica' | 'verifica'
 export type WizardStepStatus = 'locked' | 'todo' | 'running' | 'done' | 'attention' | 'blocked' | 'disabled';
 export type WizardActionId =
   | 'preflight' | 'initialize' | 'create_collections' | 'archive' | 'declare' | 'identity_reassign'
-  | 'inventory' | 'plan' | 'apply' | 'verify' | 'accept' | 'shadow_on' | 'shadow_off' | 'cutover';
+  | 'inventory' | 'plan' | 'apply' | 'verify' | 'accept' | 'shadow_on' | 'shadow_off' | 'cutover'
+  | 'cutover_abort' | 'transition_resume' | 'rollback_preview' | 'rollback' | 'finalize' | 'rebaseline' | 'export_v2';
+export type BackendMode = 'postgres' | 'cutover' | 'radicale' | 'rollback' | 'finalized';
+export type TransitionKind = 'cutover' | 'rollback' | 'finalize';
+export type TransitionStatus = 'active' | 'completed' | 'aborted';
+export type JournalStepStatus = 'started' | 'done' | 'skipped' | 'failed';
+export type DegradationClass =
+  | 'REPR_LOSS_VALARM' | 'REPR_LOSS_ATTENDEE' | 'REPR_LOSS_PROPERTY' | 'SEMANTIC_EXPANDED' | 'SEMANTIC_TRANSP'
+  | 'SANITIZED_UID' | 'SANITIZED_DURATION' | 'SANITIZED_SUMMARY' | 'SANITIZED_STATUS' | 'REVERSE_FAILED';
+export type ReverseStateStatus = 'projected' | 'degraded' | 'failed' | 'removed';
 
 export interface MigrationProgress {
   phase?: string;
@@ -345,7 +356,116 @@ export interface WizardStepView {
 }
 
 export interface CutoverCriterion { id: string; label: string; ok: boolean; detail: string | null }
-export interface CutoverAvailability { available: false; phase: 'F4'; reason: string; criteria: CutoverCriterion[] }
+export interface CutoverAvailability { available: boolean; phase: 'F4'; reason: string; criteria: CutoverCriterion[] }
+
+/** Passo del journal di una transizione (JournalStepView). */
+export interface JournalStepView {
+  step: string;
+  seq: number;
+  status: JournalStepStatus;
+  attempts: number;
+  run_id: string | null;
+  started_at: string;
+  finished_at: string | null;
+  error_code: string | null;
+  error: string | null;
+  data: Record<string, unknown>;
+}
+
+/** Transizione (cutover, rollback, finalize) con il journal (TransitionView). */
+export interface TransitionView {
+  id: string;
+  kind: TransitionKind;
+  status: TransitionStatus;
+  from_mode: BackendMode;
+  target_mode: BackendMode;
+  run_id: string | null;
+  epoch_before: number;
+  epoch_after: number | null;
+  started_by: string;
+  started_at: string;
+  finished_at: string | null;
+  outcome_code: string | null;
+  outcome: string | null;
+  data: Record<string, unknown>;
+  steps: JournalStepView[];
+  next_step: string | null;
+  resumable: boolean;
+  abortable: boolean;
+}
+
+export interface RollbackWindowView {
+  cutover_at: string;
+  cutover_by: string | null;
+  rollback_until: string | null;
+  days_left: number;
+  expired: boolean;
+  finalize_available_at: string;
+  finalize_ready: boolean;
+  finalize_blockers: string[];
+}
+
+export interface ReverseProjectionHealthView {
+  active: boolean;
+  until: string | null;
+  objects: number;
+  by_status: Record<ReverseStateStatus, number>;
+  by_class: Partial<Record<DegradationClass, number>>;
+  derived_rows: number;
+  last_projected_at: string | null;
+  queue: { pending: number; running: number; dead: number };
+}
+
+export interface SmokeCheck { code: string; ok: boolean; ms: number; detail: string | null }
+export interface SmokeReport { ok: boolean; started_at: string; finished_at: string; checks: SmokeCheck[] }
+
+export interface ReverseApplySummary {
+  objects: number;
+  projected: number;
+  degraded: number;
+  failed: number;
+  removed: number;
+  unchanged: number;
+  rows: { inserted: number; updated: number; deleted: number };
+  by_class: Partial<Record<DegradationClass, number>>;
+  duration_ms: number;
+}
+
+export interface CutoverSummary {
+  transition_id: string;
+  outcome: 'completed' | 'aborted';
+  abort_reason: string | null;
+  epoch_before: number;
+  epoch_after: number | null;
+  rollback_until: string | null;
+  delta: ApplySummary | null;
+  reverse: ReverseApplySummary | null;
+  bookings_reconciled: number;
+  smoke: SmokeReport | null;
+}
+
+export interface RollbackPreviewSummary {
+  preview_hash: string;
+  generated_at: string;
+  cutover_at: string | null;
+  rollback_until: string | null;
+  changes_since_cutover: { created: number; updated: number; deleted: number; by_actor: Partial<Record<string, number>> };
+  objects: number;
+  derived_rows: number;
+  by_class: Partial<Record<DegradationClass, number>>;
+  reverse_failed: number;
+  busy_identical: boolean | null;
+  calendars: Array<{ calendar_id: string; collection_name: string; objects: number; degraded: number; failed: number; derived_rows: number }>;
+}
+
+export interface RollbackSummary {
+  transition_id: string;
+  outcome: 'completed' | 'aborted';
+  abort_reason: string | null;
+  emergency: boolean;
+  preview_hash: string | null;
+  final_preview_hash: string | null;
+}
 
 export interface MigrationStateView {
   contract_version: number;
@@ -374,6 +494,12 @@ export interface MigrationStateView {
   shadow_queue: { pending: number; running: number; dead: number };
   wizard: { current_step: WizardStepId; steps: WizardStepView[] };
   cutover: CutoverAvailability;
+  /** F4: transizione attiva o ultima conclusa. */
+  transition?: TransitionView | null;
+  /** F4: finestra di rollback dopo il passaggio. */
+  rollback_window?: RollbackWindowView | null;
+  /** F4: salute della proiezione inversa (Radicale → Postgres). */
+  reverse_projection?: ReverseProjectionHealthView | null;
 }
 
 // ─── Costanti del contratto ───────────────────────────────
@@ -391,7 +517,98 @@ export const MIGRATION_CONFIRMATIONS = Object.freeze({
   declare: 'CONFERMO',
   cutover: 'PASSA A RADICALE',
   rollback: 'TORNA A POSTGRES',
+  finalize: 'CHIUDI LA FINESTRA',
+  cutoverAbort: 'ANNULLA IL PASSAGGIO',
+  rollbackEmergency: 'ROLLBACK DI EMERGENZA',
 } as const);
+
+/** Finestra di rollback proposta e limiti (F4_LIMITS di types.ts). */
+export const F4_LIMITS = Object.freeze({
+  rollbackWindowDays: 30,
+  rollbackWindowMinDays: 14,
+  rollbackWindowMaxDays: 90,
+  finalizeMinDays: 14,
+  rollbackPreviewMaxAgeMinutes: 60,
+});
+
+/** Passi delle transizioni nell'ordine (CUTOVER_STEPS, ROLLBACK_STEPS, FINALIZE_STEPS di types.ts). */
+export const TRANSITION_STEPS: Readonly<Record<TransitionKind, readonly string[]>> = Object.freeze({
+  cutover: ['preflight', 'freeze', 'quiesce', 'delta_apply', 'delta_verify', 'epoch', 'control_plane', 'index_sync', 'reverse_start', 'bookings_reconcile', 'unfreeze', 'smoke'],
+  rollback: ['preflight', 'freeze', 'quiesce', 'index_sync', 'reverse_final', 'rebaseline', 'epoch', 'control_plane', 'cleanup'],
+  finalize: ['preflight', 'stop_reverse', 'state', 'legacy_finalize'],
+});
+
+export const TRANSITION_KIND_LABELS: Readonly<Record<TransitionKind, string>> = Object.freeze({
+  cutover: 'Passaggio a Radicale',
+  rollback: 'Ritorno a Postgres',
+  finalize: 'Chiusura della finestra',
+});
+
+/** Descrizione dei passi del journal (per tipo di transizione). */
+export const TRANSITION_STEP_LABELS: Readonly<Record<TransitionKind, Readonly<Record<string, string>>>> = Object.freeze({
+  cutover: {
+    preflight: 'Controllo dei criteri',
+    freeze: 'Scritture sospese (device in sola lettura)',
+    quiesce: 'Attesa delle scritture in corso e quiescenza dei device',
+    delta_apply: 'Ultime modifiche di Postgres verso Radicale',
+    delta_verify: 'Verifica del delta',
+    epoch: 'Radicale autorevole (punto di non ritorno)',
+    control_plane: 'Nuova policy ai device',
+    index_sync: 'Allineamento dell\'indice',
+    reverse_start: 'Prima copia di sicurezza in Postgres',
+    bookings_reconcile: 'Prenotazioni a cavallo del passaggio',
+    unfreeze: 'Scritture riaperte',
+    smoke: 'Prove finali (slot, prenotazione, feed, MCP)',
+    abort: 'Annullamento: ritorno a Postgres',
+  },
+  rollback: {
+    preflight: 'Controllo dell\'anteprima e della finestra',
+    freeze: 'Scritture sospese (device in sola lettura)',
+    quiesce: 'Attesa delle scritture in corso e quiescenza dei device',
+    index_sync: 'Sincronizzazione finale dell\'indice',
+    reverse_final: 'Copia finale in Postgres',
+    rebaseline: 'Ri-baseline del ledger',
+    epoch: 'Postgres autorevole (punto di non ritorno)',
+    control_plane: 'Nuova policy ai device',
+    cleanup: 'Pulizia',
+    abort: 'Annullamento: Radicale resta autorevole',
+  },
+  finalize: {
+    preflight: 'Controllo delle condizioni',
+    stop_reverse: 'Stop della copia verso Postgres',
+    state: 'Finestra chiusa',
+    legacy_finalize: 'Tabella legacy in sola lettura',
+  },
+});
+
+export const JOURNAL_STATUS_LABELS: Readonly<Record<JournalStepStatus, string>> = Object.freeze({
+  started: 'In corso',
+  done: 'Fatto',
+  skipped: 'Saltato',
+  failed: 'Non riuscito',
+});
+
+export const BACKEND_MODE_LABELS: Readonly<Record<string, string>> = Object.freeze({
+  postgres: 'Postgres',
+  cutover: 'Passaggio in corso',
+  radicale: 'Radicale',
+  rollback: 'Ritorno in corso',
+  finalized: 'Radicale (finestra chiusa)',
+});
+
+/** Classi dei degradi della copia verso Postgres (DEGRADATION_CLASSES di types.ts). */
+export const DEGRADATION_LABELS: Readonly<Record<DegradationClass, string>> = Object.freeze({
+  REPR_LOSS_VALARM: 'Promemoria (VALARM) non rappresentabili in Postgres',
+  REPR_LOSS_ATTENDEE: 'Invitati e organizzatore non rappresentabili',
+  REPR_LOSS_PROPERTY: 'Altre proprietà senza colonna in Postgres',
+  SEMANTIC_EXPANDED: 'Serie espanse in occorrenze singole',
+  SEMANTIC_TRANSP: '"Libero" reso come provvisorio',
+  SANITIZED_UID: 'UID adattati (duplicati)',
+  SANITIZED_DURATION: 'Durate nulle allungate',
+  SANITIZED_SUMMARY: 'Titoli vuoti sostituiti',
+  SANITIZED_STATUS: 'Stati adattati',
+  REVERSE_FAILED: 'Risorse non copiate in Postgres',
+});
 
 export const FORCEABLE_CONFLICTS: readonly ConflictCode[] = ['TARGET_NEWER', 'BOTH_CHANGED', 'UNTRACKED_TARGET', 'DELETED_IN_TARGET', 'UID_AT_OTHER_HREF', 'REVALIDATION_REQUIRED'];
 export const VERIFY_LEVELS: readonly VerifyLevel[] = ['V1', 'V2', 'V3', 'V4', 'V5'];
@@ -624,6 +841,24 @@ export const PRECONDITION_REASON_LABELS: Readonly<Record<string, string>> = Obje
   SHADOW_DISABLED: 'Lo shadow non è attivo',
   IDENTITY_DIFF_CHANGED: 'Il diff d\'identità è cambiato: rileggilo',
   RUN_KIND_NOT_VERIFY: 'Il run non è una verifica',
+  MODE_NOT_RADICALE: 'Il backend non è in modalità Radicale',
+  TRANSITION_ACTIVE: 'È attiva un\'altra transizione',
+  NO_ACTIVE_TRANSITION: 'Nessuna transizione attiva',
+  TRANSITION_NOT_ABORTABLE: 'Oltre il passo d\'epoch la transizione non si annulla più',
+  ROLLBACK_WINDOW_EXPIRED: 'La finestra di rollback è scaduta',
+  FINALIZE_TOO_EARLY: 'Servono almeno 14 giorni dal passaggio',
+  SHADOW_PARITY_REQUIRED: 'Serve la parità dello shadow (o una verifica dopo il rollback)',
+  DEVICE_MATRIX_REQUIRED: 'Serve la matrice device superata',
+  BACKUP_TOO_OLD: 'Serve un backup coordinato di meno di 2 ore',
+  OPEN_CONFLICTS: 'Ci sono conflitti aperti o scritture a metà',
+  REVERSE_FAILED_OPEN: 'Ci sono risorse non copiate in Postgres',
+  DEAD_JOBS: 'Ci sono job del calendario in dead letter',
+  HEALTH_NOT_GREEN: 'La salute del calendario non è verde',
+  PREVIEW_REQUIRED: 'Serve un\'anteprima del rollback',
+  PREVIEW_STALE: 'L\'anteprima del rollback è troppo vecchia',
+  PROBE_UNAVAILABLE: 'Password di caldes-probe assente',
+  CONTROL_PLANE_UNAVAILABLE: 'Control-plane del calendario non attivo',
+  ARCHIVE_DEVICE_WRITABLE: 'L\'archivio della Fase 0 sarebbe scrivibile dai device',
 });
 
 export function isRunActive(run: Pick<MigrationRunView, 'status'> | null | undefined): boolean {
@@ -665,6 +900,7 @@ export function migrationErrorMessage(err: unknown): string {
       const active = err.activeRun;
       return active ? `È in corso un run (${RUN_KIND_LABELS[active.kind] ?? active.kind}): attendi che finisca o annullalo` : err.message;
     }
+    if (err.code === 'TRANSITION_IN_PROGRESS') return err.message;
     return reasons.length ? `${err.message} (${reasons.join('; ')})` : err.message;
   }
   return err instanceof Error ? err.message : 'Errore inatteso';
@@ -780,6 +1016,40 @@ export const migrationApi = {
   subscriptionFlags: (id: string, body: { blocks_availability?: boolean; device_visible?: boolean }) =>
     sendJson<SubscriptionFlagsResponse>('PATCH', `/subscriptions/${encodeURIComponent(id)}`, body),
 
+  // F4: transizioni (contratto f4-modules §6.1).
+  transition: () => getJson<TransitionView | null>('/transition'),
+  reverse: () => getJson<ReverseProjectionHealthView>('/reverse'),
+  cutover: (body: { confirm: string; rollback_window_days?: number; verify_run_id?: string | null }, key: string) =>
+    sendJson<RunCreatedResponse>('POST', '/cutover', body, key),
+  cutoverAbort: (body: { confirm: string }, key: string) => sendJson<RunCreatedResponse>('POST', '/cutover/abort', body, key),
+  rollbackAbort: (body: { confirm: string }, key: string) => sendJson<RunCreatedResponse>('POST', '/rollback/abort', body, key),
+  transitionResume: (body: { confirm: string }, key: string) => sendJson<RunCreatedResponse>('POST', '/transition/resume', body, key),
+  rollbackPreview: (body: { scope?: MigrationScope }, key?: string) => sendJson<RunCreatedResponse>('POST', '/rollback/preview', body, key),
+  rollback: (
+    body: { preview_run_id: string; expect_preview_hash?: string | null; confirm: string; emergency?: boolean; confirm_emergency?: string },
+    key: string,
+  ) => sendJson<RunCreatedResponse>('POST', '/rollback', body, key),
+  finalize: (body: { confirm: string }, key: string) => sendJson<RunCreatedResponse>('POST', '/finalize', body, key),
+  rebaseline: (body: { scope?: MigrationScope; confirm: string }, key: string) => sendJson<RunCreatedResponse>('POST', '/rebaseline', body, key),
+
+  /** Export v2 del calendario: zip con un .ics per collezione e manifest.json (GET /api/backup/export?format=calendar-v2). */
+  downloadCalendarExportV2: async (): Promise<void> => {
+    // Stesso flusso di refresh del JWT di apiFetch; un 409 (mode postgres) arriva come errore con il messaggio dell'API.
+    const res = await apiFetchRaw('/api/backup/export?format=calendar-v2');
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition') ?? '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const filename = match?.[1] ?? `calendario-export-v2-${new Date().toISOString().slice(0, 10)}.zip`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1_000);
+  },
+
   /** Archivio della Fase 0 (multipart: file e conferma). */
   archive: async (file: File, confirm: string, key: string): Promise<RunCreatedResponse> => {
     const fd = new FormData();
@@ -858,4 +1128,12 @@ export const migrationKeys = {
   parity: ['calendar-migration', 'parity'] as const,
   subscriptions: ['calendar-migration', 'subscriptions'] as const,
   runs: (kind: MigrationRunKind | null) => ['calendar-migration', 'runs', kind] as const,
+  transition: ['calendar-migration', 'transition'] as const,
 };
+
+/** Giorni interi fra adesso e un istante (0 se passato). */
+export function daysUntil(iso: string | null | undefined, now: number = Date.now()): number {
+  if (!iso) return 0;
+  const t = Date.parse(iso);
+  return Number.isFinite(t) ? Math.max(0, Math.floor((t - now) / 86_400_000)) : 0;
+}

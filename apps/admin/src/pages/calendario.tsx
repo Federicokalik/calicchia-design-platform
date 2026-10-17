@@ -18,7 +18,14 @@ import type { RowAction } from '@/components/ui/row-context-menu';
 import { useTopbar } from '@/hooks/use-topbar';
 import { useI18n } from '@/hooks/use-i18n';
 import { apiFetch } from '@/lib/api';
-import { CALENDAR_TZ } from '@/lib/timezone';
+import {
+  CALENDAR_TZ,
+  calendarDateToDay,
+  calendarDateToIso,
+  isoToCalendarAllDayEnd,
+  isoToCalendarDate,
+  zonedDateToIso,
+} from '@/lib/timezone';
 import { useConfirm } from '@/hooks/use-confirm';
 import EventoEditModal from '@/pages/calendario/evento-edit';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
@@ -31,19 +38,15 @@ const EDITABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp', 'booking'])
 // NON aggiornerebbe la prenotazione né avviserebbe il partecipante (desync).
 const DRAGGABLE_SOURCES = new Set(['manual', 'admin', 'agent', 'mcp']);
 
-// ─── Helper RRULE per "questa e le successive" ───────────────────────────────
-function rruleCompact(d: Date): string {
-  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
-}
-/** Imposta UNTIL (rimuovendo COUNT/UNTIL preesistenti) → tronca la serie. */
-function rruleWithUntil(rrule: string, until: Date): string {
-  const parts = rrule.split(';').filter((p) => p && !/^(UNTIL|COUNT)=/i.test(p));
-  parts.push(`UNTIL=${rruleCompact(until)}`);
-  return parts.join(';');
-}
-/** Rimuove COUNT (per la nuova serie scorporata da "questa e successive"). */
-function rruleStripCount(rrule: string): string {
-  return rrule.split(';').filter((p) => p && !/^COUNT=/i.test(p)).join(';');
+/**
+ * Date per FullCalendar (che gira con timeZone 'UTC' e il wall-time di Roma,
+ * vedi lib/timezone.ts): timed come istante convertito, all-day come giorni di
+ * Roma con la fine esclusiva.
+ */
+function toCalendarRange(startIso: string, endIso: string, allDay: boolean): { start: string; end: string } {
+  return allDay
+    ? { start: isoToCalendarDate(startIso, true), end: isoToCalendarAllDayEnd(startIso, endIso) }
+    : { start: isoToCalendarDate(startIso), end: isoToCalendarDate(endIso) };
 }
 
 // Colors per source (fallback se evento non ha colore custom dal calendario)
@@ -108,7 +111,7 @@ export default function CalendarioPage() {
   const calendarRef = useRef<FullCalendar>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEventOcc | null>(null);
   const [editingEvent, setEditingEvent] = useState<CalendarEventOcc | null>(null);
-  const [creatingFromSlot, setCreatingFromSlot] = useState<{ start: string; end: string } | null>(null);
+  const [creatingFromSlot, setCreatingFromSlot] = useState<{ start: string; end: string; allDay: boolean } | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null);
   const [ctxMenu, setCtxMenu] = useState<{ event: CalendarEventOcc; x: number; y: number } | null>(null);
@@ -227,11 +230,12 @@ export default function CalendarioPage() {
       if (coveredByBlock(ev)) continue;
       const cal = calendarById.get(ev.calendar_id);
       const sourceColor = SOURCE_COLORS[ev.source] || SOURCE_COLORS.manual;
+      const range = toCalendarRange(ev.start_time, ev.end_time, ev.all_day);
       events.push({
         id: `event-${ev.id}-${ev.start_time}`,
         title: ev.summary,
-        start: ev.start_time,
-        end: ev.end_time,
+        start: range.start,
+        end: range.end,
         allDay: ev.all_day,
         backgroundColor: cal?.color || sourceColor.backgroundColor,
         borderColor: cal?.color || sourceColor.borderColor,
@@ -244,8 +248,9 @@ export default function CalendarioPage() {
       if (festActive && ev.calendar_id === festCal.id) {
         events.push({
           id: `bg-${ev.id}-${ev.start_time}`,
-          start: ev.start_time,
-          end: ev.end_time,
+          start: range.start,
+          end: range.end,
+          allDay: ev.all_day,
           display: 'background',
           backgroundColor: cal?.color || sourceColor.backgroundColor,
         });
@@ -258,8 +263,8 @@ export default function CalendarioPage() {
       events.push({
         id: `calcom-${b.id}`,
         title: `[Cal.com] ${b.title}`,
-        start: b.start_time,
-        end: b.end_time,
+        start: isoToCalendarDate(b.start_time),
+        end: isoToCalendarDate(b.end_time),
         allDay: false,
         editable: false,
         ...SOURCE_COLORS.calcom,
@@ -368,11 +373,14 @@ export default function CalendarioPage() {
       return;
     }
 
-    const startIso = info.event.start.toISOString();
+    // FullCalendar restituisce il wall-time di Roma nei campi UTC: si riconverte in istanti veri.
+    // Un all-day resta a mezzanotte di Roma (fine esclusiva).
+    const allDay = info.event.allDay;
+    const startIso = allDay ? zonedDateToIso(calendarDateToDay(info.event.start)) : calendarDateToIso(info.event.start);
     const endIso = info.event.end
-      ? info.event.end.toISOString()
+      ? (allDay ? zonedDateToIso(calendarDateToDay(info.event.end)) : calendarDateToIso(info.event.end))
       : new Date(
-          info.event.start.getTime() +
+          new Date(startIso).getTime() +
             (new Date(data.end_time).getTime() - new Date(data.start_time).getTime()),
         ).toISOString();
 
@@ -468,47 +476,21 @@ export default function CalendarioPage() {
     }
   };
 
-  // "Questa e le successive": tronca il master a prima di questa occorrenza e,
-  // per move/resize, crea una nuova serie da qui in poi con i nuovi orari.
+  // "Questa e le successive": una sola richiesta all'API (saga recurrence_split
+  // con lo store Radicale, transazione unica con Postgres) che tronca la serie
+  // prima di questa occorrenza e, per move/resize, crea la nuova serie da qui
+  // in poi con i nuovi orari. Mai una serie troncata senza la continuazione.
   const applyToThisAndFollowing = async () => {
     const a = recurringAction;
     if (!a) return;
     try {
-      const res = await apiFetch(`/api/admin/calendar/events/${a.data.id}`);
-      const master = res?.event as {
-        rrule: string | null; calendar_id: string; summary: string;
-        description: string | null; location: string | null; url: string | null; all_day: boolean;
-      } | undefined;
-      if (!master?.rrule) throw new Error('Serie non trovata');
-
-      const cutoff = new Date(a.data.original_start!);
-      // 1. tronca la serie originale a prima di questa occorrenza
-      await apiFetch(`/api/admin/calendar/events/${a.data.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({ rrule: rruleWithUntil(master.rrule, new Date(cutoff.getTime() - 60_000)) }),
+      await apiFetch(`/api/admin/calendar/events/${a.data.id}/split`, {
+        method: 'POST',
+        body: JSON.stringify(a.kind === 'delete'
+          ? { original_start: a.data.original_start, delete: true }
+          : { original_start: a.data.original_start, start_time: a.startIso, end_time: a.endIso }),
       });
-
-      if (a.kind !== 'delete') {
-        // 2. nuova serie da questa occorrenza in poi con i nuovi orari
-        await apiFetch('/api/admin/calendar/events', {
-          method: 'POST',
-          body: JSON.stringify({
-            calendar_id: master.calendar_id,
-            summary: master.summary,
-            description: master.description,
-            location: master.location,
-            url: master.url,
-            start_time: a.startIso,
-            end_time: a.endIso,
-            all_day: master.all_day,
-            rrule: rruleStripCount(master.rrule),
-            source: 'admin',
-          }),
-        });
-        toast.success('Aggiornate questa e le successive');
-      } else {
-        toast.success('Eliminate questa e le successive');
-      }
+      toast.success(a.kind === 'delete' ? 'Eliminate questa e le successive' : 'Aggiornate questa e le successive');
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       setSelectedEvent(null);
@@ -634,14 +616,20 @@ export default function CalendarioPage() {
     },
   ];
 
+  // Selezione sulla griglia: wall-time di Roma → istanti veri. Una selezione
+  // di giorni interi crea un all-day da mezzanotte a mezzanotte di Roma (fine
+  // esclusiva), mai un evento 00:00-00:00 UTC.
   const handleDateSelect = (selectInfo: DateSelectArg) => {
-    setCreatingFromSlot({ start: selectInfo.startStr, end: selectInfo.endStr });
+    setCreatingFromSlot(selectInfo.allDay
+      ? { start: zonedDateToIso(calendarDateToDay(selectInfo.start)), end: zonedDateToIso(calendarDateToDay(selectInfo.end)), allDay: true }
+      : { start: calendarDateToIso(selectInfo.start), end: calendarDateToIso(selectInfo.end), allDay: false });
     setEditingEvent(null);
     setShowEditor(true);
   };
 
-  const handleDatesSet = (dateInfo: { startStr: string; endStr: string }) => {
-    setDateRange({ start: dateInfo.startStr, end: dateInfo.endStr });
+  // Intervallo visibile in istanti veri (mezzanotte di Roma), per le query degli eventi.
+  const handleDatesSet = (dateInfo: { start: Date; end: Date }) => {
+    setDateRange({ start: calendarDateToIso(dateInfo.start), end: calendarDateToIso(dateInfo.end) });
   };
 
   const topbarActions = useMemo(() => (
@@ -708,6 +696,7 @@ export default function CalendarioPage() {
           initial={editingEvent}
           initialStart={creatingFromSlot?.start}
           initialEnd={creatingFromSlot?.end}
+          initialAllDay={creatingFromSlot?.allDay}
           onClose={() => { setShowEditor(false); setEditingEvent(null); setCreatingFromSlot(null); }}
           onSaved={() => {
             queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
@@ -775,6 +764,8 @@ export default function CalendarioPage() {
               right: 'dayGridMonth,timeGridWeek,timeGridDay',
             }}
             locale={locale}
+            timeZone="UTC"
+            now={() => isoToCalendarDate(new Date().toISOString())}
             firstDay={1}
             height="auto"
             events={calendarEvents}

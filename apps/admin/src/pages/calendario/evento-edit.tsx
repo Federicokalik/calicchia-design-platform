@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { X, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
-import { isoToZonedInput, zonedInputToIso } from '@/lib/timezone';
+import { addDaysToDate, isoToZonedDate, isoToZonedInput, zonedDateToIso, zonedEndOfDayIso, zonedInputToIso } from '@/lib/timezone';
 import { useConfirm } from '@/hooks/use-confirm';
 
 interface Calendar {
@@ -37,6 +37,8 @@ interface Props {
   initial?: CalendarEvent | null;
   initialStart?: string; // se nuovo evento da slot click
   initialEnd?: string;
+  /** Selezione di giorni interi sul calendario: nuovo evento "tutto il giorno". */
+  initialAllDay?: boolean;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -48,12 +50,38 @@ interface FormProps extends Props {
 
 type RecurrenceType = 'none' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
+/**
+ * UNTIL della RRULE → giorno Europe/Rome mostrato nel form. Una data
+ * (YYYYMMDD) resta quella; un istante UTC (YYYYMMDDTHHMMSSZ) diventa il giorno
+ * di Roma che lo contiene (23:59:59 di Roma è ancora lo stesso giorno in UTC).
+ */
 function parseUntil(value?: string): string | undefined {
   if (!value) return undefined;
+  const instant = value.match(/^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/i);
+  if (instant) return isoToZonedDate(`${instant[1]}-${instant[2]}-${instant[3]}T${instant[4]}:${instant[5]}:${instant[6]}Z`);
   const compact = value.match(/^(\d{4})(\d{2})(\d{2})T?/);
   if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
   const d = new Date(value);
-  return isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
+  return isNaN(d.getTime()) ? undefined : isoToZonedDate(d.toISOString());
+}
+
+/** UNTIL "fino al giorno X": l'istante UTC delle 23:59:59 di Roma di quel giorno (comprende l'ultima occorrenza del mattino). */
+function untilForDay(day: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  return zonedEndOfDayIso(day).replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+/**
+ * Inizio e fine di un evento "tutto il giorno": mezzanotte di Roma del giorno
+ * d'inizio e fine esclusiva a mezzanotte di Roma. Una fine a mezzanotte dopo
+ * l'inizio resta quella; altrimenti vale fino alla fine del giorno indicato.
+ */
+function allDayRange(startInput: string, endInput: string): { start_time: string; end_time: string } {
+  const startDay = startInput.slice(0, 10);
+  const endDay = endInput.slice(0, 10);
+  const endAtMidnight = endInput.slice(11, 16) === '00:00';
+  const exclusiveEnd = endDay > startDay && endAtMidnight ? endDay : addDaysToDate(endDay > startDay ? endDay : startDay, 1);
+  return { start_time: zonedDateToIso(startDay), end_time: zonedDateToIso(exclusiveEnd) };
 }
 
 interface RecurrenceState {
@@ -112,8 +140,8 @@ function buildRRule(opts: RecurrenceState): string | null {
   }
   if (opts.count) parts.push(`COUNT=${opts.count}`);
   if (opts.until) {
-    const d = new Date(opts.until);
-    if (!isNaN(d.getTime())) parts.push(`UNTIL=${d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`);
+    const until = untilForDay(opts.until.slice(0, 10));
+    if (until) parts.push(`UNTIL=${until}`);
   }
   return parts.join(';');
 }
@@ -191,7 +219,7 @@ export default function EventoEditModal(props: Props) {
   );
 }
 
-function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, occurrenceStart }: FormProps) {
+function EventoEditForm({ initial, initialStart, initialEnd, initialAllDay, onClose, onSaved, occurrenceStart }: FormProps) {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const isEdit = !!initial?.id;
@@ -219,7 +247,7 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, o
     initialEnd ? isoToZonedInput(initialEnd) :
     isoToZonedInput(new Date(Date.now() + 2 * 60 * 60_000).toISOString())
   );
-  const [allDay, setAllDay] = useState(initial?.all_day || false);
+  const [allDay, setAllDay] = useState(initial ? !!initial.all_day : !!initialAllDay);
   const [recurrence, setRecurrence] = useState(parseRRule(initial?.rrule || null));
   // In edit la rrule viene reinviata SOLO se l'utente tocca la sezione ricorrenza:
   // il round-trip parse→build è lossy e riscriverebbe la serie a ogni rinomina.
@@ -251,8 +279,13 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, o
       // valori originali del master (date, rrule con INTERVAL & co.) restano
       // intatti in DB — una rinomina è solo una rinomina.
       if (!isEdit || timesTouched) {
-        payload.start_time = zonedInputToIso(startInput);
-        payload.end_time = zonedInputToIso(endInput);
+        if (allDay) {
+          // Tutto il giorno: da mezzanotte a mezzanotte di Roma (fine esclusiva), mai orari arbitrari.
+          Object.assign(payload, allDayRange(startInput, endInput));
+        } else {
+          payload.start_time = zonedInputToIso(startInput);
+          payload.end_time = zonedInputToIso(endInput);
+        }
         payload.all_day = allDay;
       }
       if (!isEdit || recurrenceTouched) payload.rrule = buildRRule(recurrence);

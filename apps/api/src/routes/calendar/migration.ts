@@ -27,8 +27,15 @@
  *  - ogni POST/PATCH che cambia qualcosa scrive una riga in audit_logs
  *    (table_name 'calendar_migration', metadata senza dati personali).
  *
- * Postgres resta autorevole: in F3 cutover, rollback e finalize rispondono
- * 409 PHASE_NOT_AVAILABLE.
+ * Fase F4 (contratto docs/calendar-radicale/contracts/f4-modules.md §6.1):
+ * passaggio (cutover), annullamento, ripresa, anteprima del rollback,
+ * rollback, chiusura della finestra (finalize), ri-baseline di riparazione e
+ * salute della proiezione inversa. Ogni transizione è un run asincrono che
+ * richiede la conferma digitata e la chiave d'idempotenza; mentre una
+ * transizione è attiva (anche ferma dopo un crash) le altre ricevono 409
+ * TRANSITION_IN_PROGRESS con details.transition. Postgres resta autorevole
+ * finché il run di cutover non supera il passo d'epoch: le route non cambiano
+ * mai lo stato da sole.
  */
 
 import { createHash, randomUUID } from 'node:crypto';
@@ -46,11 +53,16 @@ import { preflightItems, preflightWithoutRadicale } from '../../lib/calendar/mig
 import { acceptDiffs, buildRunReport } from '../../lib/calendar/migration/report';
 import { canonicalJson } from '../../lib/calendar/migration/serialize';
 import { getParity, listSubscriptionsForMigration, setShadowEnabled, setSubscriptionMigrationFlags } from '../../lib/calendar/migration/shadow';
+import { assertCutoverReady, defaultRollbackWindowDays } from '../../lib/calendar/migration/cutover';
+import { readReverseProjectionHealth } from '../../lib/calendar/migration/reverse-projector';
 import {
   activeMigrationRun,
   applyParamsFromPlan,
   buildMigrationStateView,
   createMigrationRun,
+  currentTransitionView,
+  finalizeBlockersOf,
+  rollbackPreviewValidity,
   getMigrationRun,
   listMigrationRuns,
   listRunItems,
@@ -64,8 +76,12 @@ import {
 } from '../../lib/calendar/migration/runs';
 import {
   type ConflictCode,
+  type CutoverParams,
   DECLARATION_KEYS,
   type DeclarationKey,
+  F4_LIMITS,
+  F4_WRITING_RUN_KINDS,
+  type FinalizeParams,
   FORCEABLE_CONFLICTS,
   type IdentityParams,
   type InitParams,
@@ -84,8 +100,13 @@ import {
   type PreconditionReason,
   type PreflightParams,
   type PreflightSummary,
+  type RebaselineParams,
   resolveMigrationOptions,
+  type RollbackParams,
+  type RollbackPreviewParams,
   type RunCreatedResponse,
+  type TransitionKind,
+  type TransitionView,
   VERIFY_LEVELS,
   type VerifyLevel,
   type VerifyParams,
@@ -307,6 +328,12 @@ interface RunRequest {
   params: object;
   planRunId?: string | null;
   planHash?: string | null;
+  /**
+   * Transizioni della F4: controllo della transizione attiva dopo il replay e
+   * prima del run attivo (409 TRANSITION_IN_PROGRESS anche se un run la sta
+   * eseguendo: il messaggio giusto è "transizione in corso", non "run").
+   */
+  transition?: () => Promise<void>;
   /** Controlli dopo il replay e il run attivo, prima della creazione. */
   preconditions?: () => Promise<void>;
 }
@@ -319,7 +346,7 @@ interface RunRequest {
  */
 async function startRun(c: Ctx, req: RunRequest): Promise<RunCreatedResponse> {
   const key = idempotencyKeyOf(c, req.body);
-  if (WRITING_RUN_KINDS.has(req.kind) && !key) {
+  if ((WRITING_RUN_KINDS.has(req.kind) || F4_WRITING_RUN_KINDS.has(req.kind)) && !key) {
     throw new MigrationError('IDEMPOTENCY_KEY_REQUIRED', 'Chiave d\'idempotenza obbligatoria (header Idempotency-Key) per le azioni che scrivono');
   }
   const requestHash = requestHashOf(req.path, req.body);
@@ -328,6 +355,7 @@ async function startRun(c: Ctx, req: RunRequest): Promise<RunCreatedResponse> {
     if (replay) return replay;
   }
   requireRadicaleConfigured();
+  if (req.transition) await req.transition();
   await requireNoActiveRun();
   if (req.preconditions) await req.preconditions();
   return createMigrationRun({
@@ -864,9 +892,293 @@ calendarMigration.patch('/subscriptions/:id', async (c) => {
 
 // ─── Transizioni della F4 ───────────────────────────────
 
-const PHASE_F4_MESSAGE = 'Disponibile dalla fase F4: in F3 Postgres resta autorevole e il passaggio a Radicale non si può eseguire';
-for (const path of ['/cutover', '/rollback/preview', '/rollback', '/finalize']) {
-  calendarMigration.post(path, () => {
-    throw new MigrationError('PHASE_NOT_AVAILABLE', PHASE_F4_MESSAGE, { phase: 'F4' });
-  });
+/** Frase da digitare per riprendere una transizione del tipo dato (contratto f4-modules §6.1). */
+const RESUME_CONFIRMATIONS: Readonly<Record<TransitionKind, string>> = Object.freeze({
+  cutover: MIGRATION_CONFIRMATIONS.cutover,
+  rollback: MIGRATION_CONFIRMATIONS.rollback,
+  finalize: MIGRATION_CONFIRMATIONS.finalize,
+});
+
+const TRANSITION_LABELS: Readonly<Record<TransitionKind, string>> = Object.freeze({
+  cutover: 'passaggio a Radicale',
+  rollback: 'ritorno a Postgres',
+  finalize: 'chiusura della finestra di rollback',
+});
+
+/** 409 TRANSITION_IN_PROGRESS se una transizione è attiva (anche ferma, da riprendere o annullare). */
+async function requireNoActiveTransition(): Promise<void> {
+  const view = await currentTransitionView(sql);
+  if (view && view.status === 'active') throw transitionInProgress(view);
 }
+
+function transitionInProgress(view: TransitionView): MigrationError {
+  const how = view.resumable ? (view.abortable ? 'riprendila o annullala' : 'riprendila') : 'attendi che il run finisca';
+  return new MigrationError(
+    'TRANSITION_IN_PROGRESS',
+    `È attiva una transizione (${TRANSITION_LABELS[view.kind]}${view.next_step ? `, passo ${view.next_step}` : ''}): ${how} prima di avviarne un'altra.`,
+    { transition: view, reasons: ['TRANSITION_ACTIVE'] },
+  );
+}
+
+/** Transizione attiva del tipo richiesto (PRECONDITION_FAILED NO_ACTIVE_TRANSITION altrimenti). */
+async function requireActiveTransition(kinds: readonly TransitionKind[]): Promise<TransitionView> {
+  const view = await currentTransitionView(sql);
+  if (!view || view.status !== 'active' || !kinds.includes(view.kind)) {
+    throw precondition(
+      kinds.length === 1 ? `Nessuna transizione di ${TRANSITION_LABELS[kinds[0]]} attiva` : 'Nessuna transizione attiva da riprendere',
+      ['NO_ACTIVE_TRANSITION'],
+      { transition: view },
+    );
+  }
+  return view;
+}
+
+async function requireRadicaleMode(): Promise<Awaited<ReturnType<typeof readMigrationState>>> {
+  const state = await readMigrationState(sql);
+  if (state.mode !== 'radicale') {
+    throw precondition(`Serve il backend in mode radicale (ora ${state.mode})`, ['MODE_NOT_RADICALE'], { mode: state.mode });
+  }
+  return state;
+}
+
+function requireRollbackWindowOpen(state: Awaited<ReturnType<typeof readMigrationState>>, now: Date = new Date()): void {
+  const until = state.rollback_until ? state.rollback_until.getTime() : 0;
+  if (until <= now.getTime()) {
+    throw precondition(
+      state.rollback_until ? `Finestra di rollback scaduta il ${state.rollback_until.toISOString()}` : 'Nessuna finestra di rollback aperta',
+      ['ROLLBACK_WINDOW_EXPIRED'],
+      { rollback_until: state.rollback_until ? state.rollback_until.toISOString() : null },
+    );
+  }
+}
+
+function parseWindowDays(value: unknown): number {
+  if (value === undefined || value === null) return defaultRollbackWindowDays();
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < F4_LIMITS.rollbackWindowMinDays || value > F4_LIMITS.rollbackWindowMaxDays) {
+    throw new MigrationError('VALIDATION_FAILED', `rollback_window_days: intero da ${F4_LIMITS.rollbackWindowMinDays} a ${F4_LIMITS.rollbackWindowMaxDays}`);
+  }
+  return value;
+}
+
+function optionalRunId(value: unknown, name: string): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || !UUID_RE.test(value)) throw new MigrationError('VALIDATION_FAILED', `${name}: atteso l'id (UUID) di un run`);
+  return value.toLowerCase();
+}
+
+function optionalHash(value: unknown, name: string): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || !HASH_RE.test(value)) throw new MigrationError('VALIDATION_FAILED', `${name}: atteso uno sha256 esadecimale`);
+  return value;
+}
+
+function stringFrom(data: Record<string, unknown>, key: string, re: RegExp): string | null {
+  const v = data[key];
+  return typeof v === 'string' && re.test(v) ? v.toLowerCase() : null;
+}
+
+/** Stato della transizione attiva o dell'ultima conclusa (null se non ce n'è mai stata una). */
+calendarMigration.get('/transition', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await currentTransitionView(sql));
+});
+
+/** Salute della proiezione inversa (Radicale → calendar_events) durante la finestra di rollback. */
+calendarMigration.get('/reverse', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await readReverseProjectionHealth(sql));
+});
+
+calendarMigration.post('/cutover', async (c) => {
+  const body = await readJsonBody(c);
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.cutover);
+  const params: CutoverParams = {
+    action: 'start',
+    rollback_window_days: parseWindowDays(body.rollback_window_days),
+    verify_run_id: optionalRunId(body.verify_run_id, 'verify_run_id'),
+  };
+  const created = await startRun(c, {
+    kind: 'cutover',
+    path: '/cutover',
+    body,
+    params,
+    transition: requireNoActiveTransition,
+    preconditions: async () => {
+      await requirePostgresMode();
+      // Stessi criteri del passo di preflight del run (che li ricontrolla dopo un giro del control-plane).
+      await assertCutoverReady(sql, { verifyRunId: params.verify_run_id });
+    },
+  });
+  return respondRun(c, created, 'cutover_start', { rollback_window_days: params.rollback_window_days, verify_run_id: params.verify_run_id });
+});
+
+calendarMigration.post('/cutover/abort', async (c) => {
+  const body = await readJsonBody(c);
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.cutoverAbort);
+  let transitionId: string | null = null;
+  const created = await startRun(c, {
+    kind: 'cutover',
+    path: '/cutover/abort',
+    body,
+    params: { action: 'abort', rollback_window_days: defaultRollbackWindowDays(), verify_run_id: null } satisfies CutoverParams,
+    preconditions: async () => {
+      const view = await requireActiveTransition(['cutover']);
+      transitionId = view.id;
+      if (!view.abortable) {
+        throw precondition('Il passaggio ha superato il passo d\'epoch: non si annulla più, resta solo il rollback', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
+      }
+    },
+  });
+  return respondRun(c, created, 'cutover_abort', { transition_id: transitionId });
+});
+
+calendarMigration.post('/transition/resume', async (c) => {
+  const body = await readJsonBody(c);
+  const view = await currentTransitionView(sql);
+  if (!view || view.status !== 'active') {
+    throw precondition('Nessuna transizione attiva da riprendere', ['NO_ACTIVE_TRANSITION'], { transition: view });
+  }
+  requireConfirmation(body.confirm, RESUME_CONFIRMATIONS[view.kind]);
+  const data = view.data ?? {};
+  let params: CutoverParams | RollbackParams | FinalizeParams;
+  if (view.kind === 'cutover') {
+    const days = typeof data.rollback_window_days === 'number' && Number.isInteger(data.rollback_window_days)
+      && data.rollback_window_days >= F4_LIMITS.rollbackWindowMinDays && data.rollback_window_days <= F4_LIMITS.rollbackWindowMaxDays
+      ? data.rollback_window_days : defaultRollbackWindowDays();
+    params = { action: 'resume', rollback_window_days: days, verify_run_id: stringFrom(data, 'verify_run_id', UUID_RE) };
+  } else if (view.kind === 'rollback') {
+    params = {
+      action: 'resume',
+      preview_run_id: stringFrom(data, 'preview_run_id', UUID_RE),
+      expect_preview_hash: stringFrom(data, 'expect_preview_hash', HASH_RE),
+      emergency: data.emergency === true,
+    };
+  } else {
+    params = { action: 'resume' };
+  }
+  const created = await startRun(c, {
+    kind: view.kind,
+    path: '/transition/resume',
+    body,
+    params,
+    preconditions: async () => {
+      // La transizione può essere cambiata fra la lettura e la creazione del run.
+      const now = await requireActiveTransition([view.kind]);
+      if (now.id !== view.id) throw precondition('La transizione attiva è cambiata: ricarica il wizard', ['NO_ACTIVE_TRANSITION'], { transition: now });
+    },
+  });
+  return respondRun(c, created, 'transition_resume', { transition_id: view.id, transition_kind: view.kind, next_step: view.next_step });
+});
+
+calendarMigration.post('/rollback/preview', async (c) => {
+  const body = await readJsonBody(c);
+  const params: RollbackPreviewParams = { scope: parseScope(body.scope) };
+  const created = await startRun(c, {
+    kind: 'rollback_preview',
+    path: '/rollback/preview',
+    body,
+    params,
+    transition: requireNoActiveTransition,
+    preconditions: async () => {
+      const state = await requireRadicaleMode();
+      requireRollbackWindowOpen(state);
+    },
+  });
+  return respondRun(c, created, 'rollback_preview', { scope: params.scope });
+});
+
+calendarMigration.post('/rollback', async (c) => {
+  const body = await readJsonBody(c);
+  const previewRunId = optionalRunId(body.preview_run_id, 'preview_run_id');
+  if (!previewRunId) throw new MigrationError('VALIDATION_FAILED', 'preview_run_id: atteso l\'id del run d\'anteprima del rollback');
+  const expect = optionalHash(body.expect_preview_hash, 'expect_preview_hash');
+  const emergency = optionalBoolean(body.emergency, 'emergency') === true;
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.rollback);
+  if (emergency) requireConfirmation(body.confirm_emergency, MIGRATION_CONFIRMATIONS.rollbackEmergency);
+
+  const preview = await rollbackPreviewValidity(sql, previewRunId);
+  const params: RollbackParams = {
+    action: 'start',
+    preview_run_id: previewRunId,
+    expect_preview_hash: expect ?? preview.preview_hash,
+    emergency,
+  };
+  const created = await startRun(c, {
+    kind: 'rollback',
+    path: '/rollback',
+    body,
+    params,
+    transition: requireNoActiveTransition,
+    preconditions: async () => {
+      const state = await requireRadicaleMode();
+      requireRollbackWindowOpen(state);
+      if (!preview.ok) throw precondition(preview.message ?? 'Serve un\'anteprima del rollback riuscita', [preview.reason ?? 'PREVIEW_REQUIRED'], { preview_run_id: previewRunId });
+      if (expect && preview.preview_hash && expect !== preview.preview_hash) {
+        throw precondition('L\'anteprima confermata non corrisponde al run indicato: rigenerala e riprova', ['PREVIEW_STALE'], { preview_run_id: previewRunId });
+      }
+      const identity = await currentIdentityStatus(state);
+      if (identity !== 'ok') throw precondition('Identità del volume non verificata: il rollback parte solo da un volume riconosciuto', ['IDENTITY_NOT_OK'], { identity });
+    },
+  });
+  return respondRun(c, created, 'rollback_start', { preview_run_id: previewRunId, emergency });
+});
+
+calendarMigration.post('/rollback/abort', async (c) => {
+  const body = await readJsonBody(c);
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.cutoverAbort);
+  let transitionId: string | null = null;
+  const created = await startRun(c, {
+    kind: 'rollback',
+    path: '/rollback/abort',
+    body,
+    params: { action: 'abort', preview_run_id: null, expect_preview_hash: null, emergency: false } satisfies RollbackParams,
+    preconditions: async () => {
+      const view = await requireActiveTransition(['rollback']);
+      transitionId = view.id;
+      if (!view.abortable) {
+        throw precondition('Il rollback ha superato il passo d\'epoch: non si annulla più, va ripreso fino in fondo', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
+      }
+    },
+  });
+  return respondRun(c, created, 'rollback_abort', { transition_id: transitionId });
+});
+
+calendarMigration.post('/finalize', async (c) => {
+  const body = await readJsonBody(c);
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.finalize);
+  const params: FinalizeParams = { action: 'start' };
+  const created = await startRun(c, {
+    kind: 'finalize',
+    path: '/finalize',
+    body,
+    params,
+    transition: requireNoActiveTransition,
+    preconditions: async () => {
+      await requireRadicaleMode();
+      const blockers = await finalizeBlockersOf(sql);
+      if (blockers.length) {
+        throw precondition(`La finestra di rollback non si può ancora chiudere (${blockers.join(', ')})`, blockers);
+      }
+    },
+  });
+  return respondRun(c, created, 'finalize');
+});
+
+calendarMigration.post('/rebaseline', async (c) => {
+  const body = await readJsonBody(c);
+  requireConfirmation(body.confirm, MIGRATION_CONFIRMATIONS.apply);
+  const params: RebaselineParams = { scope: parseScope(body.scope), reason: 'manual' };
+  const created = await startRun(c, {
+    kind: 'rebaseline',
+    path: '/rebaseline',
+    body,
+    params,
+    transition: requireNoActiveTransition,
+    preconditions: async () => {
+      const state = await requirePostgresMode();
+      const identity = await currentIdentityStatus(state);
+      if (identity !== 'ok') throw precondition('Identità del volume non verificata: la ri-baseline legge solo un volume riconosciuto', ['IDENTITY_NOT_OK'], { identity });
+    },
+  });
+  return respondRun(c, created, 'rebaseline', { scope: params.scope });
+});

@@ -16,7 +16,11 @@
 
 import { Hono } from 'hono';
 import { fromZonedTime } from 'date-fns-tz';
+import { customAlphabet } from 'nanoid';
 import { sql, sqlInsert } from '../../db';
+import { resolveWriteStoreKind } from '../../lib/calendar/backend-mode';
+import { validateRRule } from '../../lib/calendar/legacy/rrule-legacy';
+import { splitRecurringEvent } from '../../lib/calendar/radicale/store';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
 import {
@@ -82,6 +86,7 @@ import type {
   AvailabilityOverride,
   AvailabilitySchedule,
   AvailabilitySlot,
+  CalendarEvent,
   EventType,
 } from '../../lib/calendar/types';
 import { logger } from '../../lib/logger';
@@ -964,6 +969,158 @@ calendarAdmin.post('/events/:id/exception', async (c) => {
       status: body.status || 'confirmed',
     });
     return c.json({ event: override });
+  } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
+    if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+// ─── "Questa e le successive" (contratto f4-modules §6.4 punto 1) ───────────────
+
+/** Colonne legacy restituite dalle route degli eventi (mai le caldes_* della 166). */
+const LEGACY_EVENT_COLUMNS = sql`
+  id, calendar_id, uid, summary, description, location, url, start_time, end_time, all_day,
+  rrule, exdates, recurrence_id, recurrence_master_id, source, source_id, status, created_at, updated_at
+`;
+
+/** UID delle serie create dal taglio con PgLegacyStore (stesso alfabeto di createEvent legacy). */
+const generateSplitUid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 16);
+
+/** Istante compatto UTC per UNTIL (YYYYMMDDTHHMMSSZ). */
+function rruleCompactUtc(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+/** RRULE troncata: UNTIL al posto di COUNT/UNTIL preesistenti (stesso valore che l'admin scriveva dal browser). */
+function rruleWithUntil(rrule: string, until: Date): string {
+  const parts = rrule.split(';').filter((p) => p && !/^(UNTIL|COUNT)=/i.test(p));
+  parts.push(`UNTIL=${rruleCompactUtc(until)}`);
+  return parts.join(';');
+}
+
+/** RRULE della nuova serie: senza COUNT (come dal browser). */
+function rruleWithoutCount(rrule: string): string {
+  return rrule.split(';').filter((p) => p && !/^COUNT=/i.test(p)).join(';');
+}
+
+interface SplitResult { whole_series: boolean; head: CalendarEvent | null; tail: CalendarEvent | null }
+
+/**
+ * Taglio con PgLegacyStore: le stesse due operazioni che l'admin faceva dal
+ * browser (UNTIL del master a cutoff − 60 s e nuova serie da original_start con
+ * i nuovi orari, senza COUNT), ma in una sola transazione: mai una serie
+ * troncata senza la sua continuazione.
+ */
+async function splitLegacySeries(master: CalendarEvent, originalStart: Date, times: { start: Date; end: Date } | null): Promise<SplitResult> {
+  const untilRule = validateRRule(rruleWithUntil(master.rrule as string, new Date(originalStart.getTime() - 60_000)), new Date(master.start_time).toISOString());
+  if (!untilRule) throw new EventValidationError('RRULE troncata non valida');
+  let tailRule: string | null = null;
+  if (times) {
+    tailRule = validateRRule(rruleWithoutCount(master.rrule as string), times.start.toISOString());
+    if (!tailRule) throw new EventValidationError('RRULE della nuova serie non valida');
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return sql.begin(async (tx: any) => {
+    const [head] = await tx`
+      UPDATE calendar_events SET rrule = ${untilRule}
+      WHERE id = ${master.id}::uuid AND recurrence_master_id IS NULL AND rrule IS NOT NULL
+      RETURNING ${LEGACY_EVENT_COLUMNS}
+    `;
+    if (!head) throw new EventValidationError('Serie non trovata o non più ricorrente');
+    let tail: CalendarEvent | null = null;
+    if (times && tailRule) {
+      [tail] = await tx`
+        INSERT INTO calendar_events ${sqlInsert({
+          calendar_id: master.calendar_id,
+          uid: generateSplitUid(),
+          summary: master.summary.trim().slice(0, 500),
+          description: master.description?.trim().slice(0, 5000) || null,
+          location: master.location?.trim().slice(0, 500) || null,
+          url: master.url?.trim().slice(0, 1000) || null,
+          start_time: times.start.toISOString(),
+          end_time: times.end.toISOString(),
+          all_day: !!master.all_day,
+          rrule: tailRule,
+          exdates: [],
+          recurrence_id: null,
+          recurrence_master_id: null,
+          source: 'admin',
+          source_id: null,
+          status: 'confirmed',
+        })}
+        RETURNING ${LEGACY_EVENT_COLUMNS}
+      `;
+    }
+    return { whole_series: false, head: head as CalendarEvent, tail: tail as CalendarEvent | null };
+  }) as Promise<SplitResult>;
+}
+
+/**
+ * "Questa e le successive" su una serie (move, resize o delete dal calendario):
+ * con lo store Radicale la saga recurrence_split (nuova serie con UID nuovo e
+ * taglio del master, recupero automatico se il processo cade a metà); con
+ * PgLegacyStore il taglio in una transazione. Corpo: { original_start,
+ * start_time?, end_time?, delete? }. Senza orari la nuova serie mantiene la
+ * durata della serie a partire da original_start. Un taglio sulla prima
+ * occorrenza vale per tutta la serie (whole_series).
+ */
+calendarAdmin.post('/events/:id/split', async (c) => {
+  const body = await c.req.json().catch(() => null) as Record<string, unknown> | null;
+  if (!body || typeof body !== 'object') return c.json({ error: 'Corpo JSON richiesto' }, 400);
+  const originalStartIso = typeof body.original_start === 'string' ? body.original_start : '';
+  const originalStart = new Date(originalStartIso);
+  if (!originalStartIso || Number.isNaN(originalStart.getTime())) return c.json({ error: 'original_start richiesto (ISO 8601)' }, 400);
+  if (body.delete !== undefined && typeof body.delete !== 'boolean') return c.json({ error: 'delete: atteso un booleano' }, 400);
+  const remove = body.delete === true;
+  const parseTime = (v: unknown, name: string): Date | null => {
+    if (v === undefined || v === null) return null;
+    const d = new Date(String(v));
+    if (typeof v !== 'string' || Number.isNaN(d.getTime())) throw new EventValidationError(`${name} non valido`);
+    return d;
+  };
+  try {
+    const newStart = parseTime(body.start_time, 'start_time');
+    const newEnd = parseTime(body.end_time, 'end_time');
+    if (remove && (newStart || newEnd)) return c.json({ error: 'delete non ammette start_time ed end_time' }, 400);
+
+    const master = await getEvent(c.req.param('id'));
+    if (!master) return c.json({ error: 'Evento non trovato' }, 404);
+    if (!master.rrule || master.recurrence_master_id) return c.json({ error: 'L\'evento non è il master di una serie ricorrente' }, 400);
+    if (master.source === 'ics_pull') return c.json({ error: 'Evento importato da sottoscrizione ICS (sola lettura)' }, 403);
+    const duration = new Date(master.end_time).getTime() - new Date(master.start_time).getTime();
+    const start = newStart ?? (newEnd ? new Date(newEnd.getTime() - duration) : originalStart);
+    const end = newEnd ?? new Date(start.getTime() + duration);
+    if (!remove && end.getTime() <= start.getTime()) return c.json({ error: 'end_time deve essere > start_time' }, 400);
+
+    const kind = await resolveWriteStoreKind();
+    let result: SplitResult;
+    if (kind === 'radicale') {
+      const split = await splitRecurringEvent({
+        masterEventId: master.id,
+        originalStartIso: originalStart.toISOString(),
+        changes: remove ? undefined : { start_time: start.toISOString(), end_time: end.toISOString() },
+      });
+      if (remove) {
+        // La nuova serie (o la serie intera, se il taglio è sulla prima occorrenza) si cancella: restano le occorrenze precedenti.
+        await deleteEvent(split.tail.id);
+        result = { whole_series: split.wholeSeries, head: split.head, tail: null };
+      } else {
+        result = { whole_series: split.wholeSeries, head: split.head, tail: split.tail };
+      }
+    } else if (originalStart.getTime() <= new Date(master.start_time).getTime()) {
+      // Taglio sulla prima occorrenza: come "tutta la serie" (UNTIL prima di DTSTART lascerebbe una serie vuota).
+      if (remove) {
+        await deleteEvent(master.id);
+        result = { whole_series: true, head: null, tail: null };
+      } else {
+        const tail = await updateEvent(master.id, { start_time: start.toISOString(), end_time: end.toISOString() });
+        result = { whole_series: true, head: null, tail };
+      }
+    } else {
+      result = await splitLegacySeries(master, originalStart, remove ? null : { start, end });
+    }
+    return c.json(result);
   } catch (err) {
     if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);

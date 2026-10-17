@@ -38,9 +38,18 @@
  *
  * Lo stato del wizard non è mai salvato: buildMigrationStateView() lo deriva
  * dai run, dallo stato del backend, dal ledger e dalla parità dello shadow
- * (regole del contratto §11.2). Postgres resta autorevole: questo modulo non
- * scrive mai mode, write_freeze, cutover_*, rollback_until, finalized_at né
- * api_min_version; scrive solo i run, le righe e migration_declarations.
+ * (regole del contratto §11.2). Questo modulo non scrive mai mode,
+ * write_freeze, cutover_*, rollback_until, finalized_at né api_min_version;
+ * scrive solo i run, le righe e migration_declarations.
+ *
+ * Fase F4 (contratto f4-modules §6.2): i run cutover, rollback_preview,
+ * rollback, rebaseline e finalize hanno i propri handler (cutover.ts,
+ * rollback.ts, rebaseline.ts, finalize.ts); le transizioni di stato le fanno
+ * solo quei moduli attraverso transition.ts, con il journal che sopravvive al
+ * run. Un run di transizione interrotto lascia la transizione `active`: il
+ * wizard la mostra da riprendere (o da annullare prima del passo d'epoch). Lo
+ * stato del wizard aggiunge la transizione, la finestra di rollback e la
+ * salute della proiezione inversa.
  */
 
 import type { Logger } from 'pino';
@@ -69,6 +78,12 @@ import { runApply } from './apply';
 import { runVerify } from './verify';
 import { latestVerifyVerdicts } from './report';
 import { getParity } from './shadow';
+import { cutoverCriteria, runCutover } from './cutover';
+import { finalizeBlockers, runFinalize } from './finalize';
+import { runRebaselineRun } from './rebaseline';
+import { readReverseProjectionHealth } from './reverse-projector';
+import { runRollback, runRollbackPreview } from './rollback';
+import { buildTransitionView, getLatestTransition, readJournal } from './transition';
 import {
   ACTIVE_RUN_STATUSES,
   type ApplyParams,
@@ -80,6 +95,9 @@ import {
   DECLARATION_KEYS,
   type DeclarationValues,
   F3_RUN_KINDS,
+  type FinalizeParams,
+  F4_LIMITS,
+  F4_RUN_KINDS,
   ITEM_SEVERITIES,
   type ItemSeverity,
   MIGRATION_CONFIRMATIONS,
@@ -112,12 +130,21 @@ import {
   PLAN_ACTIONS,
   type PlanAction,
   type PlanSummary,
+  type PreconditionReason,
   type PreflightSummary,
+  type RebaselineParams,
+  type ReverseProjectionHealthView,
+  type RollbackParams,
+  type RollbackPreviewParams,
+  type RollbackPreviewSummary,
+  type RollbackWindowView,
   type RunCreatedResponse,
   type RunItemsResponse,
   type RunsListResponse,
   SHADOW_MIRROR_JOB_KIND,
   TERMINAL_RUN_STATUSES,
+  type TransitionKind,
+  type TransitionView,
   VERIFY_LEVELS,
   type VerifyLevel,
   type VerifyParams,
@@ -442,7 +469,7 @@ interface NormalizedRunInput {
 }
 
 function normalizeRunInput(input: CreateRunInput): NormalizedRunInput {
-  if (!F3_RUN_KINDS.has(input.kind)) {
+  if (!F3_RUN_KINDS.has(input.kind) && !F4_RUN_KINDS.has(input.kind)) {
     throw new MigrationError('PHASE_NOT_AVAILABLE', `Tipo di run ${String(input.kind)} non disponibile in ${MIGRATION_PHASE}`);
   }
   if (!(MIGRATION_RUN_TRIGGERS as readonly string[]).includes(input.trigger)) {
@@ -736,7 +763,12 @@ async function migrationLockHeld(db: Db): Promise<boolean> {
 
 // ─── Esecutore ───────────────────────────────
 
-/** Funzione del modulo proprietario per ogni tipo di run della F3 (contratto §5.1). */
+/** Blocchi del finalize (finalize.ts, contratto f4 §5.4): per il wizard e la route POST /finalize. */
+export async function finalizeBlockersOf(db: Db = sql, now: Date = new Date()): Promise<PreconditionReason[]> {
+  return finalizeBlockers(db, now);
+}
+
+/** Funzione del modulo proprietario per ogni tipo di run (f3 §5.1, f4 §6.2). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const RUN_HANDLERS: Readonly<Record<string, MigrationRunHandler<any, object>>> = Object.freeze({
   preflight: runPreflight,
@@ -747,7 +779,16 @@ const RUN_HANDLERS: Readonly<Record<string, MigrationRunHandler<any, object>>> =
   plan: runPlan,
   apply: runApply,
   verify: runVerify,
+  cutover: runCutover,
+  // Le funzioni del gruppo ROLLBACK accettano dipendenze facoltative come secondo argomento: l'esecutore passa solo il contesto.
+  rollback_preview: (ctx: MigrationRunContext<RollbackPreviewParams>) => runRollbackPreview(ctx),
+  rollback: (ctx: MigrationRunContext<RollbackParams>) => runRollback(ctx),
+  rebaseline: (ctx: MigrationRunContext<RebaselineParams>) => runRebaselineRun(ctx),
+  finalize: (ctx: MigrationRunContext<FinalizeParams>) => runFinalize(ctx),
 });
+
+/** Run che eseguono una transizione journalizzata (cal_migration_transitions). */
+const TRANSITION_RUN_KINDS: ReadonlySet<MigrationRunKind> = new Set<MigrationRunKind>(['cutover', 'rollback', 'finalize']);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const handlerOverrides = new Map<MigrationRunKind, MigrationRunHandler<any, object>>();
@@ -1138,8 +1179,8 @@ export async function reapInterruptedRuns(opts: { now?: Date } = {}): Promise<nu
   const now = opts.now ?? new Date();
   const staleBefore = new Date(now.getTime() - MIGRATION_LIMITS.staleHeartbeatMs);
   const queuedBefore = new Date(now.getTime() - QUEUED_WITHOUT_JOB_GRACE_MS);
-  const rows = await sql<Array<{ id: string; status: MigrationRunStatus; job_status: string | null; last_beat: Date; created_at: Date }>>`
-    SELECT r.id::text AS id, r.status, j.status AS job_status,
+  const rows = await sql<Array<{ id: string; kind: MigrationRunKind; status: MigrationRunStatus; job_status: string | null; last_beat: Date; created_at: Date }>>`
+    SELECT r.id::text AS id, r.kind, r.status, j.status AS job_status,
            COALESCE(r.heartbeat_at, r.started_at, r.created_at) AS last_beat, r.created_at
     FROM cal_migration_runs r
     LEFT JOIN cal_jobs j ON j.id = r.job_id
@@ -1152,10 +1193,14 @@ export async function reapInterruptedRuns(opts: { now?: Date } = {}): Promise<nu
     if (r.status === 'running') {
       if (r.last_beat.getTime() >= staleBefore.getTime()) continue;
       if (await migrationLockHeld(sql)) continue;
+      // Run di transizione: la transizione resta `active` (journal) e il wizard la propone da riprendere.
+      const message = TRANSITION_RUN_KINDS.has(r.kind)
+        ? 'Esecutore interrotto: la transizione resta attiva con i passi già conclusi nel journal; riprendila (o annullala, se ammesso) dal wizard'
+        : 'Esecutore interrotto senza ripresa possibile: ripeti l\'azione dal wizard (le scritture già fatte sono nel ledger)';
       const upd = await sql`
         UPDATE cal_migration_runs
         SET status = 'interrupted', finished_at = now(), error_code = 'INTERRUPTED',
-            error = 'Esecutore interrotto senza ripresa possibile: ripeti l''azione dal wizard (le scritture già fatte sono nel ledger)',
+            error = ${message},
             updated_at = now()
         WHERE id = ${r.id}::uuid AND status = 'running'
           AND COALESCE(heartbeat_at, started_at, created_at) < ${staleBefore}::timestamptz
@@ -1294,6 +1339,8 @@ const HOUR_MS = 3_600_000;
 const ACTIVE_KIND_LABELS: Readonly<Record<string, string>> = Object.freeze({
   preflight: 'preflight', init: 'inizializzazione', archive: 'archivio della Fase 0', identity: 'riassegnazione d\'identità',
   inventory: 'inventario', plan: 'anteprima', apply: 'apply', verify: 'verifica',
+  cutover: 'passaggio a Radicale', rollback_preview: 'anteprima del rollback', rollback: 'ritorno a Postgres',
+  rebaseline: 'ri-baseline del ledger', finalize: 'chiusura della finestra',
 });
 
 const COLOR_LABELS: Readonly<Record<string, string>> = Object.freeze({ green: 'verde', yellow: 'giallo', red: 'rosso' });
@@ -1329,6 +1376,19 @@ export interface WizardStateInputs {
    * modifiche) non rende vecchia la verifica. Assente = l'ultimo apply riuscito.
    */
   lastWritingApplyAt?: Date | null;
+  /**
+   * Ingressi della F4 (contratto f4-modules §6.3): criteri del passaggio
+   * (cutoverCriteria, null se non valutati o fuori da mode postgres),
+   * transizione attiva o ultima, finestra di rollback e salute della
+   * proiezione inversa. Assenti = derivazione senza la F4 (criteri ricavati
+   * dagli ingressi puri, passaggio non disponibile).
+   */
+  f4?: {
+    criteria: CutoverCriterion[] | null;
+    transition: TransitionView | null;
+    rollbackWindow: RollbackWindowView | null;
+    reverse: ReverseProjectionHealthView | null;
+  };
 }
 
 function activeBlocker(inputs: WizardStateInputs): string | null {
@@ -1699,14 +1759,19 @@ function stepShadow(inputs: WizardStateInputs, verifyStep: WizardStepView): Wiza
   };
 }
 
-/** Criteri del cutover (informativi in F3, contratto §11.2 punto 6). */
-function cutoverAvailability(inputs: WizardStateInputs, verifyStep: WizardStepView): CutoverAvailability {
+/**
+ * Criteri del cutover ricavati dai soli ingressi puri (quelli della F3): si
+ * usano quando la derivazione non ha i criteri della F4 (cutoverCriteria,
+ * che leggono database, control-plane e probe), per esempio nei test della
+ * derivazione o se la loro lettura fallisce.
+ */
+function derivedCutoverCriteria(inputs: WizardStateInputs, verifyStep: WizardStepView): CutoverCriterion[] {
   const { state, parity, now } = inputs;
   const backup = backupRecent(state, now);
   const lastApply = applySummaryOf(inputs.lastSucceededByKind.get('apply'));
   const openConflicts = (parity?.open_conflicts ?? 0) + conflictCount(lastApply);
   const matrix = state.migration_declarations.device_matrix;
-  const criteria: CutoverCriterion[] = [
+  return [
     {
       id: 'verify_acceptable',
       label: 'Verifica V1-V5: tutti i calendari verdi o gialli accettati',
@@ -1738,28 +1803,298 @@ function cutoverAvailability(inputs: WizardStateInputs, verifyStep: WizardStepVi
       detail: openConflicts ? plural(openConflicts, 'conflitto aperto', 'conflitti aperti') : null,
     },
   ];
+}
+
+/** Criteri solo informativi: non bloccano il passaggio (per il cutover vale backup_fresh, contratto f4 §3.2). */
+const INFORMATIVE_CRITERIA: ReadonlySet<CutoverCriterion['id']> = new Set<CutoverCriterion['id']>(['backup_recent']);
+
+/** Criteri che bloccano il passaggio. */
+function blockingCriteria(criteria: readonly CutoverCriterion[]): CutoverCriterion[] {
+  return criteria.filter((c) => !c.ok && !INFORMATIVE_CRITERIA.has(c.id));
+}
+
+const TRANSITION_KIND_LABELS: Readonly<Record<TransitionKind, string>> = Object.freeze({
+  cutover: 'Passaggio a Radicale',
+  rollback: 'Ritorno a Postgres',
+  finalize: 'Chiusura della finestra di rollback',
+});
+
+/** Frase digitata che riprende una transizione del tipo dato (contratto f4 §6.1). */
+export const TRANSITION_RESUME_CONFIRMATIONS: Readonly<Record<TransitionKind, string>> = Object.freeze({
+  cutover: MIGRATION_CONFIRMATIONS.cutover,
+  rollback: MIGRATION_CONFIRMATIONS.rollback,
+  finalize: MIGRATION_CONFIRMATIONS.finalize,
+});
+
+/** Motivi dei blocchi del finalize in italiano (finalizeBlockers, contratto f4 §5.4). */
+const FINALIZE_BLOCKER_LABELS: Readonly<Partial<Record<PreconditionReason, string>>> = Object.freeze({
+  MODE_NOT_RADICALE: 'il backend non è in mode radicale',
+  FINALIZE_TOO_EARLY: `servono almeno ${F4_LIMITS.finalizeMinDays} giorni dal passaggio`,
+  HEALTH_NOT_GREEN: 'la salute del calendario non è verde',
+  DEAD_JOBS: 'ci sono job del calendario in dead letter',
+  REVERSE_FAILED_OPEN: 'ci sono risorse non proiettate in Postgres (REVERSE_FAILED)',
+  TRANSITION_ACTIVE: 'è attiva un\'altra transizione',
+  ROLLBACK_WINDOW_EXPIRED: 'la finestra di rollback è scaduta',
+});
+
+/** Testo dei blocchi del finalize per il wizard. */
+export function describeFinalizeBlockers(blockers: readonly PreconditionReason[]): string {
+  return blockers.map((b) => FINALIZE_BLOCKER_LABELS[b] ?? b).join('; ');
+}
+
+const NOT_AUTHORITATIVE = 'Postgres non è più autorevole: le azioni della migrazione che scrivono sono ferme';
+/** Azioni dei passi 1-5 che scrivono (o preparano una scrittura): ferme fuori da mode postgres (contratto f4 §6.3). */
+const F3_WRITING_ACTIONS: ReadonlySet<WizardActionId> = new Set<WizardActionId>([
+  'initialize', 'create_collections', 'archive', 'declare', 'identity_reassign', 'plan', 'apply', 'verify', 'accept', 'shadow_on',
+]);
+
+function freezeF3Actions(step: WizardStepView): WizardStepView {
   return {
-    available: false,
-    phase: 'F4',
-    reason: 'Il passaggio a Radicale arriva con la fase F4: in F3 Postgres resta autorevole e i criteri sono solo informativi.',
-    criteria,
+    ...step,
+    actions: step.actions.map((a) => (F3_WRITING_ACTIONS.has(a.id) ? { ...a, enabled: false, reason: NOT_AUTHORITATIVE } : a)),
   };
 }
 
-/** Passo 6: passaggio, sempre disabilitato in F3. */
-function stepCutover(availability: CutoverAvailability): WizardStepView {
-  const missing = availability.criteria.filter((c) => !c.ok);
+/** Anteprima del rollback utilizzabile: riuscita, dopo il passaggio corrente e non più vecchia del limite. */
+export interface RollbackPreviewCheck {
+  ok: boolean;
+  reason: PreconditionReason | null;
+  message: string | null;
+  run_id: string | null;
+  preview_hash: string | null;
+  finished_at: string | null;
+}
+
+function previewCheckOf(row: RunRow | null | undefined, state: MigrationBackendState, now: Date): RollbackPreviewCheck {
+  const base = { run_id: row?.id ?? null, finished_at: iso(row?.finished_at ?? null) };
+  const summary = (row?.summary ?? null) as Partial<RollbackPreviewSummary> | null;
+  const hash = summary && typeof summary.preview_hash === 'string' && HASH_RE.test(summary.preview_hash) ? summary.preview_hash : null;
+  if (!row || row.kind !== 'rollback_preview' || row.status !== 'succeeded' || !hash || !row.finished_at) {
+    return { ...base, ok: false, reason: 'PREVIEW_REQUIRED', message: 'Genera prima l\'anteprima del rollback', preview_hash: hash };
+  }
+  if (state.cutover_at && row.finished_at.getTime() < state.cutover_at.getTime()) {
+    return { ...base, ok: false, reason: 'PREVIEW_REQUIRED', message: 'L\'anteprima è di un passaggio precedente: rigenerala', preview_hash: hash };
+  }
+  const ageMin = (now.getTime() - row.finished_at.getTime()) / 60_000;
+  if (ageMin > F4_LIMITS.rollbackPreviewMaxAgeMinutes) {
+    return { ...base, ok: false, reason: 'PREVIEW_STALE', message: `Anteprima di più di ${F4_LIMITS.rollbackPreviewMaxAgeMinutes} minuti fa: rigenerala`, preview_hash: hash };
+  }
+  return { ...base, ok: true, reason: null, message: null, preview_hash: hash };
+}
+
+/** Validità di un run d'anteprima del rollback (route POST /rollback, contratto f4 §5.1 preflight). */
+export async function rollbackPreviewValidity(db: Db, previewRunId: string, now: Date = new Date()): Promise<RollbackPreviewCheck> {
+  const [row, state] = await Promise.all([readRunRow(db, previewRunId), readMigrationState(db)]);
+  return previewCheckOf(row, state, now);
+}
+
+/** Disponibilità del passaggio (contratto f4 §3.2 e §6.3). */
+function cutoverAvailability(inputs: WizardStateInputs, verifyStep: WizardStepView): CutoverAvailability {
+  const { state } = inputs;
+  const f4 = inputs.f4;
+  const transition = f4?.transition?.status === 'active' ? f4.transition : null;
+  if (state.mode !== 'postgres') {
+    return {
+      available: false,
+      phase: 'F4',
+      reason: state.mode === 'finalized'
+        ? 'Passaggio concluso e finestra di rollback chiusa: Radicale è l\'unico calendario'
+        : state.mode === 'radicale'
+          ? 'Passaggio già eseguito: Radicale è autorevole'
+          : `Transizione in corso (mode ${state.mode})`,
+      criteria: f4?.criteria ?? [],
+    };
+  }
+  if (!f4?.criteria) {
+    return {
+      available: false,
+      phase: 'F4',
+      reason: 'Criteri del passaggio non valutati (database, control-plane o Radicale non leggibili): ricarica tra poco',
+      criteria: derivedCutoverCriteria(inputs, verifyStep),
+    };
+  }
+  const missing = blockingCriteria(f4.criteria);
+  let reason: string;
+  if (transition) reason = `${TRANSITION_KIND_LABELS[transition.kind]} in corso: riprendilo o annullalo`;
+  else if (missing.length) reason = `Criteri mancanti: ${missing.length} di ${f4.criteria.filter((c) => !INFORMATIVE_CRITERIA.has(c.id)).length}`;
+  else if (inputs.active) reason = activeBlocker(inputs) ?? 'Run in corso';
+  else reason = 'Tutti i criteri sono soddisfatti: il passaggio si avvia con la conferma digitata';
+  return {
+    available: !transition && missing.length === 0 && !inputs.active,
+    phase: 'F4',
+    reason,
+    criteria: f4.criteria,
+  };
+}
+
+function journalProgress(t: TransitionView): { done: number; total: number } {
+  const total = t.kind === 'cutover' ? 12 : t.kind === 'rollback' ? 9 : 4;
+  const done = t.steps.filter((s) => s.step !== 'abort' && (s.status === 'done' || s.status === 'skipped')).length;
+  return { done: Math.min(done, total), total };
+}
+
+/** Passo 6 con una transizione attiva: avanzamento, ripresa e annullamento. */
+function stepTransitionActive(inputs: WizardStateInputs, t: TransitionView): WizardStepView {
+  const { done, total } = journalProgress(t);
+  const failed = t.steps.find((s) => s.status === 'failed' && s.step === t.next_step) ?? null;
+  const runningHere = !t.resumable;
+  const otherRun = inputs.active && inputs.active.kind !== t.kind ? activeBlocker(inputs) : null;
+  const blocking: string[] = [];
+  if (failed) blocking.push(`Passo ${failed.step} non riuscito${failed.error_code ? ` (${failed.error_code})` : ''}: ${failed.error ?? 'dettagli nel journal'}`);
+  if (!runningHere) blocking.push(`Transizione ferma${t.next_step ? ` al passo ${t.next_step}` : ''}: riprendila${t.abortable ? ' o annullala' : ' (oltre il passo d\'epoch non si annulla più)'}`);
+  const label = TRANSITION_KIND_LABELS[t.kind];
+  const resumeReason = runningHere ? 'La transizione è già in esecuzione' : otherRun ?? 'Ripresa non disponibile';
+  const abortReason = t.kind === 'finalize'
+    ? 'La chiusura della finestra non si annulla'
+    : !t.abortable
+      ? 'Oltre il passo d\'epoch la transizione non si annulla più: riprendila fino in fondo'
+      : runningHere
+        ? 'Annulla prima il run in corso (o attendi che si fermi), poi annulla la transizione'
+        : otherRun ?? 'Annullamento non disponibile';
   return {
     id: 'passaggio',
     index: 6,
     title: WIZARD_STEP_TITLES.passaggio,
-    status: 'disabled',
-    summary: missing.length
-      ? `Disponibile in F4 (criteri mancanti: ${missing.length} di ${availability.criteria.length})`
-      : 'Criteri soddisfatti: il passaggio sarà disponibile con la fase F4',
-    blocking: [availability.reason],
+    status: runningHere ? 'running' : 'attention',
+    summary: runningHere
+      ? `${label} in corso: ${done}/${total} passi${t.next_step ? `, ora ${t.next_step}` : ''}`
+      : `${label} fermo${t.next_step ? ` al passo ${t.next_step}` : ''} (${done}/${total} passi conclusi)`,
+    blocking,
+    last_run_id: t.run_id,
+    actions: [
+      action('transition_resume', t.resumable && !otherRun, resumeReason, TRANSITION_RESUME_CONFIRMATIONS[t.kind]),
+      action('cutover_abort', t.kind !== 'finalize' && t.abortable && t.resumable && !otherRun, abortReason, MIGRATION_CONFIRMATIONS.cutoverAbort),
+      action('export_v2', false, 'Export non disponibile durante una transizione'),
+    ],
+  };
+}
+
+/** Passo 6 in mode postgres: criteri, passaggio e (dopo un rollback) ri-baseline di riparazione. */
+function stepCutoverPostgres(inputs: WizardStateInputs, availability: CutoverAvailability, shadowStep: WizardStepView): WizardStepView {
+  const f4 = inputs.f4;
+  const busy = activeBlocker(inputs);
+  const last = f4?.transition ?? null;
+  const missing = f4?.criteria ? blockingCriteria(f4.criteria) : null;
+  const notes: string[] = [];
+  if (last?.kind === 'cutover' && last.status === 'aborted') {
+    notes.push(`Ultimo passaggio annullato${last.finished_at ? ` il ${last.finished_at}` : ''}${last.outcome ? ` (${last.outcome})` : ''}`);
+  }
+  const rollbackDone = last?.kind === 'rollback' && last.status === 'completed';
+  if (rollbackDone) notes.push(`Rollback concluso${last.finished_at ? ` il ${last.finished_at}` : ''}: Postgres autorevole, per ripassare serve una verifica completa accettabile`);
+
+  let status: WizardStepStatus;
+  let summary: string;
+  if (inputs.active?.kind === 'cutover') {
+    status = 'running';
+    summary = 'Passaggio a Radicale in avvio';
+  } else if (!missing) {
+    status = 'locked';
+    summary = 'Criteri del passaggio non valutati';
+  } else if (missing.length === 0) {
+    status = 'todo';
+    summary = 'Criteri soddisfatti: puoi passare a Radicale';
+  } else {
+    status = shadowStep.status === 'done' ? 'blocked' : 'locked';
+    summary = `Criteri mancanti: ${missing.length} di ${f4!.criteria!.filter((c) => !INFORMATIVE_CRITERIA.has(c.id)).length}`;
+  }
+  if (notes.length) summary = `${summary}. ${notes.join('. ')}`;
+  const blocking = missing ? missing.map((c) => c.detail ?? c.label) : [availability.reason];
+
+  const rebaselineReason = busy
+    ?? (!rollbackDone ? 'La ri-baseline di riparazione serve solo dopo un rollback'
+      : !inputs.configured ? 'Radicale non configurato'
+        : inputs.identity.status !== 'ok' ? 'Identità del volume non verificata' : null);
+  return {
+    id: 'passaggio',
+    index: 6,
+    title: WIZARD_STEP_TITLES.passaggio,
+    status,
+    summary,
+    blocking,
+    last_run_id: inputs.lastByKind.get('cutover')?.id ?? null,
+    actions: [
+      action('cutover', availability.available, busy ?? availability.reason, MIGRATION_CONFIRMATIONS.cutover),
+      action('rebaseline', rebaselineReason === null, rebaselineReason, MIGRATION_CONFIRMATIONS.apply),
+      action('export_v2', false, 'L\'export v2 (un .ics per collezione) è disponibile dopo il passaggio: in mode postgres usa il backup JSON'),
+    ],
+  };
+}
+
+/** Passo 6 in mode radicale o finalized: finestra di rollback, anteprima, rollback, finalize ed export. */
+function stepCutoverRadicale(inputs: WizardStateInputs): WizardStepView {
+  const { state, now } = inputs;
+  const f4 = inputs.f4;
+  const busy = activeBlocker(inputs);
+  const w = f4?.rollbackWindow ?? null;
+  const reverse = f4?.reverse ?? null;
+  const finalized = state.mode === 'finalized';
+  const expired = w ? w.expired : !state.rollback_until || state.rollback_until.getTime() <= now.getTime();
+  const preview = previewCheckOf(inputs.lastSucceededByKind.get('rollback_preview'), state, now);
+  const cutoverSummary = asObject(inputs.lastSucceededByKind.get('cutover')?.summary);
+  const smoke = asObject(cutoverSummary.smoke);
+  const blocking: string[] = [];
+  if (!finalized) {
+    if (smoke.ok === false) blocking.push('Le prove finali del passaggio non sono riuscite: controlla il riassunto e valuta il rollback');
+    if (reverse && reverse.by_status.failed > 0) blocking.push(`${plural(reverse.by_status.failed, 'risorsa non proiettata', 'risorse non proiettate')} in Postgres (REVERSE_FAILED): il rollback le perderebbe`);
+    if (reverse && reverse.queue.dead > 0) blocking.push(`${plural(reverse.queue.dead, 'job della proiezione inversa', 'job della proiezione inversa')} in dead letter`);
+    if (expired) blocking.push('Finestra di rollback scaduta: chiudila con "Chiudi finestra"');
+  }
+
+  let summary: string;
+  if (finalized) {
+    summary = `Finestra di rollback chiusa${state.finalized_at ? ` il ${state.finalized_at.toISOString()}` : ''}: Radicale è l'unico calendario`;
+  } else if (expired) {
+    summary = 'Radicale autorevole; finestra di rollback scaduta';
+  } else {
+    const days = w?.days_left ?? Math.max(0, Math.floor(((state.rollback_until?.getTime() ?? 0) - now.getTime()) / 86_400_000));
+    summary = `Radicale autorevole${state.cutover_at ? ` dal ${state.cutover_at.toISOString()}` : ''}: ${plural(days, 'giorno', 'giorni')} per tornare a Postgres`;
+  }
+
+  const windowReason = finalized ? 'Finestra di rollback chiusa: il ritorno a Postgres non è più possibile'
+    : expired ? 'Finestra di rollback scaduta' : null;
+  const previewReason = busy ?? windowReason ?? (!inputs.configured ? 'Radicale non configurato' : null);
+  const rollbackReason = busy ?? windowReason ?? (preview.ok ? null : preview.message);
+  const finalizeReason = finalized ? 'Finestra già chiusa'
+    : busy ?? (!w ? 'Stato della finestra non disponibile'
+      : w.finalize_ready ? null
+        : `Non ancora: ${describeFinalizeBlockers(w.finalize_blockers) || 'condizioni non soddisfatte'}${w.finalize_blockers.includes('FINALIZE_TOO_EARLY') ? ` (dal ${w.finalize_available_at})` : ''}`);
+  return {
+    id: 'passaggio',
+    index: 6,
+    title: WIZARD_STEP_TITLES.passaggio,
+    status: finalized ? 'done' : blocking.length ? 'attention' : 'done',
+    summary,
+    blocking,
+    last_run_id: inputs.lastByKind.get('rollback_preview')?.id ?? inputs.lastByKind.get('cutover')?.id ?? null,
+    actions: [
+      action('rollback_preview', previewReason === null, previewReason),
+      action('rollback', rollbackReason === null, rollbackReason, MIGRATION_CONFIRMATIONS.rollback),
+      action('finalize', finalizeReason === null, finalizeReason, MIGRATION_CONFIRMATIONS.finalize),
+      action('export_v2', true, null),
+    ],
+  };
+}
+
+/** Passo 6: passaggio, rollback e chiusura della finestra (contratto f4 §6.3). */
+function stepCutover(inputs: WizardStateInputs, availability: CutoverAvailability, shadowStep: WizardStepView): WizardStepView {
+  const t = inputs.f4?.transition ?? null;
+  if (t && t.status === 'active') return stepTransitionActive(inputs, t);
+  const mode = inputs.state.mode;
+  if (mode === 'postgres') return stepCutoverPostgres(inputs, availability, shadowStep);
+  if (mode === 'radicale' || mode === 'finalized') return stepCutoverRadicale(inputs);
+  // Mode di transizione senza una transizione attiva nel journal: stato incoerente, nessuna azione.
+  return {
+    id: 'passaggio',
+    index: 6,
+    title: WIZARD_STEP_TITLES.passaggio,
+    status: 'blocked',
+    summary: `Backend in mode ${mode} senza una transizione attiva nel journal`,
+    blocking: ['Stato incoerente: controlla i log del server e la tabella cal_migration_transitions prima di qualsiasi azione'],
     last_run_id: null,
-    actions: [action('cutover', false, 'Il passaggio a Radicale è disponibile dalla fase F4', MIGRATION_CONFIRMATIONS.cutover)],
+    actions: [
+      action('transition_resume', false, 'Nessuna transizione attiva da riprendere'),
+      action('cutover_abort', false, 'Nessuna transizione attiva da annullare'),
+    ],
   };
 }
 
@@ -1771,8 +2106,51 @@ export function deriveWizardSteps(inputs: WizardStateInputs): { steps: WizardSte
   const s4 = stepVerify(inputs);
   const s5 = stepShadow(inputs, s4);
   const cutover = cutoverAvailability(inputs, s4);
-  const s6 = stepCutover(cutover);
-  return { steps: [s1, s2, s3, s4, s5, s6], cutover };
+  const s6 = stepCutover(inputs, cutover, s5);
+  const first = [s1, s2, s3, s4, s5];
+  const steps = inputs.state.mode === 'postgres' ? [...first, s6] : [...first.map(freezeF3Actions), s6];
+  return { steps, cutover };
+}
+
+/** Transizione attiva (o ultima conclusa) con `resumable` calcolato dai run (contratto f4 §6.2). */
+export async function currentTransitionView(db: Db = sql): Promise<TransitionView | null> {
+  const record = await getLatestTransition(db);
+  if (!record) return null;
+  let runActive = false;
+  if (record.status === 'active') {
+    // Un run dello stesso tipo in coda o in esecuzione la sta eseguendo (anche una ripresa appena chiesta).
+    const [r] = await db<Array<{ n: number }>>`
+      SELECT count(*)::int AS n FROM cal_migration_runs WHERE status IN ('queued', 'running') AND kind = ${record.kind}
+    `;
+    runActive = (r?.n ?? 0) > 0;
+  }
+  return buildTransitionView(record, await readJournal(db, record.id), { runActive });
+}
+
+/** Finestra di rollback per il wizard (contratto f4 §6.3), null in mode postgres o senza passaggio. */
+async function rollbackWindowFor(db: Db, state: MigrationBackendState, now: Date): Promise<RollbackWindowView | null> {
+  if (state.mode === 'postgres' || state.mode === 'cutover' || !state.cutover_at) return null;
+  const until = state.rollback_until;
+  const expired = !until || until.getTime() <= now.getTime();
+  let blockers: PreconditionReason[] = [];
+  if (state.mode === 'radicale') {
+    try {
+      blockers = await finalizeBlockersOf(db, now);
+    } catch (err) {
+      log.warn({ err: err instanceof Error ? err.message : String(err) }, 'blocchi del finalize non letti');
+      blockers = ['HEALTH_NOT_GREEN'];
+    }
+  }
+  return {
+    cutover_at: state.cutover_at.toISOString(),
+    cutover_by: state.cutover_by ?? null,
+    rollback_until: until ? until.toISOString() : null,
+    days_left: expired || !until ? 0 : Math.floor((until.getTime() - now.getTime()) / 86_400_000),
+    expired,
+    finalize_available_at: new Date(state.cutover_at.getTime() + F4_LIMITS.finalizeMinDays * 86_400_000).toISOString(),
+    finalize_ready: state.mode === 'radicale' && blockers.length === 0,
+    finalize_blockers: blockers,
+  };
 }
 
 async function identityForView(state: MigrationBackendState, configured: boolean): Promise<WizardStateInputs['identity']> {
@@ -1861,12 +2239,18 @@ export async function buildMigrationStateView(): Promise<MigrationStateView> {
   }
   const active = activeRows[0] ?? null;
   const ledger = ledgerRows[0] ?? { live: 0, pending_intents: 0, revalidation_pending: 0 };
+  const f4 = await readF4Inputs(db, state, identity, now);
   const inputs: WizardStateInputs = {
     now, state, configured, identity, active, lastByKind, lastFinishedByKind, lastSucceededByKind, verify, parity, ledger,
     lastWritingApplyAt: writingApply[0]?.finished_at ?? null,
+    f4,
   };
   const { steps, cutover } = deriveWizardSteps(inputs);
-  const current = steps.find((s) => s.status !== 'done' && s.id !== 'passaggio')?.id ?? ('passaggio' as WizardStepId);
+  // Fuori da mode postgres, o con una transizione attiva, il lavoro è tutto nel passo 6.
+  const onCutoverStep = state.mode !== 'postgres' || f4.transition?.status === 'active';
+  const current = onCutoverStep
+    ? ('passaggio' as WizardStepId)
+    : steps.find((s) => s.status !== 'done' && s.id !== 'passaggio')?.id ?? ('passaggio' as WizardStepId);
 
   const lastRuns: MigrationStateView['last_runs'] = {};
   for (const [kind, row] of lastByKind) lastRuns[kind] = toRunView(row);
@@ -1904,7 +2288,52 @@ export async function buildMigrationStateView(): Promise<MigrationStateView> {
     shadow_queue: queueRows[0] ?? { pending: 0, running: 0, dead: 0 },
     wizard: { current_step: current, steps },
     cutover,
+    transition: f4.transition,
+    rollback_window: f4.rollbackWindow,
+    reverse_projection: f4.reverse,
   };
+}
+
+/**
+ * Ingressi della F4 per lo stato del wizard: transizione (con i run attivi),
+ * criteri del passaggio in mode postgres (senza una nuova lettura remota
+ * dell'identità: vale quella appena verificata per la vista, con la sua cache
+ * breve; la route e il run ricontrollano tutto), finestra di rollback e salute
+ * della proiezione inversa. Ogni lettura che fallisce lascia il proprio campo
+ * a null (il wizard mostra "non disponibile") senza far fallire GET /state.
+ */
+async function readF4Inputs(
+  db: Db,
+  state: MigrationBackendState,
+  identity: WizardStateInputs['identity'],
+  now: Date,
+): Promise<NonNullable<WizardStateInputs['f4']>> {
+  const warn = (what: string) => (err: unknown) => {
+    log.warn({ err: err instanceof Error ? err.message : String(err) }, `${what} non letti`);
+    return null;
+  };
+  const transition = await currentTransitionView(db).catch(warn('transizione e journal'));
+  const criteria = state.mode !== 'postgres'
+    ? null
+    : await cutoverCriteria(db, {
+      now,
+      transitionId: transition?.status === 'active' ? transition.id : null,
+      deps: {
+        assertWritable: async () => {
+          if (identity.status !== 'ok') {
+            throw new MigrationError('PRECONDITION_FAILED', `Identità del volume non verificata (${identity.status}${identity.detail ? `: ${identity.detail}` : ''})`, { reasons: ['IDENTITY_NOT_OK'] });
+          }
+          return state;
+        },
+      },
+    }).catch(warn('criteri del passaggio'));
+  const [rollbackWindow, reverse] = await Promise.all([
+    rollbackWindowFor(db, state, now).catch(warn('finestra di rollback')),
+    state.mode === 'radicale' || state.mode === 'rollback'
+      ? readReverseProjectionHealth(db, now).catch(warn('salute della proiezione inversa'))
+      : Promise.resolve(null),
+  ]);
+  return { criteria, transition, rollbackWindow, reverse };
 }
 
 /** Parametri di un apply dall'anteprima di riferimento (route POST /apply). */

@@ -43,11 +43,11 @@ import { CAL_LOCKS, INDEX_LIMITS } from '../index-model';
 export const MIGRATION_CONTRACT_VERSION = 1 as const;
 
 /**
- * Fase del piano in cui gira questo codice: in F3 cutover, rollback e
- * finalize non esistono. La porta a 'F4' il gruppo UI della F4 insieme alle
- * route e al wizard (contratto f4-modules §0 e §10).
+ * Fase del piano in cui gira questo codice: dalla F4 esistono cutover,
+ * rollback, anteprima del rollback, ri-baseline e finalize (route, esecutore
+ * e wizard; contratto f4-modules §6).
  */
-export const MIGRATION_PHASE = 'F3' as const;
+export const MIGRATION_PHASE = 'F4' as const;
 
 /**
  * Livello del protocollo calendario di questa build dell'API (design §16.6):

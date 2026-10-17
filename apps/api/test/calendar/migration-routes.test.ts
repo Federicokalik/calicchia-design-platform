@@ -10,7 +10,8 @@
  * chiave d'idempotenza (obbligatoria per i run che scrivono, replay con la
  * stessa richiesta, IDEMPOTENCY_KEY_REUSED con una diversa); 503 senza
  * Radicale per i run asincroni; MIGRATION_BUSY con il run in corso;
- * PHASE_NOT_AVAILABLE per cutover, rollback e finalize; dichiarazioni (con
+ * nessun PHASE_NOT_AVAILABLE in F4 (le route della F4 hanno i propri test in
+ * migration-routes-f4.test.ts); dichiarazioni (con
  * CONFERMO per quelle che tolgono un controllo) e audit; paginazione e filtri
  * delle righe; download del report; annullamento; ciclo di vita del run con
  * l'esecutore reale dei job (successo, errore senza dati personali,
@@ -122,7 +123,7 @@ describe('autenticazione', () => {
 });
 
 describe('GET /state', () => {
-  test('database appena migrato: 6 passi, prerequisiti da fare, passaggio disabilitato con i criteri', async () => {
+  test('database appena migrato: 6 passi, prerequisiti da fare, passaggio bloccato con i criteri della F4', async () => {
     withoutRadicale();
     await clearRuns();
     const res = await api.get(`${BASE}/state`, { auth: 'admin' });
@@ -130,7 +131,7 @@ describe('GET /state', () => {
     const s = res.json;
     assert.equal(res.headers.get('cache-control'), 'no-store');
     assert.equal(s.contract_version, 1);
-    assert.equal(s.phase, 'F3');
+    assert.equal(s.phase, 'F4');
     assert.equal(s.backend.mode, 'postgres');
     assert.equal(s.backend.shadow_enabled, false);
     assert.equal(s.backend.epoch, 0);
@@ -147,7 +148,8 @@ describe('GET /state', () => {
     assert.equal(s3.status, 'locked');
     assert.equal(s4.status, 'locked');
     assert.equal(s5.status, 'locked');
-    assert.equal(s6.status, 'disabled');
+    // F4: il passo 6 non è più disabilitato per fase; senza i criteri resta bloccato (passi precedenti da fare).
+    assert.equal(s6.status, 'locked');
     const act = (step: { actions: Array<{ id: string; enabled: boolean; confirm: string | null; reason: string | null }> }, id: string) => step.actions.find((a) => a.id === id)!;
     assert.equal(act(s1, 'preflight').enabled, true);
     assert.equal(act(s1, 'initialize').enabled, false);
@@ -157,7 +159,11 @@ describe('GET /state', () => {
     assert.equal(act(s6, 'cutover').confirm, MIGRATION_CONFIRMATIONS.cutover);
     assert.equal(s.cutover.available, false);
     assert.equal(s.cutover.phase, 'F4');
-    assert.deepEqual(s.cutover.criteria.map((c: { id: string }) => c.id), ['verify_acceptable', 'shadow_parity', 'device_matrix', 'backup_recent', 'no_open_conflicts']);
+    // Criteri della F4 (contratto f4-modules §3.2), valutati dallo stato.
+    const criteriaIds = s.cutover.criteria.map((c: { id: string }) => c.id);
+    for (const id of ['no_active_transition', 'identity_ok', 'verify_acceptable', 'shadow_parity', 'device_matrix', 'backup_fresh', 'backup_recent', 'no_open_conflicts', 'no_revalidation', 'control_plane', 'probe', 'archive_readonly']) {
+      assert.ok(criteriaIds.includes(id), `criterio ${id}`);
+    }
     assert.ok(s.cutover.criteria.every((c: { ok: boolean; label: string }) => typeof c.ok === 'boolean' && c.label.length > 0));
   });
 });
@@ -457,11 +463,11 @@ describe('conferme, chiavi e precondizioni', () => {
     }
   });
 
-  test('cutover, rollback e finalize: 409 PHASE_NOT_AVAILABLE', async () => {
+  test('cutover, rollback e finalize: in F4 mai PHASE_NOT_AVAILABLE, e senza conferme, chiave e criteri nessuna transizione', async () => {
     for (const path of ['/cutover', '/rollback/preview', '/rollback', '/finalize']) {
       const res = await api.post(`${BASE}${path}`, { auth: 'admin', body: { confirm: MIGRATION_CONFIRMATIONS.cutover } });
-      assert.equal(res.status, 409, path);
-      assert.equal(res.json.code, 'PHASE_NOT_AVAILABLE');
+      assert.ok([400, 409, 503].includes(res.status), `${path}: ${res.status} ${res.text}`);
+      assert.notEqual(res.json.code, 'PHASE_NOT_AVAILABLE', path);
     }
     const [{ mode }] = await sql<Array<{ mode: string }>>`SELECT mode FROM calendar_backend_state WHERE id = true`;
     assert.equal(mode, 'postgres');
@@ -1040,7 +1046,7 @@ describe('passi del wizard', () => {
     assert.equal(statuses(wroteAfter)[3], 'todo', 'un apply che ha scritto dopo la verifica la rende vecchia');
   });
 
-  test('passi 5-6: shadow in corso, conflitti, parità soddisfatta con e senza matrice device; passaggio sempre disabilitato', () => {
+  test('passi 5-6: shadow in corso, conflitti, parità soddisfatta con e senza matrice device; passaggio non disponibile senza i criteri della F4', () => {
     const base = [runRow('preflight', 600, READY_PREFLIGHT), runRow('plan', 300, { writes: 0, totals: { noop: 1 }, conflicts: {}, preview: { blocking: [] } }), runRow('apply', 100, { zero_writes: true, writes: { create: 0, update: 0, delete: 0 }, conflicts: {}, failed: 0 })];
     const verify = { runId: randomUUID(), verdicts: [green('c')], acceptable: true, finished_at: minutesAgo(50) };
     const parity = (over: Record<string, unknown> = {}) => ({
@@ -1078,11 +1084,12 @@ describe('passi del wizard', () => {
     });
     const all = deriveWizardSteps(inputs({ runs: base, verify, state: withMatrix, parity: parity({ satisfied: true, days_green: 8 }) }));
     assert.equal(all.steps[4].status, 'done');
-    assert.equal(all.steps[5].status, 'disabled');
+    // Senza gli ingressi della F4 (criteri letti da database, control-plane e probe) il passaggio non è disponibile.
+    assert.equal(all.steps[5].status, 'locked');
     assert.equal(all.steps[5].actions[0].enabled, false);
     assert.equal(all.cutover.available, false);
     assert.ok(all.cutover.criteria.every((c) => c.ok), JSON.stringify(all.cutover.criteria));
-    assert.match(all.steps[5].summary, /F4/);
+    assert.match(all.cutover.reason, /non valutati/);
 
     const noBackup = deriveWizardSteps(inputs({ runs: base, verify, state: { ...withMatrix, last_stack_backup: null }, parity: parity({ satisfied: true, days_green: 8 }) }));
     assert.equal(noBackup.cutover.criteria.find((c) => c.id === 'backup_recent')!.ok, false);
