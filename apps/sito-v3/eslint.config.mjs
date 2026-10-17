@@ -65,6 +65,10 @@ export default [
   // - `src/proxy.ts`: middleware Next.js (NextResponse, etc.).
   // - `src/app/error.tsx`: root error boundary, sta fuori dal NextIntlClientProvider.
   // - `src/app/api/**`: Route Handlers server-side, niente locale concern.
+  // - `src/components/layout/LanguagePromptBanner.tsx`: come AvailabilityTopbar,
+  //   legge il pathname grezzo solo per isStandaloneResourcePath.
+  // - `src/lib/portal-format.ts`: redirect del portale (non localizzato) verso
+  //   /clienti/login, raw per l'incidente 2026-05-28 descritto nel file.
   {
     files: ['src/**/*.{ts,tsx}'],
     ignores: [
@@ -72,6 +76,8 @@ export default [
       'src/components/providers/ViewTransitionsBootstrap.tsx',
       'src/components/layout/LanguageSwitcher.tsx',
       'src/components/layout/AvailabilityTopbar.tsx',
+      'src/components/layout/LanguagePromptBanner.tsx',
+      'src/lib/portal-format.ts',
       'src/components/analytics/**',
       'src/proxy.ts',
       'src/app/error.tsx',
