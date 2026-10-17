@@ -137,6 +137,7 @@ import {
   type RollbackParams,
   type RollbackPreviewParams,
   type RollbackPreviewSummary,
+  type RollbackPreviewCheck,
   type RollbackWindowView,
   type RunCreatedResponse,
   type RunItemsResponse,
@@ -1855,15 +1856,7 @@ function freezeF3Actions(step: WizardStepView): WizardStepView {
   };
 }
 
-/** Anteprima del rollback utilizzabile: riuscita, dopo il passaggio corrente e non più vecchia del limite. */
-export interface RollbackPreviewCheck {
-  ok: boolean;
-  reason: PreconditionReason | null;
-  message: string | null;
-  run_id: string | null;
-  preview_hash: string | null;
-  finished_at: string | null;
-}
+export type { RollbackPreviewCheck };
 
 function previewCheckOf(row: RunRow | null | undefined, state: MigrationBackendState, now: Date): RollbackPreviewCheck {
   const base = { run_id: row?.id ?? null, finished_at: iso(row?.finished_at ?? null) };
@@ -2128,7 +2121,7 @@ export async function currentTransitionView(db: Db = sql): Promise<TransitionVie
 }
 
 /** Finestra di rollback per il wizard (contratto f4 §6.3), null in mode postgres o senza passaggio. */
-async function rollbackWindowFor(db: Db, state: MigrationBackendState, now: Date): Promise<RollbackWindowView | null> {
+async function rollbackWindowFor(db: Db, state: MigrationBackendState, now: Date, lastPreview: RunRow | null | undefined): Promise<RollbackWindowView | null> {
   if (state.mode === 'postgres' || state.mode === 'cutover' || !state.cutover_at) return null;
   const until = state.rollback_until;
   const expired = !until || until.getTime() <= now.getTime();
@@ -2150,6 +2143,7 @@ async function rollbackWindowFor(db: Db, state: MigrationBackendState, now: Date
     finalize_available_at: new Date(state.cutover_at.getTime() + F4_LIMITS.finalizeMinDays * 86_400_000).toISOString(),
     finalize_ready: state.mode === 'radicale' && blockers.length === 0,
     finalize_blockers: blockers,
+    preview: previewCheckOf(lastPreview, state, now),
   };
 }
 
@@ -2239,7 +2233,7 @@ export async function buildMigrationStateView(): Promise<MigrationStateView> {
   }
   const active = activeRows[0] ?? null;
   const ledger = ledgerRows[0] ?? { live: 0, pending_intents: 0, revalidation_pending: 0 };
-  const f4 = await readF4Inputs(db, state, identity, now);
+  const f4 = await readF4Inputs(db, state, identity, now, lastSucceededByKind);
   const inputs: WizardStateInputs = {
     now, state, configured, identity, active, lastByKind, lastFinishedByKind, lastSucceededByKind, verify, parity, ledger,
     lastWritingApplyAt: writingApply[0]?.finished_at ?? null,
@@ -2307,6 +2301,7 @@ async function readF4Inputs(
   state: MigrationBackendState,
   identity: WizardStateInputs['identity'],
   now: Date,
+  lastSucceededByKind: Map<MigrationRunKind, RunRow>,
 ): Promise<NonNullable<WizardStateInputs['f4']>> {
   const warn = (what: string) => (err: unknown) => {
     log.warn({ err: err instanceof Error ? err.message : String(err) }, `${what} non letti`);
@@ -2328,7 +2323,7 @@ async function readF4Inputs(
       },
     }).catch(warn('criteri del passaggio'));
   const [rollbackWindow, reverse] = await Promise.all([
-    rollbackWindowFor(db, state, now).catch(warn('finestra di rollback')),
+    rollbackWindowFor(db, state, now, lastSucceededByKind.get('rollback_preview')).catch(warn('finestra di rollback')),
     state.mode === 'radicale' || state.mode === 'rollback'
       ? readReverseProjectionHealth(db, now).catch(warn('salute della proiezione inversa'))
       : Promise.resolve(null),

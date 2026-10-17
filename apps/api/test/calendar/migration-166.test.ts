@@ -36,7 +36,9 @@ import { fileURLToPath } from 'node:url';
 import { onBeforeDatabaseClose, resetCalendarBaseline, sql } from '../helpers/db';
 import { useFixtures } from '../helpers/fixtures';
 import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
+import { CalendarUnavailableError } from '../../src/lib/calendar/errors';
 import { getPgLegacyStore } from '../../src/lib/calendar/store';
+import { NODE_TYPES, validateReadOnlyQuery } from '../../src/lib/workflow/nodes';
 import { isCalendarEventsGuardError } from '../../src/lib/calendar/migration/transition';
 import {
   CALENDAR_EVENTS_GUARD_SQLSTATE,
@@ -327,7 +329,7 @@ describe('migrazione 166: guardia guidata dallo stato', () => {
       const cal = await insertCalendar(tx, 'tst-166-guc');
       const id = await insertEvent(tx, { calendarId: cal, uid: 'tst-166-guc-1' });
       await setMode(tx, 'radicale');
-      await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
       const objectId = randomUUID();
       const derived = await tx`
         INSERT INTO calendar_events (calendar_id, uid, summary, start_time, end_time, caldes_object_id, caldes_derived)
@@ -359,7 +361,7 @@ describe('migrazione 166: guardia guidata dallo stato', () => {
         `;
         const pulled = await insertEvent(tx, { calendarId: cal, uid: `tst-166-del-${withGuc}-p`, subscriptionId: sub.id, source: 'ics_pull' });
         await setMode(tx, 'radicale');
-        if (withGuc) await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+        if (withGuc) await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
         await tx`DELETE FROM calendars WHERE id = ${cal}`;
         assert.equal(await countEvents(tx, [master, override, pulled]), 0, withGuc ? 'con il GUC' : 'senza GUC: le cascate passano la guardia');
       });
@@ -396,7 +398,7 @@ describe('migrazione 166: guardia guidata dallo stato', () => {
       await expectGuard(tx, (sp) => sp`DELETE FROM calendar_events WHERE id = ${master}`, 'master senza GUC');
       assert.equal(await countEvents(tx, [master, override]), 2);
       await tx.savepoint(async (sp: Tx) => {
-        await sp`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+        await sp`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
         await sp`DELETE FROM calendar_events WHERE id = ${master}`;
         await sp`SELECT set_config('caldes.reverse_sync', 'off', true)`;
       });
@@ -424,6 +426,80 @@ describe('migrazione 166: guardia guidata dallo stato', () => {
       invalidateBackendModeCache();
     }
   });
+
+  test('F4R-TR-4: create, update e delete di calendari e iscrizioni legacy fuori da mode postgres → CalendarUnavailableError, nulla cambia', async () => {
+    const cal = await fx.calendar({ key: 'tr4-barrier' });
+    const legacy = getPgLegacyStore();
+    await setMode(sql, 'cutover');
+    invalidateBackendModeCache();
+    try {
+      await assert.rejects(legacy.deleteCalendar(cal.id), (err: unknown) => err instanceof CalendarUnavailableError && err.reason === 'store_not_available');
+      const [still] = await sql`SELECT id FROM calendars WHERE id = ${cal.id}::uuid`;
+      assert.ok(still, 'il calendario è ancora presente');
+      await assert.rejects(legacy.updateCalendar(cal.id, { name: fx.name('rinominato') }), (err: unknown) => err instanceof CalendarUnavailableError);
+      await assert.rejects(
+        legacy.createCalendar({ slug: `tst-tr4-${randomUUID().slice(0, 8)}`, name: fx.name('nuovo') }),
+        (err: unknown) => err instanceof CalendarUnavailableError,
+      );
+      await assert.rejects(
+        legacy.createSubscription({ calendar_id: cal.id, name: fx.name('iscrizione'), ics_url: 'https://example.invalid/tr4.ics' }),
+        (err: unknown) => err instanceof CalendarUnavailableError,
+      );
+      const [{ n }] = await sql`SELECT count(*)::int AS n FROM calendar_subscriptions WHERE calendar_id = ${cal.id}::uuid`;
+      assert.equal(n, 0);
+    } finally {
+      await setMode(sql, 'postgres');
+      invalidateBackendModeCache();
+    }
+    // Di nuovo in mode postgres la scrittura legacy passa.
+    await legacy.deleteCalendar(cal.id);
+    assert.equal((await sql`SELECT id FROM calendars WHERE id = ${cal.id}::uuid`).length, 0);
+  });
+
+  test('F4R-TR-3: un GUC "on" o di sessione non passa la guardia, solo l\'id della transazione corrente', async () => {
+    await inRollback(async (tx) => {
+      await setMode(tx, 'postgres');
+      const cal = await insertCalendar(tx, 'tst-166-tr3');
+      const id = await insertEvent(tx, { calendarId: cal, uid: 'tst-166-tr3-1' });
+      await setMode(tx, 'radicale');
+      // Come farebbe il nodo SQL dei workflow: set_config a livello di sessione (is_local = false).
+      await tx`SELECT set_config('caldes.reverse_sync', 'on', false)`;
+      await expectGuard(tx, (sp) => sp`UPDATE calendar_events SET summary = 'x' WHERE id = ${id}`, 'GUC di sessione "on"');
+      await tx`SELECT set_config('caldes.reverse_sync', '4242424242', false)`;
+      await expectGuard(tx, (sp) => sp`UPDATE calendar_events SET summary = 'x' WHERE id = ${id}`, 'GUC con un txid altrui');
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
+      await tx`UPDATE calendar_events SET summary = 'dalla proiezione inversa' WHERE id = ${id}`;
+    });
+  });
+
+  test('F4R-TR-3: il nodo SQL dei workflow rifiuta set_config, current_setting e txid_*, e gira in sola lettura', async () => {
+    const blocked = 'Query bloccata: funzioni di sistema non permesse';
+    assert.equal(validateReadOnlyQuery("SELECT set_config('caldes.reverse_sync','on',false)"), blocked);
+    assert.equal(validateReadOnlyQuery("SELECT current_setting('caldes.reverse_sync', true)"), blocked);
+    assert.equal(validateReadOnlyQuery('SELECT txid_current()'), blocked);
+    assert.equal(validateReadOnlyQuery('SELECT id FROM leads LIMIT 1'), null);
+    const out = await NODE_TYPES.tool_db_query.execute({ query: "SELECT set_config('caldes.reverse_sync','on',false)", params: [] }, {});
+    assert.equal((out as { error?: string }).error, blocked);
+    // La query valida gira in una transazione di sola lettura.
+    const ok = await NODE_TYPES.tool_db_query.execute({ query: 'SELECT count(*)::int AS n FROM leads', params: [] }, {});
+    assert.equal((ok as { error?: string }).error, undefined);
+  });
+
+  for (const mode of ['cutover', 'rollback'] as const) {
+    test(`F4R-TR-4: in mode ${mode} la delete di un calendario senza GUC fallisce con CD166 (le cascate non sono esenti)`, async () => {
+      await inRollback(async (tx) => {
+        await setMode(tx, 'postgres');
+        const cal = await insertCalendar(tx, `tst-166-tr4-${mode}`);
+        const ev = await insertEvent(tx, { calendarId: cal, uid: `tst-166-tr4-${mode}-e` });
+        await setMode(tx, mode);
+        await expectGuard(tx, (sp) => sp`DELETE FROM calendars WHERE id = ${cal}`, 'DELETE del calendario senza GUC');
+        assert.equal(await countEvents(tx, [ev]), 1);
+        await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
+        await tx`DELETE FROM calendars WHERE id = ${cal}`;
+        assert.equal(await countEvents(tx, [ev]), 0, 'con il GUC lo scrittore privilegiato cancella');
+      });
+    });
+  }
 });
 
 describe('migrazione 166: barriera delle transizioni', () => {

@@ -33,6 +33,7 @@
  */
 
 import { sql } from '../../db';
+import { assertCalendarApiLevel } from './api-level';
 import { readBackendStateFresh, readStoreKind, storeKindForMode, storeKindOverride, type CalendarStoreKind } from './backend-mode';
 import type { BusyLevel } from './busy';
 import type { Db } from './radicale/policy';
@@ -216,6 +217,7 @@ async function indexCalendarUsage(weeks: Array<{ start: string; end: string }>, 
 }
 
 export async function getCapacityWeeks(fromIso: string, toIsoValue: string, opts: CapacityOptions = {}): Promise<CapacityWeekUsage[]> {
+  assertCalendarApiLevel();
   const db = opts.db ?? sql;
   const level: BusyLevel = opts.level ?? 'display';
   const hoursAvailable = await getWeeklyCapacityHours(db);

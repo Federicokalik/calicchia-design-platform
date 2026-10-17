@@ -18,9 +18,10 @@
 --  2. guardia su calendar_events (trigger calendar_events_guard), SEMPRE
 --     attiva e senza DDL al cutover: fuori da mode 'postgres' ogni INSERT,
 --     UPDATE, DELETE e TRUNCATE fallisce con SQLSTATE CD166, salvo:
---      - le scritture con SET LOCAL caldes.reverse_sync = 'on' (proiezione
---        inversa, erasure GDPR, cancellazione di un calendario da
---        RadicaleStore);
+--      - le scritture della transazione che ha impostato
+--        set_config('caldes.reverse_sync', txid_current()::text, true)
+--        (proiezione inversa, erasure GDPR, cancellazione di un calendario da
+--        RadicaleStore): un valore 'on' o rimasto nella sessione non conta;
 --      - le DELETE in cascata di una riga padre già cancellata nella stessa
 --        transazione: il calendario (calendars), l'iscrizione
 --        (calendar_subscriptions) o il master della ricorrenza. Così la
@@ -96,7 +97,9 @@ BEGIN
   -- Scrittori privilegiati: proiezione inversa, erasure GDPR, cancellazione
   -- di un calendario da RadicaleStore. Coordinati fra loro dal lock
   -- cal-migration e dal gate cal-write, non da questa barriera.
-  IF current_setting('caldes.reverse_sync', true) = 'on' THEN
+  -- Il GUC vale solo se contiene l'id della transazione corrente: un 'on' o un valore
+  -- rimasto nella sessione (set_config(..., false) da un percorso applicativo) non passa.
+  IF current_setting('caldes.reverse_sync', true) = txid_current()::text THEN
     IF TG_LEVEL = 'STATEMENT' THEN
       RETURN NULL;
     ELSIF TG_OP = 'DELETE' THEN
@@ -135,7 +138,9 @@ BEGIN
   -- vincolo ON DELETE CASCADE esegue la DELETE dopo aver tolto il padre, che
   -- qui non è più visibile. Una DELETE diretta di una riga con il padre
   -- presente non passa.
-  IF TG_LEVEL = 'ROW' AND TG_OP = 'DELETE' THEN
+  -- Solo con mode radicale/finalized: in cutover e rollback una DELETE di padri
+  -- senza il GUC è una scrittura legacy fuori dal delta e fallisce.
+  IF TG_LEVEL = 'ROW' AND TG_OP = 'DELETE' AND v_mode IN ('radicale', 'finalized') THEN
     IF NOT EXISTS (SELECT 1 FROM calendars c WHERE c.id = OLD.calendar_id) THEN
       RETURN OLD;
     END IF;
@@ -152,12 +157,12 @@ BEGIN
   RAISE EXCEPTION 'calendar_events è in sola lettura con mode %: gli eventi stanno in Radicale e Postgres riceve solo la proiezione inversa', v_mode
     USING ERRCODE = 'CD166',
           DETAIL = format('operazione %s su calendar_events rifiutata dalla guardia 166 (mode=%s)', TG_OP, v_mode),
-          HINT = 'Scrivi dallo store Radicale. Solo la proiezione inversa, l''erasure GDPR e la cancellazione di un calendario usano SET LOCAL caldes.reverse_sync = ''on''.';
+          HINT = 'Scrivi dallo store Radicale. Solo la proiezione inversa, l''erasure GDPR e la cancellazione di un calendario impostano caldes.reverse_sync all''id della transazione: SELECT set_config(''caldes.reverse_sync'', txid_current()::text, true).';
 END
 $$;
 
 COMMENT ON FUNCTION calendar_events_guard() IS
-  'Guardia 166 (design §4, §13.9): fuori da mode=postgres ogni scrittura su calendar_events fallisce con SQLSTATE CD166, salvo caldes.reverse_sync=on e le cascate di una riga padre già cancellata (calendario, iscrizione, master). Legge lo stato con FOR SHARE: barriera delle transizioni.';
+  'Guardia 166 (design §4, §13.9): fuori da mode=postgres ogni scrittura su calendar_events fallisce con SQLSTATE CD166, salvo caldes.reverse_sync uguale a txid_current() (impostato con is_local) e, con mode radicale o finalized, le cascate di una riga padre già cancellata (calendario, iscrizione, master). Legge lo stato con FOR SHARE: barriera delle transizioni.';
 
 -- Prima degli altri trigger BEFORE (ordine alfabetico: calendar_events_guard
 -- precede calendar_events_updated): una scrittura rifiutata non tocca nulla.
@@ -338,3 +343,93 @@ DROP TRIGGER IF EXISTS cal_migration_reverse_state_touch ON cal_migration_revers
 CREATE TRIGGER cal_migration_reverse_state_touch
   BEFORE UPDATE ON cal_migration_reverse_state
   FOR EACH ROW EXECUTE FUNCTION cal_migration_touch_updated_at();
+
+-- ─── 6. Shadow mirror: righe derivate (F4R-ROLL-02) ─────────────────────────
+
+-- Le righe caldes_derived (occorrenze espanse dalla proiezione inversa) non
+-- appartengono a un master di PG: il serializer le raggruppa nella sorgente
+-- derived event:<caldes_object_id>. La chiave del job segue la stessa regola,
+-- altrimenti una modifica in PG dopo un rollback accoda event:<id della riga>,
+-- che nessun oggetto del ledger conosce.
+CREATE OR REPLACE FUNCTION cal_shadow_event_key(
+  p_id UUID, p_master_id UUID, p_source TEXT, p_source_id TEXT,
+  p_derived BOOLEAN, p_object_id UUID
+)
+RETURNS TEXT
+LANGUAGE sql
+IMMUTABLE
+AS $$
+  SELECT CASE
+    WHEN p_source = 'ics_pull' THEN NULL
+    WHEN p_source = 'booking' AND nullif(btrim(p_source_id), '') IS NOT NULL
+      THEN 'booking:' || btrim(p_source_id)
+    WHEN COALESCE(p_derived, false) AND p_object_id IS NOT NULL
+      THEN 'event:' || p_object_id::text
+    ELSE 'event:' || COALESCE(p_master_id, p_id)::text
+  END
+$$;
+
+-- Trigger dello shadow (165) con la chiave a sei argomenti. Il GUC della
+-- proiezione inversa vale solo se uguale a txid_current() (come nella guardia).
+CREATE OR REPLACE FUNCTION cal_shadow_mirror_enqueue()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_mode    TEXT;
+  v_enabled BOOLEAN;
+  v_volume  UUID;
+  v_keys    TEXT[] := ARRAY[]::TEXT[];
+  v_key     TEXT;
+BEGIN
+  IF current_setting('caldes.reverse_sync', true) = txid_current()::text THEN
+    RETURN NULL;
+  END IF;
+
+  SELECT s.mode, s.shadow_enabled, s.volume_id
+    INTO v_mode, v_enabled, v_volume
+  FROM calendar_backend_state s
+  WHERE s.id;
+  IF NOT FOUND OR v_mode <> 'postgres' OR NOT v_enabled OR v_volume IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  IF TG_TABLE_NAME = 'calendar_events' THEN
+    IF TG_OP IN ('INSERT', 'UPDATE') THEN
+      v_keys := v_keys || cal_shadow_event_key(NEW.id, NEW.recurrence_master_id, NEW.source, NEW.source_id, NEW.caldes_derived, NEW.caldes_object_id);
+    END IF;
+    IF TG_OP IN ('UPDATE', 'DELETE') THEN
+      v_keys := v_keys || cal_shadow_event_key(OLD.id, OLD.recurrence_master_id, OLD.source, OLD.source_id, OLD.caldes_derived, OLD.caldes_object_id);
+    END IF;
+  ELSIF TG_TABLE_NAME = 'calendar_bookings' THEN
+    IF TG_OP IN ('INSERT', 'UPDATE') THEN
+      v_keys := v_keys || ('booking:' || NEW.uid);
+    END IF;
+    IF TG_OP IN ('UPDATE', 'DELETE') THEN
+      v_keys := v_keys || ('booking:' || OLD.uid);
+    END IF;
+  END IF;
+
+  FOR v_key IN SELECT DISTINCT k FROM unnest(v_keys) AS k WHERE k IS NOT NULL LOOP
+    INSERT INTO cal_jobs (kind, key, payload, source_version, priority, run_after)
+    VALUES (
+      'shadow_mirror',
+      v_key,
+      jsonb_build_object('legacy_key', v_key, 'table', TG_TABLE_NAME, 'op', TG_OP),
+      txid_current()::text,
+      100,
+      now() + INTERVAL '2 seconds'
+    )
+    ON CONFLICT (kind, key) WHERE status = 'pending' DO UPDATE SET
+      payload        = EXCLUDED.payload,
+      source_version = EXCLUDED.source_version,
+      priority       = LEAST(cal_jobs.priority, EXCLUDED.priority),
+      run_after      = LEAST(cal_jobs.run_after, EXCLUDED.run_after),
+      attempts       = 0;
+  END LOOP;
+  RETURN NULL;
+END
+$$;
+
+COMMENT ON FUNCTION cal_shadow_mirror_enqueue() IS
+  'Shadow mirror (design §13.8): accoda shadow_mirror(legacy_key) in cal_jobs nella transazione della scrittura legacy, solo con mode=postgres, shadow_enabled e volume registrato; mai per le iscrizioni né per le scritture con caldes.reverse_sync = txid_current(). Le righe derivate (F4) hanno la chiave event:<caldes_object_id>.';

@@ -1553,12 +1553,13 @@ export interface CutoverCriterion {
    * F3: verify_acceptable, shadow_parity, device_matrix, backup_recent,
    * no_open_conflicts. F4 (contratto f4-modules §3.2): backup_fresh (meno di
    * 2 ore), identity_ok, control_plane, probe, no_revalidation,
-   * archive_readonly, no_active_transition.
+   * archive_readonly, no_active_transition, api_image_pinned (in produzione
+   * l'immagine dell'API deve avere una versione: sha-<short>).
    */
   id:
     | 'verify_acceptable' | 'shadow_parity' | 'device_matrix' | 'backup_recent' | 'no_open_conflicts'
     | 'backup_fresh' | 'identity_ok' | 'control_plane' | 'probe' | 'no_revalidation' | 'archive_readonly'
-    | 'no_active_transition';
+    | 'no_active_transition' | 'api_image_pinned';
   label: string;
   ok: boolean;
   detail: string | null;
@@ -1726,6 +1727,8 @@ export const PRECONDITION_REASONS = [
   'CONTROL_PLANE_UNAVAILABLE',
   /** Archivio della Fase 0 scrivibile dai device dopo il cutover (questione aperta 1 della F3). */
   'ARCHIVE_DEVICE_WRITABLE',
+  /** In produzione l'immagine dell'API non ha una versione (sha-<short>/CALDES_API_VERSION): il rollback d'immagine sotto la F4 non sarebbe riconoscibile. */
+  'API_IMAGE_UNVERSIONED',
 ] as const;
 export type PreconditionReason = (typeof PRECONDITION_REASONS)[number];
 
@@ -1903,6 +1906,20 @@ export interface TransitionView {
   abortable: boolean;
 }
 
+/**
+ * Anteprima del rollback utilizzabile: l'ultima RIUSCITA, dopo il passaggio corrente e non più vecchia del limite.
+ * È quella che il server valida in POST /rollback: il client deve inviare questa (F4R3-04), non l'ultima di
+ * qualsiasi esito.
+ */
+export interface RollbackPreviewCheck {
+  ok: boolean;
+  reason: PreconditionReason | null;
+  message: string | null;
+  run_id: string | null;
+  preview_hash: string | null;
+  finished_at: string | null;
+}
+
 /** Finestra di rollback (DTO del wizard dopo il cutover). */
 export interface RollbackWindowView {
   cutover_at: string;
@@ -1915,6 +1932,8 @@ export interface RollbackWindowView {
   finalize_available_at: string;
   finalize_ready: boolean;
   finalize_blockers: PreconditionReason[];
+  /** Ultima anteprima del rollback riuscita (con la sua validità): quella da inviare in POST /rollback. */
+  preview: RollbackPreviewCheck;
 }
 
 // ─── F4: proiezione inversa (design §13.11) ──────────────────
@@ -2107,6 +2126,13 @@ export interface RollbackPreviewSummary {
   derived_rows: number;
   by_class: Partial<Record<DegradationClass, number>>;
   reverse_failed: number;
+  /**
+   * Di `reverse_failed`: risorse che il piano dà per proiettabili ma che hanno uno stato `failed` (errori dell'apply:
+   * vincoli o database), non visibili nel piano puro. Con più di zero `busy_identical` è null.
+   */
+  reverse_apply_failed: number;
+  /** Collezioni con le cancellazioni sospese (health hold): il rollback le mantiene in PG, il cutover successivo le ricrea. */
+  held_collections: number;
   /** Busy legacy dopo il rollback identico a quello di Radicale sull'orizzonte (null se non calcolato). */
   busy_identical: boolean | null;
   calendars: Array<{ calendar_id: string; collection_name: string; objects: number; degraded: number; failed: number; derived_rows: number }>;

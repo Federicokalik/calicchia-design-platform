@@ -43,6 +43,7 @@ import { chmod, mkdir, unlink, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import type { Context } from 'hono';
 import { Hono } from 'hono';
+import { sameOriginWrites } from '../../lib/http/same-origin-writes';
 import { bodyLimit } from 'hono/body-limit';
 import { sql, jsonb } from '../../db';
 import { logger } from '../../lib/logger';
@@ -153,55 +154,9 @@ calendarMigration.use('*', async (c, next) => {
   await next();
 });
 
-/** Origini ammesse per le richieste che scrivono: CORS_ORIGINS (le stesse di app.ts) più l'origine della richiesta. */
-function allowedWriteOrigins(c: Ctx): Set<string> {
-  const out = new Set((process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean));
-  try {
-    out.add(new URL(c.req.url).origin);
-  } catch {
-    // URL della richiesta non analizzabile: restano CORS_ORIGINS.
-  }
-  const host = c.req.header('X-Forwarded-Host')?.split(',')[0]?.trim() || c.req.header('Host')?.trim();
-  if (host) {
-    const proto = c.req.header('X-Forwarded-Proto')?.split(',')[0]?.trim() || new URL(c.req.url).protocol.replace(/:$/, '');
-    out.add(`${proto}://${host}`);
-  }
-  return out;
-}
-
-/**
- * Difesa CSRF (contratto §10.1): il cookie auth_token è SameSite=Lax, che non
- * ferma le richieste da un sottodominio dello stesso sito. Per POST, PATCH, PUT
- * e DELETE: Fetch Metadata (Sec-Fetch-Site same-origin o none, cioè l'admin o
- * uno strumento), altrimenti un'Origin presente deve essere fra quelle ammesse;
- * un corpo deve essere application/json (multipart/form-data solo per
- * l'archivio della Fase 0, che in più richiede l'header Idempotency-Key). Una
- * richiesta "semplice" di un'altra pagina (text/plain, form) non arriva mai
- * agli handler.
- */
-calendarMigration.use('*', async (c, next) => {
-  const method = c.req.method.toUpperCase();
-  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return next();
-  const site = c.req.header('Sec-Fetch-Site')?.trim().toLowerCase();
-  if (site && site !== 'same-origin' && site !== 'none') {
-    log.warn({ method, url: c.req.path, site }, 'migrazione: richiesta da un\'altra origine rifiutata');
-    return c.json({ error: 'Richiesta da un\'altra origine rifiutata', code: 'CSRF_REJECTED' }, 403);
-  }
-  const origin = c.req.header('Origin')?.trim().replace(/\/+$/, '');
-  if (origin !== undefined && origin !== '' && (origin === 'null' || !allowedWriteOrigins(c).has(origin))) {
-    log.warn({ method, url: c.req.path }, 'migrazione: Origin non ammessa, richiesta rifiutata');
-    return c.json({ error: 'Origine della richiesta non ammessa', code: 'CSRF_REJECTED' }, 403);
-  }
-  if (c.req.raw.body !== null) {
-    const type = (c.req.header('Content-Type') ?? '').toLowerCase();
-    const multipart = c.req.path.endsWith('/phase0/archive');
-    const ok = multipart ? type.startsWith('multipart/form-data') : /^application\/json\s*(;|$)/.test(type);
-    if (!ok) {
-      return c.json({ error: multipart ? 'Corpo atteso: multipart/form-data' : 'Corpo atteso: application/json', code: 'VALIDATION_FAILED' }, 415);
-    }
-  }
-  await next();
-});
+// Difesa CSRF (contratto §10.1): vedi lib/http/same-origin-writes.ts. Multipart solo per l'archivio della Fase 0, che in
+// più richiede l'header Idempotency-Key.
+calendarMigration.use('*', sameOriginWrites({ multipartPaths: (p) => p.endsWith('/phase0/archive'), log }));
 
 // ─── Utilità ───────────────────────────────
 
@@ -921,6 +876,12 @@ function transitionInProgress(view: TransitionView): MigrationError {
 }
 
 /** Transizione attiva del tipo richiesto (PRECONDITION_FAILED NO_ACTIVE_TRANSITION altrimenti). */
+/** Messaggio dell'annullamento rifiutato con il passo d'epoch iniziato ma non concluso (null se non è il caso). */
+function epochStartedNotDone(view: TransitionView): string | null {
+  const epoch = view.steps.find((s) => s.step === 'epoch');
+  return epoch && epoch.status !== 'done' ? 'passo d\'epoch iniziato: riprendi il passaggio' : null;
+}
+
 async function requireActiveTransition(kinds: readonly TransitionKind[]): Promise<TransitionView> {
   const view = await currentTransitionView(sql);
   if (!view || view.status !== 'active' || !kinds.includes(view.kind)) {
@@ -1025,7 +986,7 @@ calendarMigration.post('/cutover/abort', async (c) => {
       const view = await requireActiveTransition(['cutover']);
       transitionId = view.id;
       if (!view.abortable) {
-        throw precondition('Il passaggio ha superato il passo d\'epoch: non si annulla più, resta solo il rollback', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
+        throw precondition(epochStartedNotDone(view) ?? 'Il passaggio ha superato il passo d\'epoch: non si annulla più, resta solo il rollback', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
       }
     },
   });
@@ -1034,6 +995,16 @@ calendarMigration.post('/cutover/abort', async (c) => {
 
 calendarMigration.post('/transition/resume', async (c) => {
   const body = await readJsonBody(c);
+  // Replay anticipato (F4R3-05): se il primo invio è riuscito ma la risposta si è persa e la transizione si è conclusa
+  // prima del nuovo tentativo, la stessa chiave con lo stesso corpo riceve il run già creato, non 412.
+  const resumeKey = idempotencyKeyOf(c, body);
+  if (resumeKey) {
+    const replay = await replayMigrationRun(resumeKey, requestHashOf('/transition/resume', body));
+    if (replay) {
+      const latest = await currentTransitionView(sql);
+      return respondRun(c, replay, 'transition_resume', { transition_id: latest?.id ?? null, transition_kind: latest?.kind ?? null, next_step: null });
+    }
+  }
   const view = await currentTransitionView(sql);
   if (!view || view.status !== 'active') {
     throw precondition('Nessuna transizione attiva da riprendere', ['NO_ACTIVE_TRANSITION'], { transition: view });
@@ -1136,7 +1107,7 @@ calendarMigration.post('/rollback/abort', async (c) => {
       const view = await requireActiveTransition(['rollback']);
       transitionId = view.id;
       if (!view.abortable) {
-        throw precondition('Il rollback ha superato il passo d\'epoch: non si annulla più, va ripreso fino in fondo', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
+        throw precondition(epochStartedNotDone(view) ?? 'Il rollback ha superato il passo d\'epoch: non si annulla più, va ripreso fino in fondo', ['TRANSITION_NOT_ABORTABLE'], { transition: view });
       }
     },
   });

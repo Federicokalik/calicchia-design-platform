@@ -422,6 +422,31 @@ describe('transizione attiva', () => {
     }
   });
 
+  test('F4R3-05: replay della ripresa anche a transizione conclusa nel frattempo (risposta persa): stessa chiave e corpo → lo stesso run, non l\'errore NO_ACTIVE_TRANSITION', async () => {
+    withOfflineRadicale();
+    try {
+      await initializedPostgres();
+      const transitionId = await activeTransition('cutover', ['preflight', 'freeze'], { rollback_window_days: 21 });
+      const key = newKey();
+      const body = { confirm: MIGRATION_CONFIRMATIONS.cutover };
+      const first = await api.post(`${BASE}/transition/resume`, { auth: 'admin', body, headers: { 'Idempotency-Key': key } });
+      assert.equal(first.status, 202, first.text);
+      // La risposta si perde e la transizione si conclude prima del nuovo tentativo.
+      await sql`UPDATE cal_migration_transitions SET status = 'completed', finished_at = now() WHERE id = ${transitionId}::uuid`;
+      const retry = await api.post(`${BASE}/transition/resume`, { auth: 'admin', body, headers: { 'Idempotency-Key': key } });
+      assert.ok(retry.status >= 200 && retry.status < 300, retry.text);
+      assert.equal(retry.json.replayed, true);
+      assert.equal(retry.json.run.id, first.json.run.id);
+      // Una chiave nuova, invece, trova davvero la transizione conclusa.
+      const fresh = await api.post(`${BASE}/transition/resume`, { auth: 'admin', body, headers: { 'Idempotency-Key': newKey() } });
+      assert.equal(fresh.status, 409, fresh.text);
+      assert.ok((fresh.json.details.reasons as string[]).includes('NO_ACTIVE_TRANSITION'));
+    } finally {
+      configureRadicaleRuntime(null);
+      await clearAll();
+    }
+  });
+
   test('ripresa di un rollback: TORNA A POSTGRES e i parametri dell\'anteprima; nessuna transizione → NO_ACTIVE_TRANSITION', async () => {
     withOfflineRadicale();
     try {
@@ -571,6 +596,35 @@ describe('rollback e anteprima', () => {
       const expired = await api.post(`${BASE}/rollback`, { auth: 'admin', body: { preview_run_id: preview.id, confirm: MIGRATION_CONFIRMATIONS.rollback }, headers: { 'Idempotency-Key': newKey() } });
       assert.equal(expired.status, 409);
       assert.ok((expired.json.details.reasons as string[]).includes('ROLLBACK_WINDOW_EXPIRED'));
+    } finally {
+      configureRadicaleRuntime(null);
+      await clearAll();
+    }
+  });
+
+  test('F4R3-04: anteprima A riuscita e B fallita → la finestra espone A (quella che il server valida) e POST /rollback con A è accettato', async () => {
+    withOfflineRadicale();
+    try {
+      await radicaleMode();
+      const a = await recordPreview();
+      // Rigenerazione fallita (Radicale instabile): l'ultima anteprima per esito è B, ma il server valida A.
+      await sql`
+        INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, summary, error_code, error, created_at, started_at, finished_at, attempts)
+        VALUES ('rollback_preview', 'failed', 'admin', 'admin:test', '{}'::jsonb, NULL, 'RADICALE_UNREACHABLE', 'Radicale non risponde', now(), now(), now(), 1)
+      `;
+      const view = await stateView();
+      assert.equal(view.last_runs.rollback_preview.status, 'failed', 'l\'ultima anteprima per esito è quella fallita');
+      assert.equal(view.rollback_window.preview.run_id, a.id);
+      assert.equal(view.rollback_window.preview.ok, true);
+      assert.equal(view.rollback_window.preview.preview_hash, a.hash);
+
+      const res = await api.post(`${BASE}/rollback`, {
+        auth: 'admin',
+        body: { preview_run_id: view.rollback_window.preview.run_id, expect_preview_hash: view.rollback_window.preview.preview_hash, confirm: MIGRATION_CONFIRMATIONS.rollback },
+        headers: { 'Idempotency-Key': newKey() },
+      });
+      const reasons = ((res.json.details?.reasons ?? []) as string[]);
+      assert.ok(!reasons.includes('PREVIEW_REQUIRED') && !reasons.includes('PREVIEW_STALE'), `anteprima accettata: ${res.text}`);
     } finally {
       configureRadicaleRuntime(null);
       await clearAll();
@@ -747,7 +801,7 @@ describe('POST /api/admin/calendar/events/:id/split (PgLegacyStore)', () => {
     return res.json.event;
   }
 
-  test('sposta questa e le successive: master troncato a cutoff − 60 s e nuova serie senza COUNT, nella stessa transazione', async () => {
+  test('sposta questa e le successive: master troncato a cutoff − 60 s e nuova serie con COUNT residuo, nella stessa transazione', async () => {
     await clearAll();
     const master = await createSeries();
     const res = await api.post(`${EVENTS}/${master.id}/split`, {
@@ -760,12 +814,56 @@ describe('POST /api/admin/calendar/events/:id/split (PgLegacyStore)', () => {
     assert.doesNotMatch(res.json.head.rrule, /COUNT=/);
     assert.equal(new Date(res.json.tail.start_time).toISOString(), '2026-11-04T09:00:00.000Z');
     assert.equal(new Date(res.json.tail.end_time).toISOString(), '2026-11-04T10:00:00.000Z');
-    assert.equal(res.json.tail.rrule.includes('COUNT='), false);
+    assert.match(res.json.tail.rrule, /COUNT=8/, 'COUNT residuo: 10 occorrenze, 2 prima del taglio (parità con splitSeries di calendar-core)');
     assert.equal(res.json.tail.source, 'admin');
     assert.equal(res.json.tail.summary, 'Standup F4');
     assert.equal('caldes_object_id' in res.json.tail, false, 'solo le colonne legacy');
     const rows = await sql`SELECT id FROM calendar_events WHERE id IN (${master.id}::uuid, ${res.json.tail.id}::uuid)`;
     assert.equal(rows.length, 2);
+  });
+
+  test('F4R3-03: COUNT=10 con EXDATE e override dopo il taglio → 10 occorrenze totali, nessun duplicato, EXDATE rispettata, override spostati con lo scarto', async () => {
+    await clearAll();
+    const master = await createSeries('FREQ=DAILY;COUNT=10');
+    // Occorrenze: 2026-11-02 … 2026-11-11 alle 08:00Z (la serie parte il 2026-11-02T08:00Z). EXDATE del 08/11 (dopo il taglio) e
+    // override spostato del 07/11.
+    const exdate = '2026-11-08T08:00:00.000Z';
+    const overrideRid = '2026-11-07T08:00:00.000Z';
+    await sql`UPDATE calendar_events SET exdates = ${sql.json([exdate] as never)} WHERE id = ${master.id}::uuid`;
+    const [ov] = await sql<Array<{ id: string }>>`
+      INSERT INTO calendar_events (calendar_id, uid, summary, start_time, end_time, recurrence_master_id, recurrence_id, source, status)
+      SELECT calendar_id, uid || '-ov', 'Spostata dopo il taglio', '2026-11-07T14:00:00Z', '2026-11-07T14:30:00Z', id, ${overrideRid}::timestamptz, 'admin', 'confirmed'
+      FROM calendar_events WHERE id = ${master.id}::uuid
+      RETURNING id
+    `;
+    // Taglio a 2026-11-05 (4ª occorrenza) con spostamento di +1 h.
+    const res = await api.post(`${EVENTS}/${master.id}/split`, {
+      auth: 'admin',
+      body: { original_start: '2026-11-05T08:00:00.000Z', start_time: '2026-11-05T09:00:00.000Z', end_time: '2026-11-05T09:30:00.000Z' },
+    });
+    assert.equal(res.status, 200, res.text);
+    assert.match(res.json.tail.rrule, /COUNT=7/, '3 occorrenze nella testa → 7 residue');
+    const rows = await sql<Array<{ id: string; recurrence_master_id: string | null; recurrence_id: Date | null; exdates: string[] }>>`
+      SELECT id::text AS id, recurrence_master_id::text AS recurrence_master_id, recurrence_id, exdates FROM calendar_events WHERE id IN (${master.id}::uuid, ${res.json.tail.id}::uuid, ${ov.id}::uuid)
+    `;
+    const head = rows.find((r) => r.id === master.id)!;
+    const tail = rows.find((r) => r.id === res.json.tail.id)!;
+    const moved = rows.find((r) => r.id === ov.id)!;
+    assert.deepEqual(head.exdates, [], 'EXDATE dopo il taglio tolta dalla testa');
+    assert.deepEqual(tail.exdates, ['2026-11-08T09:00:00.000Z'], 'EXDATE traslata dello scarto (+1 h) nella nuova serie');
+    assert.equal(moved.recurrence_master_id, res.json.tail.id, 'override passato alla nuova serie');
+    assert.equal(moved.recurrence_id?.toISOString(), '2026-11-07T09:00:00.000Z', 'recurrence_id traslato');
+
+    const { listOccurrences } = await import('../../src/lib/calendar/legacy/events-pg');
+    const occ = await listOccurrences({ fromIso: '2026-11-01T00:00:00Z', toIso: '2026-12-31T00:00:00Z' });
+    const ids = new Set([master.id, res.json.tail.id, ov.id]);
+    const mine = occ.filter((o) => ids.has(o.id));
+    assert.equal(mine.length, 10 - 1, '10 occorrenze meno quella esclusa dall\'EXDATE (l\'override è l\'occorrenza del 07/11, non una in più)');
+    const starts = mine.map((o) => new Date(o.start_time).toISOString());
+    assert.equal(new Set(starts).size, starts.length, 'nessun duplicato');
+    assert.ok(!starts.includes('2026-11-08T09:00:00.000Z') && !starts.includes('2026-11-08T08:00:00.000Z'), 'EXDATE rispettata');
+    assert.ok(starts.includes('2026-11-07T14:00:00.000Z'), 'override spostato presente');
+    assert.ok(!starts.includes('2026-11-07T09:00:00.000Z'), 'l\'occorrenza sostituita dall\'override non ricompare');
   });
 
   test('elimina questa e le successive: solo il taglio; prima occorrenza = tutta la serie', async () => {
@@ -787,6 +885,30 @@ describe('POST /api/admin/calendar/events/:id/split (PgLegacyStore)', () => {
     assert.equal(first.json.whole_series, true);
     assert.equal(new Date(first.json.tail.start_time).toISOString(), '2026-11-02T07:00:00.000Z');
     assert.equal(first.json.tail.rrule, second.rrule, 'la regola della serie intera non cambia');
+  });
+
+  test('F4R3-06: difesa CSRF — text/plain → 415, Sec-Fetch-Site cross-site → 403 CSRF_REJECTED, Origin estranea → 403; same-origin passa', async () => {
+    await clearAll();
+    const master = await createSeries();
+    const json = JSON.stringify({ original_start: '2026-11-04T08:00:00.000Z', delete: true });
+    const plain = await api.post(`${EVENTS}/${master.id}/split`, { auth: 'admin', body: json, headers: { 'Content-Type': 'text/plain' } });
+    assert.equal(plain.status, 415, plain.text);
+    const cross = await api.post(`${EVENTS}/${master.id}/split`, {
+      auth: 'admin', body: json, headers: { 'Content-Type': 'application/json', 'Sec-Fetch-Site': 'cross-site' },
+    });
+    assert.equal(cross.status, 403, cross.text);
+    assert.equal(cross.json.code, 'CSRF_REJECTED');
+    const foreign = await api.post(`${EVENTS}/${master.id}/split`, {
+      auth: 'admin', body: json, headers: { 'Content-Type': 'application/json', Origin: 'https://evil.caldes.test' },
+    });
+    assert.equal(foreign.status, 403, foreign.text);
+    assert.equal(foreign.json.code, 'CSRF_REJECTED');
+    const [intact] = await sql`SELECT rrule FROM calendar_events WHERE id = ${master.id}::uuid`;
+    assert.equal(intact.rrule, master.rrule, 'nessuna scrittura per le richieste rifiutate');
+    const ok = await api.post(`${EVENTS}/${master.id}/split`, {
+      auth: 'admin', body: json, headers: { 'Content-Type': 'application/json', 'Sec-Fetch-Site': 'same-origin' },
+    });
+    assert.equal(ok.status, 200, ok.text);
   });
 
   test('validazione: original_start, master ricorrente, delete con orari, 404; 503 durante una transizione', async () => {

@@ -18,6 +18,7 @@
 import { customAlphabet } from 'nanoid';
 import { sql } from '../../../db';
 import { CalendarConflictError, CalendarSystemError, CalendarValidationError } from '../errors';
+import { withLegacyWriteBarrier } from './write-barrier';
 import type { Calendar, ClosuresView, CreateCalendarInput, UpdateCalendarInput } from '../types';
 import { CALENDAR_SLUG_REGEX as SLUG_REGEX, isValidTimeZone } from '../validation';
 
@@ -127,29 +128,32 @@ export async function createCalendar(input: CreateCalendarInput): Promise<Calend
     throw new CalendarConflictError('Nome calendario gia usato');
   }
 
-  // Se nuovo è default, demota gli altri prima
-  if (input.is_default) {
-    await sql`UPDATE calendars SET is_default = false WHERE is_default = true`;
-  }
+  // Barriera delle transizioni: lo stato letto con FOR SHARE nella stessa transazione della scrittura.
+  return withLegacyWriteBarrier(async (tx) => {
+    // Se nuovo è default, demota gli altri prima
+    if (input.is_default) {
+      await tx`UPDATE calendars SET is_default = false WHERE is_default = true`;
+    }
 
-  const rows = await sql<Calendar[]>`
-    INSERT INTO calendars ${sql({
-      slug: input.slug.toLowerCase(),
-      name: name.slice(0, 200),
-      description: input.description?.trim().slice(0, 1000) || null,
-      color: input.color || '#7c3aed',
-      icon: input.icon || null,
-      timezone: input.timezone || 'Europe/Rome',
-      is_default: !!input.is_default,
-      is_system: !!input.is_system,
-      blocks_availability: input.blocks_availability !== false,
-      ics_feed_token: generateFeedToken(),
-      ics_feed_enabled: true,
-      sort_order: input.sort_order || 0,
-    })}
-    RETURNING ${COLUMNS}
-  `;
-  return rows[0];
+    const rows = (await tx`
+      INSERT INTO calendars ${tx({
+        slug: input.slug.toLowerCase(),
+        name: name.slice(0, 200),
+        description: input.description?.trim().slice(0, 1000) || null,
+        color: input.color || '#7c3aed',
+        icon: input.icon || null,
+        timezone: input.timezone || 'Europe/Rome',
+        is_default: !!input.is_default,
+        is_system: !!input.is_system,
+        blocks_availability: input.blocks_availability !== false,
+        ics_feed_token: generateFeedToken(),
+        ics_feed_enabled: true,
+        sort_order: input.sort_order || 0,
+      })}
+      RETURNING ${COLUMNS}
+    `) as Calendar[];
+    return rows[0];
+  });
 }
 
 export async function updateCalendar(
@@ -169,24 +173,26 @@ export async function updateCalendar(
   if (input.ics_feed_enabled !== undefined) updates.ics_feed_enabled = !!input.ics_feed_enabled;
   if (input.sort_order !== undefined) updates.sort_order = parseInt(String(input.sort_order)) || 0;
 
-  if (input.is_default === true) {
-    // Demota gli altri prima di promuovere questo
-    await sql`UPDATE calendars SET is_default = false WHERE is_default = true AND id != ${id}::uuid`;
-    updates.is_default = true;
-  } else if (input.is_default === false) {
-    updates.is_default = false;
-  }
+  if (input.is_default === true) updates.is_default = true;
+  else if (input.is_default === false) updates.is_default = false;
 
   if (Object.keys(updates).length === 0) {
     return getCalendar(id);
   }
 
-  const rows = await sql<Calendar[]>`
-    UPDATE calendars SET ${sql(updates)}
-    WHERE id = ${id}::uuid
-    RETURNING ${COLUMNS}
-  `;
-  return rows[0] || null;
+  // Barriera delle transizioni: lo stato letto con FOR SHARE nella stessa transazione della scrittura.
+  return withLegacyWriteBarrier(async (tx) => {
+    if (input.is_default === true) {
+      // Demota gli altri prima di promuovere questo
+      await tx`UPDATE calendars SET is_default = false WHERE is_default = true AND id != ${id}::uuid`;
+    }
+    const rows = (await tx`
+      UPDATE calendars SET ${tx(updates)}
+      WHERE id = ${id}::uuid
+      RETURNING ${COLUMNS}
+    `) as Calendar[];
+    return rows[0] || null;
+  });
 }
 
 export async function deleteCalendar(id: string): Promise<void> {
@@ -195,8 +201,11 @@ export async function deleteCalendar(id: string): Promise<void> {
   if (cal.is_system) {
     throw new CalendarSystemError(`Calendario "${cal.name}" è di sistema e non può essere eliminato`);
   }
-  // ON DELETE CASCADE rimuove tutti gli events
-  await sql`DELETE FROM calendars WHERE id = ${id}::uuid`;
+  // ON DELETE CASCADE rimuove tutti gli events. Barriera delle transizioni: lo stato letto con FOR SHARE
+  // nella stessa transazione della delete (la cascata passa la guardia 166 solo in mode postgres).
+  await withLegacyWriteBarrier(async (tx) => {
+    await tx`DELETE FROM calendars WHERE id = ${id}::uuid`;
+  });
 }
 
 export async function rotateFeedToken(id: string): Promise<Calendar | null> {

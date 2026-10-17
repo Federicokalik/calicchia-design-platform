@@ -307,6 +307,15 @@ export function pastPointOfNoReturn(journal: readonly JournalStepRecord[]): bool
 }
 
 /**
+ * true se il passo d'epoch è stato almeno iniziato (started, failed o done):
+ * la PROPPATCH del marker può aver già portato Radicale a E + 1, quindi
+ * l'annullamento non è ammesso senza verificare il marker (abortTransition).
+ */
+export function epochAttempted(journal: readonly JournalStepRecord[]): boolean {
+  return journal.some((j) => j.step === POINT_OF_NO_RETURN_STEP);
+}
+
+/**
  * DTO della transizione per il wizard e le route (types.ts TransitionView).
  * `runActive`: c'è un run queued/running che la sta eseguendo (lo passa chi
  * conosce i run, runs.ts): senza, una transizione attiva è da riprendere.
@@ -331,7 +340,7 @@ export function buildTransitionView(record: TransitionRecord, journal: readonly 
     steps: journal.map(journalView),
     next_step: active ? nextPendingStep(record.kind, journal) : null,
     resumable: active && !opts.runActive,
-    abortable: active && record.kind !== 'finalize' && !pastPointOfNoReturn(journal),
+    abortable: active && record.kind !== 'finalize' && !epochAttempted(journal),
   };
 }
 
@@ -884,7 +893,10 @@ async function commitEpoch(
  * PRECONDITION_FAILED TRANSITION_NOT_ABORTABLE. Idempotente su una
  * transizione già annullata.
  */
-export async function abortTransition(handle: TransitionHandle, opts: { code: MigrationRunErrorCode | string; reason: string }): Promise<Record<string, unknown>> {
+export async function abortTransition(
+  handle: TransitionHandle,
+  opts: { code: MigrationRunErrorCode | string; reason: string; marker?: { client: RadicaleClient; principal: string } },
+): Promise<Record<string, unknown>> {
   const { ctx } = handle;
   const modes = TRANSITION_MODES[handle.record.kind];
   if (!modes.abort_to || !modes.via) {
@@ -900,6 +912,25 @@ export async function abortTransition(handle: TransitionHandle, opts: { code: Mi
     throw new TransitionError('PRECONDITION_FAILED', 'Il passo d\'epoch è già concluso: la transizione non si annulla più, va completata (o, dopo il cutover, si usa il rollback).', {
       runErrorCode: 'TRANSITION_CONFLICT', reasons: ['TRANSITION_NOT_ABORTABLE'],
     });
+  }
+  if (epochAttempted(journal)) {
+    // Il passo d'epoch è iniziato ma non concluso (crash, errore del database prima di commitEpoch): la PROPPATCH può
+    // aver già portato il marker a E + 1. Annullare lascerebbe PG a E e il marker a E + 1 (identità non valida,
+    // fail-closed): si annulla solo con il marker verificato ancora a E.
+    const notAbortable = (message: string): TransitionError =>
+      new TransitionError('PRECONDITION_FAILED', message, { runErrorCode: 'TRANSITION_CONFLICT', reasons: ['TRANSITION_NOT_ABORTABLE'] });
+    if (!opts.marker) {
+      throw notAbortable('Il passo d\'epoch è già iniziato: la transizione non si annulla senza verificare il marker del volume, riprendila.');
+    }
+    const read = await readVolumeMarkerRemote(opts.marker.client, opts.marker.principal);
+    if (read.state !== 'ok') throw notAbortable('marker non verificabile: riprendi quando Radicale risponde');
+    const volumeId = (await readTransitionState(ctx.db)).volume_id;
+    if (read.marker.volume_id.toLowerCase() !== volumeId?.toLowerCase()) {
+      throw notAbortable('marker non verificabile: il volume-id del marker non coincide con quello registrato');
+    }
+    if (read.marker.epoch !== current.epoch_before) {
+      throw notAbortable('Il marker del volume è già a epoch E+1: riprendi la transizione (la ripresa la conclude)');
+    }
   }
   const freeze = journal.find((j) => j.step === 'freeze' && j.status === 'done');
   const freezeBefore = typeof freeze?.data.write_freeze_before === 'boolean' ? freeze.data.write_freeze_before : false;

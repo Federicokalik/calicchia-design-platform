@@ -40,6 +40,8 @@ import {
   redactErasureJson,
 } from '../../src/lib/calendar/gdpr';
 import { latestVerifyVerdicts } from '../../src/lib/calendar/migration/report';
+import { GDPR_ERASURE_INCOMPLETE_ALERT } from '../../src/lib/calendar/migration/shadow';
+import { onIndexAlert } from '../../src/lib/calendar/radicale/health';
 import { getPgLegacyStore } from '../../src/lib/calendar/store';
 import type { Booking } from '../../src/lib/calendar/types';
 import { databaseNow, onBeforeDatabaseClose, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
@@ -275,6 +277,46 @@ describe('calendarErase in mode postgres', () => {
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
     );
     await assert.rejects(calendarErase('a@b', { actor: 'admin:test' }), TypeError);
+  });
+
+  test('F4R-ROLL-02: risorsa derivata (caldes_derived) dopo un rollback: ledger redatto, follow-up manuale con gli id e avviso alzato', async () => {
+    await resetState();
+    await setState({ volume: VOLUME });
+    const email = fx.email('gdpr-derived');
+    const lavoro = (await getPgLegacyStore().getCalendar('lavoro'))!;
+    const objectId = randomUUID();
+    const href = `serie-derivata-${objectId.slice(0, 8)}.ics`;
+    const row = await fx.event({ calendar: lavoro, summary: `Riunione con ${email}`, start_time: romeIso('2027-06-01', '09:00'), end_time: romeIso('2027-06-01', '10:00') });
+    await sql`UPDATE calendar_events SET caldes_derived = true, caldes_object_id = ${objectId}::uuid WHERE id = ${row.id}::uuid`;
+    await sql`INSERT INTO cal_object_ids (id, calendar_id, href, recurrence_key, uid) VALUES (${objectId}::uuid, ${lavoro.id}::uuid, ${href}, '', ${href})`;
+    await sql`
+      INSERT INTO cal_migration_ledger (calendar_id, collection_name, href, kind, legacy_key, uid, legacy_snapshot, legacy_hash, written_etag, written_fingerprint, written_at)
+      VALUES (${lavoro.id}::uuid, 'lavoro', ${href}, 'event', ${`event:${objectId}`}, ${href},
+              ${sql.json({ v: 1, kind: 'derived', object_id: objectId, rows: [{ summary: `Riunione con ${email}` }] } as never)}, ${HASH}, '"d1"', 'v1:d', now())
+    `;
+    const alerts: Array<{ code: string; details: Readonly<Record<string, unknown>> }> = [];
+    const stop = onIndexAlert((code, details) => alerts.push({ code, details }));
+    try {
+      const report = await calendarErase(email, { actor: 'admin:test' });
+      assert.equal(report.events_redacted, 1);
+      const followup = report.manual_followup.find((m) => m.includes('espanse dalla proiezione inversa'));
+      assert.ok(followup?.includes(objectId) && followup.includes(href) && followup.includes('PRIMA di un nuovo cutover'), JSON.stringify(report.manual_followup));
+      assert.ok(!report.manual_followup.some((m) => m.includes(email)), 'nessuna email nel seguito manuale');
+      assert.ok(!report.manual_followup.some((m) => m.includes('anteprima e apply, che riscrive')), 'nessuna promessa di rimedio per i derived');
+      const [ledger] = await sql<Array<{ legacy_snapshot: unknown; legacy_hash: string | null }>>`SELECT legacy_snapshot, legacy_hash FROM cal_migration_ledger WHERE legacy_key = ${`event:${objectId}`}`;
+      assert.equal(ledger.legacy_snapshot, null, 'snapshot del ledger redatto');
+      assert.equal(ledger.legacy_hash, null);
+      const [ev] = await sql<Array<{ summary: string }>>`SELECT summary FROM calendar_events WHERE id = ${row.id}::uuid`;
+      assert.ok(!ev.summary.includes(email));
+      const alert = alerts.find((a) => a.code === GDPR_ERASURE_INCOMPLETE_ALERT && Array.isArray(a.details.objects) && (a.details.objects as string[]).includes(objectId));
+      assert.ok(alert, `avviso alzato: ${JSON.stringify(alerts)}`);
+    } finally {
+      stop();
+      await sql`DELETE FROM cal_migration_ledger WHERE legacy_key = ${`event:${objectId}`}`;
+      await sql`DELETE FROM cal_object_ids WHERE id = ${objectId}::uuid`;
+      await sql`DELETE FROM cal_jobs`;
+      await resetState();
+    }
   });
 
   test('senza volume inizializzato nessun job di cancellazione; con lo shadow acceso il trigger e l\'erasure si fondono', async () => {

@@ -52,7 +52,7 @@
  * MKCALENDAR con le dead prop calendar-id e role → `active` (MKCALENDAR
  * fallita → riga eliminata); modifica con PROPPATCH più sidecar; eliminazione
  * con `deleting` → DELETE della collezione → delete della riga con
- * caldes.reverse_sync='on'. Le creazioni e cancellazioni rimaste a metà le
+ * caldes.reverse_sync = txid_current()::text. Le creazioni e cancellazioni rimaste a metà le
  * completa il job calendar_lifecycle (registerStoreJobs).
  *
  * Radicale non configurato o irraggiungibile: letture dall'indice, scritture
@@ -1432,7 +1432,7 @@ function isCollectionExistsError(err: unknown): boolean {
 /** Elimina la riga del sidecar con il GUC del trigger 166 (design §4, §8). Cascate: indice, id, versioni. */
 async function deleteSidecarRow(calendarId: string): Promise<void> {
   await inTransaction(async (tx) => {
-    await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+    await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
     await tx`DELETE FROM calendars WHERE id = ${calendarId}::uuid`;
   });
 }
@@ -2434,7 +2434,7 @@ class RadicaleStore implements CalendarStore {
     const removed = await inTransaction(async (tx) => {
       const rows = await tx`DELETE FROM calendar_subscriptions WHERE id = ${id}::uuid RETURNING id`;
       if (sidecar && sidecar.role === 'subscription') {
-        await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+        await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
         await tx`DELETE FROM calendars WHERE id = ${sidecar.id}::uuid AND role = 'subscription'`;
       }
       return rows.length > 0;

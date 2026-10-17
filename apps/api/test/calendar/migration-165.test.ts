@@ -647,10 +647,10 @@ describe('165: trigger dello shadow mirror', () => {
       assert.deepEqual(await shadowKeys(tx), [], 'volume non registrato');
 
       await setState(tx, { shadow: true });
-      await tx`SET LOCAL caldes.reverse_sync = 'on'`;
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
       await ev('tst-shadow-reverse');
       assert.deepEqual(await shadowKeys(tx), [], 'scritture della proiezione inversa');
-      await tx`SET LOCAL caldes.reverse_sync = 'off'`;
+      await tx`SELECT set_config('caldes.reverse_sync', 'off', true)`;
       await ev('tst-shadow-acceso');
       assert.equal((await shadowKeys(tx)).length, 1);
     });

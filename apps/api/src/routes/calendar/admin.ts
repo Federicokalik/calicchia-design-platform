@@ -19,7 +19,8 @@ import { fromZonedTime } from 'date-fns-tz';
 import { customAlphabet } from 'nanoid';
 import { sql, sqlInsert } from '../../db';
 import { resolveWriteStoreKind } from '../../lib/calendar/backend-mode';
-import { validateRRule } from '../../lib/calendar/legacy/rrule-legacy';
+import { assertCalendarApiLevel } from '../../lib/calendar/api-level';
+import { expandRRule, validateRRule } from '../../lib/calendar/legacy/rrule-legacy';
 import { splitRecurringEvent } from '../../lib/calendar/radicale/store';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
@@ -89,11 +90,16 @@ import type {
   CalendarEvent,
   EventType,
 } from '../../lib/calendar/types';
+import { sameOriginWrites } from '../../lib/http/same-origin-writes';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'calendar-admin' });
 
 export const calendarAdmin = new Hono();
+
+// Difesa CSRF per le scritture (F4R3-06): il cookie auth_token è SameSite=Lax e POST /events/:id/split è distruttiva.
+// Nessuna route di calendarAdmin riceve corpi multipart.
+calendarAdmin.use('*', sameOriginWrites({ log }));
 
 /**
  * Errori del calendario introdotti dalla F2 (contratto f2-modules §1.4): 503
@@ -1007,23 +1013,62 @@ function rruleWithoutCount(rrule: string): string {
 interface SplitResult { whole_series: boolean; head: CalendarEvent | null; tail: CalendarEvent | null }
 
 /**
- * Taglio con PgLegacyStore: le stesse due operazioni che l'admin faceva dal
- * browser (UNTIL del master a cutoff − 60 s e nuova serie da original_start con
- * i nuovi orari, senza COUNT), ma in una sola transazione: mai una serie
- * troncata senza la sua continuazione.
+ * Taglio con PgLegacyStore in una sola transazione (mai una serie troncata
+ * senza la sua continuazione), con la stessa semantica di splitSeries di
+ * packages/calendar-core (store Radicale), così i due store danno gli stessi
+ * risultati dopo il cutover (F4R3-03):
+ *  - la testa prende UNTIL = taglio − 60 s (senza COUNT) e le sole EXDATE
+ *    precedenti al taglio;
+ *  - la nuova serie parte da original_start (o dai nuovi orari), con la stessa
+ *    regola: COUNT residuo se c'era COUNT (occorrenze della testa contate
+ *    senza EXDATE, come l'RFC 5545), UNTIL invariato; senza occorrenze residue
+ *    non nasce;
+ *  - le EXDATE dal taglio in poi passano alla nuova serie, traslate dello
+ *    stesso scarto degli orari;
+ *  - gli override dal taglio in poi seguono la nuova serie (recurrence_id
+ *    traslato) o, senza nuova serie, si cancellano: restare legati alla testa
+ *    li farebbe emettere da listOccurrences oltre l'UNTIL (occorrenze doppie e
+ *    cancellate che ricompaiono).
  */
 async function splitLegacySeries(master: CalendarEvent, originalStart: Date, times: { start: Date; end: Date } | null): Promise<SplitResult> {
-  const untilRule = validateRRule(rruleWithUntil(master.rrule as string, new Date(originalStart.getTime() - 60_000)), new Date(master.start_time).toISOString());
+  const cutMs = originalStart.getTime();
+  const masterStartIso = new Date(master.start_time).toISOString();
+  const untilRule = validateRRule(rruleWithUntil(master.rrule as string, new Date(cutMs - 60_000)), masterStartIso);
   if (!untilRule) throw new EventValidationError('RRULE troncata non valida');
+
+  // COUNT residuo: occorrenze della regola prima del taglio (senza EXDATE: le conta anche l'RFC).
+  const countMatch = /(?:^|;)COUNT=(\d+)/i.exec(master.rrule as string);
+  let residualCount: number | null = null;
+  if (countMatch) {
+    const total = Number(countMatch[1]);
+    const before = expandRRule({
+      rrule: master.rrule as string,
+      masterStartIso,
+      fromIso: masterStartIso,
+      toIso: new Date(cutMs - 1000).toISOString(),
+      limit: Math.max(total, 1),
+    }).length;
+    residualCount = total - before;
+  }
+  const wantTail = times !== null && (residualCount === null || residualCount > 0);
   let tailRule: string | null = null;
-  if (times) {
-    tailRule = validateRRule(rruleWithoutCount(master.rrule as string), times.start.toISOString());
+  if (times && wantTail) {
+    const base = rruleWithoutCount(master.rrule as string);
+    tailRule = validateRRule(residualCount !== null ? `${base};COUNT=${residualCount}` : base, times.start.toISOString());
     if (!tailRule) throw new EventValidationError('RRULE della nuova serie non valida');
   }
+
+  const delta = times ? times.start.getTime() - cutMs : 0;
+  const allExdates = (Array.isArray(master.exdates) ? master.exdates : []).map(String);
+  const headExdates = allExdates.filter((d) => new Date(d).getTime() < cutMs);
+  const tailExdates = allExdates
+    .filter((d) => new Date(d).getTime() >= cutMs)
+    .map((d) => new Date(new Date(d).getTime() + delta).toISOString());
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return sql.begin(async (tx: any) => {
     const [head] = await tx`
-      UPDATE calendar_events SET rrule = ${untilRule}
+      UPDATE calendar_events SET rrule = ${untilRule}, exdates = ${tx.json(headExdates)}
       WHERE id = ${master.id}::uuid AND recurrence_master_id IS NULL AND rrule IS NOT NULL
       RETURNING ${LEGACY_EVENT_COLUMNS}
     `;
@@ -1042,7 +1087,7 @@ async function splitLegacySeries(master: CalendarEvent, originalStart: Date, tim
           end_time: times.end.toISOString(),
           all_day: !!master.all_day,
           rrule: tailRule,
-          exdates: [],
+          exdates: tx.json(tailExdates),
           recurrence_id: null,
           recurrence_master_id: null,
           source: 'admin',
@@ -1050,6 +1095,19 @@ async function splitLegacySeries(master: CalendarEvent, originalStart: Date, tim
           status: 'confirmed',
         })}
         RETURNING ${LEGACY_EVENT_COLUMNS}
+      `;
+    }
+    // Override dal taglio in poi: seguono la nuova serie, o si cancellano se non ce n'è una.
+    if (tail) {
+      await tx`
+        UPDATE calendar_events
+        SET recurrence_master_id = ${tail.id}::uuid, recurrence_id = recurrence_id + ${delta}::float8 * interval '1 millisecond'
+        WHERE recurrence_master_id = ${master.id}::uuid AND recurrence_id >= ${originalStart.toISOString()}::timestamptz
+      `;
+    } else {
+      await tx`
+        DELETE FROM calendar_events
+        WHERE recurrence_master_id = ${master.id}::uuid AND recurrence_id >= ${originalStart.toISOString()}::timestamptz
       `;
     }
     return { whole_series: false, head: head as CalendarEvent, tail: tail as CalendarEvent | null };
@@ -1080,6 +1138,7 @@ calendarAdmin.post('/events/:id/split', async (c) => {
     return d;
   };
   try {
+    assertCalendarApiLevel();
     const newStart = parseTime(body.start_time, 'start_time');
     const newEnd = parseTime(body.end_time, 'end_time');
     if (remove && (newStart || newEnd)) return c.json({ error: 'delete non ammette start_time ed end_time' }, 400);

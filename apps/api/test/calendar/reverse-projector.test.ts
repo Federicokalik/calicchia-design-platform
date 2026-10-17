@@ -31,6 +31,7 @@ import { afterEach, describe, test } from 'node:test';
 import { buildBookingProjectionIcs } from '../../src/lib/calendar/booking-projection';
 import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
 import { indexBusyRanges } from '../../src/lib/calendar/busy';
+import { computeRollbackPreview } from '../../src/lib/calendar/migration/rollback';
 import {
   runCalendarJobsOnce,
   stopCalendarJobWorker,
@@ -487,6 +488,56 @@ describe('computeReversePlan e applyReversePlan sul database', () => {
     assert.ok(rdate?.horizon_until);
   });
 
+  test('F4R-ROLL-06: REVERSE_FAILED nati nell\'apply compaiono nell\'anteprima (reverse_apply_failed) e busy_identical diventa null; collezioni in hold contate', async () => {
+    const cal = await blockingCalendar('rev-apply-failed');
+    await indexItems(cal.id, [{ href: 'rotta.ics', raw: vcal(vevent(['UID:roll06@test', 'SUMMARY:Rotta', 'DTSTART:20310310T100000Z', 'DTEND:20310310T110000Z'])) }]);
+    await setRadicale();
+    const first = await runReverseProjection({ actor: 'admin:test-reverse', calendarIds: [cal.id] });
+    assert.equal(first.failed, 0, await failures());
+    const objectId = await objectIdOf(cal.id, 'rotta.ics');
+    const clean = await computeRollbackPreview(sql, { now: new Date() });
+    assert.equal(clean.summary.reverse_apply_failed, 0);
+    const baseFailed = clean.summary.reverse_failed;
+
+    // Errore dell'apply registrato solo nello stato: il piano puro continua a dare la risorsa per proiettabile.
+    await sql`
+      UPDATE cal_migration_reverse_state SET status = 'failed', error_code = 'REVERSE_FAILED', error = 'vincolo violato', attempts = 1
+      WHERE object_id = ${objectId}::uuid
+    `;
+    await sql`UPDATE cal_collection_state SET health = 'hold', hold_since = now(), hold_reason = 'mass-delete' WHERE calendar_id = ${cal.id}::uuid`;
+    const { summary, applyFailed } = await computeRollbackPreview(sql, { now: new Date() });
+    assert.equal(summary.reverse_apply_failed, 1);
+    assert.equal(summary.reverse_failed, baseFailed + 1, 'sommato a reverse_failed');
+    assert.equal(summary.busy_identical, null, 'il presupposto del confronto non vale più');
+    assert.ok(summary.held_collections >= 1);
+    assert.deepEqual(applyFailed.map((f) => ({ id: f.object_id, code: f.error_code })), [{ id: objectId, code: 'REVERSE_FAILED' }]);
+    await sql`UPDATE cal_collection_state SET health = 'healthy', hold_since = NULL, hold_reason = NULL WHERE calendar_id = ${cal.id}::uuid`;
+    await sql`DELETE FROM cal_migration_reverse_state WHERE object_id = ${objectId}::uuid`;
+  });
+
+  test('F4R-ROLL-03: il busy dell\'anteprima esclude le iscrizioni (righe ics_pull legacy e collezioni subscription): busy_identical non diventa rumore', async () => {
+    const parent = await blockingCalendar('rev-sub-parent');
+    const sidecar = await fx.calendar({ key: 'rev-sub-sidecar', blocks_availability: true });
+    await sql`UPDATE calendars SET role = 'subscription', parent_calendar_id = ${parent.id} WHERE id = ${sidecar.id}`;
+    const [sub] = await sql<Array<{ id: string }>>`
+      INSERT INTO calendar_subscriptions (calendar_id, collection_calendar_id, name, ics_url, blocks_availability)
+      VALUES (${parent.id}::uuid, ${sidecar.id}::uuid, ${fx.name('iscrizione')}, 'https://example.invalid/roll03.ics', true)
+      RETURNING id
+    `;
+    // Riga ics_pull legacy congelata al cutover e occorrenza diversa nel feed riscaricato nell'indice.
+    const frozen = await fx.event({ calendar: parent, summary: 'Feed congelato', start_time: '2031-03-02T09:00:00Z', end_time: '2031-03-02T10:00:00Z' });
+    await sql`UPDATE calendar_events SET source = 'ics_pull', subscription_id = ${sub.id}::uuid WHERE id = ${frozen.id}::uuid`;
+    await indexItems(sidecar.id, [], [], true);
+    await indexItems(sidecar.id, [{ href: 'nuovo.ics', raw: vcal(vevent(['UID:roll03-feed@test', 'SUMMARY:Feed nuovo', 'DTSTART:20310303T140000Z', 'DTEND:20310303T150000Z'])) }]);
+    await setRadicale();
+    const from = '2031-03-01T00:00:00Z';
+    const to = '2031-03-06T00:00:00Z';
+    const legacy = await legacyBusyAfterPlan(sql, { objects: [] }, from, to);
+    assert.deepEqual(legacy, [], 'le righe ics_pull non entrano nel busy legacy dell\'anteprima');
+    assert.deepEqual(await indexBusyRanges(sql, from, to, { excludeSubscriptions: true }), [], 'collezioni subscription escluse dall\'indice');
+    assert.equal((await indexBusyRanges(sql, from, to)).length, 1, 'senza l\'opzione il busy dell\'indice comprende la collezione dell\'iscrizione');
+  });
+
   test('migrati: stessi id e UID legacy; override annullati legacy riassorbiti dalle EXDATE; nessuna riscrittura alla seconda passata', async () => {
     const cal = await blockingCalendar('rev-migrati');
     const series = await fx.series({
@@ -639,7 +690,52 @@ function projectionIcs(booking: { uid: string; attendee_name: string; attendee_p
   return legacyId ? raw.replace('END:VEVENT', `X-CALDES-LEGACY-ID:${legacyId}\r\nEND:VEVENT`) : raw;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
+type Tx = any;
+
 describe('proiezioni delle prenotazioni', () => {
+  test('F4R-ROLL-04: una cancellazione GDPR fra il piano e l\'apply non viene annullata dall\'upsert della proiezione; la INSERT scrive il testo del piano', async () => {
+    const bookingsId = await bookingsCalendarId();
+    await sql`UPDATE calendars SET blocks_availability = true WHERE id = ${bookingsId}::uuid`;
+    const schedule = await fx.schedule();
+    const et = await fx.eventType({ key: 'rev-gdpr-race', durationMinutes: 30, schedule });
+    const { booking, projection } = await fx.booking({ eventType: et, start: romeIso('2026-11-23', '10:00') });
+    assert.ok(projection);
+    const href = `booking-${booking.uid}.ics`;
+    await reserveObjectId(sql, { calendarId: bookingsId, href, id: projection.id, uid: `${booking.uid}@caldes.it`, legacyEventId: projection.id, legacyUid: projection.uid });
+    await indexItems(bookingsId, [{ href, raw: projectionIcs(booking, projection.id) }]);
+    await setRadicale();
+    await runReverseProjection({ actor: 'admin:test-reverse', calendarIds: [bookingsId] });
+
+    // La prenotazione viene annullata nella finestra: la riga segue calendar_bookings (il piano cambia lo stato e porta il testo legacy).
+    await sql`UPDATE calendar_bookings SET status = 'cancelled', cancelled_at = now(), cancelled_by = 'attendee' WHERE uid = ${booking.uid}`;
+    const plan = await computeReversePlan(sql, { calendarIds: [bookingsId], now: new Date() });
+    const planned = plan.objects.flatMap((o) => o.rows).find((r) => r.id === projection.id);
+    assert.ok(planned && planned.role === 'projection', 'riga di proiezione nel piano');
+    assert.ok(plan.objects.some((o) => !o.unchanged), 'il piano cambia qualcosa');
+
+    // Cancellazione GDPR committata dopo il piano (scrittore privilegiato: GUC della transazione).
+    await sql.begin(async (tx: Tx) => {
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
+      await tx`UPDATE calendar_events SET summary = 'Prenotazione [rimosso]', description = NULL, location = NULL, url = NULL WHERE id = ${projection.id}::uuid`;
+    });
+    await applyReversePlan(sql, plan, { actor: 'admin:test-reverse' });
+    let [row] = await sql<Array<{ summary: string; description: string | null; status: string }>>`SELECT summary, description, status FROM calendar_events WHERE id = ${projection.id}::uuid`;
+    assert.equal(row.summary, 'Prenotazione [rimosso]', 'il testo redatto resta tale');
+    assert.equal(row.description, null);
+    assert.equal(row.status, 'cancelled', 'le altre colonne seguono il piano');
+
+    // Riga mancante: la INSERT è completa e scrive il testo del piano.
+    await sql.begin(async (tx: Tx) => {
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
+      await tx`DELETE FROM calendar_events WHERE id = ${projection.id}::uuid`;
+    });
+    await applyReversePlan(sql, plan, { actor: 'admin:test-reverse' });
+    [row] = await sql`SELECT summary, description, status FROM calendar_events WHERE id = ${projection.id}::uuid`;
+    assert.ok(row, 'riga reinserita');
+    assert.equal(row.summary, planned.row.summary, 'testo del piano scritto dalla INSERT');
+  });
+
   test('prenotazione pre-cutover annullata nella finestra → riga legacy cancelled e slot libero dopo il rollback', async () => {
     const bookingsId = await bookingsCalendarId();
     await sql`UPDATE calendars SET blocks_availability = true WHERE id = ${bookingsId}::uuid`;

@@ -325,8 +325,19 @@ export function summarizeReversePlan(plan: Pick<ReversePlan, 'objects'>): Pick<R
 }
 
 /** Righe del run dell'anteprima: una 'degradation' per degrado, una 'object' per REVERSE_FAILED (nessun dato personale). */
-function previewRows(plan: Pick<ReversePlan, 'objects'>): MigrationItemInput[] {
+function previewRows(plan: Pick<ReversePlan, 'objects'>, applyFailed: readonly ApplyFailedObject[] = []): MigrationItemInput[] {
   const rows: MigrationItemInput[] = [];
+  for (const f of applyFailed) {
+    rows.push({
+      item_type: 'object',
+      calendar_id: f.calendar_id,
+      collection_name: f.collection_name,
+      href: f.href,
+      code: 'REVERSE_FAILED',
+      severity: 'error',
+      detail: { object_id: f.object_id, error_code: f.error_code, message: 'errore dell\'apply precedente: la risorsa fallirebbe di nuovo' },
+    });
+  }
   for (const o of plan.objects) {
     if (o.status === 'removed') continue;
     if (o.status === 'failed') {
@@ -370,7 +381,7 @@ async function busyIdentical(db: Db, plan: Pick<ReversePlan, 'objects'>, now: Da
     const { legacyBusyAfterPlan } = await reverseModule();
     const [legacy, index] = await Promise.all([
       legacyBusyAfterPlan(db, plan, fromIso, toIso),
-      indexBusyRanges(db, fromIso, toIso, { includeBookingProjections: true }),
+      indexBusyRanges(db, fromIso, toIso, { includeBookingProjections: true, excludeSubscriptions: true }),
     ]);
     return sameBusy(legacy, index);
   } catch (err) {
@@ -379,23 +390,77 @@ async function busyIdentical(db: Db, plan: Pick<ReversePlan, 'objects'>, now: Da
   }
 }
 
+/** Risorsa con lo stato `failed` (errore dell'apply precedente) che il piano dà per proiettabile. */
+export interface ApplyFailedObject {
+  object_id: string;
+  calendar_id: string;
+  collection_name: string;
+  href: string;
+  error_code: string | null;
+}
+
+/**
+ * REVERSE_FAILED registrati nello stato (errori dell'apply: vincoli, database) per risorse che il piano dà per
+ * proiettabili (status diverso da failed): non compaiono nel piano puro. Solo codici, nessun dato personale.
+ */
+async function reverseApplyFailures(db: Db, plan: Pick<ReversePlan, 'objects'>): Promise<ApplyFailedObject[]> {
+  const rows = await db<Array<{ object_id: string; calendar_id: string; href: string; error_code: string | null }>>`
+    SELECT object_id::text AS object_id, calendar_id::text AS calendar_id, href, error_code
+    FROM cal_migration_reverse_state WHERE status = 'failed'
+    ORDER BY object_id
+  `;
+  if (rows.length === 0) return [];
+  const planned = new Map(plan.objects.map((o) => [o.object_id.toLowerCase(), o]));
+  const out: ApplyFailedObject[] = [];
+  for (const r of rows) {
+    const o = planned.get(r.object_id.toLowerCase());
+    if (!o || o.status === 'failed' || o.status === 'removed') continue;
+    out.push({ object_id: r.object_id, calendar_id: r.calendar_id, collection_name: o.collection_name, href: r.href, error_code: r.error_code });
+  }
+  return out;
+}
+
+/**
+ * Collezioni sidecar con le cancellazioni sospese (health 'hold', stesso stato di cui parla `held` del passo
+ * index_sync): il rollback le mantiene in PG e il cutover successivo le ricrea dal ramo `missing` della ri-baseline.
+ */
+async function countHeldCollections(db: Db): Promise<number> {
+  const [row] = await db<Array<{ n: number }>>`SELECT count(*)::int AS n FROM cal_collection_state WHERE health = 'hold'`;
+  return Number(row?.n ?? 0);
+}
+
 /** Anteprima completa (pura rispetto al database: nessuna scrittura). */
-export async function computeRollbackPreview(db: Db, opts: { now: Date; signal?: AbortSignal; deps?: Partial<RollbackDeps> }): Promise<{ summary: RollbackPreviewSummary; plan: ReversePlan }> {
+export async function computeRollbackPreview(
+  db: Db,
+  opts: { now: Date; signal?: AbortSignal; deps?: Partial<RollbackDeps> },
+): Promise<{ summary: RollbackPreviewSummary; plan: ReversePlan; applyFailed: ApplyFailedObject[] }> {
   const deps: RollbackDeps = { ...defaultRollbackDeps(), ...(opts.deps ?? {}) };
   const { reversePlanHash } = await reverseModule();
   const state = await readTransitionState(db);
   const plan = await deps.computeReversePlan(db, { now: opts.now, signal: opts.signal });
-  const [changes, busy] = await Promise.all([changesSinceCutover(db, state.cutover_at), busyIdentical(db, plan, opts.now)]);
+  const base = summarizeReversePlan(plan);
+  // REVERSE_FAILED nati in fase di apply (vincoli o errori del database, registrati solo nello stato) per risorse che il
+  // piano dà per proiettabili: senza questo l'anteprima direbbe 0 e busy identico, e il rollback fallirebbe di nuovo.
+  const [changes, applyFailed, heldCollections] = await Promise.all([
+    changesSinceCutover(db, state.cutover_at),
+    reverseApplyFailures(db, plan),
+    countHeldCollections(db),
+  ]);
+  // Con risorse che falliscono sempre nell'apply il presupposto del confronto (tutte le righe previste si applicano) non vale.
+  const busy = applyFailed.length > 0 ? null : await busyIdentical(db, plan, opts.now);
   const summary: RollbackPreviewSummary = {
     preview_hash: reversePlanHash(plan),
     generated_at: opts.now.toISOString(),
     cutover_at: iso(state.cutover_at),
     rollback_until: iso(state.rollback_until),
     changes_since_cutover: changes,
-    ...summarizeReversePlan(plan),
+    ...base,
+    reverse_failed: base.reverse_failed + applyFailed.length,
+    reverse_apply_failed: applyFailed.length,
+    held_collections: heldCollections,
     busy_identical: busy,
   };
-  return { summary, plan };
+  return { summary, plan, applyFailed };
 }
 
 /**
@@ -410,11 +475,11 @@ export async function runRollbackPreview(ctx: MigrationRunContext<RollbackPrevie
     throw preconditionError(`L'anteprima del rollback si calcola solo in mode radicale (adesso ${state.mode}).`, ['MODE_NOT_RADICALE']);
   }
   await ctx.progress({ phase: 'rollback_preview', message: 'Anteprima del rollback: proiezione inversa completa senza scrivere' });
-  const { summary, plan } = await computeRollbackPreview(ctx.db, { now: deps.now(), signal: ctx.signal, deps });
+  const { summary, plan, applyFailed } = await computeRollbackPreview(ctx.db, { now: deps.now(), signal: ctx.signal, deps });
   ctx.throwIfCancelled();
   // Righe di un tentativo precedente dello stesso run (ripresa dopo un riavvio): si rifanno da capo.
   await ctx.db`DELETE FROM cal_migration_items WHERE run_id = ${ctx.runId}::uuid`;
-  const rows = previewRows(plan);
+  const rows = previewRows(plan, applyFailed);
   for (let i = 0; i < rows.length; i += ROWS_CHUNK) await ctx.addItems(rows.slice(i, i + ROWS_CHUNK));
   await ctx.progress({ phase: 'done', message: `Anteprima pronta: ${plural(summary.objects, 'oggetto', 'oggetti')}, ${plural(summary.reverse_failed, 'REVERSE_FAILED', 'REVERSE_FAILED')}` });
   log.info({ objects: summary.objects, failed: summary.reverse_failed, busyIdentical: summary.busy_identical }, 'anteprima del rollback calcolata');
@@ -626,7 +691,14 @@ export async function runRollbackWith(ctx: MigrationRunContext<RollbackParams>, 
   if (params.action === 'abort') {
     const { handle } = await beginTransition({ ctx: tctx, kind: 'rollback', resume: true });
     const reason = 'annullato dall\'admin';
-    await abortTransition(handle, { code: 'ROLLBACK_ABORTED', reason });
+    // Il marker serve solo se il passo d'epoch è già stato tentato; con Radicale non configurato l'annullamento prima dell'epoch resta possibile.
+    let marker: { client: RadicaleClient; principal: string } | undefined;
+    try {
+      marker = deps.radicale();
+    } catch {
+      marker = undefined;
+    }
+    await abortTransition(handle, { code: 'ROLLBACK_ABORTED', reason, marker });
     log.warn({ transitionId: handle.record.id, actor: ctx.actor }, 'rollback annullato dall\'admin: backend di nuovo in mode radicale');
     return buildSummary(handle, 'aborted', reason);
   }

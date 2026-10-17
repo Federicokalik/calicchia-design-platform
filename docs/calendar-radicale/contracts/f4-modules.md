@@ -259,7 +259,12 @@ export function enforceCalendarApiLevelAtBoot(db?: Db): Promise<boolean>;
 export function calendarApiLevelBlocked(): boolean;
 ```
 
-- `store.ts` (solo questo): `calendarStore()` e `calendarStoreForWrite()` lanciano `CalendarStoreUnavailableError('api', 'level')` (motivo `store_not_available`) se `calendarApiLevelBlocked()`; nessun altro cambiamento. In mode postgres con `api_min_version = 0` non cambia nulla. Un'immagine più vecchia della F4 non ha questo controllo: la protegge il heartbeat (design §16.6) e la guardia 166, che fa fallire le sue scritture legacy.
+- Il blocco copre l'intero calendario del processo, non solo la facade (F4R-TR-5, OPS-2):
+  - `store.ts`: `calendarStore()` e `calendarStoreForWrite()` lanciano `CalendarStoreUnavailableError('api', 'level')` (motivo `store_not_available`) se `calendarApiLevelBlocked()`;
+  - `assertCalendarApiLevel()` (stesso errore) in `booking.ts` `beginDecision`, `slots.ts` `computeAvailableSlots`, `busy.ts` `getBusyRanges`, `capacity.ts` `getCapacityWeeks` e `routes/calendar/admin.ts` `POST /events/:id/split`;
+  - `cron/index.ts`: i job `ics-pull`, `italian-holidays`, `calendar-reverse-sweep`, `calendar-shadow-nightly` e `calendar-shadow-parity` escono subito se `calendarApiLevelBlocked()`;
+  - `index.ts`: il controllo d'avvio gira PRIMA di `serve()` e di `startCronEngine()`; con livello insufficiente `startCalendarControlPlane()` e `startCalendarBackground()` non partono (log «calendario fermo: livello API insufficiente, device in frozen per heartbeat assente»): senza heartbeat i device vanno in frozen.
+  In mode postgres con `api_min_version = 0` non cambia nulla. Le immagini F1-F3 NON sono fermate da nulla: non hanno questo controllo, scrivono heartbeat e policy live e, in mode radicale, servono RadicaleStore senza proiezione inversa e con l'archivio della Fase 0 scrivibile dai device (la policy F3 non conosce `DEVICE_READONLY_ORIGINS`); l'erasure GDPR della F3 fallirebbe con CD166. Per questo il criterio `api_image_pinned` (reason `API_IMAGE_UNVERSIONED`) blocca il cutover in produzione se l'API non ha una versione (`CALDES_API_VERSION` o `GIT_COMMIT_SHA`: `sha-<short>`), la versione è registrata in `cal_migration_transitions.data.api_version`, e il runbook F5 fissa il compose dell'API su `sha-<short>` PRIMA del cutover e vieta il rollback d'immagine sotto la release F4 finché la finestra è aperta.
 
 ### 3.5 Archivio della Fase 0 in sola lettura (questione aperta 1 della F3)
 
@@ -370,7 +375,7 @@ Azioni: `start`, `resume`, `abort` (solo prima di `epoch`). Il volume Radicale r
 
 ### 5.2 Rollback d'immagine API
 
-Fuori dal wizard (design §16.6): un'immagine più vecchia non scrive il heartbeat (device frozen entro 10 minuti) e le sue scritture legacy falliscono sulla guardia 166; un'immagine F4 con `api_min_version` più alto del proprio livello non serve il calendario (§3.4). Il runbook della F5 lo documenta.
+Fuori dal wizard (design §16.6): un'immagine F4 con `api_min_version` più alto del proprio livello non serve il calendario (§3.4). Le immagini F1-F3 NON si fermano da sole: scrivono heartbeat e policy live, in mode radicale servono RadicaleStore senza proiezione inversa e con l'archivio scrivibile dai device (§3.4). Il runbook della F5 fissa l'API su `sha-<short>` prima del cutover (criterio `api_image_pinned`) e vieta il rollback d'immagine sotto la release F4 finché la finestra è aperta; la correzione strutturale (dead prop `min-api-level` sul marker, `api_level` nell'heartbeat, `caldes_rights.py` in frozen se `heartbeat.api_level < min-api-level`) è facoltativa per la F5.
 
 ### 5.3 Ri-baseline del ledger (`rebaseline.ts`)
 
@@ -454,7 +459,7 @@ Regole comuni della F3 (§10.1-§10.3): audit in `audit_logs`, `MigrationErrorBo
 
 ### 6.4 Ritocchi dell'admin (piano F4 attività 7)
 
-1. **Saga "questa e le successive"**: route `POST /api/admin/calendar/events/:id/split` (`{ original_start, start_time?, end_time?, delete?: boolean }`): con lo store Radicale `splitRecurringEvent` (saga `recurrence_split`, f2 §3); con PgLegacyStore le stesse due operazioni che l'admin fa oggi dal browser (UNTIL del master a `cutoff − 60 s` e nuova serie da `original_start`) in una sola transazione, stessi valori. `calendario.tsx` usa la route invece delle due chiamate.
+1. **Saga "questa e le successive"**: route `POST /api/admin/calendar/events/:id/split` (`{ original_start, start_time?, end_time?, delete?: boolean }`): con lo store Radicale `splitRecurringEvent` (saga `recurrence_split`, f2 §3); con PgLegacyStore il taglio in una sola transazione con la stessa semantica di `splitSeries` di `packages/calendar-core/src/recurrence-ops.ts` (F4R3-03): la testa prende UNTIL = `cutoff − 60 s` (senza COUNT) e le sole EXDATE precedenti al taglio; la nuova serie parte da `original_start` (o dai nuovi orari) con la stessa regola, **COUNT residuo** se c'era COUNT (occorrenze della testa contate senza EXDATE) e UNTIL invariato, e non nasce se il COUNT residuo è ≤ 0; le EXDATE dal taglio in poi passano alla nuova serie traslate dello scarto degli orari; gli override con `recurrence_id` dal taglio in poi seguono la nuova serie (`recurrence_master_id` e `recurrence_id` traslato) o, con `delete` o senza serie nuova, si cancellano. `calendario.tsx` usa la route invece delle due chiamate.
 2. **Selezione degli all-day**: una selezione `allDay` di FullCalendar crea un evento `all_day: true` con inizio e fine a mezzanotte Europe/Rome (fine esclusiva), mai un timed 00:00-00:00 UTC.
 3. **`timeZone` Europe/Rome**: FullCalendar mostra e restituisce gli orari di Roma a prescindere dal fuso del browser. Preferita la soluzione senza dipendenze (`timeZone: 'UTC'` con gli istanti convertiti in wall-time di Roma da `lib/timezone.ts` all'ingresso e riconvertiti con `zonedInputToIso` in uscita da select, drop e resize); `@fullcalendar/luxon3` solo se l'integrazione autorizza `apps/admin/package.json`.
 4. **UNTIL a fine giornata locale**: `evento-edit.tsx` scrive `UNTIL` come l'istante UTC di 23:59:59 Europe/Rome del giorno scelto (non la mezzanotte UTC, che escludeva l'ultima occorrenza mattutina).

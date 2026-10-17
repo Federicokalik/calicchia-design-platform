@@ -115,6 +115,21 @@ try {
   console.warn('   Use admin → Impostazioni → Knowledge Base to import from S4 or upload manually.');
 }
 
+// Livello del protocollo calendario (F4, docs/calendar-radicale/contracts/
+// f4-modules.md §3.4): un'immagine con CALENDAR_API_LEVEL più basso di
+// calendar_backend_state.api_min_version (rollback d'immagine dopo il cutover)
+// non serve il calendario (503 store_not_available): facade, prenotazioni,
+// slots/busy, capacity, split dell'admin e job del cron lo rifiutano. Il
+// controllo avviene PRIMA di serve() e del cron, e con livello insufficiente
+// control-plane e background del calendario non partono: senza heartbeat i
+// device vanno in frozen. Il resto dell'API (sito, admin, CRM) parte comunque.
+let calendarLevelOk = true;
+try {
+  calendarLevelOk = await enforceCalendarApiLevelAtBoot();
+} catch (err) {
+  console.error(`⚠️  Calendar API level check failed: ${(err as Error).message}`);
+}
+
 const port = parseInt(process.env.PORT || '3001');
 
 console.log(`🚀 API server starting on port ${port}`);
@@ -127,33 +142,28 @@ const server = serve({
 // Start cron jobs
 startCronEngine();
 
-// Livello del protocollo calendario (F4, docs/calendar-radicale/contracts/
-// f4-modules.md §3.4): un'immagine con CALENDAR_API_LEVEL più basso di
-// calendar_backend_state.api_min_version (rollback d'immagine dopo il cutover)
-// non serve il calendario (503 store_not_available); il resto dell'API parte
-// comunque. Prima del control-plane, come chiede il contratto.
-try {
-  await enforceCalendarApiLevelAtBoot();
-} catch (err) {
-  console.error(`⚠️  Calendar API level check failed: ${(err as Error).message}`);
-}
-
 // Control-plane di Radicale (F1, docs/calendar-radicale/contracts/control-plane.md):
 // policy.json derivata da calendar_backend_state e heartbeat.json ogni 30 s sul
 // volume caldes_control. Attivo solo se il volume è montato (CALDES_CONTROL_PLANE);
 // non blocca il boot e i suoi errori non fermano l'API.
-startCalendarControlPlane().catch((err) => {
-  console.error(`⚠️  Calendar control-plane not started: ${(err as Error).message}`);
-});
+if (calendarLevelOk) {
+  startCalendarControlPlane().catch((err) => {
+    console.error(`⚠️  Calendar control-plane not started: ${(err as Error).message}`);
+  });
+}
 
 // Calendario su Radicale (F2, docs/calendar-radicale/contracts/f2-modules.md
 // §12): listener del modo, handler e worker dei job, campanello e canary.
 // Senza RADICALE_URL worker, campanello e canary restano spenti e la salute
 // (/api/health/calendar) lo dichiara; in mode postgres lavorano in shadow.
 // Non blocca il boot e i suoi errori non fermano l'API.
-startCalendarBackground().catch((err) => {
-  console.error(`⚠️  Calendar background not started: ${(err as Error).message}`);
-});
+if (calendarLevelOk) {
+  startCalendarBackground().catch((err) => {
+    console.error(`⚠️  Calendar background not started: ${(err as Error).message}`);
+  });
+} else {
+  console.error('⚠️  calendario fermo: livello API insufficiente, device in frozen per heartbeat assente');
+}
 
 console.log(`✅ API server running at http://localhost:${port}`);
 

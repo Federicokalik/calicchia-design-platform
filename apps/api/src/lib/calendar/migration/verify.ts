@@ -231,7 +231,7 @@ export function diffSignature(diff: Omit<VerifyDiff, 'detail'> & { detail: Omit<
 
 type SourceRow = LegacySource['events'][number];
 
-interface VerifyIndex {
+export interface VerifyIndex {
   source: LegacySource;
   serialization: SerializationResult;
   calById: Map<string, MigrationCalendar>;
@@ -253,6 +253,12 @@ interface VerifyIndex {
    * contenuto finché etag e riga legacy non cambiano.
    */
   rebaselineRunIds: ReadonlySet<string>;
+  /**
+   * Fine dei run `rollback` e `rebaseline` (null se ancora in corso): una riga adottata è «non più toccata» solo se il
+   * ledger non è stato riscritto dopo (written_at <= fine del run). Lo shadow mirror scrive il ledger con runId null e
+   * COALESCE conserva il last_run_id del rollback, quindi last_run_id da solo non basta (F4R-ROLL-05).
+   */
+  rebaselineRunFinished: ReadonlyMap<string, Date | null>;
   /** Risorse (calendar_id|href) con un degrado della proiezione inversa che cambia le occorrenze. */
   reverseDegraded: ReadonlySet<string>;
 }
@@ -390,11 +396,14 @@ function feedInstant(label: string, tz: string): DiffInstant {
  * (reverseDegraded), le differenze di V3 e V5 sono quelle documentate
  * nell'anteprima del rollback, non una divergenza.
  */
-function rebaselinedUntouched(idx: VerifyIndex, s: SerializedObject): boolean {
+export function rebaselinedUntouched(idx: VerifyIndex, s: SerializedObject): boolean {
   const k = calHref(s.calendar_id, s.href);
   if (!idx.reverseDegraded.has(k)) return false;
   const l = idx.ledgerByCalHref.get(k);
   if (!l?.adopted || l.last_run_id === null || !idx.rebaselineRunIds.has(l.last_run_id)) return false;
+  // Davvero «non più toccato»: il ledger non è stato riscritto dopo la fine del run che l'ha ri-allineato.
+  const finished = idx.rebaselineRunFinished.get(l.last_run_id);
+  if (!finished || !l.written_at || new Date(l.written_at).getTime() > finished.getTime()) return false;
   const t = idx.target.collections.get(s.calendar_id)?.objects.get(s.href);
   return Boolean(t && l.written_etag !== null && l.written_etag === t.etag && l.legacy_hash === s.legacy_hash);
 }
@@ -1350,8 +1359,8 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
   const scopeIds = scope.calendar_ids?.length ? new Set(scope.calendar_ids) : null;
   const verified = scopeIds ? included.filter((c) => scopeIds.has(c.id)) : included;
   const ledger = await readLedger(ctx.db, {});
-  const rebaselineRuns = await ctx.db<Array<{ id: string }>>`
-    SELECT id::text AS id FROM cal_migration_runs WHERE kind IN ('rollback', 'rebaseline')
+  const rebaselineRuns = await ctx.db<Array<{ id: string; finished_at: Date | null }>>`
+    SELECT id::text AS id, finished_at FROM cal_migration_runs WHERE kind IN ('rollback', 'rebaseline')
   `;
   const reverseDegraded = await ctx.db<Array<{ calendar_id: string; href: string }>>`
     SELECT calendar_id::text AS calendar_id, href FROM cal_migration_reverse_state
@@ -1389,6 +1398,7 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
     scopes: new Map(),
     now,
     rebaselineRunIds: new Set(rebaselineRuns.map((r) => r.id)),
+    rebaselineRunFinished: new Map(rebaselineRuns.map((r) => [r.id, r.finished_at ? new Date(r.finished_at) : null])),
     reverseDegraded: new Set(reverseDegraded.map((r) => calHref(r.calendar_id, r.href))),
   };
 

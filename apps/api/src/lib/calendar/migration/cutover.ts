@@ -61,7 +61,7 @@ import { CAL_JOB_KINDS, enqueueCalendarJob } from '../jobs';
 import type { RadicaleClient } from '../radicale/client';
 import { type ControlPlaneStatus, type ControlPlaneTick, getCalendarControlPlane, requestControlPlaneSync } from '../radicale/heartbeat';
 import { checkVolumeIdentity, type IdentityCheck, remoteIdentitySource } from '../radicale/identity';
-import { type Db, readSidecarCollections } from '../radicale/policy';
+import { type Db, readSidecarCollections, resolveApiVersion } from '../radicale/policy';
 import { CollectionSyncError, type SyncCollectionResult, syncAllCollections, verifyVolumeIdentity } from '../radicale/sync';
 import { type BackendMode, DEFAULT_PRINCIPAL, policyFromState } from '../radicale/types';
 import { applyItemRow, executePlanItem, type ExecuteContext, type ExecutedItem, migrationThrottle } from './apply';
@@ -200,6 +200,8 @@ export interface CutoverCriteriaDeps {
   probeAvailable: () => boolean;
   /** Principal di Radicale (per la policy derivata dell'archivio). */
   principal: () => string;
+  /** Versione dell'immagine dell'API (CALDES_API_VERSION o sha-<short>; 'unversioned' se assente). */
+  apiVersion: () => string;
 }
 
 /** Dipendenze di produzione dei criteri. */
@@ -212,6 +214,7 @@ export function defaultCutoverCriteriaDeps(env: NodeJS.ProcessEnv = process.env)
     controlPlaneStatus: () => getCalendarControlPlane()?.status() ?? null,
     probeAvailable: () => Boolean(env.RADICALE_PROBE_PASSWORD?.trim() || env.CALDES_PROBE_PASSWORD?.trim()),
     principal: () => env.RADICALE_PRINCIPAL?.trim() || DEFAULT_PRINCIPAL,
+    apiVersion: () => resolveApiVersion(env),
   };
 }
 
@@ -451,6 +454,21 @@ async function evaluateCriteria(
     archiveDetail = 'Nessun archivio della Fase 0';
   }
   out.push({ id: 'archive_readonly', label: 'Archivio della Fase 0 assente, nascosto o in sola lettura per i device', ok: archiveOk, detail: archiveDetail, reason: 'ARCHIVE_DEVICE_WRITABLE' });
+
+  // Immagine dell'API fissata su una versione (OPS-1): un rollback d'immagine sotto la F4 durante la finestra di rollback
+  // non è fermato da nulla (le immagini F1-F3 scrivono heartbeat e policy live), quindi in produzione il cutover parte
+  // solo con l'API su sha-<short> e il runbook vieta di scendere sotto la release F4.
+  const apiVersion = deps.apiVersion();
+  const unversioned = process.env.NODE_ENV === 'production' && apiVersion === 'unversioned';
+  out.push({
+    id: 'api_image_pinned',
+    label: 'Immagine dell\'API fissata su una versione (sha-<short>)',
+    ok: !unversioned,
+    detail: unversioned
+      ? 'API senza versione (CALDES_API_VERSION o GIT_COMMIT_SHA assenti): fissa il compose dell\'API su sha-<short> prima del passaggio'
+      : `Versione dell'API: ${apiVersion}`,
+    reason: 'API_IMAGE_UNVERSIONED',
+  });
 
   return out;
 }
@@ -817,12 +835,10 @@ async function runIndexSyncStep(db: Db, deps: CutoverDeps): Promise<Record<strin
   const results = await deps.syncAll();
   const failed = results.filter((r): r is CollectionSyncError => r instanceof CollectionSyncError);
   const ok = results.filter((r): r is SyncCollectionResult => !(r instanceof CollectionSyncError));
-  if (failed.length) {
-    throw new TransitionError('CALENDAR_UNAVAILABLE', `Sync dell'indice non riuscita per ${plural(failed.length, 'collezione', 'collezioni')} (${failed.map((f) => f.code).join(', ')}): riprendi il passaggio quando Radicale risponde.`, {
-      runErrorCode: 'RADICALE_UNREACHABLE',
-      details: { failed: failed.map((f) => ({ calendar_id: f.calendarId, code: f.code })) },
-    });
-  }
+  // Collezioni non sincronizzate (una che non sincronizza in modo persistente non deve bloccare il cutover oltre il punto
+  // di non ritorno: non c'è via d'uscita): la sync periodica le riprova; busy e prenotazioni sono già fail-closed sulla
+  // freshness. Se syncAll() stesso lancia (Radicale irraggiungibile) il passo fallisce e la ripresa basta.
+  if (failed.length) log.error({ failed: failed.map((f) => ({ calendar_id: f.calendarId, code: f.code })) }, 'sync del cutover: collezioni non sincronizzate, la sync periodica le riprova');
   const held = ok.filter((r) => r.status === 'held').map((r) => r.calendarId);
   if (held.length) log.warn({ held }, 'sync del cutover: collezioni con cancellazioni sospese (da risolvere dall\'admin)');
   return {
@@ -835,7 +851,8 @@ async function runIndexSyncStep(db: Db, deps: CutoverDeps): Promise<Record<strin
     upserted: ok.reduce((a, r) => a + r.upserted, 0),
     deleted: ok.reduce((a, r) => a + r.deleted, 0),
     quarantined: ok.reduce((a, r) => a + r.quarantined, 0),
-    failed: 0,
+    failed: failed.map((f) => ({ calendar_id: f.calendarId, code: f.code })),
+    degraded: failed.length > 0,
   };
 }
 
@@ -862,7 +879,7 @@ async function buildSummary(handle: TransitionHandle, outcome: 'completed' | 'ab
     quiescence: (data('quiesce') as unknown as QuiescenceReport | null) ?? null,
     delta: (delta as unknown as ApplySummary | null) ?? null,
     verify: (verify as unknown as VerifySummary | null) ?? null,
-    reverse: (data('reverse_start') as unknown as ReverseApplySummary | null) ?? null,
+    reverse: data('reverse_start')?.skipped ? null : ((data('reverse_start') as unknown as ReverseApplySummary | null) ?? null),
     bookings_reconciled: typeof bookings?.enqueued === 'number' ? bookings.enqueued : 0,
     smoke: (data('smoke') as unknown as SmokeReport | null) ?? null,
     steps: await journalViews(handle),
@@ -910,7 +927,14 @@ export async function runCutoverWith(ctx: MigrationRunContext<CutoverParams>, de
   if (params.action === 'abort') {
     const { handle } = await beginTransition({ ctx: tctx, kind: 'cutover', resume: true });
     const reason = 'annullato dall\'admin';
-    await abortTransition(handle, { code: 'CUTOVER_ABORTED', reason });
+    // Il marker serve solo se il passo d'epoch è già stato tentato; con Radicale non configurato l'annullamento prima dell'epoch resta possibile.
+    let marker: { client: RadicaleClient; principal: string } | undefined;
+    try {
+      marker = deps.radicale();
+    } catch {
+      marker = undefined;
+    }
+    await abortTransition(handle, { code: 'CUTOVER_ABORTED', reason, marker });
     log.warn({ transitionId: handle.record.id, actor: ctx.actor }, 'cutover annullato dall\'admin: backend in mode postgres con la policy shadow');
     return buildSummary(handle, 'aborted', reason);
   }
@@ -919,7 +943,7 @@ export async function runCutoverWith(ctx: MigrationRunContext<CutoverParams>, de
     ctx: tctx,
     kind: 'cutover',
     resume: params.action === 'resume',
-    data: { rollback_window_days: params.rollback_window_days, verify_run_id: params.verify_run_id },
+    data: { rollback_window_days: params.rollback_window_days, verify_run_id: params.verify_run_id, api_version: resolveApiVersion() },
   });
   const journalAtStart = await readJournal(ctx.db, handle.record.id);
   if (resumed && params.action === 'start' && !pastPointOfNoReturn(journalAtStart)) {
@@ -991,9 +1015,18 @@ export async function runCutoverWith(ctx: MigrationRunContext<CutoverParams>, de
   // 9. Proiezione inversa.
   await progress(8, 'Prima passata della proiezione inversa verso Postgres');
   await runStep(handle, 'reverse_start', async () => {
-    const summary = await deps.reverse({ db: ctx.db, actor: ctx.actor, runId: ctx.runId, signal: ctx.signal });
-    if (summary.failed > 0) log.warn({ failed: summary.failed }, 'proiezione inversa con REVERSE_FAILED: compaiono nella salute e nell\'anteprima del rollback');
-    return summary as unknown as Record<string, unknown>;
+    try {
+      const summary = await deps.reverse({ db: ctx.db, actor: ctx.actor, runId: ctx.runId, signal: ctx.signal });
+      if (summary.failed > 0) log.warn({ failed: summary.failed }, 'proiezione inversa con REVERSE_FAILED: compaiono nella salute e nell\'anteprima del rollback');
+      return summary as unknown as Record<string, unknown>;
+    } catch (err) {
+      // Dopo il punto di non ritorno un errore persistente della prima passata non deve bloccare il passaggio: lo sweep
+      // periodico della proiezione inversa riprova (e compare nella salute).
+      if (ctx.signal?.aborted) throw err;
+      const message = err instanceof Error ? err.message : String(err);
+      log.error({ err: message }, 'proiezione inversa: prima passata non riuscita, la riprova lo sweep periodico');
+      return { skipped: true, error_code: 'REVERSE_START_FAILED', message: message.slice(0, 500) };
+    }
   });
 
   // 10. Prenotazioni a cavallo del freeze.

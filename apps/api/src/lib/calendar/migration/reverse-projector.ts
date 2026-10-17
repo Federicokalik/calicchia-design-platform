@@ -8,7 +8,7 @@
  * fatta in Radicale (device, admin, MCP, sistema) viene proiettata in
  * calendar_events, che il codice legacy ritrova identico al momento del
  * rollback. È l'unico scrittore di calendar_events fuori da mode postgres (con
- * `SET LOCAL caldes.reverse_sync = 'on'`, guardia 166) e l'unico scrittore di
+ * `set_config('caldes.reverse_sync', txid_current()::text, true)`, guardia 166) e l'unico scrittore di
  * cal_migration_reverse_state.
  *
  * Mappatura totale e testata dall'indice allo schema legacy (§4.2 del
@@ -1883,8 +1883,15 @@ const UPDATE_COLUMNS = [
   'recurrence_id', 'recurrence_master_id', 'source', 'source_id', 'status', 'caldes_object_id', 'caldes_derived',
 ] as const;
 
-/** Upsert per id di una riga: riscrive solo se qualche colonna cambia. Restituisce 'inserted', 'updated' o 'same'. */
-async function upsertRow(tx: Db, row: LegacyReverseRow): Promise<'inserted' | 'updated' | 'same'> {
+const TEXT_COLUMNS: ReadonlySet<string> = new Set(['summary', 'description', 'location', 'url']);
+
+/**
+ * Upsert per id di una riga: riscrive solo se qualche colonna cambia. Restituisce 'inserted', 'updated' o 'same'.
+ * `preserveText` (proiezioni delle prenotazioni, F4R-ROLL-04): su una riga esistente titolo, descrizione, luogo e link
+ * non si riscrivono, così una cancellazione GDPR avvenuta fra il piano e l'apply non viene annullata (e le passate
+ * successive non ricopiano il testo della riga legacy); la INSERT resta completa.
+ */
+async function upsertRow(tx: Db, row: LegacyReverseRow, opts: { preserveText?: boolean } = {}): Promise<'inserted' | 'updated' | 'same'> {
   const values = {
     id: row.id,
     calendar_id: row.calendar_id,
@@ -1906,8 +1913,9 @@ async function upsertRow(tx: Db, row: LegacyReverseRow): Promise<'inserted' | 'u
     caldes_object_id: row.caldes_object_id,
     caldes_derived: row.caldes_derived,
   };
-  const set = UPDATE_COLUMNS.map((c) => `${c} = EXCLUDED.${c}`).join(', ');
-  const distinct = `(${UPDATE_COLUMNS.map((c) => `calendar_events.${c}`).join(', ')}) IS DISTINCT FROM (${UPDATE_COLUMNS.map((c) => `EXCLUDED.${c}`).join(', ')})`;
+  const columns = opts.preserveText ? UPDATE_COLUMNS.filter((c) => !TEXT_COLUMNS.has(c)) : UPDATE_COLUMNS;
+  const set = columns.map((c) => `${c} = EXCLUDED.${c}`).join(', ');
+  const distinct = `(${columns.map((c) => `calendar_events.${c}`).join(', ')}) IS DISTINCT FROM (${columns.map((c) => `EXCLUDED.${c}`).join(', ')})`;
   const rows = await tx<Array<{ inserted: boolean }>>`
     INSERT INTO calendar_events ${tx(values)}
     ON CONFLICT (id) DO UPDATE SET ${tx.unsafe(set)}
@@ -1963,7 +1971,7 @@ async function applyObject(tx: Db, plan: ReverseObjectPlan): Promise<ObjectOutco
   // 3. Upsert: prima le righe senza master (master, proiezione, derivate), poi gli override.
   const ordered = [...plan.rows].sort((a, b) => Number(a.row.recurrence_master_id !== null) - Number(b.row.recurrence_master_id !== null));
   for (const r of ordered) {
-    const res = await upsertRow(tx, r.row);
+    const res = await upsertRow(tx, r.row, { preserveText: r.role === 'projection' });
     if (res === 'inserted') outcome.inserted++;
     else if (res === 'updated') outcome.updated++;
   }
@@ -2019,7 +2027,7 @@ type SavepointDb = Db & { savepoint<T>(fn: (sp: Db) => Promise<T>): Promise<T> }
 
 /**
  * Applica il piano (§4.2): per lotti di risorse, una transazione con
- * `SET LOCAL caldes.reverse_sync = 'on'` e un SAVEPOINT per risorsa. Una
+ * `set_config('caldes.reverse_sync', txid_current()::text, true)` e un SAVEPOINT per risorsa. Una
  * risorsa che fallisce (vincolo, UID, errore del database) diventa
  * REVERSE_FAILED nel proprio stato, con le righe di prima intatte: le altre
  * proseguono e nessuna eccezione arriva al chiamante per un caso dei dati.
@@ -2035,7 +2043,7 @@ export async function applyReversePlan(db: Db, plan: ReversePlan, opts: { actor:
     checkAborted(opts.signal);
     await db.begin(async (txRaw) => {
       const tx = txRaw as unknown as SavepointDb;
-      await tx`SELECT set_config(${REVERSE_SYNC_GUC}, 'on', true)`;
+      await tx`SELECT set_config(${REVERSE_SYNC_GUC}, txid_current()::text, true)`;
       const unchanged: string[] = [];
       for (const obj of batch) {
         if (obj.unchanged) {
@@ -2133,7 +2141,8 @@ export async function runReverseProjection(opts: {
  * dopo l'applicazione del piano, senza scrivere: righe correnti dei
  * calendari bloccanti meno quelle che il piano cancella o riscrive, più le
  * righe previste. Serve al confronto `busy_identical` dell'anteprima del
- * rollback e ai test.
+ * rollback e ai test. Le righe ics_pull (iscrizioni) sono escluse: congelate al
+ * cutover, il pull legacy le riscarica dopo il rollback (F4R-ROLL-03).
  */
 export async function legacyBusyAfterPlan(db: Db, plan: Pick<ReversePlan, 'objects'>, fromIso: string, toIso: string): Promise<BusyRange[]> {
   const blocking = new Set(
@@ -2156,6 +2165,7 @@ export async function legacyBusyAfterPlan(db: Db, plan: Pick<ReversePlan, 'objec
   const current = await db<EventDbRow[]>`
     SELECT ${db(EVENT_COLUMNS as unknown as string[])} FROM calendar_events e
     WHERE EXISTS (SELECT 1 FROM calendars c WHERE c.id = e.calendar_id AND c.blocks_availability)
+      AND e.source <> 'ics_pull'
       AND (e.recurrence_master_id IS NOT NULL OR e.rrule IS NOT NULL
            OR (e.start_time < ${toIso}::timestamptz AND e.end_time > ${fromIso}::timestamptz))
   `;

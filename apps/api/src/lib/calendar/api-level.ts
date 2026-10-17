@@ -18,9 +18,21 @@
  *   CalendarStoreUnavailableError ('store_not_available', 503) per ogni
  *   lettura e scrittura della facade. Il resto dell'API (sito, admin, CRM)
  *   continua a funzionare.
- * - Un'immagine più vecchia della F4 non ha questo controllo: la proteggono il
- *   heartbeat (i device vanno in frozen entro 10 minuti senza heartbeat) e la
- *   guardia 166, che fa fallire le sue scritture legacy su calendar_events.
+ * - Le immagini più vecchie della F4 (F1-F3) NON sono fermate da questo
+ *   controllo, che non esiste nel loro codice: scrivono heartbeat e policy
+ *   live, e in mode radicale servono RadicaleStore senza proiezione inversa,
+ *   con l'archivio della Fase 0 scrivibile dai device. Per questo il runbook
+ *   F5 fissa l'API su `sha-<short>` prima del cutover e vieta il rollback
+ *   d'immagine sotto la release F4 finché la finestra è aperta, e il cutover
+ *   rifiuta di partire in produzione con un'immagine senza versione
+ *   (API_IMAGE_UNVERSIONED).
+ * - Il blocco copre l'intero calendario del processo: oltre alla facade
+ *   (calendarStore, calendarStoreForWrite), le prenotazioni (beginDecision),
+ *   slot, busy e capacità, lo split dell'admin e i job del cron
+ *   (ics-pull, italian-holidays, sweep della proiezione inversa, shadow); e
+ *   control-plane e background del calendario non partono (index.ts), così i
+ *   device vanno in frozen per heartbeat assente. Il controllo gira prima di
+ *   serve() e di startCronEngine().
  * - In mode postgres con api_min_version = 0 (la produzione prima del
  *   cutover) il controllo passa sempre e non cambia nulla.
  *
@@ -32,6 +44,7 @@
 import type { Logger } from 'pino';
 import { sql } from '../../db';
 import { logger as rootLogger } from '../logger';
+import { CalendarStoreUnavailableError } from './errors';
 import { CALENDAR_API_LEVEL } from './migration/types';
 import type { Db } from './radicale/policy';
 
@@ -99,6 +112,15 @@ export async function enforceCalendarApiLevelAtBoot(db: Db = sql): Promise<boole
 /** true dopo un controllo d'avvio fallito: la facade risponde CalendarStoreUnavailableError. */
 export function calendarApiLevelBlocked(): boolean {
   return blocked;
+}
+
+/**
+ * Ingresso pubblico del calendario che non passa dalla facade store.ts
+ * (prenotazioni, slot, busy, capacità, split dell'admin): con l'immagine sotto
+ * api_min_version lancia CalendarStoreUnavailableError ('store_not_available', 503).
+ */
+export function assertCalendarApiLevel(): void {
+  if (blocked) throw new CalendarStoreUnavailableError('api', 'level');
 }
 
 /** Azzera il blocco (solo test). Vietato con NODE_ENV=production. */

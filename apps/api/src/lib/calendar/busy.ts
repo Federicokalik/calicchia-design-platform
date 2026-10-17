@@ -55,6 +55,7 @@ import { sql } from '../../db';
 import { logger as rootLogger } from '../logger';
 import { readBackendStateFresh, readStoreKind, storeKindForMode, storeKindOverride, type CalendarStoreKind } from './backend-mode';
 import { CalendarUnavailableError, type CalendarUnavailableReason } from './errors';
+import { assertCalendarApiLevel } from './api-level';
 import type { OccurrenceKind } from './index-model';
 import { getBusyRanges as legacyBusyRanges } from './legacy/events-pg';
 import { assertDisplayReady } from './radicale/freshness';
@@ -110,6 +111,7 @@ export interface BlockingOccurrence {
  * al livello richiesto, l'errore del database o della query altrimenti.
  */
 export async function getBusyRanges(fromIso: string, toIso: string, opts: BusyOptions = {}): Promise<BusyRange[]> {
+  assertCalendarApiLevel();
   const db = opts.db ?? sql;
   const level: BusyLevel = opts.level ?? 'display';
   const kind = await busyStoreKind(db, level);
@@ -144,6 +146,13 @@ export interface IndexBusyOptions {
    * proiezione è un evento confermato del calendario Prenotazioni.
    */
   includeBookingProjections?: boolean;
+  /**
+   * Esclude le collezioni delle iscrizioni (role subscription). Serve al
+   * confronto `busy_identical` dell'anteprima del rollback (F4R-ROLL-03): le
+   * righe ics_pull legacy sono congelate al cutover mentre l'indice segue le
+   * iscrizioni, che il pull legacy riscarica dopo il rollback.
+   */
+  excludeSubscriptions?: boolean;
 }
 
 /**
@@ -168,11 +177,11 @@ export async function indexBusyRanges(db: Db, fromIso: string, toIso: string, op
       SELECT DISTINCT o.start_utc, o.end_utc
       FROM cal_occurrences o
       WHERE o.blocks
-        AND o.calendar_id IN (${blockingCalendarIds(db)})
+        AND o.calendar_id IN (${blockingCalendarIds(db, opts.excludeSubscriptions)})
         AND o.span && tstzrange(${fromTs}::timestamptz, ${toTs}::timestamptz, '[)')
       ORDER BY o.start_utc, o.end_utc
     `,
-    onTheFlyOccurrences(db, from, to),
+    onTheFlyOccurrences(db, from, to, opts.excludeSubscriptions),
     opts.includeBookingProjections
       ? db<Array<{ start_utc: Date; end_utc: Date }>>`
         SELECT DISTINCT o.start_utc, o.end_utc
@@ -180,7 +189,7 @@ export async function indexBusyRanges(db: Db, fromIso: string, toIso: string, op
         WHERE o.kind = 'booking_projection'
           AND o.status = 'confirmed'
           AND NOT o.all_day
-          AND o.calendar_id IN (${blockingCalendarIds(db)})
+          AND o.calendar_id IN (${blockingCalendarIds(db, opts.excludeSubscriptions)})
           AND o.span && tstzrange(${fromTs}::timestamptz, ${toTs}::timestamptz, '[)')
       `
       : Promise.resolve([]),
@@ -208,7 +217,7 @@ export async function indexBusyRanges(db: Db, fromIso: string, toIso: string, op
  * con blocks_availability e le iscrizioni il cui flag e quello del calendario
  * di destinazione bloccano entrambi.
  */
-function blockingCalendarIds(db: Db) {
+function blockingCalendarIds(db: Db, excludeSubscriptions = false) {
   return db`
     SELECT c.id
     FROM calendars c
@@ -217,6 +226,7 @@ function blockingCalendarIds(db: Db) {
     WHERE CASE WHEN c.role = 'subscription'
                THEN COALESCE(s.blocks_availability, false) AND COALESCE(p.blocks_availability, false)
                ELSE c.blocks_availability END
+      AND (NOT ${excludeSubscriptions}::boolean OR c.role <> 'subscription')
   `;
 }
 
@@ -300,7 +310,7 @@ export async function indexBlockingOccurrences(db: Db, fromIso: string, toIso: s
  * Nel caso normale (finestra dentro l'orizzonte, nessuna serie oltre il
  * tetto) la query non restituisce righe.
  */
-async function onTheFlyOccurrences(db: Db, from: number, to: number): Promise<BlockingOccurrence[]> {
+async function onTheFlyOccurrences(db: Db, from: number, to: number, excludeSubscriptions = false): Promise<BlockingOccurrence[]> {
   const fromTs = new Date(from);
   const toTs = new Date(to);
   const rows = await db<OnTheFlyRow[]>`
@@ -313,6 +323,7 @@ async function onTheFlyOccurrences(db: Db, from: number, to: number): Promise<Bl
       WHERE CASE WHEN c.role = 'subscription'
                  THEN COALESCE(s.blocks_availability, false) AND COALESCE(p.blocks_availability, false)
                  ELSE c.blocks_availability END
+        AND (NOT ${excludeSubscriptions}::boolean OR c.role <> 'subscription')
     ),
     uncovered AS (
       SELECT b.* FROM blocking b

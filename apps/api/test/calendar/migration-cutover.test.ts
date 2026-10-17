@@ -39,7 +39,11 @@ import {
 } from '../../src/lib/calendar/api-level';
 import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
 import { listCalendars } from '../../src/lib/calendar/calendars';
+import { createBooking } from '../../src/lib/calendar/booking';
+import { getBusyRanges } from '../../src/lib/calendar/busy';
+import { getCapacityWeeks } from '../../src/lib/calendar/capacity';
 import { CalendarStoreUnavailableError } from '../../src/lib/calendar/errors';
+import { computeAvailableSlots } from '../../src/lib/calendar/slots';
 import { createEvent } from '../../src/lib/calendar/events';
 import {
   assertCutoverReady,
@@ -51,7 +55,10 @@ import {
   runCutoverWith,
 } from '../../src/lib/calendar/migration/cutover';
 import { runCutoverSmoke, SMOKE_ATTENDEE_EMAIL } from '../../src/lib/calendar/migration/smoke';
-import { beginTransition, freezeStep, getActiveTransition, readJournal, type TransitionContext } from '../../src/lib/calendar/migration/transition';
+import { beginTransition, epochStep, freezeStep, getActiveTransition, readJournal, runStep, type TransitionContext } from '../../src/lib/calendar/migration/transition';
+import type { RadicaleClient } from '../../src/lib/calendar/radicale/client';
+import { CollectionSyncError } from '../../src/lib/calendar/radicale/sync';
+import { DEAD_PROP } from '../../src/lib/calendar/radicale/types';
 import {
   CALENDAR_API_LEVEL,
   type CutoverParams,
@@ -198,7 +205,7 @@ describe('cutover: criteri del contratto §3.2', () => {
     const criteria = await assertCutoverReady(sql, { now, verifyRunId, deps: okDeps() });
     const ids = criteria.map((c) => c.id).sort();
     assert.deepEqual(ids, [
-      'archive_readonly', 'backup_fresh', 'backup_recent', 'control_plane', 'device_matrix', 'identity_ok', 'no_active_transition',
+      'api_image_pinned', 'archive_readonly', 'backup_fresh', 'backup_recent', 'control_plane', 'device_matrix', 'identity_ok', 'no_active_transition',
       'no_open_conflicts', 'no_revalidation', 'probe', 'shadow_parity', 'verify_acceptable',
     ]);
     for (const c of criteria) assert.equal(c.ok, true, `${c.id}: ${c.detail}`);
@@ -289,6 +296,30 @@ describe('cutover: criteri del contratto §3.2', () => {
     assert.equal(c.shadow_parity.ok, false);
   });
 
+  test('OPS-1: in produzione un\'immagine dell\'API senza versione blocca il cutover (API_IMAGE_UNVERSIONED); con sha-<short> o fuori produzione no', async () => {
+    const now = new Date();
+    const { verifyRunId } = await readyState(now);
+    const previous = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      await assert.rejects(
+        assertCutoverReady(sql, { now, verifyRunId, deps: okDeps({ apiVersion: () => 'unversioned' }) }),
+        expectPrecondition('API_IMAGE_UNVERSIONED'),
+      );
+      const blocked = byId(await cutoverCriteria(sql, { now, verifyRunId, deps: okDeps({ apiVersion: () => 'unversioned' }) }));
+      assert.equal(blocked.api_image_pinned.ok, false);
+      const pinned = byId(await cutoverCriteria(sql, { now, verifyRunId, deps: okDeps({ apiVersion: () => 'sha-abc1234' }) }));
+      assert.equal(pinned.api_image_pinned.ok, true);
+      await assertCutoverReady(sql, { now, verifyRunId, deps: okDeps({ apiVersion: () => 'sha-abc1234' }) });
+    } finally {
+      if (previous === undefined) delete process.env.NODE_ENV;
+      else process.env.NODE_ENV = previous;
+    }
+    // Fuori produzione (sviluppo, test) l'assenza di versione non blocca.
+    const dev = byId(await cutoverCriteria(sql, { now, verifyRunId, deps: okDeps({ apiVersion: () => 'unversioned' }) }));
+    assert.equal(dev.api_image_pinned.ok, true);
+  });
+
   test('archivio della Fase 0: in sola lettura per i device nella policy derivata per il live', async () => {
     const now = new Date();
     const { verifyRunId } = await readyState(now);
@@ -370,6 +401,64 @@ describe('cutover: run senza Radicale (preflight, annullamento)', () => {
   });
 });
 
+describe('cutover: dopo il punto di non ritorno i passi persistenti non bloccano (F4R-TR-2)', () => {
+  /** Client finto del marker: PROPPATCH aggiorna volume-id ed epoch in memoria. */
+  function fakeMarkerClient(initial: { volume_id: string; epoch: number }): RadicaleClient {
+    const state = { ...initial };
+    return {
+      async readProps(): Promise<Record<string, string>> {
+        return { [DEAD_PROP.volumeId]: state.volume_id, [DEAD_PROP.epoch]: String(state.epoch) };
+      },
+      async proppatchRaw(_path: string, body: string): Promise<void> {
+        state.volume_id = String(/<K:volume-id>([^<]+)<\/K:volume-id>/.exec(body)?.[1]);
+        state.epoch = Number(/<K:epoch>(\d+)<\/K:epoch>/.exec(body)?.[1]);
+      },
+    } as unknown as RadicaleClient;
+  }
+
+  test('index_sync con una collezione che non sincronizza e reverse_start che lancia: transizione conclusa, freeze tolto, degradi nel journal', async () => {
+    await initializedState();
+    const tctx: TransitionContext = { db: sql, runId: randomUUID(), actor: 'admin:test-cutover', log };
+    const { handle } = await beginTransition({ ctx: tctx, kind: 'cutover' });
+    await freezeStep(handle);
+    for (const step of ['preflight', 'quiesce', 'delta_apply', 'delta_verify']) {
+      await runStep(handle, step, async () => (step === 'delta_verify' ? { acceptable: true, overall: 'green', calendars: [] } : {}));
+    }
+    const client = fakeMarkerClient({ volume_id: VOLUME, epoch: 1 });
+    await epochStep(handle, { client, principal: 'federico' }, { set: { rollback_until: new Date(Date.now() + 30 * DAY), cutover_at: new Date(), cutover_by: 'admin:test-cutover', api_min_version: CALENDAR_API_LEVEL } });
+    assert.equal((await sql`SELECT mode FROM calendar_backend_state WHERE id`)[0].mode, 'radicale');
+
+    const calendarId = randomUUID();
+    const smokeOk = { ok: true, started_at: new Date().toISOString(), finished_at: new Date().toISOString(), checks: [] };
+    const summary = await runCutoverWith(runContext({ action: 'resume' }), {
+      radicale: () => ({ client, principal: 'federico' }),
+      controlPlaneSync: async () => ({
+        ok: true, failedStage: null, state: { mode: 'radicale', epoch: 2 }, policy: { mode: 'frozen', version: 3, reasons: [] }, heartbeat: { ts: new Date().toISOString() },
+      }) as never,
+      verifyIdentity: async () => ({ status: 'ok', checkedAt: new Date().toISOString(), marker: { epoch: 2 }, detail: null }) as never,
+      syncAll: async () => [new CollectionSyncError(calendarId, 'collection_missing', 'collezione assente su Radicale')],
+      reverse: async () => { throw new Error('proiezione inversa: errore persistente'); },
+      smoke: async () => smokeOk as never,
+      sleep: async () => undefined,
+    });
+
+    assert.equal(summary.outcome, 'completed');
+    assert.equal(summary.reverse, null, 'la prima passata saltata non compare come riassunto');
+    const [st] = await sql`SELECT mode, write_freeze FROM calendar_backend_state WHERE id`;
+    assert.deepEqual({ mode: st.mode, write_freeze: st.write_freeze }, { mode: 'radicale', write_freeze: false });
+    assert.equal((await sql`SELECT status FROM cal_migration_transitions WHERE id = ${handle.record.id}::uuid`)[0].status, 'completed');
+    const journal = await readJournal(sql, handle.record.id);
+    const indexSync = journal.find((j) => j.step === 'index_sync');
+    assert.equal(indexSync?.status, 'done');
+    assert.deepEqual(indexSync?.data.failed, [{ calendar_id: calendarId, code: 'collection_missing' }]);
+    assert.equal(indexSync?.data.degraded, true);
+    const reverse = journal.find((j) => j.step === 'reverse_start');
+    assert.equal(reverse?.status, 'done');
+    assert.equal(reverse?.data.skipped, true);
+    assert.equal(reverse?.data.error_code, 'REVERSE_START_FAILED');
+  });
+});
+
 describe('cutover: prenotazioni a cavallo del freeze', () => {
   test('project_booking accodato per le prenotazioni create o cambiate dopo l\'istante', async () => {
     const eventType = await fx.eventType({ key: 'rec' });
@@ -442,6 +531,32 @@ describe('livello dell\'API (design §16.6)', () => {
     await sql`UPDATE calendar_backend_state SET api_min_version = ${CALENDAR_API_LEVEL} WHERE id`;
     assert.equal(await enforceCalendarApiLevelAtBoot(sql), true);
     assert.equal(calendarApiLevelBlocked(), false);
+  });
+});
+
+describe('livello dell\'API: ingressi che non passano dalla facade (F4R-TR-5)', () => {
+  test('con api_min_version oltre il livello: slot, busy, capacità e decisione di prenotazione rifiutano con store_not_available', async () => {
+    const et = await fx.eventType({ key: 'livello' });
+    await sql`UPDATE calendar_backend_state SET api_min_version = 99 WHERE id`;
+    assert.equal(await enforceCalendarApiLevelAtBoot(sql), false);
+    assert.equal(calendarApiLevelBlocked(), true);
+    const refused = (err: unknown): boolean => err instanceof CalendarStoreUnavailableError && err.reason === 'store_not_available';
+    const start = new Date(Date.now() + 5 * DAY);
+    const day = start.toISOString().slice(0, 10);
+    await assert.rejects(computeAvailableSlots({ eventTypeIdOrSlug: et.id, fromDateLocal: day, toDateLocal: day }), refused);
+    await assert.rejects(getBusyRanges(start.toISOString(), new Date(start.getTime() + HOUR).toISOString()), refused);
+    await assert.rejects(getCapacityWeeks(start.toISOString(), new Date(start.getTime() + HOUR).toISOString()), refused);
+    // beginDecision è la prima cosa della sezione critica di createBooking.
+    await assert.rejects(
+      createBooking({ event_type_id: et.id, start: start.toISOString(), attendee: { name: 'Livello', email: fx.email('livello'), timezone: 'Europe/Rome' }, source: 'admin_manual', skip_emails: true }),
+      refused,
+    );
+    const [none] = await sql<Array<{ n: number }>>`SELECT count(*)::int AS n FROM calendar_bookings WHERE event_type_id = ${et.id}`;
+    assert.equal(none.n, 0, 'nessuna prenotazione creata');
+    // Livello di nuovo sufficiente: gli ingressi tornano a funzionare.
+    await sql`UPDATE calendar_backend_state SET api_min_version = 0 WHERE id`;
+    assert.equal(await enforceCalendarApiLevelAtBoot(sql), true);
+    await getBusyRanges(start.toISOString(), new Date(start.getTime() + HOUR).toISOString());
   });
 });
 

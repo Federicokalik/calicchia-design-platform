@@ -71,7 +71,7 @@ import { CUTOVER_STEPS, F4_LIMITS, MigrationError, ROLLBACK_STEPS, type Quiescen
 import type { RadicaleClient } from '../../src/lib/calendar/radicale/client';
 import { RadicaleForbiddenError, RadicaleNetworkError } from '../../src/lib/calendar/radicale/errors';
 import { CalendarControlPlane, effectiveModeFromFiles, readHeartbeatFile, type ControlPlaneTick } from '../../src/lib/calendar/radicale/heartbeat';
-import { fileIdentitySource } from '../../src/lib/calendar/radicale/identity';
+import { fileIdentitySource, writeVolumeMarker } from '../../src/lib/calendar/radicale/identity';
 import { readPolicyFile } from '../../src/lib/calendar/radicale/policy';
 import { DEAD_PROP, principalPropsPath } from '../../src/lib/calendar/radicale/types';
 import { withCalendarWriteGate, writeGateStatus } from '../../src/lib/calendar/radicale/write-gate';
@@ -417,6 +417,56 @@ describe('transizioni: passo d\'epoch e annullamento', () => {
     const r2 = await abortTransition(rb2, { code: 'ROLLBACK_ABORTED', reason: 'richiesta dell\'admin' });
     assert.equal(r2.restored, false);
     assert.equal((await backend()).mode, 'radicale');
+  });
+
+  test('F4R-TR-1: epoch iniziato o fallito con il marker già a E+1 → annullamento rifiutato; marker ancora a E → ammesso', async () => {
+    // Caso 1: la PROPPATCH ha portato il marker a E+1, poi il processo cade prima di commitEpoch (passo 'failed').
+    await setBackend('postgres', { epoch: 1 });
+    const { handle } = await beginTransition({ ctx: context(), kind: 'cutover' });
+    await freezeStep(handle);
+    const fake = fakeMarkerClient({ volume_id: VOLUME, epoch: 1 });
+    await assert.rejects(runStep(handle, 'epoch', async () => {
+      await writeVolumeMarker(fake.client, P, { volume_id: VOLUME, epoch: 2 });
+      throw new Error('crash del database prima di commitEpoch');
+    }));
+    assert.deepEqual(fake.state.marker, { volume_id: VOLUME, epoch: 2 });
+    assert.equal((await readJournal(sql, handle.record.id)).find((j) => j.step === 'epoch')?.status, 'failed');
+    const view = buildTransitionView(handle.record, await readJournal(sql, handle.record.id), { runActive: false });
+    assert.equal(view.abortable, false, 'con il passo d\'epoch tentato la vista non offre l\'annullamento');
+    await assert.rejects(
+      abortTransition(handle, { code: 'CUTOVER_ABORTED', reason: 'prova', marker: { client: fake.client, principal: P } }),
+      (err: unknown) => {
+        expectTransitionError('TRANSITION_CONFLICT', 'TRANSITION_NOT_ABORTABLE')(err);
+        assert.match((err as Error).message, /già a epoch E\+1/);
+        return true;
+      },
+    );
+    assert.equal((await backend()).mode, 'cutover', 'il mode non è stato toccato');
+    // Senza il client del marker l'annullamento non è verificabile: rifiutato.
+    await assert.rejects(abortTransition(handle, { code: 'CUTOVER_ABORTED', reason: 'prova' }), expectTransitionError('TRANSITION_CONFLICT', 'TRANSITION_NOT_ABORTABLE'));
+    // Marker illeggibile (principal senza dead prop) → non verificabile.
+    const empty = fakeMarkerClient(null);
+    await assert.rejects(
+      abortTransition(handle, { code: 'CUTOVER_ABORTED', reason: 'prova', marker: { client: empty.client, principal: P } }),
+      (err: unknown) => {
+        expectTransitionError('TRANSITION_CONFLICT', 'TRANSITION_NOT_ABORTABLE')(err);
+        assert.match((err as Error).message, /marker non verificabile/);
+        return true;
+      },
+    );
+    assert.equal((await backend()).mode, 'cutover');
+    await sql`DELETE FROM cal_migration_transitions`;
+
+    // Caso 2: epoch fallito, marker ancora a E (la PROPPATCH non è partita) → annullamento ammesso.
+    await setBackend('postgres', { epoch: 1 });
+    const { handle: h2 } = await beginTransition({ ctx: context(), kind: 'cutover' });
+    await freezeStep(h2);
+    const intact = fakeMarkerClient({ volume_id: VOLUME, epoch: 1 });
+    await assert.rejects(runStep(h2, 'epoch', async () => { throw new Error('errore prima della PROPPATCH'); }));
+    const result = await abortTransition(h2, { code: 'CUTOVER_ABORTED', reason: 'marker ancora a E', marker: { client: intact.client, principal: P } });
+    assert.deepEqual({ mode: result.mode, restored: result.restored }, { mode: 'postgres', restored: true });
+    assert.equal((await backend()).mode, 'postgres');
+    assert.equal(h2.record.status, 'aborted');
   });
 });
 

@@ -133,7 +133,15 @@ export async function finalizeBlockersDetailed(
   const dead = Number(counts?.dead ?? 0);
   const failed = Number(counts?.failed ?? 0);
   if (dead > 0) out.push({ reason: 'DEAD_JOBS', message: `${dead} ${dead === 1 ? 'job del calendario fallito' : 'job del calendario falliti'} definitivamente: vanno risolti o scartati` });
-  if (failed > 0) out.push({ reason: 'REVERSE_FAILED_OPEN', message: `${failed} ${failed === 1 ? 'oggetto' : 'oggetti'} con REVERSE_FAILED nella proiezione inversa` });
+  // REVERSE_FAILED blocca solo a finestra aperta: a finestra chiusa nessuna passata della proiezione inversa può più
+  // toglierli e il finalize non finirebbe mai (né F7 né rollback, ROLLBACK_WINDOW_EXPIRED). Calcolato inline, senza
+  // importare reverse-projector (import ciclico).
+  const reverseOpen = state.rollback_until !== null && state.rollback_until.getTime() > now.getTime();
+  if (failed > 0 && reverseOpen) {
+    out.push({ reason: 'REVERSE_FAILED_OPEN', message: `${failed} ${failed === 1 ? 'oggetto' : 'oggetti'} con REVERSE_FAILED nella proiezione inversa` });
+  } else if (failed > 0) {
+    log.warn({ failed }, 'REVERSE_FAILED aperti a finestra chiusa: non bloccano il finalize');
+  }
   try {
     const health = await deps.health();
     if (health.status !== 'ok') {
@@ -215,7 +223,8 @@ export async function runFinalize(ctx: MigrationRunContext<FinalizeParams>, deps
   await runStep(handle, 'stop_reverse', async () => {
     const { closePendingReverseProjectionJobs } = await import('./reverse-projector');
     const dropped = await closePendingReverseProjectionJobs(ctx.db, 'finalize');
-    return { dropped };
+    const [abandoned] = await ctx.db<Array<{ n: number }>>`SELECT count(*)::int AS n FROM cal_migration_reverse_state WHERE status = 'failed'`;
+    return { dropped, reverse_failed_abandoned: Number(abandoned?.n ?? 0) };
   });
 
   // 3. Stato: mode finalized (policy live, epoch invariato).

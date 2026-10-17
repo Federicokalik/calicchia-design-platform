@@ -14,7 +14,7 @@
  *     calendar_events (e calendar_events_legacy, dopo il finalize della F7)
  *     l'email sostituita da "[dato rimosso]". In mode postgres senza GUC, così
  *     lo shadow mirror propaga; negli altri modi dentro
- *     `SET LOCAL caldes.reverse_sync = 'on'` (guardia 166 della F4);
+ *     `set_config('caldes.reverse_sync', txid_current()::text, true)` (guardia 166 della F4);
  *  3. audit_logs di calendar_events e calendar_bookings delle righe toccate,
  *     o che contengono l'email (anche quelli delle chiamate MCP, table_name
  *     'mcp_call', con gli argomenti dei tool di calendario), redatti in
@@ -76,6 +76,7 @@ import { CAL_JOB_KINDS, CAL_JOB_PRIORITY, enqueueCalendarJob } from './jobs';
 import { acceptedUploadDirs } from './migration/init';
 import { readMigrationStateFresh } from './migration/preflight';
 import { GDPR_ERASURE_INCOMPLETE_ALERT } from './migration/shadow';
+import { raiseIndexAlert } from './radicale/health';
 import { MIGRATION_LIMITS, parseLegacyKey, SHADOW_MIRROR_JOB_KIND, type LegacyKey } from './migration/types';
 import type { Db } from './radicale/policy';
 import { purgeVersionsForErasure } from './radicale/versions';
@@ -254,10 +255,15 @@ function uniq<T>(values: Iterable<T>): T[] {
 }
 
 /** Chiave del job shadow_mirror di una riga di calendar_events (stessa regola di cal_shadow_event_key della 165). */
-function shadowKeyOf(row: { id: string; recurrence_master_id: string | null; source: string; source_id: string | null }): LegacyKey | null {
+function shadowKeyOf(row: {
+  id: string; recurrence_master_id: string | null; source: string; source_id: string | null;
+  caldes_derived?: boolean | null; caldes_object_id?: string | null;
+}): LegacyKey | null {
   if (row.source === 'ics_pull') return null;
   const sourceId = (row.source_id ?? '').trim();
   if (row.source === 'booking' && sourceId) return `booking:${sourceId}` as LegacyKey;
+  // Righe derivate dalla proiezione inversa: l'oggetto è la risorsa Radicale (166, cal_shadow_event_key a sei argomenti).
+  if (row.caldes_derived && row.caldes_object_id) return `event:${row.caldes_object_id.toLowerCase()}` as LegacyKey;
   return `event:${String(row.recurrence_master_id ?? row.id).toLowerCase()}` as LegacyKey;
 }
 
@@ -271,6 +277,8 @@ interface EventRowRef {
   recurrence_master_id: string | null;
   source: string;
   source_id: string | null;
+  caldes_derived: boolean;
+  caldes_object_id: string | null;
 }
 
 interface ErasureTxResult {
@@ -284,6 +292,17 @@ interface ErasureTxResult {
   shadowJobs: number;
   /** Chiavi accodate che hanno già un conflitto aperto o un intento pendente: il job potrebbe non riscriverle. */
   blockedKeys: string[];
+  /** Risorse Radicale espanse dalla proiezione inversa (righe caldes_derived toccate): il wizard non le riscrive. */
+  derivedObjectIds: string[];
+  /** In mode postgres: href e calendario delle risorse derivate (per il follow-up manuale, senza dati personali). */
+  derivedHrefs: Array<{ object_id: string; href: string | null; collection: string | null }>;
+  /** La cancellazione è avvenuta in mode postgres (dopo un rollback): le risorse derivate restano su Radicale. */
+  postgresMode: boolean;
+  /**
+   * Fuori da mode postgres: dati per ripetere la redazione di calendar_events e audit_logs dopo la riscrittura dalla
+   * facade (una proiezione inversa col piano calcolato prima della COMMIT può aver riscritto i testi, F4R-ROLL-04).
+   */
+  recheck: { bookingIds: string[]; bookingUids: string[]; projectionIds: string[] } | null;
 }
 
 /**
@@ -312,6 +331,24 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
     }
   }
 
+  // Fuori da mode postgres la proiezione inversa può aver riscritto in calendar_events (e quindi in audit_logs) i testi non
+  // redatti con un piano calcolato prima della COMMIT: seconda transazione breve, idempotente, con lo stesso GUC.
+  if (txResult.recheck) {
+    const again = await inTx(db, async (tx) => {
+      await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
+      let events = 0;
+      for (const table of EVENT_TABLES) {
+        const [exists] = await tx<Array<{ ok: boolean }>>`SELECT to_regclass(${`public.${table}`}) IS NOT NULL AS ok`;
+        if (!exists?.ok) continue;
+        events += (await redactEventRows(tx, table, normalized, pattern)).length;
+      }
+      const audit = await redactAuditLogs(tx, { email: normalized, re, ...txResult.recheck! });
+      return { events, audit };
+    });
+    report.events_redacted += again.events;
+    report.audit_logs_redacted += again.audit;
+  }
+
   report.manual_followup.push(...erasureBackupFollowup());
   if (txResult.googleEvents > 0) {
     report.manual_followup.push(
@@ -324,9 +361,20 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
     );
   }
   if (txResult.shadowJobs > 0) {
+    // Il rimedio del wizard (anteprima e apply) vale per gli oggetti con un oggetto legacy; le risorse espanse dalla
+    // proiezione inversa (derived) non si riscrivono mai: per loro vale il follow-up dedicato più sotto.
+    const rewritable = txResult.shadowJobs - txResult.derivedObjectIds.length;
     report.manual_followup.push(
-      `Riscrittura su Radicale accodata per ${txResult.shadowJobs} oggetti (job shadow_mirror di cancellazione): l'esito arriva dopo questa risposta. Un oggetto in conflitto o un job in dead letter alza l'avviso "${GDPR_ERASURE_INCOMPLETE_ALERT}" (log, Bugsink, Telegram) e lascia nome e telefono sul volume finché il conflitto non si risolve dal wizard della migrazione (anteprima e apply, che riscrive il contenuto già redatto in PG).`,
+      `Riscrittura su Radicale accodata per ${txResult.shadowJobs} oggetti (job shadow_mirror di cancellazione): l'esito arriva dopo questa risposta. Un oggetto in conflitto o un job in dead letter alza l'avviso "${GDPR_ERASURE_INCOMPLETE_ALERT}" (log, Bugsink, Telegram) e lascia nome e telefono sul volume finché non si risolve.`
+      + (rewritable > 0 ? ' Per gli oggetti non derivati il conflitto si risolve dal wizard della migrazione (anteprima e apply, che riscrive il contenuto già redatto in PG).' : ''),
     );
+  }
+  if (txResult.derivedObjectIds.length > 0 && txResult.postgresMode) {
+    const where = txResult.derivedHrefs.map((h) => `${h.collection ?? '?'}/${h.href ?? '?'}`).slice(0, 20).join(', ');
+    report.manual_followup.push(
+      `Risorse Radicale espanse dalla proiezione inversa (${txResult.derivedObjectIds.length}): il wizard non le riscrive. Redigere a mano su Radicale PRIMA di un nuovo cutover (id: ${txResult.derivedObjectIds.slice(0, 20).join(', ')}; href: ${where || 'non risolti'}).`,
+    );
+    raiseIndexAlert(GDPR_ERASURE_INCOMPLETE_ALERT, 'Cancellazione GDPR: risorse derived non riscrivibili su Radicale', { objects: txResult.derivedObjectIds.slice(0, 20) });
   }
   if (txResult.blockedKeys.length > 0) {
     report.manual_followup.push(
@@ -366,6 +414,79 @@ export function erasureBackupFollowup(): string[] {
   ];
 }
 
+/** Redazione dell'email nel testo delle righe di una tabella degli eventi (passo 2). Idempotente. */
+async function redactEventRows(tx: Db, table: (typeof EVENT_TABLES)[number], email: string, pattern: string): Promise<EventRowRef[]> {
+  return tx<EventRowRef[]>`
+    UPDATE ${tx(table)} SET
+      summary = regexp_replace(summary, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi'),
+      description = CASE WHEN description IS NULL THEN NULL ELSE regexp_replace(description, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
+      location = CASE WHEN location IS NULL THEN NULL ELSE regexp_replace(location, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
+      url = CASE WHEN url IS NULL THEN NULL ELSE regexp_replace(url, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END
+    WHERE strpos(lower(concat_ws(' ', summary, description, location, url)), ${email}) > 0
+      AND (coalesce(summary, '') ~* ${pattern} OR coalesce(description, '') ~* ${pattern}
+           OR coalesce(location, '') ~* ${pattern} OR coalesce(url, '') ~* ${pattern})
+    RETURNING id::text AS id, recurrence_master_id::text AS recurrence_master_id, source, source_id, caldes_derived, caldes_object_id::text AS caldes_object_id
+  `;
+}
+
+/**
+ * Redazione di audit_logs (passo 3): righe delle prenotazioni e delle proiezioni toccate (campi personali per intero) e
+ * righe che contengono l'email (calendario e chiamate MCP). Redazione in JS, valore per valore: l'email di un'altra
+ * persona che la contiene come sottostringa resta. Idempotente: si ripete dopo la riscrittura da Radicale
+ * (F4R-ROLL-04). Restituisce le righe modificate.
+ */
+async function redactAuditLogs(
+  tx: Db,
+  p: { email: string; re: RegExp; bookingIds: string[]; bookingUids: string[]; projectionIds: string[] },
+): Promise<number> {
+  const { email, re, bookingIds, bookingUids, projectionIds } = p;
+  let redacted = 0;
+  const auditRows = await tx<Array<{
+    id: string; old_data: unknown; new_data: unknown; metadata: unknown; booking_match: boolean; projection_match: boolean;
+  }>>`
+    SELECT id::text AS id, old_data, new_data, metadata,
+           (table_name = 'calendar_bookings'
+            AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
+                 OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[]))) AS booking_match,
+           (table_name IN ('calendar_events', 'calendar_events_legacy')
+            AND (record_id = ANY(${projectionIds}::text[])
+                 OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
+                 OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[])))) AS projection_match
+    FROM audit_logs
+    WHERE (table_name = 'calendar_bookings'
+           AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
+                OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[])))
+       OR (table_name IN ('calendar_events', 'calendar_events_legacy')
+           AND (record_id = ANY(${projectionIds}::text[])
+                OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
+                OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[]))))
+       OR (table_name = ANY(${[...AUDIT_EMAIL_TABLES]}::text[])
+           AND strpos(lower(concat_ws(' ', old_data::text, new_data::text, metadata::text)), ${email}) > 0)
+    ORDER BY id
+    FOR UPDATE
+  `;
+  for (const row of auditRows) {
+    const opts = row.booking_match
+      ? { re, fullKeys: BOOKING_PERSONAL_KEYS, nested: BOOKING_NESTED_PERSONAL_KEYS }
+      : row.projection_match
+        ? { re, fullKeys: PROJECTION_TEXT_KEYS }
+        : { re };
+    const oldData = row.old_data === null ? null : redactErasureJson(row.old_data, opts);
+    const newData = row.new_data === null ? null : redactErasureJson(row.new_data, opts);
+    const metadata = row.metadata === null ? null : redactErasureJson(row.metadata, { re });
+    if (!jsonChanged(oldData, row.old_data) && !jsonChanged(newData, row.new_data) && !jsonChanged(metadata, row.metadata)) continue;
+    await tx`
+      UPDATE audit_logs SET
+        old_data = ${oldData === null ? null : tx.json(oldData as never)}::jsonb,
+        new_data = ${newData === null ? null : tx.json(newData as never)}::jsonb,
+        metadata = ${metadata === null ? null : tx.json(metadata as never)}::jsonb
+      WHERE id = ${row.id}::uuid
+    `;
+    redacted += 1;
+  }
+  return redacted;
+}
+
 async function eraseInTransaction(tx: Db, email: string, pattern: string, re: RegExp): Promise<ErasureTxResult> {
   const report: CalendarErasureReport = {
     bookings: 0, projections_legacy: 0, events_redacted: 0, audit_logs_redacted: 0, ledger_redacted: 0,
@@ -375,7 +496,7 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
   const state = await readMigrationStateFresh(tx);
   const storeKind = storeKindOverride() ?? storeKindForMode(state.mode);
   // Fuori da mode postgres le scritture legacy passano dalla guardia della F4 solo con il GUC (contratto f3 §13.1).
-  if (state.mode !== 'postgres') await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+  if (state.mode !== 'postgres') await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
 
   // 1. Prenotazioni.
   const bookings = await tx<Array<{ id: string; uid: string; google_event_id: string | null; source_metadata: unknown }>>`
@@ -436,7 +557,7 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
         UPDATE ${tx(table)} SET summary = ${RETAINED_PROJECTION_SUMMARY}, description = NULL, location = NULL, url = NULL
         WHERE source = 'booking' AND source_id = ANY(${bookingUids}::text[])
           AND (summary IS DISTINCT FROM ${RETAINED_PROJECTION_SUMMARY} OR description IS NOT NULL OR location IS NOT NULL OR url IS NOT NULL)
-        RETURNING id::text AS id, recurrence_master_id::text AS recurrence_master_id, source, source_id
+        RETURNING id::text AS id, recurrence_master_id::text AS recurrence_master_id, source, source_id, caldes_derived, caldes_object_id::text AS caldes_object_id
       `;
       report.projections_legacy += projections.length;
       touchedRows.push(...projections);
@@ -447,17 +568,7 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
       `;
       projectionRowIds.push(...already.map((r) => r.id));
     }
-    const redacted = await tx<EventRowRef[]>`
-      UPDATE ${tx(table)} SET
-        summary = regexp_replace(summary, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi'),
-        description = CASE WHEN description IS NULL THEN NULL ELSE regexp_replace(description, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
-        location = CASE WHEN location IS NULL THEN NULL ELSE regexp_replace(location, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
-        url = CASE WHEN url IS NULL THEN NULL ELSE regexp_replace(url, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END
-      WHERE strpos(lower(concat_ws(' ', summary, description, location, url)), ${email}) > 0
-        AND (coalesce(summary, '') ~* ${pattern} OR coalesce(description, '') ~* ${pattern}
-             OR coalesce(location, '') ~* ${pattern} OR coalesce(url, '') ~* ${pattern})
-      RETURNING id::text AS id, recurrence_master_id::text AS recurrence_master_id, source, source_id
-    `;
+    const redacted = await redactEventRows(tx, table, email, pattern);
     report.events_redacted += redacted.length;
     touchedRows.push(...redacted);
   }
@@ -477,53 +588,34 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
     if (row.recurrence_master_id && row.source !== 'booking') ledgerKeys.add(`detached:${row.id.toLowerCase()}` as LegacyKey);
   }
 
+  // Righe derivate (caldes_derived): la chiave del ledger e del job è la risorsa Radicale, event:<caldes_object_id>, non la
+  // riga. Così la redazione dello snapshot del ledger colpisce la riga giusta. Il piano non riscrive mai un oggetto derived
+  // (DERIVED_EDITED): l'avviso e il follow-up manuale sono in calendarErase.
+  const derivedObjectIds = touchedEventIds.size > 0
+    ? (await tx<Array<{ oid: string }>>`
+        SELECT DISTINCT caldes_object_id::text AS oid FROM calendar_events
+        WHERE id = ANY(${[...touchedEventIds]}::uuid[]) AND caldes_derived AND caldes_object_id IS NOT NULL
+      `).map((r) => r.oid.toLowerCase())
+    : [];
+  for (const oid of derivedObjectIds) {
+    jobKeys.add(`event:${oid}` as LegacyKey);
+    ledgerKeys.add(`event:${oid}` as LegacyKey);
+  }
+  let derivedHrefs: ErasureTxResult['derivedHrefs'] = [];
+  if (derivedObjectIds.length > 0 && state.mode === 'postgres') {
+    derivedHrefs = (await tx<Array<{ object_id: string; href: string | null; collection: string | null }>>`
+      SELECT o.id::text AS object_id, o.href, c.collection_name AS collection
+      FROM cal_object_ids o LEFT JOIN calendars c ON c.id = o.calendar_id
+      WHERE o.id::text = ANY(${derivedObjectIds}::text[]) AND o.recurrence_key = ''
+      ORDER BY o.id
+    `).map((r) => ({ ...r }));
+  }
+
   // 3. Audit: righe delle prenotazioni e delle proiezioni toccate (campi personali per intero) e righe che contengono
   //    l'email (calendario e chiamate MCP), anche quelle scritte dalle UPDATE qui sopra. Redazione in JS, valore per
   //    valore: l'email di un'altra persona che la contiene come sottostringa resta.
   const projectionIds = uniq(projectionRowIds);
-  const auditRows = await tx<Array<{
-    id: string; old_data: unknown; new_data: unknown; metadata: unknown; booking_match: boolean; projection_match: boolean;
-  }>>`
-    SELECT id::text AS id, old_data, new_data, metadata,
-           (table_name = 'calendar_bookings'
-            AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
-                 OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[]))) AS booking_match,
-           (table_name IN ('calendar_events', 'calendar_events_legacy')
-            AND (record_id = ANY(${projectionIds}::text[])
-                 OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
-                 OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[])))) AS projection_match
-    FROM audit_logs
-    WHERE (table_name = 'calendar_bookings'
-           AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
-                OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[])))
-       OR (table_name IN ('calendar_events', 'calendar_events_legacy')
-           AND (record_id = ANY(${projectionIds}::text[])
-                OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
-                OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[]))))
-       OR (table_name = ANY(${[...AUDIT_EMAIL_TABLES]}::text[])
-           AND strpos(lower(concat_ws(' ', old_data::text, new_data::text, metadata::text)), ${email}) > 0)
-    ORDER BY id
-    FOR UPDATE
-  `;
-  for (const row of auditRows) {
-    const opts = row.booking_match
-      ? { re, fullKeys: BOOKING_PERSONAL_KEYS, nested: BOOKING_NESTED_PERSONAL_KEYS }
-      : row.projection_match
-        ? { re, fullKeys: PROJECTION_TEXT_KEYS }
-        : { re };
-    const oldData = row.old_data === null ? null : redactErasureJson(row.old_data, opts);
-    const newData = row.new_data === null ? null : redactErasureJson(row.new_data, opts);
-    const metadata = row.metadata === null ? null : redactErasureJson(row.metadata, { re });
-    if (!jsonChanged(oldData, row.old_data) && !jsonChanged(newData, row.new_data) && !jsonChanged(metadata, row.metadata)) continue;
-    await tx`
-      UPDATE audit_logs SET
-        old_data = ${oldData === null ? null : tx.json(oldData as never)}::jsonb,
-        new_data = ${newData === null ? null : tx.json(newData as never)}::jsonb,
-        metadata = ${metadata === null ? null : tx.json(metadata as never)}::jsonb
-      WHERE id = ${row.id}::uuid
-    `;
-    report.audit_logs_redacted += 1;
-  }
+  report.audit_logs_redacted += await redactAuditLogs(tx, { email, re, bookingIds, bookingUids, projectionIds });
 
   // 4. Ledger della migrazione: snapshot delle chiavi toccate o che contengono l'email a NULL.
   const ledgerCandidates = await tx<Array<{ id: string; key_match: boolean; legacy_snapshot: unknown; intent_snapshot: unknown }>>`
@@ -692,6 +784,8 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string, re: Re
 
   return {
     report, facadeUpdates, googleEvents, archiveObjects, transition: writesSuspendedInMode(state.mode) ? state.mode : null, shadowJobs, blockedKeys,
+    derivedObjectIds, derivedHrefs, postgresMode: state.mode === 'postgres',
+    recheck: state.mode === 'postgres' ? null : { bookingIds, bookingUids, projectionIds },
   };
 }
 

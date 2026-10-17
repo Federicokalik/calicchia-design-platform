@@ -30,6 +30,7 @@ import { persistedRun } from './_migration-apply-shared';
 import { buildZip, collectionIcs, crc32, topLevelComponents } from '../../src/lib/calendar/export-v2';
 import { finalizeBlockers, finalizeBlockersDetailed, LEGACY_FINALIZE_PENDING_NOTE, runFinalize } from '../../src/lib/calendar/migration/finalize';
 import { computePlan, type TargetSnapshot } from '../../src/lib/calendar/migration/plan';
+import { rebaselinedUntouched, type VerifyIndex } from '../../src/lib/calendar/migration/verify';
 import { decideRebaseline } from '../../src/lib/calendar/migration/rebaseline';
 import { actorClass, mergeBusy, normalizeRollbackParams, rollbackBlockers, sameBusy, summarizeReversePlan } from '../../src/lib/calendar/migration/rollback';
 import { isDerivedObject, loadLegacySource, serializeLegacy } from '../../src/lib/calendar/migration/serialize';
@@ -239,6 +240,36 @@ describe('ri-baseline: riconciliazione per categoria (contratto §5.3)', () => {
   });
 });
 
+describe('verify: oggetto ri-allineato e non più toccato (F4R-ROLL-05)', () => {
+  const RUN = '44444444-4444-4444-8444-444444444444';
+  const HASH = 's1:' + 'c'.repeat(64);
+  const finished = new Date('2027-03-01T12:00:00Z');
+
+  function index(l: LedgerRow): VerifyIndex {
+    return {
+      reverseDegraded: new Set([`${CAL}|d.ics`]),
+      ledgerByCalHref: new Map([[`${CAL}|d.ics`, l]]),
+      rebaselineRunIds: new Set([RUN]),
+      rebaselineRunFinished: new Map([[RUN, finished]]),
+      target: snapshotTarget([target('d.ics', '"e1"')]),
+    } as unknown as VerifyIndex;
+  }
+  const obj = { ...derivedObject('d.ics', HASH) };
+
+  test('ledger riscritto dopo la fine del run (shadow mirror dopo una modifica in PG) → toccato; fino alla fine del run → non toccato', () => {
+    const row = (writtenAt: Date | null): LedgerRow => ledgerRow({
+      href: 'd.ics', legacy_key: `event:${OBJ}` as LegacyKey, adopted: true, last_run_id: RUN, written_etag: '"e1"', legacy_hash: HASH, written_at: writtenAt,
+    });
+    assert.equal(rebaselinedUntouched(index(row(new Date(finished.getTime() + 60_000))), obj), false, 'written_at = T + 1 min');
+    assert.equal(rebaselinedUntouched(index(row(finished)), obj), true, 'written_at = T');
+    assert.equal(rebaselinedUntouched(index(row(new Date(finished.getTime() - 3_600_000))), obj), true, 'written_at < T');
+    assert.equal(rebaselinedUntouched(index(row(null)), obj), false, 'senza written_at non si può dire');
+    // Run ancora in corso (finished_at nullo): non si può dire che sia chiuso.
+    const open = { ...index(row(finished)), rebaselineRunFinished: new Map([[RUN, null]]) } as unknown as VerifyIndex;
+    assert.equal(rebaselinedUntouched(open, obj), false);
+  });
+});
+
 describe('piano: sorgenti derived (contratto §5.6)', () => {
   const hash = 's1:' + 'c'.repeat(64);
   test('stesso hash e stesso etag → noop; etag cambiato con lo stesso contenuto → adopt', () => {
@@ -433,6 +464,25 @@ describe('finalize: blocchi e run', () => {
     for (const b of detailed) assert.doesNotMatch(b.message, /@/, 'nessun dato personale nei messaggi');
     await sql`DELETE FROM cal_migration_reverse_state`;
     await sql`DELETE FROM cal_jobs WHERE key LIKE 'test-finalize-%'`;
+  });
+
+  test('F4R-ROLL-01: REVERSE_FAILED blocca il finalize solo a finestra aperta; a finestra chiusa non lo blocca', async () => {
+    await postgresState();
+    const cal = await fx.calendar({ key: 'finalize-roll01' });
+    await sql`
+      INSERT INTO cal_migration_reverse_state (object_id, calendar_id, href, status, rows, degradations, error_code, error, attempts)
+      VALUES (${randomUUID()}::uuid, ${cal.id}::uuid, 'rotto-roll01.ics', 'failed', '[]'::jsonb, '[]'::jsonb, 'REVERSE_FAILED', 'vincolo', 1)
+    `;
+    // Finestra scaduta ieri (cutover 31 giorni fa): nessuna passata può più toglierlo.
+    await radicaleState({ cutoverDaysAgo: 31, windowDays: -1 });
+    const closed = await finalizeBlockersDetailed(sql, new Date(), { deps: greenHealth });
+    assert.ok(!closed.some((b) => b.reason === 'REVERSE_FAILED_OPEN'), `finestra chiusa: ${JSON.stringify(closed)}`);
+    assert.deepEqual(closed, []);
+    // Finestra ancora aperta (scade domani): blocca.
+    await radicaleState({ cutoverDaysAgo: 31, windowDays: 1 });
+    const open = await finalizeBlockersDetailed(sql, new Date(), { deps: greenHealth });
+    assert.deepEqual(open.map((b) => b.reason), ['REVERSE_FAILED_OPEN']);
+    await sql`DELETE FROM cal_migration_reverse_state`;
   });
 
   test('run finalize: mode finalized, proiezione inversa ferma, legacy_finalize saltato fino alla F7', async () => {

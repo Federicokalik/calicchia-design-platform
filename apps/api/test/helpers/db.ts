@@ -252,7 +252,7 @@ export async function cleanupTestData(prefix: string, tracked: TrackedRows = {})
     // Guardia 166 della F4: un test che lascia il backend fuori da mode
     // postgres non deve bloccare la propria pulizia (scrittore privilegiato,
     // come la proiezione inversa).
-    await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+    await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
     const count = (table: string, rows: Array<{ id: string }>): void => {
       report[table] = (report[table] ?? 0) + rows.length;
     };
@@ -445,7 +445,7 @@ export async function resetCalendarBaseline(): Promise<void> {
     // Guardia 166 della F4: la baseline svuota calendar_events anche se un
     // test ha lasciato il backend fuori da mode postgres (lo stato torna a
     // postgres più sotto, nella stessa transazione).
-    await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
+    await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
     // Guardia della matrice CALENDAR_BACKEND=radicale rimasta da un run
     // interrotto (helpers/calendar-backend.ts): la baseline non la conserva mai.
     await tx`DROP TRIGGER IF EXISTS caldes_test_matrix_guard ON calendar_events`;
