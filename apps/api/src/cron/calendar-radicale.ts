@@ -83,6 +83,7 @@ import {
   startReverseProjectionTrigger,
 } from '../lib/calendar/migration/reverse-projector';
 import { readTransitionView } from '../lib/calendar/migration/transition';
+import { registerCalendarImportJob } from '../lib/calendar/v2/import-export';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'calendar-radicale' });
@@ -143,6 +144,8 @@ async function startComponents(): Promise<void> {
     registerShadowMirrorJob();
     // Passaggio a Radicale (F4): proiezione inversa nella finestra di rollback.
     registerReverseProjectionJob();
+    // Admin v2 (F6): import di file ICS.
+    registerCalendarImportJob();
   } catch (err) {
     log.error({ err }, 'registrazione degli handler dei job del calendario non riuscita');
   }

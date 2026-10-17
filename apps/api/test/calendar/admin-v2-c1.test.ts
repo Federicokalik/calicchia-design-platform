@@ -142,7 +142,7 @@ describe('mode postgres: 409 STORE_MODE_UNSUPPORTED su ogni route nuova', () => 
 });
 
 describe('capacità della tranche C, passo C1', () => {
-  test('postgres: tutti falsi; radicale: raw_edit, object_tools, history e trash veri, gli altri ancora falsi', async () => {
+  test('postgres: tutti falsi; radicale: raw_edit, object_tools, history e trash veri, health_page e occurrences ancora falsi', async () => {
     await setState('postgres');
     let res = await api.get(`${BASE}/capabilities`, { auth: 'admin' });
     for (const flag of ['raw_edit', 'object_tools', 'history', 'trash']) assert.equal(res.json[flag], false, flag);
@@ -150,7 +150,7 @@ describe('capacità della tranche C, passo C1', () => {
     await setState('radicale');
     res = await api.get(`${BASE}/capabilities`, { auth: 'admin' });
     for (const flag of ['raw_edit', 'object_tools', 'history', 'trash']) assert.equal(res.json[flag], true, flag);
-    for (const flag of ['import_export', 'calendar_properties', 'health_page', 'occurrences']) assert.equal(res.json[flag], false, flag);
+    for (const flag of ['health_page', 'occurrences']) assert.equal(res.json[flag], false, flag);
     // Rollback: lettura sì (i flag dicono che la funzione esiste), scrittura no.
     await setState('rollback');
     res = await api.get(`${BASE}/capabilities`, { auth: 'admin' });

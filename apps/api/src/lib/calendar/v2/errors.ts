@@ -23,7 +23,7 @@ import type {
 } from '@calicchia/shared';
 import { CalendarRecurrenceConflictError, EventReadOnlyError, EventValidationError } from '../errors';
 
-export type CalV2ErrorStatus = 400 | 403 | 404 | 409 | 412 | 428;
+export type CalV2ErrorStatus = 400 | 403 | 404 | 409 | 412 | 413 | 428;
 
 export class CalendarV2Error extends Error {
   readonly code: CalV2ErrorCode;
@@ -125,6 +125,33 @@ const NOT_RESTORABLE_MESSAGES: Record<NotRestorableReason, string> = {
 /** 409 NOT_RESTORABLE con il motivo in `details.reason`. */
 export function notRestorable(reason: NotRestorableReason, extra?: Record<string, unknown>): CalendarV2Error {
   return new CalendarV2Error('NOT_RESTORABLE', 409, NOT_RESTORABLE_MESSAGES[reason], { reason, ...(extra ?? {}) });
+}
+
+// ─── Calendari, import e job (tranche C, contratto §9.8) ───────────────────────────────
+
+/** 413 PAYLOAD_TOO_LARGE: corpo oltre il limite (2 MB, 10 MB per l'import). */
+export function payloadTooLarge(maxMb: number): CalendarV2Error {
+  return new CalendarV2Error('PAYLOAD_TOO_LARGE', 413, `Corpo della richiesta troppo grande (massimo ${maxMb} MB)`, { max_bytes: maxMb * 1024 * 1024 });
+}
+
+/** 400 IDEMPOTENCY_KEY_REQUIRED: `commit` senza `Idempotency-Key` valida, o chiave nel corpo. */
+export function idempotencyKeyRequired(message = 'Manca l\'header Idempotency-Key (8-200 caratteri: lettere, cifre, - e _)'): CalendarV2Error {
+  return new CalendarV2Error('IDEMPOTENCY_KEY_REQUIRED', 400, message);
+}
+
+/** 409 IDEMPOTENCY_CONFLICT: la stessa chiave è già stata usata con una richiesta diversa. */
+export function idempotencyConflict(): CalendarV2Error {
+  return new CalendarV2Error('IDEMPOTENCY_CONFLICT', 409, 'Questa chiave è già stata usata per una richiesta diversa: genera una chiave nuova');
+}
+
+/** 409 PLAN_CHANGED: il piano ricalcolato è diverso da quello visto in anteprima (`details.plan`). */
+export function planChanged(plan: unknown): CalendarV2Error {
+  return new CalendarV2Error('PLAN_CHANGED', 409, 'Il calendario è cambiato dopo l\'anteprima: controlla il piano aggiornato e conferma di nuovo', { plan });
+}
+
+/** 409 CALENDAR_NOT_EMPTY: il calendario ha oggetti e manca `with_objects=1`. */
+export function calendarNotEmpty(objectCount: number): CalendarV2Error {
+  return new CalendarV2Error('CALENDAR_NOT_EMPTY', 409, 'Il calendario contiene eventi: confermane l\'eliminazione insieme agli eventi', { object_count: objectCount });
 }
 
 // ─── Mappatura degli errori del dominio ───────────────────────────────

@@ -74,6 +74,8 @@ export const CAL_JOB_KINDS = Object.freeze({
   shadowMirror: 'shadow_mirror',
   /** F4: proiezione inversa Radicale→PG nella finestra di rollback. */
   reverseProjection: 'reverse_projection',
+  /** F6: import di un file ICS in un calendario (v2/import-export.ts). */
+  calendarImport: 'calendar_import',
 });
 export type CalJobKind = (typeof CAL_JOB_KINDS)[keyof typeof CAL_JOB_KINDS];
 

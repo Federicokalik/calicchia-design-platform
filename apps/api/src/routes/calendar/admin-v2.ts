@@ -10,7 +10,8 @@
  *    versione del server (`current`) e i conflitti per campo;
  *  - difesa CSRF delle richieste che scrivono: Sec-Fetch-Site, Origin ammesse
  *    e corpo solo application/json (lib/http/same-origin-writes.ts);
- *  - corpo al più 2 MB (un oggetto è al più 1 MB, design §8);
+ *  - corpo al più 2 MB (un oggetto è al più 1 MB, design §8), 10 MB per
+ *    `POST /calendars/:id/import`; oltre → 413 PAYLOAD_TOO_LARGE;
  *  - le route `objects` lavorano solo sullo store Radicale: con lo store
  *    postgres rispondono 409 STORE_MODE_UNSUPPORTED senza toccare nulla;
  *  - PATCH, DELETE e, dalla tranche C, PUT /ics, POST /move e POST /restore
@@ -23,10 +24,22 @@ import { bodyLimit } from 'hono/body-limit';
 import { CAL_V2_SCOPES, type CalV2Scope } from '@calicchia/shared';
 import { logger } from '../../lib/logger';
 import { isCalendarUnavailable } from '../../lib/calendar/errors';
+import {
+  createCalendarRouteV2,
+  deleteCalendarRouteV2,
+  listCalendarsV2,
+  orderCalendarsRouteV2,
+  parseCalendarCreateRequest,
+  parseCalendarOrderRequest,
+  parseCalendarPatchRequest,
+  patchCalendarRouteV2,
+  rotateCalendarTokenV2,
+} from '../../lib/calendar/v2/calendars';
 import { assertV2ObjectsAvailable, readCalendarV2Capabilities } from '../../lib/calendar/v2/capabilities';
-import { CalendarV2Error, invalidValue, v2ErrorFrom } from '../../lib/calendar/v2/errors';
+import { CalendarV2Error, invalidValue, payloadTooLarge, v2ErrorFrom } from '../../lib/calendar/v2/errors';
 import { getVersionV2, listTrashV2, listVersionsV2, parseRestoreRequest, parseTrashQuery, parseTrashRestoreRequest, restoreFromTrashV2, restoreVersionV2 } from '../../lib/calendar/v2/history';
 import { duplicateObjectV2, moveObjectV2, parseDuplicateRequest, parseMoveRequest } from '../../lib/calendar/v2/move';
+import { IMPORT_MAX_BYTES, importCalendarV2, openCalendarExportV2, parseImportRequest, readJobV2 } from '../../lib/calendar/v2/import-export';
 import { parseRawPutRequest, putRawIcsV2 } from '../../lib/calendar/v2/raw';
 import {
   createObjectV2,
@@ -48,11 +61,21 @@ type Env = { Variables: { user: AdminUser | undefined } };
 export const calendarAdminV2 = new Hono<Env>();
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
+/** Percorso di `POST /calendars/:id/import`, l'unico con un limite del corpo diverso. */
+const IMPORT_PATH_RE = /\/calendars\/[^/]+\/import\/?$/;
+/** Limite del solo `POST /calendars/:id/import` (il file ICS arriva dentro il JSON). */
+const MAX_IMPORT_BODY_BYTES = IMPORT_MAX_BYTES;
 const BASE_PATH = '/api/admin/calendar/v2';
 
 // ─── Errori ───────────────────────────────
 
 calendarAdminV2.onError((err, c) => {
+  // Corpo senza Content-Length (trasferimento a blocchi) oltre il limite: lo segnala la lettura, non il controllo iniziale.
+  if (err instanceof Error && err.name === 'BodyLimitError') {
+    // Risposta già decisa qui: senza questo il bodyLimit globale dell'app, che vede lo stesso errore, la sostituirebbe con un 413 senza codice.
+    c.error = undefined;
+    return c.json(payloadTooLarge(c.req.method === 'POST' && IMPORT_PATH_RE.test(c.req.path) ? 10 : 2).toBody(), 413);
+  }
   const v2 = v2ErrorFrom(err);
   if (v2) {
     if (v2.status >= 500) log.error({ code: v2.code, url: c.req.path, method: c.req.method }, v2.message);
@@ -74,13 +97,19 @@ calendarAdminV2.use('*', async (c, next) => {
 // Difesa CSRF (contratto §3.1): vedi lib/http/same-origin-writes.ts. Nessun percorso multipart.
 calendarAdminV2.use('*', sameOriginWrites({ log }));
 
-calendarAdminV2.use(
-  '*',
-  bodyLimit({
-    maxSize: MAX_BODY_BYTES,
-    onError: (c) => c.json({ error: 'Corpo della richiesta troppo grande (massimo 2 MB)', code: 'VALIDATION_FAILED' }, 413),
-  }),
-);
+// Limite del corpo: 2 MB ovunque tranne l'import, che ha il proprio (10 MB) sulla route. Oltre → 413 PAYLOAD_TOO_LARGE.
+const globalBodyLimit = bodyLimit({
+  maxSize: MAX_BODY_BYTES,
+  onError: (c) => c.json(payloadTooLarge(2).toBody(), 413),
+});
+calendarAdminV2.use('*', async (c, next) => {
+  if (c.req.method === 'POST' && IMPORT_PATH_RE.test(c.req.path)) return next();
+  return globalBodyLimit(c, next);
+});
+const importBodyLimit = bodyLimit({
+  maxSize: MAX_IMPORT_BODY_BYTES,
+  onError: (c) => c.json(payloadTooLarge(10).toBody(), 413),
+});
 
 // ─── Utilità ───────────────────────────────
 
@@ -251,4 +280,76 @@ calendarAdminV2.post('/trash/:objectId/restore', async (c) => {
   if (res.etag) c.header('ETag', res.etag);
   if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
   return c.json(res, 201);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C2 (contratto §9.1.4): calendari, import ed export, job
+// ═══════════════════════════════════════════════════════════════════
+
+/** Corpo `{}` di `POST /calendars/:id/rotate-token`: un oggetto senza campi. */
+async function requireEmptyObject(c: { req: { text(): Promise<string> } }): Promise<void> {
+  const body = await readJson(c);
+  if (typeof body !== 'object' || body === null || Array.isArray(body) || Object.keys(body).length > 0) {
+    throw invalidValue('Il corpo della richiesta deve essere {}');
+  }
+}
+
+calendarAdminV2.get('/calendars', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listCalendarsV2());
+});
+
+calendarAdminV2.post('/calendars', async (c) => {
+  await assertV2ObjectsAvailable();
+  const view = await createCalendarRouteV2(parseCalendarCreateRequest(await readJson(c)), actorOf(c));
+  c.header('Location', `${BASE_PATH}/calendars/${encodeURIComponent(view.id)}`);
+  return c.json(view, 201);
+});
+
+// Registrata prima delle route con `:id`: "order" non è un identificativo.
+calendarAdminV2.put('/calendars/order', async (c) => {
+  await assertV2ObjectsAvailable();
+  return c.json(await orderCalendarsRouteV2(parseCalendarOrderRequest(await readJson(c)), actorOf(c)));
+});
+
+calendarAdminV2.patch('/calendars/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  return c.json(await patchCalendarRouteV2(c.req.param('id'), parseCalendarPatchRequest(await readJson(c)), actorOf(c)));
+});
+
+calendarAdminV2.delete('/calendars/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  const flag = c.req.query('with_objects');
+  return c.json(await deleteCalendarRouteV2(c.req.param('id'), flag === '1' || flag === 'true', actorOf(c)));
+});
+
+calendarAdminV2.post('/calendars/:id/rotate-token', async (c) => {
+  await assertV2ObjectsAvailable();
+  await requireEmptyObject(c);
+  return c.json(await rotateCalendarTokenV2(c.req.param('id'), actorOf(c)));
+});
+
+calendarAdminV2.get('/calendars/:id/export.ics', async (c) => {
+  const { filename, body } = await openCalendarExportV2(c.req.param('id'));
+  return new Response(body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    },
+  });
+});
+
+calendarAdminV2.post('/calendars/:id/import', importBodyLimit, async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseImportRequest(await readJson(c));
+  const res = await importCalendarV2(c.req.param('id'), req, c.req.header('Idempotency-Key'), actorOf(c));
+  c.header('Cache-Control', 'no-store');
+  return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200);
+});
+
+calendarAdminV2.get('/jobs/:jobId', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await readJobV2(c.req.param('jobId')));
 });

@@ -2940,3 +2940,251 @@ export function getRadicaleStore(): CalendarStore {
 
 
 
+
+// ═══════════════════════════════════════════════════════════════════
+// Calendari per admin-v2 (F6, tranche C, passo C2)
+// ═══════════════════════════════════════════════════════════════════
+
+/*
+ * Solo aggiunte (contratto f6-modules §9.6): le route `/calendars` della v2
+ * (lib/calendar/v2/calendars.ts) usano queste funzioni per tutto ciò che
+ * tocca Radicale o il sidecar oltre a quanto sa fare lo store legacy
+ * (ruolo, visibilità ai device, "segna come visto", ordine). Ogni scrittura
+ * passa dal gate cal-write; la MKCALENDAR è sempre quella esplicita di
+ * `createCalendar` (nessuna MKCOL implicita).
+ */
+
+/** Campi che `PATCH /calendars/:id` può cambiare (già validati dal chiamante). */
+export interface CalendarPatchV2 {
+  name?: string;
+  description?: string | null;
+  color?: string;
+  timezone?: string;
+  role?: 'user' | 'deadlines';
+  blocks_availability?: boolean;
+  device_visible?: boolean;
+  ics_feed_enabled?: boolean;
+  needs_review?: false;
+}
+
+/** Dati per `createCalendarV2`: quelli di `CreateCalendarInput` più ruolo, visibilità e feed. */
+export interface CreateCalendarV2Input {
+  slug: string;
+  name: string;
+  description?: string | null;
+  color?: string;
+  timezone?: string;
+  sort_order?: number;
+  blocks_availability?: boolean;
+  role?: 'user' | 'deadlines';
+  device_visible?: boolean;
+  ics_feed_enabled?: boolean;
+}
+
+/** Riga in audit_logs per le operazioni sui calendari (`table_name 'calendars'`): campi e conteggi, mai testo di evento. */
+export async function auditCalendarV2(entry: {
+  action: 'INSERT' | 'UPDATE' | 'DELETE';
+  recordId: string | null;
+  operation: string;
+  changed?: readonly string[];
+  actor: string;
+  extra?: Record<string, unknown>;
+}): Promise<void> {
+  await sql`
+    INSERT INTO audit_logs (
+      user_email, user_role, action, table_name, record_id,
+      old_data, new_data, changed_fields, user_agent, metadata
+    ) VALUES (
+      ${`calendar:${entry.actor}`}, 'system', ${entry.action}, 'calendars', ${entry.recordId},
+      NULL, NULL, ${entry.changed?.length ? [...entry.changed] : null}, 'calendar-store',
+      ${jsonb({ operation: entry.operation, ...(entry.recordId ? { calendar_id: entry.recordId } : {}), ...(entry.extra ?? {}) })}
+    )
+  `.catch((err: unknown) => log.error({ err, operation: entry.operation }, 'audit dell\'operazione sul calendario non riuscito'));
+}
+
+/** Allinea policy.json di Radicale dopo un cambio di ruolo o di visibilità ai device (best effort: lo farebbe comunque il ciclo di 30 s). */
+async function syncDevicePolicy(): Promise<void> {
+  try {
+    const { requestControlPlaneSync } = await import('./heartbeat');
+    await requestControlPlaneSync();
+  } catch (err) {
+    log.warn({ err }, 'aggiornamento immediato della policy dei device non riuscito: lo farà il ciclo periodico');
+  }
+}
+
+/**
+ * Crea un calendario (MKCALENDAR esplicita di `createCalendar`) con ruolo,
+ * visibilità ai device e feed scelti dall'admin. Lo slug e il nome sono già
+ * validati; i conflitti escono come CalendarConflictError.
+ */
+export async function createCalendarV2(input: CreateCalendarV2Input, actor: string): Promise<{ id: string }> {
+  const created = await getRadicaleStoreImpl().createCalendar({
+    slug: input.slug,
+    name: input.name,
+    description: input.description ?? null,
+    color: input.color,
+    timezone: input.timezone,
+    blocks_availability: input.blocks_availability,
+    sort_order: input.sort_order,
+  });
+  const role = input.role ?? 'user';
+  const deviceVisible = input.device_visible !== false;
+  const feedEnabled = input.ics_feed_enabled !== false;
+  if (role !== 'user' || !deviceVisible || !feedEnabled) {
+    const cal = await sidecarById(created.id, { activeOnly: true });
+    if (role !== 'user' && cal && isValidCollectionName(cal.collection_name)) {
+      // La dead prop `role` è solo informativa per Radicale (la policy legge il sidecar): un errore qui non annulla la creazione.
+      const { client, principal } = requireRadicale();
+      try {
+        await withCalendarWriteGate(async (ctx) => {
+          await assertVolumeIdentity(ctx.state);
+          await client.proppatch(collectionPath(principal, cal.collection_name as string), { set: [{ ...DAV_PROPS.role, value: role }] });
+        }, { expect: 'radicale' });
+      } catch (err) {
+        log.warn({ err, calendarId: created.id }, 'dead prop role non aggiornata alla creazione: la riallinea la discovery');
+      }
+    }
+    await sql`
+      UPDATE calendars SET role = ${role}, device_visible = ${deviceVisible}, ics_feed_enabled = ${feedEnabled}
+      WHERE id = ${created.id}::uuid
+    `;
+    if (role !== 'user' || !deviceVisible) await syncDevicePolicy();
+  }
+  await auditCalendarV2({
+    action: 'INSERT',
+    recordId: created.id,
+    operation: 'v2.calendar.create',
+    changed: ['name', 'slug', ...(role !== 'user' ? ['role'] : []), ...(!deviceVisible ? ['device_visible'] : []), ...(!feedEnabled ? ['ics_feed_enabled'] : [])],
+    actor,
+  });
+  return { id: created.id };
+}
+
+/**
+ * Modifica un calendario: PROPPATCH di nome, colore, descrizione, fuso e dead
+ * prop `role` sulla collezione (non sulle iscrizioni, che non hanno una
+ * collezione propria da scrivere), poi il sidecar. Restituisce i campi
+ * davvero cambiati (vuoto = nessuna modifica) o null se il calendario non c'è.
+ * Un nome già usato da un altro calendario → CalendarConflictError.
+ */
+export async function updateCalendarV2(id: string, patch: CalendarPatchV2, actor: string): Promise<{ changed: string[] } | null> {
+  const cal = await sidecarById(id, { activeOnly: true });
+  if (!cal) return null;
+  const [flags] = await sql<Array<{ device_visible: boolean; needs_review: boolean }>>`
+    SELECT device_visible, needs_review FROM calendars WHERE id = ${cal.id}::uuid
+  `;
+  if (!flags) return null;
+  const updates: Record<string, unknown> = {};
+  const changed: string[] = [];
+  const put = (field: string, column: string, value: unknown, current: unknown): void => {
+    if (value === undefined || value === current) return;
+    updates[column] = value;
+    changed.push(field);
+  };
+  put('name', 'name', patch.name === undefined ? undefined : patch.name.trim().slice(0, 200), cal.name);
+  put('description', 'description', patch.description === undefined ? undefined : (patch.description?.trim().slice(0, 1000) || null), cal.description);
+  put('color', 'color', patch.color, cal.color);
+  put('timezone', 'timezone', patch.timezone, cal.timezone);
+  put('role', 'role', patch.role, cal.role);
+  put('blocks_availability', 'blocks_availability', patch.blocks_availability, cal.blocks_availability);
+  put('device_visible', 'device_visible', patch.device_visible, flags.device_visible);
+  put('ics_feed_enabled', 'ics_feed_enabled', patch.ics_feed_enabled, cal.ics_feed_enabled);
+  if (patch.needs_review === false && flags.needs_review) {
+    updates.needs_review = false;
+    updates.review_reason = null;
+    changed.push('needs_review');
+  }
+  if (changed.length === 0) return { changed };
+
+  if (typeof updates.name === 'string') {
+    const [clash] = await sql<Array<{ id: string }>>`
+      SELECT id FROM calendars WHERE lower(name) = ${updates.name.toLowerCase()} AND id <> ${cal.id}::uuid LIMIT 1
+    `;
+    if (clash) throw new CalendarConflictError('Nome calendario gia usato');
+  }
+
+  const next = { ...cal, ...updates } as SidecarRow;
+  const davChanged = ['name', 'description', 'color', 'timezone', 'role'].some((f) => changed.includes(f));
+  if (davChanged && cal.role !== 'subscription' && isValidCollectionName(cal.collection_name)) {
+    const { client, principal } = requireRadicale();
+    await withCalendarWriteGate(async (ctx) => {
+      await assertVolumeIdentity(ctx.state);
+      const props = collectionDavProps(next);
+      if (changed.includes('role')) props.set.push({ ...DAV_PROPS.role, value: next.role });
+      try {
+        await client.proppatch(collectionPath(principal, cal.collection_name as string), { set: props.set, remove: props.remove });
+      } catch (err) {
+        throw isRadicaleError(err) ? radicaleWriteError(err, 'la modifica del calendario') : err;
+      }
+    }, { expect: 'radicale' });
+  }
+
+  await sql`UPDATE calendars SET ${sql(updates)} WHERE id = ${cal.id}::uuid`;
+  if (changed.includes('timezone')) {
+    try {
+      const { rematerializeCollection } = await import('./indexer');
+      await rematerializeCollection(cal.id, { horizon: targetHorizon(new Date()), reason: 'timezone' });
+    } catch (err) {
+      log.error({ err, calendarId: cal.id }, 'rimaterializzazione dopo il cambio di fuso non riuscita: la ripeterà l\'orizzonte');
+    }
+  }
+  if (changed.includes('role') || changed.includes('device_visible')) await syncDevicePolicy();
+  await auditCalendarV2({ action: 'UPDATE', recordId: cal.id, operation: 'v2.calendar.update', changed, actor });
+  return { changed };
+}
+
+/**
+ * Elimina un calendario con i suoi oggetti (DELETE della collezione, poi la
+ * riga: `deleteCalendarLifecycle`). I controlli su sistema, predefinito e
+ * iscrizioni li fa il chiamante. false se il calendario non c'è più.
+ */
+export async function deleteCalendarV2(id: string, actor: string, extra: Record<string, unknown> = {}): Promise<boolean> {
+  const cal = await sidecarById(id, { activeOnly: true });
+  if (!cal) return false;
+  await deleteCalendarLifecycle(cal);
+  await auditCalendarV2({ action: 'DELETE', recordId: cal.id, operation: 'v2.calendar.delete', actor, extra });
+  return true;
+}
+
+/** Audit della rotazione del token del feed (il token vero lo ruota `rotateFeedToken` dello store). */
+export async function auditCalendarTokenRotation(id: string, actor: string): Promise<void> {
+  await auditCalendarV2({ action: 'UPDATE', recordId: id, operation: 'v2.calendar.rotate_token', changed: ['ics_feed_token'], actor });
+}
+
+/**
+ * Applica l'ordine dei calendari: `sort_order` = posizione in `ids` (già
+ * verificato completo dal chiamante) e, sulle collezioni cambiate, PROPPATCH di
+ * `calendar-order` (best effort: una PROPPATCH fallita non annulla l'ordine
+ * nel database e finisce nel log senza testo).
+ */
+export async function applyCalendarOrder(ids: readonly string[], actor: string): Promise<{ changed: number; proppatchFailed: number }> {
+  const rows = await sql<Array<{ id: string; collection_name: string | null; role: string; sort_order: number }>>`
+    UPDATE calendars c SET sort_order = v.pos
+    FROM (SELECT t.id, (t.ord - 1)::int AS pos FROM unnest(${ids as string[]}::uuid[]) WITH ORDINALITY AS t(id, ord)) v
+    WHERE c.id = v.id AND c.sort_order IS DISTINCT FROM v.pos
+    RETURNING c.id, c.collection_name, c.role, c.sort_order
+  `;
+  let proppatchFailed = 0;
+  const targets = rows.filter((r) => r.role !== 'subscription' && isValidCollectionName(r.collection_name));
+  if (targets.length > 0) {
+    try {
+      const { client, principal } = requireRadicale();
+      await withCalendarWriteGate(async (ctx) => {
+        await assertVolumeIdentity(ctx.state);
+        for (const r of targets) {
+          try {
+            await client.proppatch(collectionPath(principal, r.collection_name as string), { set: [{ ...DAV_PROPS.calendarOrder, value: String(r.sort_order) }] });
+          } catch (err) {
+            proppatchFailed++;
+            log.warn({ err, calendarId: r.id }, 'PROPPATCH di calendar-order non riuscita: l\'ordine resta valido nel database');
+          }
+        }
+      }, { expect: 'radicale' });
+    } catch (err) {
+      proppatchFailed = targets.length;
+      log.warn({ err }, 'PROPPATCH di calendar-order non eseguite (Radicale non disponibile): l\'ordine resta valido nel database');
+    }
+  }
+  await auditCalendarV2({ action: 'UPDATE', recordId: null, operation: 'v2.calendar.order', changed: ['sort_order'], actor, extra: { calendars: ids.length, changed: rows.length, proppatch_failed: proppatchFailed } });
+  return { changed: rows.length, proppatchFailed };
+}
