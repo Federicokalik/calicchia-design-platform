@@ -136,12 +136,19 @@ const DETAIL_LIST_MAX = 20;
  */
 export const LEVEL_EXPECTED_REASONS: Readonly<Record<'V3' | 'V4' | 'V5', readonly ExpectedDiffReason[]>> = Object.freeze({
   V3: ['NON_PROJECTION_MOVED', 'ORPHAN_CONVERTED', 'DST_REALIGNED', 'UNTIL_REALIGNED', 'INVALID_RRULE_SINGLE', 'MIXED_BYDAY',
-    'ALLDAY_NORMALIZED', 'CANCELLED_MASTER_SKIPPED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT'],
+    'ALLDAY_NORMALIZED', 'CANCELLED_MASTER_SKIPPED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT', 'REVERSE_DEGRADED'],
   V4: ['DST_REALIGNED', 'UNTIL_REALIGNED', 'INVALID_RRULE_SINGLE', 'MIXED_BYDAY', 'BOOKING_DRIFT'],
   V5: ['OVERRIDE_UID_MASTER', 'CANCELLED_OVERRIDE_SUPPRESSED', 'DST_REALIGNED', 'DTSTART_REALIGNED', 'ORPHAN_CONVERTED', 'CANCELLED_MASTER_SKIPPED',
     'NON_PROJECTION_MOVED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT', 'UNTIL_REALIGNED', 'MIXED_BYDAY',
-    'INVALID_RRULE_SINGLE', 'ALLDAY_NORMALIZED'],
+    'INVALID_RRULE_SINGLE', 'ALLDAY_NORMALIZED', 'REVERSE_DEGRADED'],
 });
+
+/**
+ * Degradi della proiezione inversa che cambiano le occorrenze della riga
+ * legacy rispetto alla risorsa (contratto f4-modules §4.2-§4.3): dopo un
+ * rollback la verifica li tratta come differenze attese (REVERSE_DEGRADED).
+ */
+const OCCURRENCE_DEGRADATIONS: ReadonlySet<string> = new Set(['SANITIZED_DURATION', 'SEMANTIC_TRANSP', 'SANITIZED_STATUS']);
 
 /** UID presenti in un feed e non nell'altro: solo i motivi che spiegano la presenza (un UID diverso dal legacy è rosso). */
 const V5_MISSING_OVERRIDE_REASONS: readonly ExpectedDiffReason[] = ['OVERRIDE_UID_MASTER', 'ORPHAN_CONVERTED', 'CANCELLED_MASTER_SKIPPED', 'NON_PROJECTION_MOVED'];
@@ -243,6 +250,8 @@ interface VerifyIndex {
    * contenuto finché etag e riga legacy non cambiano.
    */
   rebaselineRunIds: ReadonlySet<string>;
+  /** Risorse (calendar_id|href) con un degrado della proiezione inversa che cambia le occorrenze. */
+  reverseDegraded: ReadonlySet<string>;
 }
 
 function calHref(calendarId: string, href: string): string {
@@ -342,6 +351,8 @@ function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiff
     const r = SKIP_REASONS[skip.code];
     if (r) candidates.add(r);
   }
+  // F4: oggetto ri-allineato da un rollback e non più toccato, con un degrado della proiezione inversa.
+  if (s && rebaselinedUntouched(idx, s)) candidates.add('REVERSE_DEGRADED');
   const usable = allowed.filter((r) => candidates.has(r) && reasonCodeAllowed(idx, key, r, ctx.code));
   for (const r of usable) if (reasonExplains(idx, key, r, ctx)) return r;
   const instants = ctx.instants ?? [];
@@ -367,6 +378,22 @@ function feedInstant(label: string, tz: string): DiffInstant {
   if (label.startsWith('D')) return { seconds: [], dates: [label.slice(1).split('/')[0]] };
   const start = Number(label.split('/')[0]);
   return Number.isFinite(start) ? { seconds: [start], dates: [localDateOf(start * 1000, tz)] } : { seconds: [], dates: [] };
+}
+
+/**
+ * F4: oggetto la cui riga del ledger è stata ri-allineata da un rollback o da
+ * una ri-baseline e non è più cambiata (stesso etag su Radicale, stessa riga
+ * legacy). Con un degrado della proiezione inversa che cambia le occorrenze
+ * (reverseDegraded), le differenze di V3 e V5 sono quelle documentate
+ * nell'anteprima del rollback, non una divergenza.
+ */
+function rebaselinedUntouched(idx: VerifyIndex, s: SerializedObject): boolean {
+  const k = calHref(s.calendar_id, s.href);
+  if (!idx.reverseDegraded.has(k)) return false;
+  const l = idx.ledgerByCalHref.get(k);
+  if (!l?.adopted || l.last_run_id === null || !idx.rebaselineRunIds.has(l.last_run_id)) return false;
+  const t = idx.target.collections.get(s.calendar_id)?.objects.get(s.href);
+  return Boolean(t && l.written_etag !== null && l.written_etag === t.etag && l.legacy_hash === s.legacy_hash);
 }
 
 // ─── Raccolta delle differenze ───────────────────────────────
@@ -1323,6 +1350,12 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
   const rebaselineRuns = await ctx.db<Array<{ id: string }>>`
     SELECT id::text AS id FROM cal_migration_runs WHERE kind IN ('rollback', 'rebaseline')
   `;
+  const reverseDegraded = await ctx.db<Array<{ calendar_id: string; href: string }>>`
+    SELECT calendar_id::text AS calendar_id, href FROM cal_migration_reverse_state
+    WHERE EXISTS (
+      SELECT 1 FROM jsonb_array_elements(degradations) d WHERE d->>'class' = ANY(${[...OCCURRENCE_DEGRADATIONS]}::text[])
+    )
+  `;
   ctx.throwIfCancelled();
 
   await ctx.progress({ phase: 'read-target', message: 'Lettura delle collezioni di Radicale' });
@@ -1353,6 +1386,7 @@ async function verifyLocked(ctx: VerifyCtx, guard: ((opts: { client: RadicaleCli
     scopes: new Map(),
     now,
     rebaselineRunIds: new Set(rebaselineRuns.map((r) => r.id)),
+    reverseDegraded: new Set(reverseDegraded.map((r) => calHref(r.calendar_id, r.href))),
   };
 
   // Calendari che ricevono righe: quelli verificati e, senza ambito, quelli cancellati con righe nel ledger (V4 è globale: le sue righe vanno ai calendari con oggetti sovrapposti).

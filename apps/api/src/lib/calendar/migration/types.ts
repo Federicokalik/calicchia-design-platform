@@ -719,6 +719,13 @@ export const EXPECTED_DIFF_REASONS = [
    * e, con COUNT, una in meno alla fine).
    */
   'DTSTART_REALIGNED',
+  /**
+   * F4: riga legacy scritta dalla proiezione inversa con un degrado che cambia
+   * le occorrenze (durata zero portata a una durata positiva, TRANSP o STATUS
+   * resi come tentative) e risorsa di Radicale invariata dalla ri-baseline del
+   * rollback (V3, V5; contratto f4-modules §5.3).
+   */
+  'REVERSE_DEGRADED',
 ] as const;
 export type ExpectedDiffReason = (typeof EXPECTED_DIFF_REASONS)[number];
 

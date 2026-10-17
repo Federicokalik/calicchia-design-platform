@@ -9,8 +9,8 @@
  *    senza la cache scade comunque in 2 s;
  *  - handler dei job (project_booking, booking_conflict_check,
  *    subscription_mirror, index_rebuild, recurrence_split,
- *    calendar_lifecycle, migration_run, shadow_mirror): solo registrazione in
- *    memoria;
+ *    calendar_lifecycle, migration_run, shadow_mirror, reverse_projection):
+ *    solo registrazione in memoria;
  *  - worker dei job, campanello (watcher) e canary: SOLO con Radicale
  *    configurato (RADICALE_URL). Senza, restano spenti e la salute
  *    (/api/health/calendar) li dichiara 'not_configured'/'off': l'API parte e
@@ -45,8 +45,19 @@
  * gli altri prima del worker; all'avvio, con Radicale configurato, un giro del
  * reaper chiude i run interrotti da un arresto senza ripresa possibile.
  *
+ * Passaggio a Radicale (F4, contratto f4-modules §10): l'handler del job
+ * `reverse_projection` si registra con gli altri; dopo il worker, con Radicale
+ * configurato, parte il trigger della proiezione inversa (LISTEN
+ * calendar_index_changed con debounce e giro di backstop a ogni
+ * (ri)connessione) e si registra nel log una transizione rimasta attiva da un
+ * arresto (cutover o rollback da riprendere dal wizard). Il trigger accoda
+ * solo in mode radicale; il job rilegge mode e finestra dentro il lock. Cron
+ * runCalendarReverseSweep (ogni 15 minuti): giro di backstop, solo in mode
+ * radicale con la finestra di rollback aperta.
+ *
  * L'arresto (stopCalendarBackground) ferma prima i produttori di lavoro
- * (canary, campanello con le sync in corso, worker dei job), poi il
+ * (canary, trigger della proiezione inversa, campanello con le sync in corso,
+ * worker dei job), poi il
  * worker_thread dell'indicizzatore e il listener del modo, e solo alla fine
  * chiude il pool calendario: le sync e i job lo usano fino all'ultimo.
  */
@@ -66,12 +77,20 @@ import { startCalendarWatcher, stopCalendarWatcher } from '../lib/calendar/radic
 import { registerSubscriptionMirrorJob } from '../lib/calendar/subscriptions/mirror';
 import { reapInterruptedRuns, registerMigrationRunJob } from '../lib/calendar/migration/runs';
 import { registerShadowMirrorJob } from '../lib/calendar/migration/shadow';
+import {
+  registerReverseProjectionJob,
+  runReverseProjectionSweep,
+  startReverseProjectionTrigger,
+} from '../lib/calendar/migration/reverse-projector';
+import { readTransitionView } from '../lib/calendar/migration/transition';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'calendar-radicale' });
 
 /** Funzione che smette di ascoltare calendar_policy_changed (null se il listener non è partito). */
 let stopModeListener: (() => Promise<void>) | null = null;
+/** Funzione che ferma il trigger della proiezione inversa (null se non è partito). */
+let stopReverseTrigger: (() => Promise<void>) | null = null;
 /** Avvio in corso o concluso (idempotente). */
 let starting: Promise<void> | null = null;
 /** Arresto in corso (idempotente: SIGTERM e SIGINT ravvicinati lo chiamano due volte). */
@@ -122,6 +141,8 @@ async function startComponents(): Promise<void> {
     // Strumento di migrazione (F3): run asincroni e shadow mirror.
     registerMigrationRunJob();
     registerShadowMirrorJob();
+    // Passaggio a Radicale (F4): proiezione inversa nella finestra di rollback.
+    registerReverseProjectionJob();
   } catch (err) {
     log.error({ err }, 'registrazione degli handler dei job del calendario non riuscita');
   }
@@ -163,6 +184,37 @@ async function startComponents(): Promise<void> {
   }
   if (stopping) return;
 
+  // 3d. Transizione rimasta attiva (arresto durante un cutover o un rollback):
+  // la policy resta frozen e Postgres resta autorevole finché non la si
+  // riprende o annulla dal wizard (passo 6). Solo un log: nessuna ripresa
+  // automatica, la decisione è dell'utente.
+  try {
+    const transition = await readTransitionView();
+    if (transition && transition.status === 'active') {
+      log.warn({
+        transition: transition.id,
+        kind: transition.kind,
+        from: transition.from_mode,
+        to: transition.target_mode,
+        startedAt: transition.started_at,
+      }, 'transizione del calendario rimasta attiva: riprenderla o annullarla dal wizard della migrazione');
+    }
+  } catch (err) {
+    log.warn({ err }, 'lettura della transizione attiva all\'avvio non riuscita');
+  }
+  if (stopping) return;
+
+  // 3e. Trigger della proiezione inversa (F4): accoda il job per collezione
+  // sui NOTIFY dell'indice, solo in mode radicale con la finestra aperta.
+  try {
+    const stop = await startReverseProjectionTrigger();
+    if (stopping) await stop().catch(() => {});
+    else stopReverseTrigger = stop;
+  } catch (err) {
+    log.error({ err }, 'trigger della proiezione inversa non avviato: la recupera il giro di backstop ogni 15 minuti');
+  }
+  if (stopping) return;
+
   // 4. Campanello (stat del mount o remote mode) e canary all'avvio e ogni 10 minuti.
   try {
     await startCalendarWatcher();
@@ -198,6 +250,11 @@ export function stopCalendarBackground(): Promise<void> {
     // Prima i produttori di lavoro: canary, campanello (attende giro e sync in
     // corso fino a 5 s), worker dei job (attende il giro in corso).
     await step('canary', () => stopCanarySchedule());
+    if (stopReverseTrigger) {
+      const stopTrigger = stopReverseTrigger;
+      stopReverseTrigger = null;
+      await step('trigger della proiezione inversa', () => stopTrigger());
+    }
     await step('campanello', () => stopCalendarWatcher());
     await step('worker dei job', () => stopCalendarJobWorker());
     await step('worker dell\'indicizzatore', () => stopIndexWorker());
@@ -256,4 +313,16 @@ export async function runCalendarMigrationReaper(): Promise<void> {
   if (!calendarRadicaleConfigured()) return;
   const reaped = await reapInterruptedRuns();
   if (reaped > 0) log.warn({ reaped }, 'run dello strumento di migrazione interrotti chiusi dal reaper');
+}
+
+/**
+ * Cron ogni 15 minuti (F4, contratto f4-modules §4.1 e §10): giro di backstop
+ * della proiezione inversa. Accoda le collezioni con risorse non ancora
+ * proiettate, REVERSE_FAILED, sparite o con prenotazioni cambiate; agisce
+ * solo in mode radicale con la finestra di rollback aperta (lo controlla
+ * runReverseProjectionSweep). Senza Radicale configurato non fa nulla.
+ */
+export async function runCalendarReverseSweep(): Promise<void> {
+  if (!calendarRadicaleConfigured()) return;
+  await runReverseProjectionSweep();
 }

@@ -791,6 +791,7 @@ export const EXPECTED_REASON_LABELS: Readonly<Record<string, string>> = Object.f
   MIXED_BYDAY: 'BYDAY misto (unione RFC 5545)',
   ALLDAY_NORMALIZED: 'Tutto il giorno normalizzato',
   DUPLICATE_HOLIDAY_SKIPPED: 'Festività duplicata non migrata',
+  REVERSE_DEGRADED: 'Riga legacy della proiezione inversa con un degrado documentato',
 });
 
 /** Descrizioni delle anomalie (ANOMALY_DEFINITIONS di types.ts). */

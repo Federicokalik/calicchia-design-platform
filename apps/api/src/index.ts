@@ -97,6 +97,7 @@ const { serve } = await import('@hono/node-server');
 const { app } = await import('./app');
 const { startCronEngine, stopCronEngine } = await import('./cron');
 const { startCalendarControlPlane, stopCalendarControlPlane } = await import('./lib/calendar/radicale/heartbeat');
+const { enforceCalendarApiLevelAtBoot } = await import('./lib/calendar/api-level');
 const { startCalendarBackground, stopCalendarBackground } = await import('./cron/calendar-radicale');
 const { assertKBsValid } = await import('./lib/quotes/generate');
 const { sql } = await import('./db');
@@ -125,6 +126,17 @@ const server = serve({
 
 // Start cron jobs
 startCronEngine();
+
+// Livello del protocollo calendario (F4, docs/calendar-radicale/contracts/
+// f4-modules.md §3.4): un'immagine con CALENDAR_API_LEVEL più basso di
+// calendar_backend_state.api_min_version (rollback d'immagine dopo il cutover)
+// non serve il calendario (503 store_not_available); il resto dell'API parte
+// comunque. Prima del control-plane, come chiede il contratto.
+try {
+  await enforceCalendarApiLevelAtBoot();
+} catch (err) {
+  console.error(`⚠️  Calendar API level check failed: ${(err as Error).message}`);
+}
 
 // Control-plane di Radicale (F1, docs/calendar-radicale/contracts/control-plane.md):
 // policy.json derivata da calendar_backend_state e heartbeat.json ogni 30 s sul

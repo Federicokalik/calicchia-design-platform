@@ -159,7 +159,8 @@ describe('wizard della migrazione attraverso le route, contro Radicale reale', {
     // 1. Preflight su un volume vuoto: si propone l'inizializzazione.
     let s = await wizard();
     assert.equal(s.radicale.configured, true);
-    assert.deepEqual(statuses(s), ['todo', 'locked', 'locked', 'locked', 'locked', 'disabled']);
+    // Dalla F4 il passo 6 (passaggio) esiste: bloccato finché i criteri del cutover non sono soddisfatti.
+    assert.deepEqual(statuses(s), ['todo', 'locked', 'locked', 'locked', 'locked', 'locked']);
     const pf1 = await runToEnd('/preflight', { probe_public_url: false });
     assert.equal(pf1.summary.can_initialize, true);
     assert.equal(pf1.summary.identity, 'uninitialized');
@@ -278,7 +279,7 @@ describe('wizard della migrazione attraverso le route, contro Radicale reale', {
     assert.equal(s.backend.shadow_enabled, true);
     assert.equal(s.wizard.steps[3].status, 'done', 'un apply a zero scritture non invalida la verifica');
     assert.equal(s.wizard.steps[4].status, 'running');
-    assert.equal(s.wizard.steps[5].status, 'disabled');
+    assert.equal(s.wizard.steps[5].status, 'locked');
     assert.equal(s.cutover.available, false);
     const parity = await api.get(`${BASE}/parity`, { auth: 'admin' });
     assert.equal(parity.json.shadow_enabled, true);

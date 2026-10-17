@@ -1045,10 +1045,16 @@ function representableRows(
  */
 function resolveMasterUid(input: ProjectObjectInput, icalUid: string, rowId: string, uids: UidAllocator, degr: DegradationCollector): string {
   const preserved = [input.ids.master.legacy_uid, input.existingUids?.get(rowId) ?? null].filter((u): u is string => typeof u === 'string' && u !== '');
-  for (const u of preserved) if (uids.free(u)) return uids.take(pgText(u));
   const ical = pgText(icalUid);
-  if (uids.free(ical)) return uids.take(ical);
   const sanitized = `${ical}@${input.calendar.collection_name}`;
+  for (const u of preserved) {
+    if (!uids.free(u)) continue;
+    // Riga già proiettata con l'UID sanificato da una passata precedente: il degrado resta lo stesso a
+    // ogni passata, così l'anteprima del rollback e la salute lo mostrano e lo stato non lo perde.
+    if (u !== input.ids.master.legacy_uid && u === sanitized && u !== ical) degr.add('SANITIZED_UID', '', { reason: 'duplicate' });
+    return uids.take(pgText(u));
+  }
+  if (uids.free(ical)) return uids.take(ical);
   if (!uids.free(sanitized)) throw new ReverseObjectError('UID già usato anche nella forma sanificata con il nome della collezione');
   degr.add('SANITIZED_UID', '', { reason: 'duplicate' });
   return uids.take(sanitized);

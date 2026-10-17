@@ -537,7 +537,8 @@ describe('criterio di uscita della F3 su una copia sintetica della produzione, c
     let s = await wizard();
     assert.equal(s.radicale.configured, true);
     assert.equal(s.backend.mode, 'postgres');
-    assert.deepEqual(statuses(s), ['todo', 'locked', 'locked', 'locked', 'locked', 'disabled']);
+    // Dalla F4 il passo 6 (passaggio) esiste: bloccato finché i criteri del cutover non sono soddisfatti.
+    assert.deepEqual(statuses(s), ['todo', 'locked', 'locked', 'locked', 'locked', 'locked']);
 
     // Inventario in sola lettura con le anomalie della produzione.
     const inv = await runToEnd('/inventory', {});
@@ -842,10 +843,13 @@ describe('criterio di uscita della F3 su una copia sintetica della produzione, c
     assert.equal(parity.queue.dead, 0);
     const s = await wizard();
     assert.equal(s.wizard.steps[4].status, 'running', JSON.stringify(s.wizard.steps[4]));
-    assert.equal(s.wizard.steps[5].status, 'disabled');
+    assert.equal(s.wizard.steps[5].status, 'locked');
     assert.equal(s.cutover.available, false);
-    const cutover = await api.post(`${BASE}/cutover`, { auth: 'admin', body: { confirm: MIGRATION_CONFIRMATIONS.cutover } });
-    assert.equal(cutover.json.code, 'PHASE_NOT_AVAILABLE');
+    // F4: il passaggio esiste ma i criteri lo rifiutano (parità di 7 giorni non ancora osservata).
+    const cutover = await api.post(`${BASE}/cutover`, { auth: 'admin', body: { confirm: MIGRATION_CONFIRMATIONS.cutover }, headers: { 'Idempotency-Key': key('cutover') } });
+    assert.equal(cutover.status, 409, cutover.text);
+    assert.equal(cutover.json.code, 'PRECONDITION_FAILED');
+    assert.ok(cutover.json.details.reasons.includes('SHADOW_PARITY_REQUIRED'), cutover.text);
     await assertPostgresAuthoritative('con lo shadow attivo');
   });
 

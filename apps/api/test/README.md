@@ -102,7 +102,12 @@ test/
                          piano puro (migration-plan), apply, verifica e report (migration-apply, con
                          _migration-apply-shared.ts), shadow mirror, parità e flag delle iscrizioni (migration-shadow),
                          erasure GDPR e retention (calendar-gdpr), esecutore dei run, route e stato del wizard
-                         (migration-routes); senza Radicale)
+                         (migration-routes); F4: migrazione 166 con la guardia di calendar_events e le tabelle
+                         delle transizioni (migration-166), gate, quiescenza, journal ed epoch
+                         (migration-transition), cutover, criteri, smoke e livello dell'API (migration-cutover),
+                         proiezione inversa (reverse-projector), anteprima, rollback, ri-baseline, finalize ed
+                         export v2 (migration-rollback), route e stato del wizard del passo 6 e route della saga
+                         (migration-routes-f4); senza Radicale)
   integration/           Radicale reale: smoke CalDAV, plugin del repository, client di servizio e control-plane,
                          caldes_auth contro la route reale, end-to-end F1 (radicale-f1-e2e), backup dello stack, inventario;
                          F2: sync, watcher, canary, discovery e freshness (radicale-sync), rebuild dell'indice
@@ -116,7 +121,13 @@ test/
                          del wizard dalle route (migration-routes), radicale-maint.sh (radicale-maint), emulazione
                          dei device con la config di produzione (device-emulation), criterio di uscita della F3 su
                          una copia sintetica della produzione: kill a metà apply, shadow con VALARM e parità, feed
-                         identici fra i due store, erasure GDPR (migration-f3-e2e)
+                         identici fra i due store, erasure GDPR (migration-f3-e2e);
+                         F4: transizioni con la config di produzione (migration-transition), cutover con kill a
+                         ogni passo (migration-cutover), proiezione inversa (reverse-projector), anteprima e
+                         rollback con kill a ogni passo e nuovo piano a zero scritture (migration-rollback),
+                         prova generale della F4 dalle route del wizard su una copia sintetica della produzione:
+                         cutover, uso misto, rollback, nuovo cutover, kill e rollback d'immagine
+                         (migration-f4-rehearsal)
 ```
 
 Fuori da `apps/api/test`, il pacchetto `@calicchia/calendar-core` ha i propri test (node:test via tsx, senza database né Radicale): `pnpm --filter @calicchia/calendar-core test` e `typecheck`; vedi `packages/calendar-core/README.md`.

@@ -154,13 +154,17 @@ jobs:
   # prenotazione, consumatori, specchio delle iscrizioni), lo strumento di
   # migrazione della F3 (init, piano, apply e verifica, shadow mirror, GDPR,
   # route del wizard), radicale-maint.sh e l'emulazione dei device con la
-  # config di produzione. In più la matrice
+  # config di produzione, il passaggio della F4 (transizioni, cutover,
+  # proiezione inversa, rollback e la prova generale dalle route del wizard,
+  # con kill e ripresa). In più la matrice
   # CALENDAR_BACKEND=radicale dei contratti F0 (design §15): le stesse suite
   # del job api-tests (che le esegue su PgLegacyStore) girano su RadicaleStore
   # con Radicale reale; le differenze ammesse sono in allowed-diffs.json.
   calendar-integration:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # La F4 aggiunge cutover e rollback con un kill a ogni passo e la prova
+    # generale: circa 10 minuti in più.
+    timeout-minutes: 45
     services:
       postgres:
         image: postgres:17-alpine
@@ -213,7 +217,7 @@ jobs:
         run: pnpm --filter @calicchia/api test:migrate
       - name: Typecheck dei test
         run: pnpm --filter @calicchia/api typecheck:test
-      - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2, strumento di migrazione F3)
+      - name: Test di integrazione (Radicale reale, plugin del repository, end-to-end F1, inventario, moduli F2, strumento di migrazione F3, passaggio F4)
         run: pnpm --filter @calicchia/api test:integration
       - name: Contratti F0 su RadicaleStore (matrice CALENDAR_BACKEND=radicale)
         run: pnpm --filter @calicchia/api test:contracts:radicale

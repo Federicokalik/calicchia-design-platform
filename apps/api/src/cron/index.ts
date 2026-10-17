@@ -17,7 +17,7 @@ import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintena
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
-import { runCalendarHorizon, runCalendarMigrationReaper, runCalendarNightlyAudit } from './calendar-radicale';
+import { runCalendarHorizon, runCalendarMigrationReaper, runCalendarNightlyAudit, runCalendarReverseSweep } from './calendar-radicale';
 import { runShadowHourlyParity, runShadowNightly, SHADOW_NIGHTLY_HOUR } from '../lib/calendar/migration/shadow';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
@@ -190,6 +190,14 @@ const jobs: CronJob[] = [
     name: 'calendar-shadow-parity',
     intervalMs: 60 * 60 * 1000,
     run: runShadowHourlyParity,
+  },
+  {
+    // Passaggio a Radicale (F4, contratto f4-modules §10): giro di backstop
+    // della proiezione inversa (Radicale → calendar_events) nella finestra di
+    // rollback. Non fa nulla fuori da mode radicale o senza RADICALE_URL.
+    name: 'calendar-reverse-sweep',
+    intervalMs: 15 * 60 * 1000,
+    run: runCalendarReverseSweep,
   },
   {
     name: 'whatsapp-media-fetch',
