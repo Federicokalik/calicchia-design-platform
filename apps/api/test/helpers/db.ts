@@ -564,3 +564,56 @@ export async function resetCalendarBaseline(): Promise<void> {
   // quello in cache (backend-mode.ts, 2 s).
   invalidateBackendModeCache();
 }
+
+/**
+ * Colonne dei calendari seminati che le route admin v2 (PATCH, PUT
+ * /calendars/order, rotate-token) possono modificare e che i contratti F0
+ * (admin-calendar-v1, mcp-calendar-tools) vedono negli snapshot.
+ */
+const SEED_CALENDAR_MUTABLE_COLUMNS = [
+  'name',
+  'description',
+  'color',
+  'icon',
+  'timezone',
+  'sort_order',
+  'is_default',
+  'blocks_availability',
+  'device_visible',
+  'ics_feed_enabled',
+  'ics_feed_token',
+  'needs_review',
+  'review_reason',
+] as const;
+
+/**
+ * Fotografa i calendari seminati (le colonne modificabili dalle route admin) e
+ * restituisce la funzione che li riporta com'erano, ripulendo anche le righe di
+ * audit che i trigger hanno scritto nel frattempo su di essi.
+ *
+ * Serve ai test che esercitano PUT /calendars/order o PATCH su calendari
+ * che esistono già nel database: `resetCalendarBaseline()` non tocca le righe
+ * seminate (a parte `is_default`), quindi un sort_order o un colore lasciati
+ * dal test resterebbero ai file successivi (i contratti F0 ne vedono gli
+ * snapshot, nello stesso database). Da chiamare in `onDatabaseReady` (dopo la
+ * baseline) e da eseguire in `onBeforeDatabaseClose`.
+ */
+export async function snapshotSeedCalendars(): Promise<() => Promise<void>> {
+  await assertConnectedToTestDatabase();
+  const since = await databaseNow();
+  const slugs = [...SEED_CALENDAR_SLUGS];
+  const columns = sql(SEED_CALENDAR_MUTABLE_COLUMNS as unknown as string[]);
+  const rows = await sql<Array<Record<string, unknown> & { slug: string; id: string }>>`
+    SELECT slug, id, ${columns} FROM calendars WHERE slug = ANY(${slugs}::text[])
+  `;
+  const ids = rows.map((r) => r.id);
+  return async () => {
+    await assertConnectedToTestDatabase();
+    for (const row of rows) {
+      const values: Record<string, unknown> = {};
+      for (const column of SEED_CALENDAR_MUTABLE_COLUMNS) values[column] = row[column];
+      await sql`UPDATE calendars SET ${sql(values as never, ...SEED_CALENDAR_MUTABLE_COLUMNS)} WHERE id = ${row.id}::uuid`;
+    }
+    await cleanupCalendarAudit({ since, prefixes: [], ids });
+  };
+}

@@ -44,18 +44,26 @@ import { configureRadicaleRuntime, syncCollection, updateWatchMode } from '../..
 import { overrideCalendarStore } from '../../src/lib/calendar/store';
 import type { Calendar } from '../../src/lib/calendar/types';
 import { registerCalendarImportJob } from '../../src/lib/calendar/v2/import-export';
-import { onBeforeDatabaseClose, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
+import { onBeforeDatabaseClose, onDatabaseReady, resetCalendarBaseline, snapshotSeedCalendars, sql, useTestDatabase } from '../helpers/db';
 import { useFixtures } from '../helpers/fixtures';
 import { api } from '../helpers/http';
 import { radicaleAvailability, type RadicaleServer, startRadicale, TEST_PRINCIPAL } from '../helpers/radicale';
 
 useTestDatabase({ resetBaseline: true });
+// PUT /calendars/order e PATCH (colore di 'bookings') agiscono sui calendari
+// seminati: tornano com'erano, altrimenti i contratti F0 eseguiti dopo sullo
+// stesso database (test:contracts:radicale) vedrebbero sort_order e colori diversi.
+let restoreSeedCalendars: (() => Promise<void>) | null = null;
+onDatabaseReady(async () => {
+  restoreSeedCalendars = await snapshotSeedCalendars();
+});
 onBeforeDatabaseClose(async () => {
   overrideCalendarStore(null);
   await stopIndexWorker();
   unregisterCalendarJobHandler(CAL_JOB_KINDS.calendarImport);
   await sql`DELETE FROM cal_jobs WHERE kind = 'calendar_import'`;
   await resetCalendarBaseline();
+  await restoreSeedCalendars?.();
 });
 const fx = useFixtures('admin-v2-c2-int');
 

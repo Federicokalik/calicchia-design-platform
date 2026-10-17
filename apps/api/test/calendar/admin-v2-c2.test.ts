@@ -30,19 +30,25 @@ import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode'
 import { configureRadicaleRuntime } from '../../src/lib/calendar/radicale/sync';
 import { RadicaleClient, TransportError } from '../../src/lib/calendar/radicale/client';
 import { overrideCalendarStore } from '../../src/lib/calendar/store';
-import { onBeforeDatabaseClose, onDatabaseReady, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
+import { onBeforeDatabaseClose, onDatabaseReady, resetCalendarBaseline, snapshotSeedCalendars, sql, useTestDatabase } from '../helpers/db';
 import { useFixtures } from '../helpers/fixtures';
 import { api } from '../helpers/http';
 
 useTestDatabase({ resetBaseline: true });
+// PUT /calendars/order e PATCH agiscono anche sui calendari seminati: i loro
+// sort_order e colonne modificabili tornano com'erano, altrimenti i contratti F0
+// dei file successivi (stesso database) vedrebbero sort_order spostati.
+let restoreSeedCalendars: (() => Promise<void>) | null = null;
 onDatabaseReady(async () => {
   overrideCalendarStore(null);
+  restoreSeedCalendars = await snapshotSeedCalendars();
 });
 onBeforeDatabaseClose(async () => {
   overrideCalendarStore(null);
   configureRadicaleRuntime(null);
   await sql`DELETE FROM cal_jobs WHERE kind IN ('calendar_import', 'calendar_hold_apply', 'project_booking')`;
   await resetCalendarBaseline();
+  await restoreSeedCalendars?.();
 });
 const fx = useFixtures('admin-v2-c2');
 
