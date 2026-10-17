@@ -5,10 +5,10 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, DateSelectArg, EventMountArg, EventDropArg } from '@fullcalendar/core';
-import type { EventResizeDoneArg } from '@fullcalendar/interaction';
+import type { EventClickArg, DateSelectArg, EventMountArg, EventDropArg, EventContentArg } from '@fullcalendar/core';
+import type { EventResizeDoneArg, EventDragStopArg } from '@fullcalendar/interaction';
 import {
-  Clock, MapPin, X, Plus, Settings, ExternalLink, Copy, Pencil, Trash2,
+  Clock, MapPin, X, Plus, Settings, ExternalLink, Copy, Pencil, Trash2, FolderInput,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -29,8 +29,45 @@ import {
 import { useConfirm } from '@/hooks/use-confirm';
 import EventoEditModal from '@/pages/calendario/evento-edit';
 import EventoEditor from '@/pages/calendario/evento/evento-editor';
-import { useCalendarV2Capabilities } from '@/lib/calendar-v2-api';
+import {
+  CalV2ConflictError,
+  calV2ErrorMessage,
+  calV2Keys,
+  deleteObjectV2,
+  duplicateObjectV2,
+  getObjectV2,
+  listCalendarsV2,
+  listOccurrencesV2,
+  listOverlaysV2,
+  moveObjectV2,
+  patchObjectV2,
+  useCalendarV2Capabilities,
+} from '@/lib/calendar-v2-api';
+import {
+  allowedScopes,
+  durationToMinutes,
+  generateEventUid,
+  minutesToDuration,
+  rebaseAfterConflict,
+  shiftTimeMinutes,
+} from '@/lib/calendar-v2-model';
+import { CAL_V2_ABSENT_TOKEN, CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS } from '@calicchia/shared';
+import type {
+  CalV2ComponentView,
+  CalV2ObjectView,
+  CalV2Occurrence,
+  CalV2OccurrenceBadge,
+  CalV2OccurrenceKind,
+  CalV2Op,
+  CalV2OverlayItem,
+  CalV2PreconditionFailedBody,
+  CalV2ReadonlyReason,
+  CalV2Scope,
+} from '@calicchia/shared';
 import { CalendarTabs } from '@/components/layout/calendar-tabs';
+import { ScopeDialog } from '@/components/calendar/scope-dialog';
+import { ConflictDialog } from '@/components/calendar/conflict-dialog';
+import { OccurrenceBadgeIcons, OccurrenceBadgeList } from '@/components/calendar/occurrence-badges';
 
 // Source di eventi su cui sono permesse modifiche dirette dal calendario
 // (duplicate, edit, delete). Project/domain/calcom sono read-only aggregati.
@@ -103,6 +140,277 @@ interface CalendarEventOcc {
   status: string;
   original_start: string | null;
   is_override: boolean;
+  // ─── Solo vista con le occorrenze v2 (`caps.occurrences`): `id` è l'id dell'oggetto ───
+  v2?: true;
+  /** Chiave dell'istanza ('' = evento singolo o master). */
+  recurrence_key?: string;
+  badges?: CalV2OccurrenceBadge[];
+  readonly_reason?: CalV2ReadonlyReason | null;
+  occ_kind?: CalV2OccurrenceKind;
+  recurring?: boolean;
+  /** Occorrenza dell'ultima versione buona di un oggetto in quarantena. */
+  stale?: boolean;
+  /** COLOR dell'evento; null = colore del calendario. */
+  color?: string | null;
+  /** Solo all-day: giorni del calendario (fine esclusiva). */
+  start_date?: string | null;
+  end_date?: string | null;
+  /** Festività, chiusura o iscrizione: sola lettura, non sono eventi dell'admin. */
+  overlay?: CalV2OverlayItem['source'];
+}
+
+/** Titolo mostrato quando l'evento non ha SUMMARY. */
+const UNTITLED = '(Senza titolo)';
+
+/** Sorgente (colori, etichette, permessi del pannello) di un'occorrenza v2. */
+function sourceOfKind(kind: CalV2OccurrenceKind): string {
+  if (kind === 'booking_projection') return 'booking';
+  if (kind === 'holiday_system' || kind === 'closure') return 'system';
+  return 'manual';
+}
+
+function occurrenceToEvent(o: CalV2Occurrence): CalendarEventOcc {
+  return {
+    id: o.object_id,
+    uid: '',
+    calendar_id: o.calendar_id,
+    summary: o.summary || UNTITLED,
+    description: null,
+    location: o.location,
+    url: null,
+    start_time: o.start_utc,
+    end_time: o.end_utc,
+    all_day: o.all_day,
+    source: sourceOfKind(o.kind),
+    source_id: o.booking_id,
+    status: o.status,
+    original_start: null,
+    is_override: o.kind === 'override' || o.kind === 'orphan_override',
+    v2: true,
+    recurrence_key: o.recurrence_key,
+    badges: o.badges,
+    readonly_reason: o.readonly_reason,
+    occ_kind: o.kind,
+    recurring: o.recurring,
+    stale: o.stale,
+    color: o.color,
+    start_date: o.start_date,
+    end_date: o.end_date,
+  };
+}
+
+function overlayToEvent(o: CalV2OverlayItem): CalendarEventOcc {
+  return {
+    id: o.object_id,
+    uid: '',
+    calendar_id: o.calendar_id,
+    summary: o.summary || UNTITLED,
+    description: null,
+    location: null,
+    url: null,
+    start_time: o.start_utc,
+    end_time: o.end_utc,
+    all_day: o.all_day,
+    source: o.source === 'subscription' ? 'ics_pull' : 'system',
+    source_id: null,
+    status: 'confirmed',
+    original_start: null,
+    is_override: false,
+    v2: true,
+    recurrence_key: o.recurrence_key,
+    badges: [],
+    readonly_reason: null,
+    color: o.color,
+    start_date: o.start_date,
+    end_date: o.end_date,
+    overlay: o.source,
+  };
+}
+
+/** Evento della vista v2 costruito dalla vista di un oggetto (copia appena creata): serve ad aprirlo nell'editor. */
+function viewToEvent(view: CalV2ObjectView): CalendarEventOcc | null {
+  const comp: CalV2ComponentView | null = view.target ?? view.master;
+  if (!comp || !view.id) return null;
+  return {
+    id: view.id,
+    uid: view.uid,
+    calendar_id: view.calendar_id,
+    summary: comp.fields.summary || UNTITLED,
+    description: null,
+    location: null,
+    url: null,
+    start_time: comp.start_utc,
+    end_time: comp.end_utc,
+    all_day: comp.all_day,
+    source: 'manual',
+    source_id: null,
+    status: 'confirmed',
+    original_start: null,
+    is_override: comp.is_override,
+    v2: true,
+    recurrence_key: comp.recurrence_key,
+    badges: [],
+    readonly_reason: view.readonly_reason,
+    recurring: view.recurring,
+  };
+}
+
+/** Chiave stabile di un'occorrenza nella vista v2 (l'id oggetto non basta: una serie ha molte istanze). */
+const eventKey = (ev: CalendarEventOcc): string => `${ev.id}|${ev.recurrence_key ?? ''}|${ev.start_time}`;
+
+/** Modificabile dall'editor: oggetti veri (non festività/iscrizioni) e non il blocco conservativo. */
+function isObjectEvent(ev: CalendarEventOcc): boolean {
+  return ev.v2 ? !ev.overlay && ev.occ_kind !== 'conservative' : !!(ev.id && ev.uid);
+}
+
+/**
+ * Trascinabile nella vista v2: oggetto vivo, non in sola lettura, né in
+ * quarantena né in hold, né una prenotazione (spostarla non aggiornerebbe la
+ * prenotazione, come in v1).
+ */
+function isDraggableV2(ev: CalendarEventOcc, canWrite: boolean): boolean {
+  if (!canWrite || ev.overlay || ev.readonly_reason || ev.stale) return false;
+  if (ev.occ_kind !== 'event' && ev.occ_kind !== 'override' && ev.occ_kind !== 'orphan_override') return false;
+  return !(ev.badges ?? []).some((b) => b === 'quarantined' || b === 'hold');
+}
+
+const DAY_MS = 86_400_000;
+
+/** Spezza `[from, to)` in finestre di al più `CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS` giorni (limite di /occurrences e /overlays). */
+function splitWindow(fromIso: string, toIso: string): Array<{ from: string; to: string }> {
+  const maxMs = CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS * DAY_MS;
+  const end = new Date(toIso).getTime();
+  const out: Array<{ from: string; to: string }> = [];
+  for (let cursor = new Date(fromIso).getTime(); cursor < end; cursor += maxMs) {
+    out.push({ from: new Date(cursor).toISOString(), to: new Date(Math.min(cursor + maxMs, end)).toISOString() });
+  }
+  return out;
+}
+
+/** Occorrenze della finestra visibile (senza troncamento); i duplicati fra finestre adiacenti si eliminano. */
+async function fetchOccurrencesWindow(from: string, to: string) {
+  const parts = await Promise.all(splitWindow(from, to).map((w) => listOccurrencesV2(w)));
+  const seen = new Set<string>();
+  const occurrences: CalV2Occurrence[] = [];
+  for (const part of parts) {
+    for (const o of part.occurrences) {
+      const key = `${o.object_id}|${o.recurrence_key}|${o.start_utc}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      occurrences.push(o);
+    }
+  }
+  return { occurrences, staleCalendarIds: [...new Set(parts.flatMap((p) => p.stale_calendar_ids))] };
+}
+
+async function fetchOverlaysWindow(from: string, to: string): Promise<CalV2OverlayItem[]> {
+  const parts = await Promise.all(splitWindow(from, to).map((w) => listOverlaysV2(w)));
+  const seen = new Set<string>();
+  const items: CalV2OverlayItem[] = [];
+  for (const part of parts) {
+    for (const o of part.items) {
+      const key = `${o.source}|${o.object_id}|${o.recurrence_key}|${o.start_utc}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push(o);
+    }
+  }
+  return items;
+}
+
+/** Soglia di sicurezza per tipo (task, progetti) delle sovrapposizioni caricate nella vista. */
+const OVERLAY_MAX_ITEMS = 1000;
+
+interface WindowedList { items: any[]; total: number }
+
+/**
+ * Elenco a finestra paginato fino al `count` reale dell'API (non più un
+ * `limit` fisso). Si ferma alla soglia di sicurezza o a un errore: `total`
+ * resta il conteggio vero, così la vista può dire quanti elementi mancano.
+ */
+async function fetchWindowedList(
+  path: string,
+  key: 'tasks' | 'projects',
+  params: Record<string, string>,
+  pageSize: number,
+): Promise<WindowedList> {
+  const items: any[] = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const q = new URLSearchParams({ ...params, limit: String(pageSize), offset: String(items.length) });
+      const page = await apiFetch(`${path}?${q}`);
+      const rows = (page?.[key] ?? []) as any[];
+      items.push(...rows);
+      total = Math.max(total, Number(page?.count ?? 0), items.length);
+      if (!rows.length || items.length >= total || items.length >= OVERLAY_MAX_ITEMS) break;
+    }
+  } catch {
+    /* le sovrapposizioni non bloccano la vista: restano gli elementi già caricati */
+  }
+  return { items: items.slice(0, OVERLAY_MAX_ITEMS), total: Math.max(total, items.length) };
+}
+
+/** Giorni (YYYY-MM-DD) del primo e dell'ultimo giorno visibili, per i filtri `due_*` e `overlap_*`. */
+function visibleDays(start: Date, end: Date): { startDay: string; endDay: string } {
+  return {
+    startDay: start.toISOString().slice(0, 10),
+    endDay: new Date(end.getTime() - 1).toISOString().slice(0, 10),
+  };
+}
+
+/** Minuti di un `Duration` di FullCalendar (giorni + millisecondi). */
+function deltaMinutes(d: { days: number; milliseconds: number }): number {
+  return Math.round(d.days * 1440 + d.milliseconds / 60_000);
+}
+
+/**
+ * Operazioni per spostare o ridimensionare l'istanza `comp` (pre-immagine del
+ * target della vista). Lo spostamento dell'inizio trascina la fine; senza
+ * DTEND si aggiorna la durata (DURATION) o si scrive la fine. Il server
+ * traduce lo scope (`this`, `this_and_future`, `all`) in un'operazione sulla serie.
+ */
+function buildTimeOps(
+  comp: CalV2ComponentView,
+  startDelta: number,
+  endDelta: number,
+): { ops: CalV2Op[]; base: Record<string, string> } | null {
+  const f = comp.fields;
+  const ops: CalV2Op[] = [];
+  const base: Record<string, string> = {};
+  const push = (op: CalV2Op & { op: 'set' }) => {
+    ops.push(op);
+    base[op.field] = comp.tokens[op.field] ?? CAL_V2_ABSENT_TOKEN;
+  };
+  const newStart = startDelta ? shiftTimeMinutes(f.start, startDelta) : f.start;
+  if (startDelta) push({ op: 'set', field: 'start', value: newStart });
+  const occMinutes = comp.all_day
+    ? Math.round((new Date(comp.end_utc).getTime() - new Date(comp.start_utc).getTime()) / DAY_MS) * 1440
+    : Math.round((new Date(comp.end_utc).getTime() - new Date(comp.start_utc).getTime()) / 60_000);
+  const newMinutes = occMinutes + endDelta - startDelta;
+  if (newMinutes <= 0) return null;
+  if (f.end) {
+    if (endDelta) push({ op: 'set', field: 'end', value: shiftTimeMinutes(f.end, endDelta) });
+  } else if (f.duration) {
+    const oldMinutes = durationToMinutes(f.duration);
+    if (oldMinutes + endDelta - startDelta !== oldMinutes) {
+      push({ op: 'set', field: 'duration', value: minutesToDuration(oldMinutes + endDelta - startDelta) });
+    }
+  } else if (newMinutes !== occMinutes) {
+    push({ op: 'set', field: 'end', value: shiftTimeMinutes(newStart, newMinutes) });
+  }
+  return ops.length ? { ops, base } : null;
+}
+
+/** Calendario sotto il puntatore (voce della legenda con `data-calendar-drop-id`), o null. */
+function dropCalendarIdAt(jsEvent: MouseEvent | TouchEvent): string | null {
+  const point = 'changedTouches' in jsEvent ? jsEvent.changedTouches[0] : jsEvent;
+  if (!point) return null;
+  for (const el of document.elementsFromPoint(point.clientX, point.clientY)) {
+    const id = (el as HTMLElement).closest?.('[data-calendar-drop-id]')?.getAttribute('data-calendar-drop-id');
+    if (id) return id;
+  }
+  return null;
 }
 
 /**
@@ -130,7 +438,11 @@ export default function CalendarioPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   // Capacità dell'API v2: decidono quale editor aprire (nessun'altra chiamata v2 da questa pagina).
-  const { caps: v2Caps } = useCalendarV2Capabilities();
+  const { caps: v2Caps, isLoading: capsLoading } = useCalendarV2Capabilities();
+  // Vista con le occorrenze v2 (`caps.occurrences`, che implica `objects.read`); senza il flag resta /events v1.
+  const occMode = !!v2Caps?.occurrences;
+  const canWriteV2 = occMode && !!v2Caps?.objects.write;
+  const canTools = canWriteV2 && !!v2Caps?.object_tools;
   const confirm = useConfirm();
   const { intlLocale, locale } = useI18n();
   const calendarRef = useRef<FullCalendar>(null);
@@ -138,7 +450,7 @@ export default function CalendarioPage() {
   const [editingEvent, setEditingEvent] = useState<CalendarEventOcc | null>(null);
   const [creatingFromSlot, setCreatingFromSlot] = useState<{ start: string; end: string; allDay: boolean } | null>(null);
   const [showEditor, setShowEditor] = useState(false);
-  const [dateRange, setDateRange] = useState<{ start: string; end: string } | null>(null);
+  const [dateRange, setDateRange] = useState<{ start: string; end: string; startDay: string; endDay: string } | null>(null);
   const [ctxMenu, setCtxMenu] = useState<{ event: CalendarEventOcc; x: number; y: number } | null>(null);
   // Scelta "questa occorrenza / tutta la serie" per eventi ricorrenti.
   const [recurringAction, setRecurringAction] = useState<{
@@ -150,6 +462,28 @@ export default function CalendarioPage() {
   } | null>(null);
   // Calendari/sorgenti nascosti dalla legenda (toggle mostra/nascondi).
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const legendRef = useRef<HTMLDivElement>(null);
+  // "Sposta in…" aperto per l'occorrenza selezionata (la chiave la rende valida solo per quella).
+  const [moveOpenFor, setMoveOpenFor] = useState<string | null>(null);
+  // Scelta dell'ambito (modifica da trascinamento o eliminazione) e conflitto 412 della vista v2.
+  const [v2Scope, setV2Scope] = useState<{
+    action: 'edit' | 'delete';
+    id: string;
+    key: string;
+    etag: string;
+    allowed: CalV2Scope[];
+    ops: CalV2Op[];
+    base: Record<string, string>;
+    revert?: () => void;
+  } | null>(null);
+  const [v2Conflict, setV2Conflict] = useState<{
+    body: CalV2PreconditionFailedBody;
+    id: string;
+    key: string;
+    scope: CalV2Scope;
+    ops: CalV2Op[];
+    revert?: () => void;
+  } | null>(null);
   const toggleHidden = (key: string) => setHidden((prev) => {
     const next = new Set(prev);
     if (next.has(key)) next.delete(key); else next.add(key);
@@ -160,17 +494,52 @@ export default function CalendarioPage() {
   // Niente catch-che-svuota: un errore API deve mostrare il banner, non un
   // calendario vuoto identico a "nessun evento". keepPreviousData mantiene
   // visibili gli eventi dell'ultimo fetch riuscito durante errori transitori.
-  const { data: eventsData, error: eventsError, refetch: refetchEvents } = useQuery({
+  // Con `caps.occurrences` la sorgente sono le occorrenze v2; la v1 parte solo a capacità note e senza il flag.
+  const { data: eventsData, error: eventsV1Error, refetch: refetchEventsV1 } = useQuery({
     queryKey: ['admin-calendar-events', dateRange?.start, dateRange?.end],
     queryFn: async () => {
       if (!dateRange) return { events: [] };
       const params = new URLSearchParams({ from: dateRange.start, to: dateRange.end });
       return await apiFetch(`/api/admin/calendar/events?${params}`);
     },
-    enabled: !!dateRange,
+    enabled: !!dateRange && !capsLoading && !occMode,
     retry: 1,
     placeholderData: keepPreviousData,
   });
+
+  // Occorrenze e sovrapposizioni v2 della finestra visibile (spezzata oltre i 100 giorni).
+  const { data: occData, error: occError, refetch: refetchOcc } = useQuery({
+    queryKey: calV2Keys.occurrences(dateRange?.start ?? '', dateRange?.end ?? ''),
+    queryFn: () => fetchOccurrencesWindow(dateRange!.start, dateRange!.end),
+    enabled: !!dateRange && occMode,
+    retry: 1,
+    placeholderData: keepPreviousData,
+  });
+  const { data: overlayData, error: overlayError, refetch: refetchOverlays } = useQuery({
+    queryKey: calV2Keys.overlays(dateRange?.start ?? '', dateRange?.end ?? ''),
+    queryFn: () => fetchOverlaysWindow(dateRange!.start, dateRange!.end),
+    enabled: !!dateRange && occMode,
+    retry: 1,
+    placeholderData: keepPreviousData,
+  });
+  const eventsError = occMode ? occError ?? overlayError : eventsV1Error;
+  const refetchEvents = () => {
+    if (occMode) { void refetchOcc(); void refetchOverlays(); } else void refetchEventsV1();
+  };
+
+  // Calendari dove si può spostare un evento (attivi, scrivibili, con eventi): servono solo agli strumenti sull'oggetto.
+  const { data: v2Calendars } = useQuery({
+    queryKey: calV2Keys.calendars,
+    queryFn: listCalendarsV2,
+    enabled: canTools,
+    staleTime: 30_000,
+  });
+  const moveTargets = useMemo(() => new Map(
+    (v2Calendars?.calendars ?? [])
+      .filter((c) => c.lifecycle === 'active' && !c.readonly_reason && c.components.includes('VEVENT')
+        && c.role !== 'bookings' && c.role !== 'holidays' && c.role !== 'subscription' && c.role !== 'tasks')
+      .map((c) => [c.id, c]),
+  ), [v2Calendars]);
 
   // Calendari per colore + lookup
   const { data: calData } = useQuery({
@@ -193,14 +562,13 @@ export default function CalendarioPage() {
     enabled: !!dateRange,
   });
 
-  // Projects (for start/end dates)
-  const { data: projectsData } = useQuery({
-    queryKey: ['projects-calendar'],
-    queryFn: async () => {
-      try {
-        return await apiFetch('/api/client-projects?limit=50');
-      } catch { return { projects: [] }; }
-    },
+  // Progetti che si sovrappongono alla finestra visibile, paginati fino al conteggio vero.
+  const { data: projectsWin } = useQuery({
+    queryKey: ['projects-calendar', dateRange?.startDay, dateRange?.endDay],
+    queryFn: () => fetchWindowedList('/api/client-projects', 'projects',
+      { overlap_from: dateRange!.startDay, overlap_to: dateRange!.endDay }, 100),
+    enabled: !!dateRange,
+    placeholderData: keepPreviousData,
   });
 
   // Domains (for expiry dates)
@@ -214,19 +582,38 @@ export default function CalendarioPage() {
   });
 
   // Task di progetto con due date — aggregati read-only come progetti/domini
-  const { data: tasksData } = useQuery({
-    queryKey: ['tasks-calendar'],
-    queryFn: async () => {
-      try {
-        return await apiFetch('/api/project-tasks?limit=200');
-      } catch { return { tasks: [] }; }
-    },
+  // Solo quelli con scadenza nella finestra visibile, paginati fino al conteggio vero.
+  const { data: tasksWin } = useQuery({
+    queryKey: ['tasks-calendar', dateRange?.startDay, dateRange?.endDay],
+    queryFn: () => fetchWindowedList('/api/project-tasks', 'tasks',
+      { due_from: dateRange!.startDay, due_to: dateRange!.endDay }, 200),
+    enabled: !!dateRange,
+    placeholderData: keepPreviousData,
   });
+  const truncatedOverlays = [
+    tasksWin && tasksWin.total > tasksWin.items.length ? `${tasksWin.total} task nella finestra: mostrati i primi ${tasksWin.items.length}` : null,
+    projectsWin && projectsWin.total > projectsWin.items.length ? `${projectsWin.total} progetti nella finestra: mostrati i primi ${projectsWin.items.length}` : null,
+  ].filter((m): m is string => !!m);
+
+  // Eventi della vista v2: occorrenze (modificabili) e sovrapposizioni (festività, chiusure, iscrizioni: sola lettura).
+  const v2Events = useMemo(() => [
+    ...(occData?.occurrences ?? []).map(occurrenceToEvent),
+    ...(overlayData ?? []).map(overlayToEvent),
+  ], [occData, overlayData]);
+  const staleCalendarNames = (occData?.staleCalendarIds ?? []).map((id) => calendarById.get(id)?.name ?? id);
+
+  // Dopo ogni scrittura: la vista v1 e v2 e gli editor aperti si rileggono.
+  const invalidateView = () => {
+    for (const key of [
+      'admin-calendar-events', 'admin-calendars', 'admin-bookings',
+      'admin-calendar-v2-occurrences', 'admin-calendar-v2-overlays', 'admin-calendar-v2-object',
+    ]) queryClient.invalidateQueries({ queryKey: [key] });
+  };
 
   // Build events array
   const calendarEvents = (() => {
     const events: any[] = [];
-    const occs = (eventsData?.events || []) as CalendarEventOcc[];
+    const occs: CalendarEventOcc[] = occMode ? v2Events : ((eventsData?.events || []) as CalendarEventOcc[]);
 
     // Festività e chiusure come "coperta": gli eventi interamente coperti da una
     // festività/chiusura vengono nascosti — in ferie il calendario mostra solo
@@ -236,13 +623,15 @@ export default function CalendarioPage() {
     const festCal = calendars.find((c) => /^festivit/i.test(c.name));
     const scadenzeCal = calendars.find((c) => c.slug === 'scadenze');
     const festActive = !!festCal && !hidden.has(festCal.id);
-    const blockRanges = festActive
-      ? occs.filter((e) => e.calendar_id === festCal.id)
-          .map((e) => ({ s: new Date(e.start_time).getTime(), e: new Date(e.end_time).getTime() }))
-      : [];
+    // Con le occorrenze v2 le fasce vengono dalle sovrapposizioni `holiday`/`closure`.
+    const isBlock = (e: CalendarEventOcc) => occMode
+      ? (e.overlay === 'holiday' || e.overlay === 'closure') && !hidden.has(e.calendar_id)
+      : festActive && e.calendar_id === festCal!.id;
+    const blockRanges = occs.filter(isBlock)
+      .map((e) => ({ s: new Date(e.start_time).getTime(), e: new Date(e.end_time).getTime() }));
     const coveredByBlock = (ev: CalendarEventOcc) => {
       if (!blockRanges.length) return false;
-      if (ev.calendar_id === festCal!.id || ev.source === 'booking') return false;
+      if (isBlock(ev) || ev.overlay || ev.source === 'booking') return false;
       if (scadenzeCal && ev.calendar_id === scadenzeCal.id) return false;
       const s = new Date(ev.start_time).getTime();
       const e = new Date(ev.end_time).getTime();
@@ -255,24 +644,28 @@ export default function CalendarioPage() {
       if (coveredByBlock(ev)) continue;
       const cal = calendarById.get(ev.calendar_id);
       const sourceColor = SOURCE_COLORS[ev.source] || SOURCE_COLORS.manual;
-      const range = toCalendarRange(ev.start_time, ev.end_time, ev.all_day);
+      // Gli all-day v2 portano già i giorni del calendario (fine esclusiva).
+      const range = ev.v2 && ev.all_day && ev.start_date && ev.end_date
+        ? { start: ev.start_date, end: ev.end_date }
+        : toCalendarRange(ev.start_time, ev.end_time, ev.all_day);
+      const color = (ev.v2 && ev.color) || cal?.color;
       events.push({
-        id: `event-${ev.id}-${ev.start_time}`,
+        id: ev.v2 ? `${ev.overlay ? 'overlay' : 'event'}-${eventKey(ev)}` : `event-${ev.id}-${ev.start_time}`,
         title: ev.summary,
         start: range.start,
         end: range.end,
         allDay: ev.all_day,
-        backgroundColor: cal?.color || sourceColor.backgroundColor,
-        borderColor: cal?.color || sourceColor.borderColor,
+        backgroundColor: color || sourceColor.backgroundColor,
+        borderColor: color || sourceColor.borderColor,
         textColor: '#fff',
-        editable: DRAGGABLE_SOURCES.has(ev.source),
-        extendedProps: { source: ev.source, data: ev, calendar: cal },
+        editable: ev.v2 ? isDraggableV2(ev, canWriteV2) : DRAGGABLE_SOURCES.has(ev.source),
+        extendedProps: { source: ev.source, data: ev, calendar: cal, badges: ev.badges ?? [] },
       });
       // Sfondo "bloccato" sull'intera fascia di festività/chiusure: rende
       // visivamente chiuso il periodo oltre al chip evento cliccabile.
-      if (festActive && ev.calendar_id === festCal.id) {
+      if (isBlock(ev)) {
         events.push({
-          id: `bg-${ev.id}-${ev.start_time}`,
+          id: ev.v2 ? `bg-${eventKey(ev)}` : `bg-${ev.id}-${ev.start_time}`,
           start: range.start,
           end: range.end,
           allDay: ev.all_day,
@@ -307,7 +700,7 @@ export default function CalendarioPage() {
     }
 
     // Projects (start → end as background bars)
-    for (const p of (hidden.has('project') ? [] : projectsData?.projects || [])) {
+    for (const p of (hidden.has('project') ? [] : projectsWin?.items || [])) {
       if (!p.start_date) continue;
       events.push({
         id: `proj-${p.id}`,
@@ -352,7 +745,7 @@ export default function CalendarioPage() {
     // Task di progetto: due date come chip all-day; i completati restano
     // visibili ma barrati/attenuati (classe task-done in index.css).
     // Come le Scadenze, restano visibili anche dentro ferie/festività.
-    for (const t of (hidden.has('task') ? [] : tasksData?.tasks || [])) {
+    for (const t of (hidden.has('task') ? [] : tasksWin?.items || [])) {
       if (!t.due_date) continue;
       const done = t.status === 'done';
       events.push({
@@ -387,10 +780,263 @@ export default function CalendarioPage() {
   // original_start e NON è un override già materializzato come riga a sé).
   const isRecurringOccurrence = (ev: CalendarEventOcc) => !!ev.original_start && !ev.is_override;
 
+  // ─── Vista con le occorrenze v2 (`caps.occurrences`) ───
+
+  /** Ambiti ammessi dal server per questa API (`objects.scopes`), nell'ordine di `allowedScopes`. */
+  const supportedScopes = (scopes: CalV2Scope[]): CalV2Scope[] => {
+    const supported = v2Caps?.objects.scopes ?? [];
+    return supported.length ? scopes.filter((sc) => supported.includes(sc)) : scopes;
+  };
+
+  const SCOPE_DONE: Record<CalV2Scope, string> = {
+    this: 'Modificata solo questa occorrenza',
+    this_and_future: 'Aggiornate questa e le successive',
+    all: 'Evento aggiornato',
+  };
+
+  /** Scrive lo spostamento nel tempo: 412 → ConflictDialog, altro errore → `revert()`. */
+  const runV2Patch = async (a: {
+    id: string; key: string; etag: string; scope: CalV2Scope; ops: CalV2Op[]; base: Record<string, string>; revert?: () => void;
+  }) => {
+    try {
+      const result = await patchObjectV2(a.id, a.etag, {
+        target: { recurrence_key: a.key }, scope: a.scope, ops: a.ops, base: a.base,
+      });
+      toast.success(result.noop ? 'Nessuna modifica' : SCOPE_DONE[a.scope]);
+      invalidateView();
+      setSelectedEvent(null);
+    } catch (err) {
+      if (err instanceof CalV2ConflictError) {
+        setV2Conflict({ body: err.body, id: a.id, key: a.key, scope: a.scope, ops: a.ops, revert: a.revert });
+        return;
+      }
+      a.revert?.();
+      toast.error(calV2ErrorMessage(err));
+    }
+  };
+
+  /**
+   * Trascinamento nel tempo e ridimensionamento in modalità v2: legge la vista
+   * dell'istanza, scrive start/end con i token della vista (istanza di una
+   * serie → scelta dell'ambito), 412 → conflitto per campo.
+   */
+  const applyMoveOrResizeV2 = async (kind: 'move' | 'resize', info: EventDropArg | EventResizeDoneArg) => {
+    const data = info.event.extendedProps.data as CalendarEventOcc | undefined;
+    const revert = () => info.revert();
+    if (!data?.v2 || !isDraggableV2(data, canWriteV2) || !info.event.start) {
+      revert();
+      return;
+    }
+    // Il passaggio fra "tutto il giorno" e orario cambia il tipo di DTSTART: si fa dall'editor.
+    if (info.event.allDay !== data.all_day) {
+      revert();
+      toast.error('Per passare fra «tutto il giorno» e orario usa la modifica dell\'evento');
+      return;
+    }
+    const key = data.recurrence_key ?? '';
+    try {
+      const view = await getObjectV2(data.id, { recurrenceKey: key });
+      const comp = view.target;
+      if (!comp || !view.etag || view.readonly_reason) throw new Error('Questo evento non si può modificare');
+      const startDelta = kind === 'move'
+        ? deltaMinutes((info as EventDropArg).delta)
+        : deltaMinutes((info as EventResizeDoneArg).startDelta);
+      const endDelta = kind === 'move'
+        ? startDelta
+        : deltaMinutes((info as EventResizeDoneArg).endDelta);
+      const patch = buildTimeOps(comp, startDelta, endDelta);
+      if (!patch) {
+        revert();
+        return;
+      }
+      const allowed = supportedScopes(allowedScopes(view, key, patch.ops, 'edit'));
+      if (!allowed.length) throw new Error('Questa modifica non è ammessa per questo evento');
+      if (allowed.length > 1) {
+        setV2Scope({ action: 'edit', id: view.id, key, etag: view.etag, allowed, ops: patch.ops, base: patch.base, revert });
+        return;
+      }
+      await runV2Patch({ id: view.id, key, etag: view.etag, scope: allowed[0], ops: patch.ops, base: patch.base, revert });
+    } catch (err) {
+      revert();
+      toast.error(calV2ErrorMessage(err));
+    }
+  };
+
+  const chooseV2Scope = (scope: CalV2Scope) => {
+    const ask = v2Scope;
+    setV2Scope(null);
+    if (!ask) return;
+    if (ask.action === 'delete') void runV2Delete(ask.id, ask.key, ask.etag, scope);
+    else void runV2Patch({ id: ask.id, key: ask.key, etag: ask.etag, scope, ops: ask.ops, base: ask.base, revert: ask.revert });
+  };
+
+  const cancelV2Scope = () => {
+    v2Scope?.revert?.();
+    setV2Scope(null);
+  };
+
+  // Conflitto: i campi in conflitto si scelgono uno per uno, gli altri si applicano sopra la versione del server.
+  const resolveV2Conflict = (keepMine: Set<string>) => {
+    const c = v2Conflict;
+    if (!c) return;
+    setV2Conflict(null);
+    try {
+      const rebased = rebaseAfterConflict({ ops: c.ops }, c.body, keepMine);
+      if (!rebased.ops.length) {
+        toast.info('Hai scelto i valori del server: l\'evento resta com\'è');
+        c.revert?.();
+        invalidateView();
+        return;
+      }
+      void runV2Patch({ id: c.id, key: c.key, etag: rebased.etag, scope: c.scope, ops: rebased.ops, base: rebased.base, revert: c.revert });
+    } catch (err) {
+      c.revert?.();
+      invalidateView();
+      toast.error(calV2ErrorMessage(err));
+    }
+  };
+
+  const dismissV2Conflict = () => {
+    v2Conflict?.revert?.();
+    setV2Conflict(null);
+    invalidateView();
+  };
+
+  /** Eliminazione di un'occorrenza v2 con l'ambito scelto (412 → si rilegge la vista). */
+  const runV2Delete = async (id: string, key: string, etag: string, scope: CalV2Scope) => {
+    try {
+      await deleteObjectV2(id, etag, { scope, recurrenceKey: key });
+      toast.success(scope === 'this' ? 'Occorrenza eliminata' : scope === 'this_and_future' ? 'Serie accorciata' : 'Evento eliminato');
+      setSelectedEvent(null);
+    } catch (err) {
+      toast.error(err instanceof CalV2ConflictError
+        ? 'L\'evento è stato modificato altrove: controlla la versione attuale e riprova'
+        : calV2ErrorMessage(err));
+    } finally {
+      invalidateView();
+    }
+  };
+
+  const deleteV2 = async (ev: CalendarEventOcc) => {
+    const key = ev.recurrence_key ?? '';
+    try {
+      const view = await getObjectV2(ev.id, { recurrenceKey: key });
+      if (!view.etag) throw new Error('L\'evento non ha un ETag: ricarica la vista');
+      if (view.delete_blocked_reason) {
+        toast.error('L\'evento è legato a una prenotazione attiva: annulla prima la prenotazione');
+        return;
+      }
+      const allowed = supportedScopes(allowedScopes(view, key, [], 'delete'));
+      if (!allowed.length) throw new Error('Questo evento non si può eliminare');
+      if (allowed.length > 1) {
+        setV2Scope({ action: 'delete', id: view.id, key, etag: view.etag, allowed, ops: [], base: {} });
+        return;
+      }
+      const whole = view.recurring && key === '';
+      if (await confirm({
+        title: whole ? 'Eliminare l\'intera serie?' : 'Eliminare questo evento?',
+        description: whole ? 'Verranno eliminate tutte le occorrenze di questo evento ricorrente.' : undefined,
+        variant: 'destructive',
+      })) await runV2Delete(view.id, key, view.etag, allowed[0]);
+    } catch (err) {
+      toast.error(calV2ErrorMessage(err));
+    }
+  };
+
+  /** Sposta la risorsa intera (serie o evento singolo) in un altro calendario, dopo conferma. */
+  const moveToCalendar = async (ev: CalendarEventOcc, calendarId: string) => {
+    const target = moveTargets.get(calendarId);
+    if (!target) {
+      toast.error('Questo calendario non accetta eventi');
+      return;
+    }
+    if (calendarId === ev.calendar_id) {
+      toast.info('L\'evento è già in questo calendario');
+      return;
+    }
+    const ok = await confirm({
+      title: `Spostare «${ev.summary}» in «${target.name}»?`,
+      description: ev.recurring ? 'È un evento ricorrente: si sposta l\'intera serie, non solo questa occorrenza.' : undefined,
+    });
+    if (!ok) return;
+    try {
+      const view = await getObjectV2(ev.id, { recurrenceKey: ev.recurrence_key ?? '' });
+      if (!view.etag) throw new Error('L\'evento non ha un ETag: ricarica la vista');
+      if (view.readonly_reason) throw new Error('Questo evento non si può spostare');
+      await moveObjectV2(view.id, view.etag, { calendar_id: calendarId });
+      toast.success(`Spostato in «${target.name}»`);
+      setSelectedEvent(null);
+      setMoveOpenFor(null);
+    } catch (err) {
+      toast.error(err instanceof CalV2ConflictError
+        ? 'L\'evento è stato modificato altrove: la vista si aggiorna, riprova'
+        : calV2ErrorMessage(err));
+    } finally {
+      invalidateView();
+    }
+  };
+
+  /** Duplica come evento nuovo (con l'UID generato qui, per ritentare senza doppioni) e apre la copia nell'editor. */
+  const duplicateV2 = async (ev: CalendarEventOcc) => {
+    try {
+      const result = await duplicateObjectV2(ev.id, { recurrence_key: ev.recurrence_key ?? '', uid: generateEventUid() });
+      toast.success('Evento duplicato');
+      invalidateView();
+      const copy = result.object ? viewToEvent(result.object) : null;
+      if (copy) {
+        setSelectedEvent(null);
+        setEditingEvent(copy);
+        setCreatingFromSlot(null);
+        setShowEditor(true);
+      }
+    } catch (err) {
+      toast.error(calV2ErrorMessage(err));
+    }
+  };
+
+  // Rilascio su una voce della legenda = spostamento fra calendari. Nessuno stato React
+  // durante il trascinamento: un re-render rigenererebbe gli eventi sotto il puntatore.
+  const setLegendDragging = (on: boolean) => {
+    legendRef.current?.setAttribute('data-dragging', on ? 'true' : 'false');
+  };
+  const handleEventDragStop = (info: EventDragStopArg) => {
+    setLegendDragging(false);
+    const data = info.event.extendedProps.data as CalendarEventOcc | undefined;
+    if (!canTools || !data?.v2 || !isDraggableV2(data, canWriteV2)) return;
+    const calendarId = dropCalendarIdAt(info.jsEvent);
+    if (calendarId) void moveToCalendar(data, calendarId);
+  };
+
+  /** Chip dell'evento con le icone dei badge (orfano, quarantena, hold, conservativo, nuovo dal dispositivo). */
+  const renderEventContent = (arg: EventContentArg) => {
+    const badges = (arg.event.extendedProps.badges ?? []) as CalV2OccurrenceBadge[];
+    if (!badges.length) return true;
+    const start = arg.event.start;
+    const end = arg.event.end;
+    const isDot = arg.view.type.startsWith('dayGrid') && !arg.event.allDay
+      && !(start && end && end.toISOString().slice(0, 10) !== start.toISOString().slice(0, 10));
+    return (
+      <div className="fc-event-main-frame">
+        {isDot && <div className="fc-daygrid-event-dot" style={{ borderColor: arg.borderColor }} />}
+        {arg.timeText && <div className="fc-event-time">{arg.timeText}</div>}
+        <div className="fc-event-title-container">
+          <div className="fc-event-title fc-sticky">
+            <OccurrenceBadgeIcons badges={badges} tone={isDot ? 'plain' : 'chip'} className="mr-0.5" />
+            {arg.event.title || ' '}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Drag (sposta) + resize (cambia durata: verticale in settimana/giorno,
   // orizzontale in mese). Per gli eventi ricorrenti apre la scelta
   // "questa / tutta la serie"; per singoli/override fa un PUT diretto.
   const applyMoveOrResize = async (kind: 'move' | 'resize', info: EventDropArg | EventResizeDoneArg) => {
+    if (occMode) {
+      await applyMoveOrResizeV2(kind, info);
+      return;
+    }
     const source = info.event.extendedProps.source as string | undefined;
     const data = info.event.extendedProps.data as CalendarEventOcc | undefined;
     if (!source || !DRAGGABLE_SOURCES.has(source) || !data?.id || !info.event.start) {
@@ -578,9 +1224,10 @@ export default function CalendarioPage() {
   // Right-click su un evento → menu contestuale (solo per source editabili).
   const handleEventDidMount = (arg: EventMountArg) => {
     const source = arg.event.extendedProps.source as string | undefined;
-    if (!source || !EDITABLE_SOURCES.has(source)) return;
     const data = arg.event.extendedProps.data as CalendarEventOcc | undefined;
-    if (!data?.id || !data.uid) return;
+    if (!source || !data?.id) return;
+    // v2: ogni oggetto vero (non festività/iscrizioni); v1: sorgenti editabili con UID.
+    if (data.v2 ? !isObjectEvent(data) : !EDITABLE_SOURCES.has(source) || !data.uid) return;
     const handler = (e: MouseEvent) => {
       e.preventDefault();
       setCtxMenu({ event: data, x: e.clientX, y: e.clientY });
@@ -620,17 +1267,22 @@ export default function CalendarioPage() {
         setSelectedEvent(null);
       },
     },
-    {
+    // v2: la duplicazione passa da `object_tools`; senza il flag la voce non c'è.
+    ...(ev.v2 && !canTools ? [] : [{
       label: 'Duplica',
       icon: Copy,
-      onClick: () => duplicateMutation.mutate(ev.id),
-    },
+      onClick: () => (ev.v2 ? void duplicateV2(ev) : duplicateMutation.mutate(ev.id)),
+    }]),
     { divider: true },
     {
       label: 'Elimina',
       icon: Trash2,
       destructive: true,
       onClick: async () => {
+        if (ev.v2) {
+          await deleteV2(ev);
+          return;
+        }
         // Ricorrente → chiedi questa/serie; singolo → conferma semplice.
         if (isRecurringOccurrence(ev)) {
           setRecurringAction({ kind: 'delete', data: ev });
@@ -654,7 +1306,11 @@ export default function CalendarioPage() {
 
   // Intervallo visibile in istanti veri (mezzanotte di Roma), per le query degli eventi.
   const handleDatesSet = (dateInfo: { start: Date; end: Date }) => {
-    setDateRange({ start: calendarDateToIso(dateInfo.start), end: calendarDateToIso(dateInfo.end) });
+    setDateRange({
+      start: calendarDateToIso(dateInfo.start),
+      end: calendarDateToIso(dateInfo.end),
+      ...visibleDays(dateInfo.start, dateInfo.end),
+    });
   };
 
   const topbarActions = useMemo(() => (
@@ -715,6 +1371,27 @@ export default function CalendarioPage() {
         </div>
       )}
 
+      {/* Vista v2: ambito della modifica trascinata o dell'eliminazione, e conflitto di versione */}
+      {v2Scope && (
+        <ScopeDialog
+          open
+          action={v2Scope.action}
+          allowed={v2Scope.allowed}
+          onChoose={chooseV2Scope}
+          onCancel={cancelV2Scope}
+        />
+      )}
+      {v2Conflict && (
+        <ConflictDialog
+          open
+          body={v2Conflict.body}
+          pendingOps={v2Conflict.ops}
+          onResolve={resolveV2Conflict}
+          onReload={dismissV2Conflict}
+          onCancel={dismissV2Conflict}
+        />
+      )}
+
       {/* Modale crea/edit evento */}
       {showEditor && (
         <EventEditorHost
@@ -724,25 +1401,24 @@ export default function CalendarioPage() {
           initialEnd={creatingFromSlot?.end}
           initialAllDay={creatingFromSlot?.allDay}
           onClose={() => { setShowEditor(false); setEditingEvent(null); setCreatingFromSlot(null); }}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
-            queryClient.invalidateQueries({ queryKey: ['admin-calendar-v2-object'] });
-          }}
+          onSaved={invalidateView}
         />
       )}
 
       {/* Legend — click per mostrare/nascondere calendari e sorgenti speciali */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div ref={legendRef} data-dragging="false" className="group flex flex-wrap items-center gap-1.5">
         {calendars.map((cal) => {
           const off = hidden.has(cal.id);
+          // Voce di rilascio: trascinare un evento qui lo sposta in questo calendario (v2, `object_tools`).
+          const dropTarget = canTools && moveTargets.has(cal.id);
           return (
             <button
               key={cal.id}
               type="button"
               onClick={() => toggleHidden(cal.id)}
-              title={off ? 'Mostra' : 'Nascondi'}
-              className={`flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs transition-opacity hover:bg-accent ${off ? 'opacity-40 line-through' : ''}`}
+              title={dropTarget ? `${off ? 'Mostra' : 'Nascondi'} — rilascia un evento per spostarlo qui` : off ? 'Mostra' : 'Nascondi'}
+              {...(dropTarget ? { 'data-calendar-drop-id': cal.id, 'data-testid': `cal-legend-drop-${cal.id}` } : {})}
+              className={`flex items-center gap-1.5 rounded-full border px-2 py-1 text-xs transition-opacity hover:bg-accent ${off ? 'opacity-40 line-through' : ''} ${dropTarget ? 'group-data-[dragging=true]:border-dashed group-data-[dragging=true]:border-primary group-data-[dragging=true]:bg-accent' : ''}`}
             >
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cal.color }} />
               <span className="text-muted-foreground">{cal.name}</span>
@@ -778,6 +1454,20 @@ export default function CalendarioPage() {
         </div>
       )}
 
+      {/* Calendari con dati forse non aggiornati (collezione non sana) */}
+      {occMode && staleCalendarNames.length > 0 && (
+        <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+          Dati forse non aggiornati per: {staleCalendarNames.join(', ')}. Dettagli nella pagina Salute.
+        </div>
+      )}
+
+      {/* Task e progetti oltre la soglia di sicurezza: la vista lo dice invece di tacerlo */}
+      {truncatedOverlays.length > 0 && (
+        <div data-testid="cal-overlay-more" className="rounded-lg border bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
+          {truncatedOverlays.join(' · ')}.
+        </div>
+      )}
+
       {/* Calendar + Detail */}
       <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
         <div className="rounded-lg border bg-card p-4">
@@ -799,6 +1489,9 @@ export default function CalendarioPage() {
             eventClick={handleEventClick}
             eventDidMount={handleEventDidMount}
             eventWillUnmount={handleEventWillUnmount}
+            eventContent={occMode ? renderEventContent : undefined}
+            eventDragStart={canTools ? () => setLegendDragging(true) : undefined}
+            eventDragStop={canTools ? handleEventDragStop : undefined}
             datesSet={handleDatesSet}
             select={handleDateSelect}
             editable
@@ -879,47 +1572,119 @@ export default function CalendarioPage() {
                 <p className="text-xs text-muted-foreground whitespace-pre-wrap">{selectedEvent.description}</p>
               )}
 
+              {selectedEvent.overlay && (
+                <p className="text-[11px] text-muted-foreground">
+                  {selectedEvent.overlay === 'subscription'
+                    ? 'Evento di un\'iscrizione ICS — sola lettura.'
+                    : selectedEvent.overlay === 'closure'
+                      ? 'Chiusura — sola lettura.'
+                      : 'Festività — sola lettura.'}
+                </p>
+              )}
+
+              {/* Badge della vista v2: orfano, quarantena, hold, conservativo, nuovo dal dispositivo */}
+              {selectedEvent.badges && selectedEvent.badges.length > 0 && (
+                <OccurrenceBadgeList badges={selectedEvent.badges} />
+              )}
+
               {/* Action buttons — solo per eventi del nuovo sistema, no per legacy calcom/project/domain.
                   Modifica solo su sorgenti editabili: gli ics_pull vengono sovrascritti
-                  a ogni sync e i system (festività) sono auto-gestiti dal cron. */}
-              {selectedEvent.id && selectedEvent.uid && (
-                <div className="space-y-2">
-                  {!EDITABLE_SOURCES.has(selectedEvent.source) && (
-                    <p className="text-[11px] text-muted-foreground">
-                      {selectedEvent.source === 'ics_pull'
-                        ? 'Evento importato da sottoscrizione ICS — sola lettura. Modificalo nel calendario di origine.'
-                        : 'Evento di sistema — sola lettura.'}
-                    </p>
-                  )}
-                  <div className="grid grid-cols-2 gap-2">
-                    {EDITABLE_SOURCES.has(selectedEvent.source) && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-xs"
-                        onClick={() => {
-                          setEditingEvent(selectedEvent);
-                          setCreatingFromSlot(null);
-                          setShowEditor(true);
-                          setSelectedEvent(null);
-                        }}
-                      >
-                        <Pencil className="h-3 w-3 mr-1.5" /> Modifica
-                      </Button>
+                  a ogni sync e i system (festività) sono auto-gestiti dal cron.
+                  Nella vista v2 decidono `readonly_reason`, il tipo di occorrenza e le capacità. */}
+              {isObjectEvent(selectedEvent) && (() => {
+                const sel = selectedEvent;
+                const v2 = !!sel.v2;
+                const editable = v2 ? true : EDITABLE_SOURCES.has(sel.source);
+                const toolable = v2 && canTools && !sel.readonly_reason && !sel.stale
+                  && (sel.occ_kind === 'event' || sel.occ_kind === 'override' || sel.occ_kind === 'orphan_override');
+                const showDuplicate = v2 ? toolable : true;
+                const selKey = eventKey(sel);
+                return (
+                  <div className="space-y-2">
+                    {!editable && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {sel.source === 'ics_pull'
+                          ? 'Evento importato da sottoscrizione ICS — sola lettura. Modificalo nel calendario di origine.'
+                          : 'Evento di sistema — sola lettura.'}
+                      </p>
                     )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className={`text-xs ${EDITABLE_SOURCES.has(selectedEvent.source) ? '' : 'col-span-2'}`}
-                      disabled={duplicateMutation.isPending}
-                      onClick={() => duplicateMutation.mutate(selectedEvent.id)}
-                    >
-                      <Copy className="h-3 w-3 mr-1.5" />
-                      {duplicateMutation.isPending ? 'Duplico…' : 'Duplica'}
-                    </Button>
+                    {v2 && sel.readonly_reason && (
+                      <p className="text-[11px] text-muted-foreground">
+                        {sel.readonly_reason === 'subscription'
+                          ? 'Evento di un\'iscrizione ICS — sola lettura. Modificalo nel calendario di origine.'
+                          : sel.readonly_reason === 'archive'
+                            ? 'Evento dell\'archivio della Fase 0 — sola lettura.'
+                            : sel.readonly_reason === 'unreadable'
+                              ? 'Testo non interpretabile (in quarantena): si può solo ispezionare ed eliminare.'
+                              : 'Evento in sola lettura.'}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 gap-2">
+                      {editable && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className={`text-xs ${showDuplicate ? '' : 'col-span-2'}`}
+                          onClick={() => {
+                            setEditingEvent(sel);
+                            setCreatingFromSlot(null);
+                            setShowEditor(true);
+                            setSelectedEvent(null);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3 mr-1.5" /> {v2 && sel.readonly_reason ? 'Apri' : 'Modifica'}
+                        </Button>
+                      )}
+                      {showDuplicate && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          data-testid={v2 ? 'cal-panel-duplicate' : undefined}
+                          className={`text-xs ${editable ? '' : 'col-span-2'}`}
+                          disabled={!v2 && duplicateMutation.isPending}
+                          onClick={() => (v2 ? void duplicateV2(sel) : duplicateMutation.mutate(sel.id))}
+                        >
+                          <Copy className="h-3 w-3 mr-1.5" />
+                          {!v2 && duplicateMutation.isPending ? 'Duplico…' : 'Duplica'}
+                        </Button>
+                      )}
+                      {toolable && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          data-testid="cal-panel-move"
+                          className="col-span-2 text-xs"
+                          aria-expanded={moveOpenFor === selKey}
+                          onClick={() => setMoveOpenFor(moveOpenFor === selKey ? null : selKey)}
+                        >
+                          <FolderInput className="h-3 w-3 mr-1.5" /> Sposta in…
+                        </Button>
+                      )}
+                    </div>
+                    {toolable && moveOpenFor === selKey && (
+                      <div className="space-y-1 rounded-md border p-1.5">
+                        {sel.recurring && (
+                          <p className="px-1 text-[11px] text-muted-foreground">Si sposta l&apos;intera serie.</p>
+                        )}
+                        {[...moveTargets.values()].filter((c) => c.id !== sel.calendar_id).map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => void moveToCalendar(sel, c.id)}
+                            className="flex w-full items-center gap-2 rounded px-1.5 py-1 text-left text-xs hover:bg-accent"
+                          >
+                            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: c.color }} />
+                            <span className="truncate">{c.name}</span>
+                          </button>
+                        ))}
+                        {moveTargets.size <= 1 && (
+                          <p className="px-1 text-[11px] text-muted-foreground">Nessun altro calendario disponibile.</p>
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           ) : (
             <div className="rounded-lg border bg-card flex flex-col items-center justify-center py-12 text-center">

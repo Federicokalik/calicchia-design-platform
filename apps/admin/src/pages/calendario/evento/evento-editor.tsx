@@ -75,6 +75,8 @@ export interface EditorOccurrence {
   source?: string;
   /** Istante ISO dell'occorrenza di una serie (non per gli override). */
   original_start?: string | null;
+  /** Chiave dell'istanza (vista con le occorrenze v2): ha la precedenza su `original_start`; '' = master o evento singolo. */
+  recurrence_key?: string | null;
   is_override?: boolean;
 }
 
@@ -183,10 +185,12 @@ export default function EventoEditor(props: EventoEditorProps) {
   // "Modifica la serie intera": riapre l'oggetto sul master (utile per spostarlo di calendario).
   const [wholeSeries, setWholeSeries] = useState(false);
 
+  const hasKey = typeof initial?.recurrence_key === 'string';
   const target = wholeSeries
     ? { recurrenceKey: '' }
+    : hasKey ? { recurrenceKey: initial!.recurrence_key! }
     : initial?.is_override ? {} : initial?.original_start ? { originalStart: initial.original_start } : {};
-  const targetKey = wholeSeries ? 'master' : initial?.is_override ? 'override' : initial?.original_start ? `os:${initial.original_start}` : 'default';
+  const targetKey = wholeSeries ? 'master' : hasKey ? `rk:${initial!.recurrence_key}` : initial?.is_override ? 'override' : initial?.original_start ? `os:${initial.original_start}` : 'default';
 
   const objectQuery = useQuery({
     queryKey: calV2Keys.object(objectId, targetKey),

@@ -17,12 +17,16 @@ import type {
   CalV2CalendarView,
   CalV2Capabilities,
   CalV2CreateRequest,
+  CalV2DuplicateRequest,
   CalV2HoldPlan,
   CalV2ImportPlan,
   CalV2ImportRequest,
   CalV2JobAccepted,
   CalV2JobView,
+  CalV2MoveRequest,
   CalV2ObjectView,
+  CalV2OccurrenceList,
+  CalV2OverlayList,
   CalV2PatchRequest,
   CalV2PreconditionFailedBody,
   CalV2RawPutRequest,
@@ -58,6 +62,11 @@ export const calV2Keys = {
   job: (jobId: string) => ['admin-calendar-v2-job', jobId] as const,
   /** Stato di sincronizzazione della pagina Salute (A2). */
   syncState: ['admin-calendar-v2-sync-state'] as const,
+  /** Occorrenze della finestra visibile della vista (A3); `calendarIds` vuoto = tutti i calendari. */
+  occurrences: (from: string, to: string, calendarIds: readonly string[] = []) =>
+    ['admin-calendar-v2-occurrences', from, to, [...calendarIds].sort().join(',')] as const,
+  /** Sovrapposizioni (festività, chiusure, iscrizioni) della finestra visibile (A3). */
+  overlays: (from: string, to: string) => ['admin-calendar-v2-overlays', from, to] as const,
 };
 
 // ─── Errori ───────────────────────────────
@@ -416,4 +425,33 @@ export function holdCommitV2(
     { mode: 'commit', ...req },
     { 'Idempotency-Key': idempotencyKey },
   );
+}
+
+// ─── Vista e strumenti sull'oggetto (A3) ───────────────────────────────
+
+/**
+ * Occorrenze che intersecano la finestra `[from, to)` (ISO), senza troncamento.
+ * La finestra massima è `CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS`: oltre, spezzarla in più richieste.
+ * Senza `calendarIds` il server esclude festività e iscrizioni (vanno in `listOverlaysV2`).
+ */
+export function listOccurrencesV2(q: { from: string; to: string; calendarIds?: string[] }): Promise<CalV2OccurrenceList> {
+  const params = new URLSearchParams({ from: q.from, to: q.to });
+  for (const id of q.calendarIds ?? []) params.append('calendar_id', id);
+  return getJson<CalV2OccurrenceList>(`/occurrences?${params.toString()}`);
+}
+
+/** Festività, chiusure e iscrizioni della finestra `[from, to)` (ISO), in sola lettura. */
+export function listOverlaysV2(q: { from: string; to: string }): Promise<CalV2OverlayList> {
+  const params = new URLSearchParams({ from: q.from, to: q.to });
+  return getJson<CalV2OverlayList>(`/overlays?${params.toString()}`);
+}
+
+/** Sposta la risorsa intera in un altro calendario (`If-Match` esatto). Con `req.dryRun` solo valutazione. */
+export function moveObjectV2(id: string, etag: string, req: CalV2MoveRequest): Promise<CalV2WriteResult> {
+  return sendJson<CalV2WriteResult>('POST', `/objects/${encodeURIComponent(id)}/move`, req, { 'If-Match': etag });
+}
+
+/** Duplica come oggetto nuovo (201), senza `If-Match`. Con `req.dryRun` solo valutazione. */
+export function duplicateObjectV2(id: string, req: CalV2DuplicateRequest): Promise<CalV2WriteResult> {
+  return sendJson<CalV2WriteResult>('POST', `/objects/${encodeURIComponent(id)}/duplicate`, req);
 }
