@@ -1690,13 +1690,19 @@ export async function computeReversePlan(db: Db, opts: { calendarIds?: readonly 
       if (w.bookingUid) {
         const b = bookings.get(w.bookingUid) ?? null;
         const legacy = linked ? dbRowToReverse(linked) : null;
-        const p = projectBooking({
-          calendar: { id: cal.id, collection_name: cal.collection_name, role: cal.role, timezone: cal.timezone ?? 'Europe/Rome' },
-          ids: { master: { id: masterPlannedId, legacy_uid: masterRow?.legacy_uid ?? null }, byRecurrenceKey: byKey },
-          usedUids: used,
-          booking: { booking: b ? bookingInput(b) : null, eventTitle: null, meetingUrl: null, legacyRow: legacy },
-          object: { id: w.objectId, calendar_id: cal.id, collection_name: cal.collection_name, href: w.href, etag: null, raw_ics: '', content_sha256: null },
-        }, base, w.bookingUid, false);
+        let p: ReverseObjectPlan;
+        try {
+          p = projectBooking({
+            calendar: { id: cal.id, collection_name: cal.collection_name, role: cal.role, timezone: cal.timezone ?? 'Europe/Rome' },
+            ids: { master: { id: masterPlannedId, legacy_uid: masterRow?.legacy_uid ?? null }, byRecurrenceKey: byKey },
+            usedUids: used,
+            booking: { booking: b ? bookingInput(b) : null, eventTitle: null, meetingUrl: null, legacyRow: legacy },
+            object: { id: w.objectId, calendar_id: cal.id, collection_name: cal.collection_name, href: w.href, etag: null, raw_ics: '', content_sha256: null },
+          }, base, w.bookingUid, false);
+        } catch (err) {
+          // Caso limite dei dati (come in projectObject): REVERSE_FAILED della risorsa, mai un'eccezione al job.
+          p = failedPlan(base, err instanceof ReverseObjectError ? err.message : 'proiezione della prenotazione ritirata non calcolabile');
+        }
         plan = { ...p, status: p.status === 'failed' ? 'failed' : 'removed' };
         // Una proiezione ritirata senza riga legacy attiva da annullare non entra nel piano.
         if (!w.state && plan.rows.every((r) => relatedById.get(r.id)?.status === 'cancelled')) continue;
