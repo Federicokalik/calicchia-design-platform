@@ -31,6 +31,7 @@ import PrenotazioniPage from '@/pages/calendario/prenotazioni';
 import CalendariPage from '@/pages/calendario/calendari';
 import MigrazionePage from '@/pages/calendario/migrazione';
 import CestinoPage from '@/pages/calendario/cestino';
+import SaluteCalendarioPage from '@/pages/calendario/salute';
 
 // Content pages
 import BlogPage from '@/pages/blog';
@@ -206,6 +207,7 @@ export default function App() {
         <Route path="calendario/disponibilita" element={<DisponibilitaPage />} />
         <Route path="calendario/migrazione" element={<MigrazionePage />} />
         <Route path="calendario/cestino" element={<CestinoPage />} />
+        <Route path="calendario/salute" element={<SaluteCalendarioPage />} />
         <Route path="calendar" element={<CalendarioPage />} />
         <Route path="calendar/calendars" element={<CalendariPage />} />
         <Route path="calendar/bookings" element={<PrenotazioniPage />} />
@@ -214,6 +216,7 @@ export default function App() {
         <Route path="calendar/availability" element={<DisponibilitaPage />} />
         <Route path="calendar/migration" element={<MigrazionePage />} />
         <Route path="calendar/trash" element={<CestinoPage />} />
+        <Route path="calendar/health" element={<SaluteCalendarioPage />} />
 
         {/* Content */}
         <Route path="blog" element={<BlogPage />} />

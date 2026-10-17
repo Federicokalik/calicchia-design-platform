@@ -10,7 +10,7 @@ import { useCalendarV2Capabilities } from '@/lib/calendar-v2-api';
  * granulari sono tab dentro la pagina, allineate al pattern Bierut/Pentagram di
  * minimal hairlines.
  */
-const TABS: Array<{ labelKey: string; path: string; end?: boolean; requires?: 'trash' }> = [
+const TABS: Array<{ labelKey: string; path: string; end?: boolean; requires?: 'trash' | 'health_page' }> = [
   { labelKey: 'nav.calendar', path: '/calendario', end: true },
   { labelKey: 'nav.calendar.calendars', path: '/calendario/calendari' },
   { labelKey: 'nav.calendar.bookings', path: '/calendario/prenotazioni' },
@@ -20,6 +20,8 @@ const TABS: Array<{ labelKey: string; path: string; end?: boolean; requires?: 't
   { labelKey: 'nav.calendar.migration', path: '/calendario/migrazione' },
   // Cestino degli eventi eliminati (F6): solo se l'API v2 dichiara la capacità `trash`.
   { labelKey: 'nav.calendar.trash', path: '/calendario/cestino', requires: 'trash' },
+  // Salute della sincronizzazione con Radicale (F6): solo con la capacità `health_page`.
+  { labelKey: 'nav.calendar.health', path: '/calendario/salute', requires: 'health_page' },
 ];
 
 export function CalendarTabs() {

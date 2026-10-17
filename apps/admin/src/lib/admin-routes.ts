@@ -25,6 +25,7 @@ const ROUTES: LocalizedRoute[] = [
   { it: '/calendario/disponibilita', en: '/calendar/availability' },
   { it: '/calendario/migrazione', en: '/calendar/migration' },
   { it: '/calendario/cestino', en: '/calendar/trash' },
+  { it: '/calendario/salute', en: '/calendar/health' },
   { it: '/calendario/event-types/:id', en: '/calendar/event-types/:id' },
   { it: '/calendario/event-types', en: '/calendar/event-types' },
   { it: '/calendario', en: '/calendar' },

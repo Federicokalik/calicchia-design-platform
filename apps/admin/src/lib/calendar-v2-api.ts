@@ -11,14 +11,24 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type {
+  CalV2CalendarCreateRequest,
+  CalV2CalendarList,
+  CalV2CalendarPatchRequest,
+  CalV2CalendarView,
   CalV2Capabilities,
   CalV2CreateRequest,
+  CalV2HoldPlan,
+  CalV2ImportPlan,
+  CalV2ImportRequest,
+  CalV2JobAccepted,
+  CalV2JobView,
   CalV2ObjectView,
   CalV2PatchRequest,
   CalV2PreconditionFailedBody,
   CalV2RawPutRequest,
   CalV2RestoreRequest,
   CalV2Scope,
+  CalV2SyncState,
   CalV2TrashList,
   CalV2TrashRestoreRequest,
   CalV2VersionDetail,
@@ -42,6 +52,12 @@ export const calV2Keys = {
   versions: (id: string) => ['admin-calendar-v2-versions', id] as const,
   /** Cestino, filtrato per calendario (`null` = tutti) (A1). */
   trash: (calendarId: string | null) => ['admin-calendar-v2-trash', calendarId] as const,
+  /** Elenco dei calendari v2 (A2). */
+  calendars: ['admin-calendar-v2-calendars'] as const,
+  /** Avanzamento di un job asincrono (import, applica, ricostruisci) (A2). */
+  job: (jobId: string) => ['admin-calendar-v2-job', jobId] as const,
+  /** Stato di sincronizzazione della pagina Salute (A2). */
+  syncState: ['admin-calendar-v2-sync-state'] as const,
 };
 
 // ─── Errori ───────────────────────────────
@@ -93,7 +109,7 @@ function isPreconditionBody(body: unknown): body is CalV2PreconditionFailedBody 
  * (stato 0, codice `TIMEOUT`); un abort del chiamante resta l'`AbortError`
  * originale. Il timer copre l'attesa delle intestazioni della risposta.
  */
-async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs: number = CAL_V2_FETCH_TIMEOUT_MS): Promise<Response> {
   const controller = new AbortController();
   const outer = init.signal;
   let timedOut = false;
@@ -105,7 +121,7 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
   const timer = setTimeout(() => {
     timedOut = true;
     controller.abort();
-  }, CAL_V2_FETCH_TIMEOUT_MS);
+  }, timeoutMs);
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch (err) {
@@ -117,19 +133,19 @@ async function fetchWithTimeout(url: string, init: RequestInit): Promise<Respons
   }
 }
 
-async function v2Fetch(path: string, init: RequestInit = {}, retryAuth = true): Promise<Response> {
+async function v2Fetch(path: string, init: RequestInit = {}, retryAuth = true, timeoutMs?: number): Promise<Response> {
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
   const locale = getStoredAdminLocale();
   headers.set('Accept-Language', toIntlLocale(locale));
   headers.set('X-Admin-Locale', locale);
-  const res = await fetchWithTimeout(`${API_BASE}${CAL_V2_BASE}${path}`, { ...init, headers, credentials: 'include' });
+  const res = await fetchWithTimeout(`${API_BASE}${CAL_V2_BASE}${path}`, { ...init, headers, credentials: 'include' }, timeoutMs);
   if (res.ok) {
     sessionState.lastActivity = Date.now();
     return res;
   }
   if (res.status === 401 && retryAuth && !isAuthRedirectExempt()) {
-    if (await refreshAdminSession()) return v2Fetch(path, init, false);
+    if (await refreshAdminSession()) return v2Fetch(path, init, false, timeoutMs);
   }
   if (res.status === 401 && !isAuthRedirectExempt()) {
     const back = window.location.pathname + window.location.search;
@@ -155,8 +171,14 @@ async function getJson<T>(path: string): Promise<T> {
   return (await v2Fetch(path)).json() as Promise<T>;
 }
 
-async function sendJson<T>(method: 'POST' | 'PATCH' | 'PUT', path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
-  return (await v2Fetch(path, { method, body: JSON.stringify(body ?? {}), headers })).json() as Promise<T>;
+async function sendJson<T>(
+  method: 'POST' | 'PATCH' | 'PUT',
+  path: string,
+  body: unknown,
+  headers?: Record<string, string>,
+  timeoutMs?: number,
+): Promise<T> {
+  return (await v2Fetch(path, { method, body: JSON.stringify(body ?? {}), headers }, true, timeoutMs)).json() as Promise<T>;
 }
 
 // ─── Capacità ───────────────────────────────
@@ -264,4 +286,134 @@ export function listTrashV2(q: { calendarId?: string; before?: string; limit?: n
 /** Ripristina un oggetto eliminato (201). Con `req.dryRun` solo valutazione. */
 export function restoreTrashV2(objectId: string, req: CalV2TrashRestoreRequest): Promise<CalV2WriteResult> {
   return sendJson<CalV2WriteResult>('POST', `/trash/${encodeURIComponent(objectId)}/restore`, req);
+}
+
+// ─── Calendari, import ed export (A2) ───────────────────────────────
+
+/** Timeout più largo per import e anteprima: il corpo può arrivare a 10 MB e il piano a 5000 oggetti. */
+const CAL_V2_IMPORT_TIMEOUT_MS = 60_000;
+
+/** Calendari con proprietà, URL per i device, feed e salute della collezione (ordine: `sort_order`, poi nome). */
+export function listCalendarsV2(): Promise<CalV2CalendarList> {
+  return getJson<CalV2CalendarList>('/calendars');
+}
+
+/** Crea un calendario (201): MKCALENDAR esplicita su Radicale. */
+export function createCalendarV2(req: CalV2CalendarCreateRequest): Promise<CalV2CalendarView> {
+  return sendJson<CalV2CalendarView>('POST', '/calendars', req);
+}
+
+/** Modifica le proprietà di un calendario (almeno un campo). */
+export function patchCalendarV2(id: string, req: CalV2CalendarPatchRequest): Promise<CalV2CalendarView> {
+  return sendJson<CalV2CalendarView>('PATCH', `/calendars/${encodeURIComponent(id)}`, req);
+}
+
+/** Salva l'ordine: `ids` contiene ogni calendario esattamente una volta. */
+export function reorderCalendarsV2(ids: string[]): Promise<CalV2CalendarList> {
+  return sendJson<CalV2CalendarList>('PUT', '/calendars/order', { ids });
+}
+
+/** Elimina un calendario; se non è vuoto serve `withObjects` (altrimenti 409 `CALENDAR_NOT_EMPTY`, `details.object_count`). */
+export async function deleteCalendarV2(id: string, opts: { withObjects?: boolean } = {}): Promise<{ deleted: true }> {
+  const qs = opts.withObjects ? '?with_objects=1' : '';
+  return (await v2Fetch(`/calendars/${encodeURIComponent(id)}${qs}`, { method: 'DELETE' })).json() as Promise<{ deleted: true }>;
+}
+
+/** Rigenera il token del feed ICS: il vecchio URL smette di funzionare. */
+export function rotateCalendarTokenV2(id: string): Promise<CalV2CalendarView> {
+  return sendJson<CalV2CalendarView>('POST', `/calendars/${encodeURIComponent(id)}/rotate-token`, {});
+}
+
+/** URL dell'export `.ics` del calendario (`Content-Disposition: attachment`, stessa autenticazione dei cookie). */
+export function calendarExportUrl(id: string): string {
+  return `${API_BASE}${CAL_V2_BASE}/calendars/${encodeURIComponent(id)}/export.ics`;
+}
+
+/** Anteprima dell'import (`dry_run`): piano completo con `plan_hash`, nessuna scrittura. */
+export function importPreviewV2(calendarId: string, req: Omit<CalV2ImportRequest, 'mode' | 'plan_hash'>): Promise<CalV2ImportPlan> {
+  return sendJson<CalV2ImportPlan>(
+    'POST',
+    `/calendars/${encodeURIComponent(calendarId)}/import`,
+    { ...req, mode: 'dry_run' },
+    undefined,
+    CAL_V2_IMPORT_TIMEOUT_MS,
+  );
+}
+
+/** Avvia l'import (202): `plan_hash` dell'anteprima e `Idempotency-Key` stabile per i nuovi tentativi. */
+export function importCommitV2(
+  calendarId: string,
+  req: Omit<CalV2ImportRequest, 'mode'> & { plan_hash: string },
+  idempotencyKey: string,
+): Promise<CalV2JobAccepted> {
+  return sendJson<CalV2JobAccepted>(
+    'POST',
+    `/calendars/${encodeURIComponent(calendarId)}/import`,
+    { ...req, mode: 'commit' },
+    { 'Idempotency-Key': idempotencyKey },
+    CAL_V2_IMPORT_TIMEOUT_MS,
+  );
+}
+
+/** Stato di un job asincrono (import, applica cancellazioni, ricostruisci); l'admin lo interroga ogni 2 s. */
+export function getJobV2(jobId: string): Promise<CalV2JobView> {
+  return getJson<CalV2JobView>(`/jobs/${encodeURIComponent(jobId)}`);
+}
+
+/** Il job non cambierà più (terminato, fallito o sostituito). */
+export function isJobFinishedV2(job: CalV2JobView | undefined): boolean {
+  return job?.status === 'done' || job?.status === 'dead' || job?.status === 'superseded';
+}
+
+/**
+ * Avanzamento di un job con polling ogni 2 s (§9.1.5) fino allo stato finale.
+ * Un errore transitorio (timeout, rete) non ferma il polling: la query riprova
+ * all'intervallo successivo e `error` resta visibile solo finché dura.
+ */
+export function useJobV2(jobId: string | null) {
+  return useQuery({
+    queryKey: calV2Keys.job(jobId ?? ''),
+    queryFn: () => getJobV2(jobId as string),
+    enabled: jobId !== null,
+    retry: false,
+    refetchInterval: (query) => (isJobFinishedV2(query.state.data) ? false : 2_000),
+  });
+}
+
+// ─── Salute (A2) ───────────────────────────────
+
+/** Stato di sincronizzazione aggregato (modo, identità, collezioni, quarantena, job, backup); l'admin lo interroga ogni 20 s. */
+export function getSyncStateV2(): Promise<CalV2SyncState> {
+  return getJson<CalV2SyncState>('/sync-state');
+}
+
+type HoldAction = 'apply_deletions' | 'rebuild_from_index';
+
+const HOLD_PATH: Record<HoldAction, string> = {
+  apply_deletions: 'apply-deletions',
+  rebuild_from_index: 'rebuild-from-index',
+};
+
+/** Anteprima di un'azione su una collezione in hold (`dry_run`): elenco completo e `plan_hash`. */
+export function holdPreviewV2(calendarId: string, action: HoldAction, hrefs?: string[]): Promise<CalV2HoldPlan> {
+  return sendJson<CalV2HoldPlan>(
+    'POST',
+    `/collections/${encodeURIComponent(calendarId)}/${HOLD_PATH[action]}`,
+    { mode: 'dry_run', ...(hrefs ? { hrefs } : {}) },
+  );
+}
+
+/** Esegue l'azione (202): richiede la conferma digitata, il `plan_hash` dell'anteprima e una `Idempotency-Key`. */
+export function holdCommitV2(
+  calendarId: string,
+  action: HoldAction,
+  req: { confirm: string; plan_hash: string; hrefs?: string[] },
+  idempotencyKey: string,
+): Promise<CalV2JobAccepted> {
+  return sendJson<CalV2JobAccepted>(
+    'POST',
+    `/collections/${encodeURIComponent(calendarId)}/${HOLD_PATH[action]}`,
+    { mode: 'commit', ...req },
+    { 'Idempotency-Key': idempotencyKey },
+  );
 }
