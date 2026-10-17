@@ -63,6 +63,7 @@ import {
   type PreflightDeps,
   runPreflightWith,
 } from '../../src/lib/calendar/migration/preflight';
+import type { CanaryResult } from '../../src/lib/calendar/radicale/canary';
 import {
   type ArchiveParams,
   type IdentityParams,
@@ -362,6 +363,48 @@ describe('gruppo INIT della F3 contro Radicale reale', { skip: radicale.skip }, 
     assert.equal(checkOf(summary, 'VOLUME_WATCH').status, 'pass');
     assert.equal(checkOf(summary, 'CONTROL_PLANE').status, 'pass');
     assert.deepEqual((await readdir(rad.fsPath(P, CANARY_COLLECTION))).filter((n) => n.endsWith('.ics')), [], 'nessuna risorsa del probe in _canary');
+  });
+
+  test('preflight dopo l\'inizializzazione con il canary fermo a prima (identity_not_ok, canary_missing): canary rieseguito, VOLUME_WATCH passa', async () => {
+    const mountOk: CanaryResult = { ok: true, mode: 'mount', reason: null, fsType: 'ext4 (0xef53)', fsLocal: true, mtimeLagMs: 4, checkedAt: new Date() };
+    for (const reason of ['identity_not_ok', 'canary_missing'] as const) {
+      const stale: CanaryResult = { ok: false, mode: reason === 'identity_not_ok' ? 'off' : 'remote', reason, fsType: null, fsLocal: null, mtimeLagMs: null, checkedAt: new Date(Date.now() - 60_000) };
+      let mode: 'off' | 'remote' | 'mount' = stale.mode;
+      let reruns = 0;
+      const summary = await collectPreflight(sql, deps({
+        watch: () => ({ mode, reason: mode === 'mount' ? null : 'canary non ancora eseguito' }),
+        canary: () => stale,
+        rerunCanary: async () => {
+          reruns += 1;
+          mode = 'mount';
+          return mountOk;
+        },
+        controlPlane: () => ({ status: RUNNING_CONTROL_PLANE, sync: async () => tick(true) }),
+      }));
+      assert.equal(reruns, 1, `canary rieseguito una volta (${reason})`);
+      assert.equal(checkOf(summary, 'VOLUME_WATCH').status, 'pass', `${reason}: ${checkOf(summary, 'VOLUME_WATCH').message}`);
+      // Canary rieseguito ma ancora senza risposta: il messaggio non chiede di accettare la remote mode.
+      const pending = await collectPreflight(sql, deps({
+        watch: () => ({ mode: 'remote', reason: 'canary non ancora eseguito' }),
+        canary: () => stale,
+        rerunCanary: async () => null,
+        controlPlane: () => ({ status: RUNNING_CONTROL_PLANE, sync: async () => tick(true) }),
+      }));
+      const watch = checkOf(pending, 'VOLUME_WATCH');
+      assert.equal(watch.status, 'confirm');
+      assert.match(watch.message, /fermo a prima dell'inizializzazione/);
+      assert.doesNotMatch(watch.message, /accetta esplicitamente/);
+    }
+    // Un vero guasto del mount resta da accettare o correggere, senza rieseguire il canary.
+    let reruns = 0;
+    const broken = await collectPreflight(sql, deps({
+      watch: () => ({ mode: 'remote', reason: 'mtime_not_observed' }),
+      canary: () => ({ ok: false, mode: 'remote', reason: 'mtime_not_observed', fsType: 'ext4 (0xef53)', fsLocal: true, mtimeLagMs: null, checkedAt: new Date() }),
+      rerunCanary: async () => { reruns += 1; return null; },
+      controlPlane: () => ({ status: RUNNING_CONTROL_PLANE, sync: async () => tick(true) }),
+    }));
+    assert.equal(reruns, 0);
+    assert.match(checkOf(broken, 'VOLUME_WATCH').message, /accetta esplicitamente la remote mode/);
   });
 
   test('preflight con il gate aperto: probe che può scrivere e PUT su _canary accettata falliscono, la risorsa viene rimossa', async () => {

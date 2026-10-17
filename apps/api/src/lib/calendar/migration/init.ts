@@ -65,6 +65,7 @@ import {
   preconditionError,
   readMigrationStateFresh,
   requireRadicale,
+  rerunStaleCanary,
 } from './preflight';
 import { legacyHash } from './serialize';
 import {
@@ -637,6 +638,12 @@ export async function runInit(ctx: MigrationRunContext<InitParams>): Promise<Ini
   }
   const planned = await plannedCollections(ctx.db);
   await ctx.addItems(collectionItems(summary, planned));
+  // Canary del processo fermo a prima dell'inizializzazione (identità da inizializzare, _canary assente): si riesegue
+  // subito, così il preflight che segue non chiede a torto di accettare la remote mode (VOLUME_WATCH).
+  if (summary.canary === 'created' || summary.canary === 'exists') {
+    const canary = await rerunStaleCanary();
+    if (canary) ctx.log.info({ ok: canary.ok, reason: canary.reason, mode: canary.mode }, 'canary rieseguito dopo l\'inizializzazione');
+  }
   const conflicts = summary.collections.filter((c) => c.status === 'conflict').length;
   ctx.log.info({
     action, volumeId: summary.volume_id, epoch: summary.epoch, resumed: summary.resumed,
@@ -1107,6 +1114,11 @@ export function readTarIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {
     const segments = path.split('/').filter((s) => s && s !== '.');
     const base = segments[segments.length - 1] ?? '';
     if (segments.some((s) => s.startsWith('.') || s === '..') || !base.toLowerCase().endsWith('.ics')) continue;
+    // Ogni voce .ics conta, anche quelle poi scartate (fuori dal layout, troppo grandi, nome ripetuto): un tar piatto
+    // con centinaia di migliaia di voci non diventa altrettante righe di anomalia.
+    if (entries.length + skipped.length >= maxEntries + ZIP_EXTRA_ENTRIES) {
+      throw new ArchiveFormatError(`tar con troppe voci .ics (oltre ${maxEntries + ZIP_EXTRA_ENTRIES})`);
+    }
     if (segments.length < 2) {
       skipped.push({ name: base, reason: 'fuori dal layout delle collezioni' });
       continue;
@@ -1193,17 +1205,26 @@ export async function readArchiveItems(input: Buffer, originalName: string, now:
   } else {
     const cal = parseIcs(buf, { maxBytes: MIGRATION_LIMITS.archiveMaxBytes });
     if (!cal.ok) throw new ArchiveFormatError(`file né zip né iCalendar leggibile (${cal.error.code})`);
+    await yieldEventLoop();
     const split = splitCalendar(cal.value, { duplicateMasters: 'keep-first' });
+    // Stesso limite degli item dello zip e del tar: un .ics con decine di migliaia di VEVENT si rifiuta prima di
+    // serializzarli e validarli (e prima di creare la collezione dell'archivio).
+    const maxItems = MIGRATION_LIMITS.archiveMaxItems;
+    if (split.objects.length + split.errors.length > maxItems) {
+      throw new ArchiveFormatError(`archivio oltre ${maxItems} item (${split.objects.length + split.errors.length} oggetti nel file .ics)`);
+    }
+    await yieldEventLoop();
     for (const err of split.errors) {
       rejected.push({ source_name: `${basename(originalName)}#${err.uid ?? `posizione-${err.index}`}`, reason: 'invalid', code: 'INVALID_OBJECT', message: `oggetto non leggibile (${err.error.code})`, uid: err.uid });
     }
+    tickTotal = split.objects.length * 2;
     for (const obj of split.objects) {
+      await tick();
       const text = serializeObject(obj, { prodid: 'preserve', timezones: 'preserve' });
       candidates.push({ source_name: `${basename(originalName)}#${obj.uid}`, obj, raw: Buffer.from(text, 'utf8') });
     }
     // Un .ics con un solo oggetto vale come l'item omonimo dell'export.
     if (candidates.length === 1 && rejected.length === 0) candidates[0].source_name = basename(originalName);
-    tickTotal = ticks + candidates.length;
   }
 
   const items: ArchiveItem[] = [];
@@ -1473,6 +1494,8 @@ export interface ArchiveRunSummary extends ArchiveSummary {
   conflicts: number;
   failed: number;
   skipped_entries: number;
+  /** UID già importati da un archivio precedente con un altro nome (contano come presenti nell'archivio). */
+  already_archived: number;
 }
 
 async function validateUpload(params: ArchiveParams | undefined): Promise<{ path: string; buf: Buffer }> {
@@ -1550,6 +1573,24 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
     if (total === 0) {
       removeAtEnd = true;
       throw new MigrationError('VALIDATION_FAILED', 'Archivio vuoto: nessun item .ics trovato', { run_error_code: 'ARCHIVE_INVALID' });
+    }
+    // Tutte le voci rifiutate: il run fallisce con i motivi nelle righe, prima di creare calendario e collezione
+    // dell'archivio, e la dichiarazione phase0 resta quella di prima.
+    if (parsed.items.length === 0) {
+      const reasons: MigrationItemInput[] = parsed.rejected.map((r) => ({
+        item_type: 'anomaly' as const,
+        calendar_id: null,
+        collection_name: ARCHIVE_COLLECTION_NAME,
+        legacy_key: legacyKey('archive', r.source_name.slice(0, 480)),
+        code: r.code,
+        severity: r.reason === 'invalid' ? 'warning' as const : 'info' as const,
+        detail: { source_name: r.source_name, reason: r.reason, message: r.message, uid: r.uid ?? null },
+      }));
+      for (let i = 0; i < reasons.length; i += 500) await ctx.addItems(reasons.slice(i, i + 500));
+      removeAtEnd = true;
+      throw new MigrationError('VALIDATION_FAILED', `Nessun item valido nell'archivio (${parsed.rejected.length} voci rifiutate: vedi le righe del run)`, {
+        run_error_code: 'ARCHIVE_INVALID',
+      });
     }
 
     const guard = await createIdentityGuard({ db: ctx.db, client, principal });
@@ -1658,6 +1699,7 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
       conflicts: counts.conflicts,
       failed: counts.failed,
       skipped_entries: parsed.rejected.length,
+      already_archived: counts.alreadyArchived,
     };
     if (counts.failed === 0 && counts.conflicts === 0) {
       await writePhase0Archived(ctx.db, ctx.runId, ctx.actor, summary);
@@ -1688,7 +1730,7 @@ function cancelledByAdmin(signal: AbortSignal): boolean {
 /** Dichiarazione phase0 = archived dopo un archivio riuscito (contratto §1.2: INIT scrive solo questa). */
 async function writePhase0Archived(db: Db, runId: string, actor: string, summary: ArchiveRunSummary): Promise<void> {
   const declaration = {
-    value: { status: 'archived', archive_run_id: runId, note: `${summary.imported + summary.updated + summary.unchanged} item nell'archivio ${ARCHIVE_COLLECTION_NAME}` },
+    value: { status: 'archived', archive_run_id: runId, note: `${summary.imported + summary.updated + summary.unchanged + summary.already_archived} item nell'archivio ${ARCHIVE_COLLECTION_NAME}` },
     at: new Date().toISOString(),
     by: actor,
   };

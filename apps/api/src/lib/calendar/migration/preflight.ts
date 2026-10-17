@@ -56,7 +56,7 @@ import {
 } from './types';
 import { CAL_JOB_KINDS } from '../jobs';
 import { CAL_LOCKS } from '../index-model';
-import { type CanaryResult, lastCanaryResult } from '../radicale/canary';
+import { type CanaryResult, lastCanaryResult, runCanary } from '../radicale/canary';
 import { collectionPath, objectPath, RadicaleClient } from '../radicale/client';
 import { type DavPropName, NS } from '../radicale/dav-xml';
 import { isRadicaleError, type RadicaleError } from '../radicale/errors';
@@ -240,6 +240,12 @@ export interface PreflightDeps {
   publicClient: (user: typeof SERVICE_USER | typeof PROBE_USER) => RadicaleClient | null;
   watch: () => { mode: WatchMode; reason: string | null };
   canary: () => CanaryResult | null;
+  /**
+   * Riesegue il canary quando l'ultimo esito è fermo a prima
+   * dell'inizializzazione (canaryStaleAfterInit) e ora identità e _canary ci
+   * sono: null se non ha risposto in tempo. Facoltativa (test).
+   */
+  rerunCanary?: () => Promise<CanaryResult | null>;
   controlPlane: () => { status: ControlPlaneStatus | null; sync: () => Promise<ControlPlaneTick | null> };
   now: () => Date;
 }
@@ -268,6 +274,7 @@ export function defaultPreflightDeps(env: NodeJS.ProcessEnv = process.env): Pref
     },
     watch: () => currentWatchMode(),
     canary: () => lastCanaryResult(),
+    rerunCanary: () => withTimeout(runCanary(), CANARY_RERUN_TIMEOUT_MS, null),
     controlPlane: () => {
       const cp = getCalendarControlPlane();
       return {
@@ -277,6 +284,37 @@ export function defaultPreflightDeps(env: NodeJS.ProcessEnv = process.env): Pref
     },
     now: () => new Date(),
   };
+}
+
+/** Attesa massima del canary rieseguito (preflight, fine dell'inizializzazione): PUT più finestra della mtime. */
+const CANARY_RERUN_TIMEOUT_MS = 20_000;
+
+/**
+ * Esiti del canary che dipendono dallo stato del volume prima
+ * dell'inizializzazione: identità non ancora 'ok' (volume vuoto) o _canary
+ * assente (volume della F1 senza _canary). Il canary gira all'avvio e poi
+ * ogni 10 minuti: dopo l'inizializzazione l'esito resta quello vecchio, e
+ * VOLUME_WATCH chiederebbe a torto di accettare la remote mode.
+ */
+export function canaryStaleAfterInit(result: CanaryResult | null): boolean {
+  return result !== null && !result.ok && (result.reason === 'identity_not_ok' || result.reason === 'canary_missing');
+}
+
+/**
+ * Fine dell'inizializzazione (runInit): se il canary del processo è fermo a
+ * prima dell'inizializzazione lo riesegue subito (single-flight, al più
+ * CANARY_RERUN_TIMEOUT_MS). Un canary mai eseguito (CALDES_WATCH off o
+ * remote, script) non si avvia. Non lancia mai.
+ */
+export async function rerunStaleCanary(deps: { last?: () => CanaryResult | null; run?: () => Promise<CanaryResult> } = {}): Promise<CanaryResult | null> {
+  const last = (deps.last ?? lastCanaryResult)();
+  if (!canaryStaleAfterInit(last)) return null;
+  try {
+    return await withTimeout((deps.run ?? runCanary)(), CANARY_RERUN_TIMEOUT_MS, null);
+  } catch (err) {
+    log.warn({ err }, 'canary rieseguito dopo l\'inizializzazione non riuscito (riprova il giro ogni 10 minuti)');
+    return null;
+  }
 }
 
 async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
@@ -653,6 +691,7 @@ async function radicaleChecks(
   }
 
   // Collezioni del piano e _canary (solo con l'identità verificata).
+  let canaryCollectionPresent = false;
   if (volume && identity === 'ok') {
     const planned = await plannedCollections(db);
     const present = new Map(volume.collections.map((c) => [c.name, c]));
@@ -674,6 +713,7 @@ async function radicaleChecks(
           conflicts.length ? `Collezioni con un'altra calendar-id (non toccate): ${conflicts.map((c) => c.collection_name).join(', ')}.` : '',
         ].filter(Boolean).join(' '), { detail: { missing, conflicts } }));
     const canaryPresent = present.has(CANARY_COLLECTION);
+    canaryCollectionPresent = canaryPresent;
     checks.push(canaryPresent
       ? check('CANARY_COLLECTION', 'pass', `Collezione ${CANARY_COLLECTION} presente.`)
       : check('CANARY_COLLECTION', 'warn', `Collezione ${CANARY_COLLECTION} assente: la crea l'inizializzazione ("Crea collezioni mancanti").`));
@@ -688,8 +728,12 @@ async function radicaleChecks(
   }
 
   // Campanello: mount con canary e statfs superati, oppure remote mode dichiarata.
+  let canary = deps.canary();
+  // Canary fermo a prima dell'inizializzazione (identità da inizializzare, _canary assente) ma ora identità e _canary
+  // ci sono: si riesegue invece di chiedere di accettare la remote mode.
+  const staleCanary = canaryStaleAfterInit(canary) && identity === 'ok' && canaryCollectionPresent;
+  if (staleCanary && deps.rerunCanary) canary = (await deps.rerunCanary()) ?? canary;
   const watch = deps.watch();
-  const canary = deps.canary();
   if (watch.mode === 'mount' && canary?.ok && canary.fsLocal !== false) {
     checks.push(check('VOLUME_WATCH', 'pass', `Campanello in mount: canary e statfs superati${canary.fsType ? ` (${canary.fsType})` : ''}.`, {
       detail: { mode: watch.mode, fs_type: canary.fsType, mtime_lag_ms: canary.mtimeLagMs },
@@ -697,7 +741,9 @@ async function radicaleChecks(
   } else {
     checks.push(confirmOrDeclared(state, 'VOLUME_WATCH', 'remote_mode_accepted',
       {
-        message: `Campanello in ${watch.mode}${watch.reason ? ` (${watch.reason})` : ''}${canary && !canary.ok ? `, canary non superato (${canary.reason})` : ''}: accetta esplicitamente la remote mode o correggi il mount.`,
+        message: staleCanary && canaryStaleAfterInit(canary)
+          ? `Campanello in ${watch.mode}: il canary (${canary?.reason}) è fermo a prima dell'inizializzazione e non ha ancora risposto di nuovo. Rilancia il preflight fra qualche secondo: non serve accettare la remote mode per questo.`
+          : `Campanello in ${watch.mode}${watch.reason ? ` (${watch.reason})` : ''}${canary && !canary.ok ? `, canary non superato (${canary.reason})` : ''}: accetta esplicitamente la remote mode o correggi il mount.`,
         detail: { mode: watch.mode, reason: watch.reason, canary: canary ? { ok: canary.ok, reason: canary.reason, fs_type: canary.fsType } : null },
       },
       (v) => `Remote mode accettata: ${String(v.reason ?? '')}`.trim(),

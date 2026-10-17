@@ -57,12 +57,13 @@ import {
   runInventory,
   safeUsername,
 } from '../../src/lib/calendar/migration/inventory';
-import { collectPreflight, preflightWithoutRadicale, runPreflightWith, type PreflightDeps } from '../../src/lib/calendar/migration/preflight';
+import { canaryStaleAfterInit, collectPreflight, preflightWithoutRadicale, rerunStaleCanary, runPreflightWith, type PreflightDeps } from '../../src/lib/calendar/migration/preflight';
 import {
   type AnomalyRecord,
   type CalendarInventory,
   type InitParams,
   type InventorySummary,
+  MIGRATION_LIMITS,
   MigrationError,
   PREFLIGHT_CHECK_CODES,
   type PreflightCheck,
@@ -316,6 +317,39 @@ test('archivio costruito ad arte: voci sovrapposte, dimensione falsa, voci oltre
   const fromTar = readTarIcsEntries(tar);
   assert.deepEqual(fromTar.entries.map((e) => e.name), ['lavoro__ok.ics']);
   assert.deepEqual(fromTar.skipped, [{ name: 'grande.ics', reason: 'troppo grande' }]);
+});
+
+test('canary fermo a prima dell\'inizializzazione: rieseguito solo per identity_not_ok o canary_missing, mai se non è mai partito', async () => {
+  const at = new Date('2026-10-10T08:00:00Z');
+  const result = (ok: boolean, reason: 'identity_not_ok' | 'canary_missing' | 'mtime_not_observed' | null) =>
+    ({ ok, mode: ok ? 'mount' as const : 'remote' as const, reason, fsType: null, fsLocal: null, mtimeLagMs: null, checkedAt: at });
+  assert.equal(canaryStaleAfterInit(null), false);
+  assert.equal(canaryStaleAfterInit(result(false, 'identity_not_ok')), true);
+  assert.equal(canaryStaleAfterInit(result(false, 'canary_missing')), true);
+  assert.equal(canaryStaleAfterInit(result(false, 'mtime_not_observed')), false);
+  assert.equal(canaryStaleAfterInit(result(true, null)), false);
+  let runs = 0;
+  const run = async () => { runs += 1; return result(true, null); };
+  assert.equal((await rerunStaleCanary({ last: () => result(false, 'identity_not_ok'), run }))?.ok, true);
+  assert.equal((await rerunStaleCanary({ last: () => result(false, 'canary_missing'), run }))?.ok, true);
+  assert.equal(await rerunStaleCanary({ last: () => null, run }), null, 'canary mai partito (CALDES_WATCH off/remote, script): non si avvia');
+  assert.equal(await rerunStaleCanary({ last: () => result(false, 'mtime_not_observed'), run }), null, 'un vero guasto aspetta il giro ogni 10 minuti');
+  assert.equal(runs, 2);
+  assert.equal(await rerunStaleCanary({ last: () => result(false, 'canary_missing'), run: async () => { throw new Error('boom'); } }), null, 'non lancia mai');
+});
+
+test('tar piatto con molte voci fuori dal layout e .ics con troppi VEVENT: rifiutati come archivio non valido', async () => {
+  const now = new Date('2026-10-10T08:00:00Z');
+  // Ogni voce .ics conta nel limite, anche se scartata (fuori dal layout): niente centinaia di righe di anomalia.
+  const flat = buildTar(Array.from({ length: 2 + 100 + 1 }, (_, i) => ({ name: `v${i}.ics`, data: 'x' })));
+  assert.throws(() => readTarIcsEntries(flat, { maxEntries: 2 }), /troppe voci/);
+  const within = readTarIcsEntries(buildTar(Array.from({ length: 50 }, (_, i) => ({ name: `v${i}.ics`, data: 'x' }))), { maxEntries: 2 });
+  assert.equal(within.skipped.length, 50);
+  // .ics singolo oltre archiveMaxItems oggetti: rifiutato prima di serializzarli e validarli.
+  const n = MIGRATION_LIMITS.archiveMaxItems + 1;
+  const vevents = Array.from({ length: n }, (_, i) => `BEGIN:VEVENT\r\nUID:m${i}@fase0\r\nDTSTAMP:20260101T000000Z\r\nDTSTART:20260101T090000Z\r\nDTEND:20260101T100000Z\r\nSUMMARY:x\r\nEND:VEVENT\r\n`).join('');
+  const ics = Buffer.from(`BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//test//EN\r\n${vevents}END:VCALENDAR\r\n`);
+  await assert.rejects(readArchiveItems(ics, 'export.ics', now), /oltre 20000 item/);
 });
 
 test('archivio grande ma legittimo: la lettura cede l\'event loop (nessun blocco oltre 200 ms) e chiama onTick', async () => {

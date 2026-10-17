@@ -232,15 +232,80 @@ describe('conferme, chiavi e precondizioni', () => {
     assert.equal(noRadicale.status, 503);
     assert.equal(noRadicale.json.code, 'RADICALE_NOT_CONFIGURED');
 
+    // F3-SEC-04: la chiave solo dall'header (un header custom forza il preflight CORS), mai dal corpo.
     const keyInBody = await api.post(`${BASE}/init`, {
       auth: 'admin', body: { action: 'initialize', confirm: MIGRATION_CONFIRMATIONS.initialize, idempotency_key: newKey() },
     });
-    assert.equal(keyInBody.status, 503, 'la chiave nel corpo vale come quella nell\'header');
+    assert.equal(keyInBody.status, 400, 'la chiave nel corpo è rifiutata');
+    assert.equal(keyInBody.json.code, 'VALIDATION_FAILED');
 
-    const mismatch = await api.post(`${BASE}/init`, {
+    const both = await api.post(`${BASE}/init`, {
       auth: 'admin', body: { action: 'initialize', confirm: MIGRATION_CONFIRMATIONS.initialize, idempotency_key: newKey() }, headers: { 'Idempotency-Key': newKey() },
     });
-    assert.equal(mismatch.status, 400);
+    assert.equal(both.status, 400);
+  });
+
+  test('difesa CSRF delle scritture: Origin, Sec-Fetch-Site, Content-Type e chiave nel modulo', async () => {
+    configureRadicaleRuntime(null);
+    const body = { action: 'initialize', confirm: MIGRATION_CONFIRMATIONS.initialize };
+    const json = JSON.stringify(body);
+    const before = await sql<Array<{ n: number }>>`SELECT count(*)::int AS n FROM cal_migration_runs`;
+
+    // Richiesta "semplice" da un'altra origine dello stesso sito (text/plain, nessun preflight CORS).
+    const foreign = await api.post(`${BASE}/init`, {
+      auth: 'admin', body: json, headers: { 'Content-Type': 'text/plain', Origin: 'https://evil.caldes.test', 'Idempotency-Key': newKey() },
+    });
+    assert.equal(foreign.status, 403);
+    assert.equal(foreign.json.code, 'CSRF_REJECTED');
+    const nullOrigin = await api.post(`${BASE}/init`, {
+      auth: 'admin', body, headers: { Origin: 'null', 'Idempotency-Key': newKey() },
+    });
+    assert.equal(nullOrigin.status, 403);
+    for (const site of ['same-site', 'cross-site']) {
+      const res = await api.post(`${BASE}/declarations`, {
+        auth: 'admin', body: { key: 'backup_verified', value: { note: 'csrf' }, confirm: 'CONFERMO' }, headers: { 'Sec-Fetch-Site': site },
+      });
+      assert.equal(res.status, 403, `Sec-Fetch-Site ${site}`);
+      assert.equal(res.json.code, 'CSRF_REJECTED');
+    }
+    // Corpo non JSON anche senza Origin (form, text/plain): 415.
+    for (const type of ['text/plain', 'application/x-www-form-urlencoded']) {
+      const res = await api.post(`${BASE}/init`, { auth: 'admin', body: json, headers: { 'Content-Type': type, 'Idempotency-Key': newKey() } });
+      assert.equal(res.status, 415, type);
+    }
+    const formOnJsonRoute = new FormData();
+    formOnJsonRoute.set('action', 'initialize');
+    const multipart = await api.post(`${BASE}/init`, { auth: 'admin', body: formOnJsonRoute, headers: { 'Idempotency-Key': newKey() } });
+    assert.equal(multipart.status, 415, 'multipart solo per /phase0/archive');
+
+    // Archivio: la chiave nel campo del modulo è rifiutata (una pagina estranea lo manderebbe senza preflight).
+    const form = new FormData();
+    form.set('file', new Blob(['BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n'], { type: 'text/calendar' }), 'a.ics');
+    form.set('confirm', MIGRATION_CONFIRMATIONS.archive);
+    form.set('idempotency_key', newKey());
+    const archiveKeyInForm = await api.post(`${BASE}/phase0/archive`, { auth: 'admin', body: form });
+    assert.equal(archiveKeyInForm.status, 400);
+    assert.equal(archiveKeyInForm.json.code, 'VALIDATION_FAILED');
+
+    const after = await sql<Array<{ n: number }>>`SELECT count(*)::int AS n FROM cal_migration_runs`;
+    assert.equal(after[0].n, before[0].n, 'nessun run creato dalle richieste rifiutate');
+    const [decl] = await sql<Array<{ n: number }>>`
+      SELECT count(*)::int AS n FROM calendar_backend_state WHERE migration_declarations::text LIKE '%csrf%'
+    `;
+    assert.equal(decl.n, 0, 'nessuna dichiarazione registrata');
+
+    // Richieste legittime: stessa origine o un'origine di CORS_ORIGINS, JSON, Sec-Fetch-Site same-origin.
+    for (const origin of ['http://localhost', 'https://admin.caldes.test']) {
+      const res = await api.post(`${BASE}/init`, {
+        auth: 'admin', body, headers: { Origin: origin, 'Sec-Fetch-Site': 'same-origin', 'Idempotency-Key': newKey() },
+      });
+      assert.equal(res.status, 503, `passa il middleware con Origin ${origin}`);
+      assert.equal(res.json.code, 'RADICALE_NOT_CONFIGURED');
+    }
+    const jsonCharset = await api.post(`${BASE}/init`, {
+      auth: 'admin', body: json, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Idempotency-Key': newKey() },
+    });
+    assert.equal(jsonCharset.status, 503);
   });
 
   test('init initialize con il volume non verificabile: precondizione dal diff d\'identità', async () => {
