@@ -42,7 +42,7 @@ import {
 import { latestVerifyVerdicts } from '../../src/lib/calendar/migration/report';
 import { getPgLegacyStore } from '../../src/lib/calendar/store';
 import type { Booking } from '../../src/lib/calendar/types';
-import { onBeforeDatabaseClose, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
+import { databaseNow, onBeforeDatabaseClose, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
 import { romeIso, useFixtures } from '../helpers/fixtures';
 import { api } from '../helpers/http';
 
@@ -105,6 +105,10 @@ describe('calendarErase in mode postgres', () => {
   test('erasure completa, audit_logs compresi; altre persone intatte; idempotente', async () => {
     await resetState();
     await setState({ volume: VOLUME });
+    // Inizio dei dati del test sull'orologio di Postgres (gli audit_logs usano NOW() del server): le
+    // righe scritte prima da altri file (per esempio la DELETE di resetCalendarBaseline sulle
+    // proiezioni "Mario Rossi" di reverse-projector.test.ts) non riguardano la persona cancellata qui.
+    const since = await databaseNow();
     const email = fx.email('gdpr-mario');
     const other = fx.email('gdpr-altro');
     const eventType = await fx.eventType({ key: 'gdpr' });
@@ -226,6 +230,7 @@ describe('calendarErase in mode postgres', () => {
     const [leak] = await sql<Array<{ n: number }>>`
       SELECT count(*)::int AS n FROM audit_logs
       WHERE table_name IN ('calendar_events', 'calendar_bookings')
+        AND created_at >= ${since}::timestamptz
         AND (strpos(lower(coalesce(old_data::text, '') || coalesce(new_data::text, '')), ${email}) > 0
              OR (coalesce(old_data::text, '') || coalesce(new_data::text, '')) LIKE '%Mario Rossi%'
              OR (coalesce(old_data::text, '') || coalesce(new_data::text, '')) LIKE '%333 1112223%')
