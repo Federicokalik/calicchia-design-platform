@@ -53,6 +53,7 @@ export function ScopeDialog({ open, action, allowed, onChoose, onCancel }: Scope
             <Button
               key={scope}
               type="button"
+              data-testid={`cal-scope-${scope}`}
               variant={action === 'delete' && scope === 'all' ? 'destructive' : 'outline'}
               className="h-auto flex-col items-start gap-0.5 whitespace-normal py-2 text-left"
               onClick={() => onChoose(scope)}

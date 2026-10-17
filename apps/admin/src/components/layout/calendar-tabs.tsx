@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/hooks/use-i18n';
 import { useLocalizedPath } from '@/hooks/use-localized-navigation';
+import { useCalendarV2Capabilities } from '@/lib/calendar-v2-api';
 
 /**
  * Sotto-nav per la sezione Calendario. Sostituisce le 4 voci figlie che prima
@@ -9,7 +10,7 @@ import { useLocalizedPath } from '@/hooks/use-localized-navigation';
  * granulari sono tab dentro la pagina, allineate al pattern Bierut/Pentagram di
  * minimal hairlines.
  */
-const TABS = [
+const TABS: Array<{ labelKey: string; path: string; end?: boolean; requires?: 'trash' }> = [
   { labelKey: 'nav.calendar', path: '/calendario', end: true },
   { labelKey: 'nav.calendar.calendars', path: '/calendario/calendari' },
   { labelKey: 'nav.calendar.bookings', path: '/calendario/prenotazioni' },
@@ -17,16 +18,20 @@ const TABS = [
   { labelKey: 'nav.calendar.eventTypes', path: '/calendario/event-types' },
   // Strumento di migrazione a Radicale (F3): wizard a 6 passi.
   { labelKey: 'nav.calendar.migration', path: '/calendario/migrazione' },
+  // Cestino degli eventi eliminati (F6): solo se l'API v2 dichiara la capacità `trash`.
+  { labelKey: 'nav.calendar.trash', path: '/calendario/cestino', requires: 'trash' },
 ];
 
 export function CalendarTabs() {
   const { t } = useI18n();
   const localizedPath = useLocalizedPath();
+  const { caps } = useCalendarV2Capabilities();
+  const tabs = TABS.filter((tab) => !tab.requires || caps?.[tab.requires] === true);
 
   return (
     <div className="border-b -mx-1 mb-4">
       <nav className="flex gap-1 overflow-x-auto scrollbar-auto px-1" aria-label="Sezioni calendario">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <NavLink
             key={tab.path}
             to={localizedPath(tab.path)}

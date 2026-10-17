@@ -53,7 +53,7 @@ export function ConflictDialog({ open, body, pendingOps, onResolve, onReload, on
 
   return (
     <Dialog open={open} onOpenChange={(next) => { if (!next) onCancel(); }}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl" data-testid="cal-conflict-dialog">
         <DialogHeader>
           <DialogTitle>L&apos;evento è stato modificato altrove</DialogTitle>
           <DialogDescription>
@@ -73,6 +73,7 @@ export function ConflictDialog({ open, body, pendingOps, onResolve, onReload, on
                     type="radio"
                     name={`conflict-${c.field}`}
                     checked={keepOf(c.field)}
+                    data-testid={`cal-conflict-keep-${c.field}`}
                     onChange={() => setMine((m) => ({ ...m, [c.field]: true }))}
                     className="mt-1"
                   />
@@ -107,10 +108,10 @@ export function ConflictDialog({ open, body, pendingOps, onResolve, onReload, on
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button type="button" variant="ghost" onClick={onCancel}>Annulla</Button>
-          <Button type="button" variant="outline" onClick={onReload}>Ricarica</Button>
+          <Button type="button" variant="outline" onClick={onReload} data-testid="cal-conflict-reload">Ricarica</Button>
           {hasConflicts
-            ? <Button type="button" onClick={resolve}>Salva con queste scelte</Button>
-            : <Button type="button" onClick={() => onResolve(new Set())}>Applica comunque</Button>}
+            ? <Button type="button" onClick={resolve} data-testid="cal-conflict-resolve">Salva con queste scelte</Button>
+            : <Button type="button" onClick={() => onResolve(new Set())} data-testid="cal-conflict-resolve">Applica comunque</Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

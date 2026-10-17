@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { AlertTriangle, Info, Trash2 } from 'lucide-react';
+import { AlertTriangle, History, Info, Trash2 } from 'lucide-react';
 import type {
   CalV2FieldValues,
   CalV2Issue,
@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ConflictDialog } from '@/components/calendar/conflict-dialog';
+import { HistoryDrawer } from '@/components/calendar/history-drawer';
 import { ScopeDialog } from '@/components/calendar/scope-dialog';
 import { useConfirm } from '@/hooks/use-confirm';
 import { apiFetch } from '@/lib/api';
@@ -352,6 +353,9 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
   const [scopeAsk, setScopeAsk] = useState<{ action: 'edit' | 'delete'; allowed: CalV2Scope[]; ops: CalV2Op[]; base: Record<string, string>; move?: string } | null>(null);
   const [conflict, setConflict] = useState<Conflict | null>(null);
   const [serverIssues, setServerIssues] = useState<CalV2Issue[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  // Testo dell'editor ICS modificato e non salvato (si perde chiudendo).
+  const [rawDirty, setRawDirty] = useState(false);
 
   const patchFields = (patch: Partial<CalV2FieldValues>) => setDraft((d) => ({ ...d, fields: { ...d.fields, ...patch } }));
   const setExtra = (extra: Record<string, CalV2Property[]>) => setDraft((d) => ({ ...d, extra }));
@@ -632,7 +636,7 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
 
   const requestClose = async () => {
     if (saving) return;
-    if (dirty && !readOnly && !(await confirm({
+    if ((dirty || rawDirty) && !readOnly && !(await confirm({
       title: 'Scartare le modifiche?',
       description: 'Le modifiche non salvate andranno perse.',
       variant: 'destructive',
@@ -668,12 +672,27 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
       : null;
 
   const canDelete = !isCreate && !!view?.etag && !writesOff && !view.delete_blocked_reason && (!readonlyReason || readonlyReason === 'unreadable');
+  // Cronologia e testo ICS agiscono sull'oggetto intero: si ammettono anche per un oggetto illeggibile (è il modo di ripararlo).
+  const textWritable = !isCreate && !!view?.etag && !writesOff && (!readonlyReason || readonlyReason === 'unreadable');
+  const showHistory = !isCreate && !!view?.id && !!caps?.history;
+  const rawReason = isCreate ? null
+    : writesOff || readonlyReason === 'writes_suspended' ? READONLY_TEXT.writes_suspended
+      : readonlyReason && readonlyReason !== 'unreadable' ? READONLY_TEXT[readonlyReason]
+        : !view?.etag ? 'Radicale non ha fornito la versione corrente dell\'evento.'
+          : dirty ? 'Ci sono modifiche non salvate nei campi: salvale o annullale prima di modificare il testo ICS.'
+            : null;
+  /** Testo ICS salvato o versione ripristinata: l'editor riparte dalla vista nuova. */
+  const reloadFrom = (result: CalV2WriteResult) => {
+    onSaved();
+    if (result.object) onReload(result.object);
+    else onClose();
+  };
   const heading = isCreate ? 'Nuovo evento' : 'Modifica evento';
   const kindBadge = !view?.recurring ? null : targetKey === '' ? 'Serie' : target?.is_override ? 'Occorrenza modificata' : 'Occorrenza della serie';
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) void requestClose(); }}>
-      <DialogContent className="max-w-3xl gap-0 p-0" aria-describedby={undefined}>
+      <DialogContent className="max-w-3xl gap-0 p-0" aria-describedby={undefined} data-testid="cal-editor-v2">
         <div className="flex flex-wrap items-center gap-2 border-b px-6 py-4 pr-14">
           <DialogTitle className="text-base font-semibold">{heading}</DialogTitle>
           {kindBadge && <Badge variant="secondary">{kindBadge}</Badge>}
@@ -711,7 +730,7 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
           <Tabs value={tab} onValueChange={(v) => setTab(v as TabId)}>
             <TabsList className="flex h-auto w-full flex-wrap justify-start">
               {tabs.map((id) => (
-                <TabsTrigger key={id} value={id} className="relative">
+                <TabsTrigger key={id} value={id} className="relative" data-testid={`cal-tab-${id}`}>
                   {TAB_LABELS[id]}
                   {issueTabs.has(id) && <span className="ml-1.5 h-1.5 w-1.5 rounded-full bg-destructive" aria-label="Contiene errori" />}
                 </TabsTrigger>
@@ -789,6 +808,16 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
                 extra={draft.extra}
                 onExtraChange={setExtra}
                 disabled={disabled || unreadable}
+                objectTools={!!caps?.object_tools}
+                rawEditor={!isCreate && caps?.raw_edit
+                  ? {
+                      disabled: !textWritable || dirty || saving,
+                      disabledReason: rawReason,
+                      onApplied: reloadFrom,
+                      onReload,
+                      onDirtyChange: setRawDirty,
+                    }
+                  : null}
               />
             </TabsContent>
           </Tabs>
@@ -803,9 +832,22 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
                 variant="outline"
                 className="text-destructive"
                 disabled={saving}
+                data-testid="cal-editor-delete"
                 onClick={() => { void startDelete(); }}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Elimina
+              </Button>
+            )}
+            {showHistory && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={saving}
+                data-testid="cal-history-open"
+                onClick={() => setHistoryOpen(true)}
+              >
+                <History className="h-3.5 w-3.5 mr-1.5" /> Cronologia
               </Button>
             )}
           </div>
@@ -817,7 +859,7 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
               {readOnly ? 'Chiudi' : 'Annulla'}
             </Button>
             {!readOnly && (
-              <Button type="button" size="sm" onClick={() => { void save(); }} disabled={saving || (attempted && !saveEnabled) || (!isCreate && !dirty)}>
+              <Button type="button" size="sm" data-testid="cal-editor-save" onClick={() => { void save(); }} disabled={saving || (attempted && !saveEnabled) || (!isCreate && !dirty)}>
                 {saving ? 'Salvataggio…' : 'Salva'}
               </Button>
             )}
@@ -831,6 +873,17 @@ function EditorBody({ view, calendars, initial, initialStart, initialEnd, initia
           onChoose={onScopeChosen}
           onCancel={() => setScopeAsk(null)}
         />
+        {historyOpen && showHistory && view?.id && (
+          <HistoryDrawer
+            objectId={view.id}
+            etag={view.etag}
+            tz={calendarTz}
+            canRestore={textWritable}
+            formDirty={dirty || rawDirty}
+            onClose={() => setHistoryOpen(false)}
+            onRestored={reloadFrom}
+          />
+        )}
         {conflict && (
           <ConflictDialog
             key={conflict.body.current.etag ?? 'conflict'}

@@ -8,10 +8,12 @@ import {
   type CalV2ObjectView,
   type CalV2Param,
   type CalV2Property,
+  type CalV2WriteResult,
 } from '@calicchia/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { objectIcsUrl } from '@/lib/calendar-v2-api';
+import { RawIcsEditor } from '@/components/calendar/raw-ics-editor';
+import { objectExportUrl, objectIcsUrl } from '@/lib/calendar-v2-api';
 import { describeTime } from '@/lib/calendar-v2-model';
 
 export interface TabAvanzateProps {
@@ -22,6 +24,17 @@ export interface TabAvanzateProps {
   extra: Record<string, CalV2Property[]>;
   onExtraChange: (next: Record<string, CalV2Property[]>) => void;
   disabled: boolean;
+  /** Con `caps.raw_edit`: l'ICS diventa un editor scrivibile (contratto §9.2.2). Assente = sola lettura. */
+  rawEditor?: {
+    /** Scrittura del testo non ammessa ora (l'ICS resta leggibile). */
+    disabled: boolean;
+    disabledReason: string | null;
+    onApplied: (result: CalV2WriteResult) => void;
+    onReload: (next: CalV2ObjectView) => void;
+    onDirtyChange: (dirty: boolean) => void;
+  } | null;
+  /** `caps.object_tools`: "Esporta .ics" al posto di "Scarica". */
+  objectTools?: boolean;
 }
 
 const INPUT = 'px-3 py-2 text-sm rounded-md border bg-background disabled:opacity-60';
@@ -59,7 +72,7 @@ function ReadonlyRow({ label, children }: { label: string; children: React.React
 }
 
 /** Tab "Avanzate": proprietà non tipizzate modificabili e, in sola lettura, metadati e ICS grezzo. */
-export function TabAvanzate({ mode, view, target, extra, onExtraChange, disabled }: TabAvanzateProps) {
+export function TabAvanzate({ mode, view, target, extra, onExtraChange, disabled, rawEditor = null, objectTools = false }: TabAvanzateProps) {
   const [preset, setPreset] = useState(PRESETS[0].name);
   const [customName, setCustomName] = useState('X-');
   const [newValue, setNewValue] = useState('');
@@ -215,23 +228,38 @@ export function TabAvanzate({ mode, view, target, extra, onExtraChange, disabled
 
           <section className="space-y-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="text-sm font-medium">ICS grezzo (sola lettura)</h4>
+              <h4 className="text-sm font-medium">{rawEditor ? 'Testo ICS' : 'ICS grezzo (sola lettura)'}</h4>
               <div className="flex gap-2">
                 <Button type="button" size="sm" variant="outline" onClick={() => { void copyIcs(); }}>
                   <Copy className="h-3.5 w-3.5 mr-1.5" /> Copia
                 </Button>
                 {view.id && (
                   <Button type="button" size="sm" variant="outline" asChild>
-                    <a href={objectIcsUrl(view.id)} download={`${view.uid}.ics`}>
-                      <Download className="h-3.5 w-3.5 mr-1.5" /> Scarica
+                    <a
+                      href={objectTools ? objectExportUrl(view.id) : objectIcsUrl(view.id)}
+                      download={`${view.uid}.ics`}
+                      data-testid="cal-export-ics"
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1.5" /> {objectTools ? 'Esporta .ics' : 'Scarica'}
                     </a>
                   </Button>
                 )}
               </div>
             </div>
-            <pre className="max-h-72 overflow-auto rounded-md border bg-muted/40 p-3 text-[11px] leading-snug whitespace-pre-wrap break-all font-mono">
-              {view.ics}
-            </pre>
+            {rawEditor && view.id ? (
+              <RawIcsEditor
+                view={view}
+                disabled={rawEditor.disabled}
+                disabledReason={rawEditor.disabledReason}
+                onApplied={rawEditor.onApplied}
+                onReload={rawEditor.onReload}
+                onDirtyChange={rawEditor.onDirtyChange}
+              />
+            ) : (
+              <pre className="max-h-72 overflow-auto rounded-md border bg-muted/40 p-3 text-[11px] leading-snug whitespace-pre-wrap break-all font-mono">
+                {view.ics}
+              </pre>
+            )}
           </section>
         </>
       )}

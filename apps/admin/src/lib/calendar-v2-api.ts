@@ -16,7 +16,13 @@ import type {
   CalV2ObjectView,
   CalV2PatchRequest,
   CalV2PreconditionFailedBody,
+  CalV2RawPutRequest,
+  CalV2RestoreRequest,
   CalV2Scope,
+  CalV2TrashList,
+  CalV2TrashRestoreRequest,
+  CalV2VersionDetail,
+  CalV2VersionList,
   CalV2WriteResult,
 } from '@calicchia/shared';
 import { API_BASE, refreshAdminSession, sessionState } from './api';
@@ -24,11 +30,18 @@ import { getStoredAdminLocale, toIntlLocale } from './i18n-storage';
 
 export const CAL_V2_BASE = '/api/admin/calendar/v2';
 
+/** Timeout di ogni richiesta v2 (§9.2.1): oltre, `CalV2ApiError` con stato 0 e codice `TIMEOUT`. */
+export const CAL_V2_FETCH_TIMEOUT_MS = 5_000;
+
 export const calV2Keys = {
   capabilities: ['admin-calendar-v2-capabilities'] as const,
   object: (id: string, target: string) => ['admin-calendar-v2-object', id, target] as const,
   /** Anteprima (dryRun) con debounce: la chiave porta il corpo serializzato della richiesta. */
   preview: (id: string, payload: string) => ['admin-calendar-v2-preview', id, payload] as const,
+  /** Cronologia di un oggetto (A1). */
+  versions: (id: string) => ['admin-calendar-v2-versions', id] as const,
+  /** Cestino, filtrato per calendario (`null` = tutti) (A1). */
+  trash: (calendarId: string | null) => ['admin-calendar-v2-trash', calendarId] as const,
 };
 
 // ─── Errori ───────────────────────────────
@@ -74,13 +87,43 @@ function isPreconditionBody(body: unknown): body is CalV2PreconditionFailedBody 
   return b.code === 'PRECONDITION_FAILED' && !!b.current && typeof b.current === 'object' && Array.isArray(b.conflicts);
 }
 
+/**
+ * `fetch` con timeout (`CAL_V2_FETCH_TIMEOUT_MS`): un `AbortController` interno
+ * si unisce a `init.signal`. Se scatta il timeout lancia `CalV2ApiError`
+ * (stato 0, codice `TIMEOUT`); un abort del chiamante resta l'`AbortError`
+ * originale. Il timer copre l'attesa delle intestazioni della risposta.
+ */
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const outer = init.signal;
+  let timedOut = false;
+  const onOuterAbort = () => controller.abort(outer?.reason);
+  if (outer) {
+    if (outer.aborted) controller.abort(outer.reason);
+    else outer.addEventListener('abort', onOuterAbort, { once: true });
+  }
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, CAL_V2_FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (timedOut) throw new CalV2ApiError('Il server del calendario non risponde', 0, 'TIMEOUT', null);
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    outer?.removeEventListener('abort', onOuterAbort);
+  }
+}
+
 async function v2Fetch(path: string, init: RequestInit = {}, retryAuth = true): Promise<Response> {
   const headers = new Headers(init.headers);
   if (!headers.has('Content-Type') && init.body) headers.set('Content-Type', 'application/json');
   const locale = getStoredAdminLocale();
   headers.set('Accept-Language', toIntlLocale(locale));
   headers.set('X-Admin-Locale', locale);
-  const res = await fetch(`${API_BASE}${CAL_V2_BASE}${path}`, { ...init, headers, credentials: 'include' });
+  const res = await fetchWithTimeout(`${API_BASE}${CAL_V2_BASE}${path}`, { ...init, headers, credentials: 'include' });
   if (res.ok) {
     sessionState.lastActivity = Date.now();
     return res;
@@ -112,7 +155,7 @@ async function getJson<T>(path: string): Promise<T> {
   return (await v2Fetch(path)).json() as Promise<T>;
 }
 
-async function sendJson<T>(method: 'POST' | 'PATCH', path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
+async function sendJson<T>(method: 'POST' | 'PATCH' | 'PUT', path: string, body: unknown, headers?: Record<string, string>): Promise<T> {
   return (await v2Fetch(path, { method, body: JSON.stringify(body ?? {}), headers })).json() as Promise<T>;
 }
 
@@ -179,4 +222,46 @@ export async function deleteObjectV2(
 /** URL dell'ICS grezzo dell'oggetto (`text/calendar`, stessa autenticazione dei cookie). */
 export function objectIcsUrl(id: string): string {
   return `${API_BASE}${CAL_V2_BASE}/objects/${encodeURIComponent(id)}/ics`;
+}
+
+/** Salva il testo ICS completo dell'oggetto (`If-Match` esatto): nessuna fusione per campi, 412 con la versione corrente. Con `req.dryRun` solo validazione. */
+export function putObjectIcsV2(id: string, etag: string, req: CalV2RawPutRequest): Promise<CalV2WriteResult> {
+  return sendJson<CalV2WriteResult>('PUT', `/objects/${encodeURIComponent(id)}/ics`, req, { 'If-Match': etag });
+}
+
+/** URL dell'export `.ics` dell'oggetto (`Content-Disposition: attachment`). */
+export function objectExportUrl(id: string): string {
+  return `${API_BASE}${CAL_V2_BASE}/objects/${encodeURIComponent(id)}/export.ics`;
+}
+
+// ─── Cronologia e cestino ───────────────────────────────
+
+/** Versioni dell'oggetto (dalla più recente, conservazione di `retention_days`). */
+export function listVersionsV2(id: string): Promise<CalV2VersionList> {
+  return getJson<CalV2VersionList>(`/objects/${encodeURIComponent(id)}/versions`);
+}
+
+/** Una versione con il suo testo ICS e la vista calcolata. */
+export function getVersionV2(id: string, versionId: string): Promise<CalV2VersionDetail> {
+  return getJson<CalV2VersionDetail>(`/objects/${encodeURIComponent(id)}/versions/${encodeURIComponent(versionId)}`);
+}
+
+/** Ripristina una versione sull'oggetto vivo (`If-Match` esatto). Con `req.dryRun` solo valutazione. */
+export function restoreVersionV2(id: string, etag: string, req: CalV2RestoreRequest): Promise<CalV2WriteResult> {
+  return sendJson<CalV2WriteResult>('POST', `/objects/${encodeURIComponent(id)}/restore`, req, { 'If-Match': etag });
+}
+
+/** Oggetti eliminati ripristinabili, dal più recente; `before` è il cursore `next` della pagina precedente. */
+export function listTrashV2(q: { calendarId?: string; before?: string; limit?: number } = {}): Promise<CalV2TrashList> {
+  const params = new URLSearchParams();
+  if (q.calendarId) params.set('calendar_id', q.calendarId);
+  if (q.before) params.set('before', q.before);
+  if (q.limit) params.set('limit', String(q.limit));
+  const qs = params.toString();
+  return getJson<CalV2TrashList>(`/trash${qs ? `?${qs}` : ''}`);
+}
+
+/** Ripristina un oggetto eliminato (201). Con `req.dryRun` solo valutazione. */
+export function restoreTrashV2(objectId: string, req: CalV2TrashRestoreRequest): Promise<CalV2WriteResult> {
+  return sendJson<CalV2WriteResult>('POST', `/trash/${encodeURIComponent(objectId)}/restore`, req);
 }
