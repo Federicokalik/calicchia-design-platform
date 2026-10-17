@@ -3,6 +3,13 @@ import { sql } from '../db';
 
 export const clientProjects = new Hono();
 
+/** Data `YYYY-MM-DD` esistente nel calendario (2026-02-30 no): un valore non valido non filtra. */
+function validDay(value: string | undefined): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
 const PREVIEW_PROVIDERS = ['netlify', 'vercel', 'wordpress', 'custom'] as const;
 const PREVIEW_STATUSES = ['draft', 'review', 'approved', 'archived'] as const;
 type PreviewProvider = typeof PREVIEW_PROVIDERS[number];
@@ -145,11 +152,18 @@ clientProjects.get('/', async (c) => {
     ? sql`AND (name ILIKE ${'%' + search + '%'} OR customer_name ILIKE ${'%' + search + '%'} OR customer_company ILIKE ${'%' + search + '%'})`
     : sql``;
 
+  // Finestra di sovrapposizione (estremi inclusi) per la vista calendario e il widget agenda:
+  // progetti con start_date <= overlap_to e coalesce(target_end_date, start_date) >= overlap_from.
+  const overlapFrom = c.req.query('overlap_from');
+  const overlapTo = c.req.query('overlap_to');
+  const overlapFromFilter = validDay(overlapFrom) ? sql`AND COALESCE(target_end_date, start_date) >= ${overlapFrom}::date` : sql``;
+  const overlapToFilter = validDay(overlapTo) ? sql`AND start_date <= ${overlapTo}::date` : sql``;
+
   const [projects, allProjects] = await Promise.all([
     sql`
       SELECT *, COUNT(*) OVER() AS _total_count
       FROM client_projects_view
-      WHERE 1=1 ${statusFilter} ${customerFilter} ${typeFilter} ${categoryFilter} ${searchFilter}
+      WHERE 1=1 ${statusFilter} ${customerFilter} ${typeFilter} ${categoryFilter} ${searchFilter} ${overlapFromFilter} ${overlapToFilter}
       ORDER BY updated_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `,

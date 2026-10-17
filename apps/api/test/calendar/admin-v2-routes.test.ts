@@ -150,8 +150,8 @@ describe('capacità per modo (§2)', () => {
     assert.deepEqual(res.json.objects, { read: true, write: true, dry_run: true, scopes: ['this', 'this_and_future', 'all'] });
     assert.deepEqual(res.json.reasons, []);
     // Tranche C: ogni passo accende il proprio flag (C1: editor raw, strumenti sull'oggetto, cronologia, cestino;
-    // C2: proprietà dei calendari, import ed export).
-    for (const flag of ['raw_edit', 'object_tools', 'history', 'trash', 'calendar_properties', 'import_export']) assert.equal(res.json[flag], true, `radicale: ${flag}`);
+    // C2: proprietà dei calendari, import ed export; C3: pagina Salute e vista a occorrenze).
+    for (const flag of ['raw_edit', 'object_tools', 'history', 'trash', 'calendar_properties', 'import_export', 'health_page', 'occurrences']) assert.equal(res.json[flag], true, `radicale: ${flag}`);
 
     await setState('radicale', { freeze: true });
     res = await api.get(`${BASE}/capabilities`, { auth: 'admin' });

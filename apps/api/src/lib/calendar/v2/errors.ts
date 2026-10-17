@@ -154,6 +154,18 @@ export function calendarNotEmpty(objectCount: number): CalendarV2Error {
   return new CalendarV2Error('CALENDAR_NOT_EMPTY', 409, 'Il calendario contiene eventi: confermane l\'eliminazione insieme agli eventi', { object_count: objectCount });
 }
 
+// ─── Salute e hold (tranche C, passo C3, contratto §9.8) ───────────────────────────────
+
+/** 400 CONFIRMATION_REQUIRED: conferma digitata assente o diversa da quella attesa. */
+export function confirmationRequired(expected: string): CalendarV2Error {
+  return new CalendarV2Error('CONFIRMATION_REQUIRED', 400, `Per confermare scrivi esattamente: ${expected}`, { expected });
+}
+
+/** 409 NOT_IN_HOLD: azione di hold su una collezione che non ha cancellazioni sospese. */
+export function notInHold(): CalendarV2Error {
+  return new CalendarV2Error('NOT_IN_HOLD', 409, 'Questo calendario non ha cancellazioni sospese: non c\'è nulla da applicare o ricostruire');
+}
+
 // ─── Mappatura degli errori del dominio ───────────────────────────────
 
 /**

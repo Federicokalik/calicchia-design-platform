@@ -19,7 +19,7 @@
  *  - nessun testo di evento nei log.
  */
 
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { CAL_V2_SCOPES, type CalV2Scope } from '@calicchia/shared';
 import { logger } from '../../lib/logger';
@@ -37,9 +37,11 @@ import {
 } from '../../lib/calendar/v2/calendars';
 import { assertV2ObjectsAvailable, readCalendarV2Capabilities } from '../../lib/calendar/v2/capabilities';
 import { CalendarV2Error, invalidValue, payloadTooLarge, v2ErrorFrom } from '../../lib/calendar/v2/errors';
+import { holdActionV2, parseHoldActionRequest } from '../../lib/calendar/v2/hold';
 import { getVersionV2, listTrashV2, listVersionsV2, parseRestoreRequest, parseTrashQuery, parseTrashRestoreRequest, restoreFromTrashV2, restoreVersionV2 } from '../../lib/calendar/v2/history';
 import { duplicateObjectV2, moveObjectV2, parseDuplicateRequest, parseMoveRequest } from '../../lib/calendar/v2/move';
 import { IMPORT_MAX_BYTES, importCalendarV2, openCalendarExportV2, parseImportRequest, readJobV2 } from '../../lib/calendar/v2/import-export';
+import { listOccurrencesV2, listOverlaysV2, parseCalendarIds, parseOccurrenceWindow } from '../../lib/calendar/v2/occurrences';
 import { parseRawPutRequest, putRawIcsV2 } from '../../lib/calendar/v2/raw';
 import {
   createObjectV2,
@@ -51,6 +53,7 @@ import {
   readObjectV2,
   requireIfMatch,
 } from '../../lib/calendar/v2/objects';
+import { getSyncStateV2 } from '../../lib/calendar/v2/sync-state';
 import { sameOriginWrites } from '../../lib/http/same-origin-writes';
 
 const log = logger.child({ scope: 'calendar-admin-v2-routes' });
@@ -352,4 +355,39 @@ calendarAdminV2.post('/calendars/:id/import', importBodyLimit, async (c) => {
 calendarAdminV2.get('/jobs/:jobId', async (c) => {
   c.header('Cache-Control', 'no-store');
   return c.json(await readJobV2(c.req.param('jobId')));
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C3 (contratto §9.1.5, §9.1.6): salute e vista
+// ═══════════════════════════════════════════════════════════════════
+
+calendarAdminV2.get('/sync-state', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await getSyncStateV2());
+});
+
+/** Azioni sulla collezione in hold: dry_run → 200 piano; commit (+ Idempotency-Key) → 202 job. */
+async function holdRoute(c: Context<Env>, action: 'apply_deletions' | 'rebuild_from_index'): Promise<Response> {
+  await assertV2ObjectsAvailable();
+  const req = parseHoldActionRequest(await readJson(c));
+  const res = await holdActionV2(action, c.req.param('id'), req, c.req.header('Idempotency-Key'), actorOf(c));
+  c.header('Cache-Control', 'no-store');
+  return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200);
+}
+
+calendarAdminV2.post('/collections/:id/apply-deletions', (c) => holdRoute(c, 'apply_deletions'));
+
+calendarAdminV2.post('/collections/:id/rebuild-from-index', (c) => holdRoute(c, 'rebuild_from_index'));
+
+calendarAdminV2.get('/occurrences', async (c) => {
+  const { from, to } = parseOccurrenceWindow(c.req.query('from'), c.req.query('to'));
+  const calendarIds = parseCalendarIds(c.req.queries('calendar_id') ?? []);
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listOccurrencesV2({ from, to, calendarIds }));
+});
+
+calendarAdminV2.get('/overlays', async (c) => {
+  const { from, to } = parseOccurrenceWindow(c.req.query('from'), c.req.query('to'));
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listOverlaysV2({ from, to }));
 });

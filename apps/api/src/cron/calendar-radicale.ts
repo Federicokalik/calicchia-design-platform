@@ -83,6 +83,7 @@ import {
   startReverseProjectionTrigger,
 } from '../lib/calendar/migration/reverse-projector';
 import { readTransitionView } from '../lib/calendar/migration/transition';
+import { registerCalendarHoldJobs } from '../lib/calendar/v2/hold';
 import { registerCalendarImportJob } from '../lib/calendar/v2/import-export';
 import { logger } from '../lib/logger';
 
@@ -144,8 +145,9 @@ async function startComponents(): Promise<void> {
     registerShadowMirrorJob();
     // Passaggio a Radicale (F4): proiezione inversa nella finestra di rollback.
     registerReverseProjectionJob();
-    // Admin v2 (F6): import di file ICS.
+    // Admin v2 (F6): import di file ICS, azioni di hold.
     registerCalendarImportJob();
+    registerCalendarHoldJobs();
   } catch (err) {
     log.error({ err }, 'registrazione degli handler dei job del calendario non riuscita');
   }
