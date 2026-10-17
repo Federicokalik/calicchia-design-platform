@@ -15,10 +15,12 @@
  *   quelli scritti dai device;
  * - override nella risorsa del master, con lo stesso UID; gli override
  *   STATUS:CANCELLED diventano EXDATE del master (tipizzati come il DTSTART);
- * - UID: per gli oggetti migrati `${legacyUid}@${uidDomain}` (cal_object_ids,
- *   l'UID che gli abbonati vedono oggi: il feed legacy aggiunge sempre il
- *   dominio); gli altri UID senza '@' ricevono il suffisso `@${uidDomain}`;
- *   gli UID con '@' passano invariati;
+ * - UID: formula del feed legacy (ics-feed.ts, `${uid}@${uidDomain}`), per
+ *   ogni oggetto e anche se l'UID contiene già '@': `${legacyUid}@${uidDomain}`
+ *   con l'UID della riga legacy (cal_object_ids.legacy_uid per i migrati; per
+ *   gli altri l'UID della riga che la proiezione inversa scrive o scriverebbe,
+ *   passato dal chiamante), altrimenti `${uid}@${uidDomain}`. Dopo un rollback
+ *   gli abbonati rivedono quindi lo stesso UID (design §13.5 del contratto F4);
  * - DTSTAMP stabile: LAST-MODIFIED se presente, altrimenti firstSeenAt;
  * - privacy per costruzione (whitelist): passano solo le proprietà di
  *   FEED_PROPERTY_WHITELIST; niente VALARM, ATTENDEE, ORGANIZER né X-*;
@@ -92,9 +94,11 @@ import { DEFAULT_TZ, findVtimezone, ianaZone, isIanaTzid, msToWall, resolveTzid 
 /**
  * Versione della trasformazione: entra nella chiave della cache dell'ETag lato
  * API. 2: parametri dei campi TEXT ridotti a LANGUAGE, VTIMEZONE personalizzati
- * in conflitto rinominati, folding senza continuazioni di soli spazi.
+ * in conflitto rinominati, folding senza continuazioni di soli spazi. 3: UID
+ * con la formula del feed legacy per ogni oggetto (`<uid della riga>@dominio`,
+ * anche se l'UID contiene '@').
  */
-export const FEED_TRANSFORM_VERSION = 2;
+export const FEED_TRANSFORM_VERSION = 3;
 
 /** Proprietà dei VEVENT che passano nel feed. */
 export const FEED_PROPERTY_WHITELIST = [
@@ -181,9 +185,12 @@ export interface FeedObjectInput {
   /** cal_objects.first_seen_at: DTSTAMP stabile quando manca LAST-MODIFIED. */
   firstSeenAt: Date;
   /**
-   * cal_object_ids.legacy_uid degli oggetti migrati (proiezioni comprese), o
-   * null: l'UID pubblicato diventa `${legacyUid}@${uidDomain}`, identico a
-   * quello del feed legacy anche per gli UID legacy che contengono '@'.
+   * UID della riga legacy dell'oggetto: cal_object_ids.legacy_uid dei migrati
+   * (proiezioni comprese) o l'UID della riga proiettata dalla proiezione
+   * inversa (anche sanificato, o `<uid>@caldes.it` delle prenotazioni). L'UID
+   * pubblicato diventa `${legacyUid}@${uidDomain}`, identico a quello del feed
+   * legacy anche per gli UID che contengono '@'. Null o assente: l'UID
+   * dell'oggetto con lo stesso suffisso.
    */
   legacyUid?: string | null;
   /** cal_objects.range_start (ms UTC), se noto: evita di ricalcolare l'estensione. */
@@ -233,10 +240,8 @@ const TEXT_PROPERTIES: ReadonlySet<string> = new Set(['SUMMARY', 'DESCRIPTION', 
 
 /** UID pubblicato nel feed per un oggetto (regole in testa al modulo). */
 export function feedUid(uid: string, opts: { uidDomain: string; legacyUid?: string | null }): string {
-  const legacy = opts.legacyUid?.trim();
-  if (legacy) return `${legacy}@${opts.uidDomain}`;
-  const u = uid.trim();
-  return u.includes('@') ? u : `${u}@${opts.uidDomain}`;
+  const base = opts.legacyUid?.trim() || uid.trim();
+  return `${base}@${opts.uidDomain}`;
 }
 
 /** Un oggetto → componenti del feed, o null se escluso (cancellato o fuori finestra). */

@@ -258,7 +258,7 @@ describe('feed dall\'indice: contenuto (design §10)', () => {
     const { body } = await feedAt(sc.cal, DAY1);
     assert.ok(!summaries(body).includes('Annullato'), 'master STATUS:CANCELLED (anche da device) mai nel feed');
     assert.ok(!/STATUS:CANCELLED/.test(body));
-    const series = icsEvents(body).filter((e) => icsProp(e, 'UID') === 'serie-feed@test.invalid');
+    const series = icsEvents(body).filter((e) => icsProp(e, 'UID') === `serie-feed@test.invalid@${UID_DOMAIN}`);
     assert.equal(series.length, 2, 'master e override spostato, con lo stesso UID');
     const master = series.find((e) => icsProp(e, 'RRULE')) as string[];
     assert.ok(master.some((l) => /^EXDATE;TZID=Europe\/Rome:20270107T090000$/.test(l)), `EXDATE dell'occorrenza cancellata: ${master.join(' | ')}`);
@@ -284,16 +284,16 @@ describe('feed dall\'indice: contenuto (design §10)', () => {
     assert.ok(lines.includes('PRODID:-//Caldes//Calendar//IT'));
   });
 
-  test('UID: suffisso del dominio per gli UID senza @, gli altri invariati', async () => {
+  test('UID: sempre il suffisso del dominio, come il feed legacy, anche per gli UID con @', async () => {
     const { body } = await feedAt(sc.cal, DAY1);
     assert.equal(icsProp(eventBy(body, 'Riunione'), 'UID'), `singolo-feed@${UID_DOMAIN}`);
-    assert.equal(icsProp(eventBy(body, 'Occupato'), 'UID'), 'privato-feed@test.invalid');
+    assert.equal(icsProp(eventBy(body, 'Occupato'), 'UID'), `privato-feed@test.invalid@${UID_DOMAIN}`);
   });
 
-  test('UID legacy delle proiezioni migrate (legacy_uid@CAL_FEED_UID_DOMAIN), le nuove con <uid>@caldes.it', async () => {
+  test('UID legacy delle proiezioni migrate (legacy_uid@CAL_FEED_UID_DOMAIN), le nuove <uid>@caldes.it@CAL_FEED_UID_DOMAIN', async () => {
     const { body } = await feedAt(sc.bookings, DAY1);
     assert.equal(icsProp(eventBy(body, `${sc.eventType.title} – Mario Rossi`), 'UID'), `uid-legacy-proiezione@${UID_DOMAIN}`);
-    assert.equal(icsProp(eventBy(body, `${sc.eventType.title} – Anna Neri`), 'UID'), `${sc.plainProjectionUid}@caldes.it`);
+    assert.equal(icsProp(eventBy(body, `${sc.eventType.title} – Anna Neri`), 'UID'), `${sc.plainProjectionUid}@caldes.it@${UID_DOMAIN}`);
   });
 
   test('proiezioni: contenuto della decisione 3 ricomposto da calendar_bookings al momento del feed, qualunque sia il testo in Radicale', async () => {
@@ -305,7 +305,7 @@ describe('feed dall\'indice: contenuto (design §10)', () => {
     // Luogo e link della riunione come la risorsa scritta dall'API (event type custom_url).
     assert.equal(icsProp(migrated, 'URL'), sc.eventType.location_value);
     // Prenotazione sparita (erasure): solo "Prenotazione", senza descrizione né telefono.
-    const gone = icsEvents(body).find((e) => icsProp(e, 'UID') === `${sc.goneProjectionUid}@caldes.it`);
+    const gone = icsEvents(body).find((e) => icsProp(e, 'UID') === `${sc.goneProjectionUid}@caldes.it@${UID_DOMAIN}`);
     assert.ok(gone, 'la proiezione senza prenotazione resta nel feed come "Prenotazione"');
     assert.equal(icsProp(gone, 'SUMMARY'), 'Prenotazione');
     assert.equal(icsProp(gone, 'DESCRIPTION'), undefined);
@@ -323,8 +323,8 @@ describe('feed dall\'indice: contenuto (design §10)', () => {
     clearIndexFeedCache();
     const { body } = await feedAt(sc.cal, DAY1);
     assert.equal(icsProp(eventBy(body, 'Migrato da iCloud'), 'UID'), `ABC-123@icloud.com@${UID_DOMAIN}`);
-    // Un UID con '@' di un oggetto non migrato resta invariato.
-    assert.equal(icsProp(eventBy(body, 'Occupato'), 'UID'), 'privato-feed@test.invalid');
+    // Anche un UID con '@' di un oggetto non migrato riceve il dominio.
+    assert.equal(icsProp(eventBy(body, 'Occupato'), 'UID'), `privato-feed@test.invalid@${UID_DOMAIN}`);
   });
 
   test('iscrizioni mai nel feed del calendario di destinazione', async () => {

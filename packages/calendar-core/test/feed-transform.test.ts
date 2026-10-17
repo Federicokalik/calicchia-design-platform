@@ -86,11 +86,12 @@ const liveFeed = existsSync(FEED_PATH)
   : null;
 
 describe('feedUid', () => {
-  test('oggetti migrati: UID legacy più dominio (anche se contiene @); altri: suffisso solo senza @', () => {
+  test('UID legacy (o della riga proiettata) più dominio, anche se contiene @; senza: UID dell\'oggetto più dominio', () => {
     assert.equal(feedUid('bk7Hq2xLm9Pa@caldes.it', { uidDomain: DOMAIN, legacyUid: 'projlegacy000001' }), 'projlegacy000001@api.caldes.test');
     assert.equal(feedUid('evt@google.com', { uidDomain: DOMAIN, legacyUid: 'evt@google.com' }), 'evt@google.com@api.caldes.test');
     assert.equal(feedUid('nanoid0000000001', { uidDomain: DOMAIN }), 'nanoid0000000001@api.caldes.test');
-    assert.equal(feedUid('ABC-123@icloud.com', { uidDomain: DOMAIN, legacyUid: null }), 'ABC-123@icloud.com');
+    assert.equal(feedUid('ABC-123@icloud.com', { uidDomain: DOMAIN, legacyUid: null }), 'ABC-123@icloud.com@api.caldes.test');
+    assert.equal(feedUid('ABC-123', { uidDomain: DOMAIN, legacyUid: 'ABC-123@c-sanificata' }), 'ABC-123@c-sanificata@api.caldes.test');
   });
 });
 
@@ -346,7 +347,8 @@ describe('privacy e DTSTAMP', () => {
     const parsed = splitCalendar(parseIcsOrThrow(body));
     assert.equal(parsed.objects.length, 3);
     for (const obj of parsed.objects) {
-      const original = { 'ny@x': ny, 'rome@x': rome, 'rome2@x': rome }[obj.uid] as CalendarObject;
+      // UID pubblicato: `<uid>@<dominio>` anche per gli UID che contengono già '@'.
+      const original = { 'ny@x': ny, 'rome@x': rome, 'rome2@x': rome }[obj.uid.slice(0, -`@${DOMAIN}`.length)] as CalendarObject;
       assert.equal(toLegacyEventFields(obj.master as IcsComponent, ctx(obj)).start_time, indexStart(original), obj.uid);
     }
     // Due VTIMEZONE: quello condiviso dalle due definizioni uguali e quello rinominato.

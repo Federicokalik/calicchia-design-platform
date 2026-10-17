@@ -19,14 +19,16 @@
  *    cancellate come EXDATE, VTIMEZONE deduplicati;
  *  - whitelist delle proprietà (niente VALARM, ATTENDEE, ORGANIZER, X-*) e
  *    CLASS:PRIVATE/CONFIDENTIAL → "Occupato";
- *  - UID: `legacy_uid@CAL_FEED_UID_DOMAIN` per gli oggetti migrati
- *    (cal_object_ids.legacy_uid, l'UID che gli abbonati vedono oggi, anche
- *    per le proiezioni delle prenotazioni); un oggetto migrato senza
- *    legacy_uid (legacy_event_id valorizzato) usa il proprio UID con il
- *    dominio, sempre, come il feed legacy (`${uid}@dominio` anche per gli UID
- *    con '@'): gli abbonati non vedono duplicati dopo il cutover. Gli altri
- *    oggetti: suffisso `@CAL_FEED_UID_DOMAIN` per gli UID senza '@', gli
- *    altri invariati;
+ *  - UID: la formula del feed legacy (`${uid}@CAL_FEED_UID_DOMAIN`, anche per
+ *    gli UID che contengono già '@'), con l'UID della riga legacy
+ *    dell'oggetto: `cal_object_ids.legacy_uid` per i migrati (anche per le
+ *    proiezioni delle prenotazioni, l'UID che gli abbonati vedono oggi);
+ *    altrimenti l'UID della riga che la proiezione inversa ha scritto in
+ *    calendar_events (feedLegacyUids), o che scriverebbe (UID iCalendar se
+ *    libero, `<UID>@<collezione>` se già usato, `<uid>@caldes.it` per le
+ *    prenotazioni). Gli oggetti nati nella finestra di rollback (prenotazioni,
+ *    device con UID con '@', UID sanificati) mantengono quindi lo stesso UID
+ *    dopo un rollback e gli abbonati non vedono duplicati (contratto F4 §13.5);
  *  - proiezioni delle prenotazioni (risorse booking-<uid>.ics, source
  *    'booking'): il contenuto si ricompone al momento del feed dai dati
  *    correnti di calendar_bookings e calendar_event_types con la decisione 3
@@ -72,6 +74,7 @@ import {
   FEED_FUTURE_DAYS,
   FEED_PAST_DAYS,
   FEED_TRANSFORM_VERSION,
+  bookingProjectionUid,
   type FeedObjectInput,
   parseCalendarObject,
 } from '@calicchia/calendar-core';
@@ -179,6 +182,7 @@ export function clearIndexFeedCache(): void {
 
 interface CollectionVersionRow {
   role: string;
+  collection_name: string | null;
   updated_at: Date | null;
   timezone: string | null;
   index_version: string | null;
@@ -197,13 +201,14 @@ interface FeedObjectRow {
   source: string | null;
   source_id: string | null;
   legacy_uid: string | null;
-  legacy_event_id: string | null;
+  /** calendar_events.uid della riga legacy dell'oggetto (migrata o proiettata dalla F4), se esiste. */
+  projected_uid: string | null;
   last_good_raw: string | null;
 }
 
 async function readCollectionVersion(db: Db, calendarId: string): Promise<CollectionVersionRow | null> {
   const [row] = await db<CollectionVersionRow[]>`
-    SELECT c.role, c.updated_at, c.timezone,
+    SELECT c.role, c.collection_name, c.updated_at, c.timezone,
            st.index_version::text AS index_version, st.origin_store,
            st.last_synced_at, st.last_full_sync_at,
            (SELECT b.rebuild_required FROM calendar_backend_state b LIMIT 1) AS rebuild_required
@@ -225,10 +230,11 @@ async function readFeedObjects(db: Db, calendarId: string, from: Date, to: Date)
   const toSlack = new Date(to.getTime() + 2 * DAY_MS);
   return db<FeedObjectRow[]>`
     SELECT o.id, o.href, o.raw_ics, o.health, o.first_seen_at, o.source, o.source_id,
-           ids.legacy_uid, ids.legacy_event_id::text AS legacy_event_id,
+           ids.legacy_uid, ev.uid AS projected_uid,
            CASE WHEN o.health <> 'ok' THEN v.raw_ics END AS last_good_raw
     FROM cal_objects o
     LEFT JOIN cal_object_ids ids ON ids.id = o.id
+    LEFT JOIN calendar_events ev ON ev.id = COALESCE(ids.legacy_event_id, o.id)
     LEFT JOIN cal_object_versions v ON v.id = o.last_good_version_id
     WHERE o.calendar_id = ${calendarId}::uuid
       AND o.origin_store = 'radicale'
@@ -247,7 +253,7 @@ async function readFeedObjects(db: Db, calendarId: string, from: Date, to: Date)
 
 // ─── Proiezioni delle prenotazioni (decisione 3) ───────────────────────────────
 
-/** Prenotazioni lette per volta (ANY di un array: una query anche per molte proiezioni). */
+/** Prenotazioni o UID letti per volta (ANY di un array: una query anche per molte proiezioni). */
 const MAX_BOOKINGS_PER_QUERY = 1_000;
 
 /**
@@ -271,6 +277,55 @@ interface ProjectionBookingRow {
   event_title: string | null;
   event_location_type: EventType['location_type'] | null;
   event_location_value: string | null;
+}
+
+/** Oggetto del feed con la sua riga indicizzata. */
+interface FeedEntry {
+  row: FeedObjectRow;
+  object: CalendarObject;
+  /** source_id della proiezione di una prenotazione, o null. */
+  bookingUid: string | null;
+}
+
+/**
+ * UID della riga legacy di ogni oggetto, quello che il feed legacy (ics-feed.ts,
+ * `${uid}@dominio`) pubblicherebbe dopo un rollback (contratto F4 §13.5):
+ *  - `cal_object_ids.legacy_uid` se esiste (oggetti migrati o già riassegnati
+ *    da una ri-baseline);
+ *  - altrimenti l'UID della riga di calendar_events dell'oggetto (migrata, o
+ *    scritta dalla proiezione inversa, anche sanificata);
+ *  - altrimenti, se la proiezione inversa non è ancora passata, l'UID che
+ *    assegnerebbe (resolveMasterUid e projectBooking): l'UID iCalendar (o
+ *    `<uid>@caldes.it` per la proiezione di una prenotazione) se nessuna riga
+ *    lo usa, `<UID>@<collezione>` altrimenti. Così l'UID pubblicato non cambia
+ *    quando la riga viene scritta.
+ */
+async function feedLegacyUids(db: Db, collectionName: string | null, entries: readonly FeedEntry[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const pending: Array<{ id: string; preferred: string }> = [];
+  for (const { row, object, bookingUid } of entries) {
+    const known = row.legacy_uid || row.projected_uid;
+    if (known) out.set(row.id, known);
+    else pending.push({ id: row.id, preferred: bookingUid ? bookingProjectionUid(bookingUid) : object.uid });
+  }
+  if (pending.length === 0) return out;
+  const used = new Set<string>();
+  const candidates = [...new Set(pending.map((p) => p.preferred))];
+  for (let i = 0; i < candidates.length; i += MAX_BOOKINGS_PER_QUERY) {
+    const chunk = candidates.slice(i, i + MAX_BOOKINGS_PER_QUERY);
+    for (const r of await db<Array<{ uid: string }>>`SELECT uid FROM calendar_events WHERE uid = ANY(${chunk}::text[])`) used.add(r.uid);
+  }
+  for (const { id, preferred } of pending) {
+    if (!used.has(preferred) || !collectionName) {
+      used.add(preferred);
+      out.set(id, preferred);
+    } else {
+      const sanitized = `${preferred}@${collectionName}`;
+      used.add(sanitized);
+      out.set(id, sanitized);
+    }
+  }
+  return out;
 }
 
 /** True se l'oggetto è la proiezione di una prenotazione (collezione Prenotazioni, href booking-<uid>.ics). */
@@ -384,19 +439,19 @@ export async function buildIndexFeed(db: Db, calendar: Calendar, opts: CalendarF
       : await readFeedObjects(db, calendar.id, new Date(anchor.getTime() - FEED_PAST_DAYS * DAY_MS), new Date(anchor.getTime() + (FEED_FUTURE_DAYS + 1) * DAY_MS));
     const projectionUids = rows.map(projectionUid).filter((uid): uid is string => uid !== null);
     const bookings = projectionUids.length > 0 ? await readBookingProjectionData(db, projectionUids) : new Map<string, BookingProjectionData>();
-    const inputs: FeedObjectInput[] = [];
+    const entries: FeedEntry[] = [];
     for (const row of rows) {
       const object = objectForFeed(row, calendar.id);
-      if (!object) continue;
-      const bookingUid = projectionUid(row);
-      inputs.push({
-        object,
-        firstSeenAt: row.first_seen_at,
-        // Oggetto migrato senza legacy_uid: l'UID di oggi con il dominio, come il feed legacy.
-        legacyUid: row.legacy_uid ?? (row.legacy_event_id ? object.uid : null),
-        bookingProjection: bookingUid ? { data: bookings.get(bookingUid) ?? null } : null,
-      });
+      if (object) entries.push({ row, object, bookingUid: projectionUid(row) });
     }
+    // UID della riga legacy (anche per gli oggetti nati nella finestra di rollback): il feed lo pubblica con il dominio.
+    const legacyUids = await feedLegacyUids(db, version.collection_name, entries);
+    const inputs: FeedObjectInput[] = entries.map(({ row, object, bookingUid }) => ({
+      object,
+      firstSeenAt: row.first_seen_at,
+      legacyUid: legacyUids.get(row.id) ?? null,
+      bookingProjection: bookingUid ? { data: bookings.get(bookingUid) ?? null } : null,
+    }));
     const feed = buildFeed(
       { name: calendar.name, description: calendar.description ?? null, timezone: tz, color: calendar.color },
       inputs,
