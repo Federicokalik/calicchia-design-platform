@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useQuery, useQueryClient, useMutation, keepPreviousData } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
@@ -106,14 +106,15 @@ interface CalendarEventOcc {
 }
 
 /**
- * Sceglie l'editor dell'evento (contratto F6 §6.1): il v2 (client CalDAV
+ * Sceglie l'editor dell'evento (contratto F6 §6.1, §9.2.2): il v2 (client CalDAV
  * quasi 1:1) se l'API lo dichiara leggibile, altrimenti il v1 di sempre con le
- * stesse props. La scelta si fissa all'apertura, così un cambio delle
- * capacità durante la modifica non rimonta l'editor e non fa perdere la bozza.
+ * stesse props. La scelta si fa all'apertura e si fissa finché il modale resta
+ * aperto, così un cambio delle capacità durante la modifica non rimonta
+ * l'editor e non fa perdere la bozza. Con capacità in caricamento, fallite o
+ * scadute `v2Readable` è falso e si apre subito il v1: mai un modale vuoto.
  */
-function EventEditorHost({ v2Readable, capsLoading, ...props }: {
+function EventEditorHost({ v2Readable, ...props }: {
   v2Readable: boolean;
-  capsLoading: boolean;
   initial: CalendarEventOcc | null;
   initialStart?: string;
   initialEnd?: string;
@@ -121,20 +122,15 @@ function EventEditorHost({ v2Readable, capsLoading, ...props }: {
   onClose: () => void;
   onSaved: () => void;
 }) {
-  const [kind, setKind] = useState<'v1' | 'v2' | null>(capsLoading ? null : v2Readable ? 'v2' : 'v1');
-  useEffect(() => {
-    if (kind === null && !capsLoading) setKind(v2Readable ? 'v2' : 'v1');
-  }, [kind, capsLoading, v2Readable]);
-  if (kind === 'v2') return <EventoEditor {...props} />;
-  if (kind === 'v1') return <EventoEditModal {...props} />;
-  return null;
+  const [kind] = useState<'v1' | 'v2'>(v2Readable ? 'v2' : 'v1');
+  return kind === 'v2' ? <EventoEditor {...props} /> : <EventoEditModal {...props} />;
 }
 
 export default function CalendarioPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   // Capacità dell'API v2: decidono quale editor aprire (nessun'altra chiamata v2 da questa pagina).
-  const { caps: v2Caps, isLoading: v2CapsLoading } = useCalendarV2Capabilities();
+  const { caps: v2Caps } = useCalendarV2Capabilities();
   const confirm = useConfirm();
   const { intlLocale, locale } = useI18n();
   const calendarRef = useRef<FullCalendar>(null);
@@ -723,7 +719,6 @@ export default function CalendarioPage() {
       {showEditor && (
         <EventEditorHost
           v2Readable={!!v2Caps?.objects.read}
-          capsLoading={v2CapsLoading}
           initial={editingEvent}
           initialStart={creatingFromSlot?.start}
           initialEnd={creatingFromSlot?.end}
