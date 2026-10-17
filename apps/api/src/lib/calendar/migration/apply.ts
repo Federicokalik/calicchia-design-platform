@@ -51,6 +51,7 @@ import { type CalendarObject, parseCalendarObject, semanticFingerprint, serializ
 import { logger as rootLogger } from '../../logger';
 import { objectPath, type RadicaleClient } from '../radicale/client';
 import { clark, DAV_PROPS } from '../radicale/dav-xml';
+import { projectionResourceMinimized } from '../radicale/booking-projection';
 import { isRadicaleError, type RadicaleError } from '../radicale/errors';
 import { ObjectIdConflictError, reserveObjectId } from '../radicale/ids';
 import type { Db } from '../radicale/policy';
@@ -760,6 +761,11 @@ function conflictResult(item: PlanItem, code: ConflictCode, extra: Partial<Execu
   return result(item, 'conflict', { code, ...extra });
 }
 
+/** Proiezione voluta minimizzata (decisione 3) su una risorsa che non lo è (nome, telefono o link ancora presenti). */
+function minimizedOverPersonalData(wanted: LegacySnapshot, raw: string): boolean {
+  return wanted.kind === 'booking' && wanted.minimized === true && projectionResourceMinimized(raw) === false;
+}
+
 /**
  * Contenuto della patch per campo sull'oggetto corrente (null se il testo non
  * si legge o la patch non si applica). Con `towardFallback` (la destinazione è
@@ -948,7 +954,11 @@ async function executeWrite(item: PlanItem, ctx: ExecuteContext): Promise<Execut
       && ((target.etag !== null && target.etag === l.written_etag)
         || (target.fingerprint !== null && l.written_fingerprint !== null && target.fingerprint === l.written_fingerprint));
     const patched = raw !== null ? patchContent(raw, l.legacy_snapshot, s.legacy_snapshot, ctx.now(), { towardFallback: own }) : null;
-    if (patched) {
+    if (patched && !patched.changed && target && raw !== null && minimizedOverPersonalData(s.legacy_snapshot, raw)) {
+      // Difesa (decisione 3): mai uno snapshot minimizzato registrato su una risorsa che ha ancora nome,
+      // telefono o link; si riscrive dal piano (PG è autorevole) con If-Match.
+      content = { ...content, fields: [...content.fields, 'riscrittura completa'] };
+    } else if (patched) {
       if (!patched.changed && target) {
         // La destinazione ha già i campi voluti: si registra lo snapshot nuovo senza scrivere.
         await adoptTarget(ctx.db, { item, target: { ...target, etag: ifMatch }, runId: ctx.runId });

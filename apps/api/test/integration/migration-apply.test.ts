@@ -183,9 +183,11 @@ describe('apply e verifica della F3 contro Radicale reale', { skip: radicale.ski
     // Tutti i calendari con il feed attivo, come in produzione (V5).
     await sql`UPDATE calendars SET ics_feed_enabled = true WHERE role <> 'subscription'`;
     // Serie lun-ven con più di 500 occorrenze sull'intervallo di V3 (oltre il tetto del legacy).
-    // DTSTART su un lunedì: un DTSTART fuori dalla regola è sempre un'istanza per RFC 5545 (e per i device), non per il legacy.
+    // DTSTART di domenica, fuori dalla regola (F3R-1): il legacy non lo conta, RFC 5545 sì. L'oggetto migrato
+    // parte dalla prima occorrenza legacy (il lunedì dopo), quindi V3 e V4 restano senza differenze; il
+    // DTSTART è fuori dalla finestra del feed (90 giorni), quindi nemmeno V5 ne ha.
     const probe = new Date(Date.now() - 300 * 86_400_000);
-    probe.setUTCDate(probe.getUTCDate() - ((probe.getUTCDay() + 6) % 7));
+    probe.setUTCDate(probe.getUTCDate() - probe.getUTCDay());
     const start = probe.toISOString().slice(0, 10);
     weekdaySeries = await createEvent({
       calendar_id: shape.lavoro.id, summary: fx.name('Standup'), start_time: rome(start, '09:00'), end_time: rome(start, '09:15'),
@@ -539,6 +541,18 @@ describe('apply e verifica della F3 contro Radicale reale', { skip: radicale.ski
     const latest = await latestVerifyVerdicts(sql);
     assert.equal(latest.runId, next.runId);
     assert.equal(latest.acceptable, true);
+    // Riporto tracciabile: ogni accettazione riportata punta a quella esplicita d'origine (anche in catena).
+    const carried = (await runItems(next.runId)).filter((i) => i.item_type === 'diff' && i.accepted_at !== null);
+    assert.equal(carried.length, diffs.length);
+    const origin = (i: { detail: Record<string, unknown> }): { run_id?: string; item_id?: string } => (i.detail.accepted_from ?? {}) as { run_id?: string; item_id?: string };
+    assert.ok(carried.every((i) => origin(i).run_id === runId && diffs.some((d) => d.id === origin(i).item_id)), JSON.stringify(carried.map((i) => i.detail.accepted_from)));
+    const third = await verify();
+    const chained = (await runItems(third.runId)).filter((i) => i.item_type === 'diff' && i.accepted_at !== null);
+    assert.equal(chained.length, diffs.length);
+    assert.ok(chained.every((i) => origin(i).run_id === runId), 'la catena di riporti punta sempre all\'accettazione esplicita');
+    const report = JSON.parse((await buildRunReport(sql, third.runId, 'json')).body) as unknown;
+    assert.match(JSON.stringify(report), /"accepted_carried":\d+/);
+    assert.match(JSON.stringify(report), /"accepted_from":\{/);
   });
 
   test('verifica V4 con le iscrizioni: righe informative fuori dal colore', async () => {

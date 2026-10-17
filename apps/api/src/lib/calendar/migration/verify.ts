@@ -291,19 +291,28 @@ function instantInScope(scope: ReasonScope, i: DiffInstant): boolean {
   return i.seconds.some((x) => scope.seconds.has(x)) || i.dates.some((d) => scope.dates.has(d));
 }
 
-/** true se il motivo `r` dell'oggetto `key` spiega la differenza (codice ammesso e, per i motivi con ambito, ogni istante). */
-function reasonExplains(idx: VerifyIndex, key: string, r: ExpectedDiffReason, ctx: ReasonContext): boolean {
+/** true se il motivo `r` dell'oggetto `key` può spiegare il codice della differenza (REASON_CODES e i casi di MIXED_BYDAY). */
+function reasonCodeAllowed(idx: VerifyIndex, key: string, r: ExpectedDiffReason, code: VerifyDiffCode): boolean {
   const codes = REASON_CODES[r];
-  if (codes && !codes.has(ctx.code)) return false;
-  if (r === 'MIXED_BYDAY' && (ctx.code === 'OCCURRENCE_MISSING' || ctx.code === 'BUSY_MISSING')) {
+  if (codes && !codes.has(code)) return false;
+  if (r === 'MIXED_BYDAY' && (code === 'OCCURRENCE_MISSING' || code === 'BUSY_MISSING')) {
     // Le occorrenze del legacy (intersezione) sono contenute nell'unione RFC salvo con COUNT o BYSETPOS.
     const s = idx.sByKey.get(key);
     const rule = s?.legacy_snapshot.kind === 'event' ? s.legacy_snapshot.master.rrule ?? '' : '';
     if (!/(^|;)(COUNT|BYSETPOS)=/i.test(rule.replace(/^RRULE:/i, ''))) return false;
   }
-  const scope = scopesOf(idx, key).get(r);
-  if (scope && !(ctx.instants ?? []).every((i) => instantInScope(scope, i))) return false;
   return true;
+}
+
+/** true se il motivo `r` spiega l'istante `i` (un motivo senza ambito vale per tutto l'oggetto). */
+function reasonCoversInstant(idx: VerifyIndex, key: string, r: ExpectedDiffReason, i: DiffInstant): boolean {
+  const scope = scopesOf(idx, key).get(r);
+  return !scope || instantInScope(scope, i);
+}
+
+/** true se il motivo `r` dell'oggetto `key` spiega da solo la differenza (codice ammesso e ogni istante nel suo ambito). */
+function reasonExplains(idx: VerifyIndex, key: string, r: ExpectedDiffReason, ctx: ReasonContext): boolean {
+  return reasonCodeAllowed(idx, key, r, ctx.code) && (ctx.instants ?? []).every((i) => reasonCoversInstant(idx, key, r, i));
 }
 
 /**
@@ -311,8 +320,11 @@ function reasonExplains(idx: VerifyIndex, key: string, r: ExpectedDiffReason, ct
  * la differenza: il codice deve essere fra quelli del motivo (REASON_CODES) e,
  * per i motivi "di occorrenza" (DST_REALIGNED, UNTIL_REALIGNED,
  * OVERRIDE_UID_MASTER, CANCELLED_OVERRIDE_SUPPRESSED, DTSTART_REALIGNED), ogni
- * istante della differenza deve essere nel loro ambito. Un altro scostamento
- * dello stesso oggetto resta rosso.
+ * istante della differenza deve essere nel loro ambito. Una differenza con più
+ * istanti (per esempio le istanze di un UID del feed) è attesa anche se ogni
+ * istante è spiegato da un motivo diverso dell'oggetto (eccezione DST
+ * riallineata più override nel master): vince il più specifico fra quelli
+ * usati. Un istante che nessun motivo spiega resta rosso.
  */
 function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiffReason[], ctx: ReasonContext): ExpectedDiffReason | null {
   const candidates = new Set<ExpectedDiffReason>();
@@ -323,7 +335,12 @@ function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiff
     const r = SKIP_REASONS[skip.code];
     if (r) candidates.add(r);
   }
-  for (const r of allowed) if (candidates.has(r) && reasonExplains(idx, key, r, ctx)) return r;
+  const usable = allowed.filter((r) => candidates.has(r) && reasonCodeAllowed(idx, key, r, ctx.code));
+  for (const r of usable) if (reasonExplains(idx, key, r, ctx)) return r;
+  const instants = ctx.instants ?? [];
+  if (instants.length > 1 && usable.length > 1 && instants.every((i) => usable.some((r) => reasonCoversInstant(idx, key, r, i)))) {
+    return usable.find((r) => instants.some((i) => reasonCoversInstant(idx, key, r, i))) ?? null;
+  }
   return null;
 }
 

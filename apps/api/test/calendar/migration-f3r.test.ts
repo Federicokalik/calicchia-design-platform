@@ -257,6 +257,11 @@ describe('F3R-1: DTSTART fuori dalla regola', () => {
     assert.ok(scope.seconds.has(Date.parse(wedCount.start_time) / 1000));
     assert.ok(scope.seconds.has(Date.parse('2026-11-02T08:00:00.000Z') / 1000), 'la quarta occorrenza, che il feed legacy (RFC) perde');
     assert.equal(scope.seconds.has(Date.parse('2026-10-26T08:00:00.000Z') / 1000), false);
+    // Tutto il giorno: le istanze del feed sono date locali, quindi l'ambito sono i giorni (mai i secondi).
+    const allDayScope = expectedReasonScopes(objectOf(result, ev(allDay)).legacy_snapshot, NOW).get('DTSTART_REALIGNED');
+    assert.ok(allDayScope);
+    assert.deepEqual([...allDayScope.dates].sort(), ['2026-10-14', '2026-10-29'], 'il mercoledì salvato e il terzo giovedì del legacy');
+    assert.equal(allDayScope.seconds.size, 0);
   });
 });
 

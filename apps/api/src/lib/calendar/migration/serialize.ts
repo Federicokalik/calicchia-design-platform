@@ -92,6 +92,7 @@ import {
   isValidIanaZone,
   LEGACY_SERIES_TZ,
   legacyAllDayToRange,
+  localDateOf,
   type LegacyEventFields,
   type LegacyEventSource,
   MASTER_RECURRENCE_KEY,
@@ -1176,15 +1177,18 @@ export function expectedReasonScopes(snapshot: LegacySnapshot, now: Date): Map<E
     out.set('CANCELLED_OVERRIDE_SUPPRESSED', scopeOf(cancelled.flatMap((row) => [...sec(row.recurrence_id), ...sec(ridOf(row))])));
   }
   if (eff.rule.dtstart && eff.rule.text) {
-    const seconds = [...sec(eff.rule.dtstart.from)];
+    const instants = [eff.rule.dtstart.from];
     const count = /(^|;)COUNT=(\d+)(;|$)/i.exec(eff.rule.text);
     if (count) {
       const n = Number(count[2]);
       const start = msOf(snapshot.master.start_time);
       const occ = expandRRule({ rrule: eff.rule.text, masterStartIso: snapshot.master.start_time, fromIso: new Date(start - 86_400_000).toISOString(), toIso: new Date(start + LEGACY_FIRST_SEARCH_DAYS[LEGACY_FIRST_SEARCH_DAYS.length - 1] * 86_400_000).toISOString(), limit: n });
-      if (occ.length === n) seconds.push(...sec(occ[n - 1]));
+      if (occ.length === n) instants.push(occ[n - 1]);
     }
-    out.set('DTSTART_REALIGNED', scopeOf(seconds));
+    // Serie tutto il giorno: le istanze del feed e delle occorrenze sono date locali (mai secondi), quindi
+    // l'ambito sono i giorni; per le serie con orario solo gli istanti (un giorno spiegherebbe troppo).
+    const dates = snapshot.master.all_day ? instants.map((iso) => localDateOf(msOf(iso), snapshot.calendar.timezone)) : [];
+    out.set('DTSTART_REALIGNED', scopeOf(snapshot.master.all_day ? [] : instants.flatMap((iso) => sec(iso)), dates));
   }
   return out;
 }
