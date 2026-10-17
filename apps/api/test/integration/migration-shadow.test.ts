@@ -107,8 +107,14 @@ describe('shadow mirror, proiezioni e GDPR contro Radicale reale', { skip: radic
     await svc.put(pathOf(collection, href), body, { ifMatch: current.etag! });
   }
 
+  /**
+   * Job della chiave in ordine di inserimento. ORDER BY sulla colonna bigint
+   * qualificata: un `ORDER BY id` nudo si lega all'alias di uscita `id::text`
+   * e ordina come testo ("1000" < "999"), così a cavallo di una potenza di 10
+   * della sequenza l'ultimo job letto sarebbe il primo.
+   */
   async function jobsFor(key: string): Promise<Array<{ id: string; status: string; attempts: number; run_after: Date; result: Record<string, unknown> | null; last_error: string | null }>> {
-    return sql`SELECT id::text AS id, status, attempts, run_after, result, last_error FROM cal_jobs WHERE kind = 'shadow_mirror' AND key = ${key} ORDER BY id`;
+    return sql`SELECT id::text AS id, status, attempts, run_after, result, last_error FROM cal_jobs WHERE kind = 'shadow_mirror' AND key = ${key} ORDER BY cal_jobs.id`;
   }
 
   /** Esegue subito i job shadow_mirror pending (salta il debounce di 2 s). */
