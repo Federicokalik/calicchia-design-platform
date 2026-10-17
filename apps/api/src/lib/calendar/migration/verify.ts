@@ -177,6 +177,9 @@ const REASON_CODES: Readonly<Partial<Record<ExpectedDiffReason, ReadonlySet<Veri
   OVERRIDE_UID_MASTER: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF', 'FEED_UID_MISSING']),
   CANCELLED_OVERRIDE_SUPPRESSED: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF']),
   DTSTART_REALIGNED: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF']),
+  // F4: degradi della proiezione inversa (contratto f4-modules §4): solo fine/durata (SANITIZED_DURATION)
+  // e stato o trasparenza resi come tentative (SEMANTIC_TRANSP, SANITIZED_STATUS); mai occorrenze in più o in meno.
+  REVERSE_DEGRADED: new Set<VerifyDiffCode>(['OCCURRENCE_TIME_DIFF', 'OCCURRENCE_STATUS_DIFF', 'FEED_INSTANCES_DIFF']),
 });
 const V4_SUBSCRIPTION_MISSING: ExpectedDiffReason = 'SUBSCRIPTION_RESYNCED';
 const V4_SUBSCRIPTION_EXTRA: ExpectedDiffReason = 'SUBSCRIPTION_BLOCKING_IMPACT';
