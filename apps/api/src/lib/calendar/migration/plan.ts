@@ -92,7 +92,20 @@ import {
 
 // ─── Tipi del contratto ───────────────────────────────
 
-export interface TargetCollection { calendar_id: string; collection_name: string; exists: boolean; objects: ReadonlyMap<string, TargetObject> }
+export interface TargetCollection {
+  calendar_id: string;
+  collection_name: string;
+  exists: boolean;
+  objects: ReadonlyMap<string, TargetObject>;
+  /**
+   * Collezione presente con un'altra dead prop calendar-id (o senza): per
+   * l'inizializzazione è un conflitto "mai toccata" (contratto §6.1), quindi
+   * per il piano non è utilizzabile (COLLECTION_MISSING, mai forzabile).
+   * Valore: la calendar-id trovata ('' se assente). Assente o null = la
+   * collezione è del calendario (o non si è letta la proprietà).
+   */
+  foreign?: string | null;
+}
 export interface TargetSnapshot { read_at: Date; collections: ReadonlyMap<string, TargetCollection> }
 export interface PlanInput {
   mode: PlanMode;
@@ -102,7 +115,21 @@ export interface PlanInput {
   target: TargetSnapshot;
   /** Le cancellazioni (fonte sparita) si calcolano solo dentro l'ambito. */
   scope: { calendarIds: ReadonlySet<string>; legacyKeys: ReadonlySet<LegacyKey> | null };
-  force: { itemKeys: ReadonlySet<string>; codes: ReadonlySet<ConflictCode> };
+  force: PlanForce;
+}
+
+/**
+ * "Forza" per item (chiavi planItemKey) o per codice. Con `preview` (apply
+ * legato a un run d'anteprima) la forza vale SOLO per i conflitti mostrati
+ * nell'anteprima: chiave presente, stesso codice e stesso etag della
+ * destinazione di allora. Un conflitto nato dopo (per esempio fra due
+ * tentativi dello stesso run) o con la destinazione cambiata di nuovo resta un
+ * conflitto: mai sovrascrivere modifiche che l'utente non ha visto.
+ */
+export interface PlanForce {
+  itemKeys: ReadonlySet<string>;
+  codes: ReadonlySet<ConflictCode>;
+  preview?: ReadonlyMap<string, { code: string | null; target_etag: string | null }>;
 }
 
 const CONFLICT_CODE_SET: ReadonlySet<string> = new Set<string>(CONFLICT_CODES);
@@ -168,6 +195,28 @@ function decision(action: PlanAction, extra: Partial<Decision> = {}): Decision {
 function guardRevalidation(d: Decision, l: LedgerRow | null): Decision {
   if (!l || !l.revalidate_reason || !isWriteAction(d.action)) return d;
   return { ...d, action: 'conflict', code: 'REVALIDATION_REQUIRED', pending: d.action };
+}
+
+/**
+ * Riga scritta dallo strumento: etag o fingerprint dell'ultima scrittura
+ * registrati. Una PUT riuscita senza ETag leggibile (risposta senza ETag e
+ * PROPFIND fallito) lascia written_etag NULL ma written_fingerprint (e
+ * written_at) valorizzati: la riga resta "scritta" e il confronto passa dal
+ * fingerprint, così una fonte sparita produce una delete e non un ritiro che
+ * lascerebbe l'oggetto orfano sui device.
+ */
+function isWritten(l: Pick<LedgerRow, 'written_etag' | 'written_fingerprint'> | null): boolean {
+  return l !== null && (l.written_etag !== null || l.written_fingerprint !== null);
+}
+
+/** Collezione utilizzabile dal piano: esiste ed è del calendario (calendar-id uguale). */
+function usableCollection(coll: TargetCollection | undefined): coll is TargetCollection {
+  return Boolean(coll && coll.exists && (coll.foreign === undefined || coll.foreign === null));
+}
+
+/** Snapshot redatto dall'erasure GDPR su una riga scritta (legacy_snapshot NULL): la scrittura è una cancellazione dovuta. */
+function isRedacted(l: LedgerRow | null): boolean {
+  return l !== null && l.legacy_snapshot === null && isWritten(l);
 }
 
 type IntentOutcome = 'adopt' | 'stale' | { conflict: ConflictCode };
@@ -236,15 +285,26 @@ function shadowUpdate(s: SerializedObject, l: LedgerRow, t: TargetObject, target
     if (!prev) {
       // Snapshot redatto dall'erasure GDPR: patch senza base verso l'oggetto voluto (i campi del piano
       // prendono il valore del legacy, la cancellazione è dovuta; VALARM, ATTENDEE e X-* restano).
+      // Niente REVALIDATION_REQUIRED: la patch tocca solo i campi del piano verso il legacy autorevole,
+      // con If-Match dell'etag appena letto, e nome e telefono non devono restare sui device in attesa
+      // di un "forza" (la riga si smarca alla scrittura riuscita).
       const toward = patchTowardSnapshot(parsed.value, wanted, { tz, now });
       if (!toward.changed) return decision('adopt');
-      return guardRevalidation(decision('update', { patch: true, fields: toward.fields }), l);
+      return decision('update', { patch: true, fields: toward.fields });
     }
     const patch = patchFromLegacyDiff(parsed.value, prev, wanted, { tz, now });
     if (targetChanged && patch.conflicts.length > 0) {
       return decision('conflict', { code: 'BOTH_CHANGED', fields: [...new Set(patch.conflicts.map((c) => c.field))].sort() });
     }
-    if (!patch.changed) return targetChanged ? decision('noop') : decision('adopt');
+    if (!patch.changed) {
+      if (targetChanged) return decision('noop');
+      // Destinazione invariata (è lo scritto) ma la patch dallo snapshot non cambia nulla: si adotta solo
+      // se i campi del piano coincidono davvero con l'oggetto voluto; altrimenti la base ricostruita non
+      // rappresenta lo scritto (per esempio una minimizzazione dei 24 mesi) e serve la patch senza base.
+      const toward = patchTowardSnapshot(parsed.value, wanted, { tz, now });
+      if (!toward.changed) return decision('adopt');
+      return guardRevalidation(decision('update', { patch: true, fields: toward.fields }), l);
+    }
     return guardRevalidation(decision('update', { patch: true, fields: patch.fields }), l);
   } catch {
     return targetChanged ? decision('conflict', { code: 'BOTH_CHANGED' }) : guardRevalidation(decision('update'), l);
@@ -263,9 +323,9 @@ function decideSource(state: PlanState, s: SerializedObject, l: LedgerRow | null
     if (outcome === 'adopt') return decision('adopt', { target: t });
     if (outcome !== 'stale') return decision('conflict', { code: outcome.conflict, target: t });
   }
-  if (!coll || !coll.exists) return decision('conflict', { code: 'COLLECTION_MISSING', target: null });
+  if (!usableCollection(coll)) return decision('conflict', { code: 'COLLECTION_MISSING', target: null });
 
-  const written = l !== null && l.written_etag !== null;
+  const written = isWritten(l);
   if (!written) {
     if (!t) {
       const other = uidElsewhere(state, coll, s);
@@ -294,7 +354,9 @@ function decideSource(state: PlanState, s: SerializedObject, l: LedgerRow | null
     if (mode === 'shadow') return { ...shadowUpdate(s, row, t, false, now), target: t };
     // Patch per campo sulle righe adottate o derivate (§4.4: mai la riscrittura completa); senza lo
     // snapshot precedente (redatto dall'erasure GDPR, legacy_hash NULL = "sorgente da riscrivere") la
-    // patch è senza base, verso l'oggetto voluto (apply.ts, patchTowardSnapshot).
+    // patch è senza base, verso l'oggetto voluto (apply.ts, patchTowardSnapshot), e non aspetta la
+    // rivalidazione: la cancellazione dei dati redatti è dovuta e tocca solo i campi del piano.
+    if (isRedacted(row)) return { ...decision('update', { patch: true, fields: changedFields(row, s, now) }), target: t };
     const patch = row.adopted || row.derived;
     return { ...guardRevalidation(decision('update', { patch, fields: changedFields(row, s, now) }), row), target: t };
   }
@@ -314,8 +376,8 @@ function decideGone(state: PlanState, l: LedgerRow, reason: SkipCode | null): De
     if (outcome === 'adopt') return decision('adopt', { target: t, code: reason });
     if (outcome !== 'stale') return decision('conflict', { code: outcome.conflict, target: t });
   }
-  if (!coll || !coll.exists) return decision('conflict', { code: 'COLLECTION_MISSING', target: null });
-  if (l.written_etag === null || !t) return decision('adopt', { target: t, code: reason });
+  if (!usableCollection(coll)) return decision('conflict', { code: 'COLLECTION_MISSING', target: null });
+  if (!isWritten(l) || !t) return decision('adopt', { target: t, code: reason });
   const same = (t.etag !== null && t.etag === l.written_etag)
     || (t.fingerprint !== null && l.written_fingerprint !== null && t.fingerprint === l.written_fingerprint);
   if (same) return guardRevalidation(decision('delete', { target: t, code: reason }), l);
@@ -350,7 +412,12 @@ function applyForce(state: PlanState, item: PlanItem): PlanItem {
   if (item.action !== 'conflict' || !item.code || !CONFLICT_CODE_SET.has(item.code)) return item;
   const code = item.code as ConflictCode;
   if (!FORCEABLE_CONFLICTS.has(code)) return item;
-  if (!force.codes.has(code) && !force.itemKeys.has(planItemKey(item))) return item;
+  const key = planItemKey(item);
+  if (!force.codes.has(code) && !force.itemKeys.has(key)) return item;
+  if (force.preview) {
+    const seen = force.preview.get(key);
+    if (!seen || seen.code !== code || (seen.target_etag ?? null) !== (item.target?.etag ?? null)) return item;
+  }
   switch (code) {
     case 'TARGET_NEWER':
     case 'BOTH_CHANGED':
@@ -532,15 +599,21 @@ export async function readTargetSnapshot(
     throwIfAborted(opts.signal);
     const objects = new Map<string, TargetObject>();
     const only = opts.only?.get(c.calendar_id);
+    const path = collectionPath(principal, c.collection_name);
+    const self = decodeURIComponent(path).replace(/\/+$/, '');
+    /** Dead prop calendar-id della collezione (risposta della collezione stessa) → null se è del calendario. */
+    const foreignOf = (ms: Multistatus): string | null => {
+      const entry = ms.responses.find((r) => r.path.replace(/\/+$/, '') === self);
+      const found = entry?.text(DAV_PROPS.calendarId)?.trim() ?? '';
+      return found.toLowerCase() === c.calendar_id.toLowerCase() ? null : found;
+    };
     if (opts.only) {
       const names = [...(only ?? [])].filter((n) => isValidObjectName(n)).sort();
+      let foreign: string | null;
       try {
-        if (names.length) {
-          await multigetInto(client, principal, c, names, objects, opts.signal);
-        } else {
-          // Nessun href da leggere: basta sapere se la collezione esiste.
-          await client.propfind(collectionPath(principal, c.collection_name), { props: [DAV_PROPS.resourcetype], depth: 0 });
-        }
+        // Esistenza e calendar-id della collezione (anche con gli href da leggere: una collezione estranea non si tocca).
+        foreign = foreignOf(await client.propfind(path, { props: [DAV_PROPS.resourcetype, DAV_PROPS.calendarId], depth: 0 }));
+        if (names.length && foreign === null) await multigetInto(client, principal, c, names, objects, opts.signal);
       } catch (err) {
         if (isRadicaleError(err, 'not_found')) {
           out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: false, objects: new Map() });
@@ -548,14 +621,13 @@ export async function readTargetSnapshot(
         }
         throw err;
       }
-      out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: true, objects });
+      out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: true, objects, foreign });
       continue;
     }
 
-    const path = collectionPath(principal, c.collection_name);
     let ms: Multistatus;
     try {
-      ms = await client.propfind(path, { props: [DAV_PROPS.getetag, DAV_PROPS.resourcetype], depth: 1 });
+      ms = await client.propfind(path, { props: [DAV_PROPS.getetag, DAV_PROPS.resourcetype, DAV_PROPS.calendarId], depth: 1 });
     } catch (err) {
       if (isRadicaleError(err, 'not_found')) {
         out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: false, objects: new Map() });
@@ -563,7 +635,7 @@ export async function readTargetSnapshot(
       }
       throw err;
     }
-    const self = decodeURIComponent(path).replace(/\/+$/, '');
+    const foreign = foreignOf(ms);
     for (const entry of ms.responses) {
       if (entry.path.replace(/\/+$/, '') === self) continue;
       if (entry.status !== null && entry.status !== 200) continue;
@@ -575,7 +647,7 @@ export async function readTargetSnapshot(
     }
     const toRead = [...objects.values()].filter((t) => opts.needContent(c.calendar_id, t.href, t.etag)).map((t) => t.href).sort();
     await multigetInto(client, principal, c, toRead, objects, opts.signal);
-    out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: true, objects });
+    out.set(c.calendar_id, { calendar_id: c.calendar_id, collection_name: c.collection_name, exists: true, objects, foreign });
   }
   return { read_at: new Date(), collections: out };
 }

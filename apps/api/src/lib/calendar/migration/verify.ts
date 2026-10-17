@@ -77,7 +77,7 @@ import { readLedger, withMigrationRunLock } from './apply';
 import { effectivePlanScope, readTargetSnapshot, type TargetSnapshot } from './plan';
 import { assertMigrationWritable, requireRadicale } from './preflight';
 import { buildVerdicts, carryOverAcceptances, type DiffRowLite } from './report';
-import { canonicalJson, type LegacySource, loadLegacySource, serializeLegacy } from './serialize';
+import { canonicalJson, expectedReasonScopes, type LegacySource, loadLegacySource, type ReasonScope, serializeLegacy } from './serialize';
 import {
   DEFAULT_MIGRATION_OPTIONS,
   type ExpectedDiffReason,
@@ -120,28 +120,56 @@ const DETAIL_LIST_MAX = 20;
 
 /**
  * Motivi ammessi per livello, in ordine di specificità (vince il primo che
- * l'oggetto ha). V1 e V2 non ammettono differenze attese.
+ * l'oggetto ha e che spiega la differenza). V1 e V2 non ammettono differenze
+ * attese.
  *
- * V5 comprende, oltre ai motivi elencati nel contratto, quelli che
- * EXPECTED_DIFF_REASONS di types.ts documenta anche per il feed
- * (BOOKING_REGENERATED, DUPLICATE_HOLIDAY_SKIPPED) e quelli che cambiano le
- * istanze pubblicate di un oggetto per effetto di un'opzione dell'anteprima
- * (UNTIL_REALIGNED, MIXED_BYDAY, INVALID_RRULE_SINGLE, ALLDAY_NORMALIZED):
- * restano gialle da accettare, mai verdi.
+ * V5 comprende, oltre ai motivi elencati nel contratto, quelli che cambiano
+ * le istanze pubblicate di un oggetto per effetto di un'opzione dell'anteprima
+ * o di una regola fissa (UNTIL_REALIGNED, MIXED_BYDAY, INVALID_RRULE_SINGLE,
+ * ALLDAY_NORMALIZED, DTSTART_REALIGNED, DUPLICATE_HOLIDAY_SKIPPED): restano
+ * gialle da accettare, mai verdi. BOOKING_REGENERATED non spiega differenze di
+ * occorrenze né di istanze del feed: una proiezione corretta coincide con la
+ * riga legacy; lo scostamento vero è BOOKING_DRIFT (oggetto) o
+ * BOOKING_NOT_PROJECTED (salto), altrimenti una regressione della proiezione
+ * resterebbe gialla.
  */
 export const LEVEL_EXPECTED_REASONS: Readonly<Record<'V3' | 'V4' | 'V5', readonly ExpectedDiffReason[]>> = Object.freeze({
   V3: ['NON_PROJECTION_MOVED', 'ORPHAN_CONVERTED', 'DST_REALIGNED', 'UNTIL_REALIGNED', 'INVALID_RRULE_SINGLE', 'MIXED_BYDAY',
-    'ALLDAY_NORMALIZED', 'CANCELLED_MASTER_SKIPPED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT', 'BOOKING_REGENERATED'],
+    'ALLDAY_NORMALIZED', 'CANCELLED_MASTER_SKIPPED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT'],
   V4: ['DST_REALIGNED', 'UNTIL_REALIGNED', 'INVALID_RRULE_SINGLE', 'MIXED_BYDAY', 'BOOKING_DRIFT'],
-  V5: ['OVERRIDE_UID_MASTER', 'CANCELLED_OVERRIDE_SUPPRESSED', 'DST_REALIGNED', 'ORPHAN_CONVERTED', 'CANCELLED_MASTER_SKIPPED',
-    'NON_PROJECTION_MOVED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_REGENERATED', 'BOOKING_DRIFT', 'UNTIL_REALIGNED', 'MIXED_BYDAY',
+  V5: ['OVERRIDE_UID_MASTER', 'CANCELLED_OVERRIDE_SUPPRESSED', 'DST_REALIGNED', 'DTSTART_REALIGNED', 'ORPHAN_CONVERTED', 'CANCELLED_MASTER_SKIPPED',
+    'NON_PROJECTION_MOVED', 'DUPLICATE_HOLIDAY_SKIPPED', 'BOOKING_DRIFT', 'UNTIL_REALIGNED', 'MIXED_BYDAY',
     'INVALID_RRULE_SINGLE', 'ALLDAY_NORMALIZED'],
 });
 
 /** UID presenti in un feed e non nell'altro: solo i motivi che spiegano la presenza (un UID diverso dal legacy è rosso). */
 const V5_MISSING_OVERRIDE_REASONS: readonly ExpectedDiffReason[] = ['OVERRIDE_UID_MASTER', 'ORPHAN_CONVERTED', 'CANCELLED_MASTER_SKIPPED', 'NON_PROJECTION_MOVED'];
 const V5_MISSING_REASONS: readonly ExpectedDiffReason[] = ['CANCELLED_MASTER_SKIPPED', 'DUPLICATE_HOLIDAY_SKIPPED', 'NON_PROJECTION_MOVED', 'BOOKING_DRIFT', 'ORPHAN_CONVERTED'];
-const V5_EXTRA_REASONS: readonly ExpectedDiffReason[] = ['NON_PROJECTION_MOVED', 'BOOKING_REGENERATED', 'ORPHAN_CONVERTED'];
+const V5_EXTRA_REASONS: readonly ExpectedDiffReason[] = ['NON_PROJECTION_MOVED', 'BOOKING_DRIFT', 'ORPHAN_CONVERTED'];
+
+/**
+ * Codici che un motivo può spiegare (gli altri restano rossi anche sullo
+ * stesso oggetto). Un motivo assente dalla tabella vale per ogni codice dei
+ * livelli che lo ammettono.
+ */
+const REASON_CODES: Readonly<Partial<Record<ExpectedDiffReason, ReadonlySet<VerifyDiffCode>>>> = Object.freeze({
+  // Unione RFC 5545 invece dell'intersezione: occorrenze in più (in meno solo con COUNT o BYSETPOS, vedi reasonExplains).
+  MIXED_BYDAY: new Set<VerifyDiffCode>(['OCCURRENCE_EXTRA', 'OCCURRENCE_MISSING', 'BUSY_EXTRA', 'BUSY_MISSING', 'FEED_INSTANCES_DIFF']),
+  // Evento singolo al posto della serie: occorrenze mancanti (o la sola in più se il legacy non espandeva la regola).
+  INVALID_RRULE_SINGLE: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'OCCURRENCE_EXTRA', 'BUSY_MISSING', 'BUSY_EXTRA', 'FEED_INSTANCES_DIFF']),
+  // Sorgenti non migrate: solo assenze nella destinazione.
+  CANCELLED_MASTER_SKIPPED: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'BUSY_MISSING', 'FEED_UID_MISSING', 'FEED_INSTANCES_DIFF']),
+  DUPLICATE_HOLIDAY_SKIPPED: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'BUSY_MISSING', 'FEED_UID_MISSING']),
+  // Spostamento: assente da una collezione, presente nell'altra.
+  NON_PROJECTION_MOVED: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'OCCURRENCE_EXTRA', 'BUSY_MISSING', 'BUSY_EXTRA', 'FEED_UID_MISSING', 'FEED_UID_EXTRA']),
+  // UNTIL "fino al" riallineato: occorrenze in più nel giorno dell'UNTIL.
+  UNTIL_REALIGNED: new Set<VerifyDiffCode>(['OCCURRENCE_EXTRA', 'BUSY_EXTRA', 'FEED_INSTANCES_DIFF']),
+  DST_REALIGNED: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'OCCURRENCE_EXTRA', 'OCCURRENCE_TIME_DIFF', 'BUSY_MISSING', 'BUSY_EXTRA', 'FEED_INSTANCES_DIFF']),
+  ALLDAY_NORMALIZED: new Set<VerifyDiffCode>(['OCCURRENCE_MISSING', 'OCCURRENCE_EXTRA', 'OCCURRENCE_TIME_DIFF', 'OCCURRENCE_ALLDAY_DIFF', 'FEED_INSTANCES_DIFF']),
+  OVERRIDE_UID_MASTER: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF', 'FEED_UID_MISSING']),
+  CANCELLED_OVERRIDE_SUPPRESSED: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF']),
+  DTSTART_REALIGNED: new Set<VerifyDiffCode>(['FEED_INSTANCES_DIFF']),
+});
 const V4_SUBSCRIPTION_MISSING: ExpectedDiffReason = 'SUBSCRIPTION_RESYNCED';
 const V4_SUBSCRIPTION_EXTRA: ExpectedDiffReason = 'SUBSCRIPTION_BLOCKING_IMPACT';
 
@@ -204,6 +232,8 @@ interface VerifyIndex {
   ledgerByCalHref: Map<string, LedgerRow>;
   target: TargetSnapshot;
   parsed: Map<string, CalendarObject | null>;
+  /** Ambito dei motivi "di occorrenza" per chiave (expectedReasonScopes), calcolato alla prima richiesta. */
+  scopes: Map<string, Map<ExpectedDiffReason, ReasonScope>>;
   now: Date;
 }
 
@@ -236,8 +266,54 @@ function isLegacyKey(key: string): key is LegacyKey {
   return /^(event|detached|booking|archive):/.test(key);
 }
 
-/** Primo motivo ammesso fra quelli dell'oggetto, del salto e (per le proiezioni) della rigenerazione. */
-function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiffReason[]): ExpectedDiffReason | null {
+/**
+ * Un istante di una differenza, con le sue forme alternative: secondi UTC
+ * dell'inizio (o dell'istanza originale) e giorno locale. È spiegato da un
+ * ambito se almeno una forma vi appartiene.
+ */
+interface DiffInstant { seconds: number[]; dates: string[] }
+
+/** Contesto di una differenza per il motivo: codice e istanti coinvolti (tutti devono essere spiegati). */
+interface ReasonContext { code: VerifyDiffCode; instants?: readonly DiffInstant[] }
+
+function scopesOf(idx: VerifyIndex, key: string): Map<ExpectedDiffReason, ReasonScope> {
+  let scopes = idx.scopes.get(key);
+  if (!scopes) {
+    const s = idx.sByKey.get(key);
+    scopes = s ? expectedReasonScopes(s.legacy_snapshot, idx.now) : new Map();
+    idx.scopes.set(key, scopes);
+  }
+  return scopes;
+}
+
+function instantInScope(scope: ReasonScope, i: DiffInstant): boolean {
+  return i.seconds.some((x) => scope.seconds.has(x)) || i.dates.some((d) => scope.dates.has(d));
+}
+
+/** true se il motivo `r` dell'oggetto `key` spiega la differenza (codice ammesso e, per i motivi con ambito, ogni istante). */
+function reasonExplains(idx: VerifyIndex, key: string, r: ExpectedDiffReason, ctx: ReasonContext): boolean {
+  const codes = REASON_CODES[r];
+  if (codes && !codes.has(ctx.code)) return false;
+  if (r === 'MIXED_BYDAY' && (ctx.code === 'OCCURRENCE_MISSING' || ctx.code === 'BUSY_MISSING')) {
+    // Le occorrenze del legacy (intersezione) sono contenute nell'unione RFC salvo con COUNT o BYSETPOS.
+    const s = idx.sByKey.get(key);
+    const rule = s?.legacy_snapshot.kind === 'event' ? s.legacy_snapshot.master.rrule ?? '' : '';
+    if (!/(^|;)(COUNT|BYSETPOS)=/i.test(rule.replace(/^RRULE:/i, ''))) return false;
+  }
+  const scope = scopesOf(idx, key).get(r);
+  if (scope && !(ctx.instants ?? []).every((i) => instantInScope(scope, i))) return false;
+  return true;
+}
+
+/**
+ * Primo motivo ammesso fra quelli dell'oggetto e del salto che spiega davvero
+ * la differenza: il codice deve essere fra quelli del motivo (REASON_CODES) e,
+ * per i motivi "di occorrenza" (DST_REALIGNED, UNTIL_REALIGNED,
+ * OVERRIDE_UID_MASTER, CANCELLED_OVERRIDE_SUPPRESSED, DTSTART_REALIGNED), ogni
+ * istante della differenza deve essere nel loro ambito. Un altro scostamento
+ * dello stesso oggetto resta rosso.
+ */
+function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiffReason[], ctx: ReasonContext): ExpectedDiffReason | null {
   const candidates = new Set<ExpectedDiffReason>();
   const s = idx.sByKey.get(key);
   if (s) for (const r of s.expected_reasons) candidates.add(r);
@@ -246,16 +322,33 @@ function reasonFor(idx: VerifyIndex, key: string, allowed: readonly ExpectedDiff
     const r = SKIP_REASONS[skip.code];
     if (r) candidates.add(r);
   }
-  if (key.startsWith('booking:')) candidates.add('BOOKING_REGENERATED');
-  for (const r of allowed) if (candidates.has(r)) return r;
+  for (const r of allowed) if (candidates.has(r) && reasonExplains(idx, key, r, ctx)) return r;
   return null;
+}
+
+/** Istante di un'occorrenza confrontata (V3): istanza originale e inizio, con il giorno locale. */
+function occInstant(o: { match: string; startMs: number; allDay: boolean; startDate: string | null }, tz: string): DiffInstant {
+  if (o.allDay) {
+    const dates = [o.startDate, o.match.startsWith('D') ? o.match.slice(1) : null].filter((d): d is string => Boolean(d));
+    return { seconds: [], dates };
+  }
+  const original = Number(o.match);
+  const seconds = [Math.floor(o.startMs / 1000), ...(Number.isFinite(original) ? [original] : [])];
+  return { seconds, dates: [localDateOf(o.startMs, tz)] };
+}
+
+/** Istante di un'istanza del feed (`<inizio>/<fine>` in secondi, o `D<data>/<data>`). */
+function feedInstant(label: string, tz: string): DiffInstant {
+  if (label.startsWith('D')) return { seconds: [], dates: [label.slice(1).split('/')[0]] };
+  const start = Number(label.split('/')[0]);
+  return Number.isFinite(start) ? { seconds: [start], dates: [localDateOf(start * 1000, tz)] } : { seconds: [], dates: [] };
 }
 
 // ─── Raccolta delle differenze ───────────────────────────────
 
 class DiffCollector {
   readonly diffs: VerifyDiff[] = [];
-  private readonly perGroup = new Map<string, { count: number; omitted: number; sample: VerifyDiff }>();
+  private readonly perGroup = new Map<string, { count: number; omitted: number; omittedSignatures: string[]; sample: VerifyDiff }>();
 
   constructor(private readonly verified: ReadonlySet<string>) {}
 
@@ -263,12 +356,16 @@ class DiffCollector {
    * Aggiunge una differenza (solo per i calendari verificati, salvo `global`:
    * V4 è globale e una differenza del busy entra nel colore di ogni calendario
    * con oggetti sovrapposti, anche se escluso dal piano), con il tetto per
-   * oggetto e codice.
+   * gruppo. Il gruppo è livello, codice, calendario, oggetto (`group`, poi
+   * chiave legacy, poi href), variante, ATTESA e MOTIVO: una differenza rossa
+   * non finisce mai nel gruppo di quelle gialle, quindi il tetto non la
+   * nasconde dietro una riga riassuntiva gialla.
    */
-  add(input: Omit<VerifyDiff, 'detail' | 'expected'> & { detail: Omit<VerifyDiffDetail, 'signature'>; expected?: boolean; global?: boolean }): void {
+  add(input: Omit<VerifyDiff, 'detail' | 'expected'> & { detail: Omit<VerifyDiffDetail, 'signature'>; expected?: boolean; global?: boolean; group?: string }): void {
     if (!input.calendar_id || (!input.global && !this.verified.has(input.calendar_id))) return;
     const expected = input.expected ?? input.detail.reason !== null;
-    const groupKey = `${input.level}|${input.code}|${input.calendar_id}|${input.legacy_key ?? input.href ?? ''}|${input.detail.variant ?? ''}`;
+    const object = input.group ?? input.legacy_key ?? input.href ?? '';
+    const groupKey = `${input.level}|${input.code}|${input.calendar_id}|${object}|${input.detail.variant ?? ''}|${expected ? 'expected' : 'unexpected'}|${input.detail.reason ?? ''}`;
     const group = this.perGroup.get(groupKey);
     const diff: VerifyDiff = {
       level: input.level,
@@ -280,21 +377,28 @@ class DiffCollector {
       legacy_key: input.legacy_key,
       detail: { ...input.detail, signature: '' },
     };
+    diff.detail.signature = diffSignature(diff);
     if (group && group.count >= MAX_DIFFS_PER_OBJECT) {
       group.omitted += 1;
+      group.omittedSignatures.push(diff.detail.signature);
       return;
     }
-    diff.detail.signature = diffSignature(diff);
     this.diffs.push(diff);
     if (group) group.count += 1;
-    else this.perGroup.set(groupKey, { count: 1, omitted: 0, sample: diff });
+    else this.perGroup.set(groupKey, { count: 1, omitted: 0, omittedSignatures: [], sample: diff });
   }
 
-  /** Righe riassuntive dei gruppi oltre il tetto (firma stabile, senza il conteggio). */
+  /**
+   * Righe riassuntive dei gruppi oltre il tetto, con l'attesa e il motivo del
+   * gruppo (tutte le omesse li condividono). La firma comprende il numero
+   * delle omesse e lo sha256 delle loro firme ordinate: un'accettazione non si
+   * riporta su un insieme diverso di omesse.
+   */
   finish(): void {
     for (const g of this.perGroup.values()) {
       if (g.omitted === 0) continue;
       const s = g.sample;
+      const omittedHash = createHash('sha256').update([...g.omittedSignatures].sort().join('\n'), 'utf8').digest('hex');
       const diff: VerifyDiff = {
         level: s.level,
         code: s.code,
@@ -307,9 +411,9 @@ class DiffCollector {
           reason: s.detail.reason,
           signature: '',
           variant: s.detail.variant,
-          legacy: { omitted: true },
+          legacy: { omitted: g.omitted, omitted_sha256: omittedHash },
           target: null,
-          message: `altre ${g.omitted} differenze dello stesso tipo per questo oggetto (elenco troncato a ${MAX_DIFFS_PER_OBJECT})`,
+          message: `altre ${g.omitted} differenze dello stesso tipo per ${s.legacy_key || s.href ? 'questo oggetto' : 'questo calendario'} (elenco troncato a ${MAX_DIFFS_PER_OBJECT})`,
         },
       };
       diff.detail.signature = diffSignature({ ...diff, detail: { ...diff.detail, message: null } });
@@ -326,6 +430,11 @@ function verifyV1(idx: VerifyIndex, calendars: readonly MigrationCalendar[], out
     const coll = idx.target.collections.get(cal.id);
     if (!coll || !coll.exists) {
       out.add({ level: 'V1', code: 'COLLECTION_MISSING', calendar_id: cal.id, collection_name: name, href: null, legacy_key: null, detail: { reason: null, legacy: { collection_name: name }, target: null, message: 'Collezione assente su Radicale: serve "Crea collezioni mancanti"' } });
+      continue;
+    }
+    if (coll.foreign !== undefined && coll.foreign !== null) {
+      // Collezione con un'altra calendar-id (o senza): per l'inizializzazione è un conflitto mai toccato.
+      out.add({ level: 'V1', code: 'COLLECTION_MISSING', calendar_id: cal.id, collection_name: name, href: null, legacy_key: null, detail: { reason: null, legacy: { collection_name: name, calendar_id: cal.id }, target: { calendar_id: coll.foreign || null }, message: 'Collezione presente con un\'altra calendar-id: non è di questo calendario e lo strumento non la tocca (va risolta a mano)' } });
       continue;
     }
     const tracked = new Set<string>();
@@ -604,6 +713,8 @@ async function verifyV3(idx: VerifyIndex, calendars: readonly MigrationCalendar[
   const collectionOf = (calendarId: string): string | null => idx.calById.get(calendarId)?.collection_name ?? null;
   const emit = (code: VerifyDiffCode, o: Occ | null, t: Occ | null, key: string): void => {
     const calendarId = (code === 'OCCURRENCE_MISSING' ? o?.calendar_id : t?.calendar_id ?? o?.calendar_id) as string;
+    const tz = tzOfCal(idx, calendarId);
+    const instants = [o, t].filter((x): x is Occ => x !== null).map((x) => occInstant(x, tz));
     out.add({
       level: 'V3',
       code,
@@ -612,7 +723,7 @@ async function verifyV3(idx: VerifyIndex, calendars: readonly MigrationCalendar[
       href: t?.href ?? idx.sByKey.get(key)?.href ?? null,
       legacy_key: isLegacyKey(key) ? key : null,
       detail: {
-        reason: reasonFor(idx, key, LEVEL_EXPECTED_REASONS.V3),
+        reason: reasonFor(idx, key, LEVEL_EXPECTED_REASONS.V3, { code, instants }),
         uid: key.startsWith('booking:') ? null : idx.sByKey.get(key)?.uid ?? null,
         recurrence_key: (o ?? t)?.match ?? null,
         legacy: o ? occValue(o) : null,
@@ -674,7 +785,34 @@ async function verifyV3(idx: VerifyIndex, calendars: readonly MigrationCalendar[
 // ─── V4 ───────────────────────────────
 
 interface Interval { start: number; end: number }
-interface BusyOcc extends Interval { key: string; calendar_id: string; subscription: boolean }
+interface BusyOcc extends Interval {
+  key: string;
+  calendar_id: string;
+  subscription: boolean;
+  /** Inizio (e istanza originale) dell'occorrenza, in secondi UTC: ambito dei motivi "di occorrenza". */
+  seconds?: number[];
+}
+
+/** Massimo anticipo con cui il lato legacy di V4 legge i master ricorrenti (durata massima di un'occorrenza). */
+const V4_LOOKBACK_MAX_MS = 366 * DAY_MS;
+
+/**
+ * Durata massima delle occorrenze dei master ricorrenti legacy (tetto 366
+ * giorni): listOccurrences espande i master con rrule.between, quindi tiene
+ * solo le occorrenze che INIZIANO nella finestra, mentre la destinazione
+ * (expandObject) tiene ogni occorrenza che vi si sovrappone. Leggendo il
+ * legacy da `from − lookback` un'occorrenza già iniziata all'avvio della
+ * verifica entra da entrambe le parti (poi clip a [from, to)).
+ */
+function legacyLookbackMs(idx: VerifyIndex): number {
+  let max = 0;
+  for (const e of idx.source.events) {
+    if (!e.rrule || e.recurrence_master_id || e.status === 'cancelled') continue;
+    const d = msOf(e.end_time) - msOf(e.start_time);
+    if (Number.isFinite(d) && d > max) max = d;
+  }
+  return Math.min(V4_LOOKBACK_MAX_MS, max);
+}
 
 /** Unione ordinata di intervalli [start, end): sovrapposti e contigui si fondono, i vuoti si scartano. */
 export function mergeIntervals(list: readonly Interval[]): Interval[] {
@@ -724,21 +862,32 @@ async function verifyV4(
   const seenTarget = new Set<string>();
 
   const windows = v3Windows(from, to, MIGRATION_LIMITS.v3WindowDays);
+  const lookback = legacyLookbackMs(idx);
+  const seenLegacy = new Set<string>();
   let w = 0;
   for (const win of windows) {
     ctx.throwIfCancelled();
+    const first = w === 0;
     await ctx.progress({ phase: 'v4', done: w++, total: windows.length, message: 'V4: confronto del busy' });
     // Semantica di legacy/events-pg.getBusyRanges: calendari bloccanti, confermati, timed; proiezioni escluse.
-    for (const occ of await legacyOccurrences(win.from.toISOString(), win.to.toISOString(), true)) {
+    // Prima finestra da from − lookback: le occorrenze ricorrenti già iniziate (rrule.between le scarterebbe).
+    const legacyFrom = first ? new Date(win.from.getTime() - lookback) : win.from;
+    for (const occ of await legacyOccurrences(legacyFrom.toISOString(), win.to.toISOString(), true)) {
       if (occ.status !== 'confirmed' || occ.all_day || occ.source === 'booking') continue;
-      const range = clip({ start: msOf(occ.start_time), end: msOf(occ.end_time) });
+      const startMs = msOf(occ.start_time);
+      const range = clip({ start: startMs, end: msOf(occ.end_time) });
       if (range.end <= range.start) continue;
+      // Un'occorrenza a cavallo di due finestre (singoli e override si leggono per sovrapposizione) conta una volta.
+      const dedupe = `${occ.id}|${startMs}`;
+      if (seenLegacy.has(dedupe)) continue;
+      seenLegacy.add(dedupe);
       if (occ.source === 'ics_pull') {
         legacySubs.push({ ...range, key: `subscription:${occ.calendar_id}`, calendar_id: String(occ.calendar_id), subscription: true });
         continue;
       }
       const a = attributeLegacy(idx, occ);
-      legacyOwn.push({ ...range, key: a.key, calendar_id: a.calendar_id, subscription: false });
+      const original = occ.original_start !== null && occ.original_start !== undefined ? msOf(occ.original_start) : startMs;
+      legacyOwn.push({ ...range, key: a.key, calendar_id: a.calendar_id, subscription: false, seconds: [Math.floor(startMs / 1000), Math.floor(original / 1000)] });
     }
     for (const cal of included) {
       if (!cal.blocks_availability) continue;
@@ -752,7 +901,8 @@ async function verifyV4(
         const dedupe = `${cal.id}|${e.href}|${o.recurrenceKey}|${o.startUtc}`;
         if (seenTarget.has(dedupe)) continue;
         seenTarget.add(dedupe);
-        targetOwn.push({ ...range, key: e.key, calendar_id: cal.id, subscription: false });
+        const original = o.originalStartUtc ?? o.startUtc;
+        targetOwn.push({ ...range, key: e.key, calendar_id: cal.id, subscription: false, seconds: [Math.floor(o.startUtc / 1000), Math.floor(original / 1000)] });
       }
     }
   }
@@ -784,6 +934,8 @@ async function verifyV4(
       const value = { start: iso(interval.start), end: iso(interval.end), keys: list.slice(0, DETAIL_LIST_MAX) };
       out.add({
         global: true,
+        // Gruppo del tetto: gli oggetti che contribuiscono (non il calendario intero).
+        group: list.length === 1 ? list[0] : `keys:${createHash('sha256').update(list.join('\n'), 'utf8').digest('hex').slice(0, 32)}`,
         level: 'V4',
         code,
         calendar_id: calendarId,
@@ -803,10 +955,24 @@ async function verifyV4(
     }
   };
 
-  const ownReason = (contributors: BusyOcc[]): ExpectedDiffReason | null => {
-    for (const r of LEVEL_EXPECTED_REASONS.V4) {
-      if (contributors.some((c) => reasonFor(idx, c.key, [r]) === r)) return r;
+  /**
+   * Motivo di un intervallo fuso: atteso solo se OGNI oggetto che vi
+   * contribuisce ha un motivo che spiega quell'occorrenza (un contributore
+   * senza motivo è proprio quello la cui occorrenza differisce: la sua parte
+   * coincide da entrambe le parti, altrimenti l'intervallo non sarebbe una
+   * differenza). Vince il motivo più specifico fra quelli dei contributori.
+   */
+  const ownReason = (contributors: BusyOcc[], code: 'BUSY_MISSING' | 'BUSY_EXTRA'): ExpectedDiffReason | null => {
+    if (contributors.length === 0) return null;
+    const found = new Set<ExpectedDiffReason>();
+    for (const c of contributors) {
+      const tz = tzOfCal(idx, c.calendar_id);
+      const instants: DiffInstant[] = c.seconds?.length ? [{ seconds: c.seconds, dates: c.seconds.map((x) => localDateOf(x * 1000, tz)) }] : [];
+      const r = reasonFor(idx, c.key, LEVEL_EXPECTED_REASONS.V4, { code, instants });
+      if (!r) return null;
+      found.add(r);
     }
+    for (const r of LEVEL_EXPECTED_REASONS.V4) if (found.has(r)) return r;
     return null;
   };
 
@@ -817,14 +983,14 @@ async function verifyV4(
   let withoutUnexpected = false;
   for (const i of subtractIntervals(lOwn, tOwn)) {
     const contributors = overlapping(legacyOwn, i);
-    const reason = ownReason(contributors);
+    const reason = ownReason(contributors, 'BUSY_MISSING');
     withoutCount++;
     if (!reason) withoutUnexpected = true;
     emitBusy('BUSY_MISSING', i, contributors, 'without_subscriptions', reason);
   }
   for (const i of subtractIntervals(tOwn, lOwn)) {
     const contributors = overlapping(targetOwn, i);
-    const reason = ownReason(contributors);
+    const reason = ownReason(contributors, 'BUSY_EXTRA');
     withoutCount++;
     if (!reason) withoutUnexpected = true;
     emitBusy('BUSY_EXTRA', i, contributors, 'without_subscriptions', reason);
@@ -973,10 +1139,11 @@ async function verifyV5(idx: VerifyIndex, calendars: readonly MigrationCalendar[
         const onlyT = [...t.instances].filter((i) => !l.instances.has(i)).sort();
         if (onlyL.length === 0 && onlyT.length === 0) continue;
         const key = targetKeyOf(uid);
+        const instants = [...onlyL, ...onlyT].map((i) => feedInstant(i, tz));
         out.add({
           ...base, code: 'FEED_INSTANCES_DIFF', href: publishedToHref.get(uid) ?? null, legacy_key: isLegacyKey(key) ? key : null,
           detail: {
-            reason: reasonFor(idx, key, LEVEL_EXPECTED_REASONS.V5),
+            reason: reasonFor(idx, key, LEVEL_EXPECTED_REASONS.V5, { code: 'FEED_INSTANCES_DIFF', instants }),
             published_uid: uid,
             legacy: { only: onlyL.slice(0, DETAIL_LIST_MAX).map(instanceLabel), count: onlyL.length },
             target: { only: onlyT.slice(0, DETAIL_LIST_MAX).map(instanceLabel), count: onlyT.length },
@@ -987,14 +1154,14 @@ async function verifyV5(idx: VerifyIndex, calendars: readonly MigrationCalendar[
         const { key, override } = legacyKeyOf(uid);
         out.add({
           ...base, code: 'FEED_UID_MISSING', href: null, legacy_key: isLegacyKey(key) ? key : null,
-          detail: { reason: reasonFor(idx, key, override ? V5_MISSING_OVERRIDE_REASONS : V5_MISSING_REASONS), published_uid: uid, legacy: { instances: l.instances.size }, target: null },
+          detail: { reason: reasonFor(idx, key, override ? V5_MISSING_OVERRIDE_REASONS : V5_MISSING_REASONS, { code: 'FEED_UID_MISSING', instants: [...l.instances].map((i) => feedInstant(i, tz)) }), published_uid: uid, legacy: { instances: l.instances.size }, target: null },
         });
       } else if (t) {
         if (t.instances.size === 0) continue;
         const key = targetKeyOf(uid);
         out.add({
           ...base, code: 'FEED_UID_EXTRA', href: publishedToHref.get(uid) ?? null, legacy_key: isLegacyKey(key) ? key : null,
-          detail: { reason: reasonFor(idx, key, V5_EXTRA_REASONS), published_uid: uid, legacy: null, target: { instances: t.instances.size } },
+          detail: { reason: reasonFor(idx, key, V5_EXTRA_REASONS, { code: 'FEED_UID_EXTRA', instants: [...t.instances].map((i) => feedInstant(i, tz)) }), published_uid: uid, legacy: null, target: { instances: t.instances.size } },
         });
       }
     }
@@ -1100,6 +1267,7 @@ async function verifyLocked(ctx: VerifyCtx): Promise<VerifyRunSummary> {
     ledgerByCalHref: new Map(live.map((l) => [calHref(l.calendar_id, l.href), l])),
     target,
     parsed: new Map(),
+    scopes: new Map(),
     now,
   };
 
@@ -1177,12 +1345,20 @@ async function verifyLocked(ctx: VerifyCtx): Promise<VerifyRunSummary> {
   });
   const calendars = buildVerdicts(calInfo, params.levels, lite);
   const colored = lite.filter((d) => d.variant !== 'with_subscriptions');
-  const overall = worstColor(calendars.map((c) => c.color));
+  let overall = worstColor(calendars.map((c) => c.color));
+  let acceptable = calendars.every((c) => c.color === 'green' || (c.color === 'yellow' && c.accepted));
+  // Rete di sicurezza: un busy rosso nel riassunto V4 deve comparire in almeno un verdetto; altrimenti
+  // (righe perse o attribuite a calendari senza verdetto) la verifica è rossa e non accettabile.
+  if (v4?.without_subscriptions === 'red' && !calendars.some((c) => (c.levels.V4?.unexpected ?? 0) > 0)) {
+    log.error({ runId: ctx.runId }, 'V4 rosso senza differenze inattese nei verdetti: verifica rossa');
+    overall = 'red';
+    acceptable = false;
+  }
   const summary: VerifyRunSummary = {
     generated_at: now.toISOString(),
     levels: params.levels,
     overall,
-    acceptable: calendars.every((c) => c.color === 'green' || (c.color === 'yellow' && c.accepted)),
+    acceptable,
     calendars,
     v4,
     totals: {

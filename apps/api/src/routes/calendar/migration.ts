@@ -13,9 +13,15 @@
  *    queued, 200 con replayed = true se la stessa chiave d'idempotenza è già
  *    stata usata per la stessa richiesta) e il wizard ne interroga lo stato
  *    (GET /runs/:id, GET /state);
- *  - chiave d'idempotenza nell'header Idempotency-Key (o nel campo
- *    idempotency_key), obbligatoria per i run che scrivono; request_hash =
- *    sha256 del JSON canonico di { path, body };
+ *  - chiave d'idempotenza solo nell'header Idempotency-Key (un header
+ *    custom: da un'altra origine forza il preflight CORS, anche per il
+ *    multipart), obbligatoria per i run che scrivono; request_hash = sha256
+ *    del JSON canonico di { path, body };
+ *  - difesa CSRF delle richieste che scrivono (POST, PATCH, PUT, DELETE):
+ *    Sec-Fetch-Site diverso da same-origin/none o Origin estranea → 403;
+ *    corpo solo application/json (multipart/form-data solo per
+ *    /phase0/archive) → altrimenti 415: una pagina dello stesso sito non può
+ *    mandare una richiesta "semplice" (text/plain) con il cookie dell'admin;
  *  - conferme digitate esatte (MIGRATION_CONFIRMATIONS) per le azioni che
  *    scrivono, altrimenti 400 CONFIRMATION_REQUIRED con details.expected;
  *  - ogni POST/PATCH che cambia qualcosa scrive una riga in audit_logs
@@ -126,6 +132,56 @@ calendarMigration.use('*', async (c, next) => {
   await next();
 });
 
+/** Origini ammesse per le richieste che scrivono: CORS_ORIGINS (le stesse di app.ts) più l'origine della richiesta. */
+function allowedWriteOrigins(c: Ctx): Set<string> {
+  const out = new Set((process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000').split(',').map((s) => s.trim().replace(/\/+$/, '')).filter(Boolean));
+  try {
+    out.add(new URL(c.req.url).origin);
+  } catch {
+    // URL della richiesta non analizzabile: restano CORS_ORIGINS.
+  }
+  const host = c.req.header('X-Forwarded-Host')?.split(',')[0]?.trim() || c.req.header('Host')?.trim();
+  if (host) {
+    const proto = c.req.header('X-Forwarded-Proto')?.split(',')[0]?.trim() || new URL(c.req.url).protocol.replace(/:$/, '');
+    out.add(`${proto}://${host}`);
+  }
+  return out;
+}
+
+/**
+ * Difesa CSRF (contratto §10.1): il cookie auth_token è SameSite=Lax, che non
+ * ferma le richieste da un sottodominio dello stesso sito. Per POST, PATCH, PUT
+ * e DELETE: Fetch Metadata (Sec-Fetch-Site same-origin o none, cioè l'admin o
+ * uno strumento), altrimenti un'Origin presente deve essere fra quelle ammesse;
+ * un corpo deve essere application/json (multipart/form-data solo per
+ * l'archivio della Fase 0, che in più richiede l'header Idempotency-Key). Una
+ * richiesta "semplice" di un'altra pagina (text/plain, form) non arriva mai
+ * agli handler.
+ */
+calendarMigration.use('*', async (c, next) => {
+  const method = c.req.method.toUpperCase();
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return next();
+  const site = c.req.header('Sec-Fetch-Site')?.trim().toLowerCase();
+  if (site && site !== 'same-origin' && site !== 'none') {
+    log.warn({ method, url: c.req.path, site }, 'migrazione: richiesta da un\'altra origine rifiutata');
+    return c.json({ error: 'Richiesta da un\'altra origine rifiutata', code: 'CSRF_REJECTED' }, 403);
+  }
+  const origin = c.req.header('Origin')?.trim().replace(/\/+$/, '');
+  if (origin !== undefined && origin !== '' && (origin === 'null' || !allowedWriteOrigins(c).has(origin))) {
+    log.warn({ method, url: c.req.path }, 'migrazione: Origin non ammessa, richiesta rifiutata');
+    return c.json({ error: 'Origine della richiesta non ammessa', code: 'CSRF_REJECTED' }, 403);
+  }
+  if (c.req.raw.body !== null) {
+    const type = (c.req.header('Content-Type') ?? '').toLowerCase();
+    const multipart = c.req.path.endsWith('/phase0/archive');
+    const ok = multipart ? type.startsWith('multipart/form-data') : /^application\/json\s*(;|$)/.test(type);
+    if (!ok) {
+      return c.json({ error: multipart ? 'Corpo atteso: multipart/form-data' : 'Corpo atteso: application/json', code: 'VALIDATION_FAILED' }, 415);
+    }
+  }
+  await next();
+});
+
 // ─── Utilità ───────────────────────────────
 
 function adminUser(c: Ctx): AdminUser {
@@ -154,15 +210,16 @@ async function readJsonBody(c: Ctx): Promise<Record<string, unknown>> {
   return parsed as Record<string, unknown>;
 }
 
-/** Chiave d'idempotenza dall'header o dal corpo (le due, se presenti, devono coincidere). */
+/**
+ * Chiave d'idempotenza, solo dall'header Idempotency-Key: un header custom
+ * forza il preflight CORS da un'altra origine (anche per il multipart),
+ * mentre un campo del corpo lo manderebbe anche una pagina estranea.
+ */
 function idempotencyKeyOf(c: Ctx, body: Record<string, unknown> | null): string | null {
-  const header = c.req.header('Idempotency-Key')?.trim() || null;
-  const field = body && typeof body.idempotency_key === 'string' ? body.idempotency_key.trim() || null : null;
-  if (body && body.idempotency_key !== undefined && body.idempotency_key !== null && typeof body.idempotency_key !== 'string') {
-    throw new MigrationError('VALIDATION_FAILED', 'idempotency_key: atteso un testo');
+  if (body && body.idempotency_key !== undefined && body.idempotency_key !== null) {
+    throw new MigrationError('VALIDATION_FAILED', 'La chiave d\'idempotenza va nell\'header Idempotency-Key, non nel corpo');
   }
-  if (header && field && header !== field) throw new MigrationError('VALIDATION_FAILED', 'Chiave d\'idempotenza diversa fra header e corpo');
-  const key = header ?? field;
+  const key = c.req.header('Idempotency-Key')?.trim() || null;
   if (key !== null && !IDEMPOTENCY_KEY_RE.test(key)) {
     throw new MigrationError('VALIDATION_FAILED', 'Chiave d\'idempotenza non valida: 8-200 caratteri [A-Za-z0-9._:-]');
   }
@@ -463,12 +520,10 @@ calendarMigration.post(
       throw new MigrationError('PAYLOAD_TOO_LARGE', `Archivio oltre ${MIGRATION_LIMITS.archiveMaxBytes / (1024 * 1024)} MB`);
     }
     const sha256 = createHash('sha256').update(buf).digest('hex');
-    const hashBody: Record<string, unknown> = {
-      sha256,
-      size: buf.length,
-      name: originalName,
-      ...(typeof form.idempotency_key === 'string' ? { idempotency_key: form.idempotency_key } : {}),
-    };
+    if (form.idempotency_key !== undefined) {
+      throw new MigrationError('VALIDATION_FAILED', 'La chiave d\'idempotenza va nell\'header Idempotency-Key, non nel modulo');
+    }
+    const hashBody: Record<string, unknown> = { sha256, size: buf.length, name: originalName };
     const key = idempotencyKeyOf(c, hashBody);
     if (!key) throw new MigrationError('IDEMPOTENCY_KEY_REQUIRED', 'Chiave d\'idempotenza obbligatoria (header Idempotency-Key) per l\'import dell\'archivio');
     const requestHash = requestHashOf('/phase0/archive', hashBody);

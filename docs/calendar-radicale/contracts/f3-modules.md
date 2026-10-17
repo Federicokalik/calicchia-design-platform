@@ -163,7 +163,7 @@ Condizioni (funzione `cal_shadow_mirror_enqueue()`): `mode = 'postgres'`, `shado
 
 - Tutte nel gruppo S (`STATE_TABLES` esplicito più il prefisso `cal_migration_`): esportate, mai ripristinate, mai toccate dall'import tranne l'UPDATE di rivalidazione del ledger (§4.5). Il test della partizione le protegge con trappole ENABLE ALWAYS.
 - Retention: run e righe oltre 30 giorni cancellati (tranne l'ultimo run riuscito di ogni tipo), file caricati per l'archivio cancellati a fine run e comunque dopo 24 ore (`purgeMigrationArtifacts`, §13.2).
-- Erasure: righe che citano la persona cancellate, snapshot del ledger redatti (§13.1).
+- Erasure: email sostituita nelle righe e nei run che la contengono (le righe restano: differenze ed esiti non hanno dati personali e da loro si ricalcolano verdetti e conflitti), snapshot del ledger redatti (§13.1).
 
 ## 4. Ledger: semantica (design §13.6)
 
@@ -479,12 +479,14 @@ export function handleShadowMirror(job: CalendarJob, ctx: { signal: AbortSignal;
 export function setShadowEnabled(input: { enabled: boolean; actor: string }): Promise<ShadowStateResponse>;
 export function getParity(db: Db, now?: Date): Promise<ParityView>;
 /**
- * Cron notturno: apply completo (trigger 'schedule', plan_run_id e opzioni dell'ultima anteprima riuscita, expected_plan_hash
- * null) con follow_up_verify V1-V5. Salta (con un log) se lo shadow è spento, il mode non è postgres o c'è un run attivo.
+ * Cron notturno: apply completo (trigger 'schedule', plan_run_id, opzioni e ambito dell'ultima anteprima riuscita,
+ * expected_plan_hash null) con follow_up_verify V1-V5 su tutti i calendari (scope vuoto, v4_days 180, anche con un'anteprima
+ * parziale). Salta (con un log) se lo shadow è spento o il mode non è postgres; con un run attivo riprova ogni 10 minuti per
+ * al più 3 ore ('retry'), poi salta.
  */
-export function runShadowNightly(): Promise<void>;
-/** Cron orario: verifica V4 sui prossimi 14 giorni. */
-export function runShadowHourlyParity(): Promise<void>;
+export function runShadowNightly(opts?: { retryUntil?: number; retryDelayMs?: number }): Promise<'queued' | 'skipped' | 'retry'>;
+/** Cron orario: verifica V4 sui prossimi 14 giorni; mai fra 5 minuti prima e 15 dopo l'ora del notturno. */
+export function runShadowHourlyParity(opts?: { now?: Date }): Promise<void>;
 /** Flag per singola iscrizione (decisione 5): sidecar, pull forzato verso l'indice, device_visible del sidecar. */
 export function setSubscriptionMigrationFlags(subscriptionId: string, flags: SubscriptionFlagsRequest, actor: string): Promise<SubscriptionFlagsResponse>;
 export function listSubscriptionsForMigration(db: Db): Promise<SubscriptionMigrationView[]>;
@@ -651,7 +653,7 @@ Ogni differenza ha `detail.signature` (`diffSignature`). Alla fine di `runVerify
 | All'attivazione | apply completo di recupero (trigger `shadow`) | `apply` |
 | Ogni notte (`runShadowNightly`) | apply completo con le opzioni dell'ultima anteprima riuscita, più verifica V1-V5 (`follow_up_verify`) | `apply` |
 | Ogni ora (`runShadowHourlyParity`) | verifica V4 sui prossimi 14 giorni | — |
-| Erasure GDPR, retention delle proiezioni | job `shadow_mirror` con `payload.erasure = true` (eseguiti anche con lo shadow spento, §13.1) | `shadow` |
+| Erasure GDPR, retention delle proiezioni | job `shadow_mirror` con `payload.erasure = true` (eseguiti anche con lo shadow spento, §13.1: solo oggetti già tracciati, compresa la create di uno spostamento, cioè una chiave con una riga viva del ledger in un'altra collezione; in questi job la delete della vecchia collezione non aspetta una create non riuscita, esito `move_incomplete`) | `shadow` |
 
 ### 9.2 Handler del job
 
@@ -673,9 +675,9 @@ Oggetto assente in destinazione → scrittura completa dal piano (sicura: i devi
 
 ### 9.5 Attivazione e parità
 
-- Accensione (`ATTIVA SHADOW`): mode postgres, identità `ok`, ultimo apply riuscito senza conflitti né fallimenti, ultima verifica successiva accettabile, nessuna riga da rivalidare. Altrimenti `PRECONDITION_FAILED` con i motivi (`APPLY_REQUIRED`, `APPLY_CONFLICTS`, `VERIFY_REQUIRED`, `VERIFY_RED`, `REVALIDATION_PENDING`, `IDENTITY_NOT_OK`). `shadow_since = now()`; apply di recupero accodato (se un run è attivo, `catch_up_run = null` e ci pensa il giro notturno).
+- Accensione (`ATTIVA SHADOW`): mode postgres, identità `ok`, ultimo apply riuscito senza conflitti né fallimenti, ultima verifica completa successiva (V1-V5, tutti i calendari, V4 su almeno 180 giorni: `isFullVerifyParams`) accettabile, nessuna riga da rivalidare. Altrimenti `PRECONDITION_FAILED` con i motivi (`APPLY_REQUIRED`, `APPLY_CONFLICTS`, `VERIFY_REQUIRED`, `VERIFY_RED`, `REVALIDATION_PENDING`, `IDENTITY_NOT_OK`). `shadow_since = now()`; apply di recupero accodato (se un run è attivo, `catch_up_run = null` e ci pensa il giro notturno).
 - Spegnimento: sempre ammesso, nessuna conferma; i job pending si chiudono senza azione.
-- Parità (`getParity`): un giro programmato è verde quando la verifica è accettabile (V4 senza iscrizioni non rossa per il giro orario). `green_since` è la fine del primo giro verde dopo l'ultimo non verde (o `shadow_since`); `satisfied` richiede almeno `parityDaysRequired` (7) giorni e un giro notturno verde per ognuno di quei giorni.
+- Parità (`getParity`): un giro programmato è verde quando la verifica è accettabile (V4 senza iscrizioni non rossa per il giro orario); ogni verifica programmata che non è il giro orario è un giro notturno, verde solo se completa (`isFullVerifyParams`) e accettabile. `green_since` è la fine del primo giro verde dopo l'ultimo non verde (o `shadow_since`); `satisfied` richiede almeno `parityDaysRequired` (7) giorni e un giro notturno verde in ognuno degli ultimi 7 giorni di calendario di Roma (da ieri, o da oggi se il notturno di oggi c'è già), non in finestre di 24 ore ancorate all'istante della lettura.
 
 ## 10. API REST `/api/admin/calendar/migration`
 
@@ -714,7 +716,7 @@ Oggetto assente in destinazione → scrittura completa dal piano (sicura: i devi
 
 ### 10.3 Idempotenza e conferme
 
-- Chiave nell'header `Idempotency-Key` (oppure nel campo `idempotency_key` del corpo), 8-200 caratteri `[A-Za-z0-9._:-]`, obbligatoria per i run di `WRITING_RUN_KINDS` (`400 IDEMPOTENCY_KEY_REQUIRED`). `request_hash` = sha256 del JSON canonico di `{ path, body }`. Stessa chiave e stesso hash → `200` con il run esistente e `replayed: true`; stessa chiave e hash diverso → `409 IDEMPOTENCY_KEY_REUSED`.
+- Chiave solo nell'header `Idempotency-Key` (un campo `idempotency_key` nel corpo o nel modulo è `400 VALIDATION_FAILED`: un header custom forza il preflight CORS da un'altra origine), 8-200 caratteri `[A-Za-z0-9._:-]`, obbligatoria per i run di `WRITING_RUN_KINDS` (`400 IDEMPOTENCY_KEY_REQUIRED`). `request_hash` = sha256 del JSON canonico di `{ path, body }`. Stessa chiave e stesso hash → `200` con il run esistente e `replayed: true`; stessa chiave e hash diverso → `409 IDEMPOTENCY_KEY_REUSED`.
 - Conferme: frase esatta di `MIGRATION_CONFIRMATIONS` (`confirmationMatches`), altrimenti `400 CONFIRMATION_REQUIRED` con `details.expected`. Le azioni che non scrivono non chiedono conferme.
 - Precondizioni (`409 PRECONDITION_FAILED`, `details.reasons` di `PRECONDITION_REASONS`): `init initialize` solo con identità `uninitialized` e principal assente; `init create_missing` solo con identità `ok`; `plan` dopo un preflight riuscito senza blocchi; `apply` dopo un `plan` riuscito, nessuna anomalia bloccante, identità `ok`; `shadow` §9.5.
 - Run attivo: `409 MIGRATION_BUSY` con `details.active_run` (`MigrationRunView`).
@@ -809,7 +811,7 @@ Le viste della F4 (giorni residui, proiezione inversa, anteprima del rollback, "
 
 1. **Sull'host** (OPS): `radicale-maint.sh phase0-detect` cerca il vecchio volume `radicale_data` (mai montato al posto di quello nuovo); `phase0-backup` ne fa il tar (sola lettura) con sha256 e manifest; `phase0-export` produce `archivio-fase0.zip` con gli item `.ics` (nome `<collezione>__<item>.ics`) e il manifest.
 2. **Nel wizard** (passo 1): dichiarazione `phase0` (`absent` se il volume non c'è) oppure caricamento dello zip (`POST /phase0/archive`). Il file va in `CAL_MIGRATION_UPLOAD_DIR` (`0600`, cartella `0700`) e si cancella a fine run.
-3. **Run `archive`** (INIT): crea, se manca, la riga `archivio-fase0` (`origin='migration'`, `role='user'`, `blocks_availability=false`, `ics_feed_enabled=false`, `is_system=false`, nome "Archivio Fase 0") e la collezione (MKCALENDAR in `init.ts`, con le dead prop); per ogni item valido (parse di calendar-core, `validateObject`) PUT con `If-None-Match: *` (412 = già importato) e riga del ledger `archive`; UID duplicati nell'archivio → si tiene il primo (anomalia); item non validi → righe `anomaly` e niente scrittura. Idempotente: una seconda esecuzione è tutta `unchanged`. Alla fine `phase0 = archived`.
+3. **Run `archive`** (INIT): crea, se manca, la riga `archivio-fase0` (`origin='migration'`, `role='user'`, `blocks_availability=false`, `ics_feed_enabled=false`, `is_system=false`, nome "Archivio Fase 0") e la collezione (MKCALENDAR in `init.ts`, con le dead prop); per ogni item valido (parse di calendar-core, `validateObject`) PUT con `If-None-Match: *` (412 = già importato) e riga del ledger `archive`; UID duplicati nell'archivio → si tiene il primo (anomalia); item non validi → righe `anomaly` e niente scrittura. Idempotente: una seconda esecuzione è tutta `unchanged`. Alla fine `phase0 = archived`; un archivio senza nessun item valido (tutte le voci rifiutate, nessun UID già archiviato) fallisce con `ARCHIVE_INVALID` dopo aver scritto le righe dei motivi e non tocca la dichiarazione. Lettura: voce al più `MAX_OBJECT_BYTES` (1 MiB, scartata senza decomprimerla se dichiarata più grande), 64 MiB decompressi in tutto (contano anche le voci scartate), voci della directory centrale al più `archiveMaxItems` + 100; voci sovrapposte, dimensione o CRC diversi dai dichiarati e decompressione non riuscita = archivio corrotto (`ARCHIVE_INVALID`); parse e validazione cedono l'event loop ogni 25 voci (battito e lease del run, richieste dell'API). Il file caricato si cancella a fine run e su un annullamento dell'admin, non su un'interruzione dell'esecutore (arresto dell'API, lease perso), che riprende con lo stesso file.
 4. **Effetti**: l'archivio è escluso da piano, verifica e shadow; non blocca mai (non è nel busy); è invisibile al legacy (§1.3). In F3 è in sola lettura per i device come tutto il resto (policy `shadow`). La sola lettura dopo il cutover richiede un ruolo dei device in sola lettura (questione aperta 1).
 
 ## 13. GDPR (design §16.4)
@@ -819,13 +821,16 @@ Le viste della F4 (giorni residui, proiezione inversa, anteprima del rollback, "
 Aggancio: `DELETE /api/gdpr-requests/erase/:email` chiama `calendarErase` e aggiunge `calendar: CalendarErasureReport` alla risposta e il seguito manuale. Passi:
 
 1. Prenotazioni con `lower(attendee_email) = email`: anonimizzate (`attendee_name = 'Dato cancellato (GDPR)'`, `attendee_email = 'erased-<id>@deleted.invalid'`, telefono, azienda, messaggio, risposte e consenso a NULL o vuoti); la riga resta (storico e vincolo EXCLUDE).
-2. Righe legacy delle proiezioni (`source='booking'` e `source_id` fra quelle prenotazioni): titolo "Prenotazione", descrizione, luogo e link a NULL. Le altre righe di `calendar_events` (e `calendar_events_legacy` dopo il finalize) che contengono l'email in titolo, descrizione o luogo: l'email sostituita da `[dato rimosso]`. In mode postgres senza GUC (così lo shadow propaga); con `mode ≠ postgres` dentro `SET LOCAL caldes.reverse_sync = 'on'` (trigger 166 della F4).
-3. `audit_logs` di `calendar_events` e `calendar_bookings` delle righe toccate (o che contengono l'email): `old_data`/`new_data` redatti (campi personali sostituiti).
-4. Ledger: righe delle chiavi toccate con `legacy_snapshot`, `intent_snapshot` e `legacy_hash` a NULL (il piano successivo riscrive la destinazione); righe dei run che citano le chiavi o l'email cancellate.
+   `source_metadata.user_agent` sostituito (è lo stesso dato di `consent_user_agent`), l'email sostituita nel resto di `source_metadata`.
+2. Righe legacy delle proiezioni (`source='booking'` e `source_id` fra quelle prenotazioni): titolo "Prenotazione", descrizione, luogo e link a NULL. Le altre righe di `calendar_events` (e `calendar_events_legacy` dopo il finalize) che contengono l'email in titolo, descrizione, luogo o link: l'email sostituita da `[dato rimosso]`. In mode postgres senza GUC (così lo shadow propaga); con `mode ≠ postgres` dentro `SET LOCAL caldes.reverse_sync = 'on'` (trigger 166 della F4).
+3. `audit_logs` di `calendar_events` e `calendar_bookings` delle righe toccate (campi personali sostituiti per intero, `source_metadata.user_agent` compreso) e le righe che contengono l'email, comprese quelle delle chiamate MCP (`table_name = 'mcp_call'`, argomenti dei tool in `new_data.args_summary`): email sostituita in `old_data`, `new_data` e `metadata`, a qualsiasi livello.
+4. Ledger: righe delle chiavi toccate (o con l'email negli snapshot) con `legacy_snapshot`, `intent_snapshot` e `legacy_hash` a NULL (il piano successivo riscrive la destinazione). Righe dei run (`cal_migration_items.detail`) e run (`params`, `summary` con l'anteprima salvata, `progress`, `error`) che contengono l'email: email sostituita nei valori, righe e run restano. NON DEVE cancellare righe per chiave: le differenze delle verifiche e gli esiti degli oggetti non contengono dati personali (§1.4 regola 5) e da loro si ricalcolano i verdetti (`latestVerifyVerdicts`: precondizione `VERIFY_RED` dello shadow e criteri del cutover) e i conflitti aperti; cancellarle renderebbe accettabile una verifica rossa senza rifarla.
 5. Destinazione: in mode postgres con il volume inizializzato, job `shadow_mirror` con `payload.erasure = true` per le chiavi toccate (eseguiti anche con lo shadow spento: patch dei campi redatti, proiezioni minimizzate); con lo store Radicale, `project_booking` per le prenotazioni e update dalla facade per gli altri eventi.
 6. Indice: `purgeVersionsForErasure` (f2-modules §5.6) degli oggetti toccati; `raw_ics` si aggiorna con la sync dopo la riscrittura.
-7. `cal_jobs` conclusi o morti delle chiavi toccate: cancellati.
-8. Seguito manuale nella risposta: `scripts/radicale-maint.sh purge-cache` sul server (cache degli item di Radicale); i backup scadono da soli (30 giorni).
+7. `cal_jobs` conclusi o morti: quelli di `project_booking` e `booking_conflict_check` delle prenotazioni e quelli che contengono l'email, cancellati; i risultati dello `shadow_mirror` delle chiavi toccate restano (solo chiavi, href ed esiti: servono al conteggio dei conflitti aperti).
+8. Seguito manuale nella risposta: `scripts/radicale-maint.sh purge-cache` sul server (cache degli item di Radicale); i backup ordinari scadono con la retention (30 giorni); le copie senza scadenza vanno cancellate o la conservazione motivata: snapshot conservati in `calendar-stack/pinned/` (`radicale-maint.sh pinned-list`, `pinned-purge --yes`), file della Fase 0 in `backups/phase0/` (`phase0-purge --yes`) e volume della Fase 0 (decisione 7); item dell'archivio della Fase 0 con l'email (contati con qualsiasi store: nessuna riscrittura automatica li tocca); eventi Google collegati.
+
+L'email si cerca come email intera (`erasureEmailPattern`/`erasureEmailRegex`: prima nessun carattere della parte locale, tranne l'escape `\n`; dopo il dominio non continua), nei testi iCalendar con le righe ripiegate riunite: cancellare `mario@example.com` non tocca `anna.mario@example.com` né `mario@example.com.au`.
 
 ### 13.2 Retention
 
@@ -845,6 +850,9 @@ Stesse convenzioni di `backup-calendar-stack.sh` (variabili `RADICALE_VOLUME_DIR
 | `phase0-backup [--out DIR]` | tar.gz in sola lettura del volume della Fase 0, sha256, manifest | file locali |
 | `phase0-export [--out FILE]` | zip degli item `.ics` per il wizard (al più 20 MB e 20000 item) | file locale |
 | `purge-cache` | rimuove le cartelle `.Radicale.cache` sotto `flock -x` di `.Radicale.lock` (erasure GDPR); Radicale le ricostruisce | volume |
+| `pinned-list` | snapshot conservati da `snapshot` in `calendar-stack/pinned/` (fuori dalla retention: non scadono da soli) | no |
+| `pinned-purge [--older-than GIORNI] [--dry-run] --yes` | cancella gli snapshot conservati dopo la conferma del passaggio o per un'erasure GDPR; senza `--yes` né `--dry-run` exit 2 | file locali |
+| `phase0-purge [--dry-run] --yes` | cancella tar.gz, manifest, sha256 e zip della Fase 0 in `backups/phase0/` (senza retention); mai il volume della Fase 0 | file locali |
 
 Exit: 0 ok, 1 errore, 2 uso errato, 3 volume della Fase 0 assente (`phase0-*`), 75 lock occupato. Mai montare il volume della Fase 0 in Radicale; mai toccare file fuori dalle cache in `purge-cache`.
 

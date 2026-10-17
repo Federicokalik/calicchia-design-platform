@@ -55,7 +55,8 @@ export interface TestRun<P> {
   ctx: MigrationRunContext<P>;
   items: MigrationItemInput[];
   progress: MigrationProgress[];
-  cancel(): void;
+  /** Annulla il run: con una MigrationError CANCELLED come l'admin, con un Error qualsiasi come l'esecutore (arresto, lease perso). */
+  cancel(reason?: unknown): void;
 }
 
 /** Contesto di un run con la riga in cal_migration_runs (params riletti dal database, come l'esecutore). */
@@ -89,7 +90,7 @@ export async function testRun<P extends object>(kind: MigrationRunKind, params: 
       if (controller.signal.aborted) throw new MigrationError('CANCELLED', 'Run annullato');
     },
   };
-  return { ctx, items, progress, cancel: () => controller.abort() };
+  return { ctx, items, progress, cancel: (reason?: unknown) => controller.abort(reason) };
 }
 
 // ─── Date ───────────────────────────────

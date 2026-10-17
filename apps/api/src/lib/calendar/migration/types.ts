@@ -328,6 +328,12 @@ export interface SnapshotOptions {
   realign_dst_exceptions?: boolean;
   orphans?: OrphanPolicy;
   moved_to_calendar_id?: string | null;
+  /**
+   * DTSTART fuori dalla regola (anomalia DTSTART_NOT_IN_RULE): l'oggetto parte
+   * dalla prima occorrenza della semantica legacy (rrule.js non conta il
+   * DTSTART che non soddisfa la regola, RFC 5545 sì), con la stessa durata.
+   */
+  realign_dtstart?: boolean;
 }
 
 export interface LegacyEventSnapshot {
@@ -452,6 +458,7 @@ export const ANOMALY_CODES = [
   'CANCELLED_MASTER',
   'DST_SHIFTED_EXCEPTION',
   'MIXED_BYDAY',
+  'DTSTART_NOT_IN_RULE',
   'DUPLICATE_HOLIDAY',
   'POSSIBLE_DUPLICATE',
   'BOOKING_DRIFT',
@@ -490,6 +497,7 @@ export const ANOMALY_DEFINITIONS: Readonly<Record<AnomalyCode, AnomalyDefinition
   CANCELLED_MASTER: { severity: 'info', blocking: false, option: null, description: 'Master cancellato: non migrato.' },
   DST_SHIFTED_EXCEPTION: { severity: 'warning', blocking: false, option: 'realign_dst_exceptions', description: 'EXDATE o RECURRENCE-ID con l\'ora UTC del DTSTART ma un\'ora di Roma diversa (codice precedente al fix DST): riallineato (default).' },
   MIXED_BYDAY: { severity: 'warning', blocking: false, option: null, description: 'BYDAY misto in una serie mensile o annuale: Radicale e i device mostrano l\'unione RFC 5545, il legacy l\'intersezione. Entrambe le espansioni sono nel dettaglio.' },
+  DTSTART_NOT_IN_RULE: { severity: 'warning', blocking: false, option: null, description: 'Serie con la data d\'inizio fuori dalla regola: il legacy non la mostra come occorrenza, RFC 5545 e i device sì. Migrata dalla prima occorrenza del legacy (stessa durata); il feed di oggi la pubblica già con l\'occorrenza in più.' },
   DUPLICATE_HOLIDAY: { severity: 'warning', blocking: false, option: null, description: 'Più festività di sistema per la stessa data: si migra la prima.' },
   POSSIBLE_DUPLICATE: { severity: 'info', blocking: false, option: null, description: 'Evento identico a un altro (stesso calendario, titolo e orari), per esempio una copia fatta con "Duplica": migrato così com\'è.' },
   BOOKING_DRIFT: { severity: 'warning', blocking: false, option: null, description: 'Prenotazione confermata senza proiezione, proiezione senza prenotazione o orari divergenti: la proiezione si rigenera dalla prenotazione.' },
@@ -668,6 +676,12 @@ export const EXPECTED_DIFF_REASONS = [
   'ALLDAY_NORMALIZED',
   /** Festività duplicata non migrata (V3, V5). */
   'DUPLICATE_HOLIDAY_SKIPPED',
+  /**
+   * DTSTART fuori dalla regola riallineato alla prima occorrenza legacy (V5:
+   * il feed legacy, espanso secondo RFC 5545, ha l'istanza del vecchio DTSTART
+   * e, con COUNT, una in meno alla fine).
+   */
+  'DTSTART_REALIGNED',
 ] as const;
 export type ExpectedDiffReason = (typeof EXPECTED_DIFF_REASONS)[number];
 

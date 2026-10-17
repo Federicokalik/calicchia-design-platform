@@ -802,6 +802,40 @@ describe('gruppo INIT della F3 contro Radicale reale', { skip: radicale.skip }, 
     await assert.rejects(stat(empty.upload_path));
   });
 
+  test('archivio senza item validi: run fallito con ARCHIVE_INVALID, motivi nelle righe, dichiarazione phase0 precedente intatta', async () => {
+    const [before] = await sql<Array<{ phase0: unknown }>>`SELECT migration_declarations->'phase0' AS phase0 FROM calendar_backend_state`;
+    assert.ok(before.phase0, 'una dichiarazione phase0 buona da un archivio precedente');
+    const invalid = await upload('tutto-rotto.zip', buildZip([
+      { name: 'lavoro__a.ics', data: 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n' },
+      { name: 'lavoro__b.ics', data: 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//x//IT\r\nEND:VCALENDAR\r\n' },
+      { name: 'lavoro__c.ics', data: 'non è iCalendar' },
+    ]));
+    const run = await testRun('archive', invalid);
+    await assert.rejects(runArchiveImport(run.ctx), (err: unknown) =>
+      err instanceof MigrationError && err.code === 'VALIDATION_FAILED' && err.details?.run_error_code === 'ARCHIVE_INVALID' && /Nessun item valido/.test(err.message));
+    assert.equal(run.items.filter((i) => i.item_type === 'anomaly').length, 3, 'il motivo resta nelle righe del run');
+    const [after] = await sql<Array<{ phase0: unknown }>>`SELECT migration_declarations->'phase0' AS phase0 FROM calendar_backend_state`;
+    assert.deepEqual(after.phase0, before.phase0, 'un archivio da 0 item non sostituisce la dichiarazione');
+    await assert.rejects(stat(invalid.upload_path), 'file inutile rimosso');
+  });
+
+  test('archivio interrotto dall\'esecutore: il file caricato resta per la ripresa; annullato dall\'admin: rimosso', async () => {
+    const interrupted = await upload('interrotto.zip', ARCHIVE_ZIP());
+    const run = await testRun('archive', interrupted);
+    run.cancel(new Error('esecutore fermato'));
+    await assert.rejects(runArchiveImport(run.ctx), (err: unknown) => err instanceof MigrationError && err.code === 'CANCELLED');
+    assert.ok(await stat(interrupted.upload_path), 'la ripresa ritrova il file');
+    const resumed = await testRun('archive', interrupted);
+    const summary = await runArchiveImport(resumed.ctx);
+    assert.equal(summary.total, 5, 'la ripresa rilegge lo stesso file caricato');
+
+    const cancelled = await upload('annullato.zip', ARCHIVE_ZIP());
+    const run2 = await testRun('archive', cancelled);
+    run2.cancel(new MigrationError('CANCELLED', 'Run annullato su richiesta'));
+    await assert.rejects(runArchiveImport(run2.ctx), (err: unknown) => err instanceof MigrationError && err.code === 'CANCELLED');
+    await assert.rejects(stat(cancelled.upload_path), 'annullamento dell\'admin: file rimosso');
+  });
+
   // ─── Script calendar:radicale-init ───────────────────────────────
 
   test('scripts/radicale-init.ts: prova a vuoto e --apply delegano a migration/init, rifiuto di un volume estraneo', async () => {

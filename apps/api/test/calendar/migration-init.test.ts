@@ -34,7 +34,8 @@ import { tmpdir } from 'node:os';
 import { join, relative, resolve } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { gzipSync } from 'node:zlib';
+import { crc32, deflateRawSync, gzipSync } from 'node:zlib';
+import { MAX_OBJECT_BYTES } from '@calicchia/calendar-core';
 import type { CalendarEvent } from '../../src/lib/calendar/types';
 import {
   acceptedUploadDirs,
@@ -155,7 +156,7 @@ test('MKCOL e MKCALENDAR compaiono solo in migration/init.ts, radicale/identity.
 
 // ─── Archivio della Fase 0: lettura ───────────────────────────────
 
-test('zip dell\'archivio: entry .ics stored e deflate, cartelle, file nascosti, manifest e CRC rotti esclusi', () => {
+test('zip dell\'archivio: entry .ics stored e deflate, cartelle, file nascosti e manifest esclusi; CRC rotto = archivio corrotto', () => {
   const zip = buildZip([
     { name: 'lavoro__a.ics', data: eventIcs('a@fase0') },
     { name: 'lavoro__b.ics', data: eventIcs('b@fase0'), method: 'deflate' },
@@ -164,18 +165,17 @@ test('zip dell\'archivio: entry .ics stored e deflate, cartelle, file nascosti, 
     { name: '__MACOSX/lavoro__a.ics', data: eventIcs('mac@fase0') },
     { name: 'manifest.json', data: '{}' },
     { name: 'note.txt', data: 'ciao' },
-    { name: 'lavoro__rotto.ics', data: eventIcs('c@fase0'), corruptCrc: true },
   ]);
   const { entries, skipped } = readZipIcsEntries(zip);
   assert.deepEqual(entries.map((e) => e.name), ['lavoro__a.ics', 'lavoro__b.ics']);
   assert.match(entries[1].data.toString('utf8'), /UID:b@fase0/);
-  assert.deepEqual(skipped.map((s) => s.name).sort(), ['lavoro__rotto.ics', 'note.txt']);
-  assert.match(skipped.find((s) => s.name === 'lavoro__rotto.ics')!.reason, /CRC/);
+  assert.deepEqual(skipped.map((s) => s.name).sort(), ['note.txt']);
+  assert.throws(() => readZipIcsEntries(buildZip([{ name: 'lavoro__a.ics', data: eventIcs('a@fase0') }, { name: 'lavoro__rotto.ics', data: eventIcs('c@fase0'), corruptCrc: true }])), /CRC/);
   assert.throws(() => readZipIcsEntries(Buffer.from('non è uno zip, è testo semplice abbastanza lungo')), /zip non valido/);
   assert.throws(() => readZipIcsEntries(buildZip([{ name: 'a.ics', data: eventIcs('x') }, { name: 'b.ics', data: eventIcs('y') }]), { maxEntries: 1 }), /oltre 1 item/);
 });
 
-test('item dell\'archivio: validi in ordine di nome, non validi e UID duplicati scartati, nomi delle risorse sicuri', () => {
+test('item dell\'archivio: validi in ordine di nome, non validi e UID duplicati scartati, nomi delle risorse sicuri', async () => {
   const now = new Date('2026-10-10T08:00:00Z');
   const zip = buildZip([
     { name: 'personale__z.ics', data: eventIcs('dup@fase0', { summary: 'Secondo con lo stesso UID' }) },
@@ -185,7 +185,7 @@ test('item dell\'archivio: validi in ordine di nome, non validi e UID duplicati 
     { name: 'lavoro__senza-dtstart.ics', data: eventIcs('nodt@fase0').replace(/DTSTART:[^\r]*\r\n/, '') },
     { name: 'lavoro__todo.ics', data: 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//x//IT\r\nBEGIN:VTODO\r\nUID:todo@fase0\r\nDTSTAMP:20250101T080000Z\r\nSUMMARY:Da fare\r\nEND:VTODO\r\nEND:VCALENDAR\r\n' },
   ]);
-  const { items, rejected } = readArchiveItems(zip, 'archivio-fase0.zip', now);
+  const { items, rejected } = await readArchiveItems(zip, 'archivio-fase0.zip', now);
   assert.deepEqual(items.map((i) => i.source_name), ['lavoro__nome con spazi.ics', 'lavoro__todo.ics', 'personale__a.ics']);
   const first = items.find((i) => i.source_name === 'personale__a.ics')!;
   assert.equal(first.uid, 'dup@fase0');
@@ -205,7 +205,7 @@ test('item dell\'archivio: validi in ordine di nome, non validi e UID duplicati 
   assert.ok(rejected.every((r) => r.code === 'INVALID_OBJECT' || r.code === 'POSSIBLE_DUPLICATE'));
 });
 
-test('item dell\'archivio da un .ics singolo: un item per UID, nome del file per un solo oggetto', () => {
+test('item dell\'archivio da un .ics singolo: un item per UID, nome del file per un solo oggetto', async () => {
   const now = new Date('2026-10-10T08:00:00Z');
   const two = Buffer.from([
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//x//IT',
@@ -213,17 +213,17 @@ test('item dell\'archivio da un .ics singolo: un item per UID, nome del file per
     'BEGIN:VEVENT', 'UID:due@fase0', 'DTSTAMP:20250101T080000Z', 'DTSTART:20250302T090000Z', 'DTEND:20250302T100000Z', 'SUMMARY:Due', 'END:VEVENT',
     'END:VCALENDAR', '',
   ].join('\r\n'));
-  const many = readArchiveItems(two, 'export.ics', now);
+  const many = await readArchiveItems(two, 'export.ics', now);
   assert.deepEqual(many.items.map((i) => i.source_name).sort(), ['export.ics#due@fase0', 'export.ics#uno@fase0']);
   assert.ok(many.items.every((i) => /^export-[0-9a-f]{12}\.ics$/.test(i.href)), 'href deterministico per ogni UID');
   assert.equal(new Set(many.items.map((i) => i.href)).size, 2);
 
-  const single = readArchiveItems(Buffer.from(eventIcs('solo@fase0')), 'lavoro__solo.ics', now);
+  const single = await readArchiveItems(Buffer.from(eventIcs('solo@fase0')), 'lavoro__solo.ics', now);
   assert.deepEqual(single.items.map((i) => [i.source_name, i.href]), [['lavoro__solo.ics', 'lavoro__solo.ics']]);
-  assert.throws(() => readArchiveItems(Buffer.from('testo qualsiasi'), 'x.ics', now), /né zip né iCalendar/);
+  await assert.rejects(readArchiveItems(Buffer.from('testo qualsiasi'), 'x.ics', now), /né zip né iCalendar/);
 });
 
-test('tar del volume della Fase 0: item delle collezioni con il nome dello zip, file nascosti e voci fuori dal layout esclusi', () => {
+test('tar del volume della Fase 0: item delle collezioni con il nome dello zip, file nascosti e voci fuori dal layout esclusi', async () => {
   const now = new Date('2026-10-10T08:00:00Z');
   const longItem = `${'x'.repeat(110)}.ics`;
   const tar = buildTar([
@@ -244,17 +244,101 @@ test('tar del volume della Fase 0: item delle collezioni con il nome dello zip, 
   assert.deepEqual(skipped, [{ name: 'sciolto.ics', reason: 'fuori dal layout delle collezioni' }]);
 
   // Stesso item dal tar o dallo zip di phase0-export: stessa chiave del ledger (source_name) e stesso href.
-  const fromTar = readArchiveItems(tar, 'radicale_data.tar', now).items.find((i) => i.uid === 'tar-a@fase0')!;
-  const fromZip = readArchiveItems(buildZip([{ name: 'lavoro__a.ics', data: eventIcs('tar-a@fase0') }]), 'archivio-fase0.zip', now).items[0];
+  const fromTar = (await readArchiveItems(tar, 'radicale_data.tar', now)).items.find((i) => i.uid === 'tar-a@fase0')!;
+  const fromZip = (await readArchiveItems(buildZip([{ name: 'lavoro__a.ics', data: eventIcs('tar-a@fase0') }]), 'archivio-fase0.zip', now)).items[0];
   assert.deepEqual([fromTar.source_name, fromTar.href, fromTar.fingerprint], [fromZip.source_name, fromZip.href, fromZip.fingerprint]);
   // tar.gz.
-  const gz = readArchiveItems(gzipSync(tar), 'radicale_data.tar.gz', now);
+  const gz = await readArchiveItems(gzipSync(tar), 'radicale_data.tar.gz', now);
   assert.equal(gz.items.length, 4);
   // Intestazione rovinata, gzip senza tar.
   const broken = Buffer.from(tar);
   broken[600] ^= 0xff;
   assert.throws(() => readTarIcsEntries(broken), /somma di controllo/);
-  assert.throws(() => readArchiveItems(gzipSync(Buffer.from('non un tar')), 'x.tar.gz', now), /non contiene un tar/);
+  await assert.rejects(readArchiveItems(gzipSync(Buffer.from('non un tar')), 'x.tar.gz', now), /non contiene un tar/);
+});
+
+/** Zip costruito ad arte: `n` voci della directory centrale sugli stessi dati deflate (zip a voci sovrapposte). */
+function overlappingZip(n: number, payload: Buffer): Buffer {
+  const body = deflateRawSync(payload);
+  const crc = crc32(payload) >>> 0;
+  const name = Buffer.from('lavoro__x.ics');
+  const local = Buffer.alloc(30);
+  local.writeUInt32LE(0x04034b50, 0);
+  local.writeUInt16LE(20, 4);
+  local.writeUInt16LE(8, 8);
+  local.writeUInt32LE(crc, 14);
+  local.writeUInt32LE(body.length, 18);
+  local.writeUInt32LE(1, 22);
+  local.writeUInt16LE(name.length, 26);
+  const centrals: Buffer[] = [];
+  for (let i = 0; i < n; i++) {
+    const entryName = Buffer.from(`lavoro__x${i}.ics`);
+    const c = Buffer.alloc(46);
+    c.writeUInt32LE(0x02014b50, 0);
+    c.writeUInt16LE(20, 4);
+    c.writeUInt16LE(20, 6);
+    c.writeUInt16LE(8, 10);
+    c.writeUInt32LE(crc, 16);
+    c.writeUInt32LE(body.length, 20);
+    c.writeUInt32LE(1, 24); // dimensione dichiarata falsa
+    c.writeUInt16LE(entryName.length, 28);
+    c.writeUInt32LE(0, 42);
+    centrals.push(c, entryName);
+  }
+  const head = Buffer.concat([local, name, body]);
+  const cd = Buffer.concat(centrals);
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);
+  eocd.writeUInt16LE(n, 8);
+  eocd.writeUInt16LE(n, 10);
+  eocd.writeUInt32LE(cd.length, 12);
+  eocd.writeUInt32LE(head.length, 16);
+  return Buffer.concat([head, cd, eocd]);
+}
+
+test('archivio costruito ad arte: voci sovrapposte, dimensione falsa, voci oltre 1 MiB e troppe voci rifiutati prima del parse', async () => {
+  const now = new Date('2026-10-10T08:00:00Z');
+  const bomb = overlappingZip(3000, Buffer.alloc(10 * 1024 * 1024, 0x41));
+  const t0 = Date.now();
+  await assert.rejects(readArchiveItems(bomb, 'bomba.zip', now), /stessa intestazione locale|sovrapposti/);
+  assert.ok(Date.now() - t0 < 1000, `rifiutato in ${Date.now() - t0} ms`);
+  // Una sola voce con la dimensione dichiarata falsa: decompressione limitata a 1 MiB, archivio corrotto.
+  await assert.rejects(readArchiveItems(overlappingZip(1, Buffer.alloc(4 * 1024 * 1024, 0x41)), 'falso.zip', now), /oltre 1048576 byte|dimensione o CRC/);
+  // Voce dichiarata oltre MAX_OBJECT_BYTES: scartata senza decomprimerla né analizzarla.
+  const big = buildZip([{ name: 'lavoro__ok.ics', data: eventIcs('ok@fase0') }, { name: 'lavoro__grande.ics', data: Buffer.alloc(MAX_OBJECT_BYTES + 1, 0x41), method: 'deflate' }]);
+  const res = await readArchiveItems(big, 'grande.zip', now);
+  assert.deepEqual(res.items.map((i) => i.uid), ['ok@fase0']);
+  assert.match(res.rejected.find((r) => r.source_name === 'lavoro__grande.ics')!.message, /troppo grande/);
+  // Directory centrale con più voci degli item ammessi più un piccolo margine.
+  assert.throws(() => readZipIcsEntries(buildZip(Array.from({ length: 102 }, (_, i) => ({ name: `n${i}.txt`, data: 'x' }))), { maxEntries: 1 }), /troppe voci/);
+  // Tar: voce oltre 1 MiB scartata prima della copia.
+  const tar = buildTar([{ name: 'collection-root/federico/lavoro/grande.ics', data: 'A'.repeat(MAX_OBJECT_BYTES + 10) }, { name: 'collection-root/federico/lavoro/ok.ics', data: eventIcs('tar-ok@fase0') }]);
+  const fromTar = readTarIcsEntries(tar);
+  assert.deepEqual(fromTar.entries.map((e) => e.name), ['lavoro__ok.ics']);
+  assert.deepEqual(fromTar.skipped, [{ name: 'grande.ics', reason: 'troppo grande' }]);
+});
+
+test('archivio grande ma legittimo: la lettura cede l\'event loop (nessun blocco oltre 200 ms) e chiama onTick', async () => {
+  const now = new Date('2026-10-10T08:00:00Z');
+  const zip = buildZip(Array.from({ length: 1500 }, (_, i) => ({ name: `lavoro__e${i}.ics`, data: eventIcs(`e${i}@fase0`), method: 'deflate' as const })));
+  let maxGap = 0;
+  let last = Date.now();
+  const timer = setInterval(() => {
+    const t = Date.now();
+    maxGap = Math.max(maxGap, t - last);
+    last = t;
+  }, 5);
+  let ticks = 0;
+  try {
+    const res = await readArchiveItems(zip, 'archivio-fase0.zip', now, { yieldEvery: 25, onTick: () => { ticks += 1; } });
+    assert.equal(res.items.length, 1500);
+  } finally {
+    clearInterval(timer);
+  }
+  assert.ok(ticks >= 100, `onTick chiamato ${ticks} volte`);
+  assert.ok(maxGap < 200, `event loop fermo al più ${maxGap} ms`);
+  // onTick che lancia (annullamento) interrompe la lettura.
+  await assert.rejects(readArchiveItems(zip, 'archivio-fase0.zip', now, { onTick: () => { throw new Error('annullato'); } }), /annullato/);
 });
 
 test('tar reale del volume (tar -czf di un layout di Radicale) letto come lo produce phase0-backup', { skip: spawnSync('tar', ['--version']).status === 0 ? false : 'tar non disponibile' }, async () => {
@@ -269,7 +353,7 @@ test('tar reale del volume (tar -czf di un layout di Radicale) letto come lo pro
     const out = join(dir, 'radicale_data.tar.gz');
     const res = spawnSync('tar', ['-czf', out, '-C', dir, 'collection-root']);
     assert.equal(res.status, 0, String(res.stderr));
-    const { items, rejected } = readArchiveItems(await readFile(out), 'radicale_data.tar.gz', new Date('2026-10-10T08:00:00Z'));
+    const { items, rejected } = await readArchiveItems(await readFile(out), 'radicale_data.tar.gz', new Date('2026-10-10T08:00:00Z'));
     assert.deepEqual(items.map((i) => i.source_name).sort(), [`lavoro__${'n'.repeat(120)}.ics`, 'lavoro__riunione.ics']);
     assert.deepEqual(rejected, []);
   } finally {

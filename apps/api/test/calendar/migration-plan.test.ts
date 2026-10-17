@@ -351,14 +351,18 @@ describe('computePlan: righe con il ledger (6-11)', () => {
     const adopted = itemOf(plan({ serialization: s, ledger: [written(before, { adopted: true })], targets: [targetOf(before)] }), KEY_SINGLE);
     assert.equal(adopted.action, 'update');
     assert.equal(adopted.patch, true, 'riga adottata: patch per campo sull\'oggetto corrente');
-    // Erasure GDPR: snapshot e hash redatti. Riga adottata → patch senza base verso l'oggetto voluto
-    // (§4.4: mai la riscrittura completa); riga non adottata → riscrittura completa dal piano.
+    // Erasure GDPR: snapshot e hash redatti → patch senza base verso l'oggetto voluto, adottata o no
+    // (§4.4: mai la riscrittura completa; solo i campi del piano, così la cancellazione dovuta non
+    // aspetta la rivalidazione), anche con la riga da rivalidare dopo un import del backup.
     const redacted = itemOf(plan({ serialization: s, ledger: [written(before, { adopted: true, legacy_snapshot: null, legacy_hash: null })], targets: [targetOf(before)] }), KEY_SINGLE);
     assert.equal(redacted.action, 'update');
     assert.equal(redacted.patch, true);
     const redactedPlain = itemOf(plan({ serialization: s, ledger: [written(before, { legacy_snapshot: null, legacy_hash: null })], targets: [targetOf(before)] }), KEY_SINGLE);
     assert.equal(redactedPlain.action, 'update');
-    assert.equal(redactedPlain.patch, false);
+    assert.equal(redactedPlain.patch, true);
+    const redactedRevalidate = itemOf(plan({ serialization: s, ledger: [written(before, { legacy_snapshot: null, legacy_hash: null, revalidate_reason: 'backup-import', revalidate_since: new Date() })], targets: [targetOf(before)] }), KEY_SINGLE);
+    assert.equal(redactedRevalidate.action, 'update', 'erasure con la riga da rivalidare: si scrive comunque (solo i campi del piano)');
+    assert.equal(redactedRevalidate.patch, true);
     for (const mode of MODES) {
       const same = itemOf(plan({ serialization: serialize(), mode, ledger: [written(before, { legacy_snapshot: null, legacy_hash: null })], targets: [targetOf(before)] }), KEY_SINGLE);
       assert.equal(same.action, 'adopt', `${mode}: hash NULL con il contenuto già giusto → solo il nuovo snapshot`);

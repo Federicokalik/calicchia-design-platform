@@ -31,10 +31,12 @@
  * legacy durante il job produce un nuovo pending che girerà dopo.
  *
  * Cadenza: all'attivazione apply completo di recupero (trigger 'shadow');
- * ogni notte apply completo con verifica V1-V5 (runShadowNightly); ogni ora
- * V4 sui prossimi 14 giorni (runShadowHourlyParity). La parità (getParity) è
- * quella che il wizard mostra al passo 5: almeno 7 giorni di giri verdi con
- * un giro notturno verde per ogni giorno.
+ * ogni notte apply completo con verifica V1-V5 di tutti i calendari
+ * (runShadowNightly, che con un run in corso riprova invece di saltare il
+ * giorno); ogni ora V4 sui prossimi 14 giorni (runShadowHourlyParity, mai a
+ * ridosso del notturno). La parità (getParity) è quella che il wizard mostra
+ * al passo 5: almeno 7 giorni di giri verdi con un giro notturno verde, cioè
+ * una verifica completa e accettabile, per ogni giorno di calendario di Roma.
  *
  * Proiezioni: chiave `booking:<uid>`, contenuto da calendar_bookings con
  * buildBookingProjectionIcs (decisione 3), patch sui soli campi della
@@ -112,6 +114,24 @@ export const SHADOW_CONFLICT_ALERT = 'shadow-conflict';
 
 /** Giri programmati elencati in ParityView.recent. */
 const PARITY_RECENT_LIMIT = 30;
+
+/** Ora (locale del server, come runAtHour del cron) del giro notturno: cron/index.ts la usa per calendar-shadow-nightly. */
+export const SHADOW_NIGHTLY_HOUR = 3;
+
+/** Giro notturno saltato per un run in corso: nuovo tentativo ogni 10 minuti per al più 3 ore. */
+export const SHADOW_NIGHTLY_RETRY_MS = 10 * 60_000;
+export const SHADOW_NIGHTLY_RETRY_WINDOW_MS = 3 * 3_600_000;
+
+/**
+ * Il giro orario non parte fra 5 minuti prima e 15 minuti dopo l'ora del giro
+ * notturno: una verifica V4 in corso alle 03:00 farebbe saltare il notturno.
+ */
+const HOURLY_QUIET_BEFORE_MIN = 5;
+const HOURLY_QUIET_AFTER_MIN = 15;
+
+/** Giorni di calendario della parità: Europe/Rome (un giro notturno verde per giorno). */
+const PARITY_TIME_ZONE = 'Europe/Rome';
+const PARITY_DAY_FORMAT = new Intl.DateTimeFormat('en-CA', { timeZone: PARITY_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' });
 
 const DAY_MS = 86_400_000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -258,6 +278,18 @@ export function erasureOnlyExecutable(item: PlanItem): boolean {
   return item.action === 'update' || item.action === 'delete' || item.action === 'noop' || item.action === 'adopt' || item.action === 'conflict' || item.action === 'skip';
 }
 
+/**
+ * Create di uno spostamento in un job di cancellazione GDPR (§9.1, §13.1):
+ * la chiave ha una delete su una riga viva del ledger in un'altra collezione,
+ * quindi l'oggetto esiste già su Radicale ed è tracciato. Con lo shadow spento
+ * si esegue comunque (create nella nuova collezione con il contenuto redatto,
+ * poi delete nella vecchia): saltarla lascerebbe solo la delete, e l'evento
+ * sparirebbe dai device fino al prossimo apply.
+ */
+export function isErasureMoveCreate(item: PlanItem, movedKeys: ReadonlySet<string>, erasure: boolean): boolean {
+  return erasure && item.action === 'create' && !item.ledger && item.source !== null && movedKeys.has(item.legacy_key);
+}
+
 /** Fallimento di un item che un nuovo tentativo non risolve (richiesta rifiutata da Radicale con un 4xx). */
 function permanentFailure(executed: ExecutedItem): boolean {
   const status = executed.http_status;
@@ -356,14 +388,18 @@ async function mirrorKey(
   };
 
   const results: ShadowItemResult[] = [];
-  const sourceOutcome = new Map<string, ApplyOutcome>();
+  const sourceOutcome = new Map<string, ApplyOutcome | 'skipped'>();
   const failures: Array<{ item: PlanItem; executed: ExecutedItem }> = [];
+  // Chiavi con una delete su una riga viva del ledger: un oggetto già su Radicale che cambia collezione (spostamento).
+  const movedKeys = new Set(plan.items.filter((i) => i.action === 'delete' && i.ledger).map((i) => i.legacy_key));
   let conflicts = 0;
   for (const item of orderShadowItems(plan.items)) {
     const base = { legacy_key: item.legacy_key, calendar_id: item.calendar_id, href: item.href, action: item.action };
-    // Shadow spento (solo cancellazione GDPR): mai creazioni nuove.
-    if (!opts.shadowEnabled && !erasureOnlyExecutable(item)) {
+    // Shadow spento (solo cancellazione GDPR): mai creazioni nuove, tranne la create di uno spostamento (l'oggetto
+    // esiste già su Radicale nella vecchia collezione: la create porta il contenuto redatto dove deve stare).
+    if (!opts.shadowEnabled && !erasureOnlyExecutable(item) && !isErasureMoveCreate(item, movedKeys, opts.erasure)) {
       results.push({ ...base, outcome: 'skipped', code: item.code, fields: item.fields, reason: 'shadow_off' });
+      if (item.source) sourceOutcome.set(item.legacy_key, 'skipped');
       continue;
     }
     // Calendario fuori dall'ambito dell'anteprima e mai scritto: lo porta l'apply quando l'ambito lo comprende.
@@ -371,15 +407,27 @@ async function mirrorKey(
       results.push({ ...base, outcome: 'skipped', code: item.code, fields: item.fields, reason: 'out_of_scope' });
       continue;
     }
-    // Spostamento (decisione 8): la delete nella vecchia collezione aspetta la scrittura nella nuova.
+    // Spostamento (decisione 8): la delete nella vecchia collezione aspetta la scrittura nella nuova. In un job di
+    // cancellazione GDPR no: la copia nella vecchia collezione ha ancora i dati da togliere, si cancella comunque.
+    let moveIncomplete = false;
     if (item.action === 'delete' && sourceOutcome.has(item.legacy_key) && !SOURCE_SETTLED.has(sourceOutcome.get(item.legacy_key) as ApplyOutcome)) {
-      results.push({ ...base, outcome: 'skipped', code: item.code, fields: item.fields, reason: 'move_pending' });
-      continue;
+      if (!opts.erasure) {
+        results.push({ ...base, outcome: 'skipped', code: item.code, fields: item.fields, reason: 'move_pending' });
+        continue;
+      }
+      moveIncomplete = true;
     }
     if (opts.signal.aborted) throw new CalendarUnavailableError('transition', 'shadow mirror interrotto');
     const executed = await executePlanItem(item, exec);
     if (item.source) sourceOutcome.set(item.legacy_key, executed.outcome);
-    results.push({ ...base, outcome: executed.outcome, code: executed.code, fields: executed.fields });
+    results.push({ ...base, outcome: executed.outcome, code: executed.code, fields: executed.fields, ...(moveIncomplete ? { reason: 'move_incomplete' } : {}) });
+    if (moveIncomplete) {
+      raiseIndexAlert('shadow-move-incomplete', 'Shadow mirror: cancellazione GDPR di un oggetto spostato senza la scrittura nella nuova collezione, lo riporta il prossimo apply', {
+        key: item.legacy_key,
+        calendarId: item.calendar_id,
+        href: item.href,
+      });
+    }
     if (executed.outcome === 'conflict') {
       conflicts += 1;
       raiseIndexAlert(SHADOW_CONFLICT_ALERT, 'Shadow mirror: conflitto su un oggetto di Radicale, da risolvere dal wizard della migrazione', {
@@ -482,7 +530,13 @@ export async function setShadowEnabled(input: { enabled: boolean; actor: string 
   if (!apply || apply.status !== 'succeeded') reasons.add('APPLY_REQUIRED');
   else if (applyHasConflicts(apply.summary)) reasons.add('APPLY_CONFLICTS');
   const verify = await latestVerifyVerdicts(sql);
+  const [verifyRun] = verify.runId
+    ? await sql<Array<{ params: unknown }>>`SELECT params FROM cal_migration_runs WHERE id = ${verify.runId}::uuid`
+    : [];
   if (!verify.runId || !verify.finished_at || (apply?.finished_at && verify.finished_at.getTime() <= apply.finished_at.getTime())) {
+    reasons.add('VERIFY_REQUIRED');
+  } else if (!isFullVerifyParams(verifyRun?.params)) {
+    // V4 su meno dei 180 giorni del contratto (§8.1), o verifica parziale: non attesta la migrazione.
     reasons.add('VERIFY_REQUIRED');
   } else if (!verify.acceptable) {
     reasons.add('VERIFY_RED');
@@ -536,64 +590,116 @@ export async function setShadowEnabled(input: { enabled: boolean; actor: string 
 
 // ─── Cadenza ───────────────────────────────
 
-/** Il giro programmato può partire: shadow acceso, mode postgres, Radicale configurato, nessun run attivo. */
-async function scheduledRunAllowed(what: string): Promise<boolean> {
+/**
+ * Il giro programmato può partire: shadow acceso, mode postgres, Radicale
+ * configurato, nessun run attivo ('busy': un run in corso, da riprovare).
+ */
+async function scheduledRunGate(what: string, opts: { quiet?: boolean } = {}): Promise<'ok' | 'busy' | 'skip'> {
   if (!radicaleRuntime().client) {
     log.info(`${what}: Radicale non configurato, giro saltato`);
-    return false;
+    return 'skip';
   }
   const state = await readMigrationStateFresh(sql);
   if (state.mode !== 'postgres') {
     log.info({ mode: state.mode }, `${what}: mode diverso da postgres, giro saltato`);
-    return false;
+    return 'skip';
   }
   if (!state.shadow_enabled) {
     log.info(`${what}: shadow spento, giro saltato`);
-    return false;
+    return 'skip';
   }
   const active = await (await runs()).activeMigrationRun(sql);
   if (active) {
-    log.info({ activeRun: active.id, kind: active.kind }, `${what}: run di migrazione in corso, giro saltato`);
-    return false;
+    if (!opts.quiet) log.info({ activeRun: active.id, kind: active.kind }, `${what}: run di migrazione in corso`);
+    return 'busy';
   }
-  return true;
+  return 'ok';
+}
+
+/** Esito di runShadowNightly: accodato, saltato, o nuovo tentativo programmato (run in corso). */
+export type ShadowNightlyOutcome = 'queued' | 'skipped' | 'retry';
+
+let nightlyRetryTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** Annulla il nuovo tentativo programmato del giro notturno (arresto dell'API, test). */
+export function cancelShadowNightlyRetry(): void {
+  if (nightlyRetryTimer) clearTimeout(nightlyRetryTimer);
+  nightlyRetryTimer = null;
+}
+
+function scheduleNightlyRetry(deadline: number, delayMs: number): ShadowNightlyOutcome {
+  cancelShadowNightlyRetry();
+  if (Date.now() + delayMs > deadline) {
+    log.warn('shadow notturno: run di migrazione in corso fino alla fine della finestra dei tentativi, giro saltato (la parità richiede un giro notturno verde al giorno)');
+    return 'skipped';
+  }
+  nightlyRetryTimer = setTimeout(() => {
+    nightlyRetryTimer = null;
+    runShadowNightly({ retryUntil: deadline, retryDelayMs: delayMs }).catch((err: unknown) => {
+      log.error({ err: err instanceof Error ? err.message : String(err) }, 'shadow notturno: nuovo tentativo non riuscito');
+    });
+  }, delayMs);
+  nightlyRetryTimer.unref?.();
+  log.info({ retryInMs: delayMs }, 'shadow notturno: run di migrazione in corso, nuovo tentativo programmato');
+  return 'retry';
 }
 
 /**
  * Cron notturno: apply completo (trigger 'schedule', plan_run_id e opzioni
  * dell'ultima anteprima riuscita, expected_plan_hash null) con
- * follow_up_verify V1-V5. Salta (con un log) se lo shadow è spento, il mode
- * non è postgres o c'è un run attivo.
+ * follow_up_verify V1-V5 su TUTTI i calendari (scope vuoto e V4 su 180
+ * giorni, anche se l'anteprima e quindi l'apply hanno un ambito parziale: la
+ * parità deve coprire ogni calendario). Salta (con un log) se lo shadow è
+ * spento o il mode non è postgres; con un run attivo (per esempio la verifica
+ * oraria) riprova ogni SHADOW_NIGHTLY_RETRY_MS per al più
+ * SHADOW_NIGHTLY_RETRY_WINDOW_MS, così il giorno non resta senza giro
+ * notturno.
  */
-export async function runShadowNightly(): Promise<void> {
-  if (!(await scheduledRunAllowed('shadow notturno'))) return;
+export async function runShadowNightly(opts: { retryUntil?: number; retryDelayMs?: number } = {}): Promise<ShadowNightlyOutcome> {
+  const delayMs = opts.retryDelayMs ?? SHADOW_NIGHTLY_RETRY_MS;
+  const deadline = opts.retryUntil ?? Date.now() + SHADOW_NIGHTLY_RETRY_WINDOW_MS;
+  cancelShadowNightlyRetry();
+  const gate = await scheduledRunGate('shadow notturno');
+  if (gate === 'busy') return scheduleNightlyRetry(deadline, delayMs);
+  if (gate === 'skip') return 'skipped';
   const ref = await referencePlan(sql);
   if (!ref.runId) {
     log.warn('shadow notturno: nessuna anteprima riuscita di riferimento, giro saltato');
-    return;
+    return 'skipped';
   }
   try {
     const created = await createRun({
       kind: 'apply',
       trigger: 'schedule',
       requestedBy: SHADOW_ACTOR,
-      params: applyParamsFrom(ref, { scope: ref.scope, levels: [...VERIFY_LEVELS], v4_days: MIGRATION_LIMITS.v4Days }),
+      params: applyParamsFrom(ref, { scope: {}, levels: [...VERIFY_LEVELS], v4_days: MIGRATION_LIMITS.v4Days }),
       planRunId: ref.runId,
       planHash: null,
     });
     log.info({ runId: created.run.id }, 'shadow notturno: apply completo con verifica V1-V5 accodato');
+    return 'queued';
   } catch (err) {
-    if (isMigrationError(err) && err.code === 'MIGRATION_BUSY') {
-      log.info('shadow notturno: run di migrazione in corso, giro saltato');
-      return;
-    }
+    if (isMigrationError(err) && err.code === 'MIGRATION_BUSY') return scheduleNightlyRetry(deadline, delayMs);
     throw err;
   }
 }
 
+/** Il giro orario cade nella finestra del giro notturno (ora locale del server, come il cron). */
+export function inNightlyQuietWindow(now: Date): boolean {
+  const minutes = now.getHours() * 60 + now.getMinutes();
+  const nightly = SHADOW_NIGHTLY_HOUR * 60;
+  const day = 24 * 60;
+  const delta = ((minutes - nightly) % day + day) % day; // minuti dopo l'ora del notturno, in [0, 1440)
+  return delta < HOURLY_QUIET_AFTER_MIN || delta >= day - HOURLY_QUIET_BEFORE_MIN;
+}
+
 /** Cron orario: verifica V4 sui prossimi 14 giorni (giro orario della parità). */
-export async function runShadowHourlyParity(): Promise<void> {
-  if (!(await scheduledRunAllowed('parità oraria dello shadow'))) return;
+export async function runShadowHourlyParity(opts: { now?: Date } = {}): Promise<void> {
+  if (inNightlyQuietWindow(opts.now ?? new Date())) {
+    log.info('parità oraria dello shadow: finestra del giro notturno, giro saltato');
+    return;
+  }
+  if ((await scheduledRunGate('parità oraria dello shadow')) !== 'ok') return;
   try {
     const created = await createRun({
       kind: 'verify',
@@ -631,6 +737,22 @@ export function isHourlyVerifyParams(params: unknown): boolean {
   return levels.length === 1 && levels[0] === 'V4';
 }
 
+/**
+ * Verifica completa (§8.1, §19 punto 5): tutti i livelli V1-V5, nessun ambito
+ * (tutti i calendari) e V4 su almeno MIGRATION_LIMITS.v4Days giorni. Solo
+ * questa conta come giro notturno della parità e per l'accensione dello
+ * shadow.
+ */
+export function isFullVerifyParams(params: unknown): boolean {
+  const p = asObject(params);
+  const levels = Array.isArray(p.levels) && p.levels.length > 0 ? p.levels : [...VERIFY_LEVELS];
+  if (!VERIFY_LEVELS.every((l) => levels.includes(l))) return false;
+  const ids = asObject(p.scope).calendar_ids;
+  if (Array.isArray(ids) && ids.length > 0) return false;
+  const days = p.v4_days === undefined || p.v4_days === null ? MIGRATION_LIMITS.v4Days : Number(p.v4_days);
+  return Number.isFinite(days) && days >= MIGRATION_LIMITS.v4Days;
+}
+
 /** Colore di un run di verifica concluso, per la parità (null se non riuscito). */
 function verifyRunColor(run: Pick<ScheduledRunRow, 'status' | 'params' | 'summary'>): VerifyColor | null {
   if (run.status !== 'succeeded') return null;
@@ -639,7 +761,12 @@ function verifyRunColor(run: Pick<ScheduledRunRow, 'status' | 'params' | 'summar
   return (s.overall ?? null) as VerifyColor | null;
 }
 
-/** Un giro programmato è verde quando la verifica è accettabile (per il giro orario: V4 senza iscrizioni non rossa). */
+/**
+ * Un giro programmato è verde quando la verifica è accettabile (per il giro
+ * orario: V4 senza iscrizioni non rossa). Una verifica che non è né il giro
+ * orario né completa (ambito parziale, livelli mancanti, V4 su meno di 180
+ * giorni) non è mai verde: non attesta la parità di tutti i calendari.
+ */
 export function verifyRunGreen(run: Pick<ScheduledRunRow, 'status' | 'params' | 'summary'>): boolean {
   if (run.status !== 'succeeded') return false;
   const s = asObject(run.summary) as Partial<VerifySummary>;
@@ -647,7 +774,7 @@ export function verifyRunGreen(run: Pick<ScheduledRunRow, 'status' | 'params' | 
     const color = s.v4?.without_subscriptions ?? s.overall ?? null;
     return color !== null && color !== 'red';
   }
-  return s.acceptable === true;
+  return s.acceptable === true && isFullVerifyParams(run.params);
 }
 
 function applyWrites(summary: unknown): number | null {
@@ -671,8 +798,10 @@ interface ParityRound {
 
 /**
  * Giri e loro colore (puro): verifiche programmate concluse e apply
- * programmati non riusciti, in ordine di fine. Una verifica nightly è quella
- * con tutti i livelli (non il giro orario V4).
+ * programmati non riusciti, in ordine di fine. Ogni verifica programmata che
+ * non è il giro orario V4 è un giro notturno, verde solo se completa e
+ * accettabile (verifyRunGreen): una verifica notturna parziale interrompe la
+ * serie invece di attestarla.
  */
 export function parityRounds(runs: readonly Pick<ScheduledRunRow, 'kind' | 'status' | 'trigger' | 'params' | 'summary' | 'finished_at'>[]): ParityRound[] {
   const rounds: ParityRound[] = [];
@@ -684,11 +813,24 @@ export function parityRounds(runs: readonly Pick<ScheduledRunRow, 'kind' | 'stat
   return rounds.sort((a, b) => a.at.getTime() - b.at.getTime());
 }
 
+/** Giorno di calendario (YYYY-MM-DD) di un istante in Europe/Rome. */
+export function parityDay(at: Date): string {
+  return PARITY_DAY_FORMAT.format(at);
+}
+
+function shiftParityDay(day: string, delta: number): string {
+  return new Date(Date.parse(`${day}T12:00:00Z`) + delta * DAY_MS).toISOString().slice(0, 10);
+}
+
 /**
  * Serie verde e criterio dei 7 giorni (puro): green_since è la fine del primo
  * giro verde dopo l'ultimo giro non verde (o dopo shadow_since); satisfied
  * richiede almeno `requiredDays` giorni di serie verde e un giro notturno
- * verde in ognuna delle ultime `requiredDays` finestre di 24 ore.
+ * verde in ognuno degli ultimi `requiredDays` giorni di calendario
+ * (Europe/Rome): da ieri all'indietro, oppure da oggi se il giro notturno di
+ * oggi c'è già. Giorni di calendario e non finestre di 24 ore ancorate a now:
+ * un giro che finisce qualche minuto più tardi del giorno prima non apre un
+ * buco.
  */
 export function computeParityStreak(rounds: readonly ParityRound[], opts: { now: Date; shadowSince: Date | null; requiredDays: number }):
   { green_since: Date | null; days_green: number; satisfied: boolean } {
@@ -705,12 +847,10 @@ export function computeParityStreak(rounds: readonly ParityRound[], opts: { now:
   const daysGreen = Math.max(0, Math.floor((opts.now.getTime() - greenSince.getTime()) / DAY_MS));
   let satisfied = daysGreen >= opts.requiredDays;
   if (satisfied) {
-    const streak = relevant.slice(lastBad + 1).filter((r) => r.nightly && r.green);
-    for (let d = 0; d < opts.requiredDays && satisfied; d++) {
-      const to = opts.now.getTime() - d * DAY_MS;
-      const from = to - DAY_MS;
-      satisfied = streak.some((r) => r.at.getTime() > from && r.at.getTime() <= to);
-    }
+    const greenNightlyDays = new Set(relevant.slice(lastBad + 1).filter((r) => r.nightly && r.green).map((r) => parityDay(r.at)));
+    const today = parityDay(opts.now);
+    const last = greenNightlyDays.has(today) ? today : shiftParityDay(today, -1);
+    for (let d = 0; d < opts.requiredDays && satisfied; d++) satisfied = greenNightlyDays.has(shiftParityDay(last, -d));
   }
   return { green_since: greenSince, days_green: daysGreen, satisfied };
 }

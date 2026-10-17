@@ -16,14 +16,19 @@
  *     lo shadow mirror propaga; negli altri modi dentro
  *     `SET LOCAL caldes.reverse_sync = 'on'` (guardia 166 della F4);
  *  3. audit_logs di calendar_events e calendar_bookings delle righe toccate,
- *     o che contengono l'email, redatti in old_data e new_data (il trigger
- *     118 salva to_jsonb della riga, DESCRIPTION compresa): comprese le righe
- *     scritte dalle UPDATE dei passi 1 e 2, che stanno nella stessa
- *     transazione;
+ *     o che contengono l'email (anche quelli delle chiamate MCP, table_name
+ *     'mcp_call', con gli argomenti dei tool di calendario), redatti in
+ *     old_data, new_data e metadata (il trigger 118 salva to_jsonb della riga,
+ *     DESCRIPTION compresa): comprese le righe scritte dalle UPDATE dei passi 1
+ *     e 2, che stanno nella stessa transazione;
  *  4. ledger della migrazione: righe delle chiavi toccate (o con l'email negli
  *     snapshot) con legacy_snapshot, intent_snapshot e legacy_hash a NULL (il
  *     piano successivo riscrive la destinazione); righe dei run
- *     (cal_migration_items) che citano le chiavi o l'email cancellate;
+ *     (cal_migration_items.detail) e run (params, summary, progress, error)
+ *     che contengono l'email: email sostituita, righe e run restano. Mai
+ *     cancellate per chiave: le differenze delle verifiche e gli esiti degli
+ *     oggetti non contengono dati personali e da loro si ricalcolano i
+ *     verdetti (gate dello shadow e del cutover) e i conflitti aperti;
  *  5. destinazione: in mode postgres con il volume inizializzato, job
  *     shadow_mirror con `payload.erasure = true` per le chiavi toccate
  *     (eseguiti anche con lo shadow spento: patch dei campi redatti, proiezioni
@@ -32,9 +37,17 @@
  *     per gli altri eventi indicizzati che contengono l'email, dopo la COMMIT;
  *  6. indice: versioni degli oggetti toccati cancellate (purgeVersionsForErasure,
  *     f2-modules §5.6); raw_ics si aggiorna con la sync dopo la riscrittura;
- *  7. cal_jobs conclusi o morti delle chiavi toccate: cancellati;
+ *  7. cal_jobs conclusi o morti: quelli di project_booking e
+ *     booking_conflict_check delle prenotazioni e quelli che contengono
+ *     l'email, cancellati (i risultati dello shadow_mirror delle chiavi toccate
+ *     restano: contengono solo chiavi, href ed esiti);
  *  8. seguito manuale nella risposta: purge della cache degli item di
- *     Radicale sul server, scadenza dei backup, eventi Google collegati.
+ *     Radicale sul server, backup ordinari fino alla scadenza, copie
+ *     conservate senza scadenza (snapshot "pinned", file e volume della Fase
+ *     0), item dell'archivio della Fase 0, eventi Google collegati.
+ * L'email si cerca con i confini (erasureEmailPattern): cancellare
+ * mario@example.com non tocca anna.mario@example.com né
+ * mario@example.com.au.
  * Passi 1-7 in una sola transazione (gli accodamenti sono outbox: i job
  * esistono solo dopo la COMMIT). Idempotente: una seconda esecuzione non trova
  * più l'email e non tocca nulla.
@@ -87,8 +100,20 @@ const PROJECTION_TEXT_KEYS = ['summary', 'description', 'location', 'url'] as co
 /** Tabelle di calendar_events in cui cercare l'email (la seconda esiste solo dopo il finalize della F7). */
 const EVENT_TABLES = ['calendar_events', 'calendar_events_legacy'] as const;
 
-/** Tabelle degli audit da redigere (design §16.4). */
-const AUDITED_TABLES = ['calendar_events', 'calendar_bookings'] as const;
+/**
+ * table_name degli audit in cui cercare l'email (design §16.4): le tabelle del
+ * calendario e le chiamate MCP (writeMcpAudit salva in new_data.args_summary
+ * gli argomenti dei tool, come attendee_email di create_booking o la
+ * descrizione di create_event).
+ */
+const AUDIT_EMAIL_TABLES = ['calendar_events', 'calendar_bookings', 'calendar_events_legacy', 'mcp_call'] as const;
+
+/**
+ * Chiavi personali annidate di calendar_bookings sostituite per intero (nelle
+ * righe e negli audit): source_metadata.user_agent è lo stesso dato di
+ * consent_user_agent (la pagina pubblica lo salva in entrambi).
+ */
+const BOOKING_NESTED_PERSONAL_KEYS: Readonly<Record<string, readonly string[]>> = { source_metadata: ['user_agent'] };
 
 /** Debounce dei job di cancellazione: raccoglie le UPDATE della stessa transazione. */
 const ERASURE_JOB_DELAY_MS = MIGRATION_LIMITS.shadowDebounceMs;
@@ -113,7 +138,10 @@ export interface CalendarErasureReport {
   events_redacted: number;
   audit_logs_redacted: number;
   ledger_redacted: number;
-  migration_items_deleted: number;
+  /** Righe dei run (cal_migration_items) con l'email sostituita nel dettaglio: le righe restano. */
+  migration_items_redacted: number;
+  /** Run dello strumento (cal_migration_runs) con l'email sostituita in params, summary, progress o error. */
+  migration_runs_redacted: number;
   versions_purged: number;
   /** Job accodati per la destinazione (shadow_mirror o project_booking). */
   jobs_enqueued: number;
@@ -138,9 +166,79 @@ export function normalizeErasureEmail(raw: unknown): string | null {
   return email;
 }
 
-/** Pattern (regex ARE di Postgres) che trova l'email in un testo, senza distinzione di maiuscole con il flag 'i'. */
+function escapeRegex(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Pattern (regex ARE di Postgres) che trova l'email in un testo, senza
+ * distinzione di maiuscole con il flag 'i', solo come email intera: prima non
+ * deve esserci un carattere che possa stare nella parte locale (lettere,
+ * cifre, `.`, `_`, `%`, `+`, `-`), tranne l'escape `\n` di iCalendar e JSON;
+ * dopo non deve continuare il dominio (lettera, cifra, `_`, `-`, oppure `.`
+ * seguito da una lettera o una cifra: il punto di fine frase va bene).
+ * Cancellare mario@example.com non tocca anna.mario@example.com né
+ * mario@example.com.au.
+ */
 export function erasureEmailPattern(email: string): string {
-  return email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return `(?:(?<![[:alnum:]._%+-])|(?<=\\\\[nN]))${escapeRegex(email)}(?![[:alnum:]_-]|\\.[[:alnum:]])`;
+}
+
+/** Lo stesso pattern di erasureEmailPattern per JavaScript (flag g, i, u). */
+export function erasureEmailRegex(email: string): RegExp {
+  return new RegExp(`(?:(?<![\\p{L}\\p{N}._%+\\-])|(?<=\\\\[nN]))${escapeRegex(email)}(?![\\p{L}\\p{N}_\\-]|\\.[\\p{L}\\p{N}])`, 'giu');
+}
+
+/** Il testo contiene l'email (stesse regole di erasureEmailRegex). */
+function textHasEmail(text: string | null | undefined, re: RegExp): boolean {
+  if (typeof text !== 'string' || text === '') return false;
+  re.lastIndex = 0;
+  const found = text.search(re) >= 0;
+  re.lastIndex = 0;
+  return found;
+}
+
+/**
+ * Redazione di un valore JSON (old_data/new_data/metadata degli audit,
+ * dettagli e riassunti dei run, source_metadata): nelle stringhe, a ogni
+ * livello, l'email diventa "[dato rimosso]"; le chiavi di primo livello in
+ * `fullKeys` con un valore non nullo diventano "[dato rimosso]" per intero;
+ * `nested` indica, per una chiave di primo livello che contiene un oggetto,
+ * le sue chiavi da sostituire per intero. Il resto (struttura, codici,
+ * numeri, chiavi) resta com'è. Restituisce un valore nuovo.
+ */
+export function redactErasureJson(
+  value: unknown,
+  opts: { re: RegExp; fullKeys?: readonly string[]; nested?: Readonly<Record<string, readonly string[]>> },
+): unknown {
+  const walk = (v: unknown, top: boolean, fullKeys: readonly string[], nested: Readonly<Record<string, readonly string[]>>): unknown => {
+    if (typeof v === 'string') {
+      opts.re.lastIndex = 0;
+      return v.replace(opts.re, ERASURE_REDACTED_TEXT);
+    }
+    if (Array.isArray(v)) return v.map((x) => walk(x, false, [], {}));
+    if (v !== null && typeof v === 'object') {
+      const out: Record<string, unknown> = {};
+      for (const [k, x] of Object.entries(v as Record<string, unknown>)) {
+        if (top && fullKeys.includes(k) && x !== null && x !== undefined) out[k] = ERASURE_REDACTED_TEXT;
+        else if (top && nested[k] && x !== null && typeof x === 'object' && !Array.isArray(x)) out[k] = walk(x, true, nested[k], {});
+        else out[k] = walk(x, false, [], {});
+      }
+      return out;
+    }
+    return v;
+  };
+  return walk(value, true, opts.fullKeys ?? [], opts.nested ?? {});
+}
+
+/** Il valore JSON contiene l'email in una stringa, a qualsiasi livello. */
+function jsonHasEmail(value: unknown, re: RegExp): boolean {
+  if (value === null || value === undefined) return false;
+  return JSON.stringify(redactErasureJson(value, { re })) !== JSON.stringify(value);
+}
+
+function jsonChanged(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a ?? null) !== JSON.stringify(b ?? null);
 }
 
 /** Esegue `fn` in una transazione (o direttamente se `db` è già una transazione). */
@@ -162,25 +260,8 @@ function shadowKeyOf(row: { id: string; recurrence_master_id: string | null; sou
   return `event:${String(row.recurrence_master_id ?? row.id).toLowerCase()}` as LegacyKey;
 }
 
-/**
- * Espressione SQL che redige un oggetto JSONB (old_data/new_data degli audit,
- * source_metadata): le chiavi in `fullKeys` con un valore non nullo diventano
- * "[dato rimosso]", nelle stringhe l'email si sostituisce, un valore annidato
- * (oggetto o array) che contiene l'email diventa "[dato rimosso]".
- */
-function redactJsonExpr(tx: Db, column: string, opts: { email: string; pattern: string; fullKeys: readonly string[] }) {
-  const col = tx(column);
-  return tx`
-    CASE WHEN ${col} IS NULL OR jsonb_typeof(${col}) <> 'object' THEN ${col} ELSE (
-      SELECT COALESCE(jsonb_object_agg(e.key, CASE
-        WHEN e.key = ANY(${[...opts.fullKeys]}::text[]) AND e.value <> 'null'::jsonb THEN to_jsonb(${ERASURE_REDACTED_TEXT}::text)
-        WHEN jsonb_typeof(e.value) = 'string' THEN to_jsonb(regexp_replace(e.value #>> '{}', ${opts.pattern}, ${ERASURE_REDACTED_TEXT}, 'gi'))
-        WHEN jsonb_typeof(e.value) IN ('object', 'array') AND strpos(lower(e.value::text), ${opts.email}) > 0 THEN to_jsonb(${ERASURE_REDACTED_TEXT}::text)
-        ELSE e.value END), '{}'::jsonb)
-      FROM jsonb_each(${col}) e
-    ) END
-  `;
-}
+/** Righe ripiegate di un testo iCalendar (folding a 75 ottetti, RFC 5545 §3.1) da riunire prima di cercare l'email. */
+const ICS_UNFOLD_RE = '\\r?\\n[ \\t]';
 
 // ─── Cancellazione ───────────────────────────────
 
@@ -210,13 +291,14 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
   if (!normalized) throw new TypeError('email non valida per la cancellazione dei dati del calendario');
   const db = opts.db ?? sql;
   const pattern = erasureEmailPattern(normalized);
+  const re = erasureEmailRegex(normalized);
 
-  const txResult = await inTx(db, (tx) => eraseInTransaction(tx, normalized, pattern));
+  const txResult = await inTx(db, (tx) => eraseInTransaction(tx, normalized, pattern, re));
   const report = txResult.report;
 
   // Store Radicale: gli eventi indicizzati che contengono l'email si riscrivono dalla facade (gate, If-Match, versioni).
   if (txResult.facadeUpdates) {
-    const outcome = await redactIndexedEventsViaFacade(db, normalized, pattern);
+    const outcome = await redactIndexedEventsViaFacade(db, normalized, pattern, re);
     report.events_redacted += outcome.updated;
     if (outcome.failed.length > 0) {
       report.manual_followup.push(
@@ -225,10 +307,7 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
     }
   }
 
-  report.manual_followup.push(
-    'Sul server del calendario: eseguire scripts/radicale-maint.sh purge-cache per svuotare la cache degli item di Radicale (si ricostruisce da sola).',
-    'I backup dello stack del calendario e del database contengono ancora i dati fino alla loro scadenza (30 giorni).',
-  );
+  report.manual_followup.push(...erasureBackupFollowup());
   if (txResult.googleEvents > 0) {
     report.manual_followup.push(
       `Eventi Google Calendar collegati alle prenotazioni (${txResult.googleEvents}): contengono l'email dell'invitato, eliminarli o anonimizzarli da Google Calendar.`,
@@ -241,7 +320,7 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
   }
   if (txResult.archiveObjects > 0) {
     report.manual_followup.push(
-      `Item dell'archivio della Fase 0 (o di collezioni senza sorgente legacy) che contengono l'email (${txResult.archiveObjects}): rimuoverli a mano dalla collezione su Radicale.`,
+      `Item dell'archivio della Fase 0 (o di collezioni senza sorgente legacy) che contengono l'email (${txResult.archiveObjects}): nessuna riscrittura automatica li tocca, rimuoverli o redigerli a mano dalla collezione su Radicale.`,
     );
   }
 
@@ -252,17 +331,30 @@ export async function calendarErase(email: string, opts: { actor: string; db?: D
     events_redacted: report.events_redacted,
     audit_logs_redacted: report.audit_logs_redacted,
     ledger_redacted: report.ledger_redacted,
-    migration_items_deleted: report.migration_items_deleted,
+    migration_items_redacted: report.migration_items_redacted,
+    migration_runs_redacted: report.migration_runs_redacted,
     versions_purged: report.versions_purged,
     jobs_enqueued: report.jobs_enqueued,
   }, 'cancellazione GDPR dei dati del calendario completata');
   return report;
 }
 
-async function eraseInTransaction(tx: Db, email: string, pattern: string): Promise<ErasureTxResult> {
+/**
+ * Seguito manuale sui backup (contratto f3 §13.1 passo 8): i run ordinari
+ * scadono con la retention, le copie conservate no.
+ */
+export function erasureBackupFollowup(): string[] {
+  return [
+    'Sul server del calendario: eseguire scripts/radicale-maint.sh purge-cache per svuotare la cache degli item di Radicale (si ricostruisce da sola).',
+    'I backup ordinari (run di backups/calendar-stack/<AAAAMMGGTHHMMSSZ>/ e dump caldes-*.sql.gz, in locale e su S4) contengono ancora i dati fino alla scadenza della loro retention (30 giorni).',
+    'Copie SENZA scadenza che contengono ancora i dati: snapshot conservati da radicale-maint.sh snapshot in backups/calendar-stack/pinned/ (elenco: scripts/radicale-maint.sh pinned-list; cancellazione dopo la conferma del passaggio: scripts/radicale-maint.sh pinned-purge --yes), tar.gz e zip della Fase 0 in backups/phase0/ (scripts/radicale-maint.sh phase0-purge --yes) e il volume Docker della Fase 0 (radicale_data, conservato in sola lettura per la decisione 7: scripts/radicale-maint.sh phase0-detect). Cancellarle o registrare il motivo della conservazione.',
+  ];
+}
+
+async function eraseInTransaction(tx: Db, email: string, pattern: string, re: RegExp): Promise<ErasureTxResult> {
   const report: CalendarErasureReport = {
     bookings: 0, projections_legacy: 0, events_redacted: 0, audit_logs_redacted: 0, ledger_redacted: 0,
-    migration_items_deleted: 0, versions_purged: 0, jobs_enqueued: 0, reminders_redacted: 0, jobs_deleted: 0,
+    migration_items_redacted: 0, migration_runs_redacted: 0, versions_purged: 0, jobs_enqueued: 0, reminders_redacted: 0, jobs_deleted: 0,
     manual_followup: [],
   };
   const state = await readMigrationStateFresh(tx);
@@ -271,8 +363,8 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
   if (state.mode !== 'postgres') await tx`SELECT set_config('caldes.reverse_sync', 'on', true)`;
 
   // 1. Prenotazioni.
-  const bookings = await tx<Array<{ id: string; uid: string; google_event_id: string | null }>>`
-    SELECT id::text AS id, uid, google_event_id
+  const bookings = await tx<Array<{ id: string; uid: string; google_event_id: string | null; source_metadata: unknown }>>`
+    SELECT id::text AS id, uid, google_event_id, source_metadata
     FROM calendar_bookings
     WHERE lower(attendee_email) = ${email}
     ORDER BY id
@@ -282,10 +374,17 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
   const bookingUids = bookings.map((b) => b.uid);
   let anonymized: Array<{ id: string; uid: string; updated_at: Date }> = [];
   if (bookingIds.length > 0) {
+    // source_metadata: user_agent tolto (è lo stesso dato di consent_user_agent), l'email sostituita dove compare.
+    const metadata = bookings.map((b) => ({
+      id: b.id,
+      value: b.source_metadata === null || b.source_metadata === undefined
+        ? null
+        : redactErasureJson(b.source_metadata, { re, fullKeys: BOOKING_NESTED_PERSONAL_KEYS.source_metadata }),
+    }));
     anonymized = await tx<Array<{ id: string; uid: string; updated_at: Date }>>`
-      UPDATE calendar_bookings SET
+      UPDATE calendar_bookings b SET
         attendee_name = ${ANONYMIZED_ATTENDEE_NAME},
-        attendee_email = 'erased-' || id::text || '@deleted.invalid',
+        attendee_email = 'erased-' || b.id::text || '@deleted.invalid',
         attendee_phone = NULL,
         attendee_company = NULL,
         attendee_message = NULL,
@@ -293,9 +392,13 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
         consent_ip = NULL,
         consent_user_agent = NULL,
         cancellation_reason = NULL,
-        source_metadata = ${redactJsonExpr(tx, 'source_metadata', { email, pattern, fullKeys: [] })}
-      WHERE id = ANY(${bookingIds}::uuid[])
-      RETURNING id::text AS id, uid, updated_at
+        source_metadata = COALESCE(m.value, '{}'::jsonb)
+      FROM (
+        SELECT (e->>'id')::uuid AS id, CASE WHEN jsonb_typeof(e->'value') = 'object' THEN e->'value' END AS value
+        FROM jsonb_array_elements(${tx.json(metadata as never)}::jsonb) e
+      ) m
+      WHERE b.id = m.id
+      RETURNING b.id::text AS id, b.uid, b.updated_at
     `;
     const reminders = await tx`
       UPDATE calendar_booking_reminders SET sent_to = 'erased-' || id::text || '@deleted.invalid'
@@ -307,7 +410,7 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
   report.bookings = anonymized.length;
   const googleEvents = bookings.filter((b) => (b.google_event_id ?? '').trim() !== '').length;
 
-  // 2. Righe legacy: proiezioni delle prenotazioni e altre righe con l'email.
+  // 2. Righe legacy: proiezioni delle prenotazioni e altre righe con l'email (con i confini: mai l'email di un'altra persona).
   const touchedRows: EventRowRef[] = [];
   const projectionRowIds: string[] = [];
   for (const table of EVENT_TABLES) {
@@ -335,10 +438,9 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
         description = CASE WHEN description IS NULL THEN NULL ELSE regexp_replace(description, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
         location = CASE WHEN location IS NULL THEN NULL ELSE regexp_replace(location, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END,
         url = CASE WHEN url IS NULL THEN NULL ELSE regexp_replace(url, ${pattern}, ${ERASURE_REDACTED_TEXT}, 'gi') END
-      WHERE strpos(lower(coalesce(summary, '')), ${email}) > 0
-         OR strpos(lower(coalesce(description, '')), ${email}) > 0
-         OR strpos(lower(coalesce(location, '')), ${email}) > 0
-         OR strpos(lower(coalesce(url, '')), ${email}) > 0
+      WHERE strpos(lower(concat_ws(' ', summary, description, location, url)), ${email}) > 0
+        AND (coalesce(summary, '') ~* ${pattern} OR coalesce(description, '') ~* ${pattern}
+             OR coalesce(location, '') ~* ${pattern} OR coalesce(url, '') ~* ${pattern})
       RETURNING id::text AS id, recurrence_master_id::text AS recurrence_master_id, source, source_id
     `;
     report.events_redacted += redacted.length;
@@ -360,54 +462,73 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
     if (row.recurrence_master_id && row.source !== 'booking') ledgerKeys.add(`detached:${row.id.toLowerCase()}` as LegacyKey);
   }
 
-  // 3. Audit di calendar_events e calendar_bookings (anche quelli scritti dalle UPDATE qui sopra).
-  const auditIds = new Set<string>();
-  if (bookingIds.length > 0) {
-    const rows = await tx<Array<{ id: string }>>`
+  // 3. Audit: righe delle prenotazioni e delle proiezioni toccate (campi personali per intero) e righe che contengono
+  //    l'email (calendario e chiamate MCP), anche quelle scritte dalle UPDATE qui sopra. Redazione in JS, valore per
+  //    valore: l'email di un'altra persona che la contiene come sottostringa resta.
+  const projectionIds = uniq(projectionRowIds);
+  const auditRows = await tx<Array<{
+    id: string; old_data: unknown; new_data: unknown; metadata: unknown; booking_match: boolean; projection_match: boolean;
+  }>>`
+    SELECT id::text AS id, old_data, new_data, metadata,
+           (table_name = 'calendar_bookings'
+            AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
+                 OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[]))) AS booking_match,
+           (table_name IN ('calendar_events', 'calendar_events_legacy')
+            AND (record_id = ANY(${projectionIds}::text[])
+                 OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
+                 OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[])))) AS projection_match
+    FROM audit_logs
+    WHERE (table_name = 'calendar_bookings'
+           AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
+                OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[])))
+       OR (table_name IN ('calendar_events', 'calendar_events_legacy')
+           AND (record_id = ANY(${projectionIds}::text[])
+                OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
+                OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[]))))
+       OR (table_name = ANY(${[...AUDIT_EMAIL_TABLES]}::text[])
+           AND strpos(lower(concat_ws(' ', old_data::text, new_data::text, metadata::text)), ${email}) > 0)
+    ORDER BY id
+    FOR UPDATE
+  `;
+  for (const row of auditRows) {
+    const opts = row.booking_match
+      ? { re, fullKeys: BOOKING_PERSONAL_KEYS, nested: BOOKING_NESTED_PERSONAL_KEYS }
+      : row.projection_match
+        ? { re, fullKeys: PROJECTION_TEXT_KEYS }
+        : { re };
+    const oldData = row.old_data === null ? null : redactErasureJson(row.old_data, opts);
+    const newData = row.new_data === null ? null : redactErasureJson(row.new_data, opts);
+    const metadata = row.metadata === null ? null : redactErasureJson(row.metadata, { re });
+    if (!jsonChanged(oldData, row.old_data) && !jsonChanged(newData, row.new_data) && !jsonChanged(metadata, row.metadata)) continue;
+    await tx`
       UPDATE audit_logs SET
-        old_data = ${redactJsonExpr(tx, 'old_data', { email, pattern, fullKeys: BOOKING_PERSONAL_KEYS })},
-        new_data = ${redactJsonExpr(tx, 'new_data', { email, pattern, fullKeys: BOOKING_PERSONAL_KEYS })}
-      WHERE table_name = 'calendar_bookings'
-        AND (record_id = ANY(${[...bookingIds, ...bookingUids]}::text[])
-             OR old_data->>'uid' = ANY(${bookingUids}::text[]) OR new_data->>'uid' = ANY(${bookingUids}::text[]))
-      RETURNING id::text AS id
+        old_data = ${oldData === null ? null : tx.json(oldData as never)}::jsonb,
+        new_data = ${newData === null ? null : tx.json(newData as never)}::jsonb,
+        metadata = ${metadata === null ? null : tx.json(metadata as never)}::jsonb
+      WHERE id = ${row.id}::uuid
     `;
-    rows.forEach((r) => auditIds.add(r.id));
+    report.audit_logs_redacted += 1;
   }
-  if (bookingUids.length > 0 || projectionRowIds.length > 0) {
-    const rows = await tx<Array<{ id: string }>>`
-      UPDATE audit_logs SET
-        old_data = ${redactJsonExpr(tx, 'old_data', { email, pattern, fullKeys: PROJECTION_TEXT_KEYS })},
-        new_data = ${redactJsonExpr(tx, 'new_data', { email, pattern, fullKeys: PROJECTION_TEXT_KEYS })}
-      WHERE table_name IN ('calendar_events', 'calendar_events_legacy')
-        AND (record_id = ANY(${uniq(projectionRowIds)}::text[])
-             OR (old_data->>'source' = 'booking' AND old_data->>'source_id' = ANY(${bookingUids}::text[]))
-             OR (new_data->>'source' = 'booking' AND new_data->>'source_id' = ANY(${bookingUids}::text[])))
-      RETURNING id::text AS id
-    `;
-    rows.forEach((r) => auditIds.add(r.id));
-  }
-  {
-    const rows = await tx<Array<{ id: string }>>`
-      UPDATE audit_logs SET
-        old_data = ${redactJsonExpr(tx, 'old_data', { email, pattern, fullKeys: [] })},
-        new_data = ${redactJsonExpr(tx, 'new_data', { email, pattern, fullKeys: [] })}
-      WHERE table_name = ANY(${[...AUDITED_TABLES, 'calendar_events_legacy']}::text[])
-        AND (strpos(lower(coalesce(old_data::text, '')), ${email}) > 0 OR strpos(lower(coalesce(new_data::text, '')), ${email}) > 0)
-      RETURNING id::text AS id
-    `;
-    rows.forEach((r) => auditIds.add(r.id));
-  }
-  report.audit_logs_redacted = auditIds.size;
 
-  // 4. Ledger della migrazione e righe dei run.
-  const ledger = await tx<Array<{ id: string; legacy_key: string; calendar_id: string; href: string }>>`
-    UPDATE cal_migration_ledger SET legacy_snapshot = NULL, intent_snapshot = NULL, legacy_hash = NULL
-    WHERE (legacy_key = ANY(${[...ledgerKeys]}::text[])
+  // 4. Ledger della migrazione: snapshot delle chiavi toccate o che contengono l'email a NULL.
+  const ledgerCandidates = await tx<Array<{ id: string; key_match: boolean; legacy_snapshot: unknown; intent_snapshot: unknown }>>`
+    SELECT id::text AS id,
+           (legacy_key = ANY(${[...ledgerKeys]}::text[])
+            OR (kind = 'detached' AND legacy_snapshot->>'master_id' = ANY(${[...masterIds]}::text[]))) AS key_match,
+           legacy_snapshot, intent_snapshot
+    FROM cal_migration_ledger
+    WHERE (legacy_snapshot IS NOT NULL OR intent_snapshot IS NOT NULL OR legacy_hash IS NOT NULL)
+      AND (legacy_key = ANY(${[...ledgerKeys]}::text[])
            OR (kind = 'detached' AND legacy_snapshot->>'master_id' = ANY(${[...masterIds]}::text[]))
-           OR strpos(lower(coalesce(legacy_snapshot::text, '')), ${email}) > 0
-           OR strpos(lower(coalesce(intent_snapshot::text, '')), ${email}) > 0)
-      AND (legacy_snapshot IS NOT NULL OR intent_snapshot IS NOT NULL OR legacy_hash IS NOT NULL)
+           OR strpos(lower(concat_ws(' ', legacy_snapshot::text, intent_snapshot::text)), ${email}) > 0)
+    FOR UPDATE
+  `;
+  const ledgerIds = ledgerCandidates
+    .filter((r) => r.key_match || jsonHasEmail(r.legacy_snapshot, re) || jsonHasEmail(r.intent_snapshot, re))
+    .map((r) => r.id);
+  const ledger = ledgerIds.length === 0 ? [] : await tx<Array<{ id: string; legacy_key: string; calendar_id: string; href: string }>>`
+    UPDATE cal_migration_ledger SET legacy_snapshot = NULL, intent_snapshot = NULL, legacy_hash = NULL
+    WHERE id = ANY(${ledgerIds}::bigint[])
     RETURNING id::text AS id, legacy_key, calendar_id::text AS calendar_id, href
   `;
   report.ledger_redacted = ledger.length;
@@ -426,14 +547,44 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
   `;
   for (const r of detachedMasters) if (r.master_id) jobKeys.add(`event:${r.master_id.toLowerCase()}` as LegacyKey);
 
-  const items = await tx`
-    DELETE FROM cal_migration_items
-    WHERE legacy_key = ANY(${[...ledgerKeys]}::text[]) OR strpos(lower(detail::text), ${email}) > 0
-    RETURNING id
+  // Righe dei run e run: l'email sostituita nei valori JSON (titoli degli eventi nei dettagli e nell'anteprima salvata).
+  // Le righe restano: differenze ed esiti non contengono dati personali e da loro si ricalcolano verdetti e conflitti.
+  const itemRows = await tx<Array<{ id: string; detail: unknown }>>`
+    SELECT id::text AS id, detail FROM cal_migration_items
+    WHERE strpos(lower(detail::text), ${email}) > 0
+    ORDER BY id
+    FOR UPDATE
   `;
-  report.migration_items_deleted = items.length;
+  for (const row of itemRows) {
+    const detail = redactErasureJson(row.detail, { re });
+    if (!jsonChanged(detail, row.detail)) continue;
+    await tx`UPDATE cal_migration_items SET detail = ${tx.json(detail as never)}::jsonb WHERE id = ${row.id}::bigint`;
+    report.migration_items_redacted += 1;
+  }
+  const runRows = await tx<Array<{ id: string; params: unknown; summary: unknown; progress: unknown; error: string | null }>>`
+    SELECT id::text AS id, params, summary, progress, error FROM cal_migration_runs
+    WHERE strpos(lower(concat_ws(' ', params::text, summary::text, progress::text, error)), ${email}) > 0
+    ORDER BY id
+    FOR UPDATE
+  `;
+  for (const row of runRows) {
+    const params = redactErasureJson(row.params, { re });
+    const summary = row.summary === null ? null : redactErasureJson(row.summary, { re });
+    const progress = redactErasureJson(row.progress, { re });
+    const error = row.error === null ? null : (redactErasureJson(row.error, { re }) as string);
+    if (!jsonChanged(params, row.params) && !jsonChanged(summary, row.summary) && !jsonChanged(progress, row.progress) && error === row.error) continue;
+    await tx`
+      UPDATE cal_migration_runs SET
+        params = ${tx.json(params as never)}::jsonb,
+        summary = ${summary === null ? null : tx.json(summary as never)}::jsonb,
+        progress = ${tx.json(progress as never)}::jsonb,
+        error = ${error}
+      WHERE id = ${row.id}::uuid
+    `;
+    report.migration_runs_redacted += 1;
+  }
 
-  // 6. Versioni dell'indice degli oggetti toccati.
+  // 6. Versioni dell'indice degli oggetti toccati (testo iCalendar con le righe ripiegate riunite).
   const ledgerTargets = ledger.map((l) => `${l.calendar_id}|${l.href}`);
   const objectRows = await tx<Array<{ id: string }>>`
     SELECT DISTINCT r.id::text AS id
@@ -447,36 +598,49 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
       )
       OR (r.href = ANY(${bookingUids.map((uid) => `booking-${uid}.ics`)}::text[])
           AND EXISTS (SELECT 1 FROM calendars c WHERE c.id = r.calendar_id AND c.role = 'bookings'))
-      OR EXISTS (SELECT 1 FROM cal_objects ob WHERE ob.id = r.id AND strpos(lower(coalesce(ob.raw_ics, '')), ${email}) > 0)
-      OR EXISTS (SELECT 1 FROM cal_object_versions v WHERE v.object_id = r.id AND strpos(lower(coalesce(v.raw_ics, '')), ${email}) > 0)
+      OR EXISTS (SELECT 1 FROM cal_objects ob WHERE ob.id = r.id
+                 AND regexp_replace(coalesce(ob.raw_ics, ''), ${ICS_UNFOLD_RE}, '', 'g') ~* ${pattern})
+      OR EXISTS (SELECT 1 FROM cal_object_versions v WHERE v.object_id = r.id
+                 AND regexp_replace(coalesce(v.raw_ics, ''), ${ICS_UNFOLD_RE}, '', 'g') ~* ${pattern})
     )
   `;
   report.versions_purged = await purgeVersionsForErasure(tx, { objectIds: objectRows.map((r) => r.id) });
 
-  // Oggetti indicizzati con l'email che nessuna riscrittura toccherà in mode postgres (archivio della Fase 0, collezioni non migrate).
-  let archiveObjects = 0;
-  if (storeKind === 'postgres') {
-    const [row] = await tx<Array<{ n: number }>>`
-      SELECT count(*)::int AS n
-      FROM cal_objects ob
-      JOIN calendars c ON c.id = ob.calendar_id
-      WHERE c.role <> 'subscription' AND strpos(lower(coalesce(ob.raw_ics, '')), ${email}) > 0
-        AND NOT EXISTS (
+  // Oggetti indicizzati con l'email che nessuna riscrittura automatica tocca, con qualsiasi store: l'archivio della
+  // Fase 0 (origin 'migration': escluso da piano, shadow e facade) e, in mode postgres, le collezioni senza una riga
+  // del ledger non di archivio (con lo store Radicale le riscrive la facade).
+  const [archiveRow] = await tx<Array<{ n: number }>>`
+    SELECT count(*)::int AS n
+    FROM cal_objects ob
+    JOIN calendars c ON c.id = ob.calendar_id
+    WHERE c.role <> 'subscription'
+      AND regexp_replace(coalesce(ob.raw_ics, ''), ${ICS_UNFOLD_RE}, '', 'g') ~* ${pattern}
+      AND (
+        c.origin = 'migration'
+        OR (${storeKind === 'postgres'} AND NOT EXISTS (
           SELECT 1 FROM cal_migration_ledger l
           WHERE l.calendar_id = ob.calendar_id AND l.href = ob.href AND l.deleted_at IS NULL AND l.kind <> 'archive'
-        )
-    `;
-    archiveObjects = row?.n ?? 0;
-  }
+        ))
+      )
+  `;
+  const archiveObjects = archiveRow?.n ?? 0;
 
-  // 7. Job conclusi o morti delle chiavi toccate.
+  // 7. Job conclusi o morti: quelli delle prenotazioni e quelli che contengono l'email. I risultati dello shadow_mirror
+  //    delle chiavi toccate restano (solo chiavi, href ed esiti): da loro si contano i conflitti aperti.
+  const jobCandidates = await tx<Array<{ id: string; payload: unknown; result: unknown; last_error: string | null }>>`
+    SELECT id::text AS id, payload, result, last_error FROM cal_jobs
+    WHERE status IN ('done', 'dead', 'superseded')
+      AND strpos(lower(concat_ws(' ', payload::text, result::text, last_error)), ${email}) > 0
+  `;
+  const emailJobIds = jobCandidates
+    .filter((j) => jsonHasEmail(j.payload, re) || jsonHasEmail(j.result, re) || textHasEmail(j.last_error, re))
+    .map((j) => j.id);
   const deletedJobs = await tx`
     DELETE FROM cal_jobs
     WHERE status IN ('done', 'dead', 'superseded')
       AND (
-        (kind = ${SHADOW_MIRROR_JOB_KIND} AND key = ANY(${[...jobKeys, ...ledgerKeys]}::text[]))
-        OR (kind IN (${CAL_JOB_KINDS.projectBooking}, ${CAL_JOB_KINDS.bookingConflictCheck}) AND key = ANY(${bookingUids}::text[]))
-        OR strpos(lower(payload::text || coalesce(result::text, '') || coalesce(last_error, '')), ${email}) > 0
+        (kind IN (${CAL_JOB_KINDS.projectBooking}, ${CAL_JOB_KINDS.bookingConflictCheck}) AND key = ANY(${bookingUids}::text[]))
+        OR id = ANY(${emailJobIds}::bigint[])
       )
     RETURNING id
   `;
@@ -517,7 +681,7 @@ async function eraseInTransaction(tx: Db, email: string, pattern: string): Promi
  * If-Match, versioni). Restituisce quanti ne ha aggiornati e gli id non
  * riusciti.
  */
-async function redactIndexedEventsViaFacade(db: Db, email: string, pattern: string): Promise<{ updated: number; failed: string[] }> {
+async function redactIndexedEventsViaFacade(db: Db, email: string, pattern: string, re: RegExp): Promise<{ updated: number; failed: string[] }> {
   const rows = await db<Array<{ id: string; summary: string | null; description: string | null; location: string | null; url: string | null }>>`
     SELECT cc.id::text AS id, cc.summary, cc.description, cc.location, cc.url
     FROM cal_components cc
@@ -525,15 +689,13 @@ async function redactIndexedEventsViaFacade(db: Db, email: string, pattern: stri
     JOIN calendars c ON c.id = cc.calendar_id
     WHERE c.role <> 'subscription' AND c.origin <> 'migration'
       AND NOT (c.role = 'bookings' AND ob.href LIKE 'booking-%')
-      AND (strpos(lower(coalesce(cc.summary, '')), ${email}) > 0
-           OR strpos(lower(coalesce(cc.description, '')), ${email}) > 0
-           OR strpos(lower(coalesce(cc.location, '')), ${email}) > 0
-           OR strpos(lower(coalesce(cc.url, '')), ${email}) > 0)
+      AND strpos(lower(concat_ws(' ', cc.summary, cc.description, cc.location, cc.url)), ${email}) > 0
+      AND (coalesce(cc.summary, '') ~* ${pattern} OR coalesce(cc.description, '') ~* ${pattern}
+           OR coalesce(cc.location, '') ~* ${pattern} OR coalesce(cc.url, '') ~* ${pattern})
     ORDER BY cc.calendar_id, cc.object_id, cc.recurrence_key
   `;
   if (rows.length === 0) return { updated: 0, failed: [] };
-  const re = new RegExp(pattern, 'gi');
-  const redact = (v: string | null): string | null => (v === null ? null : v.replace(re, ERASURE_REDACTED_TEXT));
+  const redact = (v: string | null): string | null => (v === null ? null : (redactErasureJson(v, { re }) as string));
   let store: Awaited<ReturnType<typeof calendarStoreForWrite>>;
   try {
     store = await calendarStoreForWrite();

@@ -42,13 +42,20 @@ import {
   projectionResourceMinimized,
 } from '../../src/lib/calendar/booking-projection';
 import {
+  cancelShadowNightlyRetry,
   computeParityStreak,
   countOpenShadowConflicts,
   erasureOnlyExecutable,
   getParity,
   handleShadowMirror,
+  inNightlyQuietWindow,
+  isErasureMoveCreate,
+  isFullVerifyParams,
   isHourlyVerifyParams,
   listSubscriptionsForMigration,
+  parityDay,
+  runShadowHourlyParity,
+  runShadowNightly,
   ShadowLockBusyError,
   orderShadowItems,
   parityRounds,
@@ -191,12 +198,131 @@ describe('parità dello shadow (pura)', () => {
   });
 });
 
+describe('parità dello shadow: verifiche complete, giorni di calendario e finestra del notturno (pura)', () => {
+  const full = { scope: {}, levels: ['V1', 'V2', 'V3', 'V4', 'V5'], v4_days: 180 };
+  const sched = (params: object, acceptable: boolean, finished: Date) => ({
+    kind: 'verify' as const, status: 'succeeded', trigger: 'schedule' as const, params,
+    summary: { acceptable, overall: acceptable ? 'green' : 'red' }, finished_at: finished,
+  });
+
+  test('solo una verifica completa (tutti i calendari, V1-V5, V4 su 180 giorni) attesta la parità', () => {
+    assert.equal(isFullVerifyParams(full), true);
+    assert.equal(isFullVerifyParams({ levels: ['V1', 'V2', 'V3', 'V4', 'V5'] }), true, 'v4_days assente = default di 180');
+    assert.equal(isFullVerifyParams({ ...full, scope: { calendar_ids: ['c0000000-0000-4000-8000-00000000000a'] } }), false, 'ambito parziale');
+    assert.equal(isFullVerifyParams({ ...full, v4_days: 1 }), false, 'V4 su un giorno');
+    assert.equal(isFullVerifyParams({ ...full, levels: ['V1', 'V2', 'V3', 'V5'] }), false);
+    const at = new Date('2026-10-10T01:10:00Z');
+    assert.equal(verifyRunGreen(sched(full, true, at)), true);
+    assert.equal(verifyRunGreen(sched({ ...full, scope: { calendar_ids: ['c0000000-0000-4000-8000-00000000000a'] } }, true, at)), false);
+    assert.equal(verifyRunGreen(sched({ ...full, v4_days: 1 }, true, at)), false);
+    // Notturno parziale: giro notturno NON verde (interrompe la serie invece di attestarla).
+    const rounds = parityRounds([sched({ ...full, scope: { calendar_ids: ['c0000000-0000-4000-8000-00000000000a'] } }, true, at)]);
+    assert.deepEqual(rounds.map((r) => ({ green: r.green, nightly: r.nightly })), [{ green: false, nightly: true }]);
+  });
+
+  test('un giro notturno verde per giorno di Roma: nessun buco se il giro finisce più tardi del giorno prima', () => {
+    const since = new Date('2026-10-01T00:00:00Z');
+    // Giri notturni alle 03:xx di Roma (01:xx UTC, ora legale) con scarti di 2-25 minuti.
+    const jitter = [2, 25, 5, 20, 3, 22, 7, 18, 10, 24];
+    const runs = jitter.map((j, i) => sched(full, true, new Date(Date.UTC(2026, 9, 2 + i, 1, j))));
+    const rounds = parityRounds(runs);
+    let checked = 0;
+    for (let m = 0; m < 24 * 60; m += 1) {
+      const now = new Date(Date.UTC(2026, 9, 11, 0, 0) + m * 60_000);
+      const streak = computeParityStreak(rounds, { now, shadowSince: since, requiredDays: 7 });
+      if (streak.days_green < 7) continue;
+      checked += 1;
+      assert.equal(streak.satisfied, true, `soddisfatta alle ${now.toISOString()} (giorni verdi ${streak.days_green})`);
+    }
+    assert.ok(checked > 1000, `istanti controllati: ${checked}`);
+    // Un giorno di calendario senza notturno resta un buco.
+    const holed = parityRounds(runs.filter((_, i) => i !== 6));
+    assert.equal(computeParityStreak(holed, { now: new Date('2026-10-11T12:00:00Z'), shadowSince: since, requiredDays: 7 }).satisfied, false);
+    assert.equal(parityDay(new Date('2026-10-10T22:30:00Z')), '2026-10-11', 'giorno di Roma, non UTC');
+  });
+
+  test('finestra del notturno: il giro orario non parte fra 02:55 e 03:15 (ora locale del cron)', () => {
+    const at = (h: number, m: number) => new Date(2026, 9, 16, h, m, 0);
+    assert.equal(inNightlyQuietWindow(at(2, 54)), false);
+    assert.equal(inNightlyQuietWindow(at(2, 55)), true);
+    assert.equal(inNightlyQuietWindow(at(3, 0)), true);
+    assert.equal(inNightlyQuietWindow(at(3, 14)), true);
+    assert.equal(inNightlyQuietWindow(at(3, 15)), false);
+    assert.equal(inNightlyQuietWindow(at(12, 0)), false);
+  });
+});
+
+describe('giri programmati dello shadow', () => {
+  after(async () => {
+    cancelShadowNightlyRetry();
+    configureRadicaleRuntime(null);
+    await sql`DELETE FROM cal_jobs WHERE kind = 'migration_run'`;
+    await sql`DELETE FROM cal_migration_runs`;
+    await resetState();
+  });
+
+  test('notturno con un run attivo: nuovo tentativo, poi apply con la verifica di TUTTI i calendari anche con un\'anteprima parziale', async () => {
+    await sql`DELETE FROM cal_migration_runs`;
+    configureRadicaleRuntime({ client: new RadicaleClient({ baseUrl: 'http://127.0.0.1:9', password: 'x', retries: 0 }), principal: 'federico', watch: 'off', identitySource: 'remote' });
+    await setState({ volume: VOLUME, shadow: true });
+    const lavoroId = (await getPgLegacyStore().getCalendar('lavoro'))!.id;
+    const planId = await insertRun({ kind: 'plan', status: 'succeeded', trigger: 'admin', params: { scope: { calendar_ids: [lavoroId] }, options: {} }, finishedAt: new Date() });
+    const [active] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, started_at, attempts)
+      VALUES ('verify', 'running', 'schedule', 'system:shadow', ${sql.json({ scope: {}, levels: ['V4'], v4_days: 14 } as never)}, now(), 1)
+      RETURNING id::text AS id
+    `;
+    const outcome = await runShadowNightly({ retryDelayMs: 100, retryUntil: Date.now() + 10_000 });
+    assert.equal(outcome, 'retry', 'il giorno non resta senza giro notturno');
+    assert.equal((await sql`SELECT 1 FROM cal_migration_runs WHERE kind = 'apply'`).length, 0);
+    await sql`UPDATE cal_migration_runs SET status = 'succeeded', finished_at = now() WHERE id = ${active.id}::uuid`;
+    let apply: { params: { scope: unknown; follow_up_verify: { scope: unknown; levels: string[]; v4_days: number } }; plan_run_id: string } | undefined;
+    for (let i = 0; i < 50 && !apply; i++) {
+      await new Promise((r) => setTimeout(r, 50));
+      [apply] = await sql<Array<{ params: { scope: unknown; follow_up_verify: { scope: unknown; levels: string[]; v4_days: number } }; plan_run_id: string }>>`
+        SELECT params, plan_run_id::text AS plan_run_id FROM cal_migration_runs WHERE kind = 'apply' AND trigger = 'schedule'
+      `;
+    }
+    assert.ok(apply, 'apply notturno accodato al nuovo tentativo');
+    assert.equal(apply.plan_run_id, planId);
+    assert.deepEqual(apply.params.scope, { calendar_ids: [lavoroId] }, 'l\'apply segue l\'ambito dell\'anteprima');
+    assert.deepEqual(apply.params.follow_up_verify.scope, {}, 'la verifica copre tutti i calendari');
+    assert.equal(apply.params.follow_up_verify.v4_days, 180);
+    assert.equal(apply.params.follow_up_verify.levels.length, 5);
+
+    // Run ancora attivo oltre la finestra: giro saltato, nessun timer lasciato.
+    assert.equal(await runShadowNightly({ retryDelayMs: 100, retryUntil: Date.now() + 50 }), 'skipped');
+    await sql`DELETE FROM cal_jobs WHERE kind = 'migration_run'`;
+    await sql`DELETE FROM cal_migration_runs`;
+  });
+
+  test('orario nella finestra del notturno: nessuna verifica accodata', async () => {
+    configureRadicaleRuntime({ client: new RadicaleClient({ baseUrl: 'http://127.0.0.1:9', password: 'x', retries: 0 }), principal: 'federico', watch: 'off', identitySource: 'remote' });
+    await setState({ volume: VOLUME, shadow: true });
+    await runShadowHourlyParity({ now: new Date(2026, 9, 16, 3, 2) });
+    assert.equal((await sql`SELECT 1 FROM cal_migration_runs WHERE kind = 'verify'`).length, 0);
+    await runShadowHourlyParity({ now: new Date(2026, 9, 16, 11, 0) });
+    assert.equal((await sql`SELECT 1 FROM cal_migration_runs WHERE kind = 'verify'`).length, 1);
+    await sql`DELETE FROM cal_jobs WHERE kind = 'migration_run'`;
+    await sql`DELETE FROM cal_migration_runs`;
+  });
+});
+
 // ─── Ordine e cancellazione con lo shadow spento ───────────────────────────────
 
 describe('item dello shadow', () => {
   test('prima tutto tranne le delete, poi le delete', () => {
     const items = [planItem({ action: 'delete', href: 'a.ics' }), planItem({ action: 'create', href: 'b.ics' }), planItem({ action: 'noop', href: 'c.ics' })];
     assert.deepEqual(orderShadowItems(items).map((i) => `${i.action}:${i.href}`), ['create:b.ics', 'noop:c.ics', 'delete:a.ics']);
+  });
+
+  test('cancellazione GDPR con lo shadow spento: la create di uno spostamento si esegue (oggetto già su Radicale)', () => {
+    const source = { uid: 'x' } as unknown as PlanItem['source'];
+    const moved = new Set(['event:e0000000-0000-4000-8000-000000000001']);
+    assert.equal(isErasureMoveCreate(planItem({ action: 'create', source }), moved, true), true);
+    assert.equal(isErasureMoveCreate(planItem({ action: 'create', source }), moved, false), false, 'solo nei job di cancellazione');
+    assert.equal(isErasureMoveCreate(planItem({ action: 'create', source }), new Set(), true), false, 'oggetto nuovo: mai con lo shadow spento');
+    assert.equal(isErasureMoveCreate(planItem({ action: 'update', source }), moved, true), false);
   });
 
   test('cancellazione GDPR con lo shadow spento: solo oggetti tracciati, mai creazioni', () => {
@@ -324,6 +450,33 @@ describe('setShadowEnabled', () => {
     await setState({ shadow: true });
     await assert.rejects(setShadowEnabled({ enabled: true, actor: 'admin:test' }), (err: unknown) =>
       err instanceof MigrationError && ((err.details?.reasons ?? []) as string[]).includes('SHADOW_ALREADY'));
+  });
+});
+
+describe('setShadowEnabled: verifica completa richiesta', () => {
+  after(async () => {
+    configureRadicaleRuntime(null);
+    await sql`DELETE FROM cal_migration_runs`;
+    await resetState();
+  });
+
+  test('una verifica accettabile con V4 su un solo giorno non vale per l\'accensione (VERIFY_REQUIRED)', async () => {
+    await sql`DELETE FROM cal_migration_runs`;
+    await resetState();
+    configureRadicaleRuntime({ client: new RadicaleClient({ baseUrl: 'http://127.0.0.1:9', password: 'x', retries: 0 }), principal: 'federico', watch: 'off', identitySource: 'remote' });
+    const t = Date.now();
+    await insertRun({ kind: 'apply', status: 'succeeded', trigger: 'admin', summary: { totals: { conflict: 0, failed: 0 }, conflicts: {}, failed: 0 }, finishedAt: new Date(t - 2 * HOUR) });
+    await insertRun({
+      kind: 'verify', status: 'succeeded', trigger: 'admin', params: { scope: {}, levels: ['V1', 'V2', 'V3', 'V4', 'V5'], v4_days: 1 },
+      summary: { levels: ['V1', 'V2', 'V3', 'V4', 'V5'], overall: 'green', acceptable: true, calendars: [] }, finishedAt: new Date(t - HOUR),
+    });
+    await assert.rejects(setShadowEnabled({ enabled: true, actor: 'admin:test' }), (err: unknown) => {
+      assert.ok(err instanceof MigrationError);
+      const reasons = (err.details?.reasons ?? []) as string[];
+      assert.ok(reasons.includes('VERIFY_REQUIRED'), reasons.join(','));
+      assert.ok(!reasons.includes('APPLY_REQUIRED') && !reasons.includes('VERIFY_RED'), reasons.join(','));
+      return true;
+    });
   });
 });
 

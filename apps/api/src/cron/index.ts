@@ -18,7 +18,7 @@ import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
 import { runCalendarHorizon, runCalendarMigrationReaper, runCalendarNightlyAudit } from './calendar-radicale';
-import { runShadowHourlyParity, runShadowNightly } from '../lib/calendar/migration/shadow';
+import { runShadowHourlyParity, runShadowNightly, SHADOW_NIGHTLY_HOUR } from '../lib/calendar/migration/shadow';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
 import { runQuoteScheduledSend } from './quote-scheduled-send';
@@ -173,16 +173,20 @@ const jobs: CronJob[] = [
   },
   {
     // Shadow mirror (F3, design §13.8, contratto f3-modules §9.5): apply
-    // completo con verifica V1-V5 dalle opzioni dell'ultima anteprima. Salta
-    // con lo shadow spento, senza Radicale o con un run in corso.
+    // completo con verifica V1-V5 di tutti i calendari dalle opzioni
+    // dell'ultima anteprima. Salta con lo shadow spento o senza Radicale; con
+    // un run in corso riprova ogni 10 minuti per al più 3 ore.
     name: 'calendar-shadow-nightly',
     intervalMs: 24 * 60 * 60 * 1000,
-    runAtHour: 3,
-    run: runShadowNightly,
+    runAtHour: SHADOW_NIGHTLY_HOUR,
+    run: async () => {
+      await runShadowNightly();
+    },
   },
   {
     // Shadow mirror (F3): giro orario della parità, verifica V4 sui prossimi
-    // 14 giorni. Stesse condizioni del giro notturno.
+    // 14 giorni. Stesse condizioni del giro notturno, più nessuna partenza fra
+    // 5 minuti prima e 15 dopo l'ora del notturno (non lo fa saltare).
     name: 'calendar-shadow-parity',
     intervalMs: 60 * 60 * 1000,
     run: runShadowHourlyParity,

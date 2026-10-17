@@ -46,6 +46,7 @@ import { customAlphabet } from 'nanoid';
 import {
   type CalendarObject,
   calendarToObject,
+  MAX_OBJECT_BYTES,
   parseCalendarObject,
   parseIcs,
   semanticFingerprint,
@@ -903,16 +904,36 @@ function archiveHref(sourceName: string, used: Set<string>): string {
 const ZIP_EOCD = 0x06054b50;
 const ZIP_CENTRAL = 0x02014b50;
 const ZIP_LOCAL = 0x04034b50;
-/** Dimensione massima decompressa di un item (Radicale accetta fino a 10 MB, calendar-core valida 1 MiB). */
-const ZIP_MAX_ENTRY_BYTES = 10 * 1024 * 1024;
-/** Dimensione massima decompressa complessiva (difesa dagli zip bomb). */
-const ZIP_MAX_TOTAL_BYTES = 200 * 1024 * 1024;
+/**
+ * Dimensione massima decompressa di un item: il limite di calendar-core
+ * (validateObject rifiuta comunque un oggetto oltre MAX_OBJECT_BYTES), così
+ * una voce più grande si scarta prima di decomprimerla e di analizzarla.
+ */
+const ARCHIVE_MAX_ENTRY_BYTES = MAX_OBJECT_BYTES;
+/**
+ * Byte decompressi complessivi (difesa dagli zip bomb): contano tutte le voci
+ * decompresse, anche quelle poi rifiutate. 20000 item da qualche KB stanno
+ * larghi sotto i 64 MiB.
+ */
+const ARCHIVE_MAX_TOTAL_BYTES = 64 * 1024 * 1024;
+/** tar.gz di phase0-backup: tar decompresso (cache di Radicale comprese) al più 128 MiB. */
+const TAR_GZ_MAX_BYTES = 128 * 1024 * 1024;
+/** Voci in più ammesse nella directory centrale oltre agli item (manifest, cartelle, file non .ics). */
+const ZIP_EXTRA_ENTRIES = 100;
 
 interface ZipEntry { name: string; data: Buffer }
 
 class ArchiveFormatError extends Error {}
 
-/** Entry `.ics` di uno zip (cartelle, file nascosti, manifest e __MACOSX esclusi). Lancia ArchiveFormatError. */
+/**
+ * Entry `.ics` di uno zip (cartelle, file nascosti, manifest e __MACOSX
+ * esclusi). Lancia ArchiveFormatError per uno zip corrotto o costruito ad arte:
+ * voci oltre il limite, due voci con la stessa intestazione locale o con dati
+ * sovrapposti, dimensione o CRC diversi da quelli dichiarati, decompressione
+ * non riuscita, byte decompressi complessivi oltre ARCHIVE_MAX_TOTAL_BYTES
+ * (contano anche le voci poi scartate). Una voce dichiarata oltre
+ * ARCHIVE_MAX_ENTRY_BYTES si scarta senza decomprimerla.
+ */
 export function readZipIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {}): { entries: ZipEntry[]; skipped: Array<{ name: string; reason: string }> } {
   const maxEntries = opts.maxEntries ?? MIGRATION_LIMITS.archiveMaxItems;
   let eocd = -1;
@@ -928,11 +949,12 @@ export function readZipIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {
   const cdOffset = buf.readUInt32LE(eocd + 16);
   if (count === 0xffff || cdOffset === 0xffffffff || cdSize === 0xffffffff) throw new ArchiveFormatError('zip64 non supportato');
   if (cdOffset + cdSize > buf.length) throw new ArchiveFormatError('zip non valido: directory centrale fuori dal file');
-  if (count > maxEntries * 2 + 10) throw new ArchiveFormatError(`zip con troppe voci (${count})`);
+  if (count > maxEntries + ZIP_EXTRA_ENTRIES) throw new ArchiveFormatError(`zip con troppe voci (${count})`);
 
-  const entries: ZipEntry[] = [];
+  // 1. Directory centrale: voci da leggere, senza decomprimere nulla.
+  interface Pending { name: string; base: string; method: number; crc: number; size: number; start: number; end: number; localOffset: number }
+  const pending: Pending[] = [];
   const skipped: Array<{ name: string; reason: string }> = [];
-  let total = 0;
   let p = cdOffset;
   for (let n = 0; n < count; n++) {
     if (p + 46 > buf.length || buf.readUInt32LE(p) !== ZIP_CENTRAL) throw new ArchiveFormatError('zip non valido: voce della directory centrale illeggibile');
@@ -958,35 +980,48 @@ export function readZipIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {
       skipped.push({ name: base, reason: 'cifrato' });
       continue;
     }
-    if (size > ZIP_MAX_ENTRY_BYTES) {
-      skipped.push({ name: base, reason: 'troppo grande' });
-      continue;
-    }
-    if (entries.length >= maxEntries) throw new ArchiveFormatError(`archivio oltre ${maxEntries} item`);
-    if (localOffset + 30 > buf.length || buf.readUInt32LE(localOffset) !== ZIP_LOCAL) throw new ArchiveFormatError(`zip non valido: intestazione locale di ${base} illeggibile`);
-    const start = localOffset + 30 + buf.readUInt16LE(localOffset + 26) + buf.readUInt16LE(localOffset + 28);
-    if (start + compSize > buf.length) throw new ArchiveFormatError(`zip non valido: dati di ${base} fuori dal file`);
-    const raw = buf.subarray(start, start + compSize);
-    let data: Buffer;
-    if (method === 0) data = Buffer.from(raw);
-    else if (method === 8) {
-      try {
-        data = inflateRawSync(raw, { maxOutputLength: ZIP_MAX_ENTRY_BYTES });
-      } catch {
-        skipped.push({ name: base, reason: 'decompressione non riuscita' });
-        continue;
-      }
-    } else {
+    if (method !== 0 && method !== 8) {
       skipped.push({ name: base, reason: `compressione ${method} non supportata` });
       continue;
     }
-    if (data.length !== size || (typeof crc32 === 'function' && crc32(data) >>> 0 !== crc >>> 0)) {
-      skipped.push({ name: base, reason: 'contenuto corrotto (dimensione o CRC)' });
+    if (size > ARCHIVE_MAX_ENTRY_BYTES || (method === 0 && compSize > ARCHIVE_MAX_ENTRY_BYTES)) {
+      skipped.push({ name: base, reason: 'troppo grande' });
       continue;
     }
+    if (pending.length >= maxEntries) throw new ArchiveFormatError(`archivio oltre ${maxEntries} item`);
+    if (localOffset + 30 > buf.length || buf.readUInt32LE(localOffset) !== ZIP_LOCAL) throw new ArchiveFormatError(`zip non valido: intestazione locale di ${base} illeggibile`);
+    const start = localOffset + 30 + buf.readUInt16LE(localOffset + 26) + buf.readUInt16LE(localOffset + 28);
+    if (start + compSize > buf.length) throw new ArchiveFormatError(`zip non valido: dati di ${base} fuori dal file`);
+    pending.push({ name, base, method, crc, size, start, end: start + compSize, localOffset });
+  }
+
+  // 2. Voci sovrapposte (zip costruito ad arte: N voci sugli stessi dati compressi).
+  const byOffset = [...pending].sort((a, b) => a.localOffset - b.localOffset);
+  for (let i = 1; i < byOffset.length; i++) {
+    if (byOffset[i].localOffset === byOffset[i - 1].localOffset) throw new ArchiveFormatError('zip non valido: due voci con la stessa intestazione locale');
+    if (byOffset[i].localOffset < byOffset[i - 1].end) throw new ArchiveFormatError('zip non valido: voci con dati sovrapposti');
+  }
+
+  // 3. Decompressione con il budget complessivo: ogni discrepanza è un archivio corrotto.
+  const entries: ZipEntry[] = [];
+  let total = 0;
+  for (const e of pending) {
+    const raw = buf.subarray(e.start, e.end);
+    let data: Buffer;
+    if (e.method === 0) data = Buffer.from(raw);
+    else {
+      try {
+        data = inflateRawSync(raw, { maxOutputLength: ARCHIVE_MAX_ENTRY_BYTES });
+      } catch {
+        throw new ArchiveFormatError(`zip non valido: decompressione di ${e.base} non riuscita o oltre ${ARCHIVE_MAX_ENTRY_BYTES} byte`);
+      }
+    }
     total += data.length;
-    if (total > ZIP_MAX_TOTAL_BYTES) throw new ArchiveFormatError('archivio decompresso oltre il limite');
-    entries.push({ name, data });
+    if (total > ARCHIVE_MAX_TOTAL_BYTES) throw new ArchiveFormatError('archivio decompresso oltre il limite');
+    if (data.length !== e.size || (typeof crc32 === 'function' && crc32(data) >>> 0 !== e.crc >>> 0)) {
+      throw new ArchiveFormatError(`zip corrotto: dimensione o CRC di ${e.base} diversi da quelli dichiarati`);
+    }
+    entries.push({ name: e.name, data });
   }
   return { entries, skipped };
 }
@@ -1076,7 +1111,7 @@ export function readTarIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {
       skipped.push({ name: base, reason: 'fuori dal layout delle collezioni' });
       continue;
     }
-    if (size > ZIP_MAX_ENTRY_BYTES) {
+    if (size > ARCHIVE_MAX_ENTRY_BYTES) {
       skipped.push({ name: base, reason: 'troppo grande' });
       continue;
     }
@@ -1089,28 +1124,50 @@ export function readTarIcsEntries(buf: Buffer, opts: { maxEntries?: number } = {
     }
     if (entries.length >= maxEntries) throw new ArchiveFormatError(`archivio oltre ${maxEntries} item`);
     total += size;
-    if (total > ZIP_MAX_TOTAL_BYTES) throw new ArchiveFormatError('archivio decompresso oltre il limite');
+    if (total > ARCHIVE_MAX_TOTAL_BYTES) throw new ArchiveFormatError('archivio decompresso oltre il limite');
     used.add(name);
     entries.push({ name, data: Buffer.from(data) });
   }
   return { entries, skipped };
 }
 
+/** Opzioni della lettura dell'archivio: ogni `yieldEvery` voci cede l'event loop e chiama `onTick`. */
+export interface ReadArchiveOptions {
+  /** Voci fra una cessione dell'event loop e l'altra (default 25). */
+  yieldEvery?: number;
+  /** Dopo ogni cessione (annullamento, avanzamento): un errore interrompe la lettura. */
+  onTick?: (done: number, total: number) => Promise<void> | void;
+}
+
+/** Cede l'event loop: battito e lease del run, richieste HTTP e cron girano anche durante la lettura di un archivio grande. */
+const yieldEventLoop = (): Promise<void> => new Promise<void>((done) => setImmediate(done));
+
 /**
  * Item dell'archivio dal file caricato: zip di phase0-export (un item per
  * entry `.ics`), tar o tar.gz del volume di phase0-backup (un item per
  * risorsa `.ics` delle collezioni, con lo stesso nome dello zip) o un singolo
- * .ics (un item per UID). Parse e validateObject di calendar-core; UID
- * duplicati → si tiene il primo (in ordine di nome).
+ * .ics (un item per UID). Parse (al più MAX_OBJECT_BYTES per item) e
+ * validateObject di calendar-core; UID duplicati → si tiene il primo (in
+ * ordine di nome). Asincrona: ogni `yieldEvery` voci cede l'event loop (il
+ * run gira nel processo dell'API, che serve anche prenotazioni, feed e cron).
  */
-export function readArchiveItems(input: Buffer, originalName: string, now: Date): { items: ArchiveItem[]; rejected: ArchiveRejected[] } {
+export async function readArchiveItems(input: Buffer, originalName: string, now: Date, opts: ReadArchiveOptions = {}): Promise<{ items: ArchiveItem[]; rejected: ArchiveRejected[] }> {
+  const yieldEvery = Math.max(1, opts.yieldEvery ?? 25);
+  let ticks = 0;
+  let tickTotal = 0;
+  const tick = async (): Promise<void> => {
+    ticks += 1;
+    if (ticks % yieldEvery !== 0) return;
+    await yieldEventLoop();
+    await opts.onTick?.(ticks, tickTotal);
+  };
   const rejected: ArchiveRejected[] = [];
   const candidates: Array<{ source_name: string; obj: CalendarObject; raw: Uint8Array }> = [];
   const isGzip = input.length >= 2 && input[0] === 0x1f && input[1] === 0x8b;
   let buf = input;
   if (isGzip) {
     try {
-      buf = gunzipSync(input, { maxOutputLength: ZIP_MAX_TOTAL_BYTES });
+      buf = gunzipSync(input, { maxOutputLength: TAR_GZ_MAX_BYTES });
     } catch {
       throw new ArchiveFormatError('gzip non leggibile o decompresso oltre il limite');
     }
@@ -1122,8 +1179,11 @@ export function readArchiveItems(input: Buffer, originalName: string, now: Date)
     const { entries, skipped } = isZip ? readZipIcsEntries(buf) : readTarIcsEntries(buf);
     for (const s of skipped) rejected.push({ source_name: s.name, reason: 'invalid', code: 'INVALID_OBJECT', message: `Voce scartata: ${s.reason}` });
     entries.sort((a, b) => a.name.localeCompare(b.name));
+    tickTotal = entries.length * 2;
+    await yieldEventLoop();
     for (const e of entries) {
-      const parsed = parseCalendarObject(e.data);
+      await tick();
+      const parsed = parseCalendarObject(e.data, { maxBytes: ARCHIVE_MAX_ENTRY_BYTES });
       if (!parsed.ok) {
         rejected.push({ source_name: e.name, reason: 'invalid', code: 'INVALID_OBJECT', message: `iCalendar non leggibile (${parsed.error.code})` });
         continue;
@@ -1131,7 +1191,7 @@ export function readArchiveItems(input: Buffer, originalName: string, now: Date)
       candidates.push({ source_name: e.name, obj: parsed.value, raw: e.data });
     }
   } else {
-    const cal = parseIcs(buf);
+    const cal = parseIcs(buf, { maxBytes: MIGRATION_LIMITS.archiveMaxBytes });
     if (!cal.ok) throw new ArchiveFormatError(`file né zip né iCalendar leggibile (${cal.error.code})`);
     const split = splitCalendar(cal.value, { duplicateMasters: 'keep-first' });
     for (const err of split.errors) {
@@ -1143,12 +1203,14 @@ export function readArchiveItems(input: Buffer, originalName: string, now: Date)
     }
     // Un .ics con un solo oggetto vale come l'item omonimo dell'export.
     if (candidates.length === 1 && rejected.length === 0) candidates[0].source_name = basename(originalName);
+    tickTotal = ticks + candidates.length;
   }
 
   const items: ArchiveItem[] = [];
   const seenUids = new Map<string, string>();
   const usedHrefs = new Set<string>();
   for (const c of candidates) {
+    await tick();
     const check = validateObject(c.obj, { tz: 'Europe/Rome', allowedComponents: ARCHIVE_COMPONENTS, now });
     if (!check.ok) {
       const codes = [...new Set(check.issues.filter((i) => i.severity === 'error').map((i) => i.code))];
@@ -1470,10 +1532,18 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
     const now = new Date();
     let parsed: { items: ArchiveItem[]; rejected: ArchiveRejected[] };
     try {
-      parsed = readArchiveItems(upload.buf, ctx.params.original_name || basename(upload.path), now);
+      parsed = await readArchiveItems(upload.buf, ctx.params.original_name || basename(upload.path), now, {
+        yieldEvery: 25,
+        onTick: async (done, total) => {
+          ctx.throwIfCancelled();
+          await ctx.progress({ phase: 'read-archive', done, total, message: 'Lettura dell\'archivio' });
+        },
+      });
     } catch (err) {
-      removeAtEnd = true;
-      if (err instanceof ArchiveFormatError) throw new MigrationError('VALIDATION_FAILED', `Archivio non valido: ${err.message}`, { run_error_code: 'ARCHIVE_INVALID' });
+      if (err instanceof ArchiveFormatError) {
+        removeAtEnd = true;
+        throw new MigrationError('VALIDATION_FAILED', `Archivio non valido: ${err.message}`, { run_error_code: 'ARCHIVE_INVALID' });
+      }
       throw err;
     }
     const total = parsed.items.length + parsed.rejected.length;
@@ -1513,7 +1583,7 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
       severity: r.reason === 'invalid' ? 'warning' as const : 'info' as const,
       detail: { source_name: r.source_name, reason: r.reason, message: r.message, uid: r.uid ?? null },
     }));
-    const counts = { imported: 0, updated: 0, unchanged: 0, conflicts: 0, failed: 0, duplicates: parsed.rejected.filter((r) => r.reason === 'duplicate').length };
+    const counts = { imported: 0, updated: 0, unchanged: 0, conflicts: 0, failed: 0, alreadyArchived: 0, duplicates: parsed.rejected.filter((r) => r.reason === 'duplicate').length };
 
     let done = 0;
     for (const item of parsed.items) {
@@ -1527,6 +1597,7 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
       const sameUid = byUid.get(item.uid);
       if (sameUid && sameUid.legacy_key !== key) {
         counts.duplicates++;
+        counts.alreadyArchived++;
         anomalyItems.push({
           item_type: 'anomaly', calendar_id: calendar.id, collection_name: ARCHIVE_COLLECTION_NAME, legacy_key: key, code: 'POSSIBLE_DUPLICATE', severity: 'info',
           detail: { source_name: item.source_name, reason: 'duplicate', message: `UID già importato come ${sameUid.legacy_key}`, uid: item.uid },
@@ -1564,6 +1635,16 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
     const all = [...anomalyItems, ...objectItems];
     for (let i = 0; i < all.length; i += 500) await ctx.addItems(all.slice(i, i + 500));
 
+    // Nessun item valido (tutte le voci rifiutate): il run fallisce con i motivi nelle righe e la dichiarazione
+    // phase0 resta quella di prima. Gli UID già importati da un archivio precedente contano come presenti.
+    const present = counts.imported + counts.updated + counts.unchanged + counts.alreadyArchived;
+    if (present === 0 && counts.failed === 0 && counts.conflicts === 0) {
+      removeAtEnd = true;
+      throw new MigrationError('VALIDATION_FAILED', `Nessun item valido nell'archivio (${parsed.rejected.length} voci rifiutate: vedi le righe del run)`, {
+        run_error_code: 'ARCHIVE_INVALID',
+      });
+    }
+
     const summary: ArchiveRunSummary = {
       calendar_id: calendar.id,
       collection_name: ARCHIVE_COLLECTION_NAME,
@@ -1585,11 +1666,23 @@ export async function runArchiveImport(ctx: MigrationRunContext<ArchiveParams>):
     ctx.log.info({ ...summary }, 'archivio della Fase 0 importato');
     return summary;
   } catch (err) {
-    if (err instanceof MigrationError && err.code === 'CANCELLED') removeAtEnd = true;
+    // Annullamento chiesto dall'admin: il file non serve più. Un'interruzione dell'esecutore (arresto dell'API,
+    // lease perso) ha un altro motivo nel segnale: il run riprende con lo stesso file (contratto §5.2).
+    if (err instanceof MigrationError && err.code === 'CANCELLED' && cancelledByAdmin(ctx.signal)) removeAtEnd = true;
     throw err;
   } finally {
     if (removeAtEnd) await removeUpload(uploadPath);
   }
+}
+
+/**
+ * Il run è stato annullato dall'admin (motivo del segnale: MigrationError
+ * CANCELLED, da POST /runs/:id/cancel o da cancel_requested_at), non fermato
+ * dall'esecutore per riprenderlo (arresto dell'API, lease del job perso).
+ */
+function cancelledByAdmin(signal: AbortSignal): boolean {
+  const reason: unknown = signal.reason;
+  return signal.aborted && reason instanceof MigrationError && reason.code === 'CANCELLED';
 }
 
 /** Dichiarazione phase0 = archived dopo un archivio riuscito (contratto §1.2: INIT scrive solo questa). */

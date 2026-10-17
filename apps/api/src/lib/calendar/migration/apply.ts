@@ -55,7 +55,7 @@ import { isRadicaleError, type RadicaleError } from '../radicale/errors';
 import { ObjectIdConflictError, reserveObjectId } from '../radicale/ids';
 import type { Db } from '../radicale/policy';
 import { inventoryAppPasswords } from './inventory';
-import { buildPlan, objectItemDetail, type PlanInput, planItemKey, readTargetSnapshot } from './plan';
+import { buildPlan, objectItemDetail, type PlanForce, planItemKey, readTargetSnapshot } from './plan';
 import { createIdentityGuard, describeRadicaleError, preconditionError, requireRadicale } from './preflight';
 import { LEDGER_SELECT, ledgerRowFromDb, patchFromLegacyDiff, patchTowardSnapshot } from './serialize';
 import {
@@ -377,10 +377,60 @@ async function positionRow(
   return row;
 }
 
-async function reserveIds(
-  tx: Db,
-  input: { calendar_id: string; href: string; uid: string | null; legacy_uid: string | null; objectIds: readonly ReservedObjectId[] },
-): Promise<void> {
+type ReserveIdsInput = { calendar_id: string; href: string; uid: string | null; legacy_uid: string | null; objectIds: readonly ReservedObjectId[] };
+
+/**
+ * L'id legacy di `oid` è ancora della posizione precedente dello STESSO
+ * oggetto (evento spostato di calendario in PG, spostamento della decisione 8
+ * scelto dopo un primo apply, href cambiato): la riga di cal_object_ids si
+ * ri-chiava sulla posizione nuova (stessa semantica del MOVE di
+ * allocateObjectIds), con legacy_uid e override, così gli id restituiti oggi
+ * da list_events restano validi dopo il cutover e il feed pubblica lo stesso
+ * UID. Stesso oggetto = stesso id e legacy_event_id, stessa recurrence_key,
+ * UID uguale (o mai registrato) e posizione nuova libera. Una riga dell'indice
+ * (cal_objects) ancora alla posizione vecchia la toglie l'indicizzatore alla
+ * prima sync della nuova ("stesso id in un'altra posizione") o della vecchia
+ * (cancellazione); se la risorsa vecchia restasse su Radicale, la sua
+ * indicizzazione le darebbe un id nuovo: la posizione autorevole è quella che
+ * PG indica adesso. Restituisce true se ha ri-chiavato.
+ */
+async function rekeyMovedObjectId(tx: Db, input: ReserveIdsInput, oid: ReservedObjectId): Promise<boolean> {
+  const cal = input.calendar_id.toLowerCase();
+  const id = oid.id.toLowerCase();
+  const legacy = oid.legacy_event_id?.toLowerCase() ?? null;
+  const rows = await tx<Array<{ id: string; calendar_id: string; href: string; recurrence_key: string; uid: string | null; legacy_event_id: string | null }>>`
+    SELECT id::text AS id, calendar_id::text AS calendar_id, href, recurrence_key, uid, legacy_event_id::text AS legacy_event_id
+    FROM cal_object_ids
+    WHERE id = ${id}::uuid OR (${legacy}::uuid IS NOT NULL AND legacy_event_id = ${legacy}::uuid)
+    ORDER BY id
+    FOR UPDATE
+  `;
+  if (rows.length !== 1) return false;
+  const r = rows[0];
+  if (r.id.toLowerCase() !== id || r.recurrence_key !== oid.recurrence_key) return false;
+  if (legacy !== null && r.legacy_event_id !== null && r.legacy_event_id.toLowerCase() !== legacy) return false;
+  if (r.calendar_id.toLowerCase() === cal && r.href === input.href) return false;
+  if (r.uid !== null && input.uid !== null && r.uid !== input.uid) return false;
+  const moved = await tx<Array<{ id: string }>>`
+    UPDATE cal_object_ids SET
+      calendar_id = ${cal}::uuid, href = ${input.href}, retired_at = NULL, updated_at = now(),
+      uid = COALESCE(${input.uid}, uid),
+      legacy_event_id = COALESCE(legacy_event_id, ${legacy}::uuid),
+      legacy_uid = CASE WHEN recurrence_key = '' THEN COALESCE(legacy_uid, ${oid.recurrence_key === '' ? input.legacy_uid : null}) ELSE legacy_uid END
+    WHERE id = ${id}::uuid
+      AND NOT EXISTS (
+        SELECT 1 FROM cal_object_ids x
+        WHERE x.calendar_id = ${cal}::uuid AND x.href = ${input.href} AND x.recurrence_key = ${oid.recurrence_key}
+      )
+    RETURNING id::text AS id
+  `;
+  if (moved.length) {
+    log.info({ calendarId: cal, href: input.href, from: { calendarId: r.calendar_id, href: r.href }, recurrenceKey: oid.recurrence_key, id }, 'id legacy ri-chiavato sulla posizione nuova dell\'oggetto');
+  }
+  return moved.length > 0;
+}
+
+async function reserveIds(tx: Db, input: ReserveIdsInput): Promise<void> {
   for (const oid of input.objectIds) {
     try {
       await reserveObjectId(tx, {
@@ -393,13 +443,12 @@ async function reserveIds(
         legacyUid: oid.recurrence_key === '' ? input.legacy_uid : null,
       });
     } catch (err) {
-      // L'id legacy è già di un'altra posizione (per esempio prima di uno spostamento): la
-      // posizione nuova riceverà un id dalla sync (MOVE o X-CALDES-LEGACY-ID), mai un errore.
-      if (err instanceof ObjectIdConflictError) {
-        log.warn({ calendarId: input.calendar_id, href: input.href, recurrenceKey: oid.recurrence_key, id: oid.id }, 'id legacy già usato da un\'altra posizione: non preassegnato');
-        continue;
-      }
-      throw err;
+      if (!(err instanceof ObjectIdConflictError)) throw err;
+      // L'id legacy è ancora della posizione precedente dello stesso oggetto: si ri-chiava qui.
+      if (await rekeyMovedObjectId(tx, input, oid)) continue;
+      // Id di un'altra posizione che non è lo stesso oggetto: la posizione nuova riceverà un id dalla
+      // sync (MOVE o X-CALDES-LEGACY-ID), mai un errore.
+      log.warn({ calendarId: input.calendar_id, href: input.href, recurrenceKey: oid.recurrence_key, id: oid.id }, 'id legacy già usato da un\'altra posizione: non preassegnato');
     }
   }
 }
@@ -711,16 +760,28 @@ function conflictResult(item: PlanItem, code: ConflictCode, extra: Partial<Execu
   return result(item, 'conflict', { code, ...extra });
 }
 
-/** Contenuto della patch per campo sull'oggetto corrente (null se il testo non si legge o la patch non si applica). */
-function patchContent(raw: string, previous: LegacySnapshot | null, current: LegacySnapshot, now: Date):
+/**
+ * Contenuto della patch per campo sull'oggetto corrente (null se il testo non
+ * si legge o la patch non si applica). Con `towardFallback` (la destinazione è
+ * quella scritta dallo strumento) una patch dallo snapshot che non cambia
+ * nulla si verifica con la patch senza base: se i campi del piano differiscono
+ * dall'oggetto voluto, la base ricostruita non rappresenta lo scritto (per
+ * esempio la minimizzazione dei 24 mesi) e si scrivono quei campi invece di
+ * adottare.
+ */
+function patchContent(raw: string, previous: LegacySnapshot | null, current: LegacySnapshot, now: Date, opts: { towardFallback?: boolean } = {}):
   { object: CalendarObject; changed: boolean; fields: string[]; conflicts: number } | null {
   const parsed = parseCalendarObject(raw);
   if (!parsed.ok) return null;
   try {
     // Senza lo snapshot precedente (redatto dall'erasure GDPR) la patch è senza base, verso l'oggetto voluto.
-    const p = previous
+    let p = previous
       ? patchFromLegacyDiff(parsed.value, previous, current, { tz: tzOf(current), now })
       : patchTowardSnapshot(parsed.value, current, { tz: tzOf(current), now });
+    if (!p.changed && previous && opts.towardFallback) {
+      const toward = patchTowardSnapshot(parsed.value, current, { tz: tzOf(current), now });
+      if (toward.changed) p = { ...toward, conflicts: [] };
+    }
     return { object: p.object, changed: p.changed, fields: p.fields, conflicts: p.conflicts.length };
   } catch (err) {
     log.warn({ err: shortError(err) }, 'patch per campo non applicabile: riscrittura completa dal piano');
@@ -882,7 +943,11 @@ async function executeWrite(item: PlanItem, ctx: ExecuteContext): Promise<Execut
       target = fresh;
       raw = fresh.raw;
     }
-    const patched = raw !== null ? patchContent(raw, l.legacy_snapshot, s.legacy_snapshot, ctx.now()) : null;
+    // Destinazione ancora quella scritta dallo strumento (stesso etag o fingerprint dell'ultima scrittura).
+    const own = target !== null
+      && ((target.etag !== null && target.etag === l.written_etag)
+        || (target.fingerprint !== null && l.written_fingerprint !== null && target.fingerprint === l.written_fingerprint));
+    const patched = raw !== null ? patchContent(raw, l.legacy_snapshot, s.legacy_snapshot, ctx.now(), { towardFallback: own }) : null;
     if (patched) {
       if (!patched.changed && target) {
         // La destinazione ha già i campi voluti: si registra lo snapshot nuovo senza scrivere.
@@ -1186,15 +1251,28 @@ function normalizeApplyParams(params: Partial<ApplyParams> | null | undefined, p
   };
 }
 
-/** "Forza" per item: id delle righe 'object' del run d'anteprima → chiavi stabili degli item (planItemKey). */
-async function resolveForce(db: Db, planRunId: string | null, params: NormalizedApplyParams): Promise<PlanInput['force']> {
+/**
+ * "Forza": id delle righe 'object' del run d'anteprima → chiavi stabili degli
+ * item (planItemKey). Con un run d'anteprima di riferimento anche la forza per
+ * codice si lega ai conflitti dell'anteprima (chiave, codice ed etag della
+ * destinazione, PlanForce.preview): alla ripresa di un run (tentativo > 1,
+ * hash non riconfrontato) un conflitto nato fra i due tentativi, mai mostrato
+ * all'utente, resta un conflitto. Senza anteprima (chiamate dirette) la forza
+ * per codice vale per il piano corrente.
+ */
+async function resolveForce(db: Db, planRunId: string | null, params: NormalizedApplyParams): Promise<PlanForce> {
   const codes = new Set<ConflictCode>(params.force_codes);
-  if (params.force_item_ids.length === 0) return { itemKeys: new Set(), codes };
-  if (!planRunId) throw new MigrationError('VALIDATION_FAILED', 'force_item_ids senza un run d\'anteprima di riferimento');
-  const rows = await db<Array<{ id: string; calendar_id: string | null; href: string | null; legacy_key: string | null }>>`
-    SELECT id::text AS id, calendar_id::text AS calendar_id, href, legacy_key
+  if (params.force_item_ids.length === 0 && codes.size === 0) return { itemKeys: new Set(), codes };
+  if (!planRunId) {
+    if (params.force_item_ids.length) throw new MigrationError('VALIDATION_FAILED', 'force_item_ids senza un run d\'anteprima di riferimento');
+    return { itemKeys: new Set(), codes };
+  }
+  type PreviewRow = { id: string; calendar_id: string | null; href: string | null; legacy_key: string | null; action: string | null; code: string | null; target_etag: string | null };
+  const rows = await db<PreviewRow[]>`
+    SELECT id::text AS id, calendar_id::text AS calendar_id, href, legacy_key, action, code, detail->>'target_etag' AS target_etag
     FROM cal_migration_items
-    WHERE run_id = ${planRunId}::uuid AND item_type = 'object' AND id = ANY(${params.force_item_ids}::bigint[])
+    WHERE run_id = ${planRunId}::uuid AND item_type = 'object'
+      AND (id = ANY(${params.force_item_ids}::bigint[]) OR (action = 'conflict' AND code = ANY(${[...codes]}::text[])))
   `;
   const found = new Set(rows.map((r) => r.id));
   const missing = params.force_item_ids.filter((id) => !found.has(id));
@@ -1202,26 +1280,32 @@ async function resolveForce(db: Db, planRunId: string | null, params: Normalized
     throw new MigrationError('VALIDATION_FAILED', 'force_item_ids: righe non trovate nell\'anteprima', { missing: missing.slice(0, 20) });
   }
   const itemKeys = new Set<string>();
+  const preview = new Map<string, { code: string | null; target_etag: string | null }>();
   for (const r of rows) {
-    if (!r.calendar_id || !r.legacy_key) continue;
-    itemKeys.add(planItemKey({ calendar_id: r.calendar_id, href: r.href ?? '', legacy_key: r.legacy_key as LegacyKey }));
+    if (!r.calendar_id || !r.legacy_key || r.action !== 'conflict') continue;
+    const key = planItemKey({ calendar_id: r.calendar_id, href: r.href ?? '', legacy_key: r.legacy_key as LegacyKey });
+    itemKeys.add(key);
+    preview.set(key, { code: r.code, target_etag: r.target_etag ?? null });
   }
-  return { itemKeys, codes };
+  // Le chiavi dell'anteprima coprono anche la forza per codice: niente codici liberi sul piano corrente.
+  return { itemKeys, codes: new Set(), preview };
 }
 
 /**
- * true se il run ha già lasciato tracce nel ledger: un intento registrato
- * (intent_run_id) o un esito completato, adottato o ritirato (last_run_id).
- * Ogni scrittura di runApply avviene dopo il controllo dell'hash del piano.
+ * Righe del ledger su cui il run ha già lasciato tracce: un intento
+ * registrato (intent_run_id) o un esito completato, adottato o ritirato
+ * (last_run_id), comprese le righe ritirate. Ogni scrittura di runApply
+ * avviene dopo il controllo dell'hash del piano.
  */
-async function runHasLedgerWrites(db: Db, runId: string): Promise<boolean> {
-  const [row] = await db<Array<{ wrote: boolean }>>`
-    SELECT EXISTS (
-      SELECT 1 FROM cal_migration_ledger WHERE last_run_id = ${runId}::uuid OR intent_run_id = ${runId}::uuid
-    ) AS wrote
+async function countRunLedgerRows(db: Db, runId: string): Promise<number> {
+  const [row] = await db<Array<{ n: number }>>`
+    SELECT count(*)::int AS n FROM cal_migration_ledger WHERE last_run_id = ${runId}::uuid OR intent_run_id = ${runId}::uuid
   `;
-  return row?.wrote === true;
+  return row?.n ?? 0;
 }
+
+/** Esiti che hanno toccato Radicale o il ledger (riga del run salvata subito). */
+const TOUCHING_OUTCOMES: ReadonlySet<ApplyOutcome> = new Set<ApplyOutcome>(['done', 'forced', 'adopted', 'failed']);
 
 function severityOf(outcome: ApplyOutcome, code: string | null): 'info' | 'warning' | 'error' {
   if (outcome === 'failed') return 'error';
@@ -1259,8 +1343,14 @@ export function applyItemRow(item: PlanItem, executed: ExecutedItem, attempt: nu
 export interface ApplyRunSummary extends ApplySummary {
   /** Tentativo dell'esecutore che ha prodotto i totali (> 1 dopo una ripresa). */
   attempt: number;
-  /** Scritture riuscite nei tentativi precedenti dello stesso run (comprese in `writes`). */
+  /** Scritture riuscite nei tentativi precedenti dello stesso run (comprese in `writes`), dalle righe salvate. */
   previous_attempt_writes: number;
+  /**
+   * Righe del ledger toccate dai tentativi precedenti (intento, esito, adozione
+   * o ritiro con questo run), lette all'avvio del tentativo: > 0 → il run ha
+   * già scritto e `zero_writes` è false anche se questo tentativo non scrive.
+   */
+  previous_attempt_ledger_rows: number;
   calendars: Array<{ calendar_id: string; collection_name: string; totals: Record<ApplyOutcome, number> }>;
   scope: MigrationScope;
 }
@@ -1291,6 +1381,9 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
   }
   const force = await resolveForce(ctx.db, ctx.planRunId, params);
   const forcing = force.itemKeys.size > 0 || force.codes.size > 0;
+  // Tracce dei tentativi precedenti nel ledger, prima di qualunque scrittura di questo tentativo: le righe
+  // del run possono essere andate perse con il processo (mai salvate), il ledger no.
+  const previousLedgerRows = ctx.attempt > 1 ? await countRunLedgerRows(ctx.db, ctx.runId) : 0;
 
   const now = new Date();
   await ctx.progress({ phase: 'plan', message: 'Ricalcolo del piano dell\'anteprima' });
@@ -1305,7 +1398,7 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
     // scritto: il piano differisce dall'anteprima per le scritture di questo stesso run (create fatte →
     // noop, intenti pendenti → adozione), quindi l'hash non è più confrontabile. Il controllo l'ha già
     // superato il primo tentativo, che scrive solo dopo; senza scritture precedenti vale come sempre.
-    if (ctx.attempt > 1 && (await runHasLedgerWrites(ctx.db, ctx.runId))) {
+    if (ctx.attempt > 1 && previousLedgerRows > 0) {
       log.info({ runId: ctx.runId, attempt: ctx.attempt }, 'ripresa dell\'apply dopo scritture del tentativo precedente: hash dell\'anteprima non riconfrontato');
     } else {
       throw new MigrationError('PLAN_CHANGED', 'Il piano è cambiato dall\'anteprima: rigenera l\'anteprima e riprova', {
@@ -1385,6 +1478,8 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
     pending.push(applyItemRow(item, executed, ctx.attempt));
   };
 
+  let loopFailed = false;
+  let flushError: unknown = null;
   try {
     for (const phase of phases) {
       for (const group of phase) {
@@ -1405,7 +1500,9 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
           }
           record(item, executed);
           done += 1;
-          if (pending.length >= ROWS_FLUSH_EVERY) await flush();
+          // La riga di un item che ha toccato Radicale o il ledger si salva subito: un processo ucciso
+          // perde al più quella in corso, e la ripresa vede le scritture dei tentativi precedenti.
+          if (pending.length >= ROWS_FLUSH_EVERY || TOUCHING_OUTCOMES.has(executed.outcome)) await flush();
           await ctx.progress({
             phase: item.action === 'delete' ? 'delete' : 'write',
             done,
@@ -1416,9 +1513,21 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
         }
       }
     }
+  } catch (err) {
+    loopFailed = true;
+    throw err;
   } finally {
     // Righe già eseguite salvate anche con un annullamento o un errore: il wizard vede cosa è successo.
-    await flush().catch((err: unknown) => log.error({ err: shortError(err) }, 'righe dell\'apply non salvate'));
+    try {
+      await flush();
+    } catch (err) {
+      log.error({ err: shortError(err) }, 'righe dell\'apply non salvate');
+      if (!loopFailed) flushError = err;
+    }
+  }
+  if (flushError) {
+    // Mai un apply concluso con le righe non salvate: il run fallisce e la ripresa riparte dal ledger.
+    throw new MigrationError('INTERNAL', `Righe dell'apply non salvate: ${shortError(flushError)}`);
   }
 
   let previousWrites = 0;
@@ -1449,9 +1558,11 @@ async function applyLocked(ctx: MigrationRunContext<ApplyParams>): Promise<Apply
     adopted: totals.adopted,
     forced: totals.forced,
     duration_ms: Date.now() - started,
-    zero_writes: writesDone === 0 && plannedWrites === 0 && conflictCount === 0 && totals.failed === 0,
+    // Una ripresa dopo tentativi che hanno toccato il ledger non è una "seconda esecuzione": il run ha scritto.
+    zero_writes: writesDone === 0 && plannedWrites === 0 && conflictCount === 0 && totals.failed === 0 && previousLedgerRows === 0,
     attempt: ctx.attempt,
     previous_attempt_writes: previousWrites,
+    previous_attempt_ledger_rows: previousLedgerRows,
     calendars: [...perCalendar.values()].sort((a, b) => a.collection_name.localeCompare(b.collection_name) || a.calendar_id.localeCompare(b.calendar_id)),
     scope: params.scope,
   };

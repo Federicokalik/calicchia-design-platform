@@ -228,7 +228,9 @@ function declarationSummary(key: DeclarationKey, value: unknown): string {
   const v = (value ?? {}) as Record<string, unknown>;
   switch (key) {
     case 'phase0':
-      return v.status === 'absent' ? 'Volume della Fase 0 assente' : v.status === 'archived' ? 'Archiviato nella collezione archivio-fase0' : 'Presente, non importato';
+      if (v.status === 'absent') return 'Volume della Fase 0 assente';
+      if (v.status === 'archived') return `Archiviato nella collezione archivio-fase0${typeof v.note === 'string' && v.note ? ` (${v.note})` : ''}`;
+      return 'Presente, non importato';
     case 'remote_mode_accepted':
       return `Accettata: ${String(v.reason ?? '')}`;
     case 'public_401_verified':

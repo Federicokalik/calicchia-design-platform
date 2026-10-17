@@ -50,6 +50,14 @@
 #                     compattazione della cache: rimuove le voci della cache degli
 #                     item i cui item non esistono più, sotto il lock esclusivo,
 #                     senza invalidare i sync-token
+#   pinned-list       snapshot conservati in $BACKUP_DIR/calendar-stack/pinned/
+#                     (fuori dalla retention: non scadono mai da soli) con data,
+#                     etichetta e dimensione (sola lettura)
+#   pinned-purge [--older-than GIORNI] [--dry-run] --yes
+#                     cancella gli snapshot conservati (tutti, o quelli più vecchi
+#                     di GIORNI): dopo la conferma del passaggio, o come seguito di
+#                     un'erasure GDPR (contengono dump del database e volume con i
+#                     dati di allora). Senza --yes né --dry-run rifiuta (exit 2)
 #   phase0-detect     cerca il volume della Fase 0 e ne riassume il contenuto
 #   phase0-backup [--out DIR]
 #                     tar.gz in sola lettura del volume della Fase 0, con sha256 e
@@ -60,6 +68,13 @@
 #                     20 MiB e 20000 item (limiti del wizard). Con --from legge il
 #                     tar.gz di phase0-backup invece del volume
 #                     (default $BACKUP_DIR/phase0/archivio-fase0.zip)
+#   phase0-purge [--dry-run] --yes
+#                     cancella i file della Fase 0 in $BACKUP_DIR/phase0/ (tar.gz,
+#                     manifest e sha256 di phase0-backup, zip di phase0-export), che
+#                     non hanno retention: dopo la conferma del passaggio o come
+#                     seguito di un'erasure GDPR. Il volume Docker della Fase 0 non
+#                     si tocca mai (decisione 7). Senza --yes né --dry-run rifiuta
+#                     (exit 2)
 #
 # Configurazione (env):
 #   Volume di Radicale, in ordine di precedenza (come backup-calendar-stack.sh):
@@ -113,7 +128,7 @@ CMD="$1"
 shift
 case "$CMD" in
   -h|--help|help) usage; exit 0 ;;
-  status|du|verify|identity|snapshot|purge-cache|compact-cache|phase0-detect|phase0-backup|phase0-export) ;;
+  status|du|verify|identity|snapshot|purge-cache|compact-cache|pinned-list|pinned-purge|phase0-detect|phase0-backup|phase0-export|phase0-purge) ;;
   *) bad_usage "Sottocomando sconosciuto: $CMD" ;;
 esac
 
@@ -122,11 +137,19 @@ OPT_OUT=""
 OPT_FROM=""
 OPT_LABEL=""
 OPT_NO_UPLOAD=0
+OPT_YES=0
+OPT_OLDER_THAN=""
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -h|--help) usage; exit 0 ;;
     --dry-run)
-      case "$CMD" in purge-cache|compact-cache) OPT_DRY_RUN=1 ;; *) bad_usage "--dry-run vale solo per purge-cache e compact-cache" ;; esac ;;
+      case "$CMD" in purge-cache|compact-cache|pinned-purge|phase0-purge) OPT_DRY_RUN=1 ;; *) bad_usage "--dry-run vale solo per purge-cache, compact-cache, pinned-purge e phase0-purge" ;; esac ;;
+    --yes)
+      case "$CMD" in pinned-purge|phase0-purge) OPT_YES=1 ;; *) bad_usage "--yes vale solo per pinned-purge e phase0-purge" ;; esac ;;
+    --older-than)
+      [ "$CMD" = pinned-purge ] || bad_usage "--older-than vale solo per pinned-purge"
+      [ "$#" -ge 2 ] && [[ "$2" =~ ^[0-9]{1,5}$ ]] || bad_usage "--older-than richiede un numero di giorni"
+      OPT_OLDER_THAN="$2"; shift ;;
     --out)
       case "$CMD" in phase0-backup|phase0-export) ;; *) bad_usage "--out vale solo per phase0-backup e phase0-export" ;; esac
       [ "$#" -ge 2 ] && [ -n "$2" ] || bad_usage "--out richiede un percorso"
@@ -471,6 +494,104 @@ cmd_snapshot() {
     "$id" "$pin" "$identity" "$sha"
 }
 
+# ─── Copie senza retention (snapshot conservati, file della Fase 0) ───
+
+# Report JSON delle voci (file o cartelle) passate come argomenti: nome, byte, data.
+entries_report() {
+  python3 -c '
+import datetime, json, os, sys
+dry = sys.argv[1] == "1"
+out = []
+total = 0
+for path in sys.argv[2:]:
+    size = 0
+    if os.path.isdir(path) and not os.path.islink(path):
+        seen = set()
+        for base, dirs, files in os.walk(path):
+            for f in files:
+                st = os.lstat(os.path.join(base, f))
+                if (st.st_dev, st.st_ino) in seen:
+                    continue
+                seen.add((st.st_dev, st.st_ino))
+                size += st.st_size
+    else:
+        size = os.lstat(path).st_size
+    total += size
+    mtime = datetime.datetime.fromtimestamp(os.lstat(path).st_mtime, datetime.timezone.utc)
+    out.append({"name": os.path.basename(path), "bytes": size, "modified": mtime.strftime("%Y-%m-%dT%H:%M:%SZ")})
+print(json.dumps({"entries": out, "count": len(out), "bytes": total, "dry_run": dry}, ensure_ascii=False, indent=2))
+' "$@"
+}
+
+# Snapshot conservati: cartelle <AAAAMMGGTHHMMSSZ>[-<etichetta>] in pinned/ (mai i parziali).
+pinned_dirs() {
+  local root="${BACKUP_DIR%/}/calendar-stack/pinned"
+  [ -d "$root" ] || return 0
+  find "$root" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -E '^[0-9]{8}T[0-9]{6}Z(-[a-z0-9][a-z0-9._-]{0,39})?$' | sort || true
+}
+
+cmd_pinned_list() {
+  local root="${BACKUP_DIR%/}/calendar-stack/pinned"
+  local names=() paths=() n
+  mapfile -t names < <(pinned_dirs)
+  for n in "${names[@]}"; do [ -n "$n" ] && paths+=("$root/$n"); done
+  entries_report 0 "${paths[@]}"
+  log "${#paths[@]} snapshot conservati in $root (fuori dalla retention: si cancellano solo con pinned-purge)"
+}
+
+cmd_pinned_purge() {
+  [ "$OPT_YES" = 1 ] || [ "$OPT_DRY_RUN" = 1 ] || bad_usage "pinned-purge cancella gli snapshot conservati: aggiungi --yes (o --dry-run per l'elenco)"
+  local root="${BACKUP_DIR%/}/calendar-stack/pinned"
+  local names=() paths=() n cutoff=""
+  mapfile -t names < <(pinned_dirs)
+  [ -n "$OPT_OLDER_THAN" ] && cutoff="$(date -u -d "-${OPT_OLDER_THAN} days" +%Y%m%dT%H%M%SZ)"
+  for n in "${names[@]}"; do
+    [ -n "$n" ] || continue
+    # L'id del run (data UTC) ordina come testo.
+    if [ -n "$cutoff" ] && [[ ! "${n:0:16}" < "$cutoff" ]]; then continue; fi
+    paths+=("$root/$n")
+  done
+  local report
+  report="$(entries_report "$OPT_DRY_RUN" "${paths[@]}")"
+  if [ "$OPT_DRY_RUN" = 0 ]; then
+    for n in "${paths[@]}"; do
+      rm -rf -- "$n" || die "snapshot non cancellato: $n"
+      log "snapshot conservato cancellato: $(basename "$n")"
+    done
+  fi
+  printf '%s\n' "$report"
+  if [ "$OPT_DRY_RUN" = 1 ]; then
+    log "prova a vuoto: ${#paths[@]} snapshot da cancellare in $root"
+  else
+    log "${#paths[@]} snapshot conservati cancellati da $root; i run ordinari seguono la retention di backup-calendar-stack.sh"
+  fi
+}
+
+cmd_phase0_purge() {
+  [ "$OPT_YES" = 1 ] || [ "$OPT_DRY_RUN" = 1 ] || bad_usage "phase0-purge cancella i file della Fase 0: aggiungi --yes (o --dry-run per l'elenco)"
+  local dir="${BACKUP_DIR%/}/phase0"
+  local paths=() f
+  if [ -d "$dir" ]; then
+    while IFS= read -r f; do
+      [ -n "$f" ] && paths+=("$dir/$f")
+    done < <(find "$dir" -mindepth 1 -maxdepth 1 -type f -printf '%f\n' \
+      | grep -E '^(radicale_data-fase0-[0-9]{8}T[0-9]{6}Z\.(tar\.gz|tar\.gz\.sha256|manifest\.json)|archivio-fase0[A-Za-z0-9._-]*\.zip)$' | sort || true)
+  fi
+  local report
+  report="$(entries_report "$OPT_DRY_RUN" "${paths[@]}")"
+  if [ "$OPT_DRY_RUN" = 0 ]; then
+    for f in "${paths[@]}"; do
+      rm -f -- "$f" || die "file non cancellato: $f"
+    done
+  fi
+  printf '%s\n' "$report"
+  if [ "$OPT_DRY_RUN" = 1 ]; then
+    log "prova a vuoto: ${#paths[@]} file della Fase 0 da cancellare in $dir"
+  else
+    log "${#paths[@]} file della Fase 0 cancellati da $dir; il volume Docker della Fase 0 resta (decisione 7: phase0-detect per vederlo)"
+  fi
+}
+
 cmd_phase0_detect() {
   resolve_phase0
   python3 "$HELPER" phase0-scan "$P0_DIR" --source "$P0_SOURCE" --mounted-by "$P0_MOUNTED_BY" --human
@@ -567,4 +688,7 @@ case "$CMD" in
   phase0-detect) cmd_phase0_detect ;;
   phase0-backup) cmd_phase0_backup ;;
   phase0-export) cmd_phase0_export ;;
+  pinned-list) cmd_pinned_list ;;
+  pinned-purge) cmd_pinned_purge ;;
+  phase0-purge) cmd_phase0_purge ;;
 esac

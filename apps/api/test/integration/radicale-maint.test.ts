@@ -277,7 +277,7 @@ describe('radicale-maint.sh: sintassi, uso e limiti', { skip: SKIP ?? false }, (
   test('--help elenca i sottocomandi; sottocomando o opzione sbagliati → exit 2', () => {
     const help = run(MAINT, ['--help']);
     assert.equal(help.status, 0, output(help));
-    for (const cmd of ['status', 'du', 'verify', 'identity', 'snapshot', 'purge-cache', 'compact-cache', 'phase0-detect', 'phase0-backup', 'phase0-export']) {
+    for (const cmd of ['status', 'du', 'verify', 'identity', 'snapshot', 'purge-cache', 'compact-cache', 'pinned-list', 'pinned-purge', 'phase0-detect', 'phase0-backup', 'phase0-export', 'phase0-purge']) {
       assert.match(help.stdout, new RegExp(`\\b${cmd}\\b`), cmd);
     }
     assert.equal(run(MAINT, []).status, 2);
@@ -602,7 +602,7 @@ describe('radicale-maint.sh: volume della Fase 0 (decisione 7)', { skip: SKIP ??
     assert.deepEqual(inventory(volume), before);
   });
 
-  test('phase0-export: zip con i nomi di readTarIcsEntries(), riletto da readArchiveItems() come lo importerà il wizard', () => {
+  test('phase0-export: zip con i nomi di readTarIcsEntries(), riletto da readArchiveItems() come lo importerà il wizard', async () => {
     const volume = makePhase0Volume();
     const before = inventory(volume);
     const backups = freshDir('backups');
@@ -623,7 +623,7 @@ describe('radicale-maint.sh: volume della Fase 0 (decisione 7)', { skip: SKIP ??
     assert.deepEqual(fromZip, ['casa__compleanno.ics', 'lavoro__riunione.ics', 'lavoro__rotto.ics', 'iphone__casa__compleanno.ics']);
     assert.deepEqual([...fromZip].sort(), [...fromTar].sort());
 
-    const imported = readArchiveItems(zip, 'archivio-fase0.zip', new Date('2026-10-10T00:00:00Z'));
+    const imported = await readArchiveItems(zip, 'archivio-fase0.zip', new Date('2026-10-10T00:00:00Z'));
     assert.deepEqual(imported.items.map((i) => [i.source_name, i.uid]).sort(), [
       ['casa__compleanno.ics', 'compleanno@fase0.test'],
       ['iphone__casa__compleanno.ics', 'compleanno-iphone@fase0.test'],
@@ -687,6 +687,80 @@ async function readMigrationState() {
 async function setIdentity(volumeId: string | null, epoch: number): Promise<void> {
   await sql`UPDATE calendar_backend_state SET volume_id = ${volumeId}::uuid, epoch = ${epoch} WHERE id`;
 }
+
+describe('radicale-maint.sh: copie senza retention (snapshot conservati e file della Fase 0)', { skip: SKIP ?? false }, () => {
+  /** BACKUP_DIR con due snapshot conservati (uno vecchio con etichetta, uno di oggi), un parziale e i file della Fase 0. */
+  function makeBackupDir(): { dir: string; old: string; recent: string } {
+    const dir = freshDir('backups');
+    const pinned = join(dir, 'calendar-stack/pinned');
+    const old = '20200101T000000Z-pre-migrazione';
+    const recent = `${new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`;
+    for (const name of [old, recent]) {
+      mkdirSync(join(pinned, name, 'radicale'), { recursive: true });
+      writeFileSync(join(pinned, name, 'database.sql.gz'), `dump ${SECRET_SUMMARY}`);
+      writeFileSync(join(pinned, name, 'manifest.json'), '{}');
+    }
+    mkdirSync(join(pinned, '.partial-20990101T000000Z'), { recursive: true });
+    // Run ordinario (gestito dalla retention del backup): mai toccato.
+    mkdirSync(join(dir, 'calendar-stack/20260101T000000Z'), { recursive: true });
+    const phase0 = join(dir, 'phase0');
+    mkdirSync(phase0, { recursive: true });
+    for (const f of ['radicale_data-fase0-20260101T000000Z.tar.gz', 'radicale_data-fase0-20260101T000000Z.tar.gz.sha256',
+      'radicale_data-fase0-20260101T000000Z.manifest.json', 'archivio-fase0.zip']) writeFileSync(join(phase0, f), 'x');
+    writeFileSync(join(phase0, '.gitignore'), '*\n');
+    writeFileSync(join(phase0, 'note-operatore.txt'), 'non toccare');
+    return { dir, old, recent };
+  }
+
+  test('pinned-list: elenco in sola lettura con byte e data, parziali esclusi', () => {
+    const { dir, old, recent } = makeBackupDir();
+    const res = run(MAINT, ['pinned-list'], { BACKUP_DIR: dir });
+    assert.equal(res.status, 0, output(res));
+    const report = json(res);
+    assert.deepEqual(report.entries.map((e: Json) => e.name), [old, recent].sort());
+    assert.ok(report.bytes > 0);
+    assert.ok(!res.stdout.includes(SECRET_SUMMARY), 'nessun contenuto nel report');
+    assert.ok(existsSync(join(dir, 'calendar-stack/pinned', old)));
+  });
+
+  test('pinned-purge: senza --yes rifiuta; --dry-run elenca; --older-than e --yes cancellano solo gli snapshot conservati', () => {
+    const { dir, old, recent } = makeBackupDir();
+    const pinned = join(dir, 'calendar-stack/pinned');
+    assert.equal(run(MAINT, ['pinned-purge'], { BACKUP_DIR: dir }).status, 2, 'serve una conferma esplicita');
+    assert.equal(run(MAINT, ['pinned-purge', '--older-than', 'tanti', '--yes'], { BACKUP_DIR: dir }).status, 2);
+    assert.equal(run(MAINT, ['status', '--yes'], { BACKUP_DIR: dir }).status, 2);
+    const dry = run(MAINT, ['pinned-purge', '--dry-run'], { BACKUP_DIR: dir });
+    assert.equal(dry.status, 0, output(dry));
+    assert.equal(json(dry).count, 2);
+    assert.ok(existsSync(join(pinned, old)) && existsSync(join(pinned, recent)), 'la prova a vuoto non cancella');
+    const older = run(MAINT, ['pinned-purge', '--older-than', '30', '--yes'], { BACKUP_DIR: dir });
+    assert.equal(older.status, 0, output(older));
+    assert.deepEqual(json(older).entries.map((e: Json) => e.name), [old]);
+    assert.ok(!existsSync(join(pinned, old)));
+    assert.ok(existsSync(join(pinned, recent)));
+    const all = run(MAINT, ['pinned-purge', '--yes'], { BACKUP_DIR: dir });
+    assert.equal(all.status, 0, output(all));
+    assert.deepEqual(readdirSync(pinned).sort(), ['.partial-20990101T000000Z'], 'il parziale di uno snapshot in corso resta');
+    assert.ok(existsSync(join(dir, 'calendar-stack/20260101T000000Z')), 'i run ordinari restano alla retention del backup');
+  });
+
+  test('phase0-purge: solo i file di phase0-backup e phase0-export; .gitignore e altri file restano; mai il volume', () => {
+    const { dir } = makeBackupDir();
+    const phase0Volume = makePhase0Volume();
+    const before = inventory(phase0Volume);
+    assert.equal(run(MAINT, ['phase0-purge'], { BACKUP_DIR: dir }).status, 2);
+    const dry = run(MAINT, ['phase0-purge', '--dry-run'], { BACKUP_DIR: dir, PHASE0_VOLUME_DIR: phase0Volume });
+    assert.equal(dry.status, 0, output(dry));
+    assert.equal(json(dry).count, 4);
+    const res = run(MAINT, ['phase0-purge', '--yes'], { BACKUP_DIR: dir, PHASE0_VOLUME_DIR: phase0Volume });
+    assert.equal(res.status, 0, output(res));
+    assert.deepEqual(readdirSync(join(dir, 'phase0')).sort(), ['.gitignore', 'note-operatore.txt']);
+    assert.deepEqual(inventory(phase0Volume), before, 'il volume della Fase 0 non si tocca (decisione 7)');
+    const empty = run(MAINT, ['phase0-purge', '--yes'], { BACKUP_DIR: freshDir('vuota') });
+    assert.equal(empty.status, 0, output(empty));
+    assert.equal(json(empty).count, 0);
+  });
+});
 
 describe('radicale-maint.sh identity e backup coordinato registrato', { skip: SKIP_DB ?? false }, () => {
   test('identity: da inizializzare, marker senza stato, ok, mismatch', async () => {

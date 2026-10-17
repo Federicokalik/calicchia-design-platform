@@ -113,7 +113,7 @@ import {
   X_CALDES,
   zonedToUtc,
 } from '@calicchia/calendar-core';
-import { buildBookingProjectionIcs, PROJECTED_BOOKING_STATUSES, RETAINED_PROJECTION_SUMMARY } from '../booking-projection';
+import { bookingProjectionContentFor, buildBookingProjectionIcs, PROJECTED_BOOKING_STATUSES, RETAINED_PROJECTION_SUMMARY } from '../booking-projection';
 import { expandRRule, validateRRule } from '../legacy/rrule-legacy';
 import { resolveLocationForBooking } from '../meeting-url';
 import { isValidObjectName } from '../radicale/client';
@@ -209,6 +209,9 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 
 /** source_id delle festività di sistema. */
 const HOLIDAY_SOURCE_ID_RE = /^it-holiday-(\d{4}-\d{2}-\d{2})$/;
+
+/** Istante di contenuto che non fa mai scattare la scadenza dei 24 mesi (ricostruzione di uno snapshot non minimizzato). */
+const RETENTION_NEUTRAL_NOW = new Date(0);
 
 /** Massimo di elementi negli elenchi dei dettagli delle anomalie. */
 const DETAIL_LIST_MAX = 20;
@@ -678,8 +681,42 @@ interface RuleAnalysis {
   adminPattern: { from: string; to: string } | null;
   /** True se la correzione di UNTIL è stata applicata. */
   fixed: boolean;
+  /**
+   * DTSTART fuori dalla regola (semantica legacy: la prima occorrenza di
+   * rrule.js dal DTSTART in avanti non è il DTSTART): istante originale e
+   * prima occorrenza legacy, solo con il riallineamento richiesto.
+   */
+  dtstart: { from: string; to: string } | null;
   /** Codici di validazione che hanno deciso lo stato (anomalie). */
   codes: string[];
+}
+
+/** Finestre di ricerca della prima occorrenza legacy (giorni dal DTSTART): la regola annuale più rada (29 febbraio) sta entro 8 anni. */
+const LEGACY_FIRST_SEARCH_DAYS: readonly number[] = [400, 11 * 366];
+
+/**
+ * Prima occorrenza della serie secondo il legacy (rrule.js in ora flottante
+ * di Roma, come listOccurrences): rrule.js non conta il DTSTART che non
+ * soddisfa la regola, né lo conta in COUNT. Le EXDATE non contano (escludono
+ * un'occorrenza, non spostano l'inizio della serie). null se il legacy non ha
+ * nessuna occorrenza (UNTIL prima del primo giorno valido).
+ */
+function legacyFirstOccurrence(master: LegacyEventRowSnapshot, rule: string): string | null {
+  const start = msOf(master.start_time);
+  // Un giorno prima: rrule.js non produce mai istanze prima del DTSTART, e il DTSTART troncato al secondo non resta fuori.
+  const fromIso = new Date(start - 86_400_000).toISOString();
+  for (const days of LEGACY_FIRST_SEARCH_DAYS) {
+    const found = expandRRule({ rrule: rule, masterStartIso: master.start_time, fromIso, toIso: new Date(start + days * 86_400_000).toISOString(), limit: 1 });
+    if (found.length) return found[0];
+  }
+  return null;
+}
+
+/** Riga del master con DTSTART spostato a `startIso` e la stessa durata. */
+function shiftedMaster(master: LegacyEventRowSnapshot, startIso: string): LegacyEventRowSnapshot {
+  const duration = msOf(master.end_time) - msOf(master.start_time);
+  const start = msOf(startIso);
+  return { ...master, start_time: new Date(start).toISOString(), end_time: new Date(start + duration).toISOString() };
 }
 
 function legacyInput(row: LegacyEventRowSnapshot, overrides: Partial<Parameters<typeof buildEventFromLegacy>[0]> = {}): Parameters<typeof buildEventFromLegacy>[0] {
@@ -759,14 +796,27 @@ function replaceUntil(rule: string, until: string): string {
   return rule.replace(UNTIL_UTC_MIDNIGHT_RE, (_all, sep: string) => `${sep}UNTIL=${until}`);
 }
 
-function analyzeRule(cal: CalendarSnapshot, master: LegacyEventRowSnapshot, fixUntil: boolean, now: Date): RuleAnalysis {
+function analyzeRule(cal: CalendarSnapshot, master: LegacyEventRowSnapshot, fixUntil: boolean, realignDtstart: boolean, now: Date): RuleAnalysis {
   const raw = master.rrule ? master.rrule.trim().replace(/^RRULE:/i, '') : '';
-  if (!raw) return { status: 'none', raw: null, text: null, adminPattern: null, fixed: false, codes: [] };
+  if (!raw) return { status: 'none', raw: null, text: null, adminPattern: null, fixed: false, dtstart: null, codes: [] };
   const check = checkRule(cal, master, raw, now);
-  if (check.status !== 'ok') return { status: check.status, raw, text: raw, adminPattern: null, fixed: false, codes: check.codes };
+  if (check.status !== 'ok') return { status: check.status, raw, text: raw, adminPattern: null, fixed: false, dtstart: null, codes: check.codes };
   const adminPattern = untilAdminPattern(cal, master, raw, now);
   const fixed = fixUntil && adminPattern !== null;
-  return { status: 'ok', raw, text: fixed && adminPattern ? replaceUntil(raw, adminPattern.to) : raw, adminPattern, fixed, codes: [] };
+  const text = fixed && adminPattern ? replaceUntil(raw, adminPattern.to) : raw;
+  let dtstart: RuleAnalysis['dtstart'] = null;
+  // BYDAY misto (MIXED_BYDAY): le due semantiche divergono per costruzione (unione RFC contro intersezione
+  // del legacy, anche vuota) e il design tiene l'unione dei device con le differenze attese: niente riallineamento.
+  if (realignDtstart && !isMixedByday(text)) {
+    // Semantica legacy (rrule.js, e dateutil di Radicale): il DTSTART fuori dalla regola non è un'occorrenza.
+    // RFC 5545 (calendar-core, device, feed) lo conterebbe: si parte dalla prima occorrenza legacy.
+    const first = legacyFirstOccurrence(master, text);
+    if (first === null) {
+      return { status: 'until_before_dtstart', raw, text, adminPattern, fixed, dtstart: null, codes: ['NO_LEGACY_OCCURRENCE'] };
+    }
+    if (secondKey(msOf(first)) !== secondKey(msOf(master.start_time))) dtstart = { from: master.start_time, to: new Date(msOf(first)).toISOString() };
+  }
+  return { status: 'ok', raw, text, adminPattern, fixed, dtstart, codes: [] };
 }
 
 type DstSkipReason = 'NON_ROME_CALENDAR' | 'NO_MATCHING_OCCURRENCE' | 'OVERRIDE_CONFLICT';
@@ -888,10 +938,14 @@ function planDst(
 interface EventFlags {
   fixUntil: boolean;
   realignDst: boolean;
+  /** DTSTART fuori dalla regola spostato sulla prima occorrenza legacy (sempre nel serializer, dallo snapshot per la ricostruzione). */
+  realignDtstart: boolean;
 }
 
 interface EffectiveEvent {
   rule: RuleAnalysis;
+  /** Riga del master con il DTSTART effettivo (spostato se rule.dtstart; altrimenti quella legacy). */
+  master: LegacyEventRowSnapshot;
   dst: DstResult | null;
   /** EXDATE effettive del master (exdates riallineate più override cancellati), solo con una regola valida. */
   exdates: string[];
@@ -907,12 +961,15 @@ function effectiveEvent(
   flags: EventFlags,
   now: Date,
 ): EffectiveEvent {
-  const rule = analyzeRule(cal, master, flags.fixUntil, now);
+  const rule = analyzeRule(cal, master, flags.fixUntil, flags.realignDtstart, now);
   const cancelled = overrides.filter((o) => o.status === 'cancelled' && o.recurrence_id);
   const modified = overrides.filter((o) => o.status !== 'cancelled' && o.recurrence_id);
-  if (rule.status !== 'ok' || !rule.text) return { rule, dst: null, exdates: [], overrides: [], cancelled };
+  if (rule.status !== 'ok' || !rule.text) return { rule, master, dst: null, exdates: [], overrides: [], cancelled };
   const masterExdates = [...master.exdates];
-  const trial = trialMaster(cal, master, rule.text, now);
+  // Griglia delle occorrenze: quella del DTSTART effettivo (la stessa del legacy). La firma delle
+  // eccezioni DST resta quella del DTSTART salvato, con cui il codice precedente al fix le scriveva.
+  const effMaster = rule.dtstart ? shiftedMaster(master, rule.dtstart.to) : master;
+  const trial = trialMaster(cal, effMaster, rule.text, now);
   const dst = planDst(cal, master, trial, [...modified, ...cancelled], masterExdates);
   const ridOf = (row: LegacyEventRowSnapshot): string => (flags.realignDst ? dst.ridMap.get(row.id) : undefined) ?? (row.recurrence_id as string);
   const exdates = uniqueBySecond([
@@ -921,6 +978,7 @@ function effectiveEvent(
   ]);
   return {
     rule,
+    master: effMaster,
     dst,
     exdates,
     overrides: modified.map((row) => ({ row, rid: ridOf(row) })),
@@ -931,11 +989,11 @@ function effectiveEvent(
 /** Costruisce l'oggetto di un evento dal modello effettivo (master più override). */
 function assembleEvent(
   cal: CalendarSnapshot,
-  master: LegacyEventRowSnapshot,
   eff: EffectiveEvent,
   now: Date,
   stamps?: StampLookup,
 ): CalendarObject {
+  const master = eff.master;
   const ok = eff.rule.status === 'ok';
   const ms = stamps?.(master.id);
   const masterComp = buildEventFromLegacy(
@@ -967,9 +1025,13 @@ function finishObject(object: CalendarObject, opts: { prodid?: 'preserve' } = {}
 }
 
 function buildEventObject(snapshot: LegacyEventSnapshot, now: Date, stamps?: StampLookup): { built: BuiltObject; eff: EffectiveEvent } {
-  const flags = { fixUntil: snapshot.options.fix_until_admin_pattern === true, realignDst: snapshot.options.realign_dst_exceptions === true };
+  const flags: EventFlags = {
+    fixUntil: snapshot.options.fix_until_admin_pattern === true,
+    realignDst: snapshot.options.realign_dst_exceptions === true,
+    realignDtstart: snapshot.options.realign_dtstart === true,
+  };
   const eff = effectiveEvent(snapshot.calendar, snapshot.master, snapshot.overrides, flags, now);
-  return { built: finishObject(assembleEvent(snapshot.calendar, snapshot.master, eff, now, stamps)), eff };
+  return { built: finishObject(assembleEvent(snapshot.calendar, eff, now, stamps)), eff };
 }
 
 function buildDetachedObject(snapshot: LegacyDetachedSnapshot, now: Date, stamps?: StampLookup): BuiltObject {
@@ -992,7 +1054,7 @@ function buildDetachedObject(snapshot: LegacyDetachedSnapshot, now: Date, stamps
 function buildBookingObject(snapshot: LegacyBookingSnapshot, now: Date): BuiltObject {
   const b = snapshot.booking;
   if (!b) throw new TypeError(`proiezione senza prenotazione nello snapshot (${snapshot.legacy_event_id ?? '-'})`);
-  const raw = buildBookingProjectionIcs({
+  const input = {
     booking: {
       uid: b.uid,
       attendee_name: b.attendee_name,
@@ -1005,17 +1067,28 @@ function buildBookingObject(snapshot: LegacyBookingSnapshot, now: Date): BuiltOb
     eventTitle: b.title || RETAINED_PROJECTION_SUMMARY,
     meetingUrl: b.meeting_url,
     now,
-  });
+  };
+  const raw = buildBookingProjectionIcs(input);
   const parsed = parseCalendarObject(raw);
   if (!parsed.ok || !parsed.value.master) throw new TypeError('proiezione non rileggibile');
   const obj = parsed.value;
   const master = obj.master as IcsComponent;
-  if (snapshot.minimized) {
-    const content = bookingProjectionContent(null, { now });
+  // La minimizzazione la decide SOLO lo snapshot (decisione 3: serializeLegacy la calcola con lo stesso
+  // `now`), mai il tempo trascorso: uno snapshot precedente alla soglia dei 24 mesi, ricostruito dopo
+  // (base della patch per campo dello shadow e dell'update delle righe adottate), deve restare con nome e
+  // telefono, altrimenti il diff verso lo snapshot minimizzato risulterebbe vuoto e la risorsa non si
+  // riscriverebbe mai. `now` resta per DTSTAMP e LAST-MODIFIED.
+  const content = snapshot.minimized
+    ? bookingProjectionContent(null, { now })
+    : isBookingProjectionExpired(b.end_time, now)
+      ? bookingProjectionContentFor({ ...input, now: RETENTION_NEUTRAL_NOW })
+      : null;
+  if (content) {
     setTextValue(master, 'SUMMARY', content.summary);
-    setTextValue(master, 'DESCRIPTION', null);
-    setTextValue(master, 'LOCATION', null);
+    setTextValue(master, 'DESCRIPTION', content.description);
+    setTextValue(master, 'LOCATION', content.location);
     removeProperties(master, 'URL');
+    if (content.url) master.properties.push(createProperty('URL', content.url));
   }
   if (snapshot.legacy_event_id) setTextValue(master, X_CALDES.LEGACY_ID, snapshot.legacy_event_id);
   return finishObject(obj, { prodid: 'preserve' });
@@ -1038,6 +1111,82 @@ export function buildObjectFromSnapshot(snapshot: LegacySnapshot, ctx: { now: Da
     default:
       throw new TypeError('gli item dell\'archivio della Fase 0 non hanno una sorgente legacy da ricostruire');
   }
+}
+
+// ─── Ambito dei motivi attesi (verifica) ───────────────────────────────
+
+/**
+ * Istanti (secondi UTC dell'inizio) e giorni (YYYY-MM-DD nel fuso della serie)
+ * che un motivo atteso spiega. Un motivo senza ambito vale per tutto
+ * l'oggetto.
+ */
+export interface ReasonScope {
+  seconds: ReadonlySet<number>;
+  dates: ReadonlySet<string>;
+}
+
+function scopeOf(seconds: Iterable<number>, dates: Iterable<string> = []): ReasonScope {
+  return { seconds: new Set(seconds), dates: new Set(dates) };
+}
+
+/**
+ * Ambito dei motivi "di occorrenza" di un oggetto voluto, ricostruito dallo
+ * snapshot (stessa logica del serializer, pura): la verifica rende gialla una
+ * differenza solo se il motivo spiega proprio quell'istanza, non ogni
+ * differenza dell'oggetto.
+ *  - DST_REALIGNED: istanti prima e dopo il riallineamento delle eccezioni;
+ *  - UNTIL_REALIGNED: il giorno "fino al" (le sue occorrenze, escluse dal legacy);
+ *  - OVERRIDE_UID_MASTER: istanza originale e nuova di ogni override modificato;
+ *  - CANCELLED_OVERRIDE_SUPPRESSED: istanze degli override cancellati (salvata e riallineata);
+ *  - DTSTART_REALIGNED: il DTSTART salvato e, con COUNT, l'ultima occorrenza del legacy
+ *    (il feed legacy espanso secondo RFC 5545 conta il DTSTART e ne perde una alla fine).
+ * Gli altri motivi (o un errore di ricostruzione) non hanno ambito.
+ */
+export function expectedReasonScopes(snapshot: LegacySnapshot, now: Date): Map<ExpectedDiffReason, ReasonScope> {
+  const out = new Map<ExpectedDiffReason, ReasonScope>();
+  if (snapshot.kind !== 'event') return out;
+  let eff: EffectiveEvent;
+  try {
+    eff = effectiveEvent(snapshot.calendar, snapshot.master, snapshot.overrides, {
+      fixUntil: snapshot.options.fix_until_admin_pattern === true,
+      realignDst: snapshot.options.realign_dst_exceptions === true,
+      realignDtstart: snapshot.options.realign_dtstart === true,
+    }, now);
+  } catch {
+    return out;
+  }
+  const sec = (iso: string | null | undefined): number[] => {
+    const ms = iso ? Date.parse(iso) : NaN;
+    return Number.isFinite(ms) ? [secondKey(ms)] : [];
+  };
+  if (eff.dst && snapshot.options.realign_dst_exceptions) {
+    out.set('DST_REALIGNED', scopeOf(eff.dst.changes.flatMap((c) => [...sec(c.from), ...sec(c.to)])));
+  }
+  if (eff.rule.fixed && eff.rule.adminPattern) {
+    const m = /^(\d{4})(\d{2})(\d{2})/.exec(eff.rule.adminPattern.from);
+    if (m) out.set('UNTIL_REALIGNED', scopeOf([], [`${m[1]}-${m[2]}-${m[3]}`]));
+  }
+  const modified = eff.overrides;
+  if (modified.length) {
+    out.set('OVERRIDE_UID_MASTER', scopeOf(modified.flatMap(({ row, rid }) => [...sec(row.recurrence_id), ...sec(rid), ...sec(row.start_time)])));
+  }
+  const cancelled = snapshot.overrides.filter((o) => o.status === 'cancelled');
+  if (cancelled.length) {
+    const ridOf = (row: LegacyEventRowSnapshot): string | undefined => eff.dst?.ridMap.get(row.id);
+    out.set('CANCELLED_OVERRIDE_SUPPRESSED', scopeOf(cancelled.flatMap((row) => [...sec(row.recurrence_id), ...sec(ridOf(row))])));
+  }
+  if (eff.rule.dtstart && eff.rule.text) {
+    const seconds = [...sec(eff.rule.dtstart.from)];
+    const count = /(^|;)COUNT=(\d+)(;|$)/i.exec(eff.rule.text);
+    if (count) {
+      const n = Number(count[2]);
+      const start = msOf(snapshot.master.start_time);
+      const occ = expandRRule({ rrule: eff.rule.text, masterStartIso: snapshot.master.start_time, fromIso: new Date(start - 86_400_000).toISOString(), toIso: new Date(start + LEGACY_FIRST_SEARCH_DAYS[LEGACY_FIRST_SEARCH_DAYS.length - 1] * 86_400_000).toISOString(), limit: n });
+      if (occ.length === n) seconds.push(...sec(occ[n - 1]));
+    }
+    out.set('DTSTART_REALIGNED', scopeOf(seconds));
+  }
+  return out;
 }
 
 // ─── Serializer ───────────────────────────────
@@ -1258,6 +1407,26 @@ function mixedBydayExpansions(cal: CalendarSnapshot, master: LegacyEventRowSnaps
   return { legacy, core };
 }
 
+/**
+ * Dettaglio di DTSTART_NOT_IN_RULE: le prime occorrenze del legacy (quelle
+ * dell'oggetto migrato) e quelle che RFC 5545 ricava dal DTSTART salvato (come
+ * le vedono oggi gli iscritti al feed e come le vedrebbero i device senza il
+ * riallineamento).
+ */
+function dtstartExpansions(cal: CalendarSnapshot, master: LegacyEventRowSnapshot, rule: string, now: Date): { legacy: string[]; rfc_from_saved_dtstart: string[] } {
+  const from = msOf(master.start_time);
+  const to = from + 400 * 86_400_000;
+  const legacy = expandRRule({ rrule: rule, masterStartIso: master.start_time, fromIso: new Date(from - 86_400_000).toISOString(), toIso: new Date(to).toISOString(), limit: 5 });
+  let rfc: string[] = [];
+  try {
+    const exp = expandObject(trialMaster(cal, master, rule, now), { from, to, tz: cal.timezone, maxOccurrences: 5, computeRangeEnd: false });
+    rfc = exp.occurrences.slice(0, 5).map((o) => new Date(o.startUtc).toISOString());
+  } catch {
+    rfc = [];
+  }
+  return { legacy, rfc_from_saved_dtstart: rfc };
+}
+
 function serializeEventGroup(
   sctx: SerializerContext,
   sourceCal: MigrationCalendar,
@@ -1335,7 +1504,7 @@ function serializeEventGroup(
   const uniqueModified = modifiedRows.filter((o) => !duplicates.includes(o));
 
   // Modello effettivo con tutte le opzioni globali, poi classificazione degli orfani sull'oggetto di prova.
-  const flags = { fixUntil: options.fix_until_admin_pattern, realignDst: options.realign_dst_exceptions };
+  const flags: EventFlags = { fixUntil: options.fix_until_admin_pattern, realignDst: options.realign_dst_exceptions, realignDtstart: true };
   const candidates = [...uniqueModified, ...cancelledRows].map(rowSnapshot).sort(byRecurrenceThenId);
   let eff: EffectiveEvent;
   try {
@@ -1346,7 +1515,13 @@ function serializeEventGroup(
   }
 
   if (eff.rule.status === 'until_before_dtstart') {
-    acc.anomaly('UNTIL_BEFORE_DTSTART', targetCal.id, key, { event_id: master.id, summary: master.summary, rrule: eff.rule.raw });
+    acc.anomaly('UNTIL_BEFORE_DTSTART', targetCal.id, key, {
+      event_id: master.id,
+      summary: master.summary,
+      rrule: eff.rule.raw,
+      // NO_LEGACY_OCCURRENCE: UNTIL prima della prima occorrenza della regola (DTSTART fuori dalla regola).
+      ...(eff.rule.codes.includes('NO_LEGACY_OCCURRENCE') ? { reason: 'no_legacy_occurrence' } : {}),
+    });
     acc.skip({ legacy_key: key, kind: 'event', calendar_id: targetCal.id, collection_name: cal.collection_name, code: 'UNTIL_BEFORE_DTSTART', legacy_event_id: master.id, summary: master.summary });
     return;
   }
@@ -1370,7 +1545,7 @@ function serializeEventGroup(
   const orphanReasons = new Map<string, string>();
   for (const d of duplicates) orphanReasons.set(d.id, 'duplicate_recurrence_id');
   if (eff.rule.status === 'ok') {
-    const trial = assembleEvent(cal, masterSnap, eff, now);
+    const trial = assembleEvent(cal, eff, now);
     const check = findOrphanOverrides(trial, { tz: cal.timezone });
     for (const idx of check.orphans) {
       const row = eff.overrides[idx]?.row;
@@ -1406,6 +1581,18 @@ function serializeEventGroup(
       anomalies.add('NON_ROME_SERIES');
       acc.anomaly('NON_ROME_SERIES', targetCal.id, key, { event_id: master.id, summary: master.summary, calendar_timezone: cal.timezone });
     }
+    if (eff.rule.dtstart) {
+      anomalies.add('DTSTART_NOT_IN_RULE');
+      expected.add('DTSTART_REALIGNED');
+      acc.anomaly('DTSTART_NOT_IN_RULE', targetCal.id, key, {
+        event_id: master.id,
+        summary: master.summary,
+        rrule: eff.rule.text,
+        dtstart_from: eff.rule.dtstart.from,
+        dtstart_to: eff.rule.dtstart.to,
+        ...dtstartExpansions(cal, masterSnap, eff.rule.text, now),
+      });
+    }
     if (isMixedByday(eff.rule.text)) {
       anomalies.add('MIXED_BYDAY');
       expected.add('MIXED_BYDAY');
@@ -1440,6 +1627,7 @@ function serializeEventGroup(
 
   const snapOptions: SnapshotOptions = {};
   if (eff.rule.fixed) snapOptions.fix_until_admin_pattern = true;
+  if (eff.rule.dtstart) snapOptions.realign_dtstart = true;
   if (dstRelevant.length > 0) snapOptions.realign_dst_exceptions = true;
   if (movedTo) snapOptions.moved_to_calendar_id = movedTo;
   const snapshot: LegacyEventSnapshot = {
@@ -1930,6 +2118,12 @@ export function patchFromLegacyDiff(
 ): FieldPatchResult {
   if (previous.kind !== current.kind || previous.kind === 'archive' || current.kind === 'archive') {
     throw new TypeError(`patch per campo non applicabile (${previous.kind} → ${current.kind})`);
+  }
+  if (previous.kind === 'booking' && current.kind === 'booking' && previous.minimized !== current.minimized) {
+    // Cambio di minimizzazione (24 mesi, anonimizzazione): i campi della decisione 3 si riscrivono
+    // comunque, con la base presa dall'oggetto corrente (come patchTowardSnapshot), anche se la
+    // ricostruzione dello snapshot precedente non li distinguesse.
+    return patchAgainstBase(target, target, safeTz(ctx.tz), current, ctx);
   }
   const prev = buildObjectFromSnapshot(previous, { now: ctx.now }).object;
   return patchAgainstBase(target, prev, previous.calendar.timezone, current, ctx);

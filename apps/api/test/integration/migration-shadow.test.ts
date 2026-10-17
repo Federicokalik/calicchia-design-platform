@@ -270,6 +270,42 @@ describe('shadow mirror, proiezioni e GDPR contro Radicale reale', { skip: radic
     assert.equal(ledger.written_etag, after.etag);
   });
 
+  test('erasure con lo shadow spento di un evento spostato di calendario: create redatta nella nuova collezione, poi delete nella vecchia', async () => {
+    const email = fx.email('cliente-spostato');
+    await setShadow(true);
+    await sql`DELETE FROM cal_jobs WHERE kind = 'shadow_mirror'`;
+    const moved = await createEvent({
+      calendar_id: shape.lavoro.id, summary: fx.name('Evento da spostare'), description: `Contatto: ${email}`,
+      start_time: rome('2026-11-20', '09:00'), end_time: rome('2026-11-20', '10:00'), all_day: false, source: 'admin', status: 'confirmed',
+    });
+    fx.track('eventIds', moved.id);
+    const key = `event:${moved.id}`;
+    await runShadowJobs();
+    const before = await liveRow(key);
+    assert.equal(before.collection_name, 'lavoro');
+    await svc.get(pathOf('lavoro', before.href));
+
+    // Spostamento in c con lo shadow spento (nessun job), poi la cancellazione dei dati.
+    await setShadow(false);
+    await sql`UPDATE calendar_events SET calendar_id = ${shape.c.id} WHERE id = ${moved.id}`;
+    await sql`DELETE FROM cal_jobs WHERE kind = 'shadow_mirror'`;
+    const report = await calendarErase(email, { actor: 'admin:test' });
+    assert.ok(report.jobs_enqueued >= 1);
+    await runShadowJobs();
+    const jobs = await jobsFor(key);
+    const job = jobs[jobs.length - 1];
+    assert.equal(job.status, 'done', job.last_error ?? '');
+    const items = (job.result?.items ?? []) as Array<{ action: string; outcome: string; reason?: string }>;
+    assert.deepEqual(items.map((i) => `${i.action}:${i.outcome}`), ['create:done', 'delete:done'], JSON.stringify(items));
+
+    const after = await liveRow(key);
+    assert.equal(after.collection_name, 'c', 'l\'evento resta sui device, nella nuova collezione');
+    const obj = await svc.get(pathOf('c', after.href));
+    assert.ok(!obj.body.toLowerCase().includes(email), 'email tolta');
+    assert.match(obj.body, /\[dato rimosso\]/);
+    await assert.rejects(svc.get(pathOf('lavoro', before.href)), 'nessuna copia nella vecchia collezione');
+  });
+
   test('proiezione oltre i 24 mesi e prenotazione anonimizzata con lo store Radicale: riscritta con If-Match, VALARM preservato', async () => {
     overrideCalendarStore('radicale');
     try {

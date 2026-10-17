@@ -353,12 +353,37 @@ export function RunPanel({ run, compact }: { run: MigrationRunView; compact?: bo
           <span className="font-mono">{run.error.code}</span> — {run.error.message}
         </p>
       )}
+      {!active && run.kind === 'archive' && run.summary && <ArchiveRunCounts summary={run.summary} />}
       {!active && !compact && (
         <p className="text-[11px] text-muted-foreground">
           Concluso {formatDateTime(run.finished_at)} · richiesto da {run.requested_by}
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * Conteggi di un run dell'archivio della Fase 0 (anche nel pannello compatto):
+ * senza, un archivio con tutte le voci rifiutate sembrava riuscito.
+ */
+export function ArchiveRunCounts({ summary }: { summary: Record<string, unknown> }) {
+  const n = (key: string): number => (typeof summary[key] === 'number' ? (summary[key] as number) : 0);
+  const present = n('imported') + n('updated') + n('unchanged');
+  const parts = [
+    `${n('imported')} importati`,
+    n('updated') > 0 ? `${n('updated')} aggiornati` : null,
+    `${n('unchanged')} già presenti`,
+    `${n('invalid')} non validi`,
+    n('duplicates') > 0 ? `${n('duplicates')} duplicati` : null,
+    n('conflicts') > 0 ? `${n('conflicts')} conflitti` : null,
+    n('failed') > 0 ? `${n('failed')} non riusciti` : null,
+  ].filter(Boolean);
+  return (
+    <p className={cn('text-[11px]', present === 0 || n('conflicts') > 0 || n('failed') > 0 ? 'text-amber-700' : 'text-muted-foreground')}>
+      {parts.join(' · ')}
+      {present === 0 && ' — nessun item nell\'archivio'}
+    </p>
   );
 }
 

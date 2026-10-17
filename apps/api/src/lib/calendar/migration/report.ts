@@ -229,14 +229,23 @@ export async function calendarVerdicts(db: Db, verifyRunId: string): Promise<Cal
 /**
  * Copia sulle differenze attese del run le accettazioni di differenze con la
  * stessa firma (detail.signature) nei run di verifica precedenti: stesso
- * accepted_by, accepted_at = now(). Restituisce quante righe ha accettato.
+ * accepted_by, accepted_at = now() e, nel dettaglio, `accepted_from` con la
+ * riga, il run e l'istante dell'accettazione esplicita d'origine (una catena
+ * di riporti punta sempre all'accettazione fatta dalla persona). Così il
+ * report distingue un'accettazione riportata dal giro notturno da una
+ * esplicita. Restituisce quante righe ha accettato.
  */
 export async function carryOverAcceptances(db: Db, verifyRunId: string): Promise<number> {
   const rows = await db<Array<{ id: string }>>`
     UPDATE cal_migration_items cur
-    SET accepted_at = now(), accepted_by = prev.accepted_by
+    SET accepted_at = now(), accepted_by = prev.accepted_by,
+        detail = cur.detail || jsonb_build_object('accepted_from', COALESCE(
+          prev.detail->'accepted_from',
+          jsonb_build_object('item_id', prev.id::text, 'run_id', prev.run_id::text, 'accepted_at', to_jsonb(prev.accepted_at))
+        ))
     FROM (
-      SELECT DISTINCT ON (i.detail->>'signature') i.detail->>'signature' AS signature, i.accepted_by
+      SELECT DISTINCT ON (i.detail->>'signature') i.detail->>'signature' AS signature, i.accepted_by,
+             i.id, i.run_id, i.accepted_at, i.detail
       FROM cal_migration_items i
       JOIN cal_migration_runs r ON r.id = i.run_id
       WHERE r.kind = 'verify' AND i.run_id <> ${verifyRunId}::uuid
@@ -434,6 +443,8 @@ function readableSection(run: RunRow, items: readonly MigrationItemView[], verdi
     message: typeof i.detail.message === 'string' ? i.detail.message : typeof i.detail.error === 'string' ? i.detail.error : null,
     reason: typeof i.detail.reason === 'string' ? i.detail.reason : null,
     accepted: i.accepted_at !== null,
+    // Accettazione riportata per firma da un run precedente (§8.4): riga, run e istante dell'accettazione esplicita.
+    accepted_from: i.detail.accepted_from && typeof i.detail.accepted_from === 'object' ? i.detail.accepted_from : null,
   }));
   const calendars = [...byCalendar.entries()].map(([calendarId, list]) => {
     const countBy = (f: (i: MigrationItemView) => string | null) => {
@@ -466,6 +477,9 @@ function readableSection(run: RunRow, items: readonly MigrationItemView[], verdi
       entry.by_level = countBy((i) => i.level);
       entry.unexpected = sample(list.filter((i) => i.item_type === 'diff' && i.expected === false));
       entry.to_accept = sample(list.filter((i) => i.item_type === 'diff' && i.expected === true && i.accepted_at === null && i.detail.variant !== 'with_subscriptions'));
+      const accepted = list.filter((i) => i.item_type === 'diff' && i.accepted_at !== null);
+      entry.accepted_carried = accepted.filter((i) => Boolean(i.detail.accepted_from)).length;
+      entry.accepted_explicit = accepted.length - (entry.accepted_carried as number);
     } else {
       entry.by_code = countBy((i) => i.code);
       entry.attention = sample(list.filter((i) => i.severity !== 'info'));

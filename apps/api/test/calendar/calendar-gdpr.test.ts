@@ -34,9 +34,12 @@ import {
   calendarErase,
   enqueueExpiredProjectionRewrites,
   erasureEmailPattern,
+  erasureEmailRegex,
   normalizeErasureEmail,
   purgeMigrationArtifacts,
+  redactErasureJson,
 } from '../../src/lib/calendar/gdpr';
+import { latestVerifyVerdicts } from '../../src/lib/calendar/migration/report';
 import { getPgLegacyStore } from '../../src/lib/calendar/store';
 import type { Booking } from '../../src/lib/calendar/types';
 import { onBeforeDatabaseClose, resetCalendarBaseline, sql, useTestDatabase } from '../helpers/db';
@@ -92,7 +95,7 @@ describe('normalizzazione dell\'email', () => {
     for (const bad of ['', '   ', 'a@b', '@example.com', 'mario', 'mario rossi@example.com', null, 42]) {
       assert.equal(normalizeErasureEmail(bad), null, String(bad));
     }
-    assert.equal(erasureEmailPattern('a.b+c@x.it'), 'a\\.b\\+c@x\\.it');
+    assert.ok(erasureEmailPattern('a.b+c@x.it').includes('a\\.b\\+c@x\\.it'));
   });
 });
 
@@ -172,9 +175,9 @@ describe('calendarErase in mode postgres', () => {
     assert.equal(report.events_redacted, 1);
     assert.equal(report.reminders_redacted, 1);
     assert.equal(report.ledger_redacted, 2);
-    assert.equal(report.migration_items_deleted, 2);
+    assert.equal(report.migration_items_redacted, 1, 'solo la riga che contiene l\'email: mai cancellazioni per chiave');
     assert.equal(report.versions_purged, 2);
-    assert.ok(report.jobs_deleted >= 2);
+    assert.ok(report.jobs_deleted >= 1);
     assert.equal(report.jobs_enqueued, 3, 'booking:<uid> per le due prenotazioni ed event:<master> per l\'evento');
     assert.ok(report.audit_logs_redacted >= 3);
     assert.ok(report.manual_followup.some((m) => m.includes('radicale-maint.sh purge-cache')));
@@ -233,14 +236,16 @@ describe('calendarErase in mode postgres', () => {
       assert.equal(row.legacy_hash, null);
     }
     assert.equal(ledger.find((l) => l.legacy_key === `event:${plain.id}`)?.legacy_hash, HASH);
-    const items = await sql<Array<{ seq: number }>>`SELECT seq FROM cal_migration_items WHERE run_id = ${run.id}::uuid ORDER BY seq`;
-    assert.deepEqual(items.map((i) => i.seq), [2]);
+    const items = await sql<Array<{ seq: number; detail: Record<string, unknown> }>>`SELECT seq, detail FROM cal_migration_items WHERE run_id = ${run.id}::uuid ORDER BY seq`;
+    assert.deepEqual(items.map((i) => i.seq), [0, 1, 2], 'le righe dei run restano');
+    assert.deepEqual(items[1].detail, { note: 'riga sbagliata con [dato rimosso]' });
 
     // 6-7. Versioni e job.
     const versions = await sql<Array<{ object_id: string }>>`SELECT object_id::text AS object_id FROM cal_object_versions WHERE object_id = ANY(${[projObject, emailObject, keepObject]}::uuid[])`;
     assert.deepEqual(versions.map((v) => v.object_id), [keepObject]);
     const jobs = await sql<Array<{ kind: string; key: string; status: string; payload: Record<string, unknown> }>>`SELECT kind, key, status, payload FROM cal_jobs ORDER BY kind, key, status`;
-    assert.ok(!jobs.some((j) => j.status !== 'pending' && (j.key === bookingKey || j.key === confirmed.booking.uid)), 'job conclusi delle chiavi toccate cancellati');
+    assert.ok(!jobs.some((j) => j.status !== 'pending' && j.key === confirmed.booking.uid), 'job conclusi delle prenotazioni cancellati');
+    assert.ok(jobs.some((j) => j.status === 'done' && j.kind === 'shadow_mirror' && j.key === bookingKey), 'il risultato dello shadow della chiave toccata resta (nessun dato personale)');
     assert.ok(jobs.some((j) => j.status === 'done' && j.key === `event:${plain.id}`), 'gli altri job restano');
     const erasureJobs = jobs.filter((j) => j.kind === 'shadow_mirror' && j.status === 'pending' && j.payload.erasure === true).map((j) => j.key).sort();
     assert.deepEqual(erasureJobs, [bookingKey, `booking:${cancelled.booking.uid}`, `event:${withEmail.id}`].sort());
@@ -248,8 +253,8 @@ describe('calendarErase in mode postgres', () => {
     // Seconda esecuzione: nulla da fare.
     const again = await calendarErase(email, { actor: 'admin:test' });
     assert.deepEqual(
-      [again.bookings, again.projections_legacy, again.events_redacted, again.audit_logs_redacted, again.ledger_redacted, again.migration_items_deleted, again.versions_purged, again.jobs_enqueued],
-      [0, 0, 0, 0, 0, 0, 0, 0],
+      [again.bookings, again.projections_legacy, again.events_redacted, again.audit_logs_redacted, again.ledger_redacted, again.migration_items_redacted, again.migration_runs_redacted, again.versions_purged, again.jobs_enqueued],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0],
     );
     await assert.rejects(calendarErase('a@b', { actor: 'admin:test' }), TypeError);
   });
@@ -274,6 +279,202 @@ describe('calendarErase in mode postgres', () => {
     assert.equal(jobs[0].payload.erasure, true, 'il payload dell\'erasure prevale su quello del trigger');
     await resetState();
     await sql`DELETE FROM cal_jobs`;
+  });
+});
+
+describe('calendarErase: confini dell\'email, run, verdetti, MCP e backup', () => {
+  after(async () => {
+    await resetState();
+    await sql`DELETE FROM cal_migration_runs`;
+    await sql`DELETE FROM cal_migration_ledger`;
+    await sql`DELETE FROM cal_jobs`;
+    await sql`DELETE FROM audit_logs WHERE table_name = 'mcp_call'`;
+  });
+
+  test('pattern con i confini: mai l\'email di un\'altra persona che la contiene', () => {
+    const re = erasureEmailRegex('mario@example.com');
+    const redact = (t: string): string => t.replace(re, '[dato rimosso]');
+    assert.equal(redact('Contatto: anna.mario@example.com, tel 333'), 'Contatto: anna.mario@example.com, tel 333');
+    assert.equal(redact('x-mario@example.com e mario@example.com.au e mario@example.community'), 'x-mario@example.com e mario@example.com.au e mario@example.community');
+    assert.equal(redact('Scrivi a MARIO@Example.com. Oppure <mailto:mario@example.com>; "mario@example.com"'),
+      'Scrivi a [dato rimosso]. Oppure <mailto:[dato rimosso]>; "[dato rimosso]"');
+    assert.equal(redact('riga\\nmario@example.com'), 'riga\\n[dato rimosso]', 'escape \\n di iCalendar e JSON');
+    assert.deepEqual(
+      redactErasureJson({ a: 'mario@example.com', b: ['x mario@example.com', { c: 'anna.mario@example.com' }], n: 3, user_agent: 'UA' }, { re, fullKeys: ['user_agent'] }),
+      { a: '[dato rimosso]', b: ['x [dato rimosso]', { c: 'anna.mario@example.com' }], n: 3, user_agent: '[dato rimosso]' },
+    );
+  });
+
+  test('anna.mario@… resta intatta in eventi, audit, ledger e righe dei run', async () => {
+    await resetState();
+    await setState({ volume: VOLUME });
+    const local = fx.email('gdpr-sub').split('@');
+    const email = `${local[0]}@${local[1]}`;
+    const longer = `anna.${email}`;
+    const personale = (await getPgLegacyStore().getCalendar('personale'))!;
+    const ev = await fx.event({ calendar: personale, summary: 'Nota', description: `Contatto: ${longer}, tel 333`, start_time: romeIso('2027-07-01', '09:00'), end_time: romeIso('2027-07-01', '10:00') });
+    await sql`
+      INSERT INTO audit_logs (action, table_name, record_id, new_data)
+      VALUES ('INSERT', 'calendar_events', ${ev.id}, ${sql.json({ id: ev.id, description: `Contatto: ${longer}` } as never)})
+    `;
+    await sql`
+      INSERT INTO cal_migration_ledger (calendar_id, collection_name, href, kind, legacy_key, uid, legacy_snapshot, legacy_hash, written_etag, written_fingerprint, written_at)
+      VALUES (${personale.id}::uuid, 'personale', ${`${ev.uid}.ics`}, 'event', ${`event:${ev.id}`}, ${ev.uid},
+              ${sql.json({ v: 1, kind: 'event', master: { description: `Contatto: ${longer}` } } as never)}, ${HASH}, '"e9"', 'v1:q', now())
+    `;
+    const [run] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, summary, started_at, finished_at)
+      VALUES ('plan', 'succeeded', 'admin', 'admin:test', '{}'::jsonb, ${sql.json({ preview: { examples: [{ summary: `Call ${longer}` }] } } as never)}, now(), now())
+      RETURNING id::text AS id
+    `;
+    await sql`INSERT INTO cal_migration_items (run_id, seq, item_type, legacy_key, action, detail) VALUES (${run.id}::uuid, 0, 'object', ${`event:${ev.id}`}, 'noop', ${sql.json({ summary: `Call ${longer}` } as never)})`;
+
+    const report = await calendarErase(email, { actor: 'admin:test' });
+    assert.deepEqual(
+      [report.events_redacted, report.audit_logs_redacted, report.ledger_redacted, report.migration_items_redacted, report.migration_runs_redacted, report.jobs_enqueued],
+      [0, 0, 0, 0, 0, 0],
+    );
+    const [row] = await sql<Array<{ description: string }>>`SELECT description FROM calendar_events WHERE id = ${ev.id}`;
+    assert.equal(row.description, `Contatto: ${longer}, tel 333`);
+    const [l] = await sql<Array<{ legacy_hash: string | null }>>`SELECT legacy_hash FROM cal_migration_ledger WHERE legacy_key = ${`event:${ev.id}`}`;
+    assert.equal(l.legacy_hash, HASH, 'lo snapshot di un\'altra persona non si redige');
+    const audits = await sql<Array<{ new_data: Record<string, unknown> }>>`SELECT new_data FROM audit_logs WHERE table_name = 'calendar_events' AND record_id = ${ev.id}`;
+    assert.ok(audits.length >= 1);
+    for (const audit of audits) {
+      assert.ok(String(audit.new_data.description).startsWith(`Contatto: ${longer}`), String(audit.new_data.description));
+    }
+    await sql`DELETE FROM cal_migration_runs WHERE id = ${run.id}::uuid`;
+    await sql`DELETE FROM cal_migration_ledger`;
+  });
+
+  test('verifica rossa sulla chiave toccata: resta non accettabile dopo l\'erasure; run e righe redatti, non cancellati', async () => {
+    await resetState();
+    await setState({ volume: VOLUME });
+    await sql`DELETE FROM cal_migration_runs`;
+    const email = fx.email('gdpr-verdetto');
+    const lavoro = (await getPgLegacyStore().getCalendar('lavoro'))!;
+    const ev = await fx.event({ calendar: lavoro, summary: `Call ${email}`, start_time: romeIso('2027-08-02', '09:00'), end_time: romeIso('2027-08-02', '10:00') });
+    const key = `event:${ev.id}`;
+    // Anteprima con il titolo nell'anteprima salvata e nel dettaglio della riga; verifica completa con una rossa V2 sulla chiave.
+    const [plan] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, summary, error, started_at, finished_at)
+      VALUES ('plan', 'succeeded', 'admin', 'admin:test', '{}'::jsonb,
+              ${sql.json({ totals: { create: 1 }, preview: { examples: [{ legacy_key: key, summary: `Call ${email}` }], bookings_move_candidates: [] } } as never)},
+              ${`nota con ${email}`}, now(), now())
+      RETURNING id::text AS id
+    `;
+    await sql`INSERT INTO cal_migration_items (run_id, seq, item_type, legacy_key, calendar_id, action, detail) VALUES (${plan.id}::uuid, 0, 'object', ${key}, ${lavoro.id}::uuid, 'create', ${sql.json({ kind: 'event', summary: `Call ${email}` } as never)})`;
+    const [verify] = await sql<Array<{ id: string }>>`
+      INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, summary, started_at, finished_at)
+      VALUES ('verify', 'succeeded', 'admin', 'admin:test', ${sql.json({ scope: {}, levels: ['V1', 'V2', 'V3', 'V4', 'V5'], v4_days: 180 } as never)},
+              ${sql.json({ levels: ['V1', 'V2', 'V3', 'V4', 'V5'], overall: 'red', acceptable: false, calendars: [{ calendar_id: lavoro.id, collection_name: 'lavoro', slug: 'lavoro' }] } as never)},
+              now(), now())
+      RETURNING id::text AS id
+    `;
+    await sql`
+      INSERT INTO cal_migration_items (run_id, seq, item_type, legacy_key, calendar_id, code, level, expected, severity, detail)
+      VALUES (${verify.id}::uuid, 0, 'diff', ${key}, ${lavoro.id}::uuid, 'CONTENT_MISMATCH', 'V2', false, 'error',
+              ${sql.json({ uid: ev.uid, message: `titolo diverso: Call ${email}`, signature: 'sig-1' } as never)})
+    `;
+    const before = await latestVerifyVerdicts(sql);
+    assert.equal(before.runId, verify.id);
+    assert.equal(before.acceptable, false);
+
+    const report = await calendarErase(email, { actor: 'admin:test' });
+    assert.equal(report.events_redacted, 1);
+    assert.equal(report.migration_items_redacted, 2, 'dettaglio della riga dell\'anteprima e della differenza');
+    assert.equal(report.migration_runs_redacted, 1, 'riassunto ed errore dell\'anteprima');
+
+    const after = await latestVerifyVerdicts(sql);
+    assert.equal(after.runId, verify.id);
+    assert.equal(after.acceptable, false, 'una erasure non rende accettabile una verifica rossa');
+    const [diff] = await sql<Array<{ code: string; level: string; expected: boolean; detail: Record<string, unknown> }>>`
+      SELECT code, level, expected, detail FROM cal_migration_items WHERE run_id = ${verify.id}::uuid
+    `;
+    assert.deepEqual({ code: diff.code, level: diff.level, expected: diff.expected }, { code: 'CONTENT_MISMATCH', level: 'V2', expected: false });
+    assert.equal(diff.detail.signature, 'sig-1');
+    assert.equal(diff.detail.message, 'titolo diverso: Call [dato rimosso]');
+    const [leak] = await sql<Array<{ n: number }>>`
+      SELECT count(*)::int AS n FROM cal_migration_runs
+      WHERE strpos(lower(concat_ws(' ', params::text, summary::text, progress::text, error)), ${email}) > 0
+    `;
+    assert.equal(leak.n, 0, 'nessun run contiene più l\'email');
+    const [planRow] = await sql<Array<{ summary: { preview: { examples: Array<{ summary: string; legacy_key: string }> }; totals: unknown }; error: string }>>`
+      SELECT summary, error FROM cal_migration_runs WHERE id = ${plan.id}::uuid
+    `;
+    assert.deepEqual(planRow.summary.preview.examples[0], { legacy_key: key, summary: 'Call [dato rimosso]' });
+    assert.deepEqual(planRow.summary.totals, { create: 1 });
+    assert.equal(planRow.error, 'nota con [dato rimosso]');
+    await sql`DELETE FROM cal_migration_runs`;
+  });
+
+  test('audit delle chiamate MCP e user_agent di source_metadata redatti; seguito manuale sulle copie senza scadenza', async () => {
+    await resetState();
+    const email = fx.email('gdpr-mcp');
+    const eventType = await fx.eventType({ key: 'gdpr-mcp' });
+    const b = await fx.booking({ eventType, start: romeIso('2027-09-01', '10:00'), attendee: { name: 'Pia Gialli', email } });
+    await sql`
+      UPDATE calendar_bookings SET source_metadata = ${sql.json({ source_page: '/prenota', user_agent: 'Mozilla/5.0 (X11; Linux) Prova/1.0', note: `da ${email}` } as never)}
+      WHERE id = ${b.booking.id}::uuid
+    `;
+    await sql`
+      INSERT INTO audit_logs (action, table_name, record_id, new_data)
+      SELECT 'INSERT', 'calendar_bookings', id::text, to_jsonb(cb) FROM calendar_bookings cb WHERE id = ${b.booking.id}::uuid
+    `;
+    const argsSummary = JSON.stringify({ attendee_name: 'Pia Gialli', attendee_email: email, start: '2027-09-01T08:00:00Z' });
+    await sql`
+      INSERT INTO audit_logs (action, table_name, user_email, new_data, metadata)
+      VALUES ('INSERT', 'mcp_call', 'mcp:test', ${sql.json({ tool: 'create_booking', args_summary: argsSummary, risk: 'medium', success: true } as never)},
+              ${sql.json({ mcp_token_id: 'tok', note: email } as never)})
+    `;
+
+    const report = await calendarErase(email, { actor: 'admin:test' });
+    assert.equal(report.bookings, 1);
+    const [row] = await sql<Array<{ source_metadata: Record<string, unknown>; consent_user_agent: string | null }>>`
+      SELECT source_metadata, consent_user_agent FROM calendar_bookings WHERE id = ${b.booking.id}::uuid
+    `;
+    assert.equal(row.consent_user_agent, null);
+    assert.deepEqual(row.source_metadata, { source_page: '/prenota', user_agent: '[dato rimosso]', note: 'da [dato rimosso]' });
+    const audits = await sql<Array<{ new_data: Record<string, unknown> }>>`
+      SELECT new_data FROM audit_logs WHERE table_name = 'calendar_bookings' AND record_id = ${b.booking.id}
+    `;
+    assert.ok(audits.length >= 1);
+    for (const a of audits) {
+      const meta = a.new_data.source_metadata as Record<string, unknown> | undefined;
+      if (meta && 'user_agent' in meta) assert.equal(meta.user_agent, '[dato rimosso]');
+      assert.ok(!JSON.stringify(a.new_data).includes('Prova/1.0'));
+    }
+    const [mcp] = await sql<Array<{ new_data: { tool: string; args_summary: string }; metadata: Record<string, unknown> }>>`
+      SELECT new_data, metadata FROM audit_logs WHERE table_name = 'mcp_call' AND user_email = 'mcp:test'
+    `;
+    assert.equal(mcp.new_data.tool, 'create_booking');
+    assert.ok(!mcp.new_data.args_summary.toLowerCase().includes(email));
+    assert.ok(mcp.new_data.args_summary.includes('[dato rimosso]'));
+    assert.equal(mcp.metadata.note, '[dato rimosso]');
+    assert.equal(mcp.metadata.mcp_token_id, 'tok');
+    assert.ok(report.manual_followup.some((m) => m.includes('calendar-stack/pinned') && m.includes('phase0-purge') && m.includes('radicale_data')));
+    assert.ok(!report.manual_followup.some((m) => /backup .*scadono/i.test(m) && !m.includes('pinned')));
+  });
+
+  test('item dell\'archivio della Fase 0 con l\'email segnalati anche con lo store Radicale (righe ripiegate comprese)', async () => {
+    await resetState();
+    const email = fx.email('gdpr-arch');
+    const [archive] = await sql<Array<{ id: string }>>`
+      INSERT INTO calendars (name, slug, color, role, origin, blocks_availability, ics_feed_token, ics_feed_enabled, is_system, collection_name)
+      VALUES ('Archivio Fase 0', 'archivio-fase0', '#888888', 'user', 'migration', false, ${`tok-gdpr-${randomUUID()}`.slice(0, 40)}, false, false, 'archivio-fase0')
+      RETURNING id::text AS id
+    `;
+    try {
+      const folded = `BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nDESCRIPTION:Contatto vecchio: ${email.slice(0, 5)}\r\n ${email.slice(5)}\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n`;
+      await indexObject(archive.id, 'vecchio.ics', { raw: folded, summary: 'Vecchio' });
+      await setState({ volume: VOLUME, mode: 'radicale' });
+      const report = await calendarErase(email, { actor: 'admin:test' });
+      assert.ok(report.manual_followup.some((m) => m.includes('archivio della Fase 0') && m.includes('(1)')), JSON.stringify(report.manual_followup));
+    } finally {
+      await resetState();
+      await sql`DELETE FROM cal_object_ids WHERE calendar_id = ${archive.id}::uuid`;
+      await sql`DELETE FROM calendars WHERE id = ${archive.id}::uuid`;
+    }
   });
 });
 
