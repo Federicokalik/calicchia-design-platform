@@ -13,7 +13,8 @@
  *  - corpo al più 2 MB (un oggetto è al più 1 MB, design §8);
  *  - le route `objects` lavorano solo sullo store Radicale: con lo store
  *    postgres rispondono 409 STORE_MODE_UNSUPPORTED senza toccare nulla;
- *  - PATCH e DELETE richiedono If-Match con un ETag esatto (428 se manca o è `*`);
+ *  - PATCH, DELETE e, dalla tranche C, PUT /ics, POST /move e POST /restore
+ *    richiedono If-Match con un ETag esatto (428 se manca o è `*`);
  *  - nessun testo di evento nei log.
  */
 
@@ -24,6 +25,9 @@ import { logger } from '../../lib/logger';
 import { isCalendarUnavailable } from '../../lib/calendar/errors';
 import { assertV2ObjectsAvailable, readCalendarV2Capabilities } from '../../lib/calendar/v2/capabilities';
 import { CalendarV2Error, invalidValue, v2ErrorFrom } from '../../lib/calendar/v2/errors';
+import { getVersionV2, listTrashV2, listVersionsV2, parseRestoreRequest, parseTrashQuery, parseTrashRestoreRequest, restoreFromTrashV2, restoreVersionV2 } from '../../lib/calendar/v2/history';
+import { duplicateObjectV2, moveObjectV2, parseDuplicateRequest, parseMoveRequest } from '../../lib/calendar/v2/move';
+import { parseRawPutRequest, putRawIcsV2 } from '../../lib/calendar/v2/raw';
 import {
   createObjectV2,
   deleteObjectV2,
@@ -168,4 +172,83 @@ calendarAdminV2.delete('/objects/:id', async (c) => {
   );
   if (res.etag) c.header('ETag', res.etag);
   return c.json(res);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C1 (contratto §9.1.2, §9.1.3): editor raw, strumenti
+// sull'oggetto, cronologia e cestino
+// ═══════════════════════════════════════════════════════════════════
+
+calendarAdminV2.get('/objects/:id/export.ics', async (c) => {
+  const { ics, etag, uid } = await readObjectIcsV2(c.req.param('id'));
+  if (etag) c.header('ETag', etag);
+  c.header('Content-Type', 'text/calendar; charset=utf-8');
+  c.header('Content-Disposition', `attachment; filename="${safeFilename(uid)}"`);
+  c.header('Cache-Control', 'no-store');
+  return c.body(ics);
+});
+
+calendarAdminV2.put('/objects/:id/ics', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseRawPutRequest(await readJson(c));
+  const res = await putRawIcsV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.post('/objects/:id/move', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseMoveRequest(await readJson(c));
+  const res = await moveObjectV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.post('/objects/:id/duplicate', async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseDuplicateRequest(await readJson(c));
+  const res = await duplicateObjectV2(c.req.param('id'), req, actorOf(c));
+  if (req.dryRun) return c.json(res);
+  if (res.etag) c.header('ETag', res.etag);
+  if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
+  return c.json(res, 201);
+});
+
+calendarAdminV2.get('/objects/:id/versions/:versionId', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await getVersionV2(c.req.param('id'), c.req.param('versionId')));
+});
+
+calendarAdminV2.get('/objects/:id/versions', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listVersionsV2(c.req.param('id')));
+});
+
+calendarAdminV2.post('/objects/:id/restore', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseRestoreRequest(await readJson(c));
+  const res = await restoreVersionV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.get('/trash', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listTrashV2(parseTrashQuery({ calendar_id: c.req.query('calendar_id'), before: c.req.query('before'), limit: c.req.query('limit') })));
+});
+
+calendarAdminV2.post('/trash/:objectId/restore', async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseTrashRestoreRequest(await readJson(c));
+  const res = await restoreFromTrashV2(c.req.param('objectId'), req, actorOf(c));
+  if (req.dryRun) return c.json(res);
+  if (res.etag) c.header('ETag', res.etag);
+  if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
+  return c.json(res, 201);
 });

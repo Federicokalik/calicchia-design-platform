@@ -66,11 +66,11 @@ export async function readCalendarV2Capabilities(db: Db = sql): Promise<CalV2Cap
     store,
     objects: { read, write, dry_run: read, scopes: read ? [...CAL_V2_SCOPES] : [] },
     // Tranche C (contratto §9.7): ogni passo accende il proprio flag, sempre
-    // in AND con `read`.
-    raw_edit: false,
-    object_tools: false,
-    history: false,
-    trash: false,
+    // in AND con `read`. C1: editor raw, strumenti sull'oggetto, cronologia, cestino.
+    raw_edit: read,
+    object_tools: read,
+    history: read,
+    trash: read,
     import_export: false,
     calendar_properties: false,
     health_page: false,

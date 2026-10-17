@@ -149,6 +149,8 @@ describe('capacità per modo (§2)', () => {
     assert.equal(res.json.store, 'radicale');
     assert.deepEqual(res.json.objects, { read: true, write: true, dry_run: true, scopes: ['this', 'this_and_future', 'all'] });
     assert.deepEqual(res.json.reasons, []);
+    // Tranche C: ogni passo accende il proprio flag (C1: editor raw, strumenti sull'oggetto, cronologia, cestino).
+    for (const flag of ['raw_edit', 'object_tools', 'history', 'trash']) assert.equal(res.json[flag], true, `radicale: ${flag}`);
 
     await setState('radicale', { freeze: true });
     res = await api.get(`${BASE}/capabilities`, { auth: 'admin' });

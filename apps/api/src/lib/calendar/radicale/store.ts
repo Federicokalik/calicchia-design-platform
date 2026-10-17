@@ -481,7 +481,7 @@ interface CurrentObject {
 }
 
 type WritePlan =
-  | { action: 'put'; object: CalendarObject; previous: CalendarObject | null; changed?: string[] }
+  | { action: 'put'; object: CalendarObject; previous: CalendarObject | null; changed?: string[]; text?: string }
   | { action: 'delete' }
   | { action: 'none' };
 
@@ -574,7 +574,8 @@ async function writeObject(req: ObjectWriteRequest): Promise<WriteOutcome> {
       }
       let text: string;
       try {
-        text = serializeObject(plan.object, current ? { prodid: 'preserve' } : {});
+        // `plan.text`: testo da scrivere così com'è (editor raw della F6, già normalizzato in CRLF dal chiamante).
+        text = plan.text ?? serializeObject(plan.object, current ? { prodid: 'preserve' } : {});
       } catch (err) {
         throw domainError(err, req.what);
       }

@@ -117,15 +117,15 @@ export interface AdminActor {
 }
 
 /** Tentativi di GET → PUT dopo un 412 di Radicale (§3.3). */
-const MAX_ATTEMPTS = 3;
+export const MAX_ATTEMPTS = 3;
 /** Timeout del GET diretto nelle letture (oltre si risponde dall'indice). */
 const READ_GET_TIMEOUT_MS = 3_000;
-const ARCHIVE_MESSAGE = 'Calendario d\'archivio della Fase 0: sola lettura';
-const UNSUPPORTED_COMPONENT_MESSAGE = 'Questo elemento non è un evento (attività o note): per ora non si modifica da qui';
+export const ARCHIVE_MESSAGE = 'Calendario d\'archivio della Fase 0: sola lettura';
+export const UNSUPPORTED_COMPONENT_MESSAGE = 'Questo elemento non è un evento (attività o note): per ora non si modifica da qui';
 /** Attore delle righe di audit e della sync dopo la scrittura. */
-const ACTOR = 'admin';
+export const ACTOR = 'admin';
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ═══════════════════════════════════════════════════════════════════
 // Validazione delle richieste (zod)
@@ -139,7 +139,7 @@ const MAX_PROPERTIES_PER_NAME = 50;
 const MAX_LIST = 2_000;
 const MAX_CATEGORIES = 100;
 const PROPERTY_NAME_RE = /^[A-Z][A-Z0-9-]*$/;
-const UID_RE = /^[A-Za-z0-9@._-]{1,255}$/;
+export const UID_RE = /^[A-Za-z0-9@._-]{1,255}$/;
 const RESERVED: ReadonlySet<string> = new Set(CAL_V2_RESERVED_PROPERTIES);
 
 const int = (min: number, max: number) => z.number().int().min(min).max(max);
@@ -163,7 +163,7 @@ const dateTimeSchema = z
     zone: zoneSchema,
   })
   .strict();
-const timeSchema = z.union([dateSchema, dateTimeSchema]);
+export const timeSchema = z.union([dateSchema, dateTimeSchema]);
 const durationSchema = z
   .object({ negative: z.boolean(), weeks: int(0, 100_000), days: int(0, 1_000_000), hours: int(0, 100_000_000), minutes: int(0, 1_000_000_000), seconds: int(0, 100_000_000_000) })
   .strict();
@@ -210,7 +210,7 @@ const FIELD_VALUE_SCHEMAS = {
 
 const scopeSchema = z.enum(CAL_V2_SCOPES, { errorMap: () => ({ message: 'scope non valido' }) });
 
-function zodIssues(error: z.ZodError): CalV2Issue[] {
+export function zodIssues(error: z.ZodError): CalV2Issue[] {
   return error.issues.slice(0, 30).map((i) => ({
     code: 'VALIDATION_FAILED',
     severity: 'error' as const,
@@ -358,7 +358,7 @@ export function parseCreateRequest(raw: unknown): CalV2CreateRequest {
 // Risoluzione e lettura
 // ═══════════════════════════════════════════════════════════════════
 
-interface Resolved {
+export interface Resolved {
   /** Id risolto (master o override). */
   id: string;
   /** Id della risorsa (recurrence key ''). */
@@ -369,7 +369,7 @@ interface Resolved {
   calendar: SidecarRow;
 }
 
-function notFound(message = 'Evento non trovato'): CalendarV2Error {
+export function notFound(message = 'Evento non trovato'): CalendarV2Error {
   return new CalendarV2Error('NOT_FOUND', 404, message);
 }
 
@@ -401,7 +401,7 @@ interface IndexRow {
   health_reason: string | null;
 }
 
-async function indexRow(calendarId: string, href: string): Promise<IndexRow | null> {
+export async function indexRow(calendarId: string, href: string): Promise<IndexRow | null> {
   const [row] = await sql<IndexRow[]>`
     SELECT id, uid, etag, component, raw_ics, health, health_reason
     FROM cal_objects WHERE calendar_id = ${calendarId}::uuid AND href = ${href}
@@ -433,7 +433,7 @@ async function displayCalendarId(cal: SidecarRow): Promise<string> {
 }
 
 /** Testo, ETag e oggetto di una risorsa, da Radicale o (ripiego) dall'indice. */
-interface Snapshot {
+export interface Snapshot {
   resolved: Resolved;
   raw: string;
   etag: string | null;
@@ -465,7 +465,7 @@ async function readLive(cal: SidecarRow, href: string): Promise<CurrentObject | 
   }
 }
 
-async function snapshotOf(resolved: Resolved): Promise<Snapshot> {
+export async function snapshotOf(resolved: Resolved): Promise<Snapshot> {
   const live = await readLive(resolved.calendar, resolved.href);
   if (live === 'missing') throw notFound();
   if (live) return { resolved, raw: live.raw, etag: live.etag, object: live.object, parseError: live.parseError, source: 'radicale' };
@@ -491,7 +491,7 @@ interface ViewOptions {
   ensureTargetId?: boolean;
 }
 
-async function viewOf(s: Snapshot, targetKey: string | null, opts: ViewOptions = {}): Promise<CalV2ObjectView> {
+export async function viewOf(s: Snapshot, targetKey: string | null, opts: ViewOptions = {}): Promise<CalV2ObjectView> {
   const cal = s.resolved.calendar;
   const [row, collectionHealth, ids, caps, displayId, bookingActive] = await Promise.all([
     indexRow(cal.id, s.resolved.href),
@@ -546,7 +546,7 @@ function masterStartOf(obj: CalendarObject): IcsTime | null {
   }
 }
 
-function isRecurring(obj: CalendarObject): boolean {
+export function isRecurring(obj: CalendarObject): boolean {
   return Boolean(obj.master && (getProperty(obj.master, 'RRULE') || getProperty(obj.master, 'RDATE')));
 }
 
@@ -610,7 +610,7 @@ export async function readObjectIcsV2(ref: string): Promise<{ ics: string; etag:
 // Scritture: utilità
 // ═══════════════════════════════════════════════════════════════════
 
-function normalizeEtag(etag: string | null | undefined): string {
+export function normalizeEtag(etag: string | null | undefined): string {
   return (etag ?? '').trim().replace(/^W\//, '');
 }
 
@@ -623,20 +623,20 @@ export function requireIfMatch(ifMatch: string | null | undefined): string {
   return value;
 }
 
-function assertWritableCalendar(cal: SidecarRow): void {
+export function assertWritableCalendar(cal: SidecarRow): void {
   if (cal.role === 'subscription') throw readOnly(ICS_READ_ONLY_MESSAGE, 'subscription');
   if (cal.origin === 'migration') throw readOnly(ARCHIVE_MESSAGE, 'archive');
 }
 
 /** Oggetto illeggibile o non-VEVENT: nessuna scrittura (la DELETE `all` di un illeggibile è ammessa dal chiamante). */
-function assertEditableObject(current: CurrentObject): CalendarObject {
+export function assertEditableObject(current: CurrentObject): CalendarObject {
   if (!current.object) throw readOnly(UNREADABLE_EVENT_MESSAGE, 'unreadable');
   if (current.object.componentType !== 'VEVENT') throw readOnly(UNSUPPORTED_COMPONENT_MESSAGE, 'component_unsupported');
   return current.object;
 }
 
 /** Il piano si ferma: la versione del server non è fondibile con la richiesta (412). */
-class PreconditionMarker extends Error {
+export class PreconditionMarker extends Error {
   constructor(readonly conflicts: CalV2FieldConflict[]) {
     super('precondition');
     this.name = 'PreconditionMarker';
@@ -649,18 +649,18 @@ function planError(err: unknown): unknown {
 }
 
 /** Le issue di un errore di validazione (400 VALIDATION_FAILED), altrimenti null: in dryRun non sono un errore ma `valid: false`. */
-function validationIssuesOf(err: unknown): CalV2Issue[] | null {
+export function validationIssuesOf(err: unknown): CalV2Issue[] | null {
   const v2 = v2ErrorFrom(err);
   if (!v2 || v2.code !== 'VALIDATION_FAILED') return null;
   return (v2.details?.issues as CalV2Issue[] | undefined) ?? [{ code: 'INVALID_VALUE', severity: 'error', message: v2.message }];
 }
 
-function validate(obj: CalendarObject, cal: SidecarRow, previous: CalendarObject | null, now: Date): { ok: boolean; issues: CalV2Issue[] } {
+export function validate(obj: CalendarObject, cal: SidecarRow, previous: CalendarObject | null, now: Date): { ok: boolean; issues: CalV2Issue[] } {
   const res = validateObject(obj, { tz: safeTz(cal.timezone), allowedComponents: allowedComponents(cal), previous, now });
   return { ok: res.ok, issues: res.issues.map((i: ValidationIssue) => toV2Issue(i)) };
 }
 
-function serialized(obj: CalendarObject, fallback: string): string {
+export function serialized(obj: CalendarObject, fallback: string): string {
   try {
     return serializeObject(obj, { prodid: 'preserve' });
   } catch {
@@ -669,7 +669,7 @@ function serialized(obj: CalendarObject, fallback: string): string {
 }
 
 /** Vista del server dopo un 412: lettura fresca, così il client rifà la modifica sulla versione più nuova. */
-async function currentForPrecondition(resolved: Resolved, key: string): Promise<CalV2ObjectView> {
+export async function currentForPrecondition(resolved: Resolved, key: string): Promise<CalV2ObjectView> {
   const fresh = await locateFresh(resolved);
   return viewOf(await snapshotOf(fresh), key);
 }
@@ -683,8 +683,8 @@ async function locateFresh(resolved: Resolved): Promise<Resolved> {
   }
 }
 
-interface AuditArgs {
-  operation: 'v2.patch' | 'v2.patch+move' | 'v2.create' | 'v2.delete';
+export interface AuditArgs {
+  operation: 'v2.patch' | 'v2.patch+move' | 'v2.create' | 'v2.delete' | 'v2.raw' | 'v2.move' | 'v2.duplicate' | 'v2.restore' | 'v2.trash_restore';
   action: 'INSERT' | 'UPDATE' | 'DELETE';
   recordId: string | null;
   calendar: SidecarRow;
@@ -698,7 +698,7 @@ interface AuditArgs {
 }
 
 /** Riga in audit_logs: collezione, href, ETag prima e dopo, campi cambiati e scope; mai il testo. */
-async function auditV2(a: AuditArgs): Promise<void> {
+export async function auditV2(a: AuditArgs): Promise<void> {
   await audit({
     action: a.action,
     recordId: a.recordId,
@@ -713,7 +713,7 @@ async function auditV2(a: AuditArgs): Promise<void> {
   });
 }
 
-function result(partial: Partial<CalV2WriteResult> & Pick<CalV2WriteResult, 'object' | 'etag'>): CalV2WriteResult {
+export function result(partial: Partial<CalV2WriteResult> & Pick<CalV2WriteResult, 'object' | 'etag'>): CalV2WriteResult {
   return {
     changed: [],
     noop: false,
@@ -1075,7 +1075,7 @@ const CREATE_FIELD_ORDER = [
   'end', 'duration', 'rrule', 'rdates', 'exdates', 'alarms', 'organizer', 'attendees',
 ] as const;
 
-function utcStamp(d: Date): string {
+export function utcStamp(d: Date): string {
   return formatTimeValue({ type: 'date-time', ...msToWall(d.getTime()), zone: { kind: 'utc' } });
 }
 
@@ -1123,7 +1123,7 @@ function buildNewObject(uid: string, req: CalV2CreateRequest, tz: string, now: D
   return { object: createCalendarObject({ uid, componentType: 'VEVENT', master: component }), changed };
 }
 
-async function existingObjectId(cal: SidecarRow, href: string, uid: string): Promise<string | null> {
+export async function existingObjectId(cal: SidecarRow, href: string, uid: string): Promise<string | null> {
   const [byHref] = await sql<Array<{ id: string }>>`
     SELECT id FROM cal_object_ids
     WHERE calendar_id = ${cal.id}::uuid AND href = ${href} AND recurrence_key = '' AND retired_at IS NULL LIMIT 1
@@ -1136,7 +1136,7 @@ async function existingObjectId(cal: SidecarRow, href: string, uid: string): Pro
   return byUid?.id ?? null;
 }
 
-function objectExists(objectId: string | null): CalendarV2Error {
+export function objectExists(objectId: string | null): CalendarV2Error {
   return new CalendarV2Error('OBJECT_EXISTS', 409, 'Esiste già un evento con questo identificativo', objectId ? { object_id: objectId } : undefined);
 }
 
@@ -1207,7 +1207,7 @@ export async function createObjectV2(req: CalV2CreateRequest, actor: AdminActor)
   return result({ object: await viewOf(snap, MASTER_RECURRENCE_KEY), etag: outcome.etagAfter, changed: built.changed, issues: check.issues });
 }
 
-class CreateCollision extends Error {
+export class CreateCollision extends Error {
   constructor() {
     super('risorsa già esistente');
     this.name = 'CreateCollision';
@@ -1328,3 +1328,9 @@ export async function deleteObjectV2(
   return result({ object: await viewOf(snap, null), etag: outcome.etagAfter, changed: d.changed, sequence_bumped: true, issues: d.issues });
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// Alias per i moduli della tranche C (raw, move, history)
+// ═══════════════════════════════════════════════════════════════════
+
+export { resolve as resolveObjectRef };

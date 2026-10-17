@@ -94,6 +94,39 @@ export function readOnly(message: string, reason: string, extra?: Record<string,
   return new CalendarV2Error('READ_ONLY', 403, message, { reason, ...(extra ?? {}) });
 }
 
+// ─── Cronologia e cestino (tranche C, contratto §9.8) ───────────────────────────────
+
+/** Motivi di 409 VERSION_NOT_RESTORABLE (`details.reason`). */
+export type VersionNotRestorableReason = 'invalid' | 'expired' | 'other_object';
+
+const VERSION_NOT_RESTORABLE_MESSAGES: Record<VersionNotRestorableReason, string> = {
+  invalid: 'Questa versione non si può ripristinare: il testo non era valido',
+  expired: 'Questa versione è scaduta: la cronologia conserva 90 giorni',
+  other_object: 'Questa versione appartiene a un altro evento',
+};
+
+/** 409 VERSION_NOT_RESTORABLE con il motivo in `details.reason`. */
+export function versionNotRestorable(reason: VersionNotRestorableReason): CalendarV2Error {
+  return new CalendarV2Error('VERSION_NOT_RESTORABLE', 409, VERSION_NOT_RESTORABLE_MESSAGES[reason], { reason });
+}
+
+/** Motivi di 409 NOT_RESTORABLE (`details.reason`): quelli del cestino più `href_taken`. */
+export type NotRestorableReason = 'uid_exists' | 'calendar_gone' | 'calendar_readonly' | 'no_valid_version' | 'expired' | 'href_taken';
+
+const NOT_RESTORABLE_MESSAGES: Record<NotRestorableReason, string> = {
+  uid_exists: 'Esiste già un evento con lo stesso UID: non si può ripristinare un duplicato',
+  calendar_gone: 'Il calendario originale non esiste più: scegli un altro calendario',
+  calendar_readonly: 'Il calendario di destinazione è in sola lettura: scegli un altro calendario',
+  no_valid_version: 'Non c\'è nessuna versione valida da ripristinare',
+  expired: 'L\'ultima versione valida è scaduta: la cronologia conserva 90 giorni',
+  href_taken: 'Nel calendario di destinazione c\'è già un evento con lo stesso nome',
+};
+
+/** 409 NOT_RESTORABLE con il motivo in `details.reason`. */
+export function notRestorable(reason: NotRestorableReason, extra?: Record<string, unknown>): CalendarV2Error {
+  return new CalendarV2Error('NOT_RESTORABLE', 409, NOT_RESTORABLE_MESSAGES[reason], { reason, ...(extra ?? {}) });
+}
+
 // ─── Mappatura degli errori del dominio ───────────────────────────────
 
 /**
