@@ -1,15 +1,15 @@
 # Contratto dei moduli della F6
 
-Versione 1.0. Vincola chi implementa la fase F6 del [piano](../piano.md) ("Admin client CalDAV quasi 1:1"), divisa in due tranche: la **tranche B** (subito, due agenti paralleli **API** e **ADMIN**) e la **tranche C** (fase successiva). Riferimenti al [design](../design.md): §5 (identità e provenienza), §8 (percorso di scrittura, ricorrenze, MOVE), §11 (admin come client CalDAV), §16.2 (backup in `mode≠postgres`); [decisioni](../decisioni.md) 2, 3, 6, 7 e 9. Restano in vigore e prevalgono, salvo le eccezioni dichiarate nel §11: il [contratto del control-plane](control-plane.md), il [contratto della F2](f2-modules.md) (facade, indice, id, salute, gate, store), della [F3](f3-modules.md) (route della migrazione, difesa CSRF) e della [F4](f4-modules.md) (modi, livello API, ritocchi dell'admin).
+Versione 1.1 (la 1.0 copriva la tranche B; la 1.1 rende vincolante il §9 per la tranche C). Vincola chi implementa la fase F6 del [piano](../piano.md) ("Admin client CalDAV quasi 1:1"), divisa in due tranche: la **tranche B** (subito, due agenti paralleli **API** e **ADMIN**) e la **tranche C** (fase successiva). Riferimenti al [design](../design.md): §5 (identità e provenienza), §8 (percorso di scrittura, ricorrenze, MOVE), §11 (admin come client CalDAV), §16.2 (backup in `mode≠postgres`); [decisioni](../decisioni.md) 2, 3, 6, 7 e 9. Restano in vigore e prevalgono, salvo le eccezioni dichiarate nel §11: il [contratto del control-plane](control-plane.md), il [contratto della F2](f2-modules.md) (facade, indice, id, salute, gate, store), della [F3](f3-modules.md) (route della migrazione, difesa CSRF) e della [F4](f4-modules.md) (modi, livello API, ritocchi dell'admin).
 
 "DEVE", "NON DEVE" e "PUÒ" hanno il significato normativo consueto. Le firme elencate sono quelle che l'altro agente importa: un agente PUÒ aggiungere funzioni ed esportazioni, NON DEVE cambiare nome, argomenti o semantica di quelle elencate senza un aggiornamento di questo contratto.
 
 ## 0. Perimetro e invarianti
 
 1. **Rilascio dopo la F5.** Le funzioni nuove lavorano solo sullo store Radicale (mode `radicale` e `finalized`; lettura anche in `rollback`). In mode `postgres` e `cutover` l'API v2 lo dichiara nelle capacità (§2) e l'admin si comporta esattamente come oggi.
-2. **Nulla dell'admin attuale cambia in mode postgres.** Le route v1 (`routes/calendar/admin.ts`), `evento-edit.tsx`, `lib/recurrence-form.ts`, le query key di react-query (`admin-calendar-events`, `admin-calendars`, `admin-bookings`, `admin-calendar-event-raw`) e il drag & drop della vista restano invariati. La v2 è un router nuovo montato accanto.
+2. **Nulla dell'admin attuale cambia in mode postgres.** Le route v1 (`routes/calendar/admin.ts`), `evento-edit.tsx`, `lib/recurrence-form.ts`, le query key di react-query (`admin-calendar-events`, `admin-calendars`, `admin-bookings`, `admin-calendar-event-raw`) e il drag & drop della vista restano invariati (nella tranche C la vista cambia solo con `caps.occurrences`, §9.0). La v2 è un router nuovo montato accanto.
 3. **Contratti invariati:** sito (`/api/calendar/*`), feed ICS, percorsi CalDAV dei device, 22 tool MCP, contratti F0 verdi su entrambi gli store.
-4. **Tranche B senza migrazioni, variabili, cron né dipendenze nuove.** Nessuna modifica a `apps/admin/package.json`, `apps/admin/vite.config.ts`, `apps/admin/Dockerfile`, `apps/api/package.json`, `pnpm-lock.yaml`, `.github/workflows/*`. Una migrazione della tranche C, se serve, prende un numero ≥ 168 (la 167 è del finalize, piano F7).
+4. **Tranche B senza migrazioni, variabili, cron né dipendenze nuove.** Nessuna modifica a `apps/admin/package.json`, `apps/admin/vite.config.ts`, `apps/admin/Dockerfile`, `apps/api/package.json`, `pnpm-lock.yaml`, `.github/workflows/*`. Una migrazione della tranche C, se serve, prende un numero ≥ 168 (la 167 è del finalize, piano F7). Le eccezioni della tranche C sono nel §9.0.
 5. **Lossless.** Ogni scrittura v2 passa dalla pipeline del design §8 (gate `cal-write`, GET, CAS, patch di calendar-core, PUT con precondizione, write-through, audit): VALARM, ATTENDEE, X-* e parametri sconosciuti non toccati restano byte per byte dove sono; SEQUENCE+1 solo per tempi, ricorrenza, luogo o stato; DTSTAMP e LAST-MODIFIED aggiornati.
 6. **Dati personali.** Nessun testo di evento nei log né in `audit_logs` (solo collezione, href, ETag prima e dopo, nomi dei campi cambiati, scope).
 
@@ -37,7 +37,7 @@ Il riepilogo RRULE in italiano è una funzione pura nuova di calendar-core (`des
 | `rollback` | radicale | true | false | true | `WRITES_SUSPENDED` |
 | `finalized` | radicale | come `radicale` | | | |
 
-In aggiunta, su qualsiasi modo: Radicale non configurato → `read` e `write` false, `RADICALE_UNCONFIGURED`; `calendarApiLevelBlocked()` → tutto false, `API_LEVEL_BLOCKED`. Il modo si legge con `readBackendStateCached()` (2 s). I flag della tranche C (`history`, `trash`, `import_export`, `calendar_properties`, `health_page`) sono `false` nella tranche B.
+In aggiunta, su qualsiasi modo: Radicale non configurato → `read` e `write` false, `RADICALE_UNCONFIGURED`; `calendarApiLevelBlocked()` → tutto false, `API_LEVEL_BLOCKED`. Il modo si legge con `readBackendStateCached()` (2 s). I flag della tranche C (`raw_edit`, `object_tools`, `history`, `trash`, `import_export`, `calendar_properties`, `health_page`, `occurrences`) sono `false` nella tranche B; ciascuno lo accende il passo che ne implementa le route (§9.7), sempre in AND con `objects.read`.
 
 Regole per l'admin:
 - capacità non leggibili (errore di rete, 404 di un'API più vecchia, 5xx) → si comporta come `read: false` (editor v1): un deploy disallineato non rompe nulla;
@@ -164,7 +164,7 @@ Guardie: proiezione `booking-*` di una prenotazione `pending/confirmed` → 403 
 
 ## 4. DTO condivisi: `packages/shared/src/calendar-v2.ts`
 
-Proprietario: agente API. Solo tipi e costanti, nessun import. Esportato da `packages/shared/src/index.ts` (`export * from './calendar-v2';`) e dalla voce `"./calendar-v2": "./src/calendar-v2.ts"` di `packages/shared/package.json`. L'admin importa da `@calicchia/shared` (già dipendenza dell'admin e già copiata nel suo Dockerfile). L'agente API scrive questo file **per primo**, identico al blocco qui sotto; un test di tipo dell'API (`admin-v2-view.test.ts`) verifica che `CalV2Time`, `CalV2Duration`, `CalV2Property`, `CalV2Component` e `CalV2FieldValues` siano assegnabili da e verso i tipi di calendar-core (`IcsTime`, ..., `PatchFieldValues`).
+Proprietario: agente API nella tranche B; nella tranche C il file lo scrive l'architetto **prima** dei flussi (§9.5) e nessun flusso lo modifica. Solo tipi e costanti, nessun import. Esportato da `packages/shared/src/index.ts` (`export * from './calendar-v2';`) e dalla voce `"./calendar-v2": "./src/calendar-v2.ts"` di `packages/shared/package.json`. L'admin importa da `@calicchia/shared` (già dipendenza dell'admin e già copiata nel suo Dockerfile). L'agente API scrive questo file **per primo**, identico al blocco qui sotto; un test di tipo dell'API (`admin-v2-view.test.ts`) verifica che `CalV2Time`, `CalV2Duration`, `CalV2Property`, `CalV2Component` e `CalV2FieldValues` siano assegnabili da e verso i tipi di calendar-core (`IcsTime`, ..., `PatchFieldValues`).
 
 ```ts
 /**
@@ -213,12 +213,15 @@ export interface CalV2Capabilities {
   mode: CalV2BackendMode;
   store: 'postgres' | 'radicale';
   objects: { read: boolean; write: boolean; dry_run: boolean; scopes: CalV2Scope[] };
-  /** Tranche C: false finché non esistono. */
+  /** Tranche C (§9.7): vero solo se la route esiste E objects.read. */
+  raw_edit: boolean;
+  object_tools: boolean;
   history: boolean;
   trash: boolean;
   import_export: boolean;
   calendar_properties: boolean;
   health_page: boolean;
+  occurrences: boolean;
   reasons: CalV2CapabilityReason[];
 }
 
@@ -450,6 +453,9 @@ export const CAL_V2_ERROR_CODES = [
   'VALIDATION_FAILED', 'SCOPE_INVALID', 'CSRF_REJECTED', 'READ_ONLY', 'NOT_FOUND', 'AMBIGUOUS_REF',
   'RECURRENCE_TARGET_GONE', 'OBJECT_EXISTS', 'MOVE_CONFLICT', 'STORE_MODE_UNSUPPORTED',
   'PRECONDITION_FAILED', 'PRECONDITION_REQUIRED', 'CALENDAR_UNAVAILABLE',
+  // Tranche C (§9.8).
+  'PAYLOAD_TOO_LARGE', 'CONFIRMATION_REQUIRED', 'IDEMPOTENCY_KEY_REQUIRED', 'IDEMPOTENCY_CONFLICT',
+  'PLAN_CHANGED', 'VERSION_NOT_RESTORABLE', 'NOT_RESTORABLE', 'CALENDAR_NOT_EMPTY', 'NOT_IN_HOLD',
 ] as const;
 export type CalV2ErrorCode = (typeof CAL_V2_ERROR_CODES)[number];
 
@@ -717,59 +723,287 @@ Mirati, con le suite complete lasciate alla CI.
 - **ADMIN**: `pnpm --filter @calicchia/admin build` (tsc + vite) e `lint`. Prova manuale o headless facoltativa; gli e2e sono della tranche C.
 - **Uscita della tranche B:** test sopra verdi; contratti v1/F0 verdi in CI; in mode postgres l'admin identico (stesso editor, nessuna chiamata v2 oltre alle capacità); in staging, un evento creato da iPhone e modificato dall'editor v2 conserva VALARM, ATTENDEE e X-*, e una modifica concorrente da un device si risolve dal `ConflictDialog`.
 
-## 9. Tranche C (fase successiva)
+## 9. Tranche C (vincolante dalla v1.1)
 
-Le firme qui sotto orientano la tranche C; diventano vincolanti con l'aggiornamento v1.1 di questo contratto all'avvio della fase, con la stessa regola dei proprietari del §7. I DTO nuovi si aggiungono a `packages/shared/src/calendar-v2.ts`. Ogni funzione accende il proprio flag in `CalV2Capabilities`.
+Questa sezione vincola la tranche C come il §3-§8 vincolano la tranche B: stesse regole su firme, proprietari e "DEVE/PUÒ". Tutto ciò che il §0, il §2 e il §3 dicono della tranche B vale anche per le route nuove (montaggio, JWT, `sameOriginWrites`, errori `CalV2ErrorBody`, `STORE_MODE_UNSUPPORTED` con store postgres, gate `cal-write` e 503, lossless, nessun testo di evento in log e `audit_logs`), salvo dove il §9 dice altro.
+
+### 9.0 Decisioni dell'orchestratore (prese all'avvio della tranche C)
+
+1. **calendar-core resta sul server** (§9.4): nessuna modifica a `apps/admin/vite.config.ts`, `apps/admin/Dockerfile` né alle dipendenze dell'admin per calendar-core.
+2. **Niente refactor della vista** (FullCalendar 6.1.21, `@fullcalendar/luxon3`, `luxon`, `pages/calendario/vista/*`): rinviato (§12.5). La vista resta `calendario.tsx` con le dipendenze attuali. Si aggiungono `GET /occurrences` e `GET /overlays`; l'admin li usa **solo** con `caps.occurrences` (che implica `objects.read`): badge orfani, quarantena, hold, conservativo, nuovo dal dispositivo; drag fra calendari = `POST /objects/:id/move`. In mode postgres (o con capacità illeggibili) la vista resta identica a oggi, su `/events` v1, senza nessuna chiamata v2 oltre alle capacità.
+3. **Correzione del rilievo noto della tranche B** (passo A1): `EventEditorHost` non restituisce più `null` mentre le capacità si caricano, e `v2Fetch` ha un timeout di 5 s con `AbortController`. Finché le capacità non sono note, o se falliscono o scadono, si apre l'editor v1 (regola del §2).
+4. **Widget agenda e sovrapposizioni senza troncamento:** finestra temporale invece di un limite di righe, con "mostra altri" esplicito (passi C3 e A3).
+5. **E2E Playwright** in `apps/admin/e2e` con `apps/admin/playwright.config.ts` e un job CI dedicato (§9.3). Solo il passo E2E PUÒ modificare `apps/admin/package.json`, `pnpm-lock.yaml` e `.github/workflows/ci.yml`.
+6. **Nessuna migrazione:** lo schema basta. `cal_object_versions` e `cal_object_ids.retired_at` (163) servono a cronologia e cestino; `cal_jobs` (164, `kind` libero) ai job `calendar_import`, `calendar_hold_apply`, `calendar_hold_rebuild`; `calendars.sort_order`, `needs_review` e `review_reason` (071, 162) a ordine e badge "nuovo dal dispositivo"; l'idempotenza usa `cal_jobs (kind, key)`. Se un passo scopre che una migrazione serve davvero, prende il numero 168 e lo scrive nel report con il motivo; nessun altro passo ne crea.
+7. **Nessuna variabile d'ambiente, cron o dipendenza nuova dell'API.** I job nuovi si registrano in `apps/api/src/cron/calendar-radicale.ts` accanto agli altri (una riga per registrazione).
 
 ### 9.1 Route
 
-| Area | Route | Note |
-|---|---|---|
-| Oggetti | `PUT /objects/:id/ics` `{ ics, dryRun? }` + `If-Match` → `CalV2WriteResult` | Editor raw: validazione completa, stesso UID obbligatorio |
-| | `POST /objects/:id/move` `{ calendar_id }` + `If-Match`; `POST /objects/:id/duplicate` `{ recurrence_key?, start?: CalV2Time, calendar_id? }` | MOVE per il drag fra calendari; la copia nasce alla data dell'occorrenza (design §8) |
-| | `GET /objects/:id/export.ics` | |
-| Cronologia | `GET /objects/:id/versions` → `{ versions: CalV2VersionSummary[] }`; `GET /objects/:id/versions/:versionId` → `{ version, ics, view: CalV2ObjectView \| null }`; `POST /objects/:id/restore` `{ version_id, dryRun? }` + `If-Match` | Da `cal_object_versions` (90 giorni); il ripristino è una PUT normale (nuova versione, audit `v2.restore`) |
-| Cestino | `GET /trash?calendar_id&before` → `{ items: CalV2TrashItem[]; next: string \| null }`; `POST /trash/:objectId/restore` `{ version_id?, calendar_id? }` | Oggetti con `cal_object_ids.retired_at` e una versione valida non scaduta; ripristino con `If-None-Match: *`, stesso id (MOVE-like) |
-| Import/export | `GET /calendars/:id/export.ics`; `POST /calendars/:id/import` `{ ics, mode: 'dry_run' \| 'commit', on_conflict: 'skip' \| 'replace' \| 'new_uid' }` + `Idempotency-Key` → dry_run `CalV2ImportPlan`, commit 202 `{ job_id }` (job `calendar_import` in `cal_jobs`, lotti ≤ 20 PUT/s); `GET /imports/:jobId` | Corpo JSON (nessun multipart: stessa difesa CSRF) |
-| Calendari | `GET /calendars` → `CalV2CalendarView[]`; `POST /calendars`; `PATCH /calendars/:id` (nome, colore, descrizione, fuso, ruolo → PROPPATCH e sidecar); `PUT /calendars/order` `{ ids }`; `DELETE /calendars/:id`; `POST /calendars/:id/rotate-token` | Proprietà CalDAV, URL dei device, ruolo, badge "nuovo dal dispositivo" (decisione 4), stato della sincronizzazione |
-| Salute | `GET /sync-state` → `CalV2SyncState` (modo, freeze, identità, heartbeat, canary, collezioni con salute e `dirty_since`, oggetti in quarantena, hold, job falliti, conflitti di prenotazione); `POST /collections/:id/apply-deletions`, `POST /collections/:id/rebuild-from-index` con conferma digitata e `Idempotency-Key` come la migrazione | Polling 20 s dall'admin |
-| Vista | `GET /occurrences?from&to&calendar_id` → `{ occurrences: CalV2Occurrence[] }` senza troncamento (finestra limitata, non conteggio) con `object_id`, `component_id`, `recurrence_key`, `blocks`, `kind` e badge `orphan`, `quarantined`, `hold`, `conservative`, `new_from_device`; `GET /overlays?from&to` (festività e iscrizioni in sola lettura) | Sostituisce `/events` v1 nella vista solo con `objects.read` |
+#### 9.1.1 Regole comuni
 
-```ts
-export interface CalV2VersionSummary { id: string; object_id: string; etag: string | null; valid: boolean; recorded_at: string; size_bytes: number; summary: string | null; changed_fields: string[] }
-export interface CalV2TrashItem { object_id: string; calendar_id: string; uid: string; summary: string | null; deleted_at: string; last_version_id: string; restorable: boolean; not_restorable_reason: 'uid_exists' | 'calendar_gone' | 'expired' | null }
-export interface CalV2ImportPlan { total: number; create: number; replace: number; skip: number; invalid: Array<{ uid: string | null; issues: CalV2Issue[] }>; plan_hash: string }
-export interface CalV2Occurrence { object_id: string; component_id: string | null; recurrence_key: string; calendar_id: string; start_utc: string; end_utc: string; all_day: boolean; summary: string | null; color: string | null; status: string; transp: string | null; blocks: boolean; kind: string; badges: Array<'orphan' | 'quarantined' | 'hold' | 'conservative' | 'new_from_device'> }
-```
+- Tutte le route nuove stanno nel router `calendarAdminV2` (`routes/calendar/admin-v2.ts`) o in sotto-router montati da quel file con `calendarAdminV2.route('/', sub)` **dopo** i middleware esistenti (401, `sameOriginWrites`, `bodyLimit`), così li ereditano. Nessuna modifica a `app.ts`.
+- `bodyLimit`: resta 2 MB, tranne `POST /calendars/:id/import` che ha 10 MB (il middleware globale salta quel percorso e la route applica il proprio limite). Superato → 413 `PAYLOAD_TOO_LARGE` (il passo C2 cambia anche il codice del limite globale).
+- **Idempotency-Key** (solo header, mai nel corpo, `^[A-Za-z0-9_-]{8,200}$`): obbligatoria per i `commit` di import e azioni di hold (400 `IDEMPOTENCY_KEY_REQUIRED`). La chiave del job è `<calendar_id>:<Idempotency-Key>`; il payload del job porta `request_hash` (sha256 del corpo canonico). Stessa chiave e stesso hash → 202 con lo stesso `job_id` (`created: false`), qualunque sia lo stato del job; stessa chiave e hash diverso → 409 `IDEMPOTENCY_CONFLICT`.
+- **Conferma digitata** (azioni di hold): `confirm` uguale a `CAL_V2_HOLD_CONFIRMATIONS[azione]` (confronto esatto, come `confirmationMatches` della migrazione), altrimenti 400 `CONFIRMATION_REQUIRED`.
+- **Piano e hash:** import e azioni di hold hanno un `dry_run` che restituisce il piano con `plan_hash`; il `commit` ricalcola il piano e, se l'hash differisce, risponde 409 `PLAN_CHANGED` con `details.plan` (il piano nuovo). Il job ricalcola ogni voce prima di scriverla (una voce cambiata nel frattempo va in `failed`, non si sovrascrive).
+- **Scritture:** tutte dal gate `cal-write` e con le precondizioni HTTP (`If-Match` esatto sulle risorse esistenti, `If-None-Match: *` sulle nuove), write-through e audit come il §3.1. `dryRun` come il §3.5 (nessun gate, nessuna PUT, nessun audit).
+- **Audit** (`audit()` dello store, `table_name 'cal_objects'` o `'calendars'`), operazioni: `v2.raw`, `v2.move`, `v2.duplicate`, `v2.restore`, `v2.trash_restore`, `v2.import` (una riga per oggetto scritto, più una riga `v2.import.job` a fine job con i conteggi), `v2.calendar.create`, `v2.calendar.update`, `v2.calendar.delete`, `v2.calendar.order`, `v2.calendar.rotate_token`, `v2.hold.apply`, `v2.hold.rebuild`. Dettagli solo strutturali (collezione, href, ETag, nomi dei campi, conteggi, id di versione e di job).
+- **Job:** `cal_jobs` con `kind` in `CAL_V2_JOB_KINDS`, priorità normale, `max_attempts` 3, avanzamento in `result.progress` aggiornato al più ogni 2 s sotto lease. A fine lavoro (done o dead) il testo ICS nel payload si elimina (`payload - 'ics'`): nessun testo di evento resta in `cal_jobs`.
+
+#### 9.1.2 Oggetti (passo C1)
+
+| Metodo e percorso | Corpo / query | Risposta |
+|---|---|---|
+| `PUT /objects/:id/ics` | `CalV2RawPutRequest`, `If-Match` esatto (428 senza) | 200 `CalV2WriteResult` + `ETag` |
+| `POST /objects/:id/move` | `CalV2MoveRequest`, `If-Match` esatto | 200 `CalV2WriteResult` (`object` nel calendario di destinazione) |
+| `POST /objects/:id/duplicate` | `CalV2DuplicateRequest` | 201 `CalV2WriteResult` + `ETag` + `Location`; dryRun 200 con `object.id = ''` |
+| `GET /objects/:id/export.ics` | | 200 `text/calendar; charset=utf-8`, `Content-Disposition: attachment; filename="<uid>.ics"`, `ETag` |
+
+- **Editor raw.** Il testo si valida per intero: parse di calendar-core, un solo UID uguale a quello corrente (altrimenti 400 `VALIDATION_FAILED`, `property: UID`), solo VEVENT (VTODO e VJOURNAL → 403 `READ_ONLY` `component_unsupported`), ≤ 1 MB, limiti strutturali di calendar-core, `validateObject` con `previous`. Si scrive il testo così com'è dopo la sola normalizzazione dei fine riga in CRLF: nessun aggiornamento automatico di DTSTAMP, LAST-MODIFIED o SEQUENCE (lo fa l'utente; un avviso `CalV2Issue` `sequence_not_bumped` severity warning se tempi o ricorrenza cambiano senza SEQUENCE+1). Nessuna fusione per campi: ETag diverso → 412 con `current` e `conflicts: []`. `changed: ['raw']`. Le guardie del §3.9 valgono (sola lettura, prenotazione attiva per un testo che cambia i tempi: `booking_projection` è solo una nota). Oggetto illeggibile (`unreadable`): il raw PUT è ammesso (è il modo di ripararlo) se il testo nuovo è valido.
+- **Sposta.** Stessa logica e stesse guardie di `move_to_calendar_id` (§3.5): destinazione attiva, non `subscription`, non archivio, con VEVENT; MOVE con `Overwrite: F`; href o UID presenti → 409 `MOVE_CONFLICT`. Stesso calendario → 200 `noop`. L'id resta quello (ids.ts riconosce la MOVE). `changed: ['calendar_id']`.
+- **Duplica.** Copia del componente target (pre-immagine per un'istanza) come oggetto nuovo: UID del corpo (stesse regole di `POST /objects`) o generato; senza RECURRENCE-ID; senza RRULE, RDATE, EXDATE né override, salvo `keep_recurrence: true` con `recurrence_key: ''` (allora si copiano tutti). Inizio = `start` o quello dell'occorrenza, durata e tipo (all-day/timed, TZID) conservati. VALARM, ATTENDEE, ORGANIZER e X-* si copiano, tranne le proprietà di provenienza e di proiezione (`X-CALDES-*`), che il server riscrive come per `createEvent` con source `admin`. SEQUENCE 0, DTSTAMP/CREATED/LAST-MODIFIED nuovi. Calendario: `calendar_id` o quello dell'originale (se non scrivibile → 403 `READ_ONLY`). Esistente → 409 `OBJECT_EXISTS` con `details.object_id`.
+- **Export.** Il testo corrente dell'oggetto (da Radicale; fallback indice come il §3.3), identico a `GET /objects/:id/ics` tranne l'header `attachment`.
+
+#### 9.1.3 Cronologia e cestino (passo C1)
+
+| Metodo e percorso | Corpo / query | Risposta |
+|---|---|---|
+| `GET /objects/:id/versions` | | 200 `CalV2VersionList` |
+| `GET /objects/:id/versions/:versionId` | | 200 `CalV2VersionDetail`; versione di un altro oggetto → 404 |
+| `POST /objects/:id/restore` | `CalV2RestoreRequest`, `If-Match` esatto | 200 `CalV2WriteResult` + `ETag` |
+| `GET /trash` | `?calendar_id=&before=&limit=` | 200 `CalV2TrashList` |
+| `POST /trash/:objectId/restore` | `CalV2TrashRestoreRequest` | 201 `CalV2WriteResult` + `ETag` + `Location`; dryRun 200 |
+
+- `:id` delle versioni è risolto con `resolveEventRef` (§3.2) e usa sempre la riga della risorsa (`recurrence_key ''`), la stessa a cui punta `cal_object_versions.object_id`. Conservazione: quella di `purgeExpiredVersions` (90 giorni), esposta in `retention_days`.
+- `changed_fields`: confronto dei campi tipizzati e delle proprietà non tipizzate del master (e del numero di override) con la versione precedente nella lista; versione non valida → `[]`.
+- **Ripristino di una versione** sull'oggetto vivo: la versione DEVE essere dell'oggetto, valida e non scaduta (altrimenti 409 `VERSION_NOT_RESTORABLE` con `details.reason`: `invalid`, `expired`, `other_object`). Si scrive il testo della versione con `If-Match` dell'ETag corrente (diverso da `If-Match` → 412 con `current` e `conflicts: []`), aggiornando DTSTAMP e LAST-MODIFIED e portando SEQUENCE a max(corrente, versione) + 1 (i device accettano la modifica). Il risultato crea una versione nuova (`change_kind 'restore'`, actor `admin:<id>`), come ogni scrittura.
+- **Cestino:** oggetti con la riga `cal_object_ids` (`recurrence_key ''`) ritirata (`retired_at` non nullo), una versione `delete` e almeno una versione non scaduta. `restorable` falso con il motivo: `uid_exists` (lo stesso UID è attivo in un calendario), `calendar_gone` (il calendario non esiste più e il corpo non ne indica un altro), `calendar_readonly` (iscrizione o archivio), `no_valid_version`, `expired`. Elenco ordinato per `deleted_at` decrescente, paginato con cursore opaco; filtro facoltativo per calendario.
+- **Ripristino dal cestino:** PUT con `If-None-Match: *` del testo della versione (default `restore_version_id`), con DTSTAMP e LAST-MODIFIED nuovi e SEQUENCE+1, sullo stesso href nel calendario originale (la riga ritirata torna attiva: **stesso id**) o nel `calendar_id` indicato (riconosciuto come MOVE da ids.ts entro 30 giorni; oltre, l'id può essere nuovo e la risposta porta quello vero). href occupato o motivo di non ripristinabilità → 409 `NOT_RESTORABLE` con `details.reason`.
+
+#### 9.1.4 Calendari, import ed export (passo C2)
+
+| Metodo e percorso | Corpo / query | Risposta |
+|---|---|---|
+| `GET /calendars` | | 200 `CalV2CalendarList` |
+| `POST /calendars` | `CalV2CalendarCreateRequest` | 201 `CalV2CalendarView` |
+| `PATCH /calendars/:id` | `CalV2CalendarPatchRequest` | 200 `CalV2CalendarView` |
+| `PUT /calendars/order` | `CalV2CalendarOrderRequest` | 200 `CalV2CalendarList` |
+| `DELETE /calendars/:id` | `?with_objects=1` | 200 `{ deleted: true }`; non vuoto senza `with_objects` → 409 `CALENDAR_NOT_EMPTY` (`details.object_count`) |
+| `POST /calendars/:id/rotate-token` | `{}` | 200 `CalV2CalendarView` (nuovo `feed_url`) |
+| `GET /calendars/:id/export.ics` | | 200 `text/calendar`, `attachment; filename="<slug>.ics"` |
+| `POST /calendars/:id/import` | `CalV2ImportRequest` (+ `Idempotency-Key` con `commit`) | dry_run 200 `CalV2ImportPlan`; commit 202 `CalV2JobAccepted` |
+| `GET /jobs/:jobId` | | 200 `CalV2JobView`; tipo non in `CAL_V2_JOB_KINDS` → 404 |
+
+- Le route dei calendari passano dai metodi dello store (`createCalendar` con la sola MKCALENDAR esplicita, `updateCalendar` con PROPPATCH e sidecar, `deleteCalendar`, `rotateFeedToken`): nessuna MKCOL implicita. Calendari di sistema, predefinito, `bookings` e `holidays` non si eliminano (403 `READ_ONLY`, `details.reason: 'system'`); iscrizioni e archivio non si modificano se non per nome, colore e ordine (403 per il resto). `role` solo fra `CAL_V2_ASSIGNABLE_ROLES` e solo se il ruolo attuale è fra quelli (403 altrimenti). `needs_review: false` azzera anche `review_reason`.
+- `PUT /calendars/order`: `ids` DEVE contenere ogni calendario esattamente una volta (400 altrimenti); `sort_order` = posizione, più PROPPATCH di `calendar-order` sulle collezioni visibili ai device (best effort: una PROPPATCH fallita non annulla l'ordine nel DB e compare nel log senza testo).
+- **Export:** VCALENDAR con PRODID del sistema, un VTIMEZONE per TZID (deduplicati), ogni oggetto attivo dal testo di Radicale (fallback indice); in streaming.
+- **Import:** METHOD rimosso; componenti raggruppati per UID (master e override insieme, VTIMEZONE allegati a chi li usa); ≤ 5000 gruppi; solo VEVENT (VTODO e VJOURNAL → `invalid`, `component_unsupported`); ogni gruppo validato con calendar-core. Azione per gruppo: UID nuovo → `create`; UID già nel calendario → `on_conflict` (`skip`, `replace` con `If-Match` dell'ETag corrente, `new_uid` con UID nuovo e `RELATED-TO` invariati); UID in un altro calendario → `skip` con `on_conflict: 'skip'`, altrimenti `new_uid` (motivo `uid_in_other_calendar`). Provenienza `admin` (design §5) sugli oggetti creati. Il job `calendar_import` scrive al più 20 PUT/s, aggiorna `progress` e termina con `CalV2ImportResult`; un errore su un oggetto va in `failed` e non ferma il job; 503 del gate → il job si riaccoda (attesa) senza contare come errore dell'oggetto.
+
+#### 9.1.5 Salute (passo C3)
+
+| Metodo e percorso | Corpo | Risposta |
+|---|---|---|
+| `GET /sync-state` | | 200 `CalV2SyncState` |
+| `POST /collections/:id/apply-deletions` | `CalV2HoldActionRequest` (+ `Idempotency-Key` con `commit`) | dry_run 200 `CalV2HoldPlan`; commit 202 `CalV2JobAccepted` |
+| `POST /collections/:id/rebuild-from-index` | come sopra | come sopra |
+
+- `GET /sync-state` aggrega, senza scrivere: `readBackendStateCached`, `lastIdentityCheck`, heartbeat, `currentWatchMode`/`mountUntrusted`, `getIndexHealth`, `listCollectionHealth`, oggetti con `health ≠ 'ok'`, job `dead` del calendario, `cal_booking_conflicts` aperti, l'ultimo backup coordinato (`last_stack_backup`, come lo legge il preflight della migrazione; `stale` se assente o più vecchio di 12 ore). Elenchi completi.
+- `:id` è il `calendar_id` della collezione. Collezione non in hold → 409 `NOT_IN_HOLD`.
+- **Applica cancellazioni** (job `calendar_hold_apply`): `applyHeldDeletions(calendarId, { actor: 'admin:<id>', hrefs })`. Piano: una voce `remove_from_index` per href sospeso.
+- **Ricostruisci dall'indice** (job `calendar_hold_rebuild`, design §16.3 scenario A): per ogni href sospeso con un'ultima versione valida non scaduta, PUT con `If-None-Match: *` del testo di quella versione (≤ 20 PUT/s; risorsa già presente → `skip` `present_in_radicale`); senza versione valida → `skip` `no_valid_version`. Poi sync completa della collezione; le cancellazioni sospese ricostruite escono da `pending_deletions` e l'hold cade se non ne restano (C3 PUÒ aggiungere a `radicale/sync.ts` la funzione che serve, solo come aggiunta).
+- L'admin fa polling di `/sync-state` ogni 20 s e di `/jobs/:jobId` ogni 2 s.
+
+#### 9.1.6 Vista (passo C3)
+
+| Metodo e percorso | Query | Risposta |
+|---|---|---|
+| `GET /occurrences` | `from`, `to` (ISO), `calendar_id` ripetibile | 200 `CalV2OccurrenceList` |
+| `GET /overlays` | `from`, `to` | 200 `CalV2OverlayList` |
+
+- Finestra: `from < to` e `to − from ≤ CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS` (100 giorni), altrimenti 400. **Nessun troncamento per conteggio**: tutte le occorrenze che intersecano la finestra. Oltre l'orizzonte dell'indice le occorrenze si espandono al volo dai componenti indicizzati (stessa espansione dell'indicizzatore), così la risposta è completa per qualsiasi finestra valida.
+- `/occurrences` senza `calendar_id`: tutti i calendari tranne `holidays` e `subscription` (quelli vanno in `/overlays`); con `calendar_id`: esattamente quelli. Archivio incluso con `readonly_reason: 'archive'`.
+- Badge: `orphan` (kind `orphan_override`), `quarantined` (oggetto non `ok` o occorrenza `stale`), `hold` (collezione in hold), `conservative` (kind `conservative`), `new_from_device` (calendario con `needs_review`).
+- **Parametri a finestra per le sovrapposizioni della vista e del widget** (additivi, retrocompatibili): `GET /api/project-tasks?due_from=YYYY-MM-DD&due_to=YYYY-MM-DD` (estremi inclusi, insieme a `limit`/`offset` e `count` già esistenti) e `GET /api/client-projects?overlap_from=&overlap_to=` (progetti con `start_date ≤ overlap_to` e `coalesce(target_end_date, start_date) ≥ overlap_from`). Senza i parametri nuovi il comportamento resta identico.
 
 ### 9.2 Admin
 
-- Refactor di `calendario.tsx` in `pages/calendario/vista/*.tsx`; FullCalendar 6.1.21 con `@fullcalendar/luxon3` 6.1.21, `luxon` 3.7.2 e `timeZone="Europe/Rome"`, viste lista e anno, badge orfani e quarantena, drag fra calendari = MOVE (design §11).
-- `components/calendar/{raw-ics-editor,history-drawer,import-dialog}.tsx`, pagina cestino, `calendari.tsx` esteso, `pages/calendario/salute.tsx` ("Salute del calendario": quarantene, hold con "applica" o "ricostruisci", identità, canary), avviso della pagina Backup in `mode≠postgres` (§16.2 del design).
-- Correzioni UI: `components/dashboard/widget-agenda.tsx` e overlay senza troncamento (finestra temporale invece di un limite di righe, "mostra altri" esplicito).
+Regola generale: ogni elemento nuovo compare solo con il proprio flag di capacità (§9.7); capacità illeggibili → niente di nuovo (§2). Testi in italiano, stile dei componenti esistenti (`components/ui/*`, toast, react-query). Ogni scrittura v2 invalida le query key v1 di oggi (`admin-calendar-events`, `admin-calendars`, `admin-bookings`) e quelle v2 toccate.
 
-### 9.3 E2E
+#### 9.2.1 Client (`apps/admin/src/lib/calendar-v2-api.ts`, solo aggiunte)
 
-`apps/admin/e2e/calendar.spec.ts` con `apps/admin/playwright.config.ts` e un job CI dedicato (stack API + Radicale + admin buildato). Scenari del piano: solo questa, questa e successive, tutta la serie; elimina e ripristina; all-day; fuso diverso; allarmi; invitati; import ed export; 412 → `ConflictDialog`; collezione in hold → "applica" o "ricostruisci"; più la regressione mode postgres (editor v1).
+```ts
+/** A1: timeout di ogni richiesta v2 (AbortController, unito a init.signal). */
+export const CAL_V2_FETCH_TIMEOUT_MS = 5_000;
+// Timeout → CalV2ApiError('Il server del calendario non risponde', 0, 'TIMEOUT', null).
+// calV2Keys si estende con: versions(id), trash(calendarId | null), calendars, job(jobId), syncState,
+// occurrences(from, to, calendarIds), overlays(from, to).
 
-### 9.4 calendar-core nel browser
+// A1
+export function putObjectIcsV2(id: string, etag: string, req: CalV2RawPutRequest): Promise<CalV2WriteResult>;
+export function listVersionsV2(id: string): Promise<CalV2VersionList>;
+export function getVersionV2(id: string, versionId: string): Promise<CalV2VersionDetail>;
+export function restoreVersionV2(id: string, etag: string, req: CalV2RestoreRequest): Promise<CalV2WriteResult>;
+export function listTrashV2(q?: { calendarId?: string; before?: string; limit?: number }): Promise<CalV2TrashList>;
+export function restoreTrashV2(objectId: string, req: CalV2TrashRestoreRequest): Promise<CalV2WriteResult>;
+export function objectExportUrl(id: string): string;
+// A2
+export function listCalendarsV2(): Promise<CalV2CalendarList>;
+export function createCalendarV2(req: CalV2CalendarCreateRequest): Promise<CalV2CalendarView>;
+export function patchCalendarV2(id: string, req: CalV2CalendarPatchRequest): Promise<CalV2CalendarView>;
+export function reorderCalendarsV2(ids: string[]): Promise<CalV2CalendarList>;
+export function deleteCalendarV2(id: string, opts?: { withObjects?: boolean }): Promise<{ deleted: true }>;
+export function rotateCalendarTokenV2(id: string): Promise<CalV2CalendarView>;
+export function calendarExportUrl(id: string): string;
+export function importPreviewV2(calendarId: string, req: Omit<CalV2ImportRequest, 'mode' | 'plan_hash'>): Promise<CalV2ImportPlan>;
+export function importCommitV2(calendarId: string, req: Omit<CalV2ImportRequest, 'mode'> & { plan_hash: string }, idempotencyKey: string): Promise<CalV2JobAccepted>;
+export function getJobV2(jobId: string): Promise<CalV2JobView>;
+export function getSyncStateV2(): Promise<CalV2SyncState>;
+export function holdPreviewV2(calendarId: string, action: 'apply_deletions' | 'rebuild_from_index', hrefs?: string[]): Promise<CalV2HoldPlan>;
+export function holdCommitV2(calendarId: string, action: 'apply_deletions' | 'rebuild_from_index', req: { confirm: string; plan_hash: string; hrefs?: string[] }, idempotencyKey: string): Promise<CalV2JobAccepted>;
+// A3
+export function listOccurrencesV2(q: { from: string; to: string; calendarIds?: string[] }): Promise<CalV2OccurrenceList>;
+export function listOverlaysV2(q: { from: string; to: string }): Promise<CalV2OverlayList>;
+export function moveObjectV2(id: string, etag: string, req: CalV2MoveRequest): Promise<CalV2WriteResult>;
+export function duplicateObjectV2(id: string, req: CalV2DuplicateRequest): Promise<CalV2WriteResult>;
+```
 
-Da decidere all'avvio della tranche C con una misura del bundle. Default: resta sul server (anteprima dell'import con `mode: 'dry_run'`, validazione dell'editor raw con `PUT /ics` e `dryRun`). Se si adotta (per esempio per la validazione dal vivo dell'editor raw), cambiano insieme: `apps/admin/package.json` (`"@calicchia/calendar-core": "workspace:*"`), `vite.config.ts` (chunk `calendarCore` caricato solo dall'editor raw e dall'import), `apps/admin/Dockerfile` (COPY di `packages/calendar-core/package.json` nello stadio `deps` e di `packages/calendar-core` in `builder`) e il lockfile, con l'import dinamico che non pesa sul primo caricamento.
+La `Idempotency-Key` si genera con `crypto.randomUUID()` all'apertura del dialogo (import, azione di hold) e resta la stessa per i nuovi tentativi dello stesso commit.
+
+#### 9.2.2 Passo A1: correzione dell'host, editor raw, cronologia, cestino
+
+- **`EventEditorHost` (`pages/calendario.tsx`):** la scelta dell'editor si fa all'apertura e non cambia finché il modale resta aperto: `caps?.objects.read === true` → v2; capacità in caricamento, fallite, scadute o `read: false` → v1 subito (mai `null`, mai un modale vuoto). `useCalendarV2Capabilities` resta con `retry: false` e ora eredita il timeout di `v2Fetch`.
+- **Editor raw scrivibile** (`components/calendar/raw-ics-editor.tsx`, montato in `tab-avanzate.tsx` con `caps.raw_edit`): textarea monospaziata con il testo della vista, "Verifica" (`putObjectIcsV2` con `dryRun`, issues in elenco), "Salva" (stesso ETag della vista; 412 → messaggio con "Ricarica" e "Sovrascrivi" che rimanda con `current.etag`), avviso fisso che il testo si salva così com'è. Senza `raw_edit` resta la sola lettura della tranche B. Link "Esporta .ics" (`objectExportUrl`) con `caps.object_tools`.
+- **Cronologia** (`components/calendar/history-drawer.tsx`, aperta dall'editor v2 con `caps.history`): elenco delle versioni (data, autore, tipo, campi cambiati, "corrente"), anteprima (`getVersionV2`: riepilogo della vista e ICS), "Ripristina" (dryRun, conferma, poi `restoreVersionV2` con l'ETag della vista corrente; 412 → ricarica e chiede di nuovo). Dopo il ripristino l'editor ricarica la vista.
+- **Cestino** (`pages/calendario/cestino.tsx`, rotta `calendario/cestino`, tab in `calendar-tabs.tsx` visibile solo con `caps.trash`): elenco paginato ("mostra altri" con `next`), filtro per calendario, motivo di non ripristinabilità in chiaro, "Ripristina" (dialogo con il calendario di destinazione quando serve, dryRun e poi commit).
+
+#### 9.2.3 Passo A2: calendari, import ed export, salute, backup
+
+- **`pages/calendario/calendari.tsx` esteso** con `caps.calendar_properties` (senza il flag resta com'è oggi su v1): elenco da `listCalendarsV2` con ordine trascinabile (`@dnd-kit/sortable`, già dipendenza) → `reorderCalendarsV2`; modifica di nome, descrizione, colore, fuso (`tz-select`), ruolo assegnabile, `blocks_availability`, visibilità ai device, feed; URL CalDAV per i device con "copia"; `feed_url` con "rigenera" (`rotateCalendarTokenV2`, conferma); badge "Nuovo dal dispositivo" con "Segna come visto" (`needs_review: false`); salute della collezione (badge `stale`/`unsyncable`/`hold` con link alla pagina Salute); eliminazione con conferma e, se non vuoto, seconda conferma con il numero di oggetti (`withObjects`).
+- **Import ed export** con `caps.import_export`: `components/calendar/import-dialog.tsx` (file `.ics` letto nel browser e inviato come JSON; scelta di `on_conflict`; anteprima `importPreviewV2` con conteggi e tabella completa degli oggetti, filtrabile, senza troncamento; "Importa" → `importCommitV2` → avanzamento con polling di `getJobV2` ogni 2 s → esito con l'elenco dei falliti); "Esporta" per calendario (`calendarExportUrl`).
+- **Pagina Salute** (`pages/calendario/salute.tsx`, rotta `calendario/salute`, tab visibile solo con `caps.health_page`): modo, freeze, identità, heartbeat, canary, guardia post-ripristino, orizzonte, collezioni (con `dirty_since`, errori, cancellazioni sospese), oggetti in quarantena (link all'editor), job falliti, conflitti di prenotazione, ultimo backup coordinato. Per una collezione in hold: "Applica cancellazioni" e "Ricostruisci dall'indice", ciascuna con anteprima (`holdPreviewV2`, elenco completo), campo di conferma digitata (`CAL_V2_HOLD_CONFIRMATIONS`), commit e avanzamento del job. Polling di `getSyncStateV2` ogni 20 s.
+- **Avviso della pagina Backup** (`pages/impostazioni.tsx`, solo `BackupCalendarNotice` e il suo contorno) in `mode ≠ postgres`: oltre al testo attuale, con `caps.health_page` mostra l'età dell'ultimo backup coordinato (`sync-state.backup`, avviso ambra se `stale`) e i link a "Salute del calendario" e, con `caps.trash`, al "Cestino" e al ripristino da versioni. In mode postgres nulla cambia.
+
+#### 9.2.4 Passo A3: vista, widget agenda, sovrapposizioni
+
+- **Vista con le occorrenze v2** (`pages/calendario.tsx`) solo con `caps.occurrences`: la sorgente degli eventi Caldes diventa `listOccurrencesV2` + `listOverlaysV2` sulla finestra visibile di FullCalendar (`datesSet`; le finestre oltre 100 giorni, come la vista anno se esistesse, si spezzano in più richieste); senza il flag la vista usa `/events` v1 esattamente come oggi. Stesse regole di colore, legenda, "coperta" delle festività (dalle overlay `holiday`/`closure`) e pannello laterale; l'editor si apre con `object_id` e `recurrence_key` (non più `original_start`). Badge sull'evento (icona e tooltip): orfano, in quarantena, collezione in hold, blocco conservativo, nuovo dal dispositivo; gli eventi con `readonly_reason` non sono trascinabili.
+- **Drag & drop in modalità v2** (solo con `caps.occurrences` e `objects.write`): spostamento o ridimensionamento nel tempo → GET della vista, `patchObjectV2` di `start`/`end` con i token della vista (istanza di una serie → `ScopeDialog` con `allowedScopes`; 412 → `ConflictDialog`; errore → `revert()`); **drag fra calendari** = rilascio su una voce della legenda (`eventDragStop` con hit-test degli elementi `data-calendar-drop-id`) → conferma → `moveObjectV2` (solo serie intera o evento singolo); nel pannello laterale "Sposta in…" (`moveObjectV2`) e "Duplica" (`duplicateObjectV2`, con `caps.object_tools`, al posto della duplicazione v1).
+- **Widget agenda** (`components/dashboard/widget-agenda.tsx`): finestra temporale esplicita (oggi, con "domani" e "prossimi 7 giorni" selezionabili), eventi da `/events` v1 (o `listOccurrencesV2` con `caps.occurrences`), task da `project-tasks?due_from&due_to`; nessun limite silenzioso: si mostrano i primi N elementi e un pulsante "Mostra altri (k)" con il conteggio vero (`count` dell'API o lunghezza dell'elenco), che carica le pagine successive.
+- **Sovrapposizioni della vista** (task e progetti in `calendario.tsx`): caricate per la finestra visibile (`due_from/due_to`, `overlap_from/overlap_to`) e paginate fino al `count` reale invece di `limit=200`/`limit=50`; se il numero supera la soglia di sicurezza (1000 per tipo) la vista lo dice ("N task nella finestra: mostrati i primi 1000") invece di tacerlo. Il popover "+N altri" di `dayMaxEvents` resta (non è un troncamento).
+
+#### 9.2.5 Selettori per gli e2e
+
+Gli agenti ADMIN mettono questi `data-testid` (stabili, senza testo localizzato), così il passo E2E non modifica i componenti:
+
+| Passo | `data-testid` |
+|---|---|
+| A1 | `cal-editor-v2` (radice del modale v2), `cal-tab-<generale\|tempo\|ricorrenza\|promemoria\|partecipanti\|avanzate>`, `cal-editor-save`, `cal-editor-delete`, `cal-scope-<this\|this_and_future\|all>`, `cal-conflict-dialog`, `cal-conflict-keep-<campo>`, `cal-conflict-resolve`, `cal-conflict-reload`, `cal-raw-editor`, `cal-raw-check`, `cal-raw-save`, `cal-history-open`, `cal-history-item`, `cal-history-restore`, `cal-trash-item`, `cal-trash-restore` |
+| A2 | `cal-calendar-row`, `cal-calendar-edit`, `cal-calendar-review-ack`, `cal-import-open`, `cal-import-file`, `cal-import-preview`, `cal-import-commit`, `cal-import-status`, `cal-export-link`, `cal-health-collection`, `cal-hold-apply`, `cal-hold-rebuild`, `cal-hold-confirm-input`, `cal-hold-confirm`, `cal-backup-notice` |
+| A3 | `cal-occ-badge-<orphan\|quarantined\|hold\|conservative\|new_from_device>`, `cal-legend-drop-<calendar_id>` (anche `data-calendar-drop-id`), `cal-panel-move`, `cal-panel-duplicate`, `cal-agenda-more`, `cal-overlay-more` |
+
+L'editor v1 si riconosce per l'assenza di `cal-editor-v2` (il file v1 non cambia).
+
+### 9.3 E2E (passo E2E, dopo i due flussi)
+
+- File: `apps/admin/e2e/**` (spec, fixture ICS, `global-setup.ts`/`global-teardown.ts` o script di avvio dello stack), `apps/admin/playwright.config.ts`, `apps/admin/package.json` (devDependency `@playwright/test` **1.56.1** esatta, la versione dei browser preinstallati in `/opt/pw-browsers`; script `"e2e": "playwright test"`), `pnpm-lock.yaml`, `.github/workflows/ci.yml` (job `admin-e2e`), voci di `.gitignore` per `test-results/` e `playwright-report/`. Gli e2e non entrano in `tsc -b` dell'admin (il `tsconfig` dell'app include solo `src`).
+- Stack: Postgres (servizio CI), migrazioni (`test:migrate`), Radicale 3.7.8 nel venv come il job `calendar-integration`, API avviata con mode `radicale` (stato impostato con gli helper di test dell'API), admin buildato servito con `vite preview` (il proxy `/api` è ereditato da `server.proxy`), sessione admin con `storageState`. In locale: `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers` (o `launchOptions.executablePath` quando serve); in CI `pnpm --filter @calicchia/admin exec playwright install --with-deps chromium`. Un solo worker, `retries: 1` in CI, trace `on-first-retry`.
+- Scenari (`apps/admin/e2e/calendar.spec.ts`, più file se serve): modifica "solo questa", "questa e successive", "tutta la serie"; elimina e ripristina dal cestino; ripristino di una versione dalla cronologia; all-day; fuso diverso; promemoria; invitati; editor raw (verifica e salva); import (anteprima, commit, avanzamento) ed export; 412 → `ConflictDialog` (modifica concorrente fatta con PUT diretta a Radicale); collezione in hold → "applica" e "ricostruisci"; badge in vista; drag fra calendari (MOVE); widget agenda con "mostra altri"; **regressione mode postgres** (stato `postgres`: editor v1, nessuna chiamata v2 oltre a `/capabilities`, verificato con `page.on('request')`); capacità lente (route di `/capabilities` ritardata oltre 5 s) → editor v1 subito.
+
+### 9.4 calendar-core nel browser: deciso, resta sul server
+
+Decisione della v1.1: l'admin **non** importa `@calicchia/calendar-core` nemmeno nella tranche C. L'anteprima dell'import è il `dry_run` del server, la validazione dell'editor raw è `PUT /objects/:id/ics` con `dryRun`, il riepilogo delle ricorrenze resta `preview.rrule_summary`. Nessuna modifica a `apps/admin/package.json` per calendar-core, a `vite.config.ts`, al Dockerfile dell'admin né al lockfile per questo motivo. Una validazione dal vivo nel browser, se mai servirà, è una fase futura con la misura del bundle (§12.6).
+
+### 9.5 DTO della tranche C
+
+Nel file `packages/shared/src/calendar-v2.ts`, sezione "Tranche C", scritta dall'architetto prima dei flussi e **non modificabile** dai flussi (una richiesta di cambio va nel report e passa da un aggiornamento di questo contratto). Il file è la fonte di verità delle forme; qui i nomi:
+
+- capacità: `CalV2Capabilities.{raw_edit, object_tools, history, trash, import_export, calendar_properties, health_page, occurrences}`;
+- oggetti: `CalV2RawPutRequest`, `CalV2MoveRequest`, `CalV2DuplicateRequest`;
+- cronologia e cestino: `CAL_V2_VERSION_CHANGE_KINDS`, `CalV2VersionSummary`, `CalV2VersionList`, `CalV2VersionDetail`, `CalV2RestoreRequest`, `CAL_V2_TRASH_NOT_RESTORABLE_REASONS`, `CalV2TrashItem`, `CalV2TrashList`, `CalV2TrashRestoreRequest`;
+- calendari: `CAL_V2_CALENDAR_ROLES`, `CAL_V2_ASSIGNABLE_ROLES`, `CAL_V2_COLLECTION_HEALTH`, `CalV2CalendarView`, `CalV2CalendarList`, `CalV2CalendarCreateRequest`, `CalV2CalendarPatchRequest`, `CalV2CalendarOrderRequest`;
+- import e job: `CAL_V2_IMPORT_CONFLICT_MODES`, `CalV2ImportRequest`, `CalV2ImportPlanItem`, `CalV2ImportPlan`, `CAL_V2_JOB_KINDS`, `CalV2JobAccepted`, `CalV2ImportResult`, `CalV2HoldActionResult`, `CalV2JobView`;
+- salute: `CalV2CollectionState`, `CalV2QuarantinedObject`, `CalV2SyncState`, `CAL_V2_HOLD_CONFIRMATIONS`, `CalV2HoldActionRequest`, `CalV2HoldPlanItem`, `CalV2HoldPlan`;
+- vista: `CAL_V2_OCCURRENCE_KINDS`, `CAL_V2_OCCURRENCE_BADGES`, `CAL_V2_OCCURRENCE_MAX_WINDOW_DAYS`, `CalV2Occurrence`, `CalV2OccurrenceList`, `CalV2OverlayItem`, `CalV2OverlayList`;
+- codici: §9.8.
+
+Le bozze di `CalV2VersionSummary`, `CalV2TrashItem`, `CalV2ImportPlan` e `CalV2Occurrence` della v1.0 sono sostituite da quelle del file.
+
+### 9.6 Flussi, passi e file
+
+Due flussi **paralleli fra loro**, ciascuno con tre passi **sequenziali**; nessun file in comune fra i flussi (dentro un flusso i passi successivi POSSONO toccare i file dei precedenti). Le dipendenze fra flussi sono solo di runtime e passano dai flag di capacità: un passo ADMIN può finire prima del passo API corrispondente, perché senza il flag non mostra nulla. Il passo **E2E** parte quando entrambi i flussi sono chiusi.
+
+| Passo | File posseduti | Route | Flag acceso |
+|---|---|---|---|
+| **C1** | `apps/api/src/lib/calendar/v2/{raw,move,history}.ts` (nuovi); `v2/objects.ts`, `v2/errors.ts`, `v2/capabilities.ts`, `routes/calendar/admin-v2.ts` (aggiunte); `radicale/store.ts`, `radicale/versions.ts`, `radicale/ids.ts` (solo aggiunte, se servono); test `apps/api/test/calendar/admin-v2-c1.test.ts`, `apps/api/test/integration/admin-v2-c1-radicale.test.ts` | §9.1.2, §9.1.3 | `raw_edit`, `object_tools`, `history`, `trash` |
+| **C2** | `v2/calendars.ts`, `v2/import-export.ts` (nuovi, con l'handler del job `calendar_import`); `routes/calendar/admin-v2.ts` (aggiunte, `bodyLimit` dell'import), `v2/capabilities.ts`, `v2/errors.ts`; `lib/calendar/jobs.ts` (voce in `CAL_JOB_KINDS`); `cron/calendar-radicale.ts` (una riga di registrazione); `radicale/store.ts` (solo aggiunte); test `admin-v2-c2.test.ts`, `integration/admin-v2-c2-radicale.test.ts` | §9.1.4 | `calendar_properties`, `import_export` |
+| **C3** | `v2/sync-state.ts`, `v2/hold.ts` (con gli handler `calendar_hold_apply` e `calendar_hold_rebuild`), `v2/occurrences.ts` (nuovi); `routes/calendar/admin-v2.ts`, `v2/capabilities.ts`, `v2/errors.ts`, `lib/calendar/jobs.ts`, `cron/calendar-radicale.ts` (aggiunte); `radicale/sync.ts` (solo aggiunte); `routes/project-tasks.ts`, `routes/client-projects.ts` (solo i parametri a finestra); test `admin-v2-c3.test.ts`, `integration/admin-v2-c3-radicale.test.ts`, `apps/api/test/window-params.test.ts` | §9.1.5, §9.1.6 | `health_page`, `occurrences` |
+| **A1** | `apps/admin/src/lib/calendar-v2-api.ts` (timeout e funzioni A1); `pages/calendario.tsx` (solo `EventEditorHost`); `pages/calendario/evento/{evento-editor,tab-avanzate}.tsx` e `components/calendar/{scope-dialog,conflict-dialog}.tsx` (cronologia, raw, `data-testid`); `components/calendar/{raw-ics-editor,history-drawer}.tsx`, `pages/calendario/cestino.tsx` (nuovi); `App.tsx` (rotta), `components/layout/calendar-tabs.tsx` (tab condizionale); `lib/i18n-dictionary.ts` (solo voci nuove) | — | — |
+| **A2** | `lib/calendar-v2-api.ts` (funzioni A2); `pages/calendario/calendari.tsx`; `components/calendar/import-dialog.tsx`, `pages/calendario/salute.tsx` (nuovi); `pages/impostazioni.tsx` (solo l'avviso Backup); `App.tsx`, `calendar-tabs.tsx`, `i18n-dictionary.ts` (aggiunte) | — | — |
+| **A3** | `lib/calendar-v2-api.ts` (funzioni A3); `pages/calendario.tsx` (vista, pannello, drag); `components/dashboard/widget-agenda.tsx`; componenti nuovi della vista in `components/calendar/` (es. `occurrence-badges.tsx`); `i18n-dictionary.ts` (aggiunte) | — | — |
+| **E2E** | §9.3 | — | — |
+
+Nessun passo tocca: questo contratto e i precedenti (le questioni vanno nel report), `packages/shared/src/calendar-v2.ts`, `routes/calendar/admin.ts` (v1), `evento-edit.tsx`, `lib/recurrence-form.ts`, `lib/api.ts`, `vite.config.ts`, i Dockerfile, `apps/api/package.json`, `apps/api/src/index.ts`, `app.ts`, le migrazioni; `apps/admin/package.json`, il lockfile e la CI solo nel passo E2E. `apps/api/src/lib/agent/.kb-metadata.json` non si committa mai.
+
+### 9.7 Capacità della tranche C
+
+| Flag | Passo | Vero quando |
+|---|---|---|
+| `raw_edit` | C1 | `objects.read` |
+| `object_tools` | C1 | `objects.read` |
+| `history` | C1 | `objects.read` |
+| `trash` | C1 | `objects.read` |
+| `calendar_properties` | C2 | `objects.read` |
+| `import_export` | C2 | `objects.read` |
+| `health_page` | C3 | `objects.read` |
+| `occurrences` | C3 | `objects.read` |
+
+Un flag dice che la funzione esiste ed è leggibile; scrivere richiede comunque `objects.write` (con `write: false` l'admin mostra i comandi di scrittura disabilitati con il motivo di `reasons`, e il server risponde 503 dal gate). Ogni passo aggiorna il test delle capacità di `admin-v2-routes.test.ts` (postgres: tutti false) e aggiunge l'asserzione "radicale: il proprio flag vero".
+
+### 9.8 Codici nuovi
+
+| Stato | `code` | Quando |
+|---|---|---|
+| 400 | `CONFIRMATION_REQUIRED` | conferma digitata assente o diversa (§9.1.1) |
+| 400 | `IDEMPOTENCY_KEY_REQUIRED` | `commit` senza `Idempotency-Key` valida, o chiave nel corpo |
+| 409 | `IDEMPOTENCY_CONFLICT` | stessa chiave con una richiesta diversa |
+| 409 | `PLAN_CHANGED` | `plan_hash` del commit diverso dal piano ricalcolato (`details.plan`) |
+| 409 | `VERSION_NOT_RESTORABLE` | versione non valida, scaduta o di un altro oggetto |
+| 409 | `NOT_RESTORABLE` | ripristino dal cestino impossibile (`details.reason` in `CAL_V2_TRASH_NOT_RESTORABLE_REASONS` o `href_taken`) |
+| 409 | `CALENDAR_NOT_EMPTY` | `DELETE /calendars/:id` di un calendario con oggetti senza `with_objects=1` |
+| 409 | `NOT_IN_HOLD` | azione di hold su una collezione non in hold |
+| 413 | `PAYLOAD_TOO_LARGE` | corpo oltre il limite (2 MB, 10 MB per l'import); sostituisce il 413 `VALIDATION_FAILED` della tranche B |
+
+`GET /jobs/:jobId`, versioni, cestino e calendari inesistenti → 404 `NOT_FOUND`. `CalV2ErrorStatus` dell'API si estende con 413.
+
+### 9.9 Test e uscita della tranche C
+
+Mirati, suite complete alla CI. Ogni passo API: unità con il runner (`pnpm --filter @calicchia/api exec tsx test/run.ts test/calendar/admin-v2-cN.test.ts`), integrazione con Radicale reale (stesso runner su `test/integration/admin-v2-cN-radicale.test.ts`, `RADICALE_BIN` del venv), `typecheck` e `typecheck:test`. Ogni passo ADMIN: `pnpm --filter @calicchia/admin build` e `lint`.
+
+- **C1** — unità: 401, CSRF (403/415), mode postgres → 409 `STORE_MODE_UNSUPPORTED` su ogni route nuova, 428 su raw/move/restore senza `If-Match`, UID diverso nel raw → 400, VTODO nel raw → 403, flag. Integrazione: raw PUT lossless (byte per byte salvo CRLF) e 412 con device concorrente; dryRun non cambia l'ETag; move con stesso id e 409 `MOVE_CONFLICT`; duplicate di un'istanza (data dell'occorrenza, niente RRULE) e `keep_recurrence`; export identico a `/ics`; versioni dopo tre modifiche (`changed_fields`, `current`); restore con SEQUENCE+1 e nuova versione `restore`; delete → cestino → restore con **lo stesso id**; `uid_exists`; versione scaduta → 409.
+- **C2** — unità: validazione dei corpi, ruoli non assegnabili → 403, ordine incompleto → 400, `CALENDAR_NOT_EMPTY`, import senza `Idempotency-Key` → 400, stessa chiave → stesso job, chiave con corpo diverso → 409, `PLAN_CHANGED`, 413 oltre 10 MB, `GET /jobs` di un tipo estraneo → 404. Integrazione: CRUD con PROPPATCH visibile via PROPFIND; ordine; rotate-token cambia il feed; export → import in un calendario vuoto con lo stesso numero di oggetti e VALARM/X-* conservati; `on_conflict` nelle tre modalità; job con progress e risultato; payload senza `ics` a fine job.
+- **C3** — unità: finestra > 100 giorni → 400, badge calcolati (orfano, quarantena, hold, conservativo, nuovo dal dispositivo), esclusione di holidays/subscription da `/occurrences` e presenza in `/overlays`, conferma errata → 400, `NOT_IN_HOLD`; `window-params.test.ts`: `due_from/due_to` e `overlap_from/overlap_to` filtrano, senza parametri risposta invariata. Integrazione: occorrenze oltre l'orizzonte complete (serie giornaliera su 100 giorni: 100 occorrenze, nessun troncamento); cancellazione di massa da "device" → hold → dry_run → apply (indice ripulito, hold caduto); seconda volta → rebuild (risorse riscritte da versione, hold caduto, stessi id); `sync-state` coerente.
+- **A1-A3** — build e lint verdi; in mode postgres nessuna chiamata v2 oltre a `/capabilities` (verificato poi dall'E2E).
+- **E2E** — il job `admin-e2e` verde in CI con gli scenari del §9.3.
+- **Uscita della tranche C:** tutto sopra verde; contratti v1/F0 verdi in CI; in mode postgres l'admin identico a oggi; in staging, con un iPhone e un Android collegati: modifica raw, ripristino dal cestino (il device rivede l'evento con lo stesso UID), import di un export di Google Calendar, hold provocato e risolto dalla pagina Salute.
 
 ## 10. Grafo delle chiamate (tranche B)
 
 `routes/calendar/admin-v2.ts` → `v2/objects.ts` → (`v2/capabilities.ts`, `v2/view.ts`, `v2/series.ts`, `radicale/store.ts` primitive, `@calicchia/calendar-core`). `v2/view.ts` e `v2/series.ts` non importano lo store né il database. `v2/*` non importa `routes/*`. L'admin importa solo `@calicchia/shared` e i propri moduli.
 
+Tranche C: `routes/calendar/admin-v2.ts` → `v2/{raw,move,history}.ts` (C1), `v2/{calendars,import-export}.ts` (C2), `v2/{sync-state,hold,occurrences}.ts` (C3) → (`v2/objects.ts`, `v2/view.ts`, `v2/capabilities.ts`, `radicale/{store,versions,ids,sync,health}.ts`, `lib/calendar/jobs.ts`, `@calicchia/calendar-core`). I moduli di un passo non importano quelli di un passo successivo; gli handler dei job stanno nei moduli del passo e si registrano da `cron/calendar-radicale.ts`.
+
 ## 11. Precisazioni rispetto al design
 
 1. **412 invece di 409 per il CAS della v2.** Il design §8 passo 4 prevede 409 con `{field, base, theirs, yours}`; la v2 usa 412 `PRECONDITION_FAILED` con la versione completa del server (`current`) e `{field, theirs, yours}` (la base ce l'ha il client). v1 e MCP restano con la base implicita e il 409.
 2. **Base come token opachi** per campo e per proprietà, calcolati sul componente target (pre-immagine per un'istanza), al posto dei valori: niente conversioni wire↔core nel confronto.
-3. **calendar-core non va nel browser nella tranche B** (§1); il piano F6 attività 3 si sposta alla tranche C ed è condizionata (§9.4). `describeRrule` sta in calendar-core.
+3. **calendar-core non va nel browser** né nella tranche B (§1) né nella C (§9.4, decisione della v1.1): il piano F6 attività 3 non si fa in questa fase. `describeRrule` sta in calendar-core.
 4. **Sposta dentro la PATCH** (`move_to_calendar_id`) nella tranche B, per non perdere la funzione dell'editor v1; `POST /move` separata nella tranche C per il drag fra calendari.
 5. **Archivio in sola lettura nella v2** (decisione 7). La nota del design §8 "nessuna nuova guardia di ruolo per l'API" resta vera per v1 e MCP.
 6. **Propagazione dello scope `all` agli override non personalizzati** (§3.8), come i client Apple e Google: il design non la specificava.
-7. **Nessun `GET /occurrences` nella tranche B:** la vista resta su `/events` v1 e il target si risolve con `original_start` (§3.2).
-8. **Editor ICS raw in sola lettura nella tranche B** (visualizza, copia, scarica); `PUT /objects/:id/ics` nella tranche C.
+7. **`GET /occurrences` solo nella tranche C e solo con `caps.occurrences`:** nella tranche B e in mode postgres la vista resta su `/events` v1 e il target si risolve con `original_start` (§3.2).
+8. **Editor ICS raw in sola lettura nella tranche B** (visualizza, copia, scarica); `PUT /objects/:id/ics` nella tranche C, senza ritocchi automatici di DTSTAMP e SEQUENCE (§9.1.2).
+9. **Niente refactor della vista nella F6** (§9.0.2): il design §11 e il piano F6 prevedevano FullCalendar con luxon, viste lista e anno in `pages/calendario/vista/*`; resta tutto in `calendario.tsx`, e il drag fra calendari si fa rilasciando sulla legenda invece che in una vista a risorse.
+10. **Azioni di hold come job** (`calendar_hold_apply`, `calendar_hold_rebuild`) invece che sincrone: idempotenza con `cal_jobs (kind, key)` senza una tabella nuova, avanzamento visibile e throttling delle PUT.
+11. **"Ricostruisci dall'indice" riscrive l'ultima versione valida** di ogni cancellazione sospesa con `If-None-Match: *` (design §16.3 scenario A parla di `If-Match`: per una risorsa sparita la precondizione corretta è `If-None-Match: *`).
 
 ## 12. Questioni aperte
 
@@ -777,3 +1011,6 @@ Da decidere all'avvio della tranche C con una misura del bundle. Default: resta 
 2. **Propagazione dello scope `all`.** Da confermare in staging con iOS e macOS (stessa matrice della F3) che la regola del §3.8 coincida con quella dei client Apple sugli override.
 3. **VTODO e VJOURNAL.** Solo lettura (`component_unsupported`) finché non si sceglie l'estensione VTODO (decisione 9, F7).
 4. **Override senza master** (inviti a singole occorrenze, RFC 6638): ammessi solo con scope `this`; da verificare se un client li produce davvero in produzione.
+5. **Refactor della vista** (FullCalendar 6.1.21 con `@fullcalendar/luxon3` e `luxon` 3.7.2, `timeZone="Europe/Rome"`, viste lista e anno, `pages/calendario/vista/*`, drag fra calendari in una vista a risorse): rinviato a dopo la F6 per decisione dell'orchestratore; richiederà le modifiche a `apps/admin/package.json` e al lockfile.
+6. **calendar-core nel browser** (validazione dal vivo dell'editor raw e anteprima locale dell'import): solo se il `dryRun` del server si rivela lento in uso reale, con la misura del bundle e le modifiche elencate nella v1.0 del §9.4 (vite, Dockerfile, package.json, lockfile).
+7. **Cestino delle istanze:** il cestino copre gli oggetti interi; un'istanza esclusa (EXDATE) si ripristina dalla cronologia dell'oggetto o dal tab Ricorrenza ("ripristina occorrenza"), non dal cestino.
