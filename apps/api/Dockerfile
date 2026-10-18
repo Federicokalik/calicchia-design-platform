@@ -22,6 +22,7 @@ COPY apps/admin/package.json ./apps/admin/
 COPY apps/sito-v3/package.json ./apps/sito-v3/
 COPY apps/mcp/package.json ./apps/mcp/
 COPY packages/shared/package.json ./packages/shared/
+COPY packages/calendar-core/package.json ./packages/calendar-core/
 RUN pnpm install --frozen-lockfile
 
 # --- runtime ---
@@ -58,6 +59,13 @@ COPY apps/api/assets ./apps/api/assets
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/shared/src ./packages/shared/src
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+# Stesso schema per @calicchia/calendar-core (nucleo iCalendar del calendario su
+# Radicale): sorgente TypeScript dal build context e node_modules proprio del
+# pacchetto dallo stage deps (ical.js e timezones-ical-library, pinnati esatti).
+# Senza: ERR_MODULE_NOT_FOUND su '@calicchia/calendar-core' o su 'ical.js'.
+COPY packages/calendar-core/package.json ./packages/calendar-core/
+COPY packages/calendar-core/src ./packages/calendar-core/src
+COPY --from=deps /app/packages/calendar-core/node_modules ./packages/calendar-core/node_modules
 # Migration runner + SQL files — used by the one-off `migrate` service in
 # docker-compose.prod.yml. scripts/migrate.ts resolves apps/api/database/
 # (base schema) and database/migrations/ (numbered files) by relative path.

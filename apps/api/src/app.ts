@@ -55,6 +55,8 @@ import { calendarPublic } from './routes/calendar/public';
 import { calendarAdmin } from './routes/calendar/admin';
 import { calendarFeed } from './routes/calendar/feed';
 import { caldavBackend } from './routes/calendar/caldav-backend';
+import { calendarHealth } from './routes/calendar/health';
+import { calendarMigration } from './routes/calendar/migration';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -145,6 +147,10 @@ const LARGE_BODY_PREFIXES = [
   '/api/backup/import',
   '/api/whatsapp-admin/conversations/',
   '/api/portal/upload',
+  // Archivio della Fase 0 dello strumento di migrazione del calendario: fino a
+  // 20 MB, limite applicato dal router (routes/calendar/migration.ts, contratto
+  // f3-modules §10.2).
+  '/api/admin/calendar/migration/phase0/archive',
 ];
 app.use('*', async (c, next) => {
   const path = c.req.path.toLowerCase();
@@ -233,6 +239,8 @@ app.use('/api/assets/*', serveStatic({ root: './assets', rewriteRequestPath: (pa
 
 // Health check (no auth required)
 app.route('/api/health', health);
+// Salute del calendario (F2, design §16.5): stato pubblico, dettaglio con JWT admin.
+app.route('/api/health/calendar', calendarHealth);
 
 // Private files (SEC-10): quote PDFs / receipts / WhatsApp media. Public route —
 // access is gated by the signed URL, not by a session. Must stay OUT of the
@@ -524,6 +532,9 @@ app.route('/api/milestones', milestones);
 app.route('/api/time-entries', timeEntries);
 app.route('/api/project-comments', projectComments);
 app.route('/api/calcom', calcom);
+// Strumento di migrazione del calendario a Radicale (F3, contratto f3-modules
+// §10): montato PRIMA di /api/admin/calendar, stesso JWT admin (protectedPaths).
+app.route('/api/admin/calendar/migration', calendarMigration);
 app.route('/api/admin/calendar', calendarAdmin);
 app.route('/api/notifications', notifications);
 app.route('/api/dashboard', dashboard);
@@ -577,9 +588,11 @@ app.use('/api/mcp', mcpAuthMiddleware);
 app.use('/api/mcp/*', mcpAuthMiddleware);
 app.route('/api/mcp', mcp);
 
-// CalDAV backend — endpoint interni per il plugin Radicale (service-token auth).
-// Path top-level (NON sotto /api/calendar, che è il router pubblico). Mai
-// esposto dal reverse proxy: raggiungibile solo da Radicale su app-net.
+// CalDAV backend — POST /verify-credentials per il plugin caldes_auth di
+// Radicale (service-token auth, contratto control-plane §9.4). Path top-level
+// (NON sotto /api/calendar, che è il router pubblico). Radicale lo chiama sulla
+// rete interna caldav-int (CALDAV_BACKEND_URL=http://api-int:3001/...); il vhost
+// pubblico dell'API inoltra anche questo path, quindi la protezione è il Bearer.
 app.use('/api/caldav-backend', caldavServiceAuth);
 app.use('/api/caldav-backend/*', caldavServiceAuth);
 app.route('/api/caldav-backend', caldavBackend);

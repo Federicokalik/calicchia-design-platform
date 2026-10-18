@@ -1,32 +1,140 @@
-# Radicale — config FASE 3 (backend Postgres via API).
-# Storage + auth plugin caldes_* parlano con /api/caldav-backend/* (Bearer
-# CALDAV_SERVICE_TOKEN). Postgres è l'unica fonte di verità: nessun file
-# storage lato Radicale, nessun htpasswd. Vedi apps/radicale/README.md.
+# Radicale 3.7.8 per Caldes, fase F1 del passaggio del calendario a Radicale.
+#
+# Radicale è il server CalDAV dei device (iPhone, Mac, DAVx5, Thunderbird) con
+# storage nativo su file nel volume radicale_collections. In F1 Postgres resta
+# la fonte di verità: la policy scritta dall'API tiene i device in sola lettura
+# (shadow) o senza accesso finché il volume non è inizializzato. Riferimenti:
+# docs/calendar-radicale/design.md §3.2-§3.4 e
+# docs/calendar-radicale/contracts/control-plane.md.
+#
+# Regole di questo file:
+# - il config sta nell'immagine (/app/config/config, CMD del Dockerfile) e
+#   cambia solo con un tag sha nuovo: il compose non lo monta dal repository;
+#   nessuna variabile RADICALE_CONFIG_*: l'entrypoint dell'immagine tomsquest
+#   proverebbe a riscriverlo (design §3.1);
+# - i commenti stanno sempre su righe proprie: Radicale legge il file con
+#   RawConfigParser, che non conosce i commenti in fondo alla riga e li
+#   tratterebbe come parte del valore ("False   # ..." non è un booleano);
+# - segreti e indirizzi dei plugin arrivano solo dall'ambiente (CALDAV_*,
+#   CALDES_*, RADICALE_PRINCIPAL), mai da qui.
 
 [server]
-# Loopback gestito da Docker; CloudPanel fa da TLS terminator davanti.
+# Tutte le interfacce IPv4 del container: la porta è pubblicata solo su
+# 127.0.0.1:3011 (CloudPanel termina il TLS) e raggiungibile dall'API sulla
+# rete interna caldav-int; l'healthcheck interroga 127.0.0.1:5232.
 hosts = 0.0.0.0:5232
+# Richieste servite in parallelo. Un client lento o un backend di auth lento
+# occupano un thread ciascuno: 16 bastano per un utente con pochi device e
+# l'API, senza far crescere troppo la memoria.
+max_connections = 16
+# Corpo massimo di una richiesta (20 MB), allineato a client_max_body_size 20m
+# del vhost CloudPanel: oltre, Radicale risponde 413 invece di leggerlo.
+max_content_length = 20000000
+# Dimensione massima di un singolo oggetto iCalendar (10 MB, il default di
+# Radicale, esplicitato): basta per qualsiasi evento con allegati inline.
+max_resource_size = 10000000
+# Timeout dei socket in secondi: un client che smette di inviare libera il
+# thread dopo 30 s.
+timeout = 30
+# Nessun ritardo sulle risposte 5xx (il default di Radicale è 1 s). Quando il
+# backend di autenticazione è giù e non c'è una credenziale in cache, caldes_auth
+# solleva un'eccezione e Radicale risponde 500: il client riprova senza
+# invalidare la password e la risposta deve arrivare subito, senza tenere
+# occupato un thread (design §3.3, contratto §10 "500 senza delay").
+delay_on_error = 0
+# Tetto di occorrenze stimate di una RRULE. Radicale la stima come
+# (UNTIL - DTSTART) / intervallo della FREQ, ignorando INTERVAL e BY*: con il
+# default 10000 una serie giornaliera fino al 2056 viene rifiutata (400).
+# Vale anche IN LETTURA (cache miss): mai abbassarlo dopo che ci sono dati.
+# Replicato identico nel validatore dell'API e nello strumento di migrazione.
+max_vevent_rrule_occurrence = 50000
 
 [auth]
-# Plugin custom: valida Basic auth (username:app-password) chiamando
-# POST /api/caldav-backend/verify-credentials. Le app-password sono token
-# random hashati sha256 nella tabella caldav_app_passwords.
+# Plugin caldes_auth (apps/radicale/plugins/caldes_auth.py): utenti di servizio
+# caldes-svc e caldes-probe riconosciuti dal peer TCP (CALDES_SVC_CIDR,
+# 127.0.0.1 solo per il probe) con hash in env; ogni altra credenziale è
+# un'app-password verificata da POST $CALDAV_BACKEND_URL/verify-credentials e
+# restituisce sempre il principal canonico RADICALE_PRINCIPAL. Configurazione
+# solo da env (contratto §1.2 e §9).
 type = caldes_auth
-# Backend URL interno (Docker app-net). Override via env CALDAV_BACKEND_URL.
-caldes_backend_url = http://api:3001/api/caldav-backend
-# Bearer secret letto da env CALDAV_SERVICE_TOKEN (NON committato qui).
-
-[storage]
-# Plugin custom: thin client HTTP verso /api/caldav-backend/*. Nessun file.
-type = caldes_storage
-caldes_backend_url = http://api:3001/api/caldav-backend
-# Bearer secret letto da env CALDAV_SERVICE_TOKEN (NON committato qui).
+# Ritardo dopo un login fallito (casuale fra 0,5 e 1,5 volte il valore): rallenta
+# i tentativi di forza bruta. Radicale lo applica anche ai 401/403 dei client già
+# autenticati. Le risposte 500 (backend giù) restano senza ritardo.
+delay = 1
 
 [rights]
-# owner_only: ogni utente vede solo le proprie collezioni. Mono-utente OK
-# (il principal viene dall'auth plugin = username dell'app-password).
-type = owner_only
+# Plugin caldes_rights (apps/radicale/plugins/caldes_rights.py): policy
+# shadow/live/frozen scritta dall'API, heartbeat dell'API (più vecchio di 10
+# minuti → frozen), identità del volume (dead prop volume-id ed epoch sul
+# principal), matrice dei permessi del contratto §8. Richiede l'env
+# RADICALE_PRINCIPAL e verifica all'avvio la patch di fedeltà di vobject.
+type = caldes_rights
+# Policy e heartbeat sul volume caldes_control, montato in sola lettura: li
+# scrive solo l'API. caldes_auth legge lo stesso file della policy
+# (CALDES_POLICY_FILE) per credential_epoch: i due percorsi devono coincidere.
+caldes_policy_file = /control/policy.json
+caldes_heartbeat_file = /control/heartbeat.json
+# Nessuna DELETE di una collezione senza il permesso esplicito D: ce l'ha solo
+# caldes-svc, mai i device (un calendario cancellato da un telefono
+# porterebbe via eventi che Postgres o l'indice considerano esistenti).
+permit_delete_collection = False
+# Nessuna MKCALENDAR o PUT che sovrascriva una collezione esistente senza il
+# permesso esplicito O, che nessuno ha: la collezione resta, la richiesta
+# risponde con un errore.
+permit_overwrite_collection = False
+
+[storage]
+# Storage nativo su file: una directory per collezione, un file .ics per
+# oggetto, proprietà in .Radicale.props, cache in .Radicale.cache. L'API monta
+# lo stesso volume in sola lettura e fa stat delle directory (campanello,
+# design §6.1).
+type = multifilesystem
+# Volume radicale_collections montato in /data (permessi 770, utente radicale
+# 2999): le collezioni stanno in /data/collections/collection-root/<principal>/.
+# Il lock globale è /data/collections/.Radicale.lock (flock, usato anche dallo
+# script di backup).
+filesystem_folder = /data/collections
+# Cache degli item validata con mtime e dimensione del file invece dello
+# sha256 del contenuto: molto più veloce sulle collezioni grandi. Sicuro perché
+# nessuno modifica i file a mano (l'API scrive solo via CalDAV).
+use_mtime_and_size_for_item_cache = True
+# Età massima dei sync-token (60 giorni): un device fermo più a lungo rifà una
+# sincronizzazione completa invece di ricevere un diff incompleto.
+max_sync_token_age = 5184000
+# Un file .ics illeggibile viene saltato (con un errore nel log) invece di far
+# fallire l'intera collezione. Nella sync-collection compare come 404 pur
+# esistendo su disco: l'indicizzatore dell'API distingue questo caso da una
+# cancellazione vera controllando il file (design §6.2).
+skip_broken_item = True
+# Precondizioni rigorose sulle PUT (If-Match/If-None-Match obbligatori dove
+# servono). Resta False finché iOS, macOS, DAVx5 e Thunderbird non superano la
+# matrice di prova della fase F3; poi True. L'API manda sempre If-Match o
+# If-None-Match comunque.
+strict_preconditions = False
+# Nessuna collezione creata in automatico al primo login: principal e
+# collezioni nascono solo dall'inizializzazione (wizard, contratto §4.4).
+predefined_collections = {}
+
+[hook]
+# Nessun hook di storage: le modifiche le rileva l'API con stat delle
+# directory. Se un giorno servisse, la property `enabled` del plugin deve
+# restituire True, altrimenti la PUT risponde 500 dopo aver già salvato.
+type = none
+
+[sharing]
+# Nessuna condivisione per token o mappa (Radicale 3.7): un solo utente, accesso
+# solo dal principal canonico.
+type = none
+
+[web]
+# Nessuna interfaccia web: solo CalDAV.
+type = none
 
 [logging]
-# Alza a debug per diagnosticare discovery/sync dei device.
-# level = debug
+# info: una riga per richiesta e per login, più gli eventi caldes_event dei
+# plugin. Per diagnosticare la discovery di un device: debug, temporaneamente.
+level = info
+# Le password non compaiono mai nei log (default di Radicale, esplicitato).
+mask_passwords = True
+# Il contenuto delle PUT rifiutate non va nei log: contiene dati personali.
+bad_put_request_content = False

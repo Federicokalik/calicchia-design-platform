@@ -17,6 +17,8 @@ import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintena
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
+import { runCalendarHorizon, runCalendarMigrationReaper, runCalendarNightlyAudit, runCalendarReverseSweep } from './calendar-radicale';
+import { runShadowHourlyParity, runShadowNightly, SHADOW_NIGHTLY_HOUR } from '../lib/calendar/migration/shadow';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
 import { runQuoteScheduledSend } from './quote-scheduled-send';
@@ -30,12 +32,24 @@ import { runMarketingSend } from './marketing-send';
 import { runMarketingSendWhatsApp } from './marketing-send-whatsapp';
 import { runMarketingAutomations } from './marketing-automations';
 import { runDeviceNotesTranscription } from './device-notes';
+import { calendarApiLevelBlocked } from '../lib/calendar/api-level';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'cron' });
 
 interface LongTimer {
   clear: () => void;
+}
+
+/**
+ * Job che toccano il calendario: con l'immagine sotto api_min_version (F4R-TR-5,
+ * design §16.6) non girano. Il blocco si decide al boot, prima di startCronEngine().
+ */
+function unlessCalendarLevelBlocked(run: () => Promise<void>): () => Promise<void> {
+  return async () => {
+    if (calendarApiLevelBlocked()) return;
+    await run();
+  };
 }
 
 interface CronJob {
@@ -136,9 +150,66 @@ const jobs: CronJob[] = [
     run: runDunningEngine,
   },
   {
+    // Iscrizioni ICS: pull legacy e, con lo store postgres, pull verso
+    // l'indice delle iscrizioni con sidecar (F3: sostituisce il cron
+    // calendar-subscriptions-index della F2).
     name: 'ics-pull',
     intervalMs: 15 * 60 * 1000,
-    run: runIcsPull,
+    run: unlessCalendarLevelBlocked(runIcsPull),
+  },
+  {
+    // Calendario su Radicale (F2, design §6.9): estensione giornaliera
+    // dell'orizzonte dell'indice dal testo già indicizzato, senza I/O verso
+    // Radicale. Spento senza RADICALE_URL.
+    name: 'calendar-horizon',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 1,
+    run: runCalendarHorizon,
+  },
+  {
+    // Calendario su Radicale (F2, design §6.8): auditor notturno (volume
+    // contro indice, identità, policy, sidecar, orizzonte, retention di
+    // versioni e job). Spento senza RADICALE_URL.
+    name: 'calendar-audit',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 4,
+    run: runCalendarNightlyAudit,
+  },
+  {
+    // Strumento di migrazione del calendario (F3, contratto f3-modules §5.2):
+    // run rimasti senza esecutore chiusi come `interrupted`. Spento senza
+    // RADICALE_URL.
+    name: 'calendar-migration-reaper',
+    intervalMs: 5 * 60 * 1000,
+    run: runCalendarMigrationReaper,
+  },
+  {
+    // Shadow mirror (F3, design §13.8, contratto f3-modules §9.5): apply
+    // completo con verifica V1-V5 di tutti i calendari dalle opzioni
+    // dell'ultima anteprima. Salta con lo shadow spento o senza Radicale; con
+    // un run in corso riprova ogni 10 minuti per al più 3 ore.
+    name: 'calendar-shadow-nightly',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: SHADOW_NIGHTLY_HOUR,
+    run: unlessCalendarLevelBlocked(async () => {
+      await runShadowNightly();
+    }),
+  },
+  {
+    // Shadow mirror (F3): giro orario della parità, verifica V4 sui prossimi
+    // 14 giorni. Stesse condizioni del giro notturno, più nessuna partenza fra
+    // 5 minuti prima e 15 dopo l'ora del notturno (non lo fa saltare).
+    name: 'calendar-shadow-parity',
+    intervalMs: 60 * 60 * 1000,
+    run: unlessCalendarLevelBlocked(runShadowHourlyParity),
+  },
+  {
+    // Passaggio a Radicale (F4, contratto f4-modules §10): giro di backstop
+    // della proiezione inversa (Radicale → calendar_events) nella finestra di
+    // rollback. Non fa nulla fuori da mode radicale o senza RADICALE_URL.
+    name: 'calendar-reverse-sweep',
+    intervalMs: 15 * 60 * 1000,
+    run: unlessCalendarLevelBlocked(runCalendarReverseSweep),
   },
   {
     name: 'whatsapp-media-fetch',
@@ -181,7 +252,7 @@ const jobs: CronJob[] = [
     // mantiene una finestra mobile di 6 anni (Pasqua inclusa, auto-calcolata).
     name: 'italian-holidays',
     intervalMs: 7 * 24 * 60 * 60 * 1000,
-    run: runItalianHolidays,
+    run: unlessCalendarLevelBlocked(runItalianHolidays),
   },
   {
     // KB → S4 backup: retries a pending push (admin edit that didn't reach S4).
