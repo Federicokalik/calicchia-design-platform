@@ -98,7 +98,7 @@ import {
 } from '../../src/lib/calendar/migration/reverse-projector';
 import { sameBusy } from '../../src/lib/calendar/migration/rollback';
 import { registerMigrationRunJob } from '../../src/lib/calendar/migration/runs';
-import { registerShadowMirrorJob } from '../../src/lib/calendar/migration/shadow';
+import { parityDay, registerShadowMirrorJob } from '../../src/lib/calendar/migration/shadow';
 import { getActiveTransition, setTransitionTestHooks } from '../../src/lib/calendar/migration/transition';
 import {
   CALENDAR_API_LEVEL,
@@ -637,8 +637,12 @@ describe('prova generale della F4 dalle route del wizard, con Radicale reale e l
     // Sette giorni di parità verde emulati: giri notturni verdi retrodatati (il test non aspetta una settimana).
     const now = Date.now();
     await sql`UPDATE calendar_backend_state SET shadow_since = ${new Date(now - 9 * DAY_MS)} WHERE id`;
-    for (let d = 7; d >= 1; d--) {
-      const at = new Date(now - d * DAY_MS - 2 * 3_600_000);
+    // Un giro per giorno di calendario di Roma (come computeParityStreak), alle 12:00 UTC del giorno
+    // d prima di oggi: con now - d*24h, fra le 22 e le 24 UTC (ora legale) restava un buco di un giorno.
+    // Otto giorni: dopo mezzanotte UTC il giro di sette giorni fa dista meno di 7*24h da now (days_green).
+    const today = Date.parse(`${parityDay(new Date(now))}T12:00:00Z`);
+    for (let d = 8; d >= 1; d--) {
+      const at = new Date(today - d * DAY_MS);
       await sql`
         INSERT INTO cal_migration_runs (kind, status, trigger, requested_by, params, summary, created_at, started_at, finished_at, attempts)
         VALUES ('verify', 'succeeded', 'schedule', 'system:shadow', ${sql.json(FULL_VERIFY as never)}, ${sql.json({ acceptable: true, overall: 'green' } as never)}, ${at}, ${at}, ${at}, 1)
