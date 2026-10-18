@@ -31,6 +31,7 @@ import { after, test } from 'node:test';
 import { onBeforeDatabaseClose, onDatabaseReady, sql } from '../helpers/db';
 import { api, ensureTestAdmin, signTestToken, TEST_ADMIN, type TestResponse } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
+import { isRadicaleBackend, useCalendarBackend } from '../helpers/calendar-backend';
 import { createNormalizer } from '../helpers/normalize';
 import { freezeTime, restoreTime } from '../helpers/clock';
 import { BookingConflictError } from '../../src/lib/calendar/booking';
@@ -44,6 +45,7 @@ import {
 } from './_http-contract';
 
 const fx = useFixtures('contratto-capacita', { resetBaseline: true });
+useCalendarBackend();
 
 const store = httpContractStore(
   'capacity-and-slots',
@@ -164,7 +166,14 @@ async function buildScenario(): Promise<Scenario> {
   await fx.allDayEvent({ calendar: work, summary: 'Fiera', date: '2027-05-06' });
   await fx.event({ calendar: work, summary: 'Forse', status: 'tentative', start_time: romeIso('2027-05-06', '11:00'), end_time: romeIso('2027-05-06', '12:00') });
   await fx.event({ calendar: work, summary: 'Annullato', status: 'cancelled', start_time: romeIso('2027-05-06', '14:00'), end_time: romeIso('2027-05-06', '15:00') });
-  await fx.event({ calendar: work, summary: 'Scadenza di sistema', source: 'system', start_time: romeIso('2027-05-07', '09:00'), end_time: romeIso('2027-05-07', '10:00') });
+  // Con lo store Radicale la provenienza 'system' esiste solo per le festività
+  // del cron nel calendario festività (design §5: la decidono collezione e href,
+  // RadicaleStore rifiuta source 'system' altrove), quindi l'evento non è
+  // rappresentabile. Escluso dalla capacity, e nel giorno della chiusura del 7
+  // maggio: con lo store legacy non cambia né le ore né gli slot.
+  if (!isRadicaleBackend()) {
+    await fx.event({ calendar: work, summary: 'Scadenza di sistema', source: 'system', start_time: romeIso('2027-05-07', '09:00'), end_time: romeIso('2027-05-07', '10:00') });
+  }
   await fx.event({ calendar: work, summary: 'A cavallo della settimana', start_time: romeIso('2027-05-09', '23:00'), end_time: romeIso('2027-05-10', '01:00') });
   await fx.series({
     calendar: work, summary: 'Standup',

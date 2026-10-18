@@ -14,6 +14,7 @@ autenticazione si prova senza l'API:
 
   Bearer assente o errato       401 {"error": "Unauthorized"}
   credenziali valide            200 {"ok": true, "principal": "<principal>"}
+                                (più "expires_at" se l'utente lo definisce)
   credenziali non valide        401 {"ok": false}
   corpo non JSON o campi non stringa: come credenziali vuote (401 {"ok": false})
 
@@ -21,7 +22,10 @@ Il principal restituito dipende da `principal_mode`:
   - "canonical" (default, contratto di F1): sempre `principal` (federico),
     qualunque sia lo username dell'app-password;
   - "username": lo username stesso, come l'API di oggi.
-Un utente può avere un principal proprio. Con `reject_reserved` (default) gli
+Un utente può avere un principal proprio e una scadenza `expires_at` (stringa
+ISO 8601 o null): solo se l'utente la definisce la risposta 200 contiene
+"expires_at", come la route di F1 (contratto control-plane §9.4); senza, la
+risposta resta {"ok": true, "principal": ...}. Con `reject_reserved` (default) gli
 username con prefisso "caldes-" sono rifiutati con 401: sono riservati agli
 utenti di servizio e non devono mai finire nel ramo device.
 
@@ -40,8 +44,8 @@ Endpoint di controllo (nessuna autenticazione: il mock ascolta solo su loopback)
   GET    /__mock/state    stato corrente (solo gli username, mai le password)
   POST   /__mock/state    patch dello stato: mode, delay_ms, token, principal,
                           principal_mode, reject_reserved, users
-                          (users: [{"username", "password", "principal"?}],
-                          sostituisce l'elenco)
+                          (users: [{"username", "password", "principal"?,
+                          "expires_at"?}], sostituisce l'elenco)
   GET    /__mock/calls    chiamate ricevute a verify-credentials, in ordine
   DELETE /__mock/calls    azzera le chiamate
 
@@ -80,6 +84,12 @@ MAX_CALLS = 1000
 UNAUTHORIZED_BODY = {"error": "Unauthorized"}
 RATE_LIMIT_BODY = {"error": "Troppi tentativi. Riprova tra qualche minuto."}
 
+# Segnaposto per "expires_at non definito" (diverso da null, che è un valore valido).
+NO_EXPIRY = object()
+
+# username -> (password, principal o None, expires_at: stringa, None o NO_EXPIRY)
+UserEntry = Tuple[str, Optional[str], Any]
+
 
 class MockState:
     """Stato condiviso fra i thread del server (protetto da un lock)."""
@@ -92,8 +102,7 @@ class MockState:
         self.principal = "federico"
         self.principal_mode = "canonical"
         self.reject_reserved = True
-        # username -> (password, principal o None)
-        self.users: Dict[str, Tuple[str, Optional[str]]] = {}
+        self.users: Dict[str, UserEntry] = {}
         self.calls: List[Dict[str, Any]] = []
 
     def apply(self, patch: Dict[str, Any]) -> None:
@@ -151,10 +160,10 @@ class MockState:
                 del self.calls[: len(self.calls) - MAX_CALLS]
 
 
-def parse_users(raw: Any) -> Dict[str, Tuple[str, Optional[str]]]:
+def parse_users(raw: Any) -> Dict[str, UserEntry]:
     if not isinstance(raw, list):
         raise ValueError("users deve essere una lista")
-    users: Dict[str, Tuple[str, Optional[str]]] = {}
+    users: Dict[str, UserEntry] = {}
     for item in raw:
         if not isinstance(item, dict):
             raise ValueError("ogni utente deve essere un oggetto")
@@ -163,7 +172,10 @@ def parse_users(raw: Any) -> Dict[str, Tuple[str, Optional[str]]]:
             raise ValueError("username e password devono essere stringhe non vuote")
         if principal is not None and (not isinstance(principal, str) or not principal):
             raise ValueError("principal deve essere una stringa non vuota")
-        users[username] = (password, principal)
+        expires_at = item.get("expires_at", NO_EXPIRY)
+        if expires_at is not NO_EXPIRY and expires_at is not None and not isinstance(expires_at, str):
+            raise ValueError("expires_at deve essere una stringa o null")
+        users[username] = (password, principal, expires_at)
     return users
 
 
@@ -189,6 +201,16 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002 (firma di BaseHTTPRequestHandler)
         if os.environ.get("MOCK_VERIFY_VERBOSE"):
             sys.stderr.write("[mock-verify] %s %s\n" % (self.address_string(), format % args))
+
+    def end_headers(self) -> None:
+        # Come Node (@hono/node-server): a una richiesta con "Connection: close"
+        # la risposta porta lo stesso header. http.client del plugin passa
+        # allora il socket alla risposta e lo chiude appena letto il corpo:
+        # senza questo header il mock nasconderebbe proprio quel percorso.
+        request_headers = getattr(self, "headers", None)  # assente se la richiesta non si è letta
+        if request_headers is not None and (request_headers.get("Connection") or "").strip().lower() == "close":
+            self.send_header("Connection", "close")
+        super().end_headers()
 
     def send_json(self, status: int, payload: Any) -> None:
         body = json.dumps(payload).encode("utf-8")
@@ -342,7 +364,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         own_principal = entry[1]
         principal = own_principal or (canonical if principal_mode == "canonical" else username)
-        respond(200, {"ok": True, "principal": principal})
+        payload: Dict[str, Any] = {"ok": True, "principal": principal}
+        if entry[2] is not NO_EXPIRY:
+            payload["expires_at"] = entry[2]
+        respond(200, payload)
 
 
 def main(argv: Optional[List[str]] = None) -> int:

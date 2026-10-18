@@ -10,7 +10,8 @@
     "test/**/*",
     "scripts/calendar-inventory.ts",
     "scripts/fix-dst-exceptions.ts",
-    "scripts/mcp-contract-snapshot.ts"
+    "scripts/mcp-contract-snapshot.ts",
+    "scripts/radicale-init.ts"
   ],
   "exclude": ["node_modules", "dist"]
 }

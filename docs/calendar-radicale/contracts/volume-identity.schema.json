@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://calicchia.design/schemas/caldes/volume-identity.v1.schema.json",
+  "title": "Dead prop dell'identità del volume (principal) e delle collezioni",
+  "description": "Sottoinsieme di <filesystem_folder>/collection-root/<principal>/.Radicale.props (JSON scritto da Radicale) che porta l'identità del volume. Le chiavi sono in notazione Clark (namespace urn:calicchia:caldes, non abbreviato da Radicale) e i valori sono sempre stringhe. Le scrive solo caldes-svc con PROPPATCH (inizializzazione, cutover, rollback, riassegnazione); nessuno modifica il file a mano. Le altre chiavi del file sono ignorate. Contratto: control-plane.md §4.",
+  "type": "object",
+  "required": ["{urn:calicchia:caldes}volume-id", "{urn:calicchia:caldes}epoch"],
+  "properties": {
+    "{urn:calicchia:caldes}volume-id": {
+      "description": "UUID del volume, scritto in minuscolo; i lettori confrontano senza distinguere maiuscole e minuscole.",
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "{urn:calicchia:caldes}epoch": {
+      "description": "Epoch decimale ≥ 1, senza zeri iniziali né spazi.",
+      "type": "string",
+      "pattern": "^[1-9][0-9]{0,9}$"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "collectionDeadProps": {
+      "description": "Dead prop di una collezione calendario sotto il principal (.Radicale.props della collezione), scritte con MKCALENDAR o PROPPATCH da caldes-svc e lette dalla discovery in calendars.dav_props.",
+      "type": "object",
+      "properties": {
+        "{urn:calicchia:caldes}calendar-id": {
+          "description": "calendars.id del sidecar (UUID minuscolo): la discovery adotta la riga per questa prop.",
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "{urn:calicchia:caldes}role": {
+          "description": "calendars.role, per riconciliarlo dopo un ripristino (calendar_sidecar_reconcile).",
+          "enum": ["user", "bookings", "holidays", "deadlines", "subscription", "tasks"]
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "examples": [
+    {
+      "{urn:calicchia:caldes}epoch": "1",
+      "{urn:calicchia:caldes}volume-id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60"
+    }
+  ]
+}

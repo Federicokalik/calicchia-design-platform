@@ -1,11 +1,27 @@
 /**
  * Admin booking API — CRUD event types, schedule, bookings management.
  * Tutte le route richiedono authMiddleware (mountato in app.ts).
+ *
+ * Fase F2 del passaggio a Radicale (design §7, §12; contratto f2-modules §9):
+ * le letture del calendario passano dalla facade e quindi dallo store scelto
+ * dal modo del backend (PgLegacyStore in mode postgres, comportamento di
+ * oggi): event_count da countEventsByCalendar(), GET /closures da
+ * listClosures(). Con lo store Radicale la descrizione delle proiezioni delle
+ * prenotazioni si ricompone da calendar_bookings (stesso testo di oggi).
+ * Errori nuovi (onError del router): CalendarUnavailableError → 503
+ * {error, code}; conflitti di ricorrenza e CAS per campo → 409
+ * {error, code, conflicts?}. Gli altri errori proseguono verso l'handler
+ * globale di app.ts.
  */
 
 import { Hono } from 'hono';
 import { fromZonedTime } from 'date-fns-tz';
+import { customAlphabet } from 'nanoid';
 import { sql, sqlInsert } from '../../db';
+import { resolveWriteStoreKind } from '../../lib/calendar/backend-mode';
+import { assertCalendarApiLevel } from '../../lib/calendar/api-level';
+import { expandRRule, validateRRule } from '../../lib/calendar/legacy/rrule-legacy';
+import { splitRecurringEvent } from '../../lib/calendar/radicale/store';
 import { computeAvailableSlots } from '../../lib/calendar/slots';
 import { getEventType, loadScheduleForEventType } from '../../lib/calendar/availability';
 import {
@@ -35,11 +51,19 @@ import {
   rotateFeedToken,
   buildFeedUrl,
   getOrCreateFestivitaCalendar,
+  countEventsByCalendar,
+  listClosures,
   CalendarValidationError,
   CalendarConflictError,
   CalendarSystemError,
   isValidTimeZone,
 } from '../../lib/calendar/calendars';
+import {
+  CalendarFieldConflictError,
+  CalendarRecurrenceConflictError,
+  isCalendarUnavailable,
+} from '../../lib/calendar/errors';
+import { withProjectionDescription, withProjectionDescriptions } from '../../lib/calendar/projection-descriptions';
 import {
   listOccurrences,
   getEvent,
@@ -63,13 +87,41 @@ import type {
   AvailabilityOverride,
   AvailabilitySchedule,
   AvailabilitySlot,
+  CalendarEvent,
   EventType,
 } from '../../lib/calendar/types';
+import { sameOriginWrites } from '../../lib/http/same-origin-writes';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'calendar-admin' });
 
 export const calendarAdmin = new Hono();
+
+// Difesa CSRF per le scritture (F4R3-06): il cookie auth_token è SameSite=Lax e POST /events/:id/split è distruttiva.
+// Nessuna route di calendarAdmin riceve corpi multipart.
+calendarAdmin.use('*', sameOriginWrites({ log }));
+
+/**
+ * Errori del calendario introdotti dalla F2 (contratto f2-modules §1.4): 503
+ * {error, code} per l'indisponibilità (transizione, freeze, identità del
+ * volume, collezione non sincronizzabile, store non disponibile), 409
+ * {error, code, conflicts?} per il target di ricorrenza sparito e il CAS per
+ * campo. Tutto il resto si rilancia all'handler globale di app.ts (mappatura
+ * degli errori del database, 500).
+ */
+calendarAdmin.onError((err, c) => {
+  if (isCalendarUnavailable(err)) {
+    log.warn({ reason: err.reason, detail: err.detail, url: c.req.url, method: c.req.method }, 'calendario non disponibile: 503');
+    return c.json({ error: err.message, code: err.code }, 503);
+  }
+  if (err instanceof CalendarFieldConflictError) {
+    return c.json({ error: err.message, code: err.code, conflicts: err.conflicts }, 409);
+  }
+  if (err instanceof CalendarRecurrenceConflictError) {
+    return c.json({ error: err.message, code: err.code }, 409);
+  }
+  throw err;
+});
 
 const isValidTime = (s: string) => /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(s);
 const isValidDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
@@ -376,17 +428,11 @@ calendarAdmin.delete('/schedule/overrides/:id', async (c) => {
 // ============================================
 
 calendarAdmin.get('/closures', async (c) => {
-  const cal = await getOrCreateFestivitaCalendar();
-  // source != 'system' separa le chiusure manuali dalle festività auto (cron).
-  const closures = await sql`
-    SELECT id, summary, start_time, end_time, source, status
-    FROM calendar_events
-    WHERE calendar_id = ${cal.id}::uuid
-      AND source != 'system'
-      AND end_time > NOW() - interval '30 days'
-    ORDER BY start_time ASC
-  `;
-  return c.json({ closures, calendar: { id: cal.id, name: cal.name, timezone: cal.timezone } });
+  // Chiusure manuali (source != 'system', cioè non le festività del cron) con
+  // fine negli ultimi 30 giorni o dopo. Lo store legacy crea il calendario
+  // festività se manca, come prima; lo store Radicale legge la collezione
+  // role=holidays tranne it-holiday-* senza crearla (design §7, §14).
+  return c.json(await listClosures());
 });
 
 calendarAdmin.post('/closures', async (c) => {
@@ -682,14 +728,9 @@ calendarAdmin.get('/event-types/:idOrSlug/schedule', async (c) => {
 
 calendarAdmin.get('/calendars', async (c) => {
   const calendars = await listCalendars();
-  // Conteggio eventi attivi per ogni calendario
-  const counts = await sql<{ calendar_id: string; n: number }[]>`
-    SELECT calendar_id, COUNT(*)::int AS n
-    FROM calendar_events
-    WHERE status != 'cancelled'
-    GROUP BY calendar_id
-  `;
-  const countMap = new Map(counts.map((r) => [r.calendar_id, r.n]));
+  // Conteggio eventi attivi per ogni calendario (semantica legacy di event_count: non cancellati,
+  // override compresi; con lo store Radicale le iscrizioni contano nel calendario di destinazione).
+  const countMap = await countEventsByCalendar();
   return c.json({
     calendars: calendars.map((cal) => ({
       ...cal,
@@ -725,6 +766,8 @@ calendarAdmin.post('/calendars', async (c) => {
     if (err instanceof SyntaxError) return c.json({ error: 'JSON non valido' }, 400);
     if (err instanceof CalendarConflictError) return c.json({ error: err.message }, 409);
     if ((err as { code?: string }).code === '23505') return c.json({ error: 'Slug già usato' }, 409);
+    // Indisponibilità del calendario: 503 {error, code} dall'onError del router.
+    if (isCalendarUnavailable(err)) throw err;
     log.error({ err }, 'calendar create failed');
     const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
       || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
@@ -792,8 +835,10 @@ calendarAdmin.get('/events', async (c) => {
       includeCancelled,
     });
 
-    return c.json({ events: occurrences });
+    return c.json({ events: await withProjectionDescriptions(occurrences) });
   } catch (err) {
+    // Indisponibilità del calendario: 503 {error, code} dall'onError del router.
+    if (isCalendarUnavailable(err)) throw err;
     log.error({ err }, 'calendar events list failed');
     const code = (err as { code?: string; errors?: Array<{ code?: string }> }).code
       || (err as { errors?: Array<{ code?: string }> }).errors?.[0]?.code;
@@ -805,7 +850,7 @@ calendarAdmin.get('/events', async (c) => {
 });
 
 calendarAdmin.get('/events/:id', async (c) => {
-  const ev = await getEvent(c.req.param('id'));
+  const ev = await withProjectionDescription(await getEvent(c.req.param('id')));
   if (!ev) return c.json({ error: 'Evento non trovato' }, 404);
   return c.json({ event: ev });
 });
@@ -838,7 +883,9 @@ calendarAdmin.post('/events', async (c) => {
 calendarAdmin.put('/events/:id', async (c) => {
   const body = await c.req.json();
   try {
-    const ev = await updateEvent(c.req.param('id'), body);
+    const updated = await updateEvent(c.req.param('id'), body);
+    // Descrizione delle proiezioni ricomposta solo se la richiesta non ne ha scritta una propria.
+    const ev = body && typeof body === 'object' && 'description' in body ? updated : await withProjectionDescription(updated);
     if (!ev) return c.json({ error: 'Evento non trovato' }, 404);
     return c.json({ event: ev });
   } catch (err) {
@@ -873,7 +920,9 @@ calendarAdmin.delete('/events/:id', async (c) => {
  * Un nuovo uid viene generato automaticamente da createEvent().
  */
 calendarAdmin.post('/events/:id/duplicate', async (c) => {
-  const original = await getEvent(c.req.param('id'));
+  // Proiezione di una prenotazione con lo store Radicale: la copia riceve la
+  // descrizione completa ricomposta da calendar_bookings, come oggi (decisione 3).
+  const original = await withProjectionDescription(await getEvent(c.req.param('id')));
   if (!original) return c.json({ error: 'Evento non trovato' }, 404);
 
   const body = await c.req.json().catch(() => ({} as Record<string, unknown>));
@@ -926,6 +975,211 @@ calendarAdmin.post('/events/:id/exception', async (c) => {
       status: body.status || 'confirmed',
     });
     return c.json({ event: override });
+  } catch (err) {
+    if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
+    if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);
+    throw err;
+  }
+});
+
+// ─── "Questa e le successive" (contratto f4-modules §6.4 punto 1) ───────────────
+
+/** Colonne legacy restituite dalle route degli eventi (mai le caldes_* della 166). */
+const LEGACY_EVENT_COLUMNS = sql`
+  id, calendar_id, uid, summary, description, location, url, start_time, end_time, all_day,
+  rrule, exdates, recurrence_id, recurrence_master_id, source, source_id, status, created_at, updated_at
+`;
+
+/** UID delle serie create dal taglio con PgLegacyStore (stesso alfabeto di createEvent legacy). */
+const generateSplitUid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyz', 16);
+
+/** Istante compatto UTC per UNTIL (YYYYMMDDTHHMMSSZ). */
+function rruleCompactUtc(d: Date): string {
+  return d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+}
+
+/** RRULE troncata: UNTIL al posto di COUNT/UNTIL preesistenti (stesso valore che l'admin scriveva dal browser). */
+function rruleWithUntil(rrule: string, until: Date): string {
+  const parts = rrule.split(';').filter((p) => p && !/^(UNTIL|COUNT)=/i.test(p));
+  parts.push(`UNTIL=${rruleCompactUtc(until)}`);
+  return parts.join(';');
+}
+
+/** RRULE della nuova serie: senza COUNT (come dal browser). */
+function rruleWithoutCount(rrule: string): string {
+  return rrule.split(';').filter((p) => p && !/^COUNT=/i.test(p)).join(';');
+}
+
+interface SplitResult { whole_series: boolean; head: CalendarEvent | null; tail: CalendarEvent | null }
+
+/**
+ * Taglio con PgLegacyStore in una sola transazione (mai una serie troncata
+ * senza la sua continuazione), con la stessa semantica di splitSeries di
+ * packages/calendar-core (store Radicale), così i due store danno gli stessi
+ * risultati dopo il cutover (F4R3-03):
+ *  - la testa prende UNTIL = taglio − 60 s (senza COUNT) e le sole EXDATE
+ *    precedenti al taglio;
+ *  - la nuova serie parte da original_start (o dai nuovi orari), con la stessa
+ *    regola: COUNT residuo se c'era COUNT (occorrenze della testa contate
+ *    senza EXDATE, come l'RFC 5545), UNTIL invariato; senza occorrenze residue
+ *    non nasce;
+ *  - le EXDATE dal taglio in poi passano alla nuova serie, traslate dello
+ *    stesso scarto degli orari;
+ *  - gli override dal taglio in poi seguono la nuova serie (recurrence_id
+ *    traslato) o, senza nuova serie, si cancellano: restare legati alla testa
+ *    li farebbe emettere da listOccurrences oltre l'UNTIL (occorrenze doppie e
+ *    cancellate che ricompaiono).
+ */
+async function splitLegacySeries(master: CalendarEvent, originalStart: Date, times: { start: Date; end: Date } | null): Promise<SplitResult> {
+  const cutMs = originalStart.getTime();
+  const masterStartIso = new Date(master.start_time).toISOString();
+  const untilRule = validateRRule(rruleWithUntil(master.rrule as string, new Date(cutMs - 60_000)), masterStartIso);
+  if (!untilRule) throw new EventValidationError('RRULE troncata non valida');
+
+  // COUNT residuo: occorrenze della regola prima del taglio (senza EXDATE: le conta anche l'RFC).
+  const countMatch = /(?:^|;)COUNT=(\d+)/i.exec(master.rrule as string);
+  let residualCount: number | null = null;
+  if (countMatch) {
+    const total = Number(countMatch[1]);
+    const before = expandRRule({
+      rrule: master.rrule as string,
+      masterStartIso,
+      fromIso: masterStartIso,
+      toIso: new Date(cutMs - 1000).toISOString(),
+      limit: Math.max(total, 1),
+    }).length;
+    residualCount = total - before;
+  }
+  const wantTail = times !== null && (residualCount === null || residualCount > 0);
+  let tailRule: string | null = null;
+  if (times && wantTail) {
+    const base = rruleWithoutCount(master.rrule as string);
+    tailRule = validateRRule(residualCount !== null ? `${base};COUNT=${residualCount}` : base, times.start.toISOString());
+    if (!tailRule) throw new EventValidationError('RRULE della nuova serie non valida');
+  }
+
+  const delta = times ? times.start.getTime() - cutMs : 0;
+  const allExdates = (Array.isArray(master.exdates) ? master.exdates : []).map(String);
+  const headExdates = allExdates.filter((d) => new Date(d).getTime() < cutMs);
+  const tailExdates = allExdates
+    .filter((d) => new Date(d).getTime() >= cutMs)
+    .map((d) => new Date(new Date(d).getTime() + delta).toISOString());
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return sql.begin(async (tx: any) => {
+    const [head] = await tx`
+      UPDATE calendar_events SET rrule = ${untilRule}, exdates = ${tx.json(headExdates)}
+      WHERE id = ${master.id}::uuid AND recurrence_master_id IS NULL AND rrule IS NOT NULL
+      RETURNING ${LEGACY_EVENT_COLUMNS}
+    `;
+    if (!head) throw new EventValidationError('Serie non trovata o non più ricorrente');
+    let tail: CalendarEvent | null = null;
+    if (times && tailRule) {
+      [tail] = await tx`
+        INSERT INTO calendar_events ${sqlInsert({
+          calendar_id: master.calendar_id,
+          uid: generateSplitUid(),
+          summary: master.summary.trim().slice(0, 500),
+          description: master.description?.trim().slice(0, 5000) || null,
+          location: master.location?.trim().slice(0, 500) || null,
+          url: master.url?.trim().slice(0, 1000) || null,
+          start_time: times.start.toISOString(),
+          end_time: times.end.toISOString(),
+          all_day: !!master.all_day,
+          rrule: tailRule,
+          exdates: tx.json(tailExdates),
+          recurrence_id: null,
+          recurrence_master_id: null,
+          source: 'admin',
+          source_id: null,
+          status: 'confirmed',
+        })}
+        RETURNING ${LEGACY_EVENT_COLUMNS}
+      `;
+    }
+    // Override dal taglio in poi: seguono la nuova serie, o si cancellano se non ce n'è una.
+    if (tail) {
+      await tx`
+        UPDATE calendar_events
+        SET recurrence_master_id = ${tail.id}::uuid, recurrence_id = recurrence_id + ${delta}::float8 * interval '1 millisecond'
+        WHERE recurrence_master_id = ${master.id}::uuid AND recurrence_id >= ${originalStart.toISOString()}::timestamptz
+      `;
+    } else {
+      await tx`
+        DELETE FROM calendar_events
+        WHERE recurrence_master_id = ${master.id}::uuid AND recurrence_id >= ${originalStart.toISOString()}::timestamptz
+      `;
+    }
+    return { whole_series: false, head: head as CalendarEvent, tail: tail as CalendarEvent | null };
+  }) as Promise<SplitResult>;
+}
+
+/**
+ * "Questa e le successive" su una serie (move, resize o delete dal calendario):
+ * con lo store Radicale la saga recurrence_split (nuova serie con UID nuovo e
+ * taglio del master, recupero automatico se il processo cade a metà); con
+ * PgLegacyStore il taglio in una transazione. Corpo: { original_start,
+ * start_time?, end_time?, delete? }. Senza orari la nuova serie mantiene la
+ * durata della serie a partire da original_start. Un taglio sulla prima
+ * occorrenza vale per tutta la serie (whole_series).
+ */
+calendarAdmin.post('/events/:id/split', async (c) => {
+  const body = await c.req.json().catch(() => null) as Record<string, unknown> | null;
+  if (!body || typeof body !== 'object') return c.json({ error: 'Corpo JSON richiesto' }, 400);
+  const originalStartIso = typeof body.original_start === 'string' ? body.original_start : '';
+  const originalStart = new Date(originalStartIso);
+  if (!originalStartIso || Number.isNaN(originalStart.getTime())) return c.json({ error: 'original_start richiesto (ISO 8601)' }, 400);
+  if (body.delete !== undefined && typeof body.delete !== 'boolean') return c.json({ error: 'delete: atteso un booleano' }, 400);
+  const remove = body.delete === true;
+  const parseTime = (v: unknown, name: string): Date | null => {
+    if (v === undefined || v === null) return null;
+    const d = new Date(String(v));
+    if (typeof v !== 'string' || Number.isNaN(d.getTime())) throw new EventValidationError(`${name} non valido`);
+    return d;
+  };
+  try {
+    assertCalendarApiLevel();
+    const newStart = parseTime(body.start_time, 'start_time');
+    const newEnd = parseTime(body.end_time, 'end_time');
+    if (remove && (newStart || newEnd)) return c.json({ error: 'delete non ammette start_time ed end_time' }, 400);
+
+    const master = await getEvent(c.req.param('id'));
+    if (!master) return c.json({ error: 'Evento non trovato' }, 404);
+    if (!master.rrule || master.recurrence_master_id) return c.json({ error: 'L\'evento non è il master di una serie ricorrente' }, 400);
+    if (master.source === 'ics_pull') return c.json({ error: 'Evento importato da sottoscrizione ICS (sola lettura)' }, 403);
+    const duration = new Date(master.end_time).getTime() - new Date(master.start_time).getTime();
+    const start = newStart ?? (newEnd ? new Date(newEnd.getTime() - duration) : originalStart);
+    const end = newEnd ?? new Date(start.getTime() + duration);
+    if (!remove && end.getTime() <= start.getTime()) return c.json({ error: 'end_time deve essere > start_time' }, 400);
+
+    const kind = await resolveWriteStoreKind();
+    let result: SplitResult;
+    if (kind === 'radicale') {
+      const split = await splitRecurringEvent({
+        masterEventId: master.id,
+        originalStartIso: originalStart.toISOString(),
+        changes: remove ? undefined : { start_time: start.toISOString(), end_time: end.toISOString() },
+      });
+      if (remove) {
+        // La nuova serie (o la serie intera, se il taglio è sulla prima occorrenza) si cancella: restano le occorrenze precedenti.
+        await deleteEvent(split.tail.id);
+        result = { whole_series: split.wholeSeries, head: split.head, tail: null };
+      } else {
+        result = { whole_series: split.wholeSeries, head: split.head, tail: split.tail };
+      }
+    } else if (originalStart.getTime() <= new Date(master.start_time).getTime()) {
+      // Taglio sulla prima occorrenza: come "tutta la serie" (UNTIL prima di DTSTART lascerebbe una serie vuota).
+      if (remove) {
+        await deleteEvent(master.id);
+        result = { whole_series: true, head: null, tail: null };
+      } else {
+        const tail = await updateEvent(master.id, { start_time: start.toISOString(), end_time: end.toISOString() });
+        result = { whole_series: true, head: null, tail };
+      }
+    } else {
+      result = await splitLegacySeries(master, originalStart, remove ? null : { start, end });
+    }
+    return c.json(result);
   } catch (err) {
     if (err instanceof EventReadOnlyError) return c.json({ error: err.message }, 403);
     if (err instanceof EventValidationError) return c.json({ error: err.message }, 400);

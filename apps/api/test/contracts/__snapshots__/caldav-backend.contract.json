@@ -1,0 +1,1214 @@
+{
+  "contract": "caldav-backend",
+  "version": 1,
+  "description": "Backend CalDAV interno (POST /api/caldav-backend/verify-credentials, route /collections* rimosse) e app-password dall'admin (/api/caldav-tokens) sullo scenario di test/contracts/caldav-backend.contract.test.ts: richiesta, status, header e corpo normalizzati, più gli effetti sulle righe. Contratto F1 (control-plane §9.4, §9.6).",
+  "regenerate": "UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/caldav-backend.contract.test.ts",
+  "cases": {
+    "verify-credentials/valida-username-canonico": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": "203.0.113.10",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/valida-username-storico": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "iphone",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "iphone",
+        "last_used_ip": "203.0.113.11",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/valida-con-scadenza": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": "2099-01-01T00:00:00.000Z"
+      }
+    },
+    "verify-credentials/principal-configurato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "agenda",
+        "expires_at": null
+      }
+    },
+    "verify-credentials/scaduta": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/revocata": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/password-errata": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/username-diverso": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/username-riservato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "caldes-svc",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/corpo-non-json": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": "<corpo non JSON>",
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/corpo-array": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": [
+          "<oggetto con credenziali valide>"
+        ],
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/campi-mancanti": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/campi-vuoti": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "",
+          "password": ""
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/campi-non-stringa": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": 42,
+          "password": true
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/username-con-controllo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "fede\u0001rico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/username-oltre-255-byte": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "<128 × à: 256 byte>",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/password-oltre-1024": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": false
+      }
+    },
+    "verify-credentials/bearer-assente": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "nessuna"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Unauthorized"
+      }
+    },
+    "verify-credentials/bearer-errato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "bearer errato"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Unauthorized"
+      }
+    },
+    "verify-credentials/principal-non-valido": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 503,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Verifica delle credenziali non disponibile"
+      }
+    },
+    "verify-credentials/ip-x-forwarded-for-multiplo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "203.0.113.21, 10.0.0.1"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": "203.0.113.21",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/ip-ipv4-mapped": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "::ffff:203.0.113.22"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": "203.0.113.22",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/ip-ipv6": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "2001:DB8::7"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": "2001:db8::7",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/ip-da-x-remote-addr": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "",
+          "x-remote-addr": "203.0.113.23"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": "203.0.113.23",
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/ip-non-valido": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "non-un-ip"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": null,
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/ip-header-non-del-plugin": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service",
+        "headers": {
+          "x-forwarded-for": "",
+          "cf-connecting-ip": "198.51.100.1",
+          "x-real-ip": "198.51.100.2"
+        }
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "ok": true,
+        "principal": "federico",
+        "expires_at": null
+      },
+      "effects": {
+        "username": "federico",
+        "last_used_ip": null,
+        "usage_count": 1,
+        "used": true
+      }
+    },
+    "verify-credentials/rate-limit-superato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-backend/verify-credentials",
+        "body": {
+          "username": "federico",
+          "password": "<token:1>"
+        },
+        "auth": "caldav-service"
+      },
+      "status": 429,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Troppi tentativi. Riprova tra qualche minuto."
+      }
+    },
+    "collections-rimosse/elenco": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-backend/collections",
+        "auth": "caldav-service"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/collezione": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-backend/collections/lavoro",
+        "auth": "caldav-service"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/items": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-backend/collections/lavoro/items",
+        "auth": "caldav-service"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/item": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-backend/collections/lavoro/items/evento.ics",
+        "auth": "caldav-service"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/put": {
+      "request": {
+        "method": "PUT",
+        "path": "/api/caldav-backend/collections/lavoro/items/evento.ics",
+        "auth": "caldav-service",
+        "body": "<VCALENDAR con un VEVENT>"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/delete": {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/caldav-backend/collections/lavoro/items/evento.ics",
+        "auth": "caldav-service"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Not Found"
+      }
+    },
+    "collections-rimosse/senza-bearer": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-backend/collections",
+        "auth": "nessuna"
+      },
+      "status": 401,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "Unauthorized"
+      }
+    },
+    "caldav-tokens/crea-senza-username": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "device_name": "<prefix> iPhone nuovo"
+        },
+        "auth": "admin"
+      },
+      "status": 201,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "id": "<id:1>",
+        "username": "federico",
+        "device_name": "<prefix> iPhone nuovo",
+        "token_prefix": "<token:1>",
+        "last_used_at": null,
+        "last_used_ip": null,
+        "usage_count": 0,
+        "is_active": true,
+        "expires_at": null,
+        "created_at": "<timestamp>",
+        "revoked_at": null,
+        "password": "<token:2>",
+        "warning": "Salva la password ora — non sarà più visibile. Sul device usa lo username \"federico\" e questa password come \"password\" dell'account CalDAV (non quella admin)."
+      }
+    },
+    "caldav-tokens/crea-username-vuoto": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "   ",
+          "device_name": "<prefix> Mac nuovo"
+        },
+        "auth": "admin"
+      },
+      "status": 201,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "id": "<id:1>",
+        "username": "federico",
+        "device_name": "<prefix> Mac nuovo",
+        "token_prefix": "<token:1>",
+        "last_used_at": null,
+        "last_used_ip": null,
+        "usage_count": 0,
+        "is_active": true,
+        "expires_at": null,
+        "created_at": "<timestamp>",
+        "revoked_at": null,
+        "password": "<token:2>",
+        "warning": "Salva la password ora — non sarà più visibile. Sul device usa lo username \"federico\" e questa password come \"password\" dell'account CalDAV (non quella admin)."
+      }
+    },
+    "caldav-tokens/crea-username-canonico": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "federico",
+          "device_name": "<prefix> iPad"
+        },
+        "auth": "admin"
+      },
+      "status": 201,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "id": "<id:1>",
+        "username": "federico",
+        "device_name": "<prefix> iPad",
+        "token_prefix": "<token:1>",
+        "last_used_at": null,
+        "last_used_ip": null,
+        "usage_count": 0,
+        "is_active": true,
+        "expires_at": null,
+        "created_at": "<timestamp>",
+        "revoked_at": null,
+        "password": "<token:2>",
+        "warning": "Salva la password ora — non sarà più visibile. Sul device usa lo username \"federico\" e questa password come \"password\" dell'account CalDAV (non quella admin)."
+      }
+    },
+    "caldav-tokens/crea-username-storico": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "iphone",
+          "device_name": "<prefix> Script storico"
+        },
+        "auth": "admin"
+      },
+      "status": 201,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "id": "<id:1>",
+        "username": "iphone",
+        "device_name": "<prefix> Script storico",
+        "token_prefix": "<token:1>",
+        "last_used_at": null,
+        "last_used_ip": null,
+        "usage_count": 0,
+        "is_active": true,
+        "expires_at": null,
+        "created_at": "<timestamp>",
+        "revoked_at": null,
+        "password": "<token:2>",
+        "warning": "Salva la password ora — non sarà più visibile. Sul device usa lo username \"iphone\" e questa password come \"password\" dell'account CalDAV (non quella admin)."
+      }
+    },
+    "caldav-tokens/crea-username-riservato": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "caldes-svc",
+          "device_name": "<prefix> Riservato svc"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username: il prefisso \"caldes-\" è riservato agli utenti di servizio di Radicale"
+      }
+    },
+    "caldav-tokens/crea-username-riservato-maiuscole": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "CALDES-Probe",
+          "device_name": "<prefix> Riservato probe"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username: il prefisso \"caldes-\" è riservato agli utenti di servizio di Radicale"
+      }
+    },
+    "caldav-tokens/crea-username-solo-prefisso": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "caldes-",
+          "device_name": "<prefix> Solo prefisso"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username: il prefisso \"caldes-\" è riservato agli utenti di servizio di Radicale"
+      }
+    },
+    "caldav-tokens/crea-username-caratteri-non-ammessi": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "fede/rico",
+          "device_name": "<prefix> Caratteri"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username: solo lettere, cifre, _, -, ."
+      }
+    },
+    "caldav-tokens/crea-username-troppo-lungo": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "device_name": "<prefix> Lungo"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username: al massimo 64 caratteri"
+      }
+    },
+    "caldav-tokens/crea-username-non-stringa": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": 42,
+          "device_name": "<prefix> Non stringa"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "username deve essere una stringa"
+      }
+    },
+    "caldav-tokens/crea-device-mancante": {
+      "request": {
+        "method": "POST",
+        "path": "/api/caldav-tokens",
+        "body": {
+          "username": "federico"
+        },
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "device_name obbligatorio (max 100 caratteri)"
+      }
+    },
+    "caldav-tokens/elenco": {
+      "request": {
+        "method": "GET",
+        "path": "/api/caldav-tokens",
+        "auth": "admin"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "passwords": [
+          {
+            "id": "<app-password:due>",
+            "username": "iphone",
+            "device_name": "<prefix> Elenco due",
+            "token_prefix": "<token:1>",
+            "last_used_at": null,
+            "last_used_ip": null,
+            "usage_count": 0,
+            "is_active": true,
+            "expires_at": "2099-06-01T00:00:00.000Z",
+            "created_at": "<timestamp>",
+            "revoked_at": null
+          },
+          {
+            "id": "<app-password:uno>",
+            "username": "federico",
+            "device_name": "<prefix> Elenco uno",
+            "token_prefix": "<token:2>",
+            "last_used_at": "<timestamp>",
+            "last_used_ip": "203.0.113.50",
+            "usage_count": 1,
+            "is_active": true,
+            "expires_at": null,
+            "created_at": "<timestamp>",
+            "revoked_at": null
+          }
+        ],
+        "principal": "federico",
+        "calendar_backend": {
+          "mode": "postgres",
+          "initialized": false
+        }
+      }
+    },
+    "caldav-tokens/revoca": {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/caldav-tokens/<app-password>",
+        "auth": "admin"
+      },
+      "status": 200,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "revoked": true
+      },
+      "effects": {
+        "credential_epoch_delta": 1,
+        "policy_version_delta": 1,
+        "row": {
+          "is_active": false,
+          "revoked": true,
+          "revoked_reason": "revoked from admin"
+        }
+      }
+    },
+    "caldav-tokens/revoca-ripetuta": {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/caldav-tokens/<app-password>",
+        "auth": "admin"
+      },
+      "status": 404,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "App-password non trovata o già revocata"
+      }
+    },
+    "caldav-tokens/revoca-id-non-valido": {
+      "request": {
+        "method": "DELETE",
+        "path": "/api/caldav-tokens/non-un-uuid",
+        "auth": "admin"
+      },
+      "status": 400,
+      "headers": {
+        "content-type": "application/json",
+        "content-disposition": null,
+        "cache-control": null,
+        "access-control-allow-origin": null,
+        "etag": null
+      },
+      "body": {
+        "error": "id non valido"
+      }
+    }
+  }
+}

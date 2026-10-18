@@ -15,6 +15,17 @@
  * Dove src/ non espone una funzione (tipi di prenotazione, schedule) l'INSERT
  * replica colonne e default della route admin corrispondente.
  *
+ * Con lo store Radicale (CALENDAR_BACKEND=radicale, helpers/calendar-backend.ts)
+ * le stesse funzioni della facade scrivono oggetti iCalendar su Radicale
+ * attraverso RadicaleStore. Cambiano solo i due percorsi che lo store legacy
+ * faceva in SQL e che con Radicale passano da un altro scrittore, come in
+ * produzione:
+ *  - proiezione di una prenotazione: job project_booking (booking-<uid>.ics
+ *    nella collezione Prenotazioni), eseguito subito;
+ *  - eventi di un'iscrizione: pull del feed verso l'indice (pull.ts) con il
+ *    corpo ICS costruito dagli eventi "parsati", al posto di
+ *    replaceSubscriptionEvents (che RadicaleStore rifiuta).
+ *
  * Ogni dato porta il prefisso del gruppo (slug, nomi, titoli, email, label) o
  * viene registrato per id: `cleanup()` lo rimuove tutto. Con `useFixtures()`
  * la pulizia avviene sia prima (residui di un run interrotto) sia dopo i test.
@@ -30,7 +41,13 @@ import { getEventType } from '../../src/lib/calendar/availability';
 import { createBooking } from '../../src/lib/calendar/booking';
 import { createAppPassword, type CalDavAppPassword } from '../../src/lib/calendar/caldav-passwords';
 import { createCalendar, getBookingsCalendar } from '../../src/lib/calendar/calendars';
-import { createEvent, createOccurrenceOverride, getEventBySource } from '../../src/lib/calendar/events';
+import {
+  createEvent,
+  createOccurrenceOverride,
+  getEventBySource,
+  getEventOverrides,
+  listEventsForCollection,
+} from '../../src/lib/calendar/events';
 import { parseIcs, type ParsedEvent } from '../../src/lib/calendar/ics-import';
 import { resolveLocationForBooking } from '../../src/lib/calendar/meeting-url';
 import {
@@ -57,6 +74,13 @@ import type {
   LocationType,
 } from '../../src/lib/calendar/types';
 import { generateMcpToken } from '../../src/lib/mcp/tokens';
+import { CAL_JOB_KINDS, enqueueCalendarJob } from '../../src/lib/calendar/jobs';
+import { pullSubscriptionToIndex } from '../../src/lib/calendar/subscriptions/pull';
+import { bookingHref } from '@calicchia/calendar-core';
+import { buildBookingProjectionIcs, PROJECTED_BOOKING_STATUSES } from '../../src/lib/calendar/booking-projection';
+import { objectPath } from '../../src/lib/calendar/radicale/client';
+import { syncCollection } from '../../src/lib/calendar/radicale/sync';
+import { isRadicaleBackend, pruneRadicaleData, radicaleBackend, settleCalendar } from './calendar-backend';
 import {
   cleanupTestData,
   onBeforeDatabaseClose,
@@ -264,6 +288,90 @@ export interface SubscriptionFixtureInput {
 export interface SubscriptionFixture {
   subscription: CalendarSubscription;
   events: CalendarEvent[];
+}
+
+// ─── Proiezioni con lo store Radicale ───────────────────────────────
+
+/**
+ * Risorsa booking-<uid>.ics nella collezione Prenotazioni con il contenuto
+ * del job project_booking (buildBookingProjectionIcs), scritta come
+ * caldes-svc con If-None-Match, poi write-through nell'indice.
+ */
+async function writeBookingProjectionResource(booking: Booking): Promise<void> {
+  const backend = radicaleBackend();
+  if (!backend) throw new Error('writeBookingProjectionResource: store Radicale non avviato');
+  const [collection] = await sql<Array<{ id: string; collection_name: string }>>`
+    SELECT id, collection_name FROM calendars WHERE role = 'bookings' AND lifecycle = 'active' ORDER BY created_at LIMIT 1
+  `;
+  if (!collection) throw new Error("Collezione Prenotazioni assente: il database non è migrato?");
+  const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
+  const resolved = eventType ? await resolveLocationForBooking({ eventType, booking, pushToGoogle: false }) : null;
+  const body = buildBookingProjectionIcs({
+    booking,
+    eventTitle: eventType?.title ?? 'Prenotazione',
+    meetingUrl: resolved?.meetingUrl ?? null,
+    now: new Date(),
+  });
+  await backend.client.put(objectPath(backend.principal, collection.collection_name, bookingHref(booking.uid)), body, { ifNoneMatch: '*' });
+  await syncCollection(collection.id, { reason: 'write-through', actor: 'test-fixture' });
+}
+
+// ─── Iscrizioni con lo store Radicale ───────────────────────────────
+
+/** Escape di un valore TEXT (RFC 5545 §3.3.11). */
+function icsText(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+}
+
+/** Istante ISO → forma compatta UTC (20270104T080000Z). */
+function icsUtc(iso: string): string {
+  return new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+}
+
+/** Data (YYYYMMDD) di un all-day "parsato": parseIcs mette i DATE alla mezzanotte UTC. */
+function icsDate(iso: string): string {
+  return new Date(iso).toISOString().slice(0, 10).replace(/-/g, '');
+}
+
+/**
+ * Corpo ICS equivalente agli eventi "parsati" di un'iscrizione (ParsedEvent,
+ * la forma che parseIcs produceva dal feed remoto): un VEVENT per evento, con
+ * gli all-day come VALUE=DATE (come nel feed da cui parseIcs li aveva letti) e
+ * gli override con RECURRENCE-ID dello stesso tipo del DTSTART.
+ */
+export function parsedEventsToIcs(events: readonly ParsedEvent[]): string {
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Calicchia Design//Fixture iscrizioni//IT', 'CALSCALE:GREGORIAN'];
+  for (const e of events) {
+    const at = (iso: string): string => (e.all_day ? `;VALUE=DATE:${icsDate(iso)}` : `:${icsUtc(iso)}`);
+    lines.push('BEGIN:VEVENT', `UID:${e.remote_uid}`, 'DTSTAMP:20260101T000000Z');
+    lines.push(`DTSTART${at(e.start_time)}`, `DTEND${at(e.end_time)}`);
+    if (e.recurrence_id) lines.push(`RECURRENCE-ID${at(e.recurrence_id)}`);
+    lines.push(`SUMMARY:${icsText(e.summary)}`);
+    if (e.description) lines.push(`DESCRIPTION:${icsText(e.description)}`);
+    if (e.location) lines.push(`LOCATION:${icsText(e.location)}`);
+    if (e.url) lines.push(`URL:${e.url}`);
+    if (e.rrule) lines.push(`RRULE:${e.rrule.replace(/^RRULE:/i, '')}`);
+    if (e.exdates.length) lines.push(`EXDATE${e.all_day ? ';VALUE=DATE:' : ':'}${e.exdates.map((x) => (e.all_day ? icsDate(x) : icsUtc(x))).join(',')}`);
+    lines.push(`STATUS:${e.status.toUpperCase()}`, 'END:VEVENT');
+  }
+  lines.push('END:VCALENDAR', '');
+  return lines.join('\r\n');
+}
+
+/**
+ * Eventi di un'iscrizione letti dalla facade (store Radicale): master e
+ * singoli del sidecar con i loro override, ordinati come la query legacy
+ * della fixture (inizio, poi UID remoto).
+ */
+async function subscriptionEventsFromIndex(sidecarId: string): Promise<CalendarEvent[]> {
+  const masters = await listEventsForCollection(sidecarId);
+  const all: CalendarEvent[] = [];
+  for (const master of masters) {
+    all.push(master);
+    if (master.rrule) all.push(...await getEventOverrides(master.id));
+  }
+  const key = (e: CalendarEvent): string => `${new Date(e.start_time).toISOString()}|${e.source_id ?? ''}`;
+  return all.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
 }
 
 /** Stesso alfabeto e lunghezza degli uid di prenotazione di booking.ts. */
@@ -581,6 +689,7 @@ export class Fixtures {
    * 'booking', source_id = uid della prenotazione.
    */
   async projectBooking(booking: Booking, eventType: EventType, meetingUrl: string | null = null): Promise<CalendarEvent> {
+    if (isRadicaleBackend()) return this.projectBookingViaJob(booking);
     const bookingsCal = await getBookingsCalendar();
     if (!bookingsCal) throw new Error("Calendario 'bookings' assente: il database non è migrato?");
     const event = await createEvent({
@@ -601,6 +710,30 @@ export class Fixtures {
       source_id: booking.uid,
       status: 'confirmed',
     });
+    this.track('eventIds', event.id);
+    return event;
+  }
+
+  /**
+   * Proiezione con lo store Radicale: lo stesso job project_booking che accoda
+   * createBooking (stato desiderato calcolato da calendar_bookings, risorsa
+   * booking-<uid>.ics, write-through nell'indice), eseguito subito. Restituisce
+   * l'evento letto dalla facade come lo vedono admin e MCP.
+   */
+  private async projectBookingViaJob(booking: Booking): Promise<CalendarEvent> {
+    if (PROJECTED_BOOKING_STATUSES.has(booking.status)) {
+      const version = booking.updated_at ? new Date(booking.updated_at).toISOString() : null;
+      await enqueueCalendarJob(CAL_JOB_KINDS.projectBooking, booking.uid, {}, { sourceVersion: version });
+      await settleCalendar();
+    } else {
+      // Proiezione rimasta per una prenotazione non più attiva (per esempio
+      // migrata, o annullata prima che il job la togliesse): il job non la
+      // scriverebbe, quindi la risorsa si crea come la creerebbe lui per una
+      // prenotazione confermata.
+      await writeBookingProjectionResource(booking);
+    }
+    const event = await getEventBySource('booking', booking.uid);
+    if (!event) throw new Error(`Proiezione della prenotazione ${booking.uid} assente dopo il job project_booking`);
     this.track('eventIds', event.id);
     return event;
   }
@@ -686,6 +819,8 @@ export class Fixtures {
       },
     });
     this.track('bookingIds', booking.id);
+    // Store Radicale: la proiezione la scrive il job accodato da createBooking.
+    await settleCalendar();
     const projection = await getEventBySource('booking', booking.uid);
     if (projection) this.track('eventIds', projection.id);
     return { booking, eventType, projection };
@@ -718,6 +853,8 @@ export class Fixtures {
     });
     this.track('subscriptionIds', created.id);
 
+    if (isRadicaleBackend()) return this.subscriptionViaPull(created, input);
+
     const parsed = input.events ?? (input.ics !== undefined ? parseIcs(input.ics) : null);
     if (parsed) {
       const { inserted } = await replaceSubscriptionEvents(created.id, calendarId, parsed, { allowEmpty: true });
@@ -739,6 +876,41 @@ export class Fixtures {
       ORDER BY start_time, source_id
     `;
     for (const e of events) this.track('eventIds', e.id);
+    return { subscription, events };
+  }
+
+  /**
+   * Eventi di un'iscrizione con lo store Radicale: il pull reale verso
+   * l'indice (split del feed, fingerprint, sidecar role=subscription) con il
+   * corpo `ics` così com'è oppure costruito dagli eventi "parsati", e
+   * l'aggiornamento di last_synced_at, last_error ed event_count che fa
+   * syncSubscription. Gli eventi restituiti sono quelli della facade, con il
+   * calendario di destinazione come calendar_id.
+   */
+  private async subscriptionViaPull(created: CalendarSubscription, input: SubscriptionFixtureInput): Promise<SubscriptionFixture> {
+    // Flag "blocca" dell'iscrizione (design §9, decisione 5): default false. Le
+    // fixture lo allineano al calendario di destinazione, cioè alla scelta che
+    // nell'anteprima del wizard tiene gli slot di oggi (con lo store legacy gli
+    // eventi di un'iscrizione bloccano come quelli del calendario).
+    await sql`
+      UPDATE calendar_subscriptions s
+      SET blocks_availability = c.blocks_availability
+      FROM calendars c
+      WHERE s.id = ${created.id}::uuid AND c.id = s.calendar_id
+    `;
+    const body = input.events ? parsedEventsToIcs(input.events) : input.ics;
+    if (body !== undefined) {
+      const result = await pullSubscriptionToIndex(created.id, { body, force: true, updateSubscriptionRow: true });
+      if (result.status === 'rejected' || result.status === 'skipped') {
+        throw new Error(`Pull dell'iscrizione ${created.id} non riuscito (${result.status}): ${result.error ?? ''}`);
+      }
+    }
+    const subscription = await getSubscription(created.id);
+    if (!subscription) throw new Error(`Iscrizione ${created.id} non riletta`);
+    const [link] = await sql<Array<{ collection_calendar_id: string | null }>>`
+      SELECT collection_calendar_id FROM calendar_subscriptions WHERE id = ${created.id}::uuid
+    `;
+    const events = link?.collection_calendar_id ? await subscriptionEventsFromIndex(link.collection_calendar_id) : [];
     return { subscription, events };
   }
 
@@ -769,9 +941,15 @@ export class Fixtures {
 
   // ─── Pulizia ───
 
-  /** Rimuove tutti i dati del gruppo (prefisso più righe registrate). */
+  /**
+   * Rimuove tutti i dati del gruppo (prefisso più righe registrate). Con lo
+   * store Radicale anche i suoi oggetti su Radicale e le collezioni rimaste
+   * senza calendario.
+   */
   async cleanup(): Promise<CleanupReport> {
-    return cleanupTestData(this.prefix, this.tracked);
+    const report = await cleanupTestData(this.prefix, this.tracked);
+    await pruneRadicaleData(this.prefix, this.tracked.eventIds);
+    return report;
   }
 }
 

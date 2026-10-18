@@ -15,6 +15,10 @@ on:
     paths:
       - 'apps/api/**'
       - 'packages/shared/**'
+      # Il Dockerfile copia anche il pacchetto calendar-core (sorgente e
+      # node_modules): senza questo path una modifica del core non
+      # ricostruisce l'immagine.
+      - 'packages/calendar-core/**'
       # Le migrations vengono COPY-ate nel runtime image (vedi Dockerfile riga
       # 63). Senza questo path, nuove migrazioni atterrano su main ma l'image
       # non viene rebuiltata e in prod restano fuori.
@@ -56,6 +60,11 @@ jobs:
       # Fail-fast: non pubblicare un'immagine se l'api non typechecka.
       - name: Typecheck — api
         run: pnpm --filter @calicchia/api typecheck
+
+      - name: Typecheck e test — calendar-core
+        run: |
+          pnpm --filter @calicchia/calendar-core typecheck
+          pnpm --filter @calicchia/calendar-core test
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

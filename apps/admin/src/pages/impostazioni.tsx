@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -24,6 +24,8 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch, apiFetchRaw } from '@/lib/api';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useLocalizedPath } from '@/hooks/use-localized-navigation';
+import { calV2Keys, getSyncStateV2, useCalendarV2Capabilities } from '@/lib/calendar-v2-api';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -1007,6 +1009,137 @@ export default function ImpostazioniPage() {
 
 const CONFIRM_TOKEN = 'RIPRISTINA-DATABASE';
 
+/**
+ * Stato del backend calendario restituito da GET /api/backup/info (design
+ * §16.2): con il calendario servito da Radicale il ripristino da file salta
+ * calendari, eventi e iscrizioni; dopo un ripristino i dispositivi CalDAV
+ * restano in sola lettura per 48 ore (restore_guard) e finché la verifica del
+ * calendario non è completata (rebuild_required).
+ */
+interface BackupCalendarInfo {
+  status: 'ok' | 'absent' | 'unreadable';
+  mode: 'postgres' | 'cutover' | 'radicale' | 'rollback' | 'finalized' | null;
+  restorable: boolean;
+  rebuild_required: boolean;
+  restore_guard_until: string | null;
+}
+
+const CALENDAR_MODE_LABELS: Record<NonNullable<BackupCalendarInfo['mode']>, string> = {
+  postgres: 'Postgres',
+  cutover: 'passaggio a Radicale in corso',
+  radicale: 'Radicale',
+  rollback: 'ritorno a Postgres in corso',
+  finalized: 'Radicale (definitivo)',
+};
+
+function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+/**
+ * Con il calendario su Radicale (mode diverso da postgres) e la capacità
+ * `health_page`: età dell'ultimo backup coordinato (database più volume) e
+ * link alla pagina Salute e al Cestino. Componente a parte, così in mode
+ * postgres non parte nessuna chiamata v2 (nemmeno le capacità).
+ */
+function BackupCalendarHealth() {
+  const { caps } = useCalendarV2Capabilities();
+  const localizedPath = useLocalizedPath();
+  const enabled = caps?.health_page === true;
+  const { data } = useQuery({
+    queryKey: calV2Keys.syncState,
+    queryFn: getSyncStateV2,
+    enabled,
+    retry: false,
+    meta: { skipGlobalRefetch: true },
+  });
+  if (!enabled) return null;
+
+  const backup = data?.backup;
+  const hours = backup?.age_hours ?? null;
+  const age = !backup
+    ? null
+    : backup.last_stack_backup_at === null
+      ? 'mai eseguito'
+      : hours !== null && hours < 1
+        ? 'meno di un\'ora fa'
+        : hours !== null && hours < 48
+          ? `${Math.round(hours)} ore fa`
+          : `${Math.round((hours ?? 0) / 24)} giorni fa`;
+
+  return (
+    <div
+      data-testid="cal-backup-notice"
+      data-stale={backup ? String(backup.stale) : undefined}
+      className={cn(
+        'flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs',
+        backup?.stale
+          ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200'
+          : 'bg-muted/40 text-muted-foreground',
+      )}
+    >
+      {backup?.stale
+        ? <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-600" />
+        : <CalendarClock className="h-3.5 w-3.5 mt-0.5 shrink-0" />}
+      <div className="space-y-1">
+        {backup && age && (
+          <p>
+            <span className="font-medium">Ultimo backup coordinato (database e volume Radicale): {age}</span>
+            {backup.last_stack_backup_at ? ` · ${formatDateTime(backup.last_stack_backup_at)}` : ''}
+            {backup.stale ? '. Il backup è più vecchio di 12 ore o non risulta: controlla che l\'esecuzione pianificata funzioni.' : '.'}
+          </p>
+        )}
+        <p>
+          <Link to={localizedPath('/calendario/salute')} className="underline underline-offset-2 hover:text-foreground">Salute del calendario</Link>
+          {caps?.trash && (
+            <>
+              {' · '}
+              <Link to={localizedPath('/calendario/cestino')} className="underline underline-offset-2 hover:text-foreground">Cestino</Link>
+              {' e cronologia delle versioni di ogni evento, per recuperare quello che serve senza un ripristino da file'}
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function BackupCalendarNotice({ calendar }: { calendar: BackupCalendarInfo }) {
+  const guardActive = !!calendar.restore_guard_until && new Date(calendar.restore_guard_until).getTime() > Date.now();
+  return (
+    <>
+      {!calendar.restorable && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2.5 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
+          <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-600" />
+          <div className="space-y-1">
+            <p className="font-medium">
+              {calendar.status === 'unreadable'
+                ? 'Stato del calendario illeggibile'
+                : `Calendario servito da Radicale (modalità: ${calendar.mode ? CALENDAR_MODE_LABELS[calendar.mode] : 'sconosciuta'})`}
+            </p>
+            <p>
+              Il ripristino da file <strong>non tocca calendari, eventi e iscrizioni</strong>: vengono saltati e
+              restano quelli attuali. Per il calendario usa il ripristino coordinato (dump del database più snapshot
+              del volume Radicale) o il ripristino da versioni.
+            </p>
+          </div>
+        </div>
+      )}
+      {(guardActive || calendar.rebuild_required) && (
+        <div className="flex items-start gap-2 rounded-lg border bg-muted/40 px-3 py-2.5 text-xs text-muted-foreground">
+          <CalendarClock className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+          <p>
+            Ripristino recente: i dispositivi CalDAV restano in sola lettura
+            {guardActive && calendar.restore_guard_until ? ` almeno fino al ${formatDateTime(calendar.restore_guard_until)}` : ''}
+            {calendar.rebuild_required ? ' e finché la verifica del calendario dopo il ripristino non è completata' : ''}.
+          </p>
+        </div>
+      )}
+      {calendar.mode && calendar.mode !== 'postgres' && <BackupCalendarHealth />}
+    </>
+  );
+}
+
 function BackupSection() {
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -1066,6 +1199,11 @@ function BackupSection() {
         `Ripristino completato: ${data?.stats?.rowsInserted ?? 0} righe. Devi effettuare nuovamente l'accesso.`,
         { duration: 6000 },
       );
+      // Avvisi del ripristino (calendario saltato fuori da Postgres, calendari
+      // assenti dal file mantenuti e da rivedere): restano visibili più a lungo
+      // e il redirect aspetta che si possano leggere.
+      const warnings: string[] = Array.isArray(data?.warnings) ? data.warnings : [];
+      for (const warning of warnings) toast.warning(warning, { duration: 12000 });
       setSelectedFile(null);
       setConfirmText('');
       if (fileRef.current) fileRef.current.value = '';
@@ -1073,12 +1211,13 @@ function BackupSection() {
       // auth handshake against the restored DB.
       setTimeout(() => {
         window.location.assign('/login?restored=1');
-      }, 800);
+      }, warnings.length > 0 ? 8000 : 800);
     },
     onError: (err: any) => toast.error(err?.message || 'Errore ripristino'),
   });
 
   const canRestore = !!selectedFile && confirmText === CONFIRM_TOKEN && !restoreMutation.isPending;
+  const calendarInfo: BackupCalendarInfo | undefined = info?.calendar;
 
   return (
     <>
@@ -1086,6 +1225,8 @@ function BackupSection() {
         <h2 className="text-lg font-semibold">Backup database</h2>
         <p className="text-sm text-muted-foreground">Esporta uno snapshot completo del database o ripristinalo da un file di backup.</p>
       </div>
+
+      {calendarInfo && <BackupCalendarNotice calendar={calendarInfo} />}
 
       {/* Stats */}
       <div className="rounded-xl border bg-card p-6 space-y-4">
@@ -1117,6 +1258,13 @@ function BackupSection() {
           Scarica un file JSON contenente tutti i dati del database. Conservalo in un luogo sicuro:
           contiene anche dati sensibili (hash password, secret cifrati, dati clienti).
         </p>
+        {calendarInfo && !calendarInfo.restorable && (
+          <p className="text-xs text-amber-700 dark:text-amber-300">
+            Con il calendario su Radicale gli eventi stanno nel volume Radicale: questo file ne contiene solo
+            l&apos;indice e lo stato, non una copia ripristinabile. Per il calendario serve il backup coordinato
+            (database più volume).
+          </p>
+        )}
         <Button onClick={exportBackup} disabled={exporting}>
           {exporting ? 'Esportazione...' : 'Scarica backup completo'}
         </Button>
@@ -1135,6 +1283,12 @@ function BackupSection() {
             <p className="text-destructive/80">
               Il ripristino <strong>cancella tutti i dati attuali</strong> e li sostituisce con il contenuto del file.
               Verrà creato automaticamente un backup di sicurezza in <code>uploads/backups/</code> prima di procedere.
+            </p>
+            <p className="text-destructive/80">
+              Fanno eccezione lo stato del calendario (modalità, identità del volume, indice) e il registro delle
+              migrazioni, che non vengono mai ripristinati.
+              {calendarInfo?.restorable !== false &&
+                ' I calendari assenti dal file non vengono cancellati: restano, vuoti, e vengono segnalati da rivedere.'}
             </p>
           </div>
         </div>
