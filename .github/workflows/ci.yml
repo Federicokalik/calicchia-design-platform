@@ -231,7 +231,10 @@ jobs:
   # cestino, cronologia, import/export, hold, badge, spostamento fra calendari,
   # widget agenda e i ripiegamenti sull'editor v1 (mode postgres, capacità lente).
   admin-e2e:
-    runs-on: ubuntu-latest
+    # Pinnato: su ubuntu-latest (26.04) `playwright install --with-deps chromium`
+    # fallisce con "Playwright does not support chromium on ubuntu26.04-x64".
+    # Tornare a ubuntu-latest quando la versione di Playwright lo supporta.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
