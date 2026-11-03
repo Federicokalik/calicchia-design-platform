@@ -46,7 +46,11 @@ export function sameOriginWrites(opts: { multipartPaths?: (path: string) => bool
       log.warn({ method, url: c.req.path }, 'Origin non ammessa, richiesta rifiutata');
       return c.json({ error: 'Origine della richiesta non ammessa', code: 'CSRF_REJECTED' }, 403);
     }
-    if (c.req.raw.body !== null) {
+    // Il corpo si riconosce dalle intestazioni, non dallo stream: @hono/node-server crea sempre un body stream
+    // per ogni metodo diverso da GET/HEAD, quindi una DELETE senza payload avrebbe `body !== null`.
+    const length = c.req.header('Content-Length');
+    const hasBody = length !== undefined ? Number(length) > 0 : c.req.header('Transfer-Encoding') !== undefined;
+    if (hasBody) {
       const type = (c.req.header('Content-Type') ?? '').toLowerCase();
       const multipart = opts.multipartPaths?.(c.req.path) === true;
       const ok = multipart ? type.startsWith('multipart/form-data') : /^application\/json\s*(;|$)/.test(type);

@@ -230,6 +230,17 @@ export async function request<T = any>(method: string, path: string, opts: TestR
     }
   }
 
+  // Come su una connessione HTTP vera: un corpo porta Content-Length (sameOriginWrites riconosce il corpo dalle intestazioni).
+  if (body instanceof FormData) {
+    const serialized = new Request('http://localhost/', { method: 'POST', body });
+    const type = serialized.headers.get('content-type');
+    if (type && !headers.has('content-type')) headers.set('content-type', type);
+    body = await serialized.arrayBuffer();
+  }
+  if (body !== undefined && !headers.has('content-length') && !headers.has('transfer-encoding')) {
+    headers.set('content-length', String(typeof body === 'string' ? Buffer.byteLength(body) : (body as Uint8Array | ArrayBuffer).byteLength));
+  }
+
   const res = await app.request(buildPath(path, opts.query), { method, headers, body });
   const text = await res.text();
   for (const hook of afterRequestHooks) await hook();

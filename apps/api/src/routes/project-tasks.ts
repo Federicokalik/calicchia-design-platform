@@ -3,6 +3,13 @@ import { sql } from '../db';
 
 export const projectTasks = new Hono();
 
+/** Data `YYYY-MM-DD` esistente nel calendario (2026-02-30 no): un valore non valido non filtra. */
+function validDay(value: string | undefined): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
+
 projectTasks.get('/', async (c) => {
   const status = c.req.query('status');
   const projectId = c.req.query('project_id');
@@ -20,6 +27,17 @@ projectTasks.get('/', async (c) => {
   // Usato dal widget "Agenda oggi": senza questo filtro arrivavano task qualsiasi.
   const dueDate = c.req.query('due_date');
   const dueFilter = dueDate && /^\d{4}-\d{2}-\d{2}$/.test(dueDate) ? sql`AND t.due_date = ${dueDate}::date` : sql``;
+  // Finestra (estremi inclusi) per la vista calendario e il widget agenda: tutti i task con scadenza nell'intervallo, senza troncamenti.
+  const dueFrom = c.req.query('due_from');
+  const dueTo = c.req.query('due_to');
+  const dueFromFilter = validDay(dueFrom) ? sql`AND t.due_date >= ${dueFrom}::date` : sql``;
+  const dueToFilter = validDay(dueTo) ? sql`AND t.due_date <= ${dueTo}::date` : sql``;
+
+  // Con una finestra di scadenza l'ordine è cronologico e stabile (t.id chiude i pareggi): le pagine del widget agenda
+  // non saltano né duplicano righe e i primi N sono davvero i più vicini.
+  const orderBy = validDay(dueFrom) || validDay(dueTo)
+    ? sql`ORDER BY t.due_date ASC, t.sort_order ASC, t.id ASC`
+    : sql`ORDER BY t.sort_order ASC, t.created_at ASC`;
 
   const tasks = await sql`
     SELECT t.*, COUNT(*) OVER() AS _total_count,
@@ -32,8 +50,8 @@ projectTasks.get('/', async (c) => {
     LEFT JOIN customers c ON c.id = p.customer_id
     LEFT JOIN profiles pr ON pr.id = t.assigned_to
     LEFT JOIN project_milestones m ON m.id = t.milestone_id
-    WHERE 1=1 ${statusFilter} ${projectFilter} ${customerFilter} ${assignedFilter} ${searchFilter} ${dueFilter}
-    ORDER BY t.sort_order ASC, t.created_at ASC
+    WHERE 1=1 ${statusFilter} ${projectFilter} ${customerFilter} ${assignedFilter} ${searchFilter} ${dueFilter} ${dueFromFilter} ${dueToFilter}
+    ${orderBy}
     LIMIT ${limit} OFFSET ${offset}
   `;
 

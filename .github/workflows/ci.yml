@@ -1,8 +1,9 @@
 name: CI
 
 # Gate qualità sulle PR verso main: typecheck, lint e build di tutti i workspace,
-# più i test dell'API su Postgres effimero (job api-tests) e l'integrazione del
-# calendario con un Radicale 3.7.8 reale (job calendar-integration).
+# più i test dell'API su Postgres effimero (job api-tests), l'integrazione del
+# calendario con un Radicale 3.7.8 reale (job calendar-integration) e gli e2e
+# dell'admin nel browser contro API e Radicale veri (job admin-e2e).
 # NB: il job "build" intercetta volutamente il finding AD-01 (build admin rotta)
 # finché non viene risolto — è la CI che fa il suo lavoro.
 #
@@ -221,3 +222,67 @@ jobs:
         run: pnpm --filter @calicchia/api test:integration
       - name: Contratti F0 su RadicaleStore (matrice CALENDAR_BACKEND=radicale)
         run: pnpm --filter @calicchia/api test:contracts:radicale
+
+  # E2E dell'admin con Playwright (contratto F6 §9.3, apps/admin/e2e): Chromium
+  # contro l'admin buildato (vite preview, il cui proxy /api punta all'API), l'API
+  # vera avviata con il calendario in mode radicale su un Radicale 3.7.8 reale e
+  # il database dei test. Lo stack lo avvia Playwright (webServer), vedi
+  # apps/admin/e2e/stack/server.ts. Gli scenari coprono editor v2, serie,
+  # cestino, cronologia, import/export, hold, badge, spostamento fra calendari,
+  # widget agenda e i ripiegamenti sull'editor v1 (mode postgres, capacità lente).
+  admin-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: caldes_test
+          POSTGRES_USER: caldes
+          POSTGRES_PASSWORD: caldes
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U caldes -d caldes_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # helpers/env.ts accetta solo localhost e nomi con 'test' o 'caldes_f<N>'.
+      TEST_DATABASE_URL: postgresql://caldes:caldes@localhost:5432/caldes_test
+      # Senza Radicale l'avvio dello stack fallisce invece di saltare gli scenari.
+      RADICALE_REQUIRED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.12.0
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      # Stesso venv del job calendar-integration (fuori dal repository).
+      - name: Radicale 3.7.8 (venv)
+        run: |
+          python -m venv "$RUNNER_TEMP/radicale-venv"
+          "$RUNNER_TEMP/radicale-venv/bin/pip" install --disable-pip-version-check --no-input 'radicale==3.7.8' 'vobject==0.9.9'
+          test "$("$RUNNER_TEMP/radicale-venv/bin/radicale" --version)" = "3.7.8"
+          echo "RADICALE_BIN=$RUNNER_TEMP/radicale-venv/bin/radicale" >> "$GITHUB_ENV"
+      - run: pnpm install --frozen-lockfile
+      - name: Migrazioni
+        run: pnpm --filter @calicchia/api test:migrate
+      - name: Build — admin
+        run: pnpm --filter @calicchia/admin build
+      # La versione di Playwright è fissata in apps/admin/package.json (1.56.1).
+      - name: Chromium per Playwright
+        run: pnpm --filter @calicchia/admin exec playwright install --with-deps chromium
+      - name: E2E dell'admin
+        run: pnpm --filter @calicchia/admin e2e
+      - name: Report e tracce Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-e2e-report
+          path: |
+            apps/admin/playwright-report
+            apps/admin/test-results
+          retention-days: 7
+          if-no-files-found: ignore

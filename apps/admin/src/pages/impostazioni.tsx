@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -24,6 +24,8 @@ import { useTopbar } from '@/hooks/use-topbar';
 import { EmptyState } from '@/components/shared/empty-state';
 import { apiFetch, apiFetchRaw } from '@/lib/api';
 import { useConfirm } from '@/hooks/use-confirm';
+import { useLocalizedPath } from '@/hooks/use-localized-navigation';
+import { calV2Keys, getSyncStateV2, useCalendarV2Capabilities } from '@/lib/calendar-v2-api';
 import { cn } from '@/lib/utils';
 
 function Field({ label, value, onChange, type = 'text', placeholder = '', rows, description }: {
@@ -1034,6 +1036,74 @@ function formatDateTime(iso: string): string {
   return new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' });
 }
 
+/**
+ * Con il calendario su Radicale (mode diverso da postgres) e la capacità
+ * `health_page`: età dell'ultimo backup coordinato (database più volume) e
+ * link alla pagina Salute e al Cestino. Componente a parte, così in mode
+ * postgres non parte nessuna chiamata v2 (nemmeno le capacità).
+ */
+function BackupCalendarHealth() {
+  const { caps } = useCalendarV2Capabilities();
+  const localizedPath = useLocalizedPath();
+  const enabled = caps?.health_page === true;
+  const { data } = useQuery({
+    queryKey: calV2Keys.syncState,
+    queryFn: getSyncStateV2,
+    enabled,
+    retry: false,
+    meta: { skipGlobalRefetch: true },
+  });
+  if (!enabled) return null;
+
+  const backup = data?.backup;
+  const hours = backup?.age_hours ?? null;
+  const age = !backup
+    ? null
+    : backup.last_stack_backup_at === null
+      ? 'mai eseguito'
+      : hours !== null && hours < 1
+        ? 'meno di un\'ora fa'
+        : hours !== null && hours < 48
+          ? `${Math.round(hours)} ore fa`
+          : `${Math.round((hours ?? 0) / 24)} giorni fa`;
+
+  return (
+    <div
+      data-testid="cal-backup-notice"
+      data-stale={backup ? String(backup.stale) : undefined}
+      className={cn(
+        'flex items-start gap-2 rounded-lg border px-3 py-2.5 text-xs',
+        backup?.stale
+          ? 'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200'
+          : 'bg-muted/40 text-muted-foreground',
+      )}
+    >
+      {backup?.stale
+        ? <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0 text-amber-600" />
+        : <CalendarClock className="h-3.5 w-3.5 mt-0.5 shrink-0" />}
+      <div className="space-y-1">
+        {backup && age && (
+          <p>
+            <span className="font-medium">Ultimo backup coordinato (database e volume Radicale): {age}</span>
+            {backup.last_stack_backup_at ? ` · ${formatDateTime(backup.last_stack_backup_at)}` : ''}
+            {backup.stale ? '. Il backup è più vecchio di 12 ore o non risulta: controlla che l\'esecuzione pianificata funzioni.' : '.'}
+          </p>
+        )}
+        <p>
+          <Link to={localizedPath('/calendario/salute')} className="underline underline-offset-2 hover:text-foreground">Salute del calendario</Link>
+          {caps?.trash && (
+            <>
+              {' · '}
+              <Link to={localizedPath('/calendario/cestino')} className="underline underline-offset-2 hover:text-foreground">Cestino</Link>
+              {' e cronologia delle versioni di ogni evento, per recuperare quello che serve senza un ripristino da file'}
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function BackupCalendarNotice({ calendar }: { calendar: BackupCalendarInfo }) {
   const guardActive = !!calendar.restore_guard_until && new Date(calendar.restore_guard_until).getTime() > Date.now();
   return (
@@ -1065,6 +1135,7 @@ function BackupCalendarNotice({ calendar }: { calendar: BackupCalendarInfo }) {
           </p>
         </div>
       )}
+      {calendar.mode && calendar.mode !== 'postgres' && <BackupCalendarHealth />}
     </>
   );
 }

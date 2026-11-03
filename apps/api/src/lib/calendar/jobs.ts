@@ -74,6 +74,12 @@ export const CAL_JOB_KINDS = Object.freeze({
   shadowMirror: 'shadow_mirror',
   /** F4: proiezione inversa Radicale→PG nella finestra di rollback. */
   reverseProjection: 'reverse_projection',
+  /** F6: import di un file ICS in un calendario (v2/import-export.ts). */
+  calendarImport: 'calendar_import',
+  /** F6: applica le cancellazioni sospese di una collezione in hold (v2/hold.ts). */
+  calendarHoldApply: 'calendar_hold_apply',
+  /** F6: ricostruisce da indice le risorse sospese di una collezione in hold (v2/hold.ts). */
+  calendarHoldRebuild: 'calendar_hold_rebuild',
 });
 export type CalJobKind = (typeof CAL_JOB_KINDS)[keyof typeof CAL_JOB_KINDS];
 

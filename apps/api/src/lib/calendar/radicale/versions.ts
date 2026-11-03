@@ -113,6 +113,33 @@ export async function lastValidVersion(db: Db, objectId: string): Promise<CalObj
   return rows[0] ?? null;
 }
 
+/**
+ * Segna come ripristino (`change_kind 'restore'`, attore `admin:<id>`) la
+ * versione che l'indicizzatore ha appena registrato per la scrittura di un
+ * ripristino (F6, cronologia e cestino): la sync registra ogni scrittura come
+ * 'create' o 'update' con l'attore `write-through:admin`, e solo il chiamante
+ * sa che era un ripristino. Si riconosce per oggetto, href ed ETag della
+ * scrittura. Restituisce l'id della versione, o null se non c'è (write-through
+ * non riuscito, o testo semanticamente uguale all'ultima versione: nessuna
+ * versione nuova).
+ */
+export async function markVersionRestored(db: Db, input: { objectId: string; href: string; etag: string | null; actor: string }): Promise<string | null> {
+  if (!input.etag) return null;
+  const rows = await db<Array<{ id: string }>>`
+    UPDATE cal_object_versions
+    SET change_kind = 'restore', actor = ${input.actor}
+    WHERE id = (
+      SELECT id FROM cal_object_versions
+      WHERE object_id = ${input.objectId} AND href = ${input.href} AND etag = ${input.etag}
+        AND change_kind IN ('create', 'update')
+      ORDER BY created_at DESC, id DESC
+      LIMIT 1
+    )
+    RETURNING id
+  `;
+  return rows[0]?.id ?? null;
+}
+
 /** Ultima versione registrata di un oggetto, per decidere se il testo nuovo merita una versione. */
 export interface LatestVersionInfo {
   id: string;

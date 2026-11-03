@@ -20,3 +20,4 @@ export * from './patch';
 export * from './validate';
 export * from './fingerprint';
 export * from './feed-transform';
+export * from './rrule-summary';

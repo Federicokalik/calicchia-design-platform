@@ -9,7 +9,8 @@
     ".": "./src/index.ts",
     "./types": "./src/types/index.ts",
     "./validators": "./src/validators.ts",
-    "./utils": "./src/utils.ts"
+    "./utils": "./src/utils.ts",
+    "./calendar-v2": "./src/calendar-v2.ts"
   },
   "dependencies": {
     "zod": "^3.25.0"
