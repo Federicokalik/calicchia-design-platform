@@ -152,23 +152,30 @@ Le risolvo innestando le idee migliori delle altre proposte e del laboratorio "m
 
 **Immagine `apps/radicale/Dockerfile`**
 - `FROM tomsquest/docker-radicale:3.7.8.0@sha256:29a9098ef9851605ca37ef3a3d5e885594c7fe91731fb6edb3194a56cfc6c54e`: indice multi-arch, verificato su Docker Hub il 2026-10-09.
-- `COPY plugins/ /app/plugins/`, `ENV PYTHONPATH=/app/plugins`.
+- `COPY plugins/ /app/plugins/`, `COPY config/config /app/config/config`, `ENV PYTHONPATH=/app/plugins`.
 - `RUN /venv/bin/python /app/plugins/caldes_selftest.py`: asserisce versioni e round-trip di fedeltà. Se la patch non funziona, la build fallisce.
 - `HEALTHCHECK` (`caldes_healthcheck.py`): PROPFIND Depth:0 sulla root `/` come `caldes-probe` da 127.0.0.1, 207 atteso.
   - Passa per auth e rights, quindi un plugin rotto rende il container unhealthy.
   - Funziona anche prima dell'inizializzazione del principal: un healthcheck su `/federico/` resterebbe a 404 al primo deploy.
 
 **Avvertenze sull'immagine tomsquest**
-- `TAKE_FILE_OWNERSHIP=false` e nessuna variabile `RADICALE_CONFIG_*`: l'entrypoint riscriverebbe il config montato in sola lettura.
+- `TAKE_FILE_OWNERSHIP=false` e nessuna variabile `RADICALE_CONFIG_*`: l'entrypoint proverebbe a riscrivere il config.
+- Config in `/app/config/config` (fuori dai `VOLUME /config` e `/data` della base) e `CMD ["/venv/bin/radicale", "--config", "/app/config/config"]`: l'entrypoint passa all'utente radicale solo se il primo argomento è esattamente `/venv/bin/radicale`.
 - Utente radicale con uid/gid 2999; `/data` ha permessi 770.
 
 ### 3.2 Configurazione (`apps/radicale/config/config`)
+
+Estratto delle chiavi che contano (il file reale, commentato, è la fonte). Radicale legge il config con `RawConfigParser`, che non conosce i commenti in fondo alla riga: ogni commento sta su una riga propria, altrimenti finisce nel valore.
+
 ```
 [server]
 hosts = 0.0.0.0:5232
 max_connections = 16
 max_content_length = 20000000
+max_resource_size = 10000000
 timeout = 30
+# 500 senza ritardo (contratto control-plane §10): il default di Radicale è 1 s
+delay_on_error = 0
 # vale anche IN LETTURA (cache miss): mai abbassarlo dopo che ci sono dati
 max_vevent_rrule_occurrence = 50000
 [auth]
@@ -186,7 +193,8 @@ filesystem_folder = /data/collections
 use_mtime_and_size_for_item_cache = True
 max_sync_token_age = 5184000
 skip_broken_item = True
-strict_preconditions = False   # True dopo la matrice device di F3
+# True dopo la matrice device di F3
+strict_preconditions = False
 predefined_collections = {}
 [hook]
 type = none
@@ -197,6 +205,7 @@ type = none
 [logging]
 level = info
 mask_passwords = True
+bad_put_request_content = False
 ```
 
 Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
@@ -229,19 +238,21 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 - Si riconoscono dal peer TCP (`context.remote_addr`), mai da un header:
   - `caldes-svc` è accettato solo da `CALDES_SVC_CIDR`, la subnet della rete interna `caldav-int` (`internal: true`, senza porte pubblicate);
   - `caldes-probe` anche da 127.0.0.1, per l'healthcheck dentro il container.
-- Il traffico pubblicato su 127.0.0.1:3011 arriva dal gateway di `app-net`, che non sta mai in `CALDES_SVC_CIDR`. Una credenziale di servizio trapelata resta quindi inutilizzabile da internet, anche se CloudPanel perde l'header `X-Remote-Addr`.
+- Il traffico pubblicato su 127.0.0.1:3011 arriva dal gateway di `dav-pub`, la rete dedicata alla porta pubblicata, che non sta mai in `CALDES_SVC_CIDR`. Una credenziale di servizio trapelata resta quindi inutilizzabile da internet, anche se CloudPanel perde l'header `X-Remote-Addr`.
 - Confronto constant-time dello sha256 con l'hash in env.
 - Uno username riservato da un peer non ammesso viene negato. Non ricade mai nel ramo device.
 - Alert (log strutturato, poi Telegram via API) se arrivano richieste device senza `X-Remote-Addr`.
 
 *Device:*
-- POST a `CALDAV_BACKEND_URL/verify-credentials` (sulla rete `caldav-int`) con il Bearer `CALDAV_SERVICE_TOKEN`, `X-Forwarded-For` uguale a `X-Remote-Addr` e timeout di 1 s.
+- POST a `CALDAV_BACKEND_URL/verify-credentials` (sulla rete `caldav-int`) con il Bearer `CALDAV_SERVICE_TOKEN`, `X-Forwarded-For` uguale a `X-Remote-Addr` e timeout di 1 s. `X-Remote-Addr` vale solo se arriva dal gateway di `dav-pub` (`CALDES_XRA_PEER_CIDR`); l'API accetta la chiamata solo dal peer di Radicale su `caldav-int` (`CALDAV_BACKEND_ALLOWED_PEERS`), quindi il vhost pubblico non espone verify-credentials nemmeno con il Bearer.
 - L'utente Radicale restituito è sempre `RADICALE_PRINCIPAL` (`federico`), qualunque sia lo username dell'app-password. Lo username resta per audit e rate limit. Così un'app-password esistente creata come `iphone` continua a funzionare e vede `/federico/`.
 - Cache positiva di 60 s in memoria. Un 401 esplicito dal backend svuota la voce.
 - Cache persistita sul volume `radicale_authcache`: HMAC-SHA256 di `username:password` con chiave da env, TTL 24 h. Si usa solo come stale-if-error.
-- Backend irraggiungibile, 5xx o 429:
+- Backend irraggiungibile o 5xx:
   - credenziali in cache, anche persistita → accettate;
   - altrimenti il plugin solleva un'eccezione e Radicale risponde 500 senza delay. Il client riprova senza invalidare la password, e non si occupano thread con il delay del login fallito.
+- 429 (troppi tentativi falliti per IP e username): negazione temporanea, 401 dopo il delay, senza consultare la cache persistita. L'API conta solo i fallimenti e verifica sempre la password prima del limite, quindi una password corretta non riceve mai 429. Se il 429 aprisse lo stale-if-error, chiunque potrebbe esaurire il proprio bucket e confrontare password senza ritardo contro la cache persistita.
+- Gli eventi provocabili da un client (`reserved_denied`, `backend_error`, `stale_if_error`, `rate_limited`, `missing_x_remote_addr`) hanno un limite per minuto, per non allagare log e alert.
 - Revoca: la policy contiene `credential_epoch`. Ogni revoca o rigenerazione lo incrementa e il plugin svuota entrambe le cache. Senza questo meccanismo la cache persistita prolungherebbe la vita di una password revocata.
 
 **`caldes_rights.py`** (non `from_file`, che legge le regole solo all'avvio).
@@ -270,7 +281,8 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 
 *Cosa fa la patch:*
 - le proprietà sconosciute (X-*, CONFERENCE...) passano a `_RawBehavior` verbatim;
-- in `TextBehavior.decode`, VALUE=URI resta verbatim e le virgole non escapate restano letterali, poi riserializzate come `\,`.
+- in `TextBehavior.decode`, VALUE=URI resta verbatim e le virgole non escapate restano letterali, poi riserializzate come `\,`;
+- `RecurringComponent.getrruleset` rifiuta le RRULE/EXRULE con valori vietati da RFC 5545 che dateutil accetta (INTERVAL o COUNT < 1, BYMONTHDAY/BYYEARDAY/BYWEEKNO = 0 o fuori intervallo, BYMONTH fuori da 1..12): la PUT risponde 400, invece di salvare un oggetto con cui una REPORT con time-range resterebbe appesa (INTERVAL=0; contratto dei moduli F2 §14.6).
 
 *Senza patch:*
 - "SUMMARY:Pranzo, cena" diventa "Pranzo";
@@ -291,7 +303,7 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 | caldes-svc | altri principal | nessuno | nessuno |
 | caldes-probe (caldav-int o 127.0.0.1) | come il device | come il device | come il device, più rw su `_canary` |
 | device (qualsiasi app-password valida → utente `federico`) | root `''` | R | R |
-| device | `federico` (principal) | R | RW: MKCALENDAR ammesso |
+| device | `federico` (principal) | R | R (il marker d'identità lo scrive solo caldes-svc); MKCALENDAR di una collezione nuova ammessa, perché usa la `w` del path nuovo |
 | device | `federico/<readonly>` (bookings, f, scadenze, sub-*) | r | r |
 | device | `federico/<hidden>` (`_canary`, sub-* in preparazione) | nessuno, non elencata | nessuno |
 | device | altre collezioni | r | rw (DELETE della collezione vietato) |
@@ -303,21 +315,21 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 
 ### 3.5 Compose, CloudPanel e deploy
 
-**Reti.** Nuova rete `caldav-int` (`internal: true`, subnet fissa scelta in F0 senza sovrapposizioni, per esempio `172.31.250.0/29`). Vi sono collegati solo `api` (alias `api-int`) e `radicale` (alias `radicale-int`). `app-net` resta per la porta pubblicata.
+**Reti.** Nuova rete `caldav-int` (`internal: true`, subnet fissa scelta in F0 senza sovrapposizioni, per esempio `172.31.250.0/29`). Vi sono collegati solo `api` (alias `api-int`) e `radicale` (alias `radicale-int`). La porta pubblicata di Radicale sta su una rete propria, `dav-pub` (`172.31.251.0/29`), con il solo `radicale`: non su `app-net`, da cui ogni container dello stack (sito, admin, worker con Chromium, analytics) raggiungerebbe `radicale:5232` scavalcando CloudPanel con un `X-Remote-Addr` scelto da lui.
 
 **Servizio radicale**
 - `image: ghcr.io/federicokalik/calicchia-radicale:sha-<short>`, senza `build:`: in produzione Compose non deve mai buildare sul VPS saltando i test della CI.
 - Volumi:
   - `radicale_collections:/data`: nome nuovo, per non rimontare il vecchio `radicale_data` della Fase 0;
-  - `./apps/radicale/config:/config:ro`;
+  - nessun bind mount del config: è nell'immagine (`/app/config/config`, avviato dal `CMD`), segue il tag sha come i plugin ed è quello verificato dal selftest. Montato dal repository, un checkout aggiornato lo porterebbe a un'immagine vecchia al primo riavvio;
   - `caldes_control:/control:ro`;
   - `radicale_authcache:/var/lib/caldes-auth`.
-- Env: `CALDAV_BACKEND_URL=http://api-int:3001/api/caldav-backend`, `CALDAV_SERVICE_TOKEN`, `CALDES_SVC_PASSWORD_SHA256`, `CALDES_PROBE_PASSWORD_SHA256`, `CALDES_PROBE_PASSWORD`, `CALDES_SVC_CIDR`, `CALDES_AUTHCACHE_KEY`, `RADICALE_PRINCIPAL=federico`, `TAKE_FILE_OWNERSHIP=false`, `TZ=UTC`.
+- Env: `CALDAV_BACKEND_URL=http://api-int:3001/api/caldav-backend`, `CALDAV_SERVICE_TOKEN`, `CALDES_SVC_PASSWORD_SHA256`, `CALDES_PROBE_PASSWORD_SHA256`, `CALDES_PROBE_PASSWORD`, `CALDES_SVC_CIDR`, `CALDES_XRA_PEER_CIDR` (subnet di `dav-pub`: `X-Remote-Addr` vale solo dal gateway della porta pubblicata), `CALDES_AUTHCACHE_KEY`, `RADICALE_PRINCIPAL=federico`, `TAKE_FILE_OWNERSHIP=false`, `TZ=UTC`.
 
 **Servizio api**
 - Volumi: `radicale_collections:/radicale-data:ro`, `caldes_control:/run/caldes-control`.
 - `group_add: ["2999"]` per leggere `/data`, che ha permessi 770.
-- Env: `RADICALE_URL=http://radicale-int:5232`, `RADICALE_SVC_USER`, `RADICALE_SVC_PASSWORD`, `RADICALE_PROBE_PASSWORD`, `RADICALE_PRINCIPAL=federico`, `RADICALE_DATA_DIR=/radicale-data/collections`, `CALDES_POLICY_FILE`, `CALDES_HEARTBEAT_FILE`, `CAL_FEED_UID_DOMAIN` (valore congelato), `CAL_DB_POOL_MAX=4`, `TZ=UTC`.
+- Env: `RADICALE_URL=http://radicale-int:5232`, `RADICALE_SVC_USER`, `RADICALE_SVC_PASSWORD`, `RADICALE_PROBE_PASSWORD`, `RADICALE_PRINCIPAL=federico`, `RADICALE_DATA_DIR=/radicale-data/collections`, `CALDES_POLICY_FILE`, `CALDES_HEARTBEAT_FILE`, `CALDAV_BACKEND_ALLOWED_PEERS` (IP di `radicale-int`: `/api/caldav-backend/*` risponde 404 a ogni altro peer, vhost pubblico compreso), `CAL_FEED_UID_DOMAIN` (valore congelato), `CAL_DB_POOL_MAX=4`, `TZ=UTC`.
 - Durante i 30 giorni di finestra il tag dell'immagine API è pinnato a `sha-<short>` invece di `latest` (§16.6).
 
 **Dipendenze fra servizi.** Nessun `depends_on` rigido in nessuna direzione:
@@ -329,8 +341,8 @@ Le scelte, motivate in laboratorio (`design-lab/final/*.py`, Radicale 3.7.8):
 - `client_max_body_size 20m`.
 
 **Deploy in due commit**, documentato nel runbook:
-1. il commit con le modifiche ad `apps/radicale/**` fa pubblicare alla CI l'immagine `sha-X`;
-2. un secondo commit aggiorna il tag nel compose.
+1. il commit con le modifiche ad `apps/radicale/**` fa pubblicare alla CI l'immagine `sha-X`, senza toccare il compose (il pull di Dockhand non deve mai cercare un tag che non esiste ancora);
+2. un secondo commit aggiorna il tag nel compose. Per la F1 il secondo commit porta anche tutto il resto del compose (reti, volumi, variabili), da `docs/calendar-radicale/deploy/f1-compose.patch`.
 
 Ordine complessivo:
 1. Radicale e volumi, con policy shadow e marker assente: i device sono comunque negati e oggi CalDAV è già rotto;
@@ -350,7 +362,7 @@ Ordine complessivo:
 
 Funzione idempotente `calendar_sidecar_reconcile()`:
 - la chiamano la migrazione, ogni import di backup e l'auditor;
-- per le righe con `role` di default usa la dead prop `role` della collezione, se l'indice la conosce;
+- per le righe con `role` di default usa la dead prop `role` della collezione, se l'indice la conosce, ma mai per le righe con `origin = device` (dead prop scritte dal device stesso);
 - altrimenti applica le regole storiche:
   - slug `bookings` → bookings;
   - is_system con slug `f`/`festivita` oppure nome `^festivit` → holidays;
@@ -383,7 +395,7 @@ Tabelle persistenti, incluse nel backup SQL completo ma mai nel ripristino JSON:
 - `cal_booking_conflicts`.
 
 **165 Migrazione.**
-- `calendar_backend_state` (singleton): mode (`postgres|cutover|radicale|rollback|finalized`), shadow_enabled, write_freeze, volume_id, epoch, cutover_at/by, rollback_until, finalized_at, policy_version, credential_epoch, api_min_version, restore_guard_until, rebuild_required, horizon_start/end.
+- `calendar_backend_state` (singleton; creata già dalla 162 con le colonne che servono in F1, la 165 aggiunge le altre: vedi [contratto del control-plane §2](contracts/control-plane.md)): mode (`postgres|cutover|radicale|rollback|finalized`), shadow_enabled, write_freeze, volume_id, epoch, cutover_at/by, rollback_until, finalized_at, policy_version, credential_epoch, api_min_version, restore_guard_until, rebuild_required, horizon_start/end.
 - `cal_migration_runs`.
 - `cal_migration_ledger` (per href): legacy_key, legacy_snapshot JSONB, legacy_hash, intent_fingerprint, intent_at, written_etag, written_at, adopted, derived.
 - `cal_migration_items`.
@@ -469,17 +481,20 @@ Una X-prop non può mai promuovere un evento a booking o system. Gli item non-pr
 
 Passi:
 1. Controllo d'identità (props del principal in cache, aggiornate a ogni cambio di mtime). Se l'identità non coincide, stop e `CalendarUnavailableError`.
-2. Si annotano la mtime m0 e l'istante di osservazione prima del REPORT.
+2. Si annotano la mtime m0 e l'istante di osservazione prima del REPORT, e (mount affidabile: mount mode, oppure filesystem locale che il canary non ha smentito) si elencano i file della collezione, anche nelle sync incrementali. `dirty_since` si azzera solo per i cambi segnati entro quell'istante.
 3. REPORT sync-collection dal token salvato. Un 403 valid-sync-token porta al full resync (PROPFIND getetag e diff).
 4. Multiget a blocchi di 100 href.
 5. Per ogni 404:
    - file ancora presente su disco → item saltato da Radicale: l'oggetto resta, va in quarantena con `health_reason='radicale-skip'` e parte un alert;
-   - file assente → cancellazione candidata.
+   - file assente → cancellazione candidata;
+   - mount non affidabile (remote mode, o copia stantia smentita dal canary) → `pending_404`, cancellazione al secondo 404 consecutivo.
+   Nelle sync incrementali un file elencato al passo 2, mai indicizzato e assente dal REPORT, si chiede a Radicale: servito → upsert, 404 → item saltato (quarantena `radicale-skip`).
 6. **Interruttore anti-cancellazione di massa.**
-   - Scatta se le cancellazioni candidate superano max(50 oggetti, 20%) della collezione, oppure se la collezione intera risulta sparita o vuota.
-   - In quel caso non si applica nulla: la collezione passa in `hold`, le occorrenze esistenti continuano a bloccare e parte un alert.
+   - Conta solo le cancellazioni osservate: quelle fatte dall'API (DELETE, origine di una MOVE, compensazione della saga) sono annunciate alla sync prima della richiesta, si applicano sempre e restano nelle versioni con l'attore `write-through:<attore>`.
+   - Scatta se le cancellazioni osservate negli ultimi 15 minuti (già applicate, più quelle nuove) superano max(50 oggetti, 20%) della collezione: CalDAV cancella una risorsa per volta e il campanello sincronizza ogni secondo, quindi la soglia di una sola sync non basterebbe. Scatta anche se la collezione intera risulta sparita, o se una sola sync la svuota (da 2 oggetti in su), e con la guardia post-ripristino attiva (§16.2) per qualsiasi cancellazione (motivo `restore-guard`).
+   - In quel caso le cancellazioni nuove non si applicano: la collezione passa in `hold`, le occorrenze esistenti continuano a bloccare e parte un alert.
    - Nella pagina sync-state l'admin sceglie fra "applica cancellazioni" e "ricostruisci in Radicale dall'indice" (§16.3).
-7. Parse ed espansione con ical.js fuori dalla transazione. Oltre i 200 oggetti si usano `worker_threads`, per non bloccare l'event loop che serve `verify-credentials`.
+7. Parse ed espansione con ical.js fuori dalla transazione. Oltre i 200 oggetti si usano `worker_threads`, per non bloccare l'event loop che serve `verify-credentials`. Un change set oltre il tempo massimo non si ripete nel thread principale: le risorse si ripreparano una per una nel worker, e quella che supera il proprio tempo va in quarantena (`index-error`) con il blocco conservativo dal testo.
 8. `BEGIN … SELECT sync_token FOR UPDATE`; se il token non è più quello di partenza, rollback (CAS).
 9. Upsert, versioni (testo delle cancellazioni compreso), rigenerazione delle occorrenze.
 10. Aggiornamento di `sync_token` e `dir_mtime_ns = m0`. m0 si salva solo se è più vecchio di 50 ms rispetto all'osservazione, altrimenti NULL (finestra "racy").
@@ -488,7 +503,7 @@ Passi:
 ### 6.3 Discovery, creazione e identità
 **Discovery**
 - PROPFIND Depth:1 sul principal: displayname, color, order, description, timezone, component-set, resourcetype, sync-token, dead prop `calendar-id` e `role`.
-- Collezione con dead prop `calendar-id` nota → adozione della riga esistente, anche se in stato `creating`.
+- Collezione con dead prop `calendar-id` nota e nome uguale al `collection_name` della riga → adozione della riga esistente, anche se in stato `creating`. Mai per una collezione nata da un device, e mai copiando in `dav_props` le dead prop `urn:calicchia:caldes` di una collezione scrivibile dai device: in live un device scrive le dead prop delle collezioni che può scrivere (contratto control-plane §4.5 e §8).
 - Collezione nuova senza dead prop → riga sidecar con origin=device, role=user (tasks se è solo VTODO), blocks_availability secondo la decisione 4, `needs_review`, feed disattivato.
 - Collezione sparita → `missing_since` e alert, mai una cancellazione automatica. L'indice tiene le occorrenze finché l'admin non conferma.
 
@@ -518,7 +533,7 @@ Passi:
   - l'oggetto va in quarantena (`expansion-budget`);
   - riceve un'occorrenza `conservative` su [max(DTSTART, inizio orizzonte), min(UNTIL, fine orizzonte)), bloccante solo se il master bloccherebbe;
   - parte un alert.
-- Oltre le 5000 occorrenze nell'orizzonte: `materialized_until`. Le decisioni oltre quella data espandono al volo solo quell'oggetto, su finestra; se fallisce, blocco conservativo della sola finestra richiesta per quel solo oggetto.
+- Oltre le 5000 occorrenze nell'orizzonte: `materialized_until`. Le decisioni oltre quella data espandono al volo solo quell'oggetto, su finestra (a blocchi da 5000, fino a 50 000 occorrenze o 1M di iterazioni per finestra, poi una coda conservativa fino alla fine della finestra); se fallisce, blocco conservativo della sola finestra richiesta per quel solo oggetto.
 
 ### 6.5 Salute per oggetto e per collezione
 
@@ -542,7 +557,8 @@ Un feed esterno con una RRULE invalida, o una serie MINUTELY creata da device, l
   - diff con l'indice e un'unica transazione di upsert e delete sugli oggetti `origin_store='remote'` del sidecar dell'iscrizione, con `index_version++`;
   - nessuna versione;
   - anti-wipe come oggi (body vuoto o HTML rifiutato, force esplicito).
-- Nelle decisioni le iscrizioni usano l'indice dell'ultimo pull completato: non stanno nel set di freschezza e la loro sync non interferisce con le prenotazioni.
+- Nelle decisioni le iscrizioni usano l'indice dell'ultimo pull completato: non stanno nel set di freschezza, la loro sync non interferisce con le prenotazioni e non contano nella garanzia dell'orizzonte (§6.9). Un'iscrizione bloccante mai scaricata vale come "nessun evento": il guasto di un feed esterno non porta mai le prenotazioni in 503, e la salute la segnala ('degraded', `subscription_never_pulled`).
+- Il corpo del feed si passa al parser come byte: l'unfolding avviene prima della decodifica UTF-8, che resta tollerante come oggi (U+FFFD per i byte non UTF-8).
 - **Specchio** su Radicale solo per `device_visible`: job a bassa priorità, PUT solo per i fingerprint cambiati (ledger per href), al massimo 5 PUT/s. La collezione `sub-<id8>` è in sola lettura per i device e il watcher la ignora, perché Radicale non è la sua fonte.
 - **Prima del cutover:** il pull legacy verso `calendar_events` resta invariato, compreso il sottoinsieme bacato (parità). Da F3 il nuovo pull popola l'indice in parallelo, in shadow.
 
@@ -562,7 +578,7 @@ Durante il rebuild le decisioni trovano `dir_mtime` NULL e forzano la sync compl
 
 ### 6.9 Orizzonte
 - `cal_occurrences` copre [oggi − 400 g, oggi + 800 g].
-- Garanzia statica: `horizon_end ≥ oggi + max(max_advance_days) + 14 g`. Se non regge, le decisioni falliscono chiuse.
+- Garanzia statica: `horizon_end ≥ oggi + max(max_advance_days) + 14 g`. Se non regge, le decisioni falliscono chiuse. Vale per le collezioni bloccanti di Radicale e solo con lo store Radicale; le iscrizioni non contano (§6.6).
 - Fuori orizzonte (admin nel 2030, export) l'espansione avviene al volo da `cal_objects`.
 
 ## 7. Percorso di lettura
@@ -621,7 +637,7 @@ Per MCP e admin v1 la `base` è implicita (i valori letti al passo 3), con un so
 - **Solo questa:** override con RECURRENCE-ID dello stesso tipo e TZID di DTSTART.
 - **Elimina questa:** EXDATE tipizzato più la rimozione dell'eventuale override.
 - **Tutta la serie:**
-  - uno spostamento di Δ si applica anche a RECURRENCE-ID ed EXDATE;
+  - uno spostamento di Δ porta con sé RECURRENCE-ID, EXDATE, RDATE e UNTIL perché restino sulle stesse occorrenze: dello stesso Δ quando le istanze seguono il DTSTART, della sola parte oraria quando la regola fissa i giorni (BYDAY, BYMONTHDAY...); un valore che resterebbe senza istanza, o un DTSTART fuori regola, è un errore (409/400) invece di un orfano silenzioso (recurrence-ops.shiftSeries);
   - un cambio di RRULE con `dryRun` restituisce `orphanedOverrides`.
 - **Questa e le successive:** saga in `cal_jobs`.
   - (a) nuova serie con UID nuovo, `RELATED-TO;RELTYPE=SIBLING`, gli override ed EXDATE successivi al taglio e il COUNT residuo;
@@ -1134,6 +1150,8 @@ Dopo il cutover mostra:
 
 RPO di 6 ore sia per il DB sia per il volume. Il dump completo include sidecar, `cal_object_ids`, versioni, job e stato.
 
+Un problema del volume (assente, senza `collections/`, lock o tar falliti) non ferma mai il dump, che contiene tutta la piattaforma: il run si chiude con il solo database, marcato incompleto nel manifest, con exit 3 e un alert Telegram (ogni run fallito ne manda uno).
+
 ### 16.2 Backup JSON dell'admin (`/api/backup`)
 Il formato v1 resta (è un contratto).
 
@@ -1141,18 +1159,25 @@ Il formato v1 resta (è un contratto).
 
 | Gruppo | Tabelle | Export | Import |
 |---|---|---|---|
-| S: stato e derivati | `calendar_backend_state`, `cal_migration_*`, `cal_jobs`, `cal_collection_state`, `cal_objects`, `cal_components`, `cal_occurrences`, `cal_booking_conflicts`, `cal_object_ids`, `cal_object_versions` | sì | mai, in nessuna modalità (saltate e riportate nel report) |
+| S: stato e derivati | `schema_migrations`, `calendar_backend_state`, `cal_migration_*`, `cal_jobs`, `cal_collection_state`, `cal_objects`, `cal_components`, `cal_occurrences`, `cal_booking_conflicts`, `cal_object_ids`, `cal_object_versions` | sì | mai, in nessuna modalità (saltate e riportate nel report) |
 | D: dominio iCalendar | `calendars`, `calendar_events` (o `_legacy`), `calendar_subscriptions` | sì | solo in `mode=postgres`; altrimenti saltate, con l'avviso "usa il ripristino coordinato o il ripristino da versioni" |
-| B: business | prenotazioni, event types, disponibilità, app-password, reminders | sì | come oggi |
+| B: business | prenotazioni, event types, disponibilità, app-password, reminders | sì | come oggi; per le app-password le revoche del database corrente restano e, se il ripristino toglie credenziali valide, `credential_epoch` + 1 |
+
+Precisazioni dell'implementazione (F1, `apps/api/src/routes/backup.ts`):
+- S è un elenco esplicito più il prefisso `cal_migration_`, non una regola `cal_*`: `cal_bookings`, `cal_sync_log` e `cal_webhook_logs` (Cal.com, migrazione 023) sono business. Le migrazioni 163-165 devono usare esattamente questi nomi.
+- `schema_migrations` sta in S: il ripristino non cambia lo schema, quindi il ledger delle migrazioni non torna mai indietro (da un backup precedente alla 162 toglierebbe la riga della 162).
+- Le tabelle B si svuotano senza CASCADE, su un insieme chiuso rispetto alle FK: se una tabella protetta (S, `calendars`, D fuori da `mode=postgres`) referenzia una tabella da svuotare, l'import risponde 409 prima di toccare i dati.
+- `caldav_app_passwords` (B): nella stessa transazione dell'import le revoche del database corrente tornano sulle righe che il backup riporta attive, perché una revoca (un telefono rubato) non si annulla con un ripristino. Le credenziali valide prima e assenti dopo (create dopo il backup) fanno incrementare `credential_epoch` nella stessa UPDATE della guardia, così `caldes_auth` svuota anche la cache persistita; la risposta lo segnala negli avvisi (contratto control-plane §9.6).
 
 **Regole dell'import di D in `mode=postgres`**
-- `calendars` in UPSERT per id sulle sole colonne presenti nel backup. Niente TRUNCATE: il CASCADE svuoterebbe indice e id. Le colonne del sidecar restano; le righe assenti dal backup vanno in `needs_review` e non vengono cancellate.
+- `calendars` in UPSERT per id sulle sole colonne presenti nel backup. Niente TRUNCATE: il CASCADE svuoterebbe indice e id. Le colonne del sidecar restano; le righe assenti dal backup vanno in `needs_review` (`missing_in_backup`) e non vengono cancellate. Se una riga mantenuta occupa uno slug, un token del feed, un `collection_name` o il default che servono a una riga del backup, li cede (slug → `<slug>-<prime 8 cifre dell'id>`, token rigenerato, `collection_name` riassegnato dalla riconciliazione): è il caso del ripristino su un database nuovo, con gli stessi slug e id diversi.
+- Dopo il caricamento si verificano le FK che toccano le tabelle D ripristinate: una riga orfana annulla l'import.
 - `calendar_events` e `calendar_subscriptions`: TRUNCATE senza CASCADE. L'insieme è chiuso rispetto alle FK, perché le tabelle nuove non hanno FK verso `calendar_events`.
 
 **Dopo ogni import**
 - `calendar_sidecar_reconcile()`;
-- `rebuild_required=true`;
-- `restore_guard_until = now() + 48 h`: nessuna cancellazione automatica e policy frozen finché la verifica post-ripristino (riconciliazione, rebuild, auditor) non è verde;
+- `rebuild_required=true`, con `sync_token` e `dir_mtime_ns` azzerati e il job `index_rebuild` accodato nella stessa transazione (`requestIndexRebuild`); all'avvio l'API accoda il rebuild anche quando trova solo il flag (`restore-calendar-stack.sh`, UPDATE manuale);
+- `restore_guard_until = now() + 48 h`: nessuna cancellazione automatica e policy frozen finché la verifica post-ripristino (riconciliazione, rebuild, auditor) non è verde. Nella sync ogni cancellazione osservata in quel periodo va in hold (motivo `restore-guard`), a qualsiasi soglia e anche nel rebuild; le cancellazioni fatte dall'API si applicano; l'unica uscita è "applica cancellazioni" dell'admin;
 - con lo shadow attivo, ledger rivalidato con un plan dry-run: le differenze diventano conflitti, mai sovrascritture;
 - un ripristino di `calendar_bookings` avvia la riconciliazione delle proiezioni in sola lettura.
 
@@ -1167,7 +1192,7 @@ Il formato v1 resta (è un contratto).
 ### 16.3 Restore coordinato e recupero
 **Scenario A: volume perso o corrotto, DB intatto**
 1. Fermare radicale e ripristinare lo snapshot.
-2. All'avvio l'identità coincide ma l'indice è più recente: il full resync incontra l'interruttore anti-cancellazione e mette le collezioni in hold.
+2. All'avvio l'identità coincide ma l'indice è più recente: il full resync incontra l'interruttore anti-cancellazione (o la guardia post-ripristino, se attiva) e mette le collezioni in hold; le cancellazioni sospese continuano a bloccare.
 3. "Ricostruisci Radicale dall'indice" rigioca le versioni più recenti dello snapshot (diff per href, If-Match, anteprima).
 4. Si riaprono i device.
 
@@ -1178,6 +1203,8 @@ Il formato v1 resta (è un contratto).
 4. Policy frozen fino alla conferma dal wizard.
 
 **In entrambi gli scenari:** la policy viene riscritta dallo stato in PG, e un mismatch d'identità o d'epoch blocca finché il wizard non conferma "riassegna identità", con diff. Drill trimestrale.
+
+`restore-calendar-stack.sh` rifiuta (salvo flag espliciti) una destinazione che non è il `/data` di Radicale, un epoch che torna indietro e un database non inizializzato con un marker valido sul volume; sposta la `collections` corrente solo dopo il caricamento del database e la rimette al suo posto se l'estrazione fallisce.
 
 ### 16.4 GDPR
 **`calendarErase(email)`**

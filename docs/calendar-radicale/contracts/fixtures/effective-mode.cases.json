@@ -1,0 +1,1565 @@
+{
+  "description": "Casi di conformità della modalità effettiva dei device (control-plane.md §7.3). Per ogni caso: scrivere policy.json (oggetto 'policy' serializzato in JSON, testo 'policy_text' verbatim, oppure nessun file se 'policy' è null) e heartbeat.json allo stesso modo; se 'last_known_good' non è null, il lettore deve aver già caricato quella policy valida prima del caso. Valutare all'istante 'now' e confrontare mode, volume_id, epoch e l'insieme dei reasons (in TS l'ordine è quello di EFFECTIVE_MODE_REASONS). Eseguiti da apps/api/test/calendar/policy-from-state.test.ts su effectiveDeviceMode() e dai test Python su caldes_rights.",
+  "principal": "federico",
+  "cases": [
+    {
+      "name": "shadow con heartbeat fresco",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "shadow",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "live con heartbeat fresco",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "frozen da cutover con heartbeat fresco",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 7,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "cutover",
+        "mode": "frozen",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "cutover",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "volume non inizializzato",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 1,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": null,
+        "epoch": 0,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 0,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "shadow",
+        "reasons": [],
+        "volume_id": null,
+        "epoch": 0
+      }
+    },
+    {
+      "name": "heartbeat di esattamente 600 s: ancora valido",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:50:00.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat di 600,001 s: scaduto",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:49:59.999Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_stale"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat scaduto anche in shadow",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:00:00.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_stale"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "heartbeat assente",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": null,
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_missing"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat non JSON",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat_text": "{\"schema\": 1, ",
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con schema 2",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 2,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat senza api_version",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con ts senza fuso",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con data impossibile (31 settembre)",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-09-31T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con ore 24",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T24:00:00.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con 9 cifre decimali",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.123456789Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con epoch diverso dalla policy",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_epoch_mismatch"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "policy live ma heartbeat in mode postgres",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_mode_mismatch"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "policy live con heartbeat in mode finalized",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "finalized",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat 60 s nel futuro: tollerato",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T18:01:00.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat 61 s nel futuro",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T18:01:01.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_future"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con offset +02:00",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T19:59:30.000+02:00"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat scaduto e di epoch diverso",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 1,
+        "ts": "2026-10-09T17:00:00.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "heartbeat_stale",
+          "heartbeat_epoch_mismatch"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "heartbeat con campo sconosciuto: ignorato",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z",
+        "pid": 42
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "live",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "policy assente e nessuna policy valida vista",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": null,
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "policy_missing",
+          "heartbeat_epoch_mismatch"
+        ],
+        "volume_id": null,
+        "epoch": 0
+      }
+    },
+    {
+      "name": "policy non JSON dopo una live: shadow con l'identità precedente",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy_text": "{\"schema\": 1, \"mode\": \"li",
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "radicale",
+        "epoch": 2,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 9,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2,
+        "credential_epoch": 4,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze",
+          "sub-abc"
+        ],
+        "hidden": [
+          "_canary",
+          "sub-new"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 2
+      }
+    },
+    {
+      "name": "policy con schema 2: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 2,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy di un altro principal: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "mario",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy live senza volume: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "radicale",
+        "mode": "live",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": null,
+        "epoch": 0,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con volume ed epoch 0: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 0,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con nome di collezione non valido: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "a/b"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con mode sconosciuto: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "open",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con epoch stringa: invalida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": "1",
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "expected": {
+        "mode": "shadow",
+        "reasons": [
+          "policy_invalid"
+        ],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy invalida senza policy valida vista: nessuna identità",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 2,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [
+          "policy_invalid",
+          "heartbeat_epoch_mismatch"
+        ],
+        "volume_id": null,
+        "epoch": 0
+      }
+    },
+    {
+      "name": "policy con campo sconosciuto: valida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ],
+        "note": "ignorato"
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "shadow",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con volume_id maiuscolo: normalizzato",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "shadow",
+        "reasons": [],
+        "principal": "federico",
+        "volume_id": "3F2B8C1E-7D4A-4E9B-9C2A-1B2C3D4E5F60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "shadow",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    },
+    {
+      "name": "policy con reasons sconosciuti: valida",
+      "now": "2026-10-09T18:00:00.000Z",
+      "policy": {
+        "schema": 1,
+        "version": 3,
+        "generated_at": "2026-10-09T17:59:00.000Z",
+        "backend_mode": "postgres",
+        "mode": "frozen",
+        "reasons": [
+          "futuro"
+        ],
+        "principal": "federico",
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1,
+        "credential_epoch": 0,
+        "readonly": [
+          "bookings",
+          "f",
+          "scadenze"
+        ],
+        "hidden": [
+          "_canary"
+        ]
+      },
+      "heartbeat": {
+        "schema": 1,
+        "api_version": "sha-1a2b3c4",
+        "mode": "postgres",
+        "epoch": 1,
+        "ts": "2026-10-09T17:59:30.000Z"
+      },
+      "last_known_good": null,
+      "expected": {
+        "mode": "frozen",
+        "reasons": [],
+        "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+        "epoch": 1
+      }
+    }
+  ]
+}

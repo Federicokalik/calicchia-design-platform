@@ -29,9 +29,15 @@ non reversibili:
 | `083_portal_access_code_drop_plaintext.sql` | `DROP COLUMN` del codice portale in chiaro |
 
 **Prima di applicarle a un ambiente che contiene dati**, eseguire un backup
-verificato del database (`scripts/backup-db.sh` — il dump viene anche caricato
-off-site su MEGA S4). Su un DB creato da zero non c'è nulla da perdere; il
-vincolo riguarda gli ambienti con dati reali.
+verificato del database (`scripts/backup-db.sh`, che dalla fase F1 del
+calendario delega a `scripts/backup-calendar-stack.sh`: il dump è in
+`$BACKUP_DIR/calendar-stack/<id>/caldes-db.sql.gz` e su MEGA S4 in
+`s3://$S4_BUCKET/calendar-stack/<id>/`). Per tornare indietro:
+`scripts/restore-calendar-stack.sh --only db <run>` oppure
+`scripts/restore-db.sh <…>/calendar-stack/<id>/caldes-db.sql.gz`. La cartella
+`s3://$S4_BUCKET/db/` contiene solo i dump precedenti alla F1. Su un DB creato
+da zero non c'è nulla da perdere; il vincolo riguarda gli ambienti con dati
+reali.
 
 ## ON DELETE RESTRICT su `customers` (MG-05)
 

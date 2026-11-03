@@ -16,6 +16,43 @@
  *   event type con requires_approval → status 'pending': lo slot è bloccato
  *   dalla EXCLUDE constraint ma la proiezione calendar_event avviene solo
  *   all'approvazione.
+ *
+ * Protocollo di decisione della fase F2 del passaggio a Radicale (design §9,
+ * §14; decisione 1; contratto dei moduli
+ * docs/calendar-radicale/contracts/f2-modules.md §7.4), per createBooking e
+ * rescheduleBooking con qualsiasi source (anche mcp e admin: la capacity
+ * nella sezione critica legge gli eventi):
+ *
+ *   tx: pg_advisory_xact_lock(cal-week-IYYY-IW)                   (invariato)
+ *       stato del backend riletto nella tx, senza cache
+ *       store Radicale: niente write_freeze; verifyFreshness({ db: tx })
+ *         (identità del volume, stat delle collezioni bloccanti, sync se
+ *         cambiate; fallimento → 503, salvo modalità degradata)
+ *       require_available_slot → computeAvailableSlots(…, { level: 'decision', db: tx })
+ *       capacity e buffer con db: tx
+ *       INSERT calendar_bookings (EXCLUDE)
+ *       store Radicale: enqueue project_booking nella tx (outbox)
+ *   commit
+ *   post, store Radicale: nuova verifica della freshness e confronto delle
+ *     occorrenze sovrapposte con quelle viste nella decisione → eventuali
+ *     cal_booking_conflicts con avviso, mai un annullamento automatico; se la
+ *     verifica non riesce, job booking_conflict_check
+ *   post, mode postgres: proiezione legacy sincrona in calendar_events, come
+ *     oggi
+ *
+ * In mode postgres il risultato è quello di oggi: stessa proiezione legacy
+ * (anche il link della riunione nullo dopo riprogrammazione e approvazione,
+ * correzione del design §14 che cambia un valore di contratto e quindi esce
+ * con lo store Radicale), stessi messaggi d'errore. Cambia solo che slot,
+ * capacity e buffer si leggono con la transazione della prenotazione (la
+ * riprogrammazione vede l'originale già annullata) e che il controllo dello
+ * slot avviene dentro l'advisory lock.
+ *
+ * Con lo store Radicale le proiezioni booking-* non bloccano (design §9):
+ * una riprogrammazione su uno slot sovrapposto all'originale è accettata. Il
+ * job project_booking (registerBookingJobs) calcola lo stato desiderato da
+ * calendar_bookings all'esecuzione (booking-projection.ts) e ricalcola sempre
+ * il link della riunione con resolveLocationForBooking.
  */
 
 import { customAlphabet } from 'nanoid';
@@ -25,6 +62,36 @@ import { resolveLocationForBooking, deleteGoogleEvent } from './meeting-url';
 import { getBookingsCalendar } from './calendars';
 import { hasWeeklyCapacityForBooking } from './capacity';
 import { createEvent, getEventBySource, updateEvent } from './events';
+import {
+  type CalendarStoreKind,
+  readBackendStateFresh,
+  storeKindForMode,
+  storeKindOverride,
+  writesSuspendedInMode,
+} from './backend-mode';
+import {
+  blockingOccurrenceKeys,
+  maxBlockingIndexVersion,
+  PROJECTED_BOOKING_STATUSES,
+  recordBookingConflicts,
+  syncBookingProjection,
+} from './booking-projection';
+import { assertReadyOrDegraded } from './busy';
+import { CalendarUnavailableError, type CalendarUnavailableReason } from './errors';
+import {
+  CAL_JOB_KINDS,
+  CalendarJobPermanentError,
+  type CalendarJob,
+  type CalendarJobContext,
+  type CalendarJobOutcome,
+  enqueueCalendarJob,
+  registerCalendarJobHandler,
+} from './jobs';
+import { isRadicaleError } from './radicale/errors';
+import { verifyFreshness } from './radicale/freshness';
+import { raiseIndexAlert } from './radicale/health';
+import type { Db } from './radicale/policy';
+import type { CalendarBackendState } from './radicale/types';
 import type {
   Booking,
   BookingWithEventType,
@@ -50,9 +117,95 @@ export class BookingValidationError extends Error {
   constructor(message: string) { super(message); }
 }
 
+/**
+ * Come si proietta una prenotazione nel calendario Prenotazioni:
+ * 'legacy' = riga di calendar_events scritta in modo sincrono (mode postgres,
+ * come oggi); 'job' = risorsa booking-<uid>.ics in Radicale tramite il job
+ * project_booking (modi cutover, radicale, rollback e finalized: il job
+ * attende da solo la fine di una transizione).
+ */
+export type BookingProjectionStrategy = 'legacy' | 'job';
+
+/** Esito della parte "calendario" di una decisione di prenotazione (design §9). */
+export interface BookingDecision {
+  /** Store che ha servito busy e capacity. */
+  store: CalendarStoreKind;
+  projection: BookingProjectionStrategy;
+  /** Verifica scavalcata dalla modalità degradata (decisione 1); null se riuscita o non necessaria. */
+  degraded: { reason: CalendarUnavailableReason; detail: string | null } | null;
+  /** Occorrenze bloccanti già sovrapposte alla prenotazione nella decisione (store Radicale). */
+  preexisting: string[];
+}
+
 interface CreateBookingResult {
   booking: Booking;
   eventType: EventType;
+  /** Parte calendario della decisione (per i side effect post-commit di chi possiede la tx). */
+  decision: BookingDecision;
+}
+
+/** Strategia di proiezione per uno stato del backend (lo store forzato dai test vale come modo). */
+export function projectionStrategyFor(state: Pick<CalendarBackendState, 'mode'>): BookingProjectionStrategy {
+  const forced = storeKindOverride();
+  if (forced) return forced === 'postgres' ? 'legacy' : 'job';
+  return state.mode === 'postgres' ? 'legacy' : 'job';
+}
+
+/** Versione della sorgente di una prenotazione per i job (updated_at in ISO). */
+function bookingVersion(booking: Pick<Booking, 'updated_at'> | null | undefined): string | null {
+  if (!booking?.updated_at) return null;
+  const d = new Date(booking.updated_at);
+  return Number.isFinite(d.getTime()) ? d.toISOString() : String(booking.updated_at);
+}
+
+/** Accoda la proiezione di una prenotazione (outbox: con `db` = tx esiste solo dopo la COMMIT). */
+async function enqueueProjection(booking: Pick<Booking, 'uid' | 'updated_at'>, db: Db): Promise<void> {
+  await enqueueCalendarJob(CAL_JOB_KINDS.projectBooking, booking.uid, {}, { db, sourceVersion: bookingVersion(booking) });
+}
+
+/** Payload del job booking_conflict_check. */
+interface ConflictCheckPayload extends Record<string, unknown> {
+  booking_id: string;
+  preexisting: string[];
+  degraded_reason: string | null;
+}
+
+/** Accoda il controllo delle sovrapposizioni da rifare più tardi (freshness non verificabile adesso). */
+async function enqueueConflictCheck(
+  booking: Pick<Booking, 'id' | 'uid'>,
+  decision: BookingDecision,
+  opts: { db: Db; delayMs: number },
+): Promise<void> {
+  const payload: ConflictCheckPayload = {
+    booking_id: booking.id,
+    preexisting: decision.preexisting,
+    degraded_reason: decision.degraded?.reason ?? null,
+  };
+  await enqueueCalendarJob(CAL_JOB_KINDS.bookingConflictCheck, booking.uid, payload, {
+    db: opts.db,
+    delayMs: opts.delayMs,
+    sourceVersion: await maxBlockingIndexVersion(opts.db),
+  });
+}
+
+/**
+ * Parte calendario della decisione, dentro la sezione critica (dopo
+ * l'advisory lock): stato riletto nella tx; con lo store Radicale niente
+ * write_freeze e freshness verificata, oppure modalità degradata accesa per
+ * un motivo scavalcabile (decisione 1). Lancia CalendarUnavailableError (503).
+ */
+async function beginDecision(tx: Db): Promise<BookingDecision> {
+  const state = await readBackendStateFresh(tx);
+  const store = storeKindOverride() ?? storeKindForMode(state.mode);
+  const decision: BookingDecision = { store, projection: projectionStrategyFor(state), degraded: null, preexisting: [] };
+  if (store === 'postgres') return decision;
+  // In mode postgres write_freeze non conta (contratto control-plane §6.2).
+  if (storeKindForMode(state.mode) === 'radicale' && state.write_freeze) {
+    throw new CalendarUnavailableError('write_freeze', 'prenotazioni sospese: scritture del calendario congelate (write_freeze)');
+  }
+  const bypassed = await assertReadyOrDegraded(tx, () => verifyFreshness({ db: tx }), 'decision');
+  if (bypassed) decision.degraded = { reason: bypassed.reason, detail: bypassed.detail };
+  return decision;
 }
 
 /**
@@ -113,8 +266,43 @@ function fireBookingWorkflow(
 
 /**
  * Proietta un booking confermato come calendar_event nel calendario 'bookings'
+ * (store legacy). Lancia gli errori di createEvent: la usano il percorso
+ * sincrono (projectBookingEvent, best-effort) e il job project_booking dopo un
+ * ritorno a mode postgres (convergeLegacyProjection, che riprova).
+ */
+async function createLegacyProjection(
+  booking: Booking,
+  eventType: EventType,
+  meetingUrl: string | null,
+): Promise<boolean> {
+  const bookingsCal = await getBookingsCalendar();
+  if (!bookingsCal) return false;
+  await createEvent({
+    calendar_id: bookingsCal.id,
+    summary: `${eventType.title} – ${booking.attendee_name}`,
+    description: [
+      `Cliente: ${booking.attendee_name} <${booking.attendee_email}>`,
+      booking.attendee_phone ? `Tel: ${booking.attendee_phone}` : null,
+      booking.attendee_company ? `Azienda: ${booking.attendee_company}` : null,
+      booking.attendee_message ? `\nNote:\n${booking.attendee_message}` : null,
+      `\nUID prenotazione: ${booking.uid}`,
+    ].filter(Boolean).join('\n'),
+    location: booking.location_value,
+    url: meetingUrl,
+    start_time: booking.start_time,
+    end_time: booking.end_time,
+    source: 'booking',
+    source_id: booking.uid,
+    status: 'confirmed',
+  });
+  return true;
+}
+
+/**
+ * Proietta un booking confermato come calendar_event nel calendario 'bookings'
  * (best-effort: non blocca il chiamante). Così il booking appare nel
- * calendario admin, nel feed ICS e via CalDAV.
+ * calendario admin, nel feed ICS e via CalDAV. Solo store legacy: con lo
+ * store Radicale la proiezione passa dal job project_booking.
  */
 async function projectBookingEvent(
   booking: Booking,
@@ -122,28 +310,66 @@ async function projectBookingEvent(
   meetingUrl: string | null,
 ): Promise<void> {
   try {
-    const bookingsCal = await getBookingsCalendar();
-    if (!bookingsCal) return;
-    await createEvent({
-      calendar_id: bookingsCal.id,
-      summary: `${eventType.title} – ${booking.attendee_name}`,
-      description: [
-        `Cliente: ${booking.attendee_name} <${booking.attendee_email}>`,
-        booking.attendee_phone ? `Tel: ${booking.attendee_phone}` : null,
-        booking.attendee_company ? `Azienda: ${booking.attendee_company}` : null,
-        booking.attendee_message ? `\nNote:\n${booking.attendee_message}` : null,
-        `\nUID prenotazione: ${booking.uid}`,
-      ].filter(Boolean).join('\n'),
-      location: booking.location_value,
-      url: meetingUrl,
-      start_time: booking.start_time,
-      end_time: booking.end_time,
-      source: 'booking',
-      source_id: booking.uid,
-      status: 'confirmed',
-    });
+    await createLegacyProjection(booking, eventType, meetingUrl);
   } catch (eventErr) {
     log.error({ err: eventErr, bookingUid: booking.uid }, 'Auto-create calendar_event FAILED for booking');
+  }
+}
+
+/** Marca come cancellata la proiezione legacy di una prenotazione (best-effort, come oggi). */
+async function cancelLegacyProjection(bookingUid: string, what: string): Promise<void> {
+  try {
+    const linkedEvent = await getEventBySource('booking', bookingUid);
+    if (linkedEvent) {
+      await updateEvent(linkedEvent.id, { status: 'cancelled' });
+    }
+  } catch (err) {
+    log.error({ err, bookingUid }, `${what} FAILED for booking`);
+  }
+}
+
+/**
+ * Side effect calendario dopo il commit di una prenotazione (design §9):
+ * proiezione legacy sincrona in mode postgres; con lo store Radicale avviso
+ * della modalità degradata oppure controllo delle sovrapposizioni.
+ */
+async function afterBookingCommitted(
+  booking: Booking,
+  eventType: EventType,
+  decision: BookingDecision,
+  meetingUrl: string | null,
+): Promise<void> {
+  if (decision.projection === 'legacy' && booking.status === 'confirmed') {
+    await projectBookingEvent(booking, eventType, meetingUrl);
+  }
+  if (decision.store !== 'radicale') return;
+  if (decision.degraded) {
+    raiseIndexAlert('booking-degraded', `Prenotazione presa in modalità degradata (${decision.degraded.reason}): sovrapposizioni da verificare`, {
+      key: booking.uid,
+      bookingUid: booking.uid,
+      reason: decision.degraded.reason,
+      source: booking.source,
+    });
+    return;
+  }
+  await checkConflictsAfterCommit(booking, decision);
+}
+
+/**
+ * Controllo post-commit (design §9): nuova verifica della freshness (stat
+ * delle collezioni del set, sync di quelle cambiate) e confronto delle
+ * occorrenze sovrapposte con quelle viste nella decisione. Non lancia: se la
+ * verifica non riesce adesso il controllo passa al job booking_conflict_check.
+ */
+async function checkConflictsAfterCommit(booking: Booking, decision: BookingDecision): Promise<void> {
+  try {
+    await verifyFreshness({ db: sql });
+    await recordBookingConflicts(sql, booking, new Set(decision.preexisting), 'post_commit');
+  } catch (err) {
+    log.warn({ err, bookingUid: booking.uid }, 'controllo post-commit delle sovrapposizioni non riuscito: rimandato al job');
+    await enqueueConflictCheck(booking, decision, { db: sql, delayMs: 30_000 }).catch((enqueueErr: unknown) => {
+      log.error({ err: enqueueErr, bookingUid: booking.uid }, 'accodamento del controllo delle sovrapposizioni non riuscito');
+    });
   }
 }
 
@@ -158,6 +384,8 @@ interface CreateBookingOptions {
  * Crea un booking. Lancia:
  * - BookingConflictError se lo slot è occupato (EXCLUDE constraint, buffer o capacità)
  * - BookingValidationError se start non è valido / fuori range
+ * - CalendarUnavailableError (503) se con lo store Radicale il calendario non
+ *   è verificabile (design §9, decisione 1)
  *
  * Con event type `requires_approval` e source self-service
  * (public_page/contact_form) il booking nasce `pending`.
@@ -197,23 +425,6 @@ export async function createBooking(
   }
   if (startDate > maxStart) {
     throw new BookingValidationError(`Puoi prenotare al massimo ${eventType.max_advance_days} giorni in anticipo`);
-  }
-
-  if (input.require_available_slot) {
-    // Prima bastava rispettare min_notice/max_advance: un orario fuori
-    // disponibilità, in una chiusura/festività, sopra un evento occupato o nei
-    // buffer veniva confermato (pagina aperta da prima di una chiusura, o
-    // richiesta manipolata). Finestra ±1 giorno per coprire il fuso dello schedule.
-    const { computeAvailableSlots } = await import('./slots');
-    const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
-    const available = await computeAvailableSlots({
-      eventTypeIdOrSlug: eventType.id,
-      fromDateLocal: day(startDate.getTime() - 86_400_000),
-      toDateLocal: day(startDate.getTime() + 86_400_000),
-    });
-    if (!available?.slots.some((s) => new Date(s.start).getTime() === startDate.getTime())) {
-      throw new BookingConflictError('Orario non più disponibile: scegli uno degli slot proposti');
-    }
   }
 
   const uid = generateBookingUid();
@@ -260,22 +471,40 @@ export async function createBooking(
     consent_user_agent: input.consent_user_agent ?? null,
   };
 
-  // Sezione critica: advisory lock per settimana ISO → capacità e buffer
-  // vengono verificati e l'INSERT eseguito senza races (il competitor attende
-  // il lock e al suo turno vede il booking già committato).
-  // NB: hasWeeklyCapacityForBooking legge dal pool globale mentre la tx tiene
-  // una connessione: servono 2 connessioni per booking concorrente. Con pool
-  // max 10 e il rate-limit pubblico 3/10min il rischio di esaurimento è
-  // teorico; se mai si scalasse, threadare il tx dentro capacity.ts.
+  // Sezione critica: advisory lock per settimana ISO → freshness del
+  // calendario, slot, capacità e buffer vengono verificati e l'INSERT
+  // eseguito senza races (il competitor attende il lock e al suo turno vede il
+  // booking già committato). Tutte le letture usano la tx (una sola
+  // connessione; READ COMMITTED: la query di busy vede le sync appena fatte
+  // dalla freshness, e la riprogrammazione vede l'originale già annullata).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const criticalSection = async (tx: any): Promise<Booking> => {
+  const criticalSection = async (tx: any): Promise<{ booking: Booking; decision: BookingDecision }> => {
     await tx`
       SELECT pg_advisory_xact_lock(hashtext(
         'cal-week-' || to_char(date_trunc('week', ${startIso}::timestamptz AT TIME ZONE 'Europe/Rome'), 'IYYY-IW')
       ))
     `;
 
-    const hasCapacity = await hasWeeklyCapacityForBooking(startIso, eventType.duration_minutes);
+    const decision = await beginDecision(tx as Db);
+
+    if (input.require_available_slot) {
+      // Prima bastava rispettare min_notice/max_advance: un orario fuori
+      // disponibilità, in una chiusura/festività, sopra un evento occupato o nei
+      // buffer veniva confermato (pagina aperta da prima di una chiusura, o
+      // richiesta manipolata). Finestra ±1 giorno per coprire il fuso dello schedule.
+      const { computeAvailableSlots } = await import('./slots');
+      const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+      const available = await computeAvailableSlots({
+        eventTypeIdOrSlug: eventType.id,
+        fromDateLocal: day(startDate.getTime() - 86_400_000),
+        toDateLocal: day(startDate.getTime() + 86_400_000),
+      }, { level: 'decision', db: tx as Db });
+      if (!available?.slots.some((s) => new Date(s.start).getTime() === startDate.getTime())) {
+        throw new BookingConflictError('Orario non più disponibile: scegli uno degli slot proposti');
+      }
+    }
+
+    const hasCapacity = await hasWeeklyCapacityForBooking(startIso, eventType.duration_minutes, { db: tx as Db, level: 'decision' });
     if (!hasCapacity) {
       throw new BookingConflictError('Capacita settimanale esaurita: scegli un altro slot');
     }
@@ -300,20 +529,65 @@ export async function createBooking(
       }
     }
 
+    // Store Radicale: occorrenze bloccanti già sovrapposte (eventi sotto una
+    // prenotazione admin/MCP, decisione 2): il controllo post-commit segnala
+    // solo quelle comparse dopo la decisione.
+    if (decision.store === 'radicale') {
+      decision.preexisting = await blockingOccurrenceKeys(tx as Db, startIso, endIso);
+    }
+
+    // Modalità degradata (decisione 1): la prenotazione porta il segno del
+    // motivo scavalcato, oltre alla riga di audit e all'avviso.
+    const row = decision.degraded
+      ? {
+          ...insertRow,
+          source_metadata: {
+            ...insertRow.source_metadata,
+            calendar_degraded: { reason: decision.degraded.reason, at: new Date().toISOString() },
+          },
+        }
+      : insertRow;
+
     const rows = await tx`
-      INSERT INTO calendar_bookings ${tx(insertRow)}
+      INSERT INTO calendar_bookings ${tx(row)}
       RETURNING *
     `;
-    return rows[0] as Booking;
+    const booking = rows[0] as Booking;
+
+    if (decision.projection === 'job' && booking.status === 'confirmed') {
+      await enqueueProjection(booking, tx as Db);
+    }
+    if (decision.degraded) {
+      await tx`
+        INSERT INTO audit_logs (action, table_name, record_id, new_data, metadata)
+        VALUES (
+          'INSERT', 'calendar_degraded_bookings', ${booking.id},
+          ${tx.json({
+            booking_uid: booking.uid,
+            start_time: startIso,
+            end_time: endIso,
+            source,
+            reason: decision.degraded.reason,
+            detail: decision.degraded.detail,
+          })},
+          ${tx.json({ calendar: 'degraded_booking' })}
+        )
+      `;
+      await enqueueConflictCheck(booking, decision, { db: tx as Db, delayMs: 60_000 });
+    }
+    return { booking, decision };
   };
 
   let inserted: Booking;
+  let decision: BookingDecision;
   try {
-    inserted = opts.db
+    const result = opts.db
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ? await criticalSection(opts.db as any)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       : await sql.begin(criticalSection) as any;
+    inserted = result.booking;
+    decision = result.decision;
   } catch (err: unknown) {
     // Cleanup evento Google orfano se l'INSERT fallisce (no-op dopo rimozione Google)
     if (resolved.googleEventId) {
@@ -332,15 +606,13 @@ export async function createBooking(
   // transazione. Con opts.db (reschedule) è il chiamante a occuparsene dopo
   // il commit, altrimenti proietteremmo eventi per una tx che può abortire.
   if (!opts.db) {
-    if (inserted.status === 'confirmed') {
-      await projectBookingEvent(inserted, eventType, resolved.meetingUrl ?? null);
-    }
+    await afterBookingCommitted(inserted, eventType, decision, resolved.meetingUrl ?? null);
     if (!opts.suppressWorkflowEvents) {
       fireBookingWorkflow(eventType.workflow_event_key || 'booking_creato', inserted, eventType);
     }
   }
 
-  return { booking: inserted, eventType };
+  return { booking: inserted, eventType, decision };
 }
 
 export async function cancelBooking(uid: string, opts: {
@@ -358,7 +630,9 @@ export async function cancelBooking(uid: string, opts: {
     return { booking, eventType: et };
   }
 
-  const updated = await sql<Booking[]>`
+  const strategy = projectionStrategyFor(await readBackendStateFresh(sql));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markCancelled = async (db: any): Promise<Booking[]> => db`
     UPDATE calendar_bookings SET
       status = 'cancelled',
       cancelled_at = NOW(),
@@ -367,19 +641,24 @@ export async function cancelBooking(uid: string, opts: {
     WHERE id = ${booking.id}::uuid
     RETURNING *
   `;
+  const updated: Booking[] = strategy === 'job'
+    // Store Radicale: la rimozione della proiezione è un job accodato nella
+    // stessa tx dell'annullamento (outbox).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? await sql.begin(async (tx: any) => {
+        const res = await markCancelled(tx);
+        if (res[0]) await enqueueProjection(res[0], tx as Db);
+        return res;
+      }) as unknown as Booking[]
+    : await markCancelled(sql);
 
   // Cleanup Google event (no-op dopo rimozione Google)
   await deleteGoogleEvent(booking.google_event_id);
 
   // Marca anche l'evento calendario corrispondente come cancellato
   // (cosi sparisce dal calendario admin + ICS feed iPhone)
-  try {
-    const linkedEvent = await getEventBySource('booking', booking.uid);
-    if (linkedEvent) {
-      await updateEvent(linkedEvent.id, { status: 'cancelled' });
-    }
-  } catch (err) {
-    log.error({ err, bookingUid: booking.uid }, 'Sync cancel calendar_event FAILED for booking');
+  if (strategy === 'legacy') {
+    await cancelLegacyProjection(booking.uid, 'Sync cancel calendar_event');
   }
 
   const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
@@ -402,6 +681,10 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
   // Cancel-old + create-new in un'unica transazione: se il nuovo INSERT
   // fallisce (EXCLUDE/capacità/buffer) il rollback ripristina automaticamente
   // l'originale — nessuna finestra in cui la prenotazione resta cancellata.
+  // Slot, busy e capacity della nuova prenotazione si leggono con la stessa
+  // tx (design §14): l'originale risulta già annullata e, con lo store
+  // Radicale, la sua proiezione non blocca, quindi uno slot sovrapposto
+  // all'originale si può scegliere.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const txResult = await sql.begin(async (tx: any) => {
     const rows = await tx`
@@ -413,13 +696,14 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
       throw new BookingValidationError('Prenotazione già cancellata');
     }
 
-    await tx`
+    const cancelledRows = await tx`
       UPDATE calendar_bookings SET
         status = 'cancelled',
         cancelled_at = NOW(),
         cancelled_by = ${opts.by},
         cancellation_reason = ${`Rescheduled${opts.reason ? ': ' + opts.reason.slice(0, 950) : ''}`}
       WHERE id = ${original.id}::uuid
+      RETURNING *
     `;
 
     const created = await createBooking({
@@ -447,23 +731,26 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
       WHERE id = ${created.booking.id}::uuid
       RETURNING *
     `;
+    const booking = linked[0] as Booking;
 
-    return { original, booking: linked[0] as Booking, eventType: created.eventType };
+    if (created.decision.projection === 'job') {
+      // Rimozione della vecchia proiezione e (ri)accodamento della nuova con
+      // la versione finale della riga: entrambe nella tx (outbox).
+      if (cancelledRows[0]) await enqueueProjection(cancelledRows[0] as Booking, tx as Db);
+      if (booking.status === 'confirmed') await enqueueProjection(booking, tx as Db);
+    }
+
+    return { original, booking, eventType: created.eventType, decision: created.decision };
   });
 
   // Side effects post-commit (best-effort)
   await deleteGoogleEvent(txResult.original.google_event_id);
-  try {
-    const linkedEvent = await getEventBySource('booking', uid);
-    if (linkedEvent) {
-      await updateEvent(linkedEvent.id, { status: 'cancelled' });
-    }
-  } catch (err) {
-    log.error({ err, bookingUid: uid }, 'Sync cancel calendar_event (reschedule) FAILED for booking');
+  if (txResult.decision.projection === 'legacy') {
+    await cancelLegacyProjection(uid, 'Sync cancel calendar_event (reschedule)');
   }
-  if (txResult.booking.status === 'confirmed') {
-    await projectBookingEvent(txResult.booking, txResult.eventType, null);
-  }
+  // Store legacy: link della riunione nullo come oggi (la correzione del
+  // design §14 esce con lo store Radicale, dove il job lo ricalcola sempre).
+  await afterBookingCommitted(txResult.booking, txResult.eventType, txResult.decision, null);
   fireBookingWorkflow('booking_riprogrammato', txResult.booking, txResult.eventType, {
     previous_uid: uid,
     previous_start: txResult.original.start_time,
@@ -487,13 +774,23 @@ export async function approveBooking(uid: string): Promise<{ booking: Booking; e
     throw new BookingValidationError('La prenotazione non è in attesa di approvazione');
   }
 
-  const updated = await sql<Booking[]>`
+  const strategy = projectionStrategyFor(await readBackendStateFresh(sql));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markConfirmed = async (db: any): Promise<Booking[]> => db`
     UPDATE calendar_bookings SET
       status = 'confirmed',
       approved_at = NOW()
     WHERE id = ${booking.id}::uuid AND status = 'pending'
     RETURNING *
   `;
+  const updated: Booking[] = strategy === 'job'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? await sql.begin(async (tx: any) => {
+        const res = await markConfirmed(tx);
+        if (res[0]) await enqueueProjection(res[0], tx as Db);
+        return res;
+      }) as unknown as Booking[]
+    : await markConfirmed(sql);
   if (!updated[0]) {
     throw new BookingValidationError('La prenotazione non è in attesa di approvazione');
   }
@@ -501,7 +798,8 @@ export async function approveBooking(uid: string): Promise<{ booking: Booking; e
   const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
   if (!eventType) return null;
 
-  await projectBookingEvent(updated[0], eventType, null);
+  // Store legacy: link della riunione nullo come oggi (vedi rescheduleBooking).
+  if (strategy === 'legacy') await projectBookingEvent(updated[0], eventType, null);
   fireBookingWorkflow('booking_approvato', updated[0], eventType);
   return { booking: updated[0], eventType };
 }
@@ -555,4 +853,106 @@ export async function getBookingByUid(uid: string): Promise<BookingWithEventType
   const eventType = await getEventType(rows[0].event_type_id, { includeInactive: true });
   if (!eventType) return null;
   return { ...rows[0], event_type: eventType };
+}
+
+// ─── Job della fase F2 (registerBookingJobs) ───────────────────────────────
+
+async function loadBooking(uid: string): Promise<Booking | null> {
+  const rows = await sql<Booking[]>`SELECT * FROM calendar_bookings WHERE uid = ${uid} LIMIT 1`;
+  return rows[0] ?? null;
+}
+
+/**
+ * Proiezione legacy convergente (job eseguito dopo un ritorno a mode
+ * postgres): prenotazione da proiettare senza riga → la crea; riga attiva di
+ * una prenotazione non più proiettata → la marca cancellata. Gli errori si
+ * propagano (il job riprova).
+ */
+async function convergeLegacyProjection(uid: string, booking: Booking | null): Promise<{ action: string }> {
+  const linked = await getEventBySource('booking', uid);
+  const desired = booking !== null && PROJECTED_BOOKING_STATUSES.has(booking.status);
+  if (desired && booking) {
+    if (linked) return { action: 'exists' };
+    const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
+    if (!eventType) return { action: 'skipped' };
+    const resolved = await resolveLocationForBooking({ eventType, booking, pushToGoogle: false });
+    return { action: (await createLegacyProjection(booking, eventType, resolved.meetingUrl)) ? 'created' : 'skipped' };
+  }
+  if (linked && linked.status !== 'cancelled') {
+    await updateEvent(linked.id, { status: 'cancelled' });
+    return { action: 'cancelled' };
+  }
+  return { action: 'absent' };
+}
+
+/**
+ * Handler di project_booking (chiave = uid della prenotazione): stato
+ * desiderato da calendar_bookings all'esecuzione. Store Radicale → risorsa
+ * booking-<uid>.ics nella collezione Prenotazioni (booking-projection.ts);
+ * mode postgres (ritorno dopo un rollback) → proiezione legacy convergente;
+ * cutover e rollback → errore ripetibile (si riprova a transizione finita).
+ * Restituisce updated_at riletto come versione corrente della sorgente.
+ */
+async function runProjectBookingJob(job: CalendarJob, ctx: CalendarJobContext): Promise<CalendarJobOutcome> {
+  const uid = job.key;
+  const booking = await loadBooking(uid);
+  const state = await readBackendStateFresh(sql);
+  if (projectionStrategyFor(state) === 'legacy') {
+    const result = await convergeLegacyProjection(uid, booking);
+    return { result: { ...result, store: 'postgres' }, currentSourceVersion: bookingVersion(await loadBooking(uid)) };
+  }
+  if (writesSuspendedInMode(state.mode)) {
+    throw new CalendarUnavailableError('transition', `modo ${state.mode}: proiezione della prenotazione rimandata`);
+  }
+  let result: Awaited<ReturnType<typeof syncBookingProjection>>;
+  try {
+    result = await syncBookingProjection(uid, booking, { state, signal: ctx.signal });
+  } catch (err) {
+    // Contratto f2-modules §1.4: un errore di Radicale non transitorio (403,
+    // 409, 400, configurazione) va in dead letter; l'auditor notturno
+    // riaccoda le proiezioni mancanti. Rete, timeout e 502-504 si ripetono.
+    if (isRadicaleError(err) && !err.transient) {
+      throw new CalendarJobPermanentError(`proiezione della prenotazione ${uid} rifiutata da Radicale: ${err.message}`, { cause: err });
+    }
+    throw err;
+  }
+  ctx.log.info({ bookingUid: uid, action: result.action }, 'proiezione della prenotazione');
+  // Versione riletta a fine lavoro: se la prenotazione è cambiata durante la
+  // PUT (es. annullata) il job si riaccoda e converge al nuovo stato.
+  return { result, currentSourceVersion: bookingVersion(await loadBooking(uid)) };
+}
+
+/**
+ * Handler di booking_conflict_check (chiave = uid): controllo delle
+ * sovrapposizioni rimandato (freshness non verificabile dopo il commit, o
+ * prenotazione presa in modalità degradata). Verifica la freshness (errore →
+ * nuovo tentativo con backoff) e registra le occorrenze sovrapposte che non
+ * c'erano al momento della decisione. Prenotazione non più attiva o mode
+ * postgres → nulla da fare.
+ */
+async function runBookingConflictCheckJob(job: CalendarJob): Promise<CalendarJobOutcome> {
+  const booking = await loadBooking(job.key);
+  if (!booking || (booking.status !== 'confirmed' && booking.status !== 'pending')) {
+    return { result: { skipped: 'prenotazione non attiva' } };
+  }
+  const state = await readBackendStateFresh(sql);
+  if ((storeKindOverride() ?? storeKindForMode(state.mode)) === 'postgres') {
+    return { result: { skipped: 'store legacy' } };
+  }
+  await verifyFreshness({ db: sql });
+  const preexisting = Array.isArray(job.payload.preexisting)
+    ? (job.payload.preexisting as unknown[]).filter((k): k is string => typeof k === 'string')
+    : [];
+  const recorded = await recordBookingConflicts(sql, booking, new Set(preexisting), 'post_commit');
+  return { result: { recorded } };
+}
+
+/**
+ * Registra gli handler dei job delle prenotazioni (project_booking,
+ * booking_conflict_check). Idempotente. La chiama il bootstrap dell'API
+ * prima di startCalendarJobWorker() (contratto f2-modules §12).
+ */
+export function registerBookingJobs(): void {
+  registerCalendarJobHandler(CAL_JOB_KINDS.projectBooking, runProjectBookingJob);
+  registerCalendarJobHandler(CAL_JOB_KINDS.bookingConflictCheck, runBookingConflictCheckJob);
 }

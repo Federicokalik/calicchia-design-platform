@@ -22,8 +22,9 @@
 
 import './env';
 import { after, before } from 'node:test';
-import { sql } from '../../src/db';
+import { closeCalendarPool, sql } from '../../src/db';
 import { runPendingMigrations } from '../../src/lib/db-migrate';
+import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
 import { TEST_DATABASE } from './env';
 
 export { sql };
@@ -71,16 +72,22 @@ export function migrateTestDatabase(): Promise<void> {
 
 let closed = false;
 
-/** Chiude il pool attendendo le query in corso (anche quelle fire-and-forget). */
+/**
+ * Chiude il pool attendendo le query in corso (anche quelle fire-and-forget).
+ * Chiude anche il pool calendario della F2 (src/db/index.ts, calSql): se un
+ * test lo ha usato (indice, job, sync), le sue connessioni terrebbero vivo il
+ * processo fino all'idle timeout.
+ */
 export async function closeTestDatabase(): Promise<void> {
   if (closed) return;
   closed = true;
-  await sql.end({ timeout: 5 });
+  await Promise.all([sql.end({ timeout: 5 }), closeCalendarPool(5)]);
 }
 
 type Task = () => Promise<unknown>;
 const readyTasks: Task[] = [];
 const teardownTasks: Task[] = [];
+const closingTasks: Task[] = [];
 let hooksRegistered = false;
 let resetRequested = false;
 
@@ -92,6 +99,17 @@ export function onDatabaseReady(task: Task): void {
 /** Registra un'operazione da eseguire dopo l'ultimo test, prima della chiusura del pool. */
 export function onBeforeDatabaseClose(task: Task): void {
   teardownTasks.push(task);
+}
+
+/**
+ * Registra un'operazione da eseguire per ultima, dopo tutti i task di
+ * `onBeforeDatabaseClose` e subito prima della chiusura del pool (anche se il
+ * `before` è fallito): serve a fermare i componenti di processo che usano il
+ * database (campanello, worker dei job) quando la pulizia dei dati è finita.
+ * Un errore viene riportato ma non salta la chiusura del pool.
+ */
+export function onDatabaseClosing(task: Task): void {
+  closingTasks.push(task);
 }
 
 /**
@@ -137,7 +155,11 @@ export function useTestDatabase(opts: { resetBaseline?: boolean } = {}): void {
       await setup.catch(() => {});
       for (const task of [...teardownTasks].reverse()) await task();
     } finally {
-      await closeTestDatabase();
+      try {
+        for (const task of closingTasks) await task();
+      } finally {
+        await closeTestDatabase();
+      }
     }
   });
 }
@@ -400,7 +422,10 @@ export const SEED_EVENT_TYPE_SLUGS = ['consulenza-gratuita-30min', 'sopralluogo-
  *   eventi rimasti nei calendari seminati;
  * - cancella app-password CalDAV, schedule non di default e override;
  * - ripristina gli slot dello schedule di default (lun-ven 09-13 e 14-18,
- *   migrazione 068) e 'lavoro' come calendario di default.
+ *   migrazione 068) e 'lavoro' come calendario di default;
+ * - riporta calendar_backend_state (162) a mode postgres, volume non
+ *   inizializzato, senza freeze, restore guard né rebuild;
+ * - svuota indice, id, versioni, job e conflitti del calendario (163-164).
  *
  * Non tocca le righe seminate di calendari e tipi di prenotazione (i test non
  * devono modificarle: si creano le proprie con le fixture) né le altre aree
@@ -413,6 +438,10 @@ export async function resetCalendarBaseline(): Promise<void> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia della matrice CALENDAR_BACKEND=radicale rimasta da un run
+    // interrotto (helpers/calendar-backend.ts): la baseline non la conserva mai.
+    await tx`DROP TRIGGER IF EXISTS caldes_test_matrix_guard ON calendar_events`;
+    await tx`DROP FUNCTION IF EXISTS caldes_test_matrix_guard()`;
     const leads = await tx`DELETE FROM calendar_bookings RETURNING lead_id, uid`;
     await tx`
       DELETE FROM leads
@@ -429,6 +458,43 @@ export async function resetCalendarBaseline(): Promise<void> {
       UPDATE calendars SET is_default = (slug = 'lavoro')
       WHERE is_default IS DISTINCT FROM (slug = 'lavoro')
     `;
+
+    // Stato del backend calendario (migrazione 162) ai default di un database
+    // appena migrato: mode postgres, volume non inizializzato, nessuna guardia.
+    // credential_epoch e policy_version restano: sono monotoni per contratto
+    // (docs/calendar-radicale/contracts/control-plane.md §2).
+    // Indice derivato, id, versioni, job e conflitti (163-164): via i residui
+    // dei calendari seminati e i job di altri file. Le righe dei calendari
+    // cancellati sopra sono già sparite in cascata.
+    const [{ hasIndex, hasJobs }]: Array<{ hasIndex: boolean; hasJobs: boolean }> = await tx`
+      SELECT to_regclass('public.cal_object_ids') IS NOT NULL AS "hasIndex",
+             to_regclass('public.cal_jobs') IS NOT NULL AS "hasJobs"
+    `;
+    if (hasIndex) {
+      await tx`DELETE FROM cal_occurrences`;
+      await tx`DELETE FROM cal_components`;
+      await tx`DELETE FROM cal_objects`;
+      await tx`DELETE FROM cal_collection_state`;
+      await tx`DELETE FROM cal_object_versions`;
+      await tx`DELETE FROM cal_object_ids`;
+    }
+    if (hasJobs) {
+      await tx`DELETE FROM cal_jobs`;
+      await tx`DELETE FROM cal_booking_conflicts`;
+    }
+
+    const [{ hasState }]: Array<{ hasState: boolean }> = await tx`
+      SELECT to_regclass('public.calendar_backend_state') IS NOT NULL AS "hasState"
+    `;
+    if (hasState) {
+      await tx`
+        UPDATE calendar_backend_state
+        SET mode = 'postgres', write_freeze = false, volume_id = NULL, epoch = 0,
+            restore_guard_until = NULL, rebuild_required = false
+        WHERE (mode, write_freeze, volume_id, epoch, restore_guard_until, rebuild_required)
+              IS DISTINCT FROM ('postgres', false, NULL::uuid, 0, NULL::timestamptz, false)
+      `;
+    }
 
     const [defaultSchedule]: Array<{ id: string }> = await tx`
       SELECT id FROM calendar_availability_schedules
@@ -453,4 +519,7 @@ export async function resetCalendarBaseline(): Promise<void> {
     await tx`DELETE FROM mcp_tokens WHERE label LIKE ${likePrefix(`${TEST_DATA_ROOT}-`)}`;
     await tx`DELETE FROM device_tokens WHERE label LIKE ${likePrefix(`${TEST_DATA_ROOT}-`)}`;
   });
+  // Il modo del backend è appena tornato a postgres: la facade non deve usare
+  // quello in cache (backend-mode.ts, 2 s).
+  invalidateBackendModeCache();
 }

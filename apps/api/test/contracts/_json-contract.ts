@@ -67,10 +67,132 @@ const typeOf = (value: unknown): string => (value === null ? 'null' : Array.isAr
 
 const escapePointer = (segment: string): string => segment.replace(/~/g, '~0').replace(/\//g, '~1');
 
+/** Forma canonica di un valore JSON (chiavi ordinate), per riconoscere gli elementi uguali di due array. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+  if (isPlainObject(value)) {
+    return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
+  }
+  return JSON.stringify(value) ?? 'undefined';
+}
+
+/** Similarità di due elementi non identici: chiavi con lo stesso valore (solo fra oggetti). */
+function similarity(a: unknown, b: unknown): number {
+  if (!isPlainObject(a) || !isPlainObject(b)) return 0;
+  let same = 0;
+  for (const key of Object.keys(a)) {
+    if (key in b && canonicalJson(a[key]) === canonicalJson(b[key])) same++;
+  }
+  return same;
+}
+
 /**
- * Differenze fra due valori JSON. Gli array si confrontano per indice
- * (elementi in più o in meno come added/removed in coda), gli oggetti per
- * chiave senza badare all'ordine.
+ * Accoppiamento di due tratti di array senza elementi identici: la
+ * sottosequenza di coppie con la similarità totale più alta (gli oggetti con
+ * più chiavi uguali si accoppiano fra loro, nell'ordine). Senza nessuna
+ * similarità (valori semplici, oggetti del tutto diversi) gli elementi si
+ * accoppiano per posizione, come il confronto per indice.
+ */
+function pairGap(expected: unknown[], actual: unknown[], ei: number, ee: number, ai: number, ae: number): Array<[number, number]> {
+  const rows = ee - ei;
+  const cols = ae - ai;
+  if (rows === 0 || cols === 0) return [];
+  const score: number[][] = Array.from({ length: rows + 1 }, () => new Array<number>(cols + 1).fill(0));
+  for (let i = rows - 1; i >= 0; i--) {
+    for (let j = cols - 1; j >= 0; j--) {
+      const sim = similarity(expected[ei + i], actual[ai + j]);
+      score[i][j] = Math.max(score[i + 1][j], score[i][j + 1], sim > 0 ? score[i + 1][j + 1] + sim : 0);
+    }
+  }
+  if (score[0][0] === 0) {
+    const n = Math.min(rows, cols);
+    return Array.from({ length: n }, (_, k) => [ei + k, ai + k] as [number, number]);
+  }
+  const pairs: Array<[number, number]> = [];
+  let i = 0;
+  let j = 0;
+  while (i < rows && j < cols) {
+    const sim = similarity(expected[ei + i], actual[ai + j]);
+    if (sim > 0 && score[i][j] === score[i + 1][j + 1] + sim) {
+      pairs.push([ei + i, ai + j]);
+      i++;
+      j++;
+    } else if (score[i + 1][j] >= score[i][j + 1]) {
+      i++;
+    } else {
+      j++;
+    }
+  }
+  return pairs;
+}
+
+/**
+ * Allineamento di due array: coppie di indici in ordine. Prima gli elementi
+ * identici (sottosequenza comune più lunga), poi, nei tratti fra due coppie
+ * identiche, gli elementi più simili (pairGap). Gli elementi senza coppia
+ * sono removed (atteso) o added (ottenuto).
+ */
+function alignArrays(expected: unknown[], actual: unknown[]): Array<[number, number]> {
+  const a = expected.map(canonicalJson);
+  const b = actual.map(canonicalJson);
+  const n = a.length;
+  const m = b.length;
+  // Prefisso e suffisso comuni senza tabella (il caso di gran lunga più frequente).
+  let start = 0;
+  while (start < n && start < m && a[start] === b[start]) start++;
+  let endA = n;
+  let endB = m;
+  while (endA > start && endB > start && a[endA - 1] === b[endB - 1]) {
+    endA--;
+    endB--;
+  }
+  const anchors: Array<[number, number]> = [];
+  const rows = endA - start;
+  const cols = endB - start;
+  if (rows > 0 && cols > 0) {
+    // LCS classica sulla parte centrale (lunghezze dal fondo, poi ricostruzione in avanti).
+    const lcs: Uint16Array[] = Array.from({ length: rows + 1 }, () => new Uint16Array(cols + 1));
+    for (let i = rows - 1; i >= 0; i--) {
+      for (let j = cols - 1; j >= 0; j--) {
+        lcs[i][j] = a[start + i] === b[start + j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+      }
+    }
+    let i = 0;
+    let j = 0;
+    while (i < rows && j < cols) {
+      if (a[start + i] === b[start + j]) {
+        anchors.push([start + i, start + j]);
+        i++;
+        j++;
+      } else if (lcs[i + 1][j] >= lcs[i][j + 1]) {
+        i++;
+      } else {
+        j++;
+      }
+    }
+  }
+  const pairs: Array<[number, number]> = [];
+  for (let k = 0; k < start; k++) pairs.push([k, k]);
+  let pi = start;
+  let pj = start;
+  for (const [ai, aj] of [...anchors, [endA, endB] as [number, number]]) {
+    pairs.push(...pairGap(expected, actual, pi, ai, pj, aj));
+    if (ai < endA) pairs.push([ai, aj]);
+    pi = ai + 1;
+    pj = aj + 1;
+  }
+  for (let k = 0; k < n - endA; k++) pairs.push([endA + k, endB + k]);
+  return pairs;
+}
+
+/**
+ * Differenze fra due valori JSON. Gli oggetti si confrontano per chiave
+ * senza badare all'ordine. Gli array si allineano (alignArrays): le coppie
+ * si confrontano in profondità (differenze puntuali al percorso dell'atteso),
+ * gli elementi senza coppia sono added (percorso dell'ottenuto) o removed
+ * (percorso dell'atteso). Così un elemento in più o in meno non fa sembrare
+ * cambiati tutti quelli che lo seguono; senza elementi in più o in meno il
+ * confronto è quello per indice.
  */
 export function diffJson(expected: unknown, actual: unknown, path = ''): JsonDiff[] {
   const te = typeOf(expected);
@@ -79,13 +201,19 @@ export function diffJson(expected: unknown, actual: unknown, path = ''): JsonDif
 
   if (Array.isArray(expected) && Array.isArray(actual)) {
     const out: JsonDiff[] = [];
-    const max = Math.max(expected.length, actual.length);
-    for (let i = 0; i < max; i++) {
-      const p = `${path}/${i}`;
-      if (i >= actual.length) out.push({ path: p, kind: 'removed', expected: expected[i] });
-      else if (i >= expected.length) out.push({ path: p, kind: 'added', actual: actual[i] });
-      else out.push(...diffJson(expected[i], actual[i], p));
+    let i = 0;
+    let j = 0;
+    const skip = (untilI: number, untilJ: number): void => {
+      for (; i < untilI; i++) out.push({ path: `${path}/${i}`, kind: 'removed', expected: expected[i] });
+      for (; j < untilJ; j++) out.push({ path: `${path}/${j}`, kind: 'added', actual: actual[j] });
+    };
+    for (const [pi, pj] of alignArrays(expected, actual)) {
+      skip(pi, pj);
+      out.push(...diffJson(expected[pi], actual[pj], `${path}/${pi}`));
+      i = pi + 1;
+      j = pj + 1;
     }
+    skip(expected.length, actual.length);
     return out;
   }
 
@@ -252,6 +380,7 @@ export class JsonContractStore<T = unknown> {
   private readonly options: ContractStoreOptions;
   private readonly expected: Record<string, T>;
   private readonly recorded = new Map<string, T>();
+  private readonly notApplicableCases = new Map<string, string>();
   private allowed: AllowedDiff[] | null = null;
 
   constructor(options: ContractStoreOptions) {
@@ -274,9 +403,24 @@ export class JsonContractStore<T = unknown> {
     return [...this.recorded.keys()];
   }
 
-  /** Casi presenti nel file ma non eseguiti in questo run. */
+  /** Casi presenti nel file ma non eseguiti in questo run (esclusi quelli non applicabili allo store). */
   staleCases(): string[] {
-    return Object.keys(this.expected).filter((id) => !this.recorded.has(id));
+    return Object.keys(this.expected).filter((id) => !this.recorded.has(id) && !this.notApplicableCases.has(id));
+  }
+
+  /**
+   * Dichiara che il caso non si esegue con lo store corrente perché il suo
+   * presupposto non esiste per costruzione (per esempio un evento che lo store
+   * Radicale rifiuta di creare): la copertura non lo segnala come obsoleto e un
+   * aggiornamento dello snapshot lo conserva. Solo per gli store successivi
+   * alla baseline (CALENDAR_BACKEND diverso da 'postgres'), con il motivo.
+   */
+  notApplicable(caseId: string, reason: string): void {
+    const store = currentCalendarBackend();
+    if (store === 'postgres') throw new Error(`Caso "${caseId}": notApplicable non è ammesso sulla baseline (store postgres)`);
+    if (!reason.trim()) throw new Error(`Caso "${caseId}": notApplicable richiede un motivo`);
+    if (!(caseId in this.expected)) throw new Error(`Caso "${caseId}" non presente nello snapshot ${this.file}`);
+    this.notApplicableCases.set(caseId, reason);
   }
 
   /**
@@ -329,6 +473,7 @@ export class JsonContractStore<T = unknown> {
       for (const [id, entry] of this.recorded) cases[id] = entry;
     } else {
       cases = Object.fromEntries(this.recorded);
+      for (const id of this.notApplicableCases.keys()) if (id in this.expected) cases[id] = this.expected[id];
     }
     const file: ContractSnapshotFile<T> = {
       contract: this.contract,

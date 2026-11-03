@@ -1,0 +1,2 @@
+# Cache di pytest (rootdir = questa cartella quando non c'è un file di configurazione).
+.pytest_cache/

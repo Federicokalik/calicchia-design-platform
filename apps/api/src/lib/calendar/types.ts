@@ -247,3 +247,129 @@ export interface CreateEventInput {
   source_id?: string | null;
   status?: CalendarEventStatus;
 }
+
+// ============================================
+// Firme pubbliche della facade del calendario (F2: events.ts, calendars.ts,
+// subscriptions.ts delegano a CalendarStore in store.ts). Tipi spostati da
+// events.ts, calendars.ts e subscriptions.ts senza modifiche, perché li usano
+// entrambi gli store (PgLegacyStore e RadicaleStore).
+// ============================================
+
+export interface UpdateEventInput {
+  summary?: string;
+  description?: string | null;
+  location?: string | null;
+  url?: string | null;
+  start_time?: string;
+  end_time?: string;
+  all_day?: boolean;
+  rrule?: string | null;
+  exdates?: string[];
+  status?: 'confirmed' | 'tentative' | 'cancelled';
+  calendar_id?: string;
+}
+
+/** Argomenti di createOccurrenceOverride (modifica o cancellazione di "solo questa occorrenza"). */
+export interface CreateOccurrenceOverrideInput {
+  masterEventId: string;
+  originalStartIso: string;
+  newStartIso?: string;
+  newEndIso?: string;
+  newSummary?: string;
+  newDescription?: string;
+  status?: 'confirmed' | 'tentative' | 'cancelled';
+}
+
+export interface ListEventsOptions {
+  calendarId?: string;
+  fromIso: string;
+  toIso: string;
+  /** Se true include anche eventi cancellati */
+  includeCancelled?: boolean;
+  /** Se true limita agli eventi di calendari che bloccano disponibilita/capacity */
+  blockingOnly?: boolean;
+}
+
+export interface BusyRange {
+  start: string;
+  end: string;
+}
+
+/** Campi modificabili di un calendario (updateCalendar). */
+export type UpdateCalendarInput = Partial<Pick<Calendar, 'name' | 'description' | 'color' | 'icon' | 'timezone' | 'is_default' | 'blocks_availability' | 'ics_feed_enabled' | 'sort_order'>>;
+
+export interface CalendarSubscription {
+  id: string;
+  calendar_id: string;
+  name: string;
+  ics_url: string;
+  sync_enabled: boolean;
+  last_synced_at: string | null;
+  last_error: string | null;
+  etag: string | null;
+  last_modified: string | null;
+  event_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateSubscriptionInput {
+  calendar_id: string;
+  name: string;
+  ics_url: string;
+}
+
+export interface UpdateSubscriptionInput {
+  name?: string;
+  ics_url?: string;
+  sync_enabled?: boolean;
+  calendar_id?: string;
+}
+
+export interface SyncResult {
+  notModified: boolean;
+  inserted: number;
+  removed: number;
+  error: string | null;
+}
+
+// ============================================
+// Letture dei consumatori portate sullo store nella F2 (prima erano query
+// inline su calendar_events nelle route e nei tool): conteggi degli eventi
+// per calendario, chiusure e feed ICS. Stessa forma delle risposte di oggi.
+// ============================================
+
+/** Una chiusura (GET /api/admin/calendar/closures): le colonne selezionate oggi dalla route. */
+export interface ClosureRow {
+  id: string;
+  summary: string;
+  start_time: string | Date;
+  end_time: string | Date;
+  source: CalendarEventSource;
+  status: CalendarEventStatus;
+}
+
+/** Risposta di GET /api/admin/calendar/closures. */
+export interface ClosuresView {
+  closures: ClosureRow[];
+  calendar: { id: string; name: string; timezone: string };
+}
+
+/** Opzioni della generazione del feed ICS pubblico. */
+export interface CalendarFeedOptions {
+  /** Istante di riferimento per la finestra dei singoli (−90 g, +365 g). */
+  now: Date;
+  /** Dominio degli UID senza '@' (valore congelato, design §10). */
+  uidDomain: string;
+}
+
+/** Feed ICS generato. */
+export interface CalendarFeedResult {
+  body: string;
+  /**
+   * ETag forte del corpo (design §10: sha256 del corpo generato). null dallo
+   * store legacy, che non lo ha mai mandato: in mode postgres gli header del
+   * feed restano quelli di oggi.
+   */
+  etag: string | null;
+}

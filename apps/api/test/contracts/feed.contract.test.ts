@@ -10,10 +10,15 @@
  * altri calendari), serie con TZID Europe/Rome e VTIMEZONE, all-day come DATE,
  * escaping e folding RFC 5545, token disabilitato e rigenerazione dall'admin.
  *
- * Gli snapshot sono in __snapshots__/feed.contract.json. In F2 il feed nasce
- * dall'indice di Radicale: le differenze previste (override nella risorsa del
- * master, cancellazioni come EXDATE, DTSTAMP stabile, ETag) entreranno in
- * allowed-diffs.json con la loro motivazione.
+ * Gli snapshot sono in __snapshots__/feed.contract.json e restano la baseline
+ * F0 (PgLegacyStore). Con lo store Radicale (CALENDAR_BACKEND=radicale) il feed
+ * nasce dall'indice della collezione (design §10): ETag dal corpo e 304,
+ * DTSTAMP stabile, override nella risorsa del master con lo stesso UID,
+ * cancellazioni come EXDATE, override di un master cancellato esclusi, orari
+ * nel fuso dell'oggetto, UID delle festività e delle proiezioni del design §5 e
+ * descrizione delle proiezioni secondo la decisione 3. Sono le voci "feed-*" di
+ * allowed-diffs.json; i rami per lo store Radicale dei casi qui sotto le
+ * verificano una per una.
  *
  * Comportamenti attuali congelati qui e da correggere dopo F0 (design §14),
  * ciascuno commentato nel caso relativo:
@@ -32,6 +37,7 @@ import { after, test } from 'node:test';
 import { onDatabaseReady, sql } from '../helpers/db';
 import { api, type TestResponse } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
+import { isRadicaleBackend, useCalendarBackend } from '../helpers/calendar-backend';
 import { createNormalizer, type SnapshotNormalizer } from '../helpers/normalize';
 import { freezeTime, restoreTime } from '../helpers/clock';
 import { cancelBooking } from '../../src/lib/calendar/booking';
@@ -50,6 +56,7 @@ import {
 } from './_http-contract';
 
 const fx = useFixtures('contratto-feed', { resetBaseline: true });
+useCalendarBackend();
 
 const store = httpContractStore(
   'feed',
@@ -234,8 +241,13 @@ function assertFeedHeaders(res: TestResponse, slug: string): void {
   assert.equal(res.headers.get('content-disposition'), `inline; filename="${slug}.ics"`);
   assert.equal(res.headers.get('cache-control'), 'private, max-age=300');
   assert.equal(res.headers.get('access-control-allow-origin'), '*');
-  // Nessun ETag oggi: i client riscaricano tutto il feed a ogni refresh.
-  assert.equal(res.headers.get('etag'), null);
+  if (isRadicaleBackend()) {
+    // Store Radicale (design §10): ETag = sha256 del corpo generato.
+    assert.match(res.headers.get('etag') ?? '', /^"[0-9a-f]{64}"$/);
+  } else {
+    // Nessun ETag oggi: i client riscaricano tutto il feed a ogni refresh.
+    assert.equal(res.headers.get('etag'), null);
+  }
   assert.ok(res.text.endsWith('\r\n'), 'il corpo termina con CRLF');
   for (const line of res.text.split('\r\n')) {
     assert.ok(Buffer.byteLength(line) <= 75, `riga oltre 75 ottetti: ${line}`);
@@ -266,6 +278,37 @@ test('feed: calendario con singoli, all-day, serie, override, iscrizione e fines
 
   const events = icsEvents(res.text);
   const summary = (e: string[]): string => (icsProp(e, 'SUMMARY') ?? '').replace(`${fx.prefix} `, '');
+  const byName = (name: string): string[] => events.find((e) => summary(e) === name)!;
+
+  if (isRadicaleBackend()) {
+    assertRadicaleSharedFeed(events, summary, byName);
+  } else {
+    assertLegacySharedFeed(events, summary, byName);
+  }
+
+  // Singoli: all-day come DATE (fine esclusiva); tentative.
+  assert.deepEqual(
+    byName('Fiera').filter((l) => l.startsWith('DTSTART') || l.startsWith('DTEND')),
+    ['DTSTART;VALUE=DATE:20270315', 'DTEND;VALUE=DATE:20270317'],
+  );
+  assert.equal(icsProp(byName('Da confermare'), 'STATUS'), 'TENTATIVE');
+  const meeting = byName('Riunione con il cliente\\, revisione\\; budget');
+  assert.equal(icsProp(meeting, 'DESCRIPTION'), 'Prima riga\\nSeconda riga con \\\\ backslash');
+  assert.equal(icsProp(meeting, 'LOCATION'), 'Sala 2\\, piano 1');
+  assert.equal(icsProp(meeting, 'URL'), 'https://example.test/riunione?x=1&y=2');
+
+  // Lo store legacy mette in DTSTAMP l'ora della richiesta (qui l'orologio
+  // fermo), uguale per tutti; lo store Radicale la LAST-MODIFIED dell'oggetto,
+  // che qui coincide perché lo scenario nasce con lo stesso orologio fermo.
+  assert.deepEqual([...new Set(events.map((e) => icsProp(e, 'DTSTAMP')))], [NOW_ICS]);
+  // Tutti gli eventi sono OPAQUE, anche i tentative.
+  assert.ok(events.every((e) => icsProp(e, 'TRANSP') === 'OPAQUE'));
+
+  record('feed/calendario-condiviso', res, normalizer({ condiviso: token }), { method: 'GET', path: feedPath(token) });
+});
+
+/** Contenuto del feed condiviso con lo store legacy (baseline F0, bug compresi). */
+function assertLegacySharedFeed(events: string[][], summary: (e: string[]) => string, byName: (name: string) => string[]): void {
   // Ordine per start_time; esclusi cancellati, fuori finestra, altro
   // calendario e iscrizione; le serie escono anche se iniziate prima.
   assert.deepEqual(events.map(summary), [
@@ -281,7 +324,6 @@ test('feed: calendario con singoli, all-day, serie, override, iscrizione e fines
     'Corso annullato',
     'Lontano ma incluso',
   ]);
-  const byName = (name: string): string[] => events.find((e) => summary(e) === name)!;
 
   // Serie: ora locale con TZID, RRULE ed EXDATE nello stesso formato.
   const master = byName('Riunione settimanale');
@@ -309,41 +351,82 @@ test('feed: calendario con singoli, all-day, serie, override, iscrizione e fines
   assert.ok(orphan.some((l) => l.startsWith('RECURRENCE-ID;TZID=Europe/Rome:20270413T180000')));
   assert.ok(!events.some((e) => icsProp(e, 'UID') === `${s.cancelledSeries.master.uid}@${UID_DOMAIN}`));
 
-  // Singoli in UTC; all-day come DATE (fine esclusiva); tentative.
+  // Singoli in UTC.
   assert.ok(byName('Evento di dicembre').includes('DTSTART:20261210T090000Z'));
-  assert.deepEqual(
-    byName('Fiera').filter((l) => l.startsWith('DTSTART') || l.startsWith('DTEND')),
-    ['DTSTART;VALUE=DATE:20270315', 'DTEND;VALUE=DATE:20270317'],
-  );
-  assert.equal(icsProp(byName('Da confermare'), 'STATUS'), 'TENTATIVE');
-  const meeting = byName('Riunione con il cliente\\, revisione\\; budget');
-  assert.equal(icsProp(meeting, 'DESCRIPTION'), 'Prima riga\\nSeconda riga con \\\\ backslash');
-  assert.equal(icsProp(meeting, 'LOCATION'), 'Sala 2\\, piano 1');
-  assert.equal(icsProp(meeting, 'URL'), 'https://example.test/riunione?x=1&y=2');
+}
 
-  // DTSTAMP è l'ora della richiesta (qui l'orologio fermo), uguale per tutti.
-  assert.deepEqual([...new Set(events.map((e) => icsProp(e, 'DTSTAMP')))], [NOW_ICS]);
-  // Tutti gli eventi sono OPAQUE, anche i tentative.
-  assert.ok(events.every((e) => icsProp(e, 'TRANSP') === 'OPAQUE'));
-
-  record('feed/calendario-condiviso', res, normalizer({ condiviso: token }), { method: 'GET', path: feedPath(token) });
-});
+/**
+ * Contenuto del feed condiviso con lo store Radicale (design §10 e §14): le
+ * correzioni dei bug della baseline, una per una.
+ */
+function assertRadicaleSharedFeed(events: string[][], summary: (e: string[]) => string, byName: (name: string) => string[]): void {
+  // Ordine per inizio della risorsa, con gli override subito dopo il loro
+  // master; esclusi cancellati, fuori finestra, altro calendario e iscrizione,
+  // e anche la serie con il master cancellato insieme al suo override.
+  assert.deepEqual(events.map(summary), [
+    'Report mensile',
+    'Evento di dicembre',
+    'Riunione settimanale',
+    'Riunione settimanale (spostata)',
+    'Riunione con il cliente\\, revisione\\; budget',
+    'Revisione trimestrale del progetto con il cliente: perché è così importante andare più a fondo',
+    'Giornata di formazione',
+    'Fiera',
+    'Da confermare',
+    'Lontano ma incluso',
+  ]);
+  const master = byName('Riunione settimanale');
+  assert.equal(icsProp(master, 'UID'), `${s.weekly.master.uid}@${UID_DOMAIN}`);
+  assert.ok(master.includes('DTSTART;TZID=Europe/Rome:20270308T090000'));
+  assert.ok(master.includes('RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=6'));
+  // L'occorrenza cancellata con override del 29 marzo è un EXDATE del master.
+  assert.deepEqual(master.filter((l) => l.startsWith('EXDATE')), [
+    'EXDATE;TZID=Europe/Rome:20270315T090000',
+    'EXDATE;TZID=Europe/Rome:20270329T090000',
+  ]);
+  // L'override spostato esce nella risorsa del master, con lo stesso UID.
+  const moved = byName('Riunione settimanale (spostata)');
+  assert.equal(icsProp(moved, 'UID'), icsProp(master, 'UID'));
+  assert.ok(moved.includes('RECURRENCE-ID;TZID=Europe/Rome:20270322T090000'));
+  assert.ok(moved.includes('DTSTART;TZID=Europe/Rome:20270322T110000'));
+  // Master cancellato: né lui né il suo override confermato escono.
+  assert.ok(!events.some((e) => summary(e) === 'Corso annullato'));
+  assert.ok(!events.some((e) => icsProp(e, 'UID') === `${s.cancelledSeries.master.uid}@${UID_DOMAIN}`));
+  // I timed creati dall'API sono nel fuso del calendario (design §5 "Fusi").
+  assert.ok(byName('Evento di dicembre').includes('DTSTART;TZID=Europe/Rome:20261210T100000'));
+}
 
 test("feed: calendario 'f' con festività del cron e chiusura", async () => {
   const token = await feedToken(s.holidays);
   const res = await api.get(feedPath(token));
   assertFeedHeaders(res, 'f');
   const events = icsEvents(res.text);
-  // Festività e chiusure sono timed 00:00→24:00 di Roma, emesse in UTC.
-  assert.deepEqual(
-    events.map((e) => [icsProp(e, 'SUMMARY'), icsProp(e, 'DTSTART'), icsProp(e, 'DTEND')]),
-    [
-      ['Natale', '20261224T230000Z', '20261225T230000Z'],
-      ['Festa della Repubblica', '20270601T220000Z', '20270602T220000Z'],
-      [`${fx.prefix} Ferie estive`, '20270808T220000Z', '20270813T220000Z'],
-    ],
-  );
-  assert.ok(!res.text.includes('BEGIN:VTIMEZONE'), 'nessuna serie, nessun VTIMEZONE');
+  if (isRadicaleBackend()) {
+    // Store Radicale: stessi eventi timed 00:00→24:00 di Roma, nel fuso
+    // dell'oggetto (con il suo VTIMEZONE); le festività del cron hanno l'UID
+    // deterministico it-holiday-YYYY-MM-DD@caldes.it (design §5).
+    assert.deepEqual(
+      events.map((e) => [icsProp(e, 'SUMMARY'), icsProp(e, 'DTSTART'), icsProp(e, 'DTEND')]),
+      [
+        ['Natale', '20261225T000000', '20261226T000000'],
+        ['Festa della Repubblica', '20270602T000000', '20270603T000000'],
+        [`${fx.prefix} Ferie estive`, '20270809T000000', '20270814T000000'],
+      ],
+    );
+    assert.ok(events.every((e) => e.some((l) => l.startsWith('DTSTART;TZID=Europe/Rome:'))));
+    assert.deepEqual(events.slice(0, 2).map((e) => icsProp(e, 'UID')), ['it-holiday-2026-12-25@caldes.it', 'it-holiday-2027-06-02@caldes.it']);
+  } else {
+    // Festività e chiusure sono timed 00:00→24:00 di Roma, emesse in UTC.
+    assert.deepEqual(
+      events.map((e) => [icsProp(e, 'SUMMARY'), icsProp(e, 'DTSTART'), icsProp(e, 'DTEND')]),
+      [
+        ['Natale', '20261224T230000Z', '20261225T230000Z'],
+        ['Festa della Repubblica', '20270601T220000Z', '20270602T220000Z'],
+        [`${fx.prefix} Ferie estive`, '20270808T220000Z', '20270813T220000Z'],
+      ],
+    );
+    assert.ok(!res.text.includes('BEGIN:VTIMEZONE'), 'nessuna serie, nessun VTIMEZONE');
+  }
   record('feed/festivita-f', res, normalizer({ f: token }), { method: 'GET', path: feedPath(token) });
 });
 
@@ -359,8 +442,20 @@ test("feed: calendario 'bookings' con proiezioni confermate ed eventi manuali", 
     'Consulenza – Mario Rossi',
     'Evento manuale in Prenotazioni',
   ], 'la proiezione della prenotazione annullata è esclusa');
-  // La descrizione della proiezione porta nome, email e telefono del cliente.
-  assert.match(icsProp(events[0], 'DESCRIPTION') ?? '', /^Cliente: Mario Rossi <.+@test\.invalid>\\nTel: \+39 06 1234567\\n/);
+  if (isRadicaleBackend()) {
+    // Store Radicale: il feed pubblica la risorsa booking-<uid>.ics, con
+    // UID <uid>@caldes.it (design §5) e la descrizione della decisione 3:
+    // telefono e link alla prenotazione in admin, niente email.
+    assert.equal(icsProp(events[0], 'UID'), `${s.bookingUids.confirmed}@caldes.it`);
+    assert.equal(
+      icsProp(events[0], 'DESCRIPTION'),
+      `Tel: +39 06 1234567\\nPrenotazione: https://admin.caldes.test/calendario/prenotazioni?uid=${s.bookingUids.confirmed}`,
+    );
+    assert.ok(!res.text.includes('@test.invalid'), 'nessuna email del cliente nel feed');
+  } else {
+    // La descrizione della proiezione porta nome, email e telefono del cliente.
+    assert.match(icsProp(events[0], 'DESCRIPTION') ?? '', /^Cliente: Mario Rossi <.+@test\.invalid>\\nTel: \+39 06 1234567\\n/);
+  }
   record('feed/bookings', res, normalizer({ bookings: seed.ics_feed_token }), { method: 'GET', path: feedPath(seed.ics_feed_token) });
 });
 
@@ -465,6 +560,13 @@ test('feed: due letture senza modifiche danno corpi diversi solo nel DTSTAMP', a
   freezeTime('2027-03-05T07:01:00.000Z');
   try {
     const second = await api.get(feedPath(token));
+    if (isRadicaleBackend()) {
+      // Store Radicale (design §10): DTSTAMP stabile (LAST-MODIFIED o
+      // first_seen_at), quindi stesso corpo e stesso ETag nello stesso giorno.
+      assert.equal(second.text, first.text);
+      assert.equal(second.headers.get('etag'), first.headers.get('etag'));
+      return;
+    }
     assert.notEqual(second.text, first.text);
     const withoutStamp = (text: string): string => text.replace(/^DTSTAMP:.*$/gm, 'DTSTAMP:');
     assert.equal(withoutStamp(second.text), withoutStamp(first.text));
@@ -474,10 +576,32 @@ test('feed: due letture senza modifiche danno corpi diversi solo nel DTSTAMP', a
   }
 });
 
-test.todo("feed: le occorrenze cancellate con override escono come EXDATE del master (design §14 e §10)");
-test.todo("feed: gli override escono nella risorsa del master con lo stesso UID (RFC 5545, design §14)");
-test.todo('feed: gli override di un master cancellato non escono come VEVENT orfani (design §10, CANCELLED_MASTER)');
-test.todo('feed: DTSTAMP stabile, ETag dal corpo e 304 su If-None-Match (design §10)');
+// Correzioni del feed della F2: con lo store Radicale le prime tre sono
+// verificate nel caso 'feed/calendario-condiviso', la quarta qui sotto; con
+// lo store legacy restano da fare (design §12 "Parità prima").
+if (isRadicaleBackend()) {
+  test('feed: DTSTAMP stabile, ETag dal corpo e 304 su If-None-Match (design §10)', async () => {
+    const token = await feedToken(s.shared);
+    const first = await api.get(feedPath(token));
+    assertFeedHeaders(first, s.shared.slug);
+    const etag = first.headers.get('etag')!;
+    const notModified = await api.get(feedPath(token), { headers: { 'if-none-match': etag } });
+    assert.equal(notModified.status, 304);
+    assert.equal(notModified.text, '');
+    assert.equal(notModified.headers.get('etag'), etag);
+    // Una modifica cambia il corpo e quindi l'ETag.
+    const extra = await fx.event({ calendar: s.shared, summary: 'Aggiunto dopo', start_time: romeIso('2027-03-19', '10:00'), end_time: romeIso('2027-03-19', '11:00') });
+    const changed = await api.get(feedPath(token), { headers: { 'if-none-match': etag } });
+    assert.equal(changed.status, 200);
+    assert.notEqual(changed.headers.get('etag'), etag);
+    assert.ok(icsEvents(changed.text).some((e) => icsProp(e, 'UID') === `${extra.uid}@${UID_DOMAIN}`));
+  });
+} else {
+  test.todo("feed: le occorrenze cancellate con override escono come EXDATE del master (design §14 e §10)");
+  test.todo("feed: gli override escono nella risorsa del master con lo stesso UID (RFC 5545, design §14)");
+  test.todo('feed: gli override di un master cancellato non escono come VEVENT orfani (design §10, CANCELLED_MASTER)');
+  test.todo('feed: DTSTAMP stabile, ETag dal corpo e 304 su If-None-Match (design §10)');
+}
 
 // ─── Copertura ───────────────────────────────
 

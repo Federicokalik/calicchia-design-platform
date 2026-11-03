@@ -1,14 +1,35 @@
 name: build-radicale-image
 
-# Builda l'immagine Docker custom di Radicale (plugin caldes_auth + caldes_storage)
-# e la pubblica su ghcr.io. Il container proxya CalDAV verso /api/caldav-backend/*
-# dell'API (Postgres unica fonte di verità). Vedi apps/radicale/README.md.
+# Immagine Radicale di Caldes (fase F1 del passaggio del calendario a
+# Radicale, docs/calendar-radicale/): Radicale 3.7.8 con storage nativo e i
+# plugin caldes_auth, caldes_rights e caldes_vobject_fix (apps/radicale/).
+#
+# - job `test`: compilazione dei plugin, selftest dell'immagine e suite pytest
+#   dei plugin contro Radicale 3.7.8 reale (stesse versioni pinnate
+#   dell'immagine: radicale 3.7.8, vobject 0.9.9, Python 3.14). I test leggono
+#   anche i casi condivisi del contratto (docs/calendar-radicale/contracts/)
+#   e il mock di verify-credentials del harness F0, per questo sono fra i path;
+# - job `build`: build dell'immagine (che riesegue il selftest dentro
+#   l'immagine) e, solo fuori dalle pull request, push su ghcr.io con il solo
+#   tag `sha-<short>`. Niente `latest`: il compose di produzione
+#   (docker-compose.portainer.yml) usa un tag sha pinnato che cambia solo con
+#   un commit del compose (deploy in due commit, vedi apps/radicale/README.md),
+#   e un `latest` mobile farebbe girare la nuova immagine con il vecchio
+#   compose al primo riavvio.
 
 on:
   push:
     branches: [main]
     paths:
       - 'apps/radicale/**'
+      - 'apps/api/test/helpers/mock_verify.py'
+      - 'docs/calendar-radicale/contracts/**'
+      - '.github/workflows/build-radicale-image.yml'
+  pull_request:
+    paths:
+      - 'apps/radicale/**'
+      - 'apps/api/test/helpers/mock_verify.py'
+      - 'docs/calendar-radicale/contracts/**'
       - '.github/workflows/build-radicale-image.yml'
   workflow_dispatch:
 
@@ -21,8 +42,58 @@ env:
   IMAGE_NAME: federicokalik/calicchia-radicale
 
 jobs:
-  build:
+  test:
+    name: test plugin (pytest + selftest)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      # Plugin importabili per nome come nell'immagine (ENV PYTHONPATH), così
+      # sitecustomize applica la patch di vobject anche nei sottoprocessi.
+      PYTHONPATH: ${{ github.workspace }}/apps/radicale/plugins
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      # Stessa versione minore di Python dell'immagine base
+      # (tomsquest/docker-radicale:3.7.8.0, Alpine 3.24).
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      # Versioni pinnate come nell'immagine: il selftest le asserisce.
+      - name: Installa Radicale 3.7.8 e pytest
+        run: python -m pip install --disable-pip-version-check 'radicale==3.7.8' 'vobject==0.9.9' 'pytest==9.1.1'
+
+      - name: Verifica sintassi di plugin e test
+        run: |
+          python - <<'PY'
+          import pathlib, sys
+          files = sorted(pathlib.Path("apps/radicale/plugins").glob("*.py")) + sorted(pathlib.Path("apps/radicale/tests").glob("*.py"))
+          for path in files:
+              compile(path.read_text(encoding="utf-8"), str(path), "exec")
+          print("compilati %d file" % len(files))
+          if not any(p.name == "caldes_auth.py" for p in files):
+              sys.exit("caldes_auth.py assente")
+          PY
+
+      # Lo stesso self-test che il Dockerfile esegue in build, qui con il
+      # config del repository: versioni, patch di vobject via sitecustomize,
+      # valori del config, firma dei plugin e un percorso reale in memoria.
+      - name: Selftest dell'immagine
+        run: python apps/radicale/plugins/caldes_selftest.py apps/radicale/config/config
+
+      # Radicale reale in processi separati: i test simulano la rete interna
+      # caldav-int con indirizzi di loopback diversi (127.0.0.2, 127.0.0.3).
+      - name: pytest dei plugin
+        run: python -m pytest -p no:cacheprovider -ra apps/radicale/tests
+
+  build:
+    name: build e push dell'immagine
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       packages: write
@@ -30,15 +101,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verifica sintassi plugin Python
-        run: |
-          python3 -m py_compile apps/radicale/plugins/caldes_auth.py
-          python3 -m py_compile apps/radicale/plugins/caldes_storage.py
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Login a ghcr.io
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -50,17 +117,39 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # Solo il tag immutabile sha-<short>: è quello da mettere nel compose.
           tags: |
             type=sha,prefix=sha-,format=short
-            type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build e push immagine
+      # Nelle pull request l'immagine si builda soltanto (il selftest nel
+      # Dockerfile fa fallire la build se la patch o il config non vanno).
+      - name: Build (e push fuori dalle pull request)
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: apps/radicale
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+
+      # Riepilogo per il commit 2 del deploy: il tag da scrivere nel compose.
+      - name: Tag per docker-compose.portainer.yml
+        if: github.event_name != 'pull_request'
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          {
+            echo "### Immagine Radicale pubblicata"
+            echo
+            echo "Da scrivere in \`docker-compose.portainer.yml\` (servizio \`radicale\`) nel commit 2 del deploy:"
+            echo
+            echo '```'
+            echo "image: ${TAGS}"
+            echo '```'
+            echo
+            echo "Digest: \`${DIGEST}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

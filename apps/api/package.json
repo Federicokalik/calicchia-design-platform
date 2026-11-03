@@ -14,6 +14,7 @@
     "verify:calendar:smoke": "tsx --env-file=../../.env scripts/verify-calendar.ts",
     "calendar:inventory": "tsx scripts/calendar-inventory.ts",
     "calendar:fix-dst": "tsx --env-file-if-exists=../../.env scripts/fix-dst-exceptions.ts",
+    "calendar:radicale-init": "tsx scripts/radicale-init.ts",
     "contract:mcp-snapshot": "tsx scripts/mcp-contract-snapshot.ts",
     "contract:mcp-check": "tsx scripts/mcp-contract-snapshot.ts --check",
     "seed": "tsx scripts/seed.ts",
@@ -23,12 +24,14 @@
     "test:migrate": "tsx --import ./test/helpers/preload.mjs scripts/migrate.ts",
     "test:smoke": "tsx test/run.ts smoke",
     "test:contracts": "tsx test/run.ts contracts",
+    "test:contracts:radicale": "CALENDAR_BACKEND=radicale tsx test/run.ts contracts",
     "test:calendar": "tsx test/run.ts calendar",
     "test:integration": "tsx test/run.ts integration"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.992.0",
     "@aws-sdk/s3-request-presigner": "^3.992.0",
+    "@calicchia/calendar-core": "workspace:*",
     "@calicchia/shared": "workspace:*",
     "@hono/node-server": "^1.13.7",
     "@maxmind/geoip2-node": "^6.3.4",

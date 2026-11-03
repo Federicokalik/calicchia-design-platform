@@ -17,6 +17,7 @@ import { runAnalyticsPartitionMaintenance } from './analytics-partition-maintena
 import { runAnalyticsGeoRefresh } from './analytics-geo-refresh';
 import { runDunningEngine } from './dunning-engine';
 import { runIcsPull } from './ics-pull';
+import { runCalendarHorizon, runCalendarNightlyAudit, runSubscriptionIndexPull } from './calendar-radicale';
 import { runWhatsAppMediaFetch } from './whatsapp-media-fetch';
 import { runWhatsAppWatchdog } from './whatsapp-watchdog';
 import { runQuoteScheduledSend } from './quote-scheduled-send';
@@ -139,6 +140,33 @@ const jobs: CronJob[] = [
     name: 'ics-pull',
     intervalMs: 15 * 60 * 1000,
     run: runIcsPull,
+  },
+  {
+    // Calendario su Radicale (F2): pull delle iscrizioni verso l'indice in
+    // shadow, solo con lo store postgres (con lo store Radicale lo fa già
+    // ics-pull attraverso la facade). Senza sidecar d'iscrizione (fino alla F3)
+    // è un giro vuoto.
+    name: 'calendar-subscriptions-index',
+    intervalMs: 15 * 60 * 1000,
+    run: runSubscriptionIndexPull,
+  },
+  {
+    // Calendario su Radicale (F2, design §6.9): estensione giornaliera
+    // dell'orizzonte dell'indice dal testo già indicizzato, senza I/O verso
+    // Radicale. Spento senza RADICALE_URL.
+    name: 'calendar-horizon',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 1,
+    run: runCalendarHorizon,
+  },
+  {
+    // Calendario su Radicale (F2, design §6.8): auditor notturno (volume
+    // contro indice, identità, policy, sidecar, orizzonte, retention di
+    // versioni e job). Spento senza RADICALE_URL.
+    name: 'calendar-audit',
+    intervalMs: 24 * 60 * 60 * 1000,
+    runAtHour: 4,
+    run: runCalendarNightlyAudit,
   },
   {
     name: 'whatsapp-media-fetch',
