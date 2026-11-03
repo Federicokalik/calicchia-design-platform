@@ -207,6 +207,12 @@ proxy_read_timeout 60s;
 > dentro l'immagine. Il fix IPv6 di `apps/admin/nginx.conf` (`listen [::]:80;`)
 > resta valido — quel nginx **dentro** il container.
 
+> `CORS_ORIGINS` dell'API deve contenere `https://admin.calicchia.design`: le
+> scritture del wizard di migrazione del calendario (`/api/admin/calendar/migration`)
+> rifiutano con `403 CSRF_REJECTED` un'`Origin` che non è fra quelle ammesse, e
+> dietro questo vhost l'API vede `X-Forwarded-Proto: http` (l'origine calcolata
+> sarebbe `http://admin…`). Vedi il contratto f3-modules §10.1.
+
 ### 5d. `mcp.calicchia.design` → `http://127.0.0.1:3002`
 
 Vhost MCP Streamable HTTP:

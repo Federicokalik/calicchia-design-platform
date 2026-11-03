@@ -1238,7 +1238,7 @@ Precisazioni dell'implementazione (F1, `apps/api/src/routes/backup.ts`):
   - il vecchio codice non scrive l'heartbeat;
   - entro 10 minuti i rights portano i device in frozen;
   - le scritture legacy falliscono sul trigger 166, quindi non si crea uno split-brain silenzioso.
-- Runbook: dopo il cutover niente rollback d'immagine sotto la release F2. Si usa il rollback del wizard; tag dell'API pinnato durante la finestra.
+- Runbook: dopo il cutover niente rollback d'immagine sotto la release F4 (le immagini F1-F3 non sono fermate dal controllo di livello: scrivono heartbeat e policy live). Si usa il rollback del wizard; tag dell'API pinnato su `sha-<short>` PRIMA del cutover (criterio `api_image_pinned`) e per tutta la finestra.
 
 ## 17. Stima
 Per uno sviluppatore senior, in giorni-persona.

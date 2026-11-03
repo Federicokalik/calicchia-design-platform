@@ -48,7 +48,10 @@ function interpolate(template: string, data: any): string {
 //      *_tokens, audit logs, payment provider creds, …) are deliberately NOT
 //      allowlisted, so `SELECT password_hash FROM profiles` and sub-select
 //      exfiltration are rejected.
-//   4. System functions (pg_*, dblink, large-object import/export) are blocked.
+//   4. System functions (pg_*, dblink, large-object import/export, set_config,
+//      current_setting, txid_*) are blocked: set_config at session level would
+//      contaminate the shared pool connection (guardia 166 del calendario).
+//      The query also runs in a READ ONLY transaction.
 //   5. Results are capped to QUERY_MAX_ROWS.
 const ALLOWED_QUERY_TABLES = new Set<string>([
   'leads', 'contacts', 'customers', 'customer_notes', 'communication_preferences',
@@ -79,13 +82,13 @@ const QUERY_MAX_ROWS = 1000;
 
 // Blocks filesystem / large-object / cross-database access reachable from a
 // plain SELECT (the only statement type allowed).
-const FORBIDDEN_SQL_IDENT = /\bpg_[a-z_]+|\blo_import\b|\blo_export\b|\bdblink\b/i;
+const FORBIDDEN_SQL_IDENT = /\bpg_[a-z_]+|\blo_import\b|\blo_export\b|\bdblink\b|\bset_config\b|\bcurrent_setting\b|\btxid_[a-z_]+\b/i;
 
 /**
  * Validate that `query` is a single read-only SELECT touching only allowlisted
  * tables. Returns an Italian error string if unsafe, or null if safe.
  */
-function validateReadOnlyQuery(query: string): string | null {
+export function validateReadOnlyQuery(query: string): string | null {
   const trimmed = query.trim().replace(/;\s*$/, ''); // tolerate one trailing ;
   if (!trimmed) return 'Query vuota';
   if (trimmed.includes(';')) return 'Query bloccata: più istruzioni non permesse';
@@ -342,7 +345,13 @@ export const NODE_TYPES: Record<string, NodeTypeDefinition> = {
       );
 
       try {
-        const rows = await sql.unsafe(query.trim().replace(/;\s*$/, ''), params);
+        const text = query.trim().replace(/;\s*$/, '');
+        // Transazione di sola lettura: nessuna scrittura né set_config persistente sulla connessione condivisa.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
+        const rows = await sql.begin(async (tx: any) => {
+          await tx`SET TRANSACTION READ ONLY`;
+          return tx.unsafe(text, params);
+        });
         const list = Array.isArray(rows) ? rows : [];
         const capped = list.slice(0, QUERY_MAX_ROWS);
         return { rows: capped, count: capped.length, truncated: list.length > QUERY_MAX_ROWS };

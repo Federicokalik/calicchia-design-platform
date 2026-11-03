@@ -195,6 +195,11 @@ const SCRUB_EXACT = new Set([
   'RADICALE_DATA_DIR',
   'RADICALE_PRINCIPAL',
   'RADICALE_PROBE_PASSWORD',
+  // Strumento di migrazione (F3, contratto f3-modules §15): probe e URL
+  // pubblico del preflight, cartella dei caricamenti dell'archivio.
+  'CALDES_PROBE_PASSWORD',
+  'RADICALE_PUBLIC_URL',
+  'CAL_MIGRATION_UPLOAD_DIR',
   'RADICALE_SVC_PASSWORD',
   'RADICALE_SVC_USER',
   'RADICALE_TIMEOUT_MS',

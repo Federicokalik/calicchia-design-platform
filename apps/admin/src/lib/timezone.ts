@@ -53,3 +53,70 @@ export function zonedDayWindow(d: Date = new Date()): { dateLocal: string; start
     endIso: zonedInputToIso(`${next}T00:00`),
   };
 }
+
+/** ISO UTC → wall-time Europe/Rome con i secondi ('YYYY-MM-DDTHH:mm:ss'). */
+export function isoToZonedWall(iso: string): string {
+  const ts = new Date(iso).getTime();
+  return new Date(ts + tzOffsetMs(ts)).toISOString().slice(0, 19);
+}
+
+/** Giorno Europe/Rome ('YYYY-MM-DD') che contiene l'istante `iso`. */
+export function isoToZonedDate(iso: string): string {
+  return isoToZonedWall(iso).slice(0, 10);
+}
+
+/** Data 'YYYY-MM-DD' spostata di `days` giorni di calendario. */
+export function addDaysToDate(date: string, days: number): string {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
+
+/** Mezzanotte Europe/Rome del giorno 'YYYY-MM-DD' come ISO UTC (inizio, o fine esclusiva, di un all-day). */
+export function zonedDateToIso(date: string): string {
+  return zonedInputToIso(`${date}T00:00`);
+}
+
+/**
+ * Istante UTC delle 23:59:59 Europe/Rome del giorno 'YYYY-MM-DD': l'UNTIL di
+ * una serie "fino al giorno X" comprende tutte le occorrenze di quel giorno
+ * locale (la mezzanotte UTC escludeva quelle del mattino in Italia).
+ */
+export function zonedEndOfDayIso(date: string): string {
+  return zonedInputToIso(`${date}T23:59:59`);
+}
+
+// ─── FullCalendar in Europe/Rome senza plugin di fuso ───────────────────────
+//
+// FullCalendar gira con timeZone 'UTC' e riceve gli istanti già convertiti in
+// wall-time di Roma "etichettato" come UTC: la griglia mostra l'ora di Roma a
+// prescindere dal fuso del browser. Le date che FullCalendar restituisce
+// (selezione, trascinamento, ridimensionamento, intervallo visibile) hanno nei
+// campi UTC il wall-time di Roma e si riconvertono in istanti veri con
+// calendarDateToIso.
+
+/** Istante UTC → data per FullCalendar (timeZone 'UTC'): wall-time di Roma, o il solo giorno per gli all-day. */
+export function isoToCalendarDate(iso: string, allDay = false): string {
+  const wall = isoToZonedWall(iso);
+  return allDay ? wall.slice(0, 10) : `${wall}Z`;
+}
+
+/**
+ * Fine esclusiva di un all-day per FullCalendar: giorno di Roma della fine,
+ * mai uguale o precedente all'inizio (una fine alle 23:59 dello stesso giorno o
+ * a mezzanotte UTC vale comunque un giorno intero).
+ */
+export function isoToCalendarAllDayEnd(startIso: string, endIso: string): string {
+  const start = isoToZonedDate(startIso);
+  const end = isoToZonedDate(endIso);
+  return end > start ? end : addDaysToDate(start, 1);
+}
+
+/** Data restituita da FullCalendar con timeZone 'UTC' (wall-time di Roma) → istante ISO UTC. */
+export function calendarDateToIso(d: Date): string {
+  return zonedInputToIso(d.toISOString().slice(0, 19));
+}
+
+/** Giorno ('YYYY-MM-DD') di una data restituita da FullCalendar con timeZone 'UTC'. */
+export function calendarDateToDay(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}

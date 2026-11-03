@@ -15,6 +15,8 @@ const TABS = [
   { labelKey: 'nav.calendar.bookings', path: '/calendario/prenotazioni' },
   { labelKey: 'nav.calendar.availability', path: '/calendario/disponibilita' },
   { labelKey: 'nav.calendar.eventTypes', path: '/calendario/event-types' },
+  // Strumento di migrazione a Radicale (F3): wizard a 6 passi.
+  { labelKey: 'nav.calendar.migration', path: '/calendario/migrazione' },
 ];
 
 export function CalendarTabs() {

@@ -404,7 +404,8 @@ test("feed: calendario 'f' con festività del cron e chiusura", async () => {
   if (isRadicaleBackend()) {
     // Store Radicale: stessi eventi timed 00:00→24:00 di Roma, nel fuso
     // dell'oggetto (con il suo VTIMEZONE); le festività del cron hanno l'UID
-    // deterministico it-holiday-YYYY-MM-DD@caldes.it (design §5).
+    // deterministico it-holiday-YYYY-MM-DD@caldes.it (design §5), pubblicato
+    // con il dominio del feed come fa il feed legacy.
     assert.deepEqual(
       events.map((e) => [icsProp(e, 'SUMMARY'), icsProp(e, 'DTSTART'), icsProp(e, 'DTEND')]),
       [
@@ -414,7 +415,7 @@ test("feed: calendario 'f' con festività del cron e chiusura", async () => {
       ],
     );
     assert.ok(events.every((e) => e.some((l) => l.startsWith('DTSTART;TZID=Europe/Rome:'))));
-    assert.deepEqual(events.slice(0, 2).map((e) => icsProp(e, 'UID')), ['it-holiday-2026-12-25@caldes.it', 'it-holiday-2027-06-02@caldes.it']);
+    assert.deepEqual(events.slice(0, 2).map((e) => icsProp(e, 'UID')), [`it-holiday-2026-12-25@caldes.it@${UID_DOMAIN}`, `it-holiday-2027-06-02@caldes.it@${UID_DOMAIN}`]);
   } else {
     // Festività e chiusure sono timed 00:00→24:00 di Roma, emesse in UTC.
     assert.deepEqual(
@@ -444,9 +445,9 @@ test("feed: calendario 'bookings' con proiezioni confermate ed eventi manuali", 
   ], 'la proiezione della prenotazione annullata è esclusa');
   if (isRadicaleBackend()) {
     // Store Radicale: il feed pubblica la risorsa booking-<uid>.ics, con
-    // UID <uid>@caldes.it (design §5) e la descrizione della decisione 3:
-    // telefono e link alla prenotazione in admin, niente email.
-    assert.equal(icsProp(events[0], 'UID'), `${s.bookingUids.confirmed}@caldes.it`);
+    // UID <uid>@caldes.it (design §5) con il dominio del feed, e la descrizione
+    // della decisione 3: telefono e link alla prenotazione in admin, niente email.
+    assert.equal(icsProp(events[0], 'UID'), `${s.bookingUids.confirmed}@caldes.it@${UID_DOMAIN}`);
     assert.equal(
       icsProp(events[0], 'DESCRIPTION'),
       `Tel: +39 06 1234567\\nPrenotazione: https://admin.caldes.test/calendario/prenotazioni?uid=${s.bookingUids.confirmed}`,

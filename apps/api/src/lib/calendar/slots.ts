@@ -26,6 +26,7 @@
  */
 
 import { sql } from '../../db';
+import { assertCalendarApiLevel } from './api-level';
 import {
   buildAvailabilityWindows,
   enumerateDates,
@@ -125,6 +126,7 @@ export interface ComputeSlotsOptions {
 }
 
 export async function computeAvailableSlots(input: ComputeSlotsInput, opts: ComputeSlotsOptions = {}): Promise<ComputeSlotsResult | null> {
+  assertCalendarApiLevel();
   const db = opts.db ?? sql;
   const level: BusyLevel = opts.level ?? 'display';
   const eventType = await getEventType(input.eventTypeIdOrSlug, { onlyPublic: input.onlyPublic === true });

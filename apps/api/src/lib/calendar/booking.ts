@@ -78,6 +78,7 @@ import {
 } from './booking-projection';
 import { assertReadyOrDegraded } from './busy';
 import { CalendarUnavailableError, type CalendarUnavailableReason } from './errors';
+import { assertCalendarApiLevel } from './api-level';
 import {
   CAL_JOB_KINDS,
   CalendarJobPermanentError,
@@ -195,6 +196,7 @@ async function enqueueConflictCheck(
  * un motivo scavalcabile (decisione 1). Lancia CalendarUnavailableError (503).
  */
 async function beginDecision(tx: Db): Promise<BookingDecision> {
+  assertCalendarApiLevel();
   const state = await readBackendStateFresh(tx);
   const store = storeKindOverride() ?? storeKindForMode(state.mode);
   const decision: BookingDecision = { store, projection: projectionStrategyFor(state), degraded: null, preexisting: [] };

@@ -77,7 +77,7 @@ async function jobs(kind: string): Promise<JobRow[]> {
   return Array.from(await sql<JobRow[]>`
     SELECT id::text AS id, kind, key, status, attempts, payload, source_version, priority, run_after, last_error,
            lease_token::text AS lease_token, result
-    FROM cal_jobs WHERE kind = ${kind} ORDER BY id
+    FROM cal_jobs WHERE kind = ${kind} ORDER BY cal_jobs.id
   `, (r) => ({ ...r }));
 }
 

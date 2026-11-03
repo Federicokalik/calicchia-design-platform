@@ -32,6 +32,7 @@ import { sql, sqlInsert } from '../../../db';
 import { SubscriptionValidationError } from '../errors';
 import { fetchIcs, parseIcs, IcsImportError, type ParsedEvent } from '../ics-import';
 import { logger } from '../../logger';
+import { withLegacyWriteBarrier } from './write-barrier';
 import type {
   CalendarSubscription,
   CreateSubscriptionInput,
@@ -74,16 +75,19 @@ export async function createSubscription(input: CreateSubscriptionInput): Promis
     throw new SubscriptionValidationError('URL ICS deve iniziare con http:// o https://');
   }
 
-  const rows = await sql<CalendarSubscription[]>`
-    INSERT INTO calendar_subscriptions ${sqlInsert({
-      calendar_id: input.calendar_id,
-      name: input.name.trim().slice(0, 200),
-      ics_url: input.ics_url.trim(),
-      sync_enabled: true,
-    })}
-    RETURNING ${COLUMNS}
-  `;
-  return rows[0];
+  // Barriera delle transizioni: lo stato letto con FOR SHARE nella stessa transazione della scrittura.
+  return withLegacyWriteBarrier(async (tx) => {
+    const rows = (await tx`
+      INSERT INTO calendar_subscriptions ${sqlInsert({
+        calendar_id: input.calendar_id,
+        name: input.name.trim().slice(0, 200),
+        ics_url: input.ics_url.trim(),
+        sync_enabled: true,
+      })}
+      RETURNING ${COLUMNS}
+    `) as CalendarSubscription[];
+    return rows[0];
+  });
 }
 
 export async function updateSubscription(id: string, input: UpdateSubscriptionInput): Promise<CalendarSubscription | null> {
@@ -103,18 +107,23 @@ export async function updateSubscription(id: string, input: UpdateSubscriptionIn
 
   if (Object.keys(updates).length === 0) return getSubscription(id);
 
-  const rows = await sql<CalendarSubscription[]>`
-    UPDATE calendar_subscriptions SET ${sql(updates)}
-    WHERE id = ${id}::uuid
-    RETURNING ${COLUMNS}
-  `;
-  return rows[0] || null;
+  // Barriera delle transizioni: lo stato letto con FOR SHARE nella stessa transazione della scrittura.
+  return withLegacyWriteBarrier(async (tx) => {
+    const rows = (await tx`
+      UPDATE calendar_subscriptions SET ${tx(updates)}
+      WHERE id = ${id}::uuid
+      RETURNING ${COLUMNS}
+    `) as CalendarSubscription[];
+    return rows[0] || null;
+  });
 }
 
 export async function deleteSubscription(id: string): Promise<boolean> {
   // CASCADE su calendar_events.subscription_id elimina automaticamente gli eventi importati
-  const rows = await sql`DELETE FROM calendar_subscriptions WHERE id = ${id}::uuid RETURNING id`;
-  return rows.length > 0;
+  return withLegacyWriteBarrier(async (tx) => {
+    const rows = await tx`DELETE FROM calendar_subscriptions WHERE id = ${id}::uuid RETURNING id`;
+    return rows.length > 0;
+  });
 }
 
 // ============================================

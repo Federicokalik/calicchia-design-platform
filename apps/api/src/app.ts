@@ -56,6 +56,7 @@ import { calendarAdmin } from './routes/calendar/admin';
 import { calendarFeed } from './routes/calendar/feed';
 import { caldavBackend } from './routes/calendar/caldav-backend';
 import { calendarHealth } from './routes/calendar/health';
+import { calendarMigration } from './routes/calendar/migration';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -146,6 +147,10 @@ const LARGE_BODY_PREFIXES = [
   '/api/backup/import',
   '/api/whatsapp-admin/conversations/',
   '/api/portal/upload',
+  // Archivio della Fase 0 dello strumento di migrazione del calendario: fino a
+  // 20 MB, limite applicato dal router (routes/calendar/migration.ts, contratto
+  // f3-modules §10.2).
+  '/api/admin/calendar/migration/phase0/archive',
 ];
 app.use('*', async (c, next) => {
   const path = c.req.path.toLowerCase();
@@ -527,6 +532,9 @@ app.route('/api/milestones', milestones);
 app.route('/api/time-entries', timeEntries);
 app.route('/api/project-comments', projectComments);
 app.route('/api/calcom', calcom);
+// Strumento di migrazione del calendario a Radicale (F3, contratto f3-modules
+// §10): montato PRIMA di /api/admin/calendar, stesso JWT admin (protectedPaths).
+app.route('/api/admin/calendar/migration', calendarMigration);
 app.route('/api/admin/calendar', calendarAdmin);
 app.route('/api/notifications', notifications);
 app.route('/api/dashboard', dashboard);

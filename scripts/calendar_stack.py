@@ -42,6 +42,15 @@ Sottocomandi (output JSON su stdout, errori su stderr con exit 1):
       Confronta due inventari (albero, collezioni, marker, proprietario):
       exit 1 con l'elenco delle differenze.
 
+  stack-backup-record --file <manifest.json>
+      Riga da registrare in calendar_backend_state.last_stack_backup a fine
+      run (contratto docs/calendar-radicale/contracts/f3-modules.md §14.3):
+      {id, at, complete, volume_id, epoch, manifest_sha256}. complete è vero
+      solo per un backup coordinato (database E volume); volume_id ed epoch
+      sono quelli del marker del volume salvato (null senza volume o senza
+      marker valido), at è l'inizio del run (il dump è il dato più vecchio).
+      Lo legge il controllo BACKUP_RECENT del preflight della migrazione.
+
   get --file <json> --path a.b.c [--default X]
       Stampa un valore di un file JSON (stringhe senza virgolette, null come
       stringa vuota, oggetti e liste in JSON).
@@ -583,6 +592,30 @@ def verify_run(run_dir: str) -> Dict[str, Any]:
     return {"id": doc["id"], "verified": checked, "identity": doc.get("consistency", {}).get("identity")}
 
 
+def stack_backup_record(manifest_path: str) -> Dict[str, Any]:
+    """Valore di calendar_backend_state.last_stack_backup per un run pubblicato (§14.3)."""
+    run_dir = os.path.dirname(os.path.abspath(manifest_path))
+    if os.path.basename(manifest_path) != MANIFEST_NAME:
+        raise ToolError("serve il %s di un run: %s" % (MANIFEST_NAME, manifest_path))
+    doc = load_manifest(run_dir)
+    radicale = doc.get("radicale")
+    marker = ((radicale or {}).get("inventory") or {}).get("marker") or {}
+    marker_ok = marker.get("state") == "ok"
+    at = doc.get("created_at")
+    if not isinstance(at, str) or not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", at):
+        raise ToolError("created_at del manifest non valido: %r" % (at,))
+    return {
+        "id": doc["id"],
+        "at": at,
+        # Un run "solo database" (--db-only, RADICALE_BACKUP=auto senza volume o
+        # volume non salvato) non è un backup coordinato: per il preflight non vale.
+        "complete": doc.get("complete", True) is True and isinstance(radicale, dict),
+        "volume_id": marker.get("volume_id") if marker_ok else None,
+        "epoch": marker.get("epoch") if marker_ok else None,
+        "manifest_sha256": sha256_file(os.path.join(run_dir, MANIFEST_NAME)),
+    }
+
+
 # ─── Utilità per gli script ───────────────────────────────────
 
 
@@ -662,6 +695,8 @@ def main(argv: List[str]) -> int:
     p.add_argument("--expected", required=True)
     p.add_argument("--actual", required=True)
     p.add_argument("--ignore-owner", action="store_true")
+    p = sub.add_parser("stack-backup-record")
+    p.add_argument("--file", required=True)
     p = sub.add_parser("get")
     p.add_argument("--file", required=True)
     p.add_argument("--path", required=True)
@@ -696,6 +731,9 @@ def main(argv: List[str]) -> int:
                                         check_owner=not args.ignore_owner)
             _print({"equal": not diffs, "differences": diffs})
             return 0 if not diffs else 1
+        elif args.cmd == "stack-backup-record":
+            json.dump(stack_backup_record(args.file), sys.stdout, ensure_ascii=False, separators=(",", ":"))
+            sys.stdout.write("\n")
         elif args.cmd == "get":
             try:
                 with open(args.file, "r", encoding="utf-8") as handle:

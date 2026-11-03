@@ -359,7 +359,7 @@ export interface ClosuresView {
 export interface CalendarFeedOptions {
   /** Istante di riferimento per la finestra dei singoli (−90 g, +365 g). */
   now: Date;
-  /** Dominio degli UID senza '@' (valore congelato, design §10). */
+  /** Dominio degli UID pubblicati (valore congelato, design §10). */
   uidDomain: string;
 }
 

@@ -239,7 +239,7 @@ describe('163-164: vincoli allineati al contratto', () => {
     for (const table of F2_TABLES) assert.equal(backupGroup(`public.${table}`), 'state', table);
   });
 
-  test('calendar_events non ha trigger né colonne della F2', async () => {
+  test('calendar_events non ha trigger né colonne della F2 (le caldes_* sono solo quelle della 166)', async () => {
     const triggers = await sql<Array<{ tgname: string }>>`
       SELECT tgname FROM pg_trigger WHERE tgrelid = 'calendar_events'::regclass AND NOT tgisinternal AND tgname LIKE 'cal\\_%'
     `;
@@ -248,7 +248,12 @@ describe('163-164: vincoli allineati al contratto', () => {
       SELECT column_name FROM information_schema.columns
       WHERE table_schema = 'public' AND table_name = 'calendar_events' AND column_name LIKE 'caldes\\_%'
     `;
-    assert.deepEqual([...cols], [], 'le colonne caldes_* nascono con la 166 (F4), non qui');
+    assert.deepEqual(
+      Array.from(cols, (c) => c.column_name).sort(),
+      ['caldes_derived', 'caldes_object_id'],
+      'le colonne caldes_* nascono con la 166 (F4), non qui',
+    );
+    assert.doesNotMatch(MIGRATION_163 + MIGRATION_164, /caldes_object_id|caldes_derived/);
   });
 
   test('idempotenti: rieseguite su uno schema già migrato non falliscono e non cambiano il catalogo', async () => {

@@ -25,7 +25,7 @@ import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { after, before, describe, test } from 'node:test';
 import { invalidateBackendModeCache } from '../../src/lib/calendar/backend-mode';
-import { clearIndexFeedCache } from '../../src/lib/calendar/feed-builder';
+import { clearIndexFeedCache, feedUidDomain } from '../../src/lib/calendar/feed-builder';
 import { objectPath, RadicaleClient } from '../../src/lib/calendar/radicale/client';
 import { initializeVolume } from '../../src/lib/calendar/radicale/identity';
 import { stopIndexWorker } from '../../src/lib/calendar/radicale/indexer';
@@ -138,7 +138,7 @@ describe('consumatori contro Radicale reale', { skip: radicale.skip }, () => {
       assert.match(etag ?? '', /^"[0-9a-f]{64}"$/);
       const events = icsEvents(res.text);
       assert.deepEqual(events.map((e) => icsProp(e, 'SUMMARY')).sort(), ['Riunione', 'Studio']);
-      const master = events.find((e) => icsProp(e, 'UID') === 'serie-rad@test.invalid') as string[];
+      const master = events.find((e) => icsProp(e, 'UID') === `serie-rad@test.invalid@${feedUidDomain()}`) as string[];
       assert.ok(master.includes('EXDATE;TZID=Europe/Rome:20270105T090000'), master.join(' | '));
       assert.equal((await api.get(path, { headers: { 'If-None-Match': etag as string } })).status, 304);
 

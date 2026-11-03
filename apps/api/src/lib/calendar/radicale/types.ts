@@ -192,7 +192,18 @@ export interface SidecarCollection {
   role: CalendarRole;
   lifecycle: CalendarLifecycle;
   device_visible: boolean;
+  /**
+   * calendars.origin (F4, contratto f4-modules §3.5): le collezioni dello
+   * strumento di migrazione (`migration`, l'archivio della Fase 0) sono in
+   * sola lettura per i device anche in live. Facoltativo per i chiamanti che
+   * non lo conoscono (assente = non `migration`); readSidecarCollections()
+   * lo legge sempre.
+   */
+  origin?: CalendarOrigin;
 }
+
+/** Origini delle collezioni sempre in sola lettura per i device (archivio della Fase 0, decisione 7). */
+export const DEVICE_READONLY_ORIGINS: readonly CalendarOrigin[] = Object.freeze(['migration']);
 
 /** Ingressi di policyFromState(). */
 export interface PolicyInput {
@@ -331,7 +342,9 @@ function sortedUnique(values: Iterable<string>): string[] {
  *   condizioni di POLICY_REASONS (write_freeze solo quando la base è live;
  *   identity_uninitialized solo fuori da mode postgres).
  * - readonly: collezioni attive e visibili con ruolo bookings, holidays,
- *   deadlines o subscription.
+ *   deadlines o subscription, più quelle create dallo strumento di
+ *   migrazione (origin `migration`: l'archivio della Fase 0, in sola lettura
+ *   anche in live, contratto f4-modules §3.5).
  * - hidden: sempre _canary, più le collezioni con device_visible=false o
  *   lifecycle diverso da active.
  *
@@ -375,7 +388,7 @@ export function policyFromState(input: PolicyInput): CaldesPolicy {
     if (!isValidCollectionName(c.collection_name)) continue;
     if (c.lifecycle !== 'active' || !c.device_visible) {
       hidden.add(c.collection_name);
-    } else if (DEVICE_READONLY_ROLES.includes(c.role)) {
+    } else if (DEVICE_READONLY_ROLES.includes(c.role) || (c.origin !== undefined && DEVICE_READONLY_ORIGINS.includes(c.origin))) {
       readonly.add(c.collection_name);
     }
   }

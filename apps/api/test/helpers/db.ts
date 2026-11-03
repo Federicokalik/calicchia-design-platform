@@ -249,6 +249,10 @@ export async function cleanupTestData(prefix: string, tracked: TrackedRows = {})
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia 166 della F4: un test che lascia il backend fuori da mode
+    // postgres non deve bloccare la propria pulizia (scrittore privilegiato,
+    // come la proiezione inversa).
+    await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
     const count = (table: string, rows: Array<{ id: string }>): void => {
       report[table] = (report[table] ?? 0) + rows.length;
     };
@@ -438,6 +442,10 @@ export async function resetCalendarBaseline(): Promise<void> {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tipo tx di postgres-js (stesso pattern di src/)
   await sql.begin(async (tx: any) => {
+    // Guardia 166 della F4: la baseline svuota calendar_events anche se un
+    // test ha lasciato il backend fuori da mode postgres (lo stato torna a
+    // postgres più sotto, nella stessa transazione).
+    await tx`SELECT set_config('caldes.reverse_sync', txid_current()::text, true)`;
     // Guardia della matrice CALENDAR_BACKEND=radicale rimasta da un run
     // interrotto (helpers/calendar-backend.ts): la baseline non la conserva mai.
     await tx`DROP TRIGGER IF EXISTS caldes_test_matrix_guard ON calendar_events`;
@@ -482,6 +490,25 @@ export async function resetCalendarBaseline(): Promise<void> {
       await tx`DELETE FROM cal_jobs`;
       await tx`DELETE FROM cal_booking_conflicts`;
     }
+    // Strumento di migrazione (165): run (le righe spariscono in cascata) e
+    // ledger, che non ha FK verso calendars e sopravvivrebbe ai calendari
+    // cancellati sopra.
+    const [{ hasMigration }]: Array<{ hasMigration: boolean }> = await tx`
+      SELECT to_regclass('public.cal_migration_runs') IS NOT NULL AS "hasMigration"
+    `;
+    if (hasMigration) {
+      // Transizioni, journal e stato della proiezione inversa (166, F4): il
+      // journal sparisce in cascata con le transizioni.
+      const [{ hasTransitions }]: Array<{ hasTransitions: boolean }> = await tx`
+        SELECT to_regclass('public.cal_migration_transitions') IS NOT NULL AS "hasTransitions"
+      `;
+      if (hasTransitions) {
+        await tx`DELETE FROM cal_migration_reverse_state`;
+        await tx`DELETE FROM cal_migration_transitions`;
+      }
+      await tx`DELETE FROM cal_migration_ledger`;
+      await tx`DELETE FROM cal_migration_runs`;
+    }
 
     const [{ hasState }]: Array<{ hasState: boolean }> = await tx`
       SELECT to_regclass('public.calendar_backend_state') IS NOT NULL AS "hasState"
@@ -494,6 +521,20 @@ export async function resetCalendarBaseline(): Promise<void> {
         WHERE (mode, write_freeze, volume_id, epoch, restore_guard_until, rebuild_required)
               IS DISTINCT FROM ('postgres', false, NULL::uuid, 0, NULL::timestamptz, false)
       `;
+      if (hasMigration) {
+        // Colonne della 165 ai default: shadow spento, nessuna transizione,
+        // nessuna dichiarazione del wizard né backup registrato.
+        await tx`
+          UPDATE calendar_backend_state
+          SET shadow_enabled = false, shadow_since = NULL, cutover_at = NULL, cutover_by = NULL,
+              rollback_until = NULL, finalized_at = NULL, api_min_version = 0,
+              last_stack_backup = NULL, migration_declarations = '{}'::jsonb
+          WHERE (shadow_enabled, shadow_since, cutover_at, cutover_by, rollback_until, finalized_at,
+                 api_min_version, last_stack_backup, migration_declarations)
+                IS DISTINCT FROM (false, NULL::timestamptz, NULL::timestamptz, NULL::text, NULL::timestamptz,
+                                  NULL::timestamptz, 0, NULL::jsonb, '{}'::jsonb)
+        `;
+      }
     }
 
     const [defaultSchedule]: Array<{ id: string }> = await tx`
