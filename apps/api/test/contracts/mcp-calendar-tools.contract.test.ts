@@ -673,6 +673,32 @@ test('reschedule_booking e update_cal_booking: successo, sovrapposizione, confli
   await runTool('successo-booking-id', 'update_cal_booking', { booking_id: viaAlias, start: at('2027-04-07', '16:00') }, effects('spostare-alias', viaAlias));
 });
 
+test('update_booking_location: link MEGA per la prenotazione, mantenuto nella riprogrammazione', async () => {
+  const { consulenza } = base.eventTypes;
+  const at = (date: string, time: string) => romeIso(date, time);
+  const created = await fx.booking({ eventType: consulenza, start: at('2027-04-08', '09:00'), attendee: { name: 'Cliente mega', email: fx.email('luogo-mega') } });
+  aliases.booking('luogo-mega', created);
+  const uid = created.booking.uid;
+  const mega = 'https://mega.nz/chat/AbCdEfGh#xYz123';
+
+  const set = await runTool('successo-mega', 'update_booking_location', { uid, meeting_url: mega }, () => bookingState(uid));
+  assert.equal(set.success, true);
+  assert.equal(set.location_type, 'custom_url');
+  assert.equal(set.location_value, mega);
+  assert.equal(set.notified, false);
+
+  // La riprogrammazione eredita il link scelto per la prenotazione (non torna al tipo evento).
+  const moved = await runTool('riprogrammata-mantiene-mega', 'reschedule_booking', { uid, start: at('2027-04-08', '11:00'), notify: false }, async (out) => {
+    if (typeof out.uid === 'string') aliases.add(out.uid, 'bk:luogo-mega-nuova');
+    return typeof out.uid === 'string' ? bookingState(out.uid) : null;
+  });
+  assert.equal(moved.location_value, mega);
+
+  await runTool('url-non-valido', 'update_booking_location', { uid, meeting_url: 'javascript:alert(1)' });
+  await runTool('senza-luogo', 'update_booking_location', { uid });
+  await runTool('inesistente', 'update_booking_location', { uid: 'nonesiste000', meeting_url: mega });
+});
+
 test('cancel_booking e cancel_cal_booking: successo, idempotenza ed errori', async () => {
   const { consulenza } = base.eventTypes;
   const make = async (key: string, time: string) => {

@@ -67,6 +67,8 @@ const HIGH_RISK_WRITE_PATTERNS: readonly RegExp[] = [
   /\/purge$/,
   /^\/api\/gdpr-requests\/erase\//,
   /^\/api\/admin\/calendar\/migration(?:\/|$)/,
+  // Annullamento di una prenotazione (avvisa il partecipante), come cancel_booking.
+  /^\/api\/admin\/calendar\/bookings\/[^/]+\/cancel$/,
 ];
 
 export type PathCheck =

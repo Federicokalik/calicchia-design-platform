@@ -147,6 +147,12 @@ export interface CreateBookingInput {
    * possono invece fissare orari fuori disponibilità.
    */
   require_available_slot?: boolean;
+  /**
+   * Solo admin/MCP: luogo o link di videocall scelto per questa prenotazione
+   * (es. link MEGA/Zoom) al posto di quello del tipo evento. Resta legato alla
+   * prenotazione anche nelle riprogrammazioni.
+   */
+  location?: { type: LocationType; value: string | null };
   /** Audit trail GDPR art. 7 — IP raccolto al POST. Null se chiamante non lo passa (es. admin manual). */
   consent_ip?: string | null;
   /** Audit trail GDPR art. 7 — user-agent raccolto al POST. */

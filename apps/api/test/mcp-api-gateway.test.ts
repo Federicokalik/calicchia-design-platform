@@ -63,11 +63,13 @@ describe('api-policy', () => {
       '/api/email-marketing/import/commit',
       '/api/settings/site',
       '/api/workflows/1/execute',
+      '/api/admin/calendar/bookings/abc/cancel',
     ]) {
       assert.equal(classifyRisk('POST', path), 'high', path);
     }
     assert.equal(classifyRisk('POST', '/api/email-marketing/import/preview'), 'medium');
     assert.equal(classifyRisk('PATCH', '/api/email-marketing/campaigns/1'), 'medium');
+    assert.equal(classifyRisk('PATCH', '/api/admin/calendar/bookings/abc/location'), 'medium');
   });
 
   test('scopeAllows', () => {

@@ -274,6 +274,8 @@ interface ProjectionBookingRow {
   start_time: Date | string;
   end_time: Date | string;
   location_value: string | null;
+  location_type: EventType['location_type'] | null;
+  source_metadata: Record<string, unknown> | null;
   event_title: string | null;
   event_location_type: EventType['location_type'] | null;
   event_location_value: string | null;
@@ -345,6 +347,7 @@ export async function readBookingProjectionData(db: Db, uids: readonly string[])
     const chunk = unique.slice(i, i + MAX_BOOKINGS_PER_QUERY);
     const rows = await db<ProjectionBookingRow[]>`
       SELECT b.uid, b.attendee_name, b.attendee_email, b.attendee_phone, b.start_time, b.end_time, b.location_value,
+             b.location_type, b.source_metadata,
              et.title AS event_title, et.location_type AS event_location_type, et.location_value AS event_location_value
       FROM calendar_bookings b
       LEFT JOIN calendar_event_types et ON et.id = b.event_type_id
@@ -361,7 +364,11 @@ export async function readBookingProjectionData(db: Db, uids: readonly string[])
             end_time: String(row.end_time),
             attendee_name: row.attendee_name ?? '',
             attendee_email: row.attendee_email ?? '',
-          } as Pick<Booking, 'uid' | 'start_time' | 'end_time' | 'attendee_name' | 'attendee_email'>,
+            // Link scelto per la prenotazione (es. MEGA): vince sul tipo evento.
+            location_type: row.location_type,
+            location_value: row.location_value,
+            source_metadata: row.source_metadata,
+          } as Pick<Booking, 'uid' | 'start_time' | 'end_time' | 'attendee_name' | 'attendee_email' | 'location_type' | 'location_value' | 'source_metadata'>,
         })
         : null;
       out.set(row.uid, {

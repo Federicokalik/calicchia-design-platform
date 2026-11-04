@@ -77,6 +77,7 @@ const FAMILY: Readonly<Record<string, Exclude<CalendarToolFamily, 'unclassified'
   list_bookings: 'booking',
   create_booking: 'booking',
   reschedule_booking: 'booking',
+  update_booking_location: 'booking',
   cancel_booking: 'booking',
   list_cal_bookings: 'booking',
   create_cal_booking: 'booking',

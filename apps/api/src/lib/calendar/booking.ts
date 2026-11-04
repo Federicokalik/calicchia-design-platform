@@ -56,9 +56,16 @@
  */
 
 import { customAlphabet } from 'nanoid';
-import { sql } from '../../db';
+import { jsonb, sql } from '../../db';
 import { getEventType } from './availability';
-import { resolveLocationForBooking, deleteGoogleEvent } from './meeting-url';
+import {
+  LOCATION_OVERRIDE_META_KEY,
+  bookingLocationOverride,
+  deleteGoogleEvent,
+  resolveExplicitLocation,
+  resolveLocationForBooking,
+  type BookingLocationOverride,
+} from './meeting-url';
 import { getBookingsCalendar } from './calendars';
 import { hasWeeklyCapacityForBooking } from './capacity';
 import { createEvent, getEventBySource, updateEvent } from './events';
@@ -437,7 +444,8 @@ export async function createBooking(
     && (source === 'public_page' || source === 'contact_form');
 
   // Pre-risolvi location PRIMA dell'INSERT (best-effort; Google rimosso → stub).
-  const resolved = await resolveLocationForBooking({
+  // Un luogo esplicito (admin/MCP, es. link MEGA) vince sul tipo evento.
+  const resolved = input.location ? resolveExplicitLocation(input.location) : await resolveLocationForBooking({
     eventType,
     booking: {
       uid,
@@ -462,11 +470,13 @@ export async function createBooking(
     custom_responses: input.custom_responses || {},
     start_time: startIso,
     end_time: endIso,
-    location_type: eventType.location_type,
+    location_type: input.location?.type ?? eventType.location_type,
     location_value: resolved.locationValue || null,
     google_event_id: resolved.googleEventId,
     source,
-    source_metadata: input.source_metadata || {},
+    source_metadata: input.location
+      ? { ...(input.source_metadata || {}), [LOCATION_OVERRIDE_META_KEY]: true }
+      : input.source_metadata || {},
     contact_id: input.contact_id || null,
     lead_id: input.lead_id || null,
     consent_ip: input.consent_ip ?? null,
@@ -679,6 +689,11 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
   allow_buffer_override?: boolean;
   /** Riprogrammazione dal cliente: il nuovo orario deve essere uno slot disponibile. */
   require_available_slot?: boolean;
+  /**
+   * Admin/MCP: nuovo luogo o link di videocall (es. MEGA). Senza, la nuova
+   * prenotazione eredita il luogo scelto per l'originale, se ne aveva uno.
+   */
+  location?: BookingLocationOverride;
 }): Promise<{ booking: Booking; eventType: EventType; previousUid: string }> {
   // Cancel-old + create-new in un'unica transazione: se il nuovo INSERT
   // fallisce (EXCLUDE/capacità/buffer) il rollback ripristina automaticamente
@@ -726,6 +741,7 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
       lead_id: original.lead_id || undefined,
       allow_buffer_override: opts.allow_buffer_override,
       require_available_slot: opts.require_available_slot,
+      location: opts.location ?? bookingLocationOverride(original) ?? undefined,
     }, { db: tx, suppressWorkflowEvents: true });
 
     const linked = await tx`
@@ -751,14 +767,66 @@ export async function rescheduleBooking(uid: string, newStartIso: string, opts: 
     await cancelLegacyProjection(uid, 'Sync cancel calendar_event (reschedule)');
   }
   // Store legacy: link della riunione nullo come oggi (la correzione del
-  // design §14 esce con lo store Radicale, dove il job lo ricalcola sempre).
-  await afterBookingCommitted(txResult.booking, txResult.eventType, txResult.decision, null);
+  // design §14 esce con lo store Radicale, dove il job lo ricalcola sempre),
+  // salvo un link scelto per la prenotazione (es. MEGA), che va proiettato.
+  const overrideLocation = bookingLocationOverride(txResult.booking);
+  await afterBookingCommitted(
+    txResult.booking,
+    txResult.eventType,
+    txResult.decision,
+    overrideLocation ? resolveExplicitLocation(overrideLocation).meetingUrl : null,
+  );
   fireBookingWorkflow('booking_riprogrammato', txResult.booking, txResult.eventType, {
     previous_uid: uid,
     previous_start: txResult.original.start_time,
   });
 
   return { booking: txResult.booking, eventType: txResult.eventType, previousUid: uid };
+}
+
+/**
+ * Cambia luogo o link di videocall di una prenotazione esistente (es. da Meet a
+ * MEGA) senza spostarla. Marca la prenotazione con l'override così il link
+ * resta anche nelle riprogrammazioni, e aggiorna la proiezione nel calendario.
+ * Non invia email: per avvisare il partecipante usare resend-confirmation.
+ */
+export async function updateBookingLocation(
+  uid: string,
+  location: BookingLocationOverride,
+): Promise<{ booking: Booking; eventType: EventType } | null> {
+  const resolved = resolveExplicitLocation(location);
+  const strategy = projectionStrategyFor(await readBackendStateFresh(sql));
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const update = async (db: any): Promise<Booking[]> => db`
+    UPDATE calendar_bookings SET
+      location_type = ${location.type},
+      location_value = ${resolved.locationValue || null},
+      source_metadata = COALESCE(source_metadata, '{}'::jsonb) || ${jsonb({ [LOCATION_OVERRIDE_META_KEY]: true })}::jsonb
+    WHERE uid = ${uid} AND status IN ('confirmed', 'pending')
+    RETURNING *
+  `;
+  const rows: Booking[] = strategy === 'job'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ? await sql.begin(async (tx: any) => {
+        const res = await update(tx);
+        if (res[0] && res[0].status === 'confirmed') await enqueueProjection(res[0], tx as Db);
+        return res;
+      }) as unknown as Booking[]
+    : await update(sql);
+  const booking = rows[0];
+  if (!booking) return null;
+
+  if (strategy === 'legacy' && booking.status === 'confirmed') {
+    const linked = await getEventBySource('booking', uid);
+    if (linked) {
+      await updateEvent(linked.id, { location: booking.location_value, url: resolved.meetingUrl })
+        .catch((err: unknown) => log.warn({ err, uid }, 'aggiornamento luogo della proiezione fallito'));
+    }
+  }
+
+  const eventType = await getEventType(booking.event_type_id, { includeInactive: true });
+  if (!eventType) return null;
+  return { booking, eventType };
 }
 
 /**

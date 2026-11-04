@@ -28,6 +28,7 @@ import {
   createBooking,
   cancelBooking,
   rescheduleBooking,
+  updateBookingLocation,
   approveBooking,
   rejectBooking,
   getBookingByUid,
@@ -91,6 +92,7 @@ import type {
   EventType,
 } from '../../lib/calendar/types';
 import { sameOriginWrites } from '../../lib/http/same-origin-writes';
+import { parseLocationInput } from '../../lib/calendar/meeting-url';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'calendar-admin' });
@@ -601,6 +603,9 @@ calendarAdmin.post('/bookings/:uid/cancel', async (c) => {
 calendarAdmin.post('/bookings/:uid/reschedule', async (c) => {
   const body = await c.req.json();
   if (!body.start || isNaN(Date.parse(body.start))) return c.json({ error: 'start ISO richiesto' }, 400);
+  // Facoltativo: nuovo link (meeting_url, es. MEGA) o luogo (location_type + location_value).
+  const parsedLocation = parseLocationInput(body);
+  if ('error' in parsedLocation) return c.json({ error: parsedLocation.error, code: 'BOOKING_VALIDATION' }, 400);
 
   try {
     const previous = await getBookingByUid(c.req.param('uid'));
@@ -609,6 +614,7 @@ calendarAdmin.post('/bookings/:uid/reschedule', async (c) => {
       by: 'admin',
       reason: body.reason || 'Riprogrammata dall\'admin',
       allow_buffer_override: body.allow_buffer_override === true,
+      location: parsedLocation.location,
     });
     if (body.notify !== false) {
       Promise.allSettled([
@@ -624,6 +630,21 @@ calendarAdmin.post('/bookings/:uid/reschedule', async (c) => {
     if (err instanceof BookingValidationError) return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
     throw err;
   }
+});
+
+/**
+ * Cambia luogo o link di videocall della prenotazione (es. da Meet a MEGA)
+ * senza spostarla. Body: { meeting_url } oppure { location_type, location_value }.
+ * Non invia email: per avvisare il partecipante usare resend-confirmation.
+ */
+calendarAdmin.patch('/bookings/:uid/location', async (c) => {
+  const body = await c.req.json().catch(() => ({}));
+  const parsed = parseLocationInput(body as Record<string, unknown>);
+  if ('error' in parsed) return c.json({ error: parsed.error, code: 'BOOKING_VALIDATION' }, 400);
+  if (!parsed.location) return c.json({ error: 'meeting_url oppure location_type richiesto', code: 'BOOKING_VALIDATION' }, 400);
+  const result = await updateBookingLocation(c.req.param('uid'), parsed.location);
+  if (!result) return c.json({ error: 'Prenotazione non trovata o non attiva' }, 404);
+  return c.json({ booking: result.booking });
 });
 
 calendarAdmin.post('/bookings/:uid/mark', async (c) => {

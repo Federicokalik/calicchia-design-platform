@@ -89,6 +89,20 @@ function romeDayWindow(): { date: string; fromIso: string; toIso: string } {
   };
 }
 
+/** Luogo/link scelto per la singola prenotazione (vince sul tipo evento, resta nelle riprogrammazioni). */
+const BOOKING_LOCATION_PROPS = {
+  meeting_url: {
+    type: 'string',
+    description: 'Link https della videocall per questa prenotazione (MEGA, Zoom, Google Meet, Teams...), es. https://mega.nz/... Sostituisce il link del tipo evento.',
+  },
+  location_type: {
+    type: 'string',
+    enum: ['custom_url', 'google_meet', 'in_person', 'phone'],
+    description: 'In alternativa a meeting_url: tipo di luogo (in_person = indirizzo, phone = telefono)',
+  },
+  location_value: { type: 'string', description: 'Valore del luogo per location_type (indirizzo, numero o link)' },
+};
+
 const CREATE_BOOKING_PARAMS = {
   type: 'object',
   properties: {
@@ -100,6 +114,7 @@ const CREATE_BOOKING_PARAMS = {
     attendee_company: { type: 'string' },
     attendee_message: { type: 'string' },
     allow_buffer_override: { type: 'boolean', description: 'Consenti lo slot anche se viola i buffer dell\'event type (default false)' },
+    ...BOOKING_LOCATION_PROPS,
   },
   required: ['event_type_slug', 'start', 'attendee_name', 'attendee_email'],
 };
@@ -107,6 +122,9 @@ const CREATE_BOOKING_PARAMS = {
 const executeCreateBooking = async (args: Record<string, unknown>): Promise<string> => {
   const { createBooking, BookingConflictError, BookingValidationError } = await import('../calendar/booking');
   const { sendBookingConfirmation, sendBookingAdminNotification } = await import('../calendar/email');
+  const { parseLocationInput } = await import('../calendar/meeting-url');
+  const parsedLocation = parseLocationInput(args);
+  if ('error' in parsedLocation) return JSON.stringify({ error: parsedLocation.error, code: 'VALIDATION' });
   try {
     const { booking, eventType } = await createBooking({
       event_type_slug: args.event_type_slug as string,
@@ -122,6 +140,7 @@ const executeCreateBooking = async (args: Record<string, unknown>): Promise<stri
       source: 'mcp',
       source_metadata: { created_via: 'mcp_tool' },
       allow_buffer_override: args.allow_buffer_override === true,
+      location: parsedLocation.location,
     });
     Promise.allSettled([
       sendBookingConfirmation({ booking, eventType }),
@@ -161,9 +180,12 @@ const executeCancelBooking = async (args: Record<string, unknown>): Promise<stri
 const executeRescheduleBooking = async (args: Record<string, unknown>): Promise<string> => {
   const { rescheduleBooking, BookingConflictError, BookingValidationError } = await import('../calendar/booking');
   const { sendBookingRescheduled } = await import('../calendar/email');
+  const { parseLocationInput } = await import('../calendar/meeting-url');
   const uid = (args.uid ?? args.booking_id) as string;
   const start = args.start as string;
   if (!uid || !start) return JSON.stringify({ error: 'uid e start richiesti' });
+  const parsedLocation = parseLocationInput(args);
+  if ('error' in parsedLocation) return JSON.stringify({ error: parsedLocation.error, code: 'VALIDATION' });
   const previous = await sql<{ start_time: string }[]>`
     SELECT start_time FROM calendar_bookings WHERE uid = ${uid} LIMIT 1
   `;
@@ -173,25 +195,59 @@ const executeRescheduleBooking = async (args: Record<string, unknown>): Promise<
       by: 'admin',
       reason: args.reason as string | undefined,
       allow_buffer_override: args.allow_buffer_override === true,
+      location: parsedLocation.location,
     });
-    Promise.allSettled([
-      sendBookingRescheduled({
-        booking: result.booking, eventType: result.eventType,
-        previousStart: previous[0].start_time, recipient: 'attendee',
-      }),
-    ]).catch(() => {});
+    if (args.notify !== false) {
+      Promise.allSettled([
+        sendBookingRescheduled({
+          booking: result.booking, eventType: result.eventType,
+          previousStart: previous[0].start_time, recipient: 'attendee',
+        }),
+      ]).catch(() => {});
+    }
     return JSON.stringify({
       success: true,
       uid: result.booking.uid,
       previous_uid: result.previousUid,
       start_time: result.booking.start_time,
       end_time: result.booking.end_time,
+      ...(parsedLocation.location || args.notify === false
+        ? { location_type: result.booking.location_type, location_value: result.booking.location_value, notified: args.notify !== false }
+        : {}),
     });
   } catch (err) {
     if (err instanceof BookingConflictError) return JSON.stringify({ error: err.message, code: 'CONFLICT' });
     if (err instanceof BookingValidationError) return JSON.stringify({ error: err.message, code: 'VALIDATION' });
     return JSON.stringify({ error: err instanceof Error ? err.message : 'Errore sconosciuto' });
   }
+};
+
+const executeUpdateBookingLocation = async (args: Record<string, unknown>): Promise<string> => {
+  const { updateBookingLocation } = await import('../calendar/booking');
+  const { parseLocationInput } = await import('../calendar/meeting-url');
+  const { sendBookingConfirmation } = await import('../calendar/email');
+  const uid = (args.uid ?? args.booking_id) as string;
+  if (!uid) return JSON.stringify({ error: 'uid richiesto' });
+  const parsed = parseLocationInput(args);
+  if ('error' in parsed) return JSON.stringify({ error: parsed.error, code: 'VALIDATION' });
+  if (!parsed.location) return JSON.stringify({ error: 'meeting_url oppure location_type richiesto', code: 'VALIDATION' });
+  const result = await updateBookingLocation(uid, parsed.location);
+  if (!result) return JSON.stringify({ error: 'Booking non trovato o non attivo' });
+  if (args.notify === true) {
+    // Come POST /bookings/:uid/resend-confirmation: rimuove l'audit della conferma e la reinvia.
+    await sql`
+      DELETE FROM calendar_booking_reminders
+      WHERE booking_id = ${result.booking.id}::uuid AND reminder_type = 'confirmation'
+    `;
+    Promise.allSettled([sendBookingConfirmation(result)]).catch(() => {});
+  }
+  return JSON.stringify({
+    success: true,
+    uid: result.booking.uid,
+    location_type: result.booking.location_type,
+    location_value: result.booking.location_value,
+    notified: args.notify === true,
+  });
 };
 
 const executeListBookings = async (args: Record<string, unknown>): Promise<string> => {
@@ -1379,6 +1435,8 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
         booking_id: { type: 'string', description: 'Sinonimo legacy di uid' },
         start: { type: 'string', description: 'Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)' },
         reason: { type: 'string', description: 'Motivo (opzionale)' },
+        ...BOOKING_LOCATION_PROPS,
+        notify: { type: 'boolean', description: 'Invia l\'email di spostamento al partecipante (default true)' },
       },
       required: ['start'],
     },
@@ -1547,19 +1605,37 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
   },
   {
     name: 'reschedule_booking',
-    description: 'Sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante via email.',
+    description: 'Sposta una prenotazione esistente a un nuovo orario (il vecchio slot viene liberato). Notifica il partecipante via email. Il link della videocall scelto per la prenotazione (es. MEGA) viene mantenuto; passa meeting_url per cambiarlo nello stesso passaggio, così l\'email contiene già il link giusto.',
     parameters: {
       type: 'object',
       properties: {
         uid: { type: 'string', description: 'UID pubblico del booking' },
         start: { type: 'string', description: 'Nuovo inizio ISO UTC (es. 2026-04-26T09:00:00Z)' },
         reason: { type: 'string', description: 'Motivo (opzionale, mostrato al partecipante)' },
+        ...BOOKING_LOCATION_PROPS,
+        notify: { type: 'boolean', description: 'Invia l\'email di spostamento al partecipante (default true)' },
       },
       required: ['uid', 'start'],
     },
     riskLevel: 'medium',
     requiresConfirmation: true,
     execute: executeRescheduleBooking,
+  },
+  {
+    name: 'update_booking_location',
+    description: 'Cambia il link della videocall (MEGA, Zoom, Google Meet, Teams...) o il luogo di una prenotazione senza spostarla. Il nuovo link vale anche per email, calendario e riprogrammazioni future. Di default non invia email: notify=true reinvia al partecipante la conferma con il nuovo link.',
+    parameters: {
+      type: 'object',
+      properties: {
+        uid: { type: 'string', description: 'UID pubblico del booking' },
+        ...BOOKING_LOCATION_PROPS,
+        notify: { type: 'boolean', description: 'Reinvia la conferma al partecipante con il nuovo link (default false)' },
+      },
+      required: ['uid'],
+    },
+    riskLevel: 'medium',
+    requiresConfirmation: true,
+    execute: executeUpdateBookingLocation,
   },
   {
     name: 'cancel_booking',

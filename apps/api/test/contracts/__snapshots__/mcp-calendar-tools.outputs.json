@@ -2971,6 +2971,150 @@
         }
       ]
     },
+    "update_booking_location/successo-mega": {
+      "tool": "update_booking_location",
+      "args": {
+        "uid": "<bk:luogo-mega>",
+        "meeting_url": "https://mega.nz/chat/AbCdEfGh#xYz123"
+      },
+      "output": {
+        "success": true,
+        "uid": "<bk:luogo-mega>",
+        "location_type": "custom_url",
+        "location_value": "https://mega.nz/chat/AbCdEfGh#xYz123",
+        "notified": false
+      },
+      "effects": {
+        "booking": {
+          "uid": "<bk:luogo-mega>",
+          "event_type_slug": "<prefix>-consulenza",
+          "status": "confirmed",
+          "source": "public_page",
+          "source_metadata": {
+            "location_override": true
+          },
+          "attendee_name": "Cliente mega",
+          "attendee_email": "<prefix>-luogo-mega@test.invalid",
+          "attendee_phone": null,
+          "attendee_company": null,
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": null,
+          "start_time": "2027-04-08T07:00:00.000Z",
+          "end_time": "2027-04-08T08:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://mega.nz/chat/AbCdEfGh#xYz123",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "rescheduled_from_uid": null
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "id": "<ev:proiezione-luogo-mega>",
+            "summary": "<prefix> Consulenza – Cliente mega",
+            "description": "Cliente: Cliente mega <<prefix>-luogo-mega@test.invalid>\n\nUID prenotazione: <bk:luogo-mega>",
+            "location": "https://mega.nz/chat/AbCdEfGh#xYz123",
+            "url": "https://mega.nz/chat/AbCdEfGh#xYz123",
+            "start_time": "2027-04-08T07:00:00.000Z",
+            "end_time": "2027-04-08T08:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "source_id": "<bk:luogo-mega>",
+            "status": "confirmed"
+          }
+        ]
+      }
+    },
+    "reschedule_booking/riprogrammata-mantiene-mega": {
+      "tool": "reschedule_booking",
+      "args": {
+        "uid": "<bk:luogo-mega>",
+        "start": "2027-04-08T09:00:00.000Z",
+        "notify": false
+      },
+      "output": {
+        "success": true,
+        "uid": "<bk:luogo-mega-nuova>",
+        "previous_uid": "<bk:luogo-mega>",
+        "start_time": "2027-04-08T09:00:00.000Z",
+        "end_time": "2027-04-08T10:00:00.000Z",
+        "location_type": "custom_url",
+        "location_value": "https://mega.nz/chat/AbCdEfGh#xYz123",
+        "notified": false
+      },
+      "effects": {
+        "booking": {
+          "uid": "<bk:luogo-mega-nuova>",
+          "event_type_slug": "<prefix>-consulenza",
+          "status": "confirmed",
+          "source": "public_page",
+          "source_metadata": {
+            "rescheduled_from": "<bk:luogo-mega>",
+            "location_override": true
+          },
+          "attendee_name": "Cliente mega",
+          "attendee_email": "<prefix>-luogo-mega@test.invalid",
+          "attendee_phone": null,
+          "attendee_company": null,
+          "attendee_timezone": "Europe/Rome",
+          "attendee_message": null,
+          "start_time": "2027-04-08T09:00:00.000Z",
+          "end_time": "2027-04-08T10:00:00.000Z",
+          "location_type": "custom_url",
+          "location_value": "https://mega.nz/chat/AbCdEfGh#xYz123",
+          "cancelled_by": null,
+          "cancellation_reason": null,
+          "rescheduled_from_uid": "<bk:luogo-mega>"
+        },
+        "projections": [
+          {
+            "calendar": "bookings",
+            "id": "<id:1>",
+            "summary": "<prefix> Consulenza – Cliente mega",
+            "description": "Cliente: Cliente mega <<prefix>-luogo-mega@test.invalid>\n\nUID prenotazione: <bk:luogo-mega-nuova>",
+            "location": "https://mega.nz/chat/AbCdEfGh#xYz123",
+            "url": "https://mega.nz/chat/AbCdEfGh#xYz123",
+            "start_time": "2027-04-08T09:00:00.000Z",
+            "end_time": "2027-04-08T10:00:00.000Z",
+            "all_day": false,
+            "source": "booking",
+            "source_id": "<bk:luogo-mega-nuova>",
+            "status": "confirmed"
+          }
+        ]
+      }
+    },
+    "update_booking_location/url-non-valido": {
+      "tool": "update_booking_location",
+      "args": {
+        "uid": "<bk:luogo-mega>",
+        "meeting_url": "javascript:alert(1)"
+      },
+      "output": {
+        "error": "meeting_url deve essere un link https valido (es. https://mega.nz/... o https://meet.google.com/...)",
+        "code": "VALIDATION"
+      }
+    },
+    "update_booking_location/senza-luogo": {
+      "tool": "update_booking_location",
+      "args": {
+        "uid": "<bk:luogo-mega>"
+      },
+      "output": {
+        "error": "meeting_url oppure location_type richiesto",
+        "code": "VALIDATION"
+      }
+    },
+    "update_booking_location/inesistente": {
+      "tool": "update_booking_location",
+      "args": {
+        "uid": "<uid:1>",
+        "meeting_url": "https://mega.nz/chat/AbCdEfGh#xYz123"
+      },
+      "output": {
+        "error": "Booking non trovato o non attivo"
+      }
+    },
     "cancel_booking/successo": {
       "tool": "cancel_booking",
       "args": {
