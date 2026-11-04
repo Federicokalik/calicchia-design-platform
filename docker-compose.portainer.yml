@@ -154,6 +154,8 @@ services:
       ANALYTICS_PEPPER: ${ANALYTICS_PEPPER}
       MAXMIND_LICENSE_KEY: ${MAXMIND_LICENSE_KEY}
       BOOKING_TOKEN_SECRET: ${BOOKING_TOKEN_SECRET}
+      # MCP api_request: admin con cui il gateway esegue le route (vuota = primo admin).
+      MCP_ACTING_USER_EMAIL: ${MCP_ACTING_USER_EMAIL:-}
       # Integrazioni opzionali (degradano graceful se vuote)
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
@@ -269,6 +271,9 @@ services:
       API_URL: http://api:3001
       MCP_PUBLIC_URL: ${MCP_PUBLIC_URL:-https://mcp.calicchia.design}
       MCP_ALLOWED_HOSTS: ${MCP_ALLOWED_HOSTS:-mcp.calicchia.design}
+      # HMAC del requestState (OTP via input_required, spec 2026-07-28).
+      # Vuota = chiave effimera di processo (ok con una sola replica).
+      MCP_REQUEST_STATE_SECRET: ${MCP_REQUEST_STATE_SECRET:-}
     depends_on:
       - api
     networks:

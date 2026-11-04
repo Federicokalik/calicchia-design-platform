@@ -501,7 +501,14 @@ test('routes/mcp.ts: GET /tools espone per scope gli stessi tool e schemi dello 
     const res = await api.get('/api/mcp/tools', { auth: { bearer: token } });
     assert.equal(res.status, 200);
     assert.equal(res.json.scope, scope);
-    const listed = res.json.tools.filter((t: { name: string }) => names.has(t.name));
+    // title e annotations (hint MCP derivati) non fanno parte del contratto dello schema.
+    const listed = res.json.tools
+      .filter((t: { name: string }) => names.has(t.name))
+      .map((t: { name: string; description: string; inputSchema: unknown }) => ({
+        name: t.name,
+        description: t.description,
+        inputSchema: t.inputSchema,
+      }));
     const expected = schema.tools
       .filter((t) => t.mcp.scopes.includes(scope))
       .map((t) => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));

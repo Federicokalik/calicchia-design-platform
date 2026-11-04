@@ -109,6 +109,7 @@ import { device } from './routes/device';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
+import { setGatewayApp } from './lib/mcp/api-gateway';
 import { caldavServiceAuth } from './middleware/caldav-service-auth';
 import { whatsappPublic, whatsappAdmin } from './routes/whatsapp';
 import { preferencesPublic } from './routes/preferences-public';
@@ -598,6 +599,11 @@ app.route('/api/mcp', mcp);
 app.use('/api/caldav-backend', caldavServiceAuth);
 app.use('/api/caldav-backend/*', caldavServiceAuth);
 app.route('/api/caldav-backend', caldavBackend);
+
+// Gateway API generico dell'MCP (tool api_catalog / api_request): esegue le
+// route admin in-process. Registrato dopo tutti i mount così app.routes è
+// completo; i prefissi admin sono gli stessi protetti da authMiddleware.
+setGatewayApp(app, protectedPaths);
 
 // 404 handler
 app.notFound((c) => {

@@ -1,9 +1,7 @@
-import { randomUUID } from 'node:crypto';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { URL } from 'node:url';
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import type { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
+import { createMcpHandler, type AuthInfo } from '@modelcontextprotocol/server';
+import { toNodeHandler } from '@modelcontextprotocol/node';
 import { createProxyServer } from './proxy-server.js';
 
 const DEFAULT_PORT = 3002;
@@ -11,28 +9,23 @@ const API_URL = (process.env.API_URL || 'http://localhost:3001').replace(/\/$/, 
 
 type AuthedRequest = IncomingMessage & { auth?: AuthInfo };
 
-type SessionEntry = {
-  transport: StreamableHTTPServerTransport;
-};
-
 function json(res: ServerResponse, status: number, body: unknown) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(body));
 }
 
-function text(res: ServerResponse, status: number, body: string) {
-  res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end(body);
-}
 
 function setCors(res: ServerResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+  // 2026-07-28: standard request headers (SEP-2243) + Mcp-Protocol-Version.
+  // Mcp-Session-Id stays allowed so 2025-era clients that still send it are
+  // not blocked by preflight (stateless serving simply ignores it).
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'Authorization,Content-Type,Mcp-Session-Id,Last-Event-Id,X-MCP-Service-Token'
+    'Authorization,Content-Type,Accept,Mcp-Protocol-Version,Mcp-Method,Mcp-Name,Mcp-Session-Id,X-MCP-Service-Token'
   );
-  res.setHeader('Access-Control-Expose-Headers', 'Mcp-Session-Id');
+  res.setHeader('Access-Control-Expose-Headers', 'Mcp-Protocol-Version');
 }
 
 function allowedHosts(): Set<string> {
@@ -169,7 +162,17 @@ async function forwardApiRequest(req: AuthedRequest, res: ServerResponse, path: 
 
 export async function startHttpServer() {
   const port = Number.parseInt(process.env.PORT || process.env.MCP_PORT || String(DEFAULT_PORT), 10);
-  const sessions = new Map<string, SessionEntry>();
+  // Stateless per-request serving: 2026-07-28 traffic (no initialize, no
+  // Mcp-Session-Id) plus 2025-era traffic through the stateless legacy leg.
+  // createMcpHandler validates neither Host nor Origin: the host allowlist
+  // below runs in front of it.
+  const mcpHandler = createMcpHandler(
+    ({ era }) => createProxyServer({ canRoundTrip: era === 'modern' }),
+    { legacy: 'stateless' }
+  );
+  const nodeHandler = toNodeHandler(mcpHandler, {
+    onerror: (err) => console.error('[caldes-mcp] MCP handler error:', err),
+  });
 
   const server = createServer(async (req: AuthedRequest, res) => {
     setCors(res);
@@ -235,56 +238,10 @@ export async function startHttpServer() {
         return;
       }
 
-      if (req.method === 'POST') {
-        const parsedBody = await readJsonBody(req);
-        const sessionId = req.headers['mcp-session-id'];
-
-        if (typeof sessionId === 'string' && sessions.has(sessionId)) {
-          await sessions.get(sessionId)!.transport.handleRequest(req, res, parsedBody);
-          return;
-        }
-
-        if (!sessionId && isInitializeRequest(parsedBody)) {
-          let transport: StreamableHTTPServerTransport;
-          transport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: () => randomUUID(),
-            onsessioninitialized: (newSessionId) => {
-              sessions.set(newSessionId, { transport });
-            },
-            onsessionclosed: (closedSessionId) => {
-              sessions.delete(closedSessionId);
-            },
-          });
-
-          transport.onclose = () => {
-            const sid = transport.sessionId;
-            if (sid) sessions.delete(sid);
-          };
-
-          const mcpServer = createProxyServer();
-          await mcpServer.connect(transport);
-          await transport.handleRequest(req, res, parsedBody);
-          return;
-        }
-
-        json(res, 400, {
-          code: 'invalid_session',
-          error: 'Sessione MCP mancante o non valida',
-        });
-        return;
-      }
-
-      if (req.method === 'GET' || req.method === 'DELETE') {
-        const sessionId = req.headers['mcp-session-id'];
-        if (typeof sessionId !== 'string' || !sessions.has(sessionId)) {
-          text(res, 400, 'Invalid or missing MCP session ID');
-          return;
-        }
-        await sessions.get(sessionId)!.transport.handleRequest(req, res);
-        return;
-      }
-
-      json(res, 405, { code: 'method_not_allowed', error: 'Metodo non supportato' });
+      // /mcp — every method (POST requests, GET/DELETE answered by the SDK)
+      // goes to the per-request handler; req.auth is forwarded as authInfo.
+      await nodeHandler(req, res);
+      return;
     } catch (err) {
       console.error('[caldes-mcp] HTTP transport error:', err);
       if (!res.headersSent) {
@@ -301,12 +258,9 @@ export async function startHttpServer() {
 
   async function shutdown(signal: string) {
     console.error(`[caldes-mcp] ${signal} ricevuto, chiusura...`);
-    for (const [sessionId, entry] of sessions) {
-      await entry.transport.close().catch((err) => {
-        console.error(`[caldes-mcp] errore chiusura sessione ${sessionId}:`, err);
-      });
-      sessions.delete(sessionId);
-    }
+    await Promise.resolve(mcpHandler.close()).catch((err: unknown) => {
+      console.error('[caldes-mcp] errore chiusura handler MCP:', err);
+    });
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 10_000).unref();
   }

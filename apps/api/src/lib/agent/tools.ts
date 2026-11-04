@@ -23,6 +23,8 @@ export interface ToolDefinition {
   description: string;
   parameters: Record<string, unknown>;
   riskLevel?: 'low' | 'medium' | 'high';
+  /** Display name for MCP clients (tools/list `title`). */
+  title?: string;
   requiresConfirmation?: boolean; // If true, agent must ask user before executing
   confirmLabel?: string; // Human-readable label for the confirmation button (admin AI bar)
   execute: (args: Record<string, unknown>) => Promise<string>;
@@ -41,14 +43,14 @@ export function isSqlSafe(query: string): boolean {
 const callCounts = new Map<string, { count: number; resetAt: number }>();
 const MAX_CALLS_PER_MINUTE = 20;
 
-export function checkRateLimit(channel: string): boolean {
+export function checkRateLimit(channel: string, maxPerMinute: number = MAX_CALLS_PER_MINUTE): boolean {
   const now = Date.now();
   const entry = callCounts.get(channel);
   if (!entry || now > entry.resetAt) {
     callCounts.set(channel, { count: 1, resetAt: now + 60_000 });
     return true;
   }
-  if (entry.count >= MAX_CALLS_PER_MINUTE) return false;
+  if (entry.count >= maxPerMinute) return false;
   entry.count++;
   return true;
 }
