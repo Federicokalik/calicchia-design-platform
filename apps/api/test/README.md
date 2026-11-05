@@ -25,6 +25,7 @@ Da `apps/api`, oppure dalla radice con `pnpm --filter @calicchia/api <script>`:
 | `pnpm test:smoke` | Esegue lo smoke dell'infrastruttura (`test/smoke`). |
 | `pnpm test:contracts` | Esegue i test di contratto (`test/contracts`). |
 | `pnpm test:calendar` | Esegue i casi del calendario (`test/calendar`). |
+| `pnpm test crm` | Clienti (dati fiscali, billing_emails, webhook Stripe), domini (validazione, rinnovo), posta (allegati, bozze, copia in Inviati con SMTP/IMAP finti di `helpers/mail-servers.ts`), proforma (numerazione, PDF, invio, pagamento → fattura), aliquota e bollo nell'XML SDI (`test/crm`). Il PDF reale delle proforma richiede Chrome/Chromium (`helpers/crm.ts` → `findChrome()`), altrimenti quel test viene saltato. |
 | `pnpm test:integration` | Esegue i test di integrazione (`test/integration`): Radicale reale, mock di verify-credentials, inventario. |
 | `pnpm typecheck:test` | Typecheck di `src`, `test` e degli script F0 e F1 (`tsconfig.test.json`). |
 | `pnpm test:contracts:radicale` | I contratti F0 sullo store Radicale (equivale a `CALENDAR_BACKEND=radicale pnpm test:contracts`, è il passo del job calendar-integration in CI) (matrice del design §15): richiede `RADICALE_BIN`; vedi "Matrice CALENDAR_BACKEND". |

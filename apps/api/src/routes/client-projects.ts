@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 
 export const clientProjects = new Hono();
 
@@ -279,15 +280,11 @@ clientProjects.post('/:id/create-invoice', async (c) => {
       return { __error: 'Progetto senza cliente', __status: 422 };
     }
 
-    const [settings] = await txSql`
-      SELECT (value->>'vat_regime') AS regime
-      FROM site_settings
-      WHERE key = 'freelancer.studio'
-      LIMIT 1
-    `;
-    const regime = settings?.regime ?? 'forfettario';
+    // Aliquota dal regime (lib/tax/default-rate.ts): prima l'imposta era 0 ma
+    // tax_rate restava al DEFAULT 22 della colonna, dati che si contraddicevano.
+    const taxRate = await defaultTaxRate();
     const subtotal = body.amount;
-    const tax = regime === 'forfettario' || regime === 'none' ? 0 : Math.round(body.amount * 0.22 * 100) / 100;
+    const tax = Math.round(body.amount * taxRate) / 100;
     const total = subtotal + tax;
     const lineItems = [
       {
@@ -300,7 +297,7 @@ clientProjects.post('/:id/create-invoice', async (c) => {
 
     const [invoice] = await txSql`
       INSERT INTO invoices (
-        customer_id, project_id, subtotal, tax, total, amount_due,
+        customer_id, project_id, subtotal, tax, tax_rate, total, amount_due,
         currency, status, issue_date, due_date, line_items, notes
       )
       VALUES (
@@ -308,6 +305,7 @@ clientProjects.post('/:id/create-invoice', async (c) => {
         ${project.id},
         ${subtotal},
         ${tax},
+        ${taxRate},
         ${total},
         ${total},
         COALESCE(${project.currency}, 'EUR'),

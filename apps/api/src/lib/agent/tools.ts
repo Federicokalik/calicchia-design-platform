@@ -13,10 +13,46 @@
  */
 
 import { fromZonedTime } from 'date-fns-tz';
+import { z, type ZodTypeAny } from 'zod';
 import { sql, jsonb } from '../../db';
 import { logger } from '../logger';
+import { billingEmailsSchema, billingRecipients } from '../customer-recipients';
+import { mergePatch } from '../json-merge-patch';
+import { dropLegacyKeys, fiscalSchemas, resolveFiscalInput, withFiscalInBillingAddress, type FiscalColumn } from '../customers/fiscal';
+import { itErrorMap, RequestValidationError, validationMessage, zodDetails, type ValidationDetail } from '../validation';
+import { ATTACHMENT_FIELD_HINTS, attachmentInputSchema, describeAttachment, MAX_ATTACHMENTS, resolveAttachments } from '../mail/attachments';
+import { addressListSchema, formatAddress, MESSAGE_FIELD_HINTS } from '../mail/message-schema';
 
 const log = logger.child({ scope: 'tools' });
+
+/** Argomenti di un tool non validi: executeTool li restituisce come errore leggibile, senza log di errore. */
+export class ToolInputError extends Error {
+  constructor(message: string, readonly details: ValidationDetail[] = []) {
+    super(message);
+    this.name = 'ToolInputError';
+  }
+}
+
+/**
+ * Valida gli argomenti di un tool. Gli oggetti sono `strict`: un argomento
+ * sconosciuto (es. "allegati" al posto di "attachments") è un errore che lo
+ * nomina, invece di essere ignorato. Uno schema con .refine() non è più uno
+ * ZodObject: va reso `.strict()` PRIMA del refine.
+ */
+export function parseToolArgs<S extends ZodTypeAny>(
+  toolName: string,
+  args: unknown,
+  schema: S,
+  hints: Readonly<Record<string, string>> = {},
+): z.output<S> {
+  const strict = schema instanceof z.ZodObject ? schema.strict() : schema;
+  const result = strict.safeParse(args ?? {}, { errorMap: itErrorMap });
+  if (!result.success) {
+    const details = zodDetails(result.error, hints);
+    throw new ToolInputError(validationMessage(details, `Argomenti non validi per ${toolName}`), details);
+  }
+  return result.data;
+}
 
 export interface ToolDefinition {
   name: string;
@@ -29,6 +65,31 @@ export interface ToolDefinition {
   confirmLabel?: string; // Human-readable label for the confirmation button (admin AI bar)
   execute: (args: Record<string, unknown>) => Promise<string>;
 }
+
+/** Parametro `attachments` dei tool email (stesso schema di POST /api/mail/send). */
+const ATTACHMENTS_PARAM = {
+  type: 'array',
+  maxItems: MAX_ATTACHMENTS,
+  description:
+    'Allegati: max 10 MB ciascuno e 20 MB in totale; tipi pdf, png, jpg, webp, zip, docx, xlsx, txt, csv. ' +
+    'Usa preferibilmente media_id (key di un file della libreria /api/media, caricato per esempio con api_request ' +
+    'multipart su /api/media/upload) oppure url interno (/media/<key> o URL firmato /api/files/...). ' +
+    'Il base64 inline in content costa molti token: solo per file piccoli (< ~50 KB).',
+  items: {
+    type: 'object',
+    properties: {
+      media_id: { type: 'string', description: 'key del file nella libreria media, es. "uploads/1730000000000-ab12cd-proforma.pdf"' },
+      url: { type: 'string', description: 'URL interno: /media/<key> oppure URL firmato /api/files/<categoria>/<nome>?exp=..&sig=..' },
+      filename: { type: 'string', description: 'Nome mostrato al destinatario, es. "Proforma PF 3-2026.pdf" (obbligatorio con content)' },
+      contentType: { type: 'string', description: 'MIME type, facoltativo (ricavato dall\'estensione)' },
+      content: { type: 'string', description: 'Contenuto in base64, solo per file piccoli' },
+      encoding: { type: 'string', enum: ['base64'] },
+    },
+    additionalProperties: false,
+  },
+};
+
+const TOOL_EMAIL_HINTS = { ...ATTACHMENT_FIELD_HINTS, ...MESSAGE_FIELD_HINTS, body: 'body (HTML), html o text' };
 
 // === GUARDRAILS ===
 
@@ -379,15 +440,242 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'get_domains_expiring',
-    description: 'Ottieni i domini in scadenza nei prossimi N giorni',
+    description:
+      'Domini dei clienti in scadenza nei prossimi N giorni (default 30), con costo di rinnovo, auto_renew e ' +
+      'destinatari amministrativi del cliente (billing_emails, altrimenti email). Con include_expired=true ' +
+      'include anche quelli già scaduti. Restituisce count=0 e domains=[] se non ce ne sono.',
     parameters: {
       type: 'object',
-      properties: { days: { type: 'number', description: 'Giorni (default 30)' } },
+      properties: {
+        days: { type: 'integer', minimum: 1, maximum: 3650, description: 'Finestra in giorni da oggi (default 30)' },
+        include_expired: { type: 'boolean', description: 'Includi i domini già scaduti (default false)' },
+      },
+      additionalProperties: false,
     },
     execute: async (args) => {
-      const days = (args.days as number) || 30;
-      const rows = await sql`SELECT domain_name, expiry_date, auto_renew, customer_id FROM domains WHERE expiry_date <= CURRENT_DATE + ${days} * INTERVAL '1 day' AND expiry_date >= CURRENT_DATE ORDER BY expiry_date`;
-      return JSON.stringify({ domains: rows, count: rows.length });
+      const { days, include_expired: includeExpired } = parseToolArgs('get_domains_expiring', args, z.object({
+        // coerce: i client MCP/LLM passano a volte "90" come stringa.
+        days: z.coerce.number().int().min(1).max(3650).default(30),
+        include_expired: z.boolean().default(false),
+      }));
+      // Colonna reale: expiration_date (la query leggeva expiry_date, inesistente:
+      // il tool falliva sempre, anche con la tabella vuota).
+      const lowerBound = includeExpired ? sql`` : sql`AND d.expiration_date >= CURRENT_DATE`;
+      const rows = await sql<Array<{
+        id: string; full_domain: string; domain_name: string; tld: string; expiration_date: string;
+        days_until_expiration: number; auto_renew: boolean | null; status: string | null;
+        renewal_cost: string | null; currency: string | null; registrar: string | null;
+        customer_id: string | null; company_name: string | null; contact_name: string | null;
+        customer_email: string | null; billing_emails: string[] | null;
+      }>>`
+        SELECT d.id, d.full_domain, d.domain_name, d.tld, d.expiration_date::text AS expiration_date,
+               (d.expiration_date - CURRENT_DATE)::int AS days_until_expiration,
+               d.auto_renew, d.status, d.renewal_cost, d.currency, d.registrar,
+               c.id AS customer_id, c.company_name, c.contact_name, c.email AS customer_email, c.billing_emails
+        FROM domains d
+        LEFT JOIN customers c ON c.id = d.customer_id
+        WHERE d.expiration_date <= CURRENT_DATE + ${days}::int
+          ${lowerBound}
+        ORDER BY d.expiration_date ASC, d.full_domain ASC
+      `;
+      const domains = rows.map((r) => ({
+        id: r.id,
+        full_domain: r.full_domain,
+        expiration_date: r.expiration_date,
+        days_until_expiration: r.days_until_expiration,
+        auto_renew: r.auto_renew,
+        status: r.status,
+        renewal_cost: r.renewal_cost === null ? null : Number(r.renewal_cost),
+        currency: r.currency,
+        registrar: r.registrar,
+        customer: r.customer_id
+          ? {
+              id: r.customer_id,
+              name: r.company_name || r.contact_name,
+              email: r.customer_email,
+              billing_emails: r.billing_emails ?? [],
+              recipients: billingRecipients({ email: r.customer_email, billing_emails: r.billing_emails }),
+            }
+          : null,
+      }));
+      return JSON.stringify({ days, include_expired: includeExpired, count: domains.length, domains });
+    },
+  },
+  {
+    name: 'list_proformas',
+    description: 'Elenca le proforma (numero PF n/anno, stato draft/issued/sent/converted/cancelled, cliente, dominio, totale). Filtri: status, customer_id, domain_id, year.',
+    parameters: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['draft', 'issued', 'sent', 'converted', 'cancelled'] },
+        customer_id: { type: 'string' },
+        domain_id: { type: 'string' },
+        year: { type: 'integer' },
+        limit: { type: 'integer', description: 'Default 20, massimo 100' },
+      },
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('list_proformas', args, z.object({
+        status: z.enum(['draft', 'issued', 'sent', 'converted', 'cancelled']).optional(),
+        customer_id: z.string().uuid().optional(),
+        domain_id: z.string().uuid().optional(),
+        year: z.coerce.number().int().min(2000).max(2999).optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+      }));
+      const { listProformas } = await import('../proforma/service');
+      const rows = await listProformas(input);
+      return JSON.stringify({
+        count: rows.length,
+        proformas: rows.map((r) => ({
+          id: r.id, number: r.number, status: r.status, customer: r.customer_name, domain: r.domain_name,
+          total: r.total_cents / 100, issue_date: r.issue_date, due_date: r.due_date, sent_at: r.sent_at,
+          paid_at: r.paid_at, invoice_id: r.converted_invoice_id,
+        })),
+      });
+    },
+  },
+  {
+    name: 'create_domain_renewal_proforma',
+    title: 'Proforma di rinnovo dominio',
+    description:
+      'Crea ed emette la proforma di rinnovo di un dominio (numero PF n/anno, regime forfettario, bollo incluso sopra 77,47 €) e ne genera il PDF. ' +
+      'Con delivery="draft" crea anche la bozza email in Posta con il PDF allegato, indirizzata ai billing_emails del cliente: NON invia. ' +
+      'Per inviare usa send_proforma. Il prezzo di default è renewal_cost del dominio. Quando la proforma viene segnata pagata (mark_proforma_paid) la scadenza del dominio si aggiorna.',
+    riskLevel: 'medium',
+    parameters: {
+      type: 'object',
+      properties: {
+        domain_id: { type: 'string', description: 'UUID del dominio (vedi get_domains_expiring)' },
+        years: { type: 'integer', minimum: 1, maximum: 10, description: 'Anni di rinnovo (default 1)' },
+        unit_price: { type: 'number', description: 'Prezzo per anno in euro (default: renewal_cost del dominio)' },
+        number: { description: 'Numero della proforma solo se indicato espressamente dall\'utente (3 o "3/2026"); altrimenti il prossimo progressivo', anyOf: [{ type: 'integer' }, { type: 'string' }] },
+        due_days: { type: 'integer', description: 'Giorni per il pagamento (default 15)' },
+        delivery: { type: 'string', enum: ['none', 'draft'], description: '"draft" = bozza email in Posta con il PDF (default "none")' },
+        notes: { type: 'string', description: 'Nota stampata sulla proforma' },
+      },
+      required: ['domain_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('create_domain_renewal_proforma', args, z.object({
+        domain_id: z.string().uuid(),
+        years: z.coerce.number().int().min(1).max(10).optional(),
+        unit_price: z.coerce.number().positive().optional(),
+        number: z.union([z.string().trim().min(1), z.number().int().positive()]).optional(),
+        due_days: z.coerce.number().int().min(0).max(365).optional(),
+        delivery: z.enum(['none', 'draft']).default('none'),
+        notes: z.string().max(2000).optional(),
+      }), { price: 'unit_price', renewal_price: 'unit_price' });
+      const { createDomainRenewalDraft, issueProforma, ProformaError } = await import('../proforma/service');
+      const { draftProformaEmail } = await import('../proforma/send');
+      try {
+        const draft = await createDomainRenewalDraft(input.domain_id, { years: input.years, unit_price: input.unit_price, due_days: input.due_days, notes: input.notes });
+        const issued = await issueProforma(draft.id, { number: input.number });
+        const p = issued.proforma;
+        const out: Record<string, unknown> = {
+          proforma_id: p.id, number: p.number, status: p.status, total: p.total_cents / 100,
+          stamp_duty: p.stamp_duty_cents / 100, due_date: p.due_date, recipients: p.customer_snapshot?.recipients ?? [],
+          pdf_ready: Boolean(p.pdf_path),
+        };
+        if (issued.pdf_error) out.pdf_error = issued.pdf_error;
+        if (input.delivery === 'draft' && !issued.pdf_error) {
+          const { draft: mail } = await draftProformaEmail(p.id);
+          out.draft_id = mail.id;
+          out.open_url = `/posta?draft=${mail.id}`;
+          out.message = `Proforma ${p.number} emessa e bozza email creata: apri [la bozza](/posta?draft=${mail.id}) per rivederla e inviarla.`;
+        } else {
+          out.message = `Proforma ${p.number} emessa. Per inviarla al cliente usa send_proforma.`;
+        }
+        return JSON.stringify(out);
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        throw err;
+      }
+    },
+  },
+  {
+    name: 'send_proforma',
+    description: 'Invia la proforma via email con il PDF allegato (lato server, nessun base64) ai billing_emails del cliente o ai destinatari indicati. Copia salvata in Inviati. RICHIEDE CONFERMA UTENTE.',
+    riskLevel: 'high',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        proforma_id: { type: 'string' },
+        to: { description: 'Facoltativo: destinatari al posto dei billing_emails', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        cc: { anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        subject: { type: 'string' },
+        text: { type: 'string', description: 'Testo semplice (default: messaggio standard con importo, scadenza e causale)' },
+        account_id: { type: 'string' },
+      },
+      required: ['proforma_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('send_proforma', args, z.object({
+        proforma_id: z.string().uuid(),
+        to: addressListSchema.optional(),
+        cc: addressListSchema.optional(),
+        subject: z.string().max(998).optional(),
+        text: z.string().max(20_000).optional(),
+        account_id: z.string().uuid().optional(),
+      }));
+      const { sendProforma } = await import('../proforma/send');
+      const { ProformaError } = await import('../proforma/service');
+      const { MailDeliveryError } = await import('../mail/outbound');
+      try {
+        const r = await sendProforma(input.proforma_id, input);
+        return JSON.stringify({ sent: true, number: r.proforma.number, status: r.proforma.status, to: r.to, message_id: r.delivery.messageId, sent_copy: r.delivery.sentCopy });
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        if (err instanceof MailDeliveryError) return JSON.stringify({ error: `Email non inviata: ${err.message}` });
+        throw err;
+      }
+    },
+  },
+  {
+    name: 'mark_proforma_paid',
+    description:
+      'Registra il pagamento di una proforma: crea la fattura in BOZZA (da rivedere prima dell\'SDI; invoice_status "paid" solo se l\'utente lo chiede espressamente), ' +
+      'aggiorna la scadenza dei domini rinnovati e segna la proforma convertita. Idempotente. RICHIEDE CONFERMA UTENTE.',
+    riskLevel: 'high',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        proforma_id: { type: 'string' },
+        paid_at: { type: 'string', description: 'Data del pagamento YYYY-MM-DD (default oggi)' },
+        payment_method: { type: 'string', description: 'Es. "bonifico"' },
+        amount: { type: 'number', description: 'Importo incassato in euro (default totale)' },
+        invoice_status: { type: 'string', enum: ['draft', 'paid'], description: 'Default "draft"' },
+        invoice_number: { type: 'string', description: 'Numero fattura, solo se indicato dall\'utente' },
+      },
+      required: ['proforma_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('mark_proforma_paid', args, z.object({
+        proforma_id: z.string().uuid(),
+        paid_at: z.string().regex(/^\d{4}-\d{2}-\d{2}/, 'data YYYY-MM-DD').optional(),
+        payment_method: z.string().max(100).optional(),
+        amount: z.coerce.number().positive().optional(),
+        invoice_status: z.enum(['draft', 'paid']).default('draft'),
+        invoice_number: z.string().max(50).optional(),
+      }));
+      const { markProformaPaid, ProformaError } = await import('../proforma/service');
+      try {
+        const { proforma_id: id, ...rest } = input;
+        const r = await markProformaPaid(id, rest);
+        return JSON.stringify({
+          number: r.proforma.number, status: r.proforma.status, already_converted: r.already_converted,
+          invoice: { id: r.invoice.id, status: r.invoice.status, invoice_number: r.invoice.invoice_number, total: Number(r.invoice.total) },
+          renewals: r.renewals, warnings: r.warnings,
+        });
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        throw err;
+      }
     },
   },
   {
@@ -464,26 +752,57 @@ export const tools: ToolDefinition[] = [
         phone: { type: 'string' },
         notes: { type: 'string' },
         tags: { type: 'array', items: { type: 'string' } },
+        billing_emails: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Destinatari amministrativi (fatture, rinnovi, solleciti), es. ["amministrazione@azienda.it", "titolare@gmail.com"]. Se vuoto si usa email. Sostituisce l\'elenco intero; [] lo svuota.',
+        },
+        billing_address: {
+          type: 'object',
+          description: 'Indirizzo di fatturazione: street, postal_code, city, province, country.',
+          additionalProperties: true,
+        },
+        vat_number: { type: 'string', description: 'Partita IVA (11 cifre IT, con o senza "IT"; estero con prefisso paese). Stringa vuota = cancella' },
+        fiscal_code: { type: 'string', description: 'Codice fiscale (16 caratteri o 11 cifre). Stringa vuota = cancella' },
+        sdi_code: { type: 'string', description: 'Codice destinatario SDI (7 caratteri). Stringa vuota = cancella' },
+        pec: { type: 'string', description: 'PEC per la fatturazione elettronica. Stringa vuota = cancella' },
       },
       required: ['contact_name', 'email'],
     },
     execute: async (args) => {
       const email = (args.email as string).toLowerCase().trim();
+      const billingEmails = args.billing_emails === undefined ? [] : parseToolArgs('create_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
+      const parsedBilling = parseToolArgs('create_customer', {
+        billing_address: args.billing_address, vat_number: args.vat_number, fiscal_code: args.fiscal_code, sdi_code: args.sdi_code, pec: args.pec,
+      }, z.object({
+        billing_address: z.record(z.unknown()).optional(),
+        vat_number: fiscalSchemas.vat_number.optional(),
+        fiscal_code: fiscalSchemas.fiscal_code.optional(),
+        sdi_code: fiscalSchemas.sdi_code.optional(),
+        pec: fiscalSchemas.pec.optional(),
+      }));
+      // P.IVA & co. nelle colonne (169), anche se passate dentro billing_address.
+      const { addressPatch, fiscal } = resolveFiscalInput(parsedBilling);
+      const billingAddress = addressPatch ?? {};
       const existing = await sql`SELECT id, contact_name FROM customers WHERE email = ${email} AND deleted_at IS NULL LIMIT 1`;
       if (existing.length > 0) {
         return JSON.stringify({ error: 'Cliente con questa email già esistente', existing: existing[0] });
       }
       const [row] = await sql`
-        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags)
+        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags, billing_emails, billing_address,
+                               vat_number, fiscal_code, sdi_code, pec)
         VALUES (
           ${args.contact_name as string},
           ${email},
           ${(args.company_name as string) || null},
           ${(args.phone as string) || null},
           ${(args.notes as string) || null},
-          ${jsonb((args.tags as string[]) || [])}::jsonb
+          ${jsonb((args.tags as string[]) || [])}::jsonb,
+          ${billingEmails}::text[],
+          ${jsonb(billingAddress)}::jsonb,
+          ${fiscal.vat_number ?? null}, ${fiscal.fiscal_code ?? null}, ${fiscal.sdi_code ?? null}, ${fiscal.pec ?? null}
         )
-        RETURNING id, contact_name, company_name, email
+        RETURNING id, contact_name, company_name, email, billing_emails, vat_number, fiscal_code, sdi_code, pec
       `;
       return JSON.stringify({ created: row });
     },
@@ -796,27 +1115,84 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'send_email',
-    description: 'Invia un\'email. RICHIEDE CONFERMA UTENTE.',
+    description:
+      "Invia un'email, anche con allegati (attachments: preferisci media_id). RICHIEDE CONFERMA UTENTE. " +
+      'Se esiste una casella collegata (Posta) parte da lì e la copia finisce in Inviati; altrimenti usa il ' +
+      'trasporto di sistema. Per le comunicazioni amministrative a un cliente usa i suoi billing_emails ' +
+      '(get_domains_expiring / find_customer li restituiscono).',
     riskLevel: 'high',
     requiresConfirmation: true,
     parameters: {
       type: 'object',
       properties: {
-        to: { type: 'string', description: 'Indirizzo email destinatario' },
+        to: {
+          description: 'Destinatari: stringa con indirizzi separati da virgola oppure array',
+          anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+        },
+        cc: { description: 'CC (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        bcc: { description: 'CCN (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
         subject: { type: 'string' },
         body: { type: 'string', description: 'Corpo email in HTML' },
+        text: { type: 'string', description: 'Corpo in testo semplice (in alternativa o in aggiunta a body)' },
+        account_id: { type: 'string', description: 'UUID della casella mittente (default: la prima casella attiva)' },
+        attachments: ATTACHMENTS_PARAM,
       },
-      required: ['to', 'subject', 'body'],
+      required: ['to', 'subject'],
+      additionalProperties: false,
     },
     execute: async (args) => {
-      try {
-        const { sendEmail } = await import('../email');
-        const result = await sendEmail({ to: args.to as string, subject: args.subject as string, html: args.body as string });
-        if (!result.success) return JSON.stringify({ error: `Email non inviata: ${result.error || 'errore sconosciuto'}` });
-        return JSON.stringify({ sent: true });
-      } catch (err) {
-        return JSON.stringify({ error: 'Errore invio email' });
+      const input = parseToolArgs('send_email', args, z.object({
+        to: addressListSchema.refine((l) => l.length > 0, 'almeno un destinatario'),
+        cc: addressListSchema.optional(),
+        bcc: addressListSchema.optional(),
+        subject: z.string().trim().min(1),
+        body: z.string().optional(),
+        text: z.string().optional(),
+        account_id: z.string().uuid().optional(),
+        attachments: z.array(attachmentInputSchema).optional(),
+      }).strict().refine((m) => Boolean(m.body?.trim() || m.text?.trim()), { path: ['body'], message: 'serve body (HTML) o text' }), TOOL_EMAIL_HINTS);
+      const attachments = await resolveAttachments(input.attachments ?? []);
+
+      const { loadOutboundAccount, sendFromAccount, MailDeliveryError } = await import('../mail/outbound');
+      const account = await loadOutboundAccount(null, input.account_id);
+      if (input.account_id && !account) return JSON.stringify({ error: 'Casella email (account_id) non trovata o non attiva' });
+
+      if (account) {
+        try {
+          const result = await sendFromAccount(account, {
+            to: input.to, cc: input.cc, bcc: input.bcc, subject: input.subject,
+            html: input.body, text: input.text, attachments,
+          });
+          return JSON.stringify({
+            sent: true,
+            via: 'mailbox',
+            from: account.email,
+            message_id: result.messageId,
+            accepted: result.accepted,
+            rejected: result.rejected,
+            attachments: attachments.map(describeAttachment),
+            sent_copy: result.sentCopy,
+          });
+        } catch (err) {
+          if (err instanceof MailDeliveryError) return JSON.stringify({ error: `Email non inviata: ${err.message}` });
+          throw err;
+        }
       }
+
+      // Nessuna casella collegata: trasporto di sistema (SMTP/Resend), senza copia in Inviati.
+      if (input.cc?.length || input.bcc?.length) {
+        return JSON.stringify({ error: 'cc e bcc richiedono una casella email collegata (Posta): il trasporto di sistema invia solo a "to"' });
+      }
+      const { sendEmail } = await import('../email');
+      const result = await sendEmail({
+        to: input.to.map(formatAddress),
+        subject: input.subject,
+        html: input.body ?? `<pre style="font-family:inherit;white-space:pre-wrap">${(input.text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre>`,
+        text: input.text,
+        attachments: attachments.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType })),
+      });
+      if (!result.success) return JSON.stringify({ error: `Email non inviata: ${result.error || 'errore sconosciuto'}` });
+      return JSON.stringify({ sent: true, via: result.via ?? 'system', message_id: result.messageId, attachments: attachments.map(describeAttachment) });
     },
   },
   {
@@ -1187,65 +1563,67 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
   },
   {
     name: 'draft_email',
-    description: 'Crea una BOZZA email pronta da rivedere e inviare. NON invia direttamente - crea un link cliccabile che apre la finestra di invio pre-compilata. Usa SEMPRE questo tool quando l\'utente chiede di "scrivere/rispondere/inviare" una email. Se è una risposta, passa reply_to_email_id per mantenere il thread.',
+    description:
+      'Crea una BOZZA email pronta da rivedere e inviare, anche con allegati (attachments: preferisci media_id). ' +
+      'NON invia direttamente: restituisce un link che apre la finestra di invio pre-compilata con gli allegati. ' +
+      'Usa SEMPRE questo tool quando l\'utente chiede di "scrivere/rispondere/inviare" una email. Se è una risposta, ' +
+      'passa reply_to_email_id per mantenere il thread.',
     riskLevel: 'medium',
     parameters: {
       type: 'object',
       properties: {
-        to: { type: 'string', description: 'Destinatario principale (email). Più destinatari separati da virgola.' },
-        cc: { type: 'string', description: 'CC opzionale, virgole.' },
+        to: {
+          description: 'Destinatari: stringa con indirizzi separati da virgola oppure array',
+          anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+        },
+        cc: { description: 'CC opzionale (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
         subject: { type: 'string', description: 'Oggetto dell\'email.' },
         body: { type: 'string', description: 'Corpo del messaggio in testo semplice. Includi saluto e firma.' },
         reply_to_email_id: { type: 'string', description: 'Opzionale: UUID di una email esistente cui si sta rispondendo (per mantenere il thread).' },
+        account_id: { type: 'string', description: 'UUID della casella mittente (default: la prima casella attiva)' },
+        attachments: ATTACHMENTS_PARAM,
       },
       required: ['to', 'subject', 'body'],
+      additionalProperties: false,
     },
     execute: async (args) => {
-      const to = (args.to as string).split(',').map((s) => s.trim()).filter(Boolean);
-      const cc = (args.cc as string | undefined)?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
+      const input = parseToolArgs('draft_email', args, z.object({
+        to: addressListSchema.refine((l) => l.length > 0, 'almeno un destinatario'),
+        cc: addressListSchema.optional(),
+        subject: z.string().trim().min(1),
+        body: z.string(),
+        reply_to_email_id: z.string().uuid().optional(),
+        account_id: z.string().uuid().optional(),
+        attachments: z.array(attachmentInputSchema).optional(),
+      }), TOOL_EMAIL_HINTS);
+      // Allegati validati PRIMA di creare la bozza: un riferimento sbagliato non lascia bozze a metà.
+      const attachments = await resolveAttachments(input.attachments ?? []);
 
-      // Resolve user + active account (single-user assumption)
-      const [acc] = await sql`
-        SELECT id, user_id FROM email_accounts WHERE active = true ORDER BY created_at ASC LIMIT 1
-      `;
+      const { loadOutboundAccount } = await import('../mail/outbound');
+      const { createDraft, resolveReplyTarget } = await import('../mail/drafts');
+      // Single-user: la casella indicata o la prima attiva.
+      const acc = await loadOutboundAccount(null, input.account_id);
       if (!acc) return JSON.stringify({ error: 'Nessun account email configurato. Configura prima la casella in /posta.' });
 
-      // If replying, fetch the target email to thread correctly
-      let inReplyToMsgid: string | null = null;
-      let replyToMessageId: string | null = null;
-      if (args.reply_to_email_id) {
-        const [ref] = await sql`
-          SELECT m.id, m.message_id
-          FROM email_messages m
-          JOIN email_accounts a ON a.id = m.account_id AND a.user_id = ${acc.user_id}
-          WHERE m.id = ${args.reply_to_email_id as string}
-          LIMIT 1
-        `;
-        if (ref) {
-          inReplyToMsgid = (ref.message_id as string | null) || null;
-          replyToMessageId = ref.id as string;
-        }
-      }
-
-      const [draft] = await sql`
-        INSERT INTO email_drafts (
-          user_id, account_id, to_addrs, cc_addrs, subject, body,
-          in_reply_to_msgid, reply_to_message_id, source
-        ) VALUES (
-          ${acc.user_id}, ${acc.id},
-          ${jsonb(to)}::jsonb,
-          ${jsonb(cc)}::jsonb,
-          ${args.subject as string}, ${args.body as string},
-          ${inReplyToMsgid}, ${replyToMessageId}, 'ai'
-        )
-        RETURNING id
-      `;
+      const reply = await resolveReplyTarget(acc.user_id, input.reply_to_email_id);
+      const draft = await createDraft({
+        userId: acc.user_id,
+        accountId: acc.id,
+        to: input.to,
+        cc: input.cc ?? [],
+        subject: input.subject,
+        body: input.body,
+        ...reply,
+        source: 'ai',
+        attachments,
+      });
 
       return JSON.stringify({
         status: 'drafted',
         draft_id: draft.id,
         open_url: `/posta?draft=${draft.id}`,
-        message: `Bozza creata. Apri [questa bozza](/posta?draft=${draft.id}) per revisionare e inviare.`,
+        attachments: attachments.map(describeAttachment),
+        message: `Bozza creata${attachments.length ? ` con ${attachments.length} allegat${attachments.length === 1 ? 'o' : 'i'}` : ''}. Apri [questa bozza](/posta?draft=${draft.id}) per revisionare e inviare.`,
       });
     },
   },
@@ -1295,6 +1673,20 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
         status: { type: 'string', description: 'Stato cliente (es: active, vip, churned, prospect)' },
         notes: { type: 'string' },
         tags: { type: 'array', items: { type: 'string' } },
+        billing_emails: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Destinatari amministrativi (fatture, rinnovi, solleciti), es. ["amministrazione@azienda.it", "titolare@gmail.com"]. Se vuoto si usa email. Sostituisce l\'elenco intero; [] lo svuota.',
+        },
+        billing_address: {
+          type: 'object',
+          description: 'Indirizzo di fatturazione, in merge con quello salvato (chiave a null = rimuovi): street, postal_code, city, province, country.',
+          additionalProperties: true,
+        },
+        vat_number: { type: 'string', description: 'Partita IVA (11 cifre IT, con o senza "IT"; estero con prefisso paese). Stringa vuota = cancella' },
+        fiscal_code: { type: 'string', description: 'Codice fiscale (16 caratteri o 11 cifre). Stringa vuota = cancella' },
+        sdi_code: { type: 'string', description: 'Codice destinatario SDI (7 caratteri). Stringa vuota = cancella' },
+        pec: { type: 'string', description: 'PEC per la fatturazione elettronica. Stringa vuota = cancella' },
       },
     },
     execute: async (args) => {
@@ -1313,13 +1705,41 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       if (args.phone !== undefined) updates.phone = args.phone;
       if (args.status !== undefined) updates.status = args.status;
       if (args.notes !== undefined) updates.notes = args.notes;
-      if (args.tags !== undefined) updates.tags = JSON.stringify(args.tags as string[]);
+      // jsonb(): JSON.stringify produceva uno scalare stringa nella colonna jsonb.
+      if (args.tags !== undefined) updates.tags = jsonb(args.tags as string[]);
+      if (args.billing_emails !== undefined) {
+        updates.billing_emails = parseToolArgs('update_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
+      }
+      const parsedBilling = parseToolArgs('update_customer', {
+        billing_address: args.billing_address, vat_number: args.vat_number, fiscal_code: args.fiscal_code, sdi_code: args.sdi_code, pec: args.pec,
+      }, z.object({
+        billing_address: z.record(z.unknown()).optional(),
+        vat_number: fiscalSchemas.vat_number.optional(),
+        fiscal_code: fiscalSchemas.fiscal_code.optional(),
+        sdi_code: fiscalSchemas.sdi_code.optional(),
+        pec: fiscalSchemas.pec.optional(),
+      }));
+      const { addressPatch, fiscal } = resolveFiscalInput(parsedBilling);
+      Object.assign(updates, fiscal);
+      const fiscalWritten = Object.keys(fiscal) as FiscalColumn[];
       updates.updated_at = new Date().toISOString();
-      if (Object.keys(updates).length === 1) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
+      if (Object.keys(updates).length === 1 && addressPatch === undefined) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
 
-      const [row] = await sql`UPDATE customers SET ${sql(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, status`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
+      const row = await sql.begin(async (tx: any) => {
+        if (addressPatch !== undefined || fiscalWritten.length) {
+          const [current] = await tx`SELECT billing_address FROM customers WHERE id = ${customerId} AND deleted_at IS NULL FOR UPDATE`;
+          if (!current) return null;
+          // Merge (RFC 7396), come PUT /api/customers/:id: le chiavi non passate restano;
+          // i dati fiscali scritti nelle colonne escono dal jsonb.
+          const merged = mergePatch(current.billing_address ?? {}, addressPatch ?? {}) as Record<string, unknown>;
+          updates.billing_address = jsonb(dropLegacyKeys(merged, fiscalWritten));
+        }
+        const [updated] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, billing_emails, billing_address, vat_number, fiscal_code, sdi_code, pec, status`;
+        return updated ?? null;
+      });
       if (!row) return JSON.stringify({ error: 'Aggiornamento fallito' });
-      return JSON.stringify({ updated: row });
+      return JSON.stringify({ updated: withFiscalInBillingAddress(row as Record<string, unknown>) });
     },
   },
   {
@@ -2388,7 +2808,19 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
   try {
     return await tool.execute(args);
   } catch (err) {
+    if (err instanceof ToolInputError) {
+      return JSON.stringify({ error: err.message, code: 'invalid_arguments', details: err.details });
+    }
+    // Validazioni condivise con le route (allegati, riferimenti): stesso messaggio del 400.
+    if (err instanceof RequestValidationError) {
+      return JSON.stringify({ error: err.message, code: 'invalid_arguments', details: err.details });
+    }
     log.error({ err }, `Tool ${name} error`);
-    return JSON.stringify({ error: `Errore esecuzione tool "${name}"` });
+    // Il messaggio reale (e lo SQLSTATE per gli errori del database) arriva al
+    // chiamante: i tool sono usati solo da admin (chat AI, Telegram, MCP con
+    // token) e un testo generico rendeva impossibile capire cosa correggere.
+    const message = err instanceof Error ? err.message : String(err);
+    const code = typeof (err as { code?: unknown })?.code === 'string' ? (err as { code: string }).code : undefined;
+    return JSON.stringify({ error: `Errore esecuzione tool "${name}": ${message}`, ...(code ? { code } : {}) });
   }
 }

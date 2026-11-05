@@ -18,6 +18,12 @@ export interface FatturaPALineItem {
   quantity: number;
   unit_price: number;
   amount: number;
+  /**
+   * 'stamp_duty' = rivalsa dell'imposta di bollo addebitata al cliente:
+   * esclusa dalla base IVA (Natura N1, art. 15 DPR 633/72) e dalla soglia
+   * del bollo. Default 'service' (Natura N2.2, forfettario).
+   */
+  kind?: 'service' | 'stamp_duty';
 }
 
 export interface FatturaPACustomer {
@@ -52,6 +58,12 @@ export interface FatturaPAConfig {
   regime_fiscale?: string;
   rea?: { ufficio: string; nrea: string };
   forfettario_reference?: string;
+  /**
+   * Imposta di bollo sulle operazioni senza IVA (DPR 642/72): sopra la
+   * soglia (77,47 €, strettamente maggiore) il documento riporta DatiBollo
+   * con BolloVirtuale=SI. Default 77,47 / 2,00 (quote.settings).
+   */
+  stamp_duty?: { threshold: number; amount: number };
 }
 
 const DEFAULT_CURRENCY = 'EUR';
@@ -60,6 +72,16 @@ const DEFAULT_REGIME_FISCALE = 'RF19';
 const DEFAULT_FORFETTARIO_REFERENCE =
   "Operazione in franchigia da IVA ai sensi dell'art.1, commi 54-89, L. 190/2014";
 const RIFERIMENTO_NORMATIVO = 'Art.1 commi 54-89 L. 190/2014 - Regime Forfettario';
+const RIFERIMENTO_NORMATIVO_BOLLO = 'Escluso art. 15 DPR 633/72 - Rivalsa imposta di bollo';
+const DEFAULT_STAMP_DUTY = { threshold: 77.47, amount: 2 };
+
+function isStampDuty(item: FatturaPALineItem): boolean {
+  return item.kind === 'stamp_duty';
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
 function escapeXml(s: string): string {
   return s
@@ -173,8 +195,21 @@ function lineItemXml(item: FatturaPALineItem, index: number): string[] {
     tag('PrezzoUnitario', formatAmount(item.unit_price), 8),
     tag('PrezzoTotale', formatAmount(amount), 8),
     tag('AliquotaIVA', '0.00', 8),
-    tag('Natura', 'N2.2', 8),
+    tag('Natura', isStampDuty(item) ? 'N1' : 'N2.2', 8),
     '      </DettaglioLinee>',
+  ];
+}
+
+function riepilogoXml(natura: 'N2.2' | 'N1', amount: number, riferimento: string): string[] {
+  return [
+    '      <DatiRiepilogo>',
+    tag('AliquotaIVA', '0.00', 8),
+    tag('Natura', natura, 8),
+    tag('ImponibileImporto', formatAmount(amount), 8),
+    tag('Imposta', '0.00', 8),
+    tag('EsigibilitaIVA', 'I', 8),
+    tag('RiferimentoNormativo', riferimento, 8),
+    '      </DatiRiepilogo>',
   ];
 }
 
@@ -201,10 +236,15 @@ export function generateFatturaPAXml(
   const forfettarioReference =
     cleanOptional(config.forfettario_reference) ?? DEFAULT_FORFETTARIO_REFERENCE;
   const notes = cleanOptional(invoice.notes);
-  const riepilogoAmount = invoice.line_items.reduce(
-    (total, item) => total + item.quantity * item.unit_price,
-    0,
-  );
+  const lineTotal = (items: FatturaPALineItem[]) => round2(items.reduce((total, item) => total + item.quantity * item.unit_price, 0));
+  const serviceLines = invoice.line_items.filter((item) => !isStampDuty(item));
+  const stampLines = invoice.line_items.filter(isStampDuty);
+  const riepilogoAmount = lineTotal(serviceLines);
+  const stampRivalsaAmount = lineTotal(stampLines);
+  // Bollo virtuale: dovuto quando le operazioni senza IVA superano la soglia
+  // (la rivalsa del bollo non conta). Prima l'XML non riportava mai DatiBollo.
+  const stampDuty = config.stamp_duty ?? DEFAULT_STAMP_DUTY;
+  const bolloDue = riepilogoAmount > stampDuty.threshold;
 
   const lines = [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -287,6 +327,14 @@ export function generateFatturaPAXml(
     tag('Divisa', cleanOptional(invoice.currency) ?? DEFAULT_CURRENCY, 8),
     tag('Data', invoice.issue_date, 8),
     tag('Numero', invoice.invoice_number, 8),
+    ...(bolloDue
+      ? [
+          '        <DatiBollo>',
+          tag('BolloVirtuale', 'SI', 10),
+          tag('ImportoBollo', formatAmount(stampDuty.amount), 10),
+          '        </DatiBollo>',
+        ]
+      : []),
     tag('ImportoTotaleDocumento', formatAmount(invoice.total), 8),
     tag('Causale', forfettarioReference, 8),
     ...optionalTag('Causale', notes, 8),
@@ -296,14 +344,8 @@ export function generateFatturaPAXml(
     '    <DatiBeniServizi>',
     ...invoice.line_items.flatMap(lineItemXml),
     '',
-    '      <DatiRiepilogo>',
-    tag('AliquotaIVA', '0.00', 8),
-    tag('Natura', 'N2.2', 8),
-    tag('ImponibileImporto', formatAmount(riepilogoAmount), 8),
-    tag('Imposta', '0.00', 8),
-    tag('EsigibilitaIVA', 'I', 8),
-    tag('RiferimentoNormativo', RIFERIMENTO_NORMATIVO, 8),
-    '      </DatiRiepilogo>',
+    ...riepilogoXml('N2.2', riepilogoAmount, RIFERIMENTO_NORMATIVO),
+    ...(stampLines.length ? riepilogoXml('N1', stampRivalsaAmount, RIFERIMENTO_NORMATIVO_BOLLO) : []),
     '    </DatiBeniServizi>',
     '  </FatturaElettronicaBody>',
     '</p:FatturaElettronica>',

@@ -1,5 +1,6 @@
 /**
- * Nodemailer SMTP wrapper.
+ * Verifica delle credenziali SMTP di una casella. L'invio vero (MIME con
+ * allegati, copia in Inviati) è in lib/mail/outbound.ts.
  */
 import nodemailer from 'nodemailer';
 import type { EncryptedBlob } from './crypto';
@@ -11,47 +12,6 @@ export interface SmtpCredentials {
   secure: boolean;
   username: string;
   passwordBlob: EncryptedBlob;
-}
-
-export interface SendOptions {
-  from: string;
-  to: string | string[];
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  text?: string;
-  html?: string;
-  inReplyTo?: string;
-  references?: string[];
-  replyTo?: string;
-}
-
-export async function sendMail(creds: SmtpCredentials, opts: SendOptions): Promise<{ messageId: string }> {
-  const password = decryptSecret(creds.passwordBlob);
-  const transporter = nodemailer.createTransport({
-    host: creds.host,
-    port: creds.port,
-    secure: creds.secure,
-    auth: { user: creds.username, pass: password },
-  });
-
-  try {
-    const info = await transporter.sendMail({
-      from: opts.from,
-      to: opts.to,
-      cc: opts.cc,
-      bcc: opts.bcc,
-      subject: opts.subject,
-      text: opts.text,
-      html: opts.html,
-      inReplyTo: opts.inReplyTo,
-      references: opts.references,
-      replyTo: opts.replyTo,
-    });
-    return { messageId: info.messageId };
-  } finally {
-    transporter.close();
-  }
 }
 
 export async function testSmtpConnection(creds: SmtpCredentials): Promise<{ ok: true } | { ok: false; error: string }> {

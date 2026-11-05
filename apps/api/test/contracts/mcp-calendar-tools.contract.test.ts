@@ -172,6 +172,19 @@ function parseOutput(raw: string): ToolOutput {
  * `select` riduce l'output registrato (es. 500 occorrenze → conteggio, prima e
  * ultima); il valore restituito resta l'output completo.
  */
+/**
+ * Parte stabile di un errore lanciato da un tool: executeTool scrive
+ * 'Errore esecuzione tool "<nome>": <messaggio reale>' (più `code` per gli
+ * errori del database). Il messaggio reale dipende dallo store e dal driver,
+ * quindi il contratto congela solo il prefisso, come prima del dettaglio.
+ */
+function stableToolError(output: ToolOutput): unknown {
+  const error = (output as { error?: unknown }).error;
+  if (typeof error !== 'string') return output;
+  const prefix = /^(Errore esecuzione tool "[^"]+")/.exec(error)?.[1];
+  return prefix ? { error: prefix } : output;
+}
+
 async function runTool(
   caseName: string,
   tool: string,
@@ -434,10 +447,12 @@ test('find_free_slots: finestre libere nella settimana, orario personalizzato, d
   await runTool('orario-personalizzato', 'find_free_slots', {
     from: WEEK_FROM, to: WEEK_TO, duration_minutes: 30, working_hours_start: '07:00', working_hours_end: '16:00',
   });
-  // Errore lanciato dalla query (cast di una data non valida): executeTool lo
-  // trasforma nel messaggio generico.
-  const invalid = await runTool('data-non-valida', 'find_free_slots', { from: 'non-una-data', to: WEEK_TO, duration_minutes: 30 });
-  assert.deepEqual(invalid, { error: 'Errore esecuzione tool "find_free_slots"' });
+  // Errore lanciato dalla query (cast di una data non valida): executeTool
+  // restituisce il prefisso stabile "Errore esecuzione tool" seguito dal
+  // messaggio reale. Il testo del messaggio (e l'eventuale SQLSTATE in `code`)
+  // dipende dallo store, quindi nello snapshot si registra solo il prefisso.
+  const invalid = await runTool('data-non-valida', 'find_free_slots', { from: 'non-una-data', to: WEEK_TO, duration_minutes: 30 }, undefined, { select: stableToolError });
+  assert.match(String(invalid.error), /^Errore esecuzione tool "find_free_slots": \S/);
 });
 
 test('list_event_types: pubblici, privati, inattivi e seminati', async () => {
@@ -891,9 +906,10 @@ test('delete_event: singolo, per uid, override, serie, proiezioni, sola lettura 
 
   await runTool('iscrizione-sola-lettura', 'delete_event', { id_or_uid: base.events.webinar.id }, () => eventRows([base.events.webinar.id]));
   await runTool('inesistente', 'delete_event', { id_or_uid: '00000000-0000-4000-8000-000000000000' });
-  // Errore lanciato (parametro undefined nella query): messaggio generico di executeTool.
-  const generic = await runTool('id-mancante', 'delete_event', {});
-  assert.deepEqual(generic, { error: 'Errore esecuzione tool "delete_event"' });
+  // Errore lanciato (parametro undefined nella query): prefisso stabile di
+  // executeTool più il messaggio reale (registrato solo il prefisso).
+  const generic = await runTool('id-mancante', 'delete_event', {}, undefined, { select: stableToolError });
+  assert.match(String(generic.error), /^Errore esecuzione tool "delete_event": \S/);
 });
 
 // ─── Copertura ───────────────────────────────

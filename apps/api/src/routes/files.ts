@@ -20,6 +20,12 @@ const MIME_BY_EXT: Record<string, string> = {
   '.mp4': 'video/mp4',
   '.mp3': 'audio/mpeg',
   '.ogg': 'audio/ogg',
+  // Allegati delle bozze email (categoria 'mail').
+  '.zip': 'application/zip',
+  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  '.txt': 'text/plain; charset=utf-8',
+  '.csv': 'text/csv; charset=utf-8',
 };
 
 function mimeFor(name: string): string {

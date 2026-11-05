@@ -18,6 +18,22 @@ migrazioni numerate (`database/migrations/*.sql`). I file Supabase-only
 Le migrazioni sono **append-only**: non modificare un file già spedito, aggiungine
 uno nuovo con il numero successivo.
 
+## Rollback (`database/migrations/down/`)
+
+Il runner applica solo in avanti. Dalla 167 ogni migrazione ha il suo rollback in
+`database/migrations/down/<nome>.down.sql`: la cartella non viene letta dal
+runner, che considera solo i `.sql` al primo livello di `database/migrations/`.
+Il file di rollback rimuove anche la riga del ledger, così una nuova esecuzione
+del runner riapplica la migrazione. Si esegue a mano, in una sola transazione,
+**dopo** aver rimesso in produzione il codice precedente (che non legge le
+colonne rimosse):
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -1 -f database/migrations/down/167_billing_emails_mail_attachments.down.sql
+```
+
+Il ciclo up → down → up va provato su un database di test prima del rilascio.
+
 ## Migrazioni distruttive — backup obbligatorio (DB-10)
 
 La maggior parte delle migrazioni è additiva, ma alcune sono **distruttive** e

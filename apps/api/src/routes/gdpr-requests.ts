@@ -186,7 +186,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     // Anagrafiche e dati principali: l'export (art. 15/20) li ometteva, cioè
     // proprio i dati che riguardano di più l'interessato.
     customerIds.length
-      ? sql`SELECT id, company_name, contact_name, email, phone, billing_address, notes, tags, status, created_at, updated_at
+      ? sql`SELECT id, company_name, contact_name, email, phone, billing_address, billing_emails, vat_number, fiscal_code, sdi_code, pec, notes, tags, status, created_at, updated_at
             FROM customers WHERE id = ANY(${customerIds as any})`
       : Promise.resolve([] as any[]),
     leadIds.length
@@ -315,6 +315,11 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             email = 'erased-' || id::text || '@deleted.invalid',
             phone = NULL,
             billing_address = '{}'::jsonb,
+            billing_emails = '{}'::text[],
+            vat_number = NULL,
+            fiscal_code = NULL,
+            sdi_code = NULL,
+            pec = NULL,
             notes = NULL,
             tags = '[]'::jsonb,
             portal_access_code_hash = NULL,
@@ -322,6 +327,15 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             updated_at = NOW()
           WHERE id = ANY(${customerIds as any}) RETURNING id`
       : [];
+    // L'interessato può essere un destinatario amministrativo di un ALTRO
+    // cliente (es. il Gmail personale nei billing_emails di un'azienda): il
+    // suo indirizzo esce dall'elenco, il cliente resta.
+    const strippedBillingEmails = await tx`
+      UPDATE customers
+      SET billing_emails = ARRAY(SELECT e FROM unnest(billing_emails) AS e WHERE lower(e) <> ${email}),
+          updated_at = NOW()
+      WHERE EXISTS (SELECT 1 FROM unnest(billing_emails) AS e WHERE lower(e) = ${email})
+      RETURNING id`;
     const anonLeads = leadIds.length
       ? await tx`
           UPDATE leads SET
@@ -348,6 +362,7 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
       anonGeoAudits: anonGeoAudits.length,
       anonCustomers: anonCustomers.length,
       anonLeads: anonLeads.length,
+      strippedBillingEmails: strippedBillingEmails.length,
     };
   });
 
@@ -363,6 +378,7 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
     geo_audits: result.anonGeoAudits,
     customers: result.anonCustomers,
     leads: result.anonLeads,
+    customer_billing_emails: result.strippedBillingEmails,
   };
 
   // Calendario: prenotazioni, eventi, audit, indice, strumento di migrazione e Radicale (design §16.4).
