@@ -501,6 +501,26 @@ function ClienteDetailPage() {
                   Separate da virgola. Se compilato, promemoria domini, fatture e solleciti vanno a questi indirizzi invece che all&apos;email principale.
                 </p>
               </div>
+              {/* Dati fiscali: validati dall'API (cifra di controllo di P.IVA e codice fiscale). */}
+              {([
+                ['vat_number', 'Partita IVA', '12345678903'],
+                ['fiscal_code', 'Codice fiscale', 'RSSMRA80A01H501U'],
+                ['sdi_code', 'Codice SDI', '0000000'],
+                ['pec', 'PEC', 'azienda@pec.it'],
+              ] as const).map(([field, label, placeholder]) => (
+                <div key={field} className="space-y-1.5">
+                  <Label htmlFor={`customer-${field}`}>{label}</Label>
+                  <Input
+                    id={`customer-${field}`}
+                    defaultValue={customer[field] || ''}
+                    placeholder={placeholder}
+                    onBlur={(e) => {
+                      const value = e.target.value.trim();
+                      if (value !== (customer[field] || '')) updateMutation.mutate({ [field]: value || null } as Partial<Customer>);
+                    }}
+                  />
+                </div>
+              ))}
             </div>
             <div className="space-y-1.5">
               <Label>Note generali</Label>

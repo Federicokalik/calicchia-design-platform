@@ -34,9 +34,12 @@ domains.get('/', async (c) => {
     expiringFilter = sql`AND d.expiration_date <= ${futureDate.toISOString().split('T')[0]}`;
   }
 
+  // open_proforma: la proforma di rinnovo aperta (bozza, emessa o inviata), se c'è.
   const rows = await sql`
     SELECT d.*,
-      jsonb_build_object('id', c.id, 'company_name', c.company_name, 'contact_name', c.contact_name, 'email', c.email) AS customers
+      jsonb_build_object('id', c.id, 'company_name', c.company_name, 'contact_name', c.contact_name, 'email', c.email) AS customers,
+      (SELECT jsonb_build_object('id', p.id, 'number', p.number, 'status', p.status, 'total_cents', p.total_cents)
+         FROM proformas p WHERE p.domain_id = d.id AND p.status IN ('draft', 'issued', 'sent') LIMIT 1) AS open_proforma
     FROM domains d
     LEFT JOIN customers c ON c.id = d.customer_id
     WHERE 1=1 ${statusFilter} ${customerFilter} ${registrarFilter} ${searchFilter} ${expiringFilter}

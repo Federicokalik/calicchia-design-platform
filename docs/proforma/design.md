@@ -1,7 +1,16 @@
 # Proforma come documento proprio (Fase 2): design
 
-> Stato: **proposta**. Nessuna riga di questo documento è implementata: va confermata prima di procedere.
-> Prerequisiti già fatti nella Fase 1: allegati email con riferimenti interni (`lib/mail/attachments.ts`), invio da casella con copia in Inviati (`lib/mail/outbound.ts`), `customers.billing_emails` con `billingRecipients()`, validazione dei domini.
+> Stato: **implementato** (migrazioni 168-170, `apps/api/src/lib/proforma/*`, `routes/proformas.ts`, tab Fatturazione → Proforma, test in `apps/api/test/crm/proformas.test.ts`).
+>
+> Decisioni confermate (§12):
+> 1. numero all'emissione, salvo numero indicato a mano (la sequenza avanza a `GREATEST`);
+> 2. formato `PF 3/2026` (senza zeri);
+> 3. la rivalsa del bollo entra nel totale della proforma;
+> 4. al pagamento la fattura nasce **in bozza**; `paid` solo se richiesto espressamente (`invoice_status: "paid"`);
+> 5. `DatiBollo` nell'XML SDI corretto (con la rivalsa come riga Natura N1);
+> 6. `vat_number`, `fiscal_code`, `sdi_code`, `pec` promossi a colonne (migrazione 169).
+>
+> Differenze rispetto alla proposta: stati senza `paid` separato (il pagamento converte subito: `converted`); `POST /api/domains/:id/proforma` accetta solo `delivery: none | draft`, l'invio vero resta `POST /api/proformas/:id/send` (rischio high via MCP); le impostazioni si leggono prima della transazione di emissione (con 10+ emissioni concorrenti il pool si esauriva).
 
 ## 1. Obiettivo
 
@@ -143,7 +152,8 @@ In admin, sulla riga del dominio: azione "Genera proforma rinnovo" e badge "PF 3
   - `years` non è validato;
   - la data è calcolata in JS con `Date` e `toISOString()`: il risultato dipende dal fuso del processo (oggi il container gira in UTC, ma basta un `TZ=Europe/Rome` per spostare la scadenza di un giorno);
   - `domain_renewals.invoice_id` non viene mai valorizzato;
-  - un dominio già scaduto viene rinnovato dalla vecchia scadenza invece che da oggi. La funzione SQL `renew_domain()` della 006 gestiva il caso, ma non è usata.
+  - ~~un dominio già scaduto viene rinnovato dalla vecchia scadenza invece che da oggi~~ — **corretto in implementazione**: rinnovare dalla scadenza precedente è il comportamento dei registrar anche nel periodo di grazia, quindi resta così (la funzione `renew_domain()` della 006, che ripartiva da oggi, non è usata);
+  - dopo un rinnovo `last_alert_milestone` non veniva azzerata: il cron `domain-alerts` non avvisava più per la scadenza successiva. Ora `renewDomain` la azzera.
   
   Il calcolo passa a SQL (`expiration_date + make_interval(years => n)`) dentro la transazione.
 - Il cron `domain-alerts` non invia il promemoria al cliente se il dominio ha una proforma `sent` non pagata: c'è già una richiesta di pagamento in corso. Il digest Telegram la mostra comunque.

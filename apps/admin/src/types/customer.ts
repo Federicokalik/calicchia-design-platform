@@ -9,6 +9,11 @@ export interface Customer {
   billing_address: Record<string, unknown>;
   /** Destinatari delle comunicazioni amministrative (fatture, rinnovi). Vuoto = email. */
   billing_emails: string[];
+  /** Dati fiscali (colonne dalla migrazione 169; anche in billing_address per compatibilità). */
+  vat_number: string | null;
+  fiscal_code: string | null;
+  sdi_code: string | null;
+  pec: string | null;
   notes: string | null;
   tags: string[];
   status: CustomerStatus;
