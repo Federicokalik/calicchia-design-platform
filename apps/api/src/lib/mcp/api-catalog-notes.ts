@@ -33,6 +33,7 @@ export const DOMAIN_NOTES: Readonly<Record<string, string>> = {
   '/api/collaborators-v2': 'Collaboratori (v2): CRUD e invio accesso portale.',
   '/api/portal-admin': 'Gestione portale clienti: messaggi al cliente, report, richiesta materiali, timeline, traduzioni.',
   '/api/websites': 'Siti web gestiti per i clienti.',
+  '/api/proformas': 'Proforma (documento non fiscale, forfettario): bozza {customer_id, lines[{description, quantity, unit_price (euro), kind?, domain_id?, years?}]}, issue (numero PF n/anno, opzionale number), PDF, send (email con PDF allegato ai billing_emails), draft-email, mark-paid (crea la fattura in bozza, invoice_status "paid" solo se richiesto; rinnova i domini collegati), cancel. Bollo 2 € incluso sopra 77,47 €.',
   '/api/domains': 'Domini dei clienti: scadenze, rinnovi, invio promemoria (a billing_emails del cliente se popolato). POST: customer_id, registration_date, expiration_date (YYYY-MM-DD) e auto_renew obbligatori; dominio come full_domain ("crimatek.co.uk") oppure domain_name + tld; prezzo in renewal_cost. Campi sconosciuti → 400.',
   '/api/blog': 'Blog: post (CRUD, traduzioni), generazione AI, SEO, pubblicazione programmata, config.',
   '/api/cms': 'Contenuti del sito: servizi, team, FAQ, glossario, curiosità, città SEO, clienti, approccio.',

@@ -11,6 +11,7 @@
 
 import './env';
 import { randomBytes } from 'node:crypto';
+import { existsSync, readdirSync } from 'node:fs';
 import { jsonb, sql } from '../../src/db';
 import { encryptSecret } from '../../src/lib/mail/crypto';
 import { onBeforeDatabaseClose, onDatabaseReady, testPrefix } from './db';
@@ -183,3 +184,32 @@ export const TEST_BUSINESS_PROFILE = {
   address_province: 'FR',
   address_country: 'IT',
 };
+
+/**
+ * Chrome per Puppeteer (PDF delle proforma): PUPPETEER_EXECUTABLE_PATH se
+ * impostata, altrimenti i percorsi noti (Chromium di Playwright nei container
+ * di sviluppo, Chrome dei runner GitHub). Imposta la variabile e restituisce il
+ * percorso, oppure null se non c'è: i test che hanno bisogno del PDF vero
+ * vengono saltati con il motivo.
+ */
+export function findChrome(): string | null {
+  const candidates = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    ...(() => {
+      try {
+        return readdirSync('/opt/pw-browsers')
+          .filter((d) => d.startsWith('chromium-'))
+          .map((d) => `/opt/pw-browsers/${d}/chrome-linux64/chrome`);
+      } catch {
+        return [];
+      }
+    })(),
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+  ].filter((p): p is string => Boolean(p));
+  const found = candidates.find((p) => existsSync(p)) ?? null;
+  if (found) process.env.PUPPETEER_EXECUTABLE_PATH = found;
+  return found;
+}

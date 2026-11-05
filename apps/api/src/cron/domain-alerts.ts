@@ -26,6 +26,8 @@ interface ExpiringDomain {
   customer_email: string | null;
   billing_emails: string[] | null;
   customer_phone: string | null;
+  /** Numero della proforma di rinnovo inviata e non ancora pagata, se c'è. */
+  open_proforma: string | null;
 }
 
 /**
@@ -53,7 +55,8 @@ export async function runDomainAlerts() {
       c.company_name,
       c.email         AS customer_email,
       c.billing_emails,
-      c.phone         AS customer_phone
+      c.phone         AS customer_phone,
+      (SELECT p.number FROM proformas p WHERE p.domain_id = d.id AND p.status = 'sent' LIMIT 1) AS open_proforma
     FROM domains d
     LEFT JOIN customers c ON c.id = d.customer_id
     WHERE d.expiration_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
@@ -76,6 +79,8 @@ export async function runDomainAlerts() {
       (m) => days <= m && (d.last_alert_milestone === null || d.last_alert_milestone > m),
     );
     if (!milestone) continue;
+    // Proforma di rinnovo già inviata: nessun nuovo avviso al cliente (resta nel digest).
+    if (d.open_proforma) continue;
 
     // Scadenza di un dominio = comunicazione amministrativa: i workflow che
     // scrivono al cliente usano {{customer_email}}, che qui contiene i
@@ -114,7 +119,8 @@ export async function runDomainAlerts() {
         const days = Math.ceil(
           (new Date(d.expiration_date).getTime() - Date.now()) / 86400000,
         );
-        return `${days <= 7 ? '🚨' : '🌐'} ${d.full_domain} — ${days}gg ${d.auto_renew ? '(auto)' : '⚠️ MANUALE'}`;
+        const status = d.open_proforma ? `📄 ${d.open_proforma} inviata` : d.auto_renew ? '(auto)' : '⚠️ MANUALE';
+        return `${days <= 7 ? '🚨' : '🌐'} ${d.full_domain} — ${days}gg ${status}`;
       })
       .join('\n');
     await sendTelegramMessage(

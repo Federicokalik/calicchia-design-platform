@@ -5,6 +5,8 @@ import { logger as honoLogger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { bodyLimit } from 'hono/body-limit';
 import { RequestValidationError } from './lib/validation';
+import { ProformaError } from './lib/proforma/service';
+import { MailDeliveryError } from './lib/mail/outbound';
 import { HTTPException } from 'hono/http-exception';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { mkdirSync } from 'fs';
@@ -28,6 +30,7 @@ import { customers } from './routes/customers';
 import { subscriptions } from './routes/subscriptions';
 import { invoices } from './routes/invoices';
 import { domains } from './routes/domains';
+import { proformas } from './routes/proformas';
 import { media } from './routes/media';
 import { newsletter } from './routes/newsletter';
 import { blog } from './routes/blog';
@@ -462,6 +465,7 @@ const protectedPaths = [
   '/api/expenses',
   '/api/tax',
   '/api/domains',
+  '/api/proformas',
   '/api/media',
   '/api/blog',
   '/api/projects',
@@ -529,6 +533,7 @@ app.route('/api/invoices', invoices);
 app.route('/api/expenses', expenses);
 app.route('/api/tax', tax);
 app.route('/api/domains', domains);
+app.route('/api/proformas', proformas);
 app.route('/api/media', media);
 app.route('/api/blog', blog);
 app.route('/api/projects', projects);
@@ -623,6 +628,13 @@ app.onError((err, c) => {
   // Validazione con dettagli per campo (lib/validation.ts): { error, details }.
   if (err instanceof RequestValidationError) {
     return c.json({ error: err.message, details: err.details }, 400);
+  }
+  // Proforma (stato non valido, numero già usato, dati mancanti) e consegna SMTP.
+  if (err instanceof ProformaError) {
+    return c.json({ error: err.message, ...err.extra }, err.status);
+  }
+  if (err instanceof MailDeliveryError) {
+    return c.json({ error: `Invio fallito: ${err.message}` }, 502);
   }
   // HTTPException from fail() helper — expected errors (4xx)
   if (err instanceof HTTPException) {

@@ -502,6 +502,183 @@ export const tools: ToolDefinition[] = [
     },
   },
   {
+    name: 'list_proformas',
+    description: 'Elenca le proforma (numero PF n/anno, stato draft/issued/sent/converted/cancelled, cliente, dominio, totale). Filtri: status, customer_id, domain_id, year.',
+    parameters: {
+      type: 'object',
+      properties: {
+        status: { type: 'string', enum: ['draft', 'issued', 'sent', 'converted', 'cancelled'] },
+        customer_id: { type: 'string' },
+        domain_id: { type: 'string' },
+        year: { type: 'integer' },
+        limit: { type: 'integer', description: 'Default 20, massimo 100' },
+      },
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('list_proformas', args, z.object({
+        status: z.enum(['draft', 'issued', 'sent', 'converted', 'cancelled']).optional(),
+        customer_id: z.string().uuid().optional(),
+        domain_id: z.string().uuid().optional(),
+        year: z.coerce.number().int().min(2000).max(2999).optional(),
+        limit: z.coerce.number().int().min(1).max(100).default(20),
+      }));
+      const { listProformas } = await import('../proforma/service');
+      const rows = await listProformas(input);
+      return JSON.stringify({
+        count: rows.length,
+        proformas: rows.map((r) => ({
+          id: r.id, number: r.number, status: r.status, customer: r.customer_name, domain: r.domain_name,
+          total: r.total_cents / 100, issue_date: r.issue_date, due_date: r.due_date, sent_at: r.sent_at,
+          paid_at: r.paid_at, invoice_id: r.converted_invoice_id,
+        })),
+      });
+    },
+  },
+  {
+    name: 'create_domain_renewal_proforma',
+    title: 'Proforma di rinnovo dominio',
+    description:
+      'Crea ed emette la proforma di rinnovo di un dominio (numero PF n/anno, regime forfettario, bollo incluso sopra 77,47 €) e ne genera il PDF. ' +
+      'Con delivery="draft" crea anche la bozza email in Posta con il PDF allegato, indirizzata ai billing_emails del cliente: NON invia. ' +
+      'Per inviare usa send_proforma. Il prezzo di default è renewal_cost del dominio. Quando la proforma viene segnata pagata (mark_proforma_paid) la scadenza del dominio si aggiorna.',
+    riskLevel: 'medium',
+    parameters: {
+      type: 'object',
+      properties: {
+        domain_id: { type: 'string', description: 'UUID del dominio (vedi get_domains_expiring)' },
+        years: { type: 'integer', minimum: 1, maximum: 10, description: 'Anni di rinnovo (default 1)' },
+        unit_price: { type: 'number', description: 'Prezzo per anno in euro (default: renewal_cost del dominio)' },
+        number: { description: 'Numero della proforma solo se indicato espressamente dall\'utente (3 o "3/2026"); altrimenti il prossimo progressivo', anyOf: [{ type: 'integer' }, { type: 'string' }] },
+        due_days: { type: 'integer', description: 'Giorni per il pagamento (default 15)' },
+        delivery: { type: 'string', enum: ['none', 'draft'], description: '"draft" = bozza email in Posta con il PDF (default "none")' },
+        notes: { type: 'string', description: 'Nota stampata sulla proforma' },
+      },
+      required: ['domain_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('create_domain_renewal_proforma', args, z.object({
+        domain_id: z.string().uuid(),
+        years: z.coerce.number().int().min(1).max(10).optional(),
+        unit_price: z.coerce.number().positive().optional(),
+        number: z.union([z.string().trim().min(1), z.number().int().positive()]).optional(),
+        due_days: z.coerce.number().int().min(0).max(365).optional(),
+        delivery: z.enum(['none', 'draft']).default('none'),
+        notes: z.string().max(2000).optional(),
+      }), { price: 'unit_price', renewal_price: 'unit_price' });
+      const { createDomainRenewalDraft, issueProforma, ProformaError } = await import('../proforma/service');
+      const { draftProformaEmail } = await import('../proforma/send');
+      try {
+        const draft = await createDomainRenewalDraft(input.domain_id, { years: input.years, unit_price: input.unit_price, due_days: input.due_days, notes: input.notes });
+        const issued = await issueProforma(draft.id, { number: input.number });
+        const p = issued.proforma;
+        const out: Record<string, unknown> = {
+          proforma_id: p.id, number: p.number, status: p.status, total: p.total_cents / 100,
+          stamp_duty: p.stamp_duty_cents / 100, due_date: p.due_date, recipients: p.customer_snapshot?.recipients ?? [],
+          pdf_ready: Boolean(p.pdf_path),
+        };
+        if (issued.pdf_error) out.pdf_error = issued.pdf_error;
+        if (input.delivery === 'draft' && !issued.pdf_error) {
+          const { draft: mail } = await draftProformaEmail(p.id);
+          out.draft_id = mail.id;
+          out.open_url = `/posta?draft=${mail.id}`;
+          out.message = `Proforma ${p.number} emessa e bozza email creata: apri [la bozza](/posta?draft=${mail.id}) per rivederla e inviarla.`;
+        } else {
+          out.message = `Proforma ${p.number} emessa. Per inviarla al cliente usa send_proforma.`;
+        }
+        return JSON.stringify(out);
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        throw err;
+      }
+    },
+  },
+  {
+    name: 'send_proforma',
+    description: 'Invia la proforma via email con il PDF allegato (lato server, nessun base64) ai billing_emails del cliente o ai destinatari indicati. Copia salvata in Inviati. RICHIEDE CONFERMA UTENTE.',
+    riskLevel: 'high',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        proforma_id: { type: 'string' },
+        to: { description: 'Facoltativo: destinatari al posto dei billing_emails', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        cc: { anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        subject: { type: 'string' },
+        text: { type: 'string', description: 'Testo semplice (default: messaggio standard con importo, scadenza e causale)' },
+        account_id: { type: 'string' },
+      },
+      required: ['proforma_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('send_proforma', args, z.object({
+        proforma_id: z.string().uuid(),
+        to: addressListSchema.optional(),
+        cc: addressListSchema.optional(),
+        subject: z.string().max(998).optional(),
+        text: z.string().max(20_000).optional(),
+        account_id: z.string().uuid().optional(),
+      }));
+      const { sendProforma } = await import('../proforma/send');
+      const { ProformaError } = await import('../proforma/service');
+      const { MailDeliveryError } = await import('../mail/outbound');
+      try {
+        const r = await sendProforma(input.proforma_id, input);
+        return JSON.stringify({ sent: true, number: r.proforma.number, status: r.proforma.status, to: r.to, message_id: r.delivery.messageId, sent_copy: r.delivery.sentCopy });
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        if (err instanceof MailDeliveryError) return JSON.stringify({ error: `Email non inviata: ${err.message}` });
+        throw err;
+      }
+    },
+  },
+  {
+    name: 'mark_proforma_paid',
+    description:
+      'Registra il pagamento di una proforma: crea la fattura in BOZZA (da rivedere prima dell\'SDI; invoice_status "paid" solo se l\'utente lo chiede espressamente), ' +
+      'aggiorna la scadenza dei domini rinnovati e segna la proforma convertita. Idempotente. RICHIEDE CONFERMA UTENTE.',
+    riskLevel: 'high',
+    requiresConfirmation: true,
+    parameters: {
+      type: 'object',
+      properties: {
+        proforma_id: { type: 'string' },
+        paid_at: { type: 'string', description: 'Data del pagamento YYYY-MM-DD (default oggi)' },
+        payment_method: { type: 'string', description: 'Es. "bonifico"' },
+        amount: { type: 'number', description: 'Importo incassato in euro (default totale)' },
+        invoice_status: { type: 'string', enum: ['draft', 'paid'], description: 'Default "draft"' },
+        invoice_number: { type: 'string', description: 'Numero fattura, solo se indicato dall\'utente' },
+      },
+      required: ['proforma_id'],
+      additionalProperties: false,
+    },
+    execute: async (args) => {
+      const input = parseToolArgs('mark_proforma_paid', args, z.object({
+        proforma_id: z.string().uuid(),
+        paid_at: z.string().regex(/^\d{4}-\d{2}-\d{2}/, 'data YYYY-MM-DD').optional(),
+        payment_method: z.string().max(100).optional(),
+        amount: z.coerce.number().positive().optional(),
+        invoice_status: z.enum(['draft', 'paid']).default('draft'),
+        invoice_number: z.string().max(50).optional(),
+      }));
+      const { markProformaPaid, ProformaError } = await import('../proforma/service');
+      try {
+        const { proforma_id: id, ...rest } = input;
+        const r = await markProformaPaid(id, rest);
+        return JSON.stringify({
+          number: r.proforma.number, status: r.proforma.status, already_converted: r.already_converted,
+          invoice: { id: r.invoice.id, status: r.invoice.status, invoice_number: r.invoice.invoice_number, total: Number(r.invoice.total) },
+          renewals: r.renewals, warnings: r.warnings,
+        });
+      } catch (err) {
+        if (err instanceof ProformaError) return JSON.stringify({ error: err.message, ...err.extra });
+        throw err;
+      }
+    },
+  },
+  {
     name: 'get_quotes',
     description: 'Ottieni lista preventivi con filtro opzionale per stato',
     parameters: {

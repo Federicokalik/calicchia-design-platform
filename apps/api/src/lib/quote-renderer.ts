@@ -35,7 +35,7 @@ const FONT_FILES: Array<{ file: string; family: string; style: string; range: st
 let cachedFontFaceCss: string | null = null;
 
 /** Inline the Funnel variable fonts as data URIs (cached per process). */
-function getFontFaceCss(): string {
+export function getFontFaceCss(): string {
   if (cachedFontFaceCss !== null) return cachedFontFaceCss;
   const blocks: string[] = [];
   for (const f of FONT_FILES) {

@@ -39,6 +39,10 @@ export const itErrorMap: z.ZodErrorMap = (issue, ctx) => {
     case z.ZodIssueCode.invalid_type:
       if (issue.received === 'undefined') return { message: 'campo obbligatorio mancante' };
       return { message: `tipo non valido: atteso ${label(issue.expected)}, ricevuto ${label(issue.received)}` };
+    case z.ZodIssueCode.invalid_union:
+      // Union (es. numero o stringa) assente: stesso messaggio degli altri obbligatori.
+      if (ctx.data === undefined) return { message: 'campo obbligatorio mancante' };
+      return { message: 'valore non valido' };
     case z.ZodIssueCode.invalid_enum_value:
       return { message: `valore non ammesso "${String(issue.received)}": valori possibili ${issue.options.map(String).join(', ')}` };
     case z.ZodIssueCode.invalid_string:

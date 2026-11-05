@@ -4,6 +4,11 @@ import postgres from 'postgres';
 import { jsonb, sql } from '../db';
 import { checkAndSendReminders } from './domain-cron';
 import { parseDomainInput } from '../lib/domains/parse';
+import { DomainRenewError, renewDomainNow } from '../lib/domains/renew';
+import { addressListSchema } from '../lib/mail/message-schema';
+import { presentDraft } from '../lib/mail/drafts';
+import { draftProformaEmail } from '../lib/proforma/send';
+import { createDomainRenewalDraft, issueProforma, presentProforma } from '../lib/proforma/service';
 import { fieldError, isoDateSchema, parseOr400 } from '../lib/validation';
 
 export const domains = new Hono();
@@ -244,37 +249,101 @@ domains.delete('/:id', async (c) => {
   return c.json({ success: true });
 });
 
+const renewSchema = z
+  .object({
+    years: z.number().int().min(1).max(10).default(1),
+    cost: money,
+    invoice_id: z.string().uuid().optional(),
+    notes: z.string().max(500).optional(),
+  })
+  .partial({ cost: true })
+  .strict();
+
+// POST /api/domains/:id/renew — rinnovo manuale (lib/domains/renew.ts: scadenza
+// in SQL dalla precedente, reset delle milestone degli alert, storico).
 domains.post('/:id/renew', async (c) => {
-  const id = c.req.param('id');
-  const { years = 1, cost } = await c.req.json();
+  const text = await c.req.text();
+  let raw: unknown = {};
+  if (text.trim()) {
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      throw fieldError([], 'body JSON non valido');
+    }
+  }
+  const body = parseOr400(renewSchema, raw, DOMAIN_FIELD_HINTS);
+  try {
+    const result = await renewDomainNow(c.req.param('id'), {
+      years: body.years,
+      cost: body.cost ?? null,
+      invoiceId: body.invoice_id ?? null,
+      notes: body.notes ?? null,
+    });
+    return c.json({
+      domain: result.domain,
+      renewal: { ...result.renewal, new_expiration: result.renewal.expiration_after },
+    });
+  } catch (err) {
+    if (err instanceof DomainRenewError) return c.json({ error: err.message }, err.status);
+    throw err;
+  }
+});
 
-  const [domain] = await sql`SELECT expiration_date, renewal_cost FROM domains WHERE id = ${id}`;
-  if (!domain) return c.json({ error: 'Dominio non trovato' }, 404);
+const domainProformaSchema = z
+  .object({
+    years: z.number().int().min(1).max(10).optional(),
+    unit_price: z.number().positive().optional(),
+    due_days: z.number().int().min(0).max(365).optional(),
+    notes: z.string().max(2000).optional(),
+    /** Numero indicato a mano (3, "3/2026", "PF 3/2026"); senza, il prossimo progressivo. */
+    number: z.union([z.string().trim().min(1), z.number().int().positive()]).optional(),
+    issue_date: isoDateSchema.optional(),
+    /** false = resta in bozza. Default true: numero e PDF subito. */
+    issue: z.boolean().optional(),
+    /** 'draft' = bozza email in Posta con il PDF allegato. L'invio vero è POST /api/proformas/:id/send (OTP via MCP). */
+    delivery: z.enum(['none', 'draft']).optional(),
+    account_id: z.string().uuid().optional(),
+    to: addressListSchema.optional(),
+    cc: addressListSchema.optional(),
+    subject: z.string().max(998).optional(),
+    text: z.string().max(20_000).optional(),
+  })
+  .strict();
 
-  const newExpiration = new Date(domain.expiration_date as string || new Date());
-  newExpiration.setFullYear(newExpiration.getFullYear() + years);
-  const newExpirationStr = newExpiration.toISOString().split('T')[0];
-  const today = new Date().toISOString().split('T')[0];
+// POST /api/domains/:id/proforma — proforma di rinnovo del dominio (riga
+// domain_renewal collegata): al pagamento la scadenza si aggiorna da sola.
+domains.post('/:id/proforma', async (c) => {
+  const text = await c.req.text();
+  let raw: unknown = {};
+  if (text.trim()) {
+    try {
+      raw = JSON.parse(text);
+    } catch {
+      throw fieldError([], 'body JSON non valido');
+    }
+  }
+  const body = parseOr400(domainProformaSchema, raw, { price: 'unit_price', renewal_price: 'unit_price', renewal_cost: 'unit_price', send: 'delivery' });
+  if (body.delivery === 'draft' && body.issue === false) throw fieldError(['delivery'], 'una bozza email richiede la proforma emessa (issue: true)');
 
-  const [updated] = await sql`
-    UPDATE domains SET
-      expiration_date = ${newExpirationStr},
-      last_renewal_date = ${today},
-      status = 'active'
-    WHERE id = ${id} RETURNING *
-  `;
+  const draft = await createDomainRenewalDraft(c.req.param('id'), {
+    years: body.years,
+    unit_price: body.unit_price,
+    due_days: body.due_days,
+    notes: body.notes,
+  });
+  if (body.issue === false) return c.json({ proforma: presentProforma(draft) }, 201);
 
-  await sql`
-    INSERT INTO domain_renewals ${sql({
-      domain_id: id,
-      renewal_date: today,
-      expiration_before: domain.expiration_date,
-      expiration_after: newExpirationStr,
-      cost: cost || domain.renewal_cost,
-    })}
-  `;
-
-  return c.json({ domain: updated, renewal: { new_expiration: newExpirationStr } });
+  const issued = await issueProforma(draft.id, { number: body.number, issue_date: body.issue_date });
+  const response: Record<string, unknown> = { proforma: presentProforma(issued.proforma) };
+  if (issued.pdf_error) response.pdf_error = issued.pdf_error;
+  if (body.delivery === 'draft' && !issued.pdf_error) {
+    const { draft: mailDraft } = await draftProformaEmail(draft.id, {
+      account_id: body.account_id, to: body.to, cc: body.cc, subject: body.subject, text: body.text,
+    });
+    response.draft = presentDraft(mailDraft);
+    response.open_url = `/posta?draft=${mailDraft.id}`;
+  }
+  return c.json(response, 201);
 });
 
 domains.post('/send-reminders', async (c) => {

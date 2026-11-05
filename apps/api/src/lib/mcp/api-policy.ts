@@ -69,6 +69,9 @@ const HIGH_RISK_WRITE_PATTERNS: readonly RegExp[] = [
   /^\/api\/admin\/calendar\/migration(?:\/|$)/,
   // Annullamento di una prenotazione (avvisa il partecipante), come cancel_booking.
   /^\/api\/admin\/calendar\/bookings\/[^/]+\/cancel$/,
+  // Proforma: il pagamento crea la fattura e rinnova i domini; l'annullamento
+  // è definitivo (l'invio è già coperto da /send).
+  /^\/api\/proformas\/[^/]+\/(?:mark-paid|cancel)$/,
 ];
 
 export type PathCheck =

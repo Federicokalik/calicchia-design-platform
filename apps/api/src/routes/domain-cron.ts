@@ -39,11 +39,14 @@ export async function checkAndSendReminders(): Promise<{
   const result = { sent: 0, skipped: 0, errors: [] as string[] };
 
   // billing_emails: destinatari amministrativi del cliente (vuoto = email).
+  // Domini con una proforma di rinnovo già inviata e non pagata: il cliente
+  // ha già la richiesta di pagamento, niente promemoria generico in più.
   const expiringDomains = await sql`
     SELECT ed.*, c.billing_emails
     FROM expiring_domains ed
     JOIN customers c ON c.id = ed.customer_id
     WHERE ed.urgency_level IN ('expired', 'critical', 'warning', 'upcoming')
+      AND NOT EXISTS (SELECT 1 FROM proformas p WHERE p.domain_id = ed.id AND p.status = 'sent')
   ` as ExpiringDomain[];
 
   if (!expiringDomains.length) return result;

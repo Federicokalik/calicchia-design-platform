@@ -25,7 +25,8 @@ const URL_TTL_SEC = (Number(process.env.PRIVATE_URL_TTL_DAYS) || 180) * 24 * 60 
 
 // 'mail': allegati delle bozze email (routes/mail/drafts.ts), snapshot dei
 // file scelti alla creazione della bozza.
-export const PRIVATE_CATEGORIES = ['quotes', 'receipts', 'whatsapp', 'mail'] as const;
+// 'proformas': PDF delle proforma (lib/proforma/service.ts).
+export const PRIVATE_CATEGORIES = ['quotes', 'receipts', 'whatsapp', 'mail', 'proformas'] as const;
 export type PrivateCategory = (typeof PRIVATE_CATEGORIES)[number];
 
 mkdirSync(PRIVATE_DIR, { recursive: true });
