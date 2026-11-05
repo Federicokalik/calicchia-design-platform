@@ -7,11 +7,8 @@ import {
   type FatturaPAInvoice,
   type FatturaPALineItem,
 } from '../lib/sdi/xml';
-import {
-  getDefaultSettingValue,
-  validateSettingValue,
-  type SettingKey,
-} from '../lib/settings-schema';
+import { loadSetting } from '../lib/settings-store';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 import { effectiveFiscal } from '../lib/customers/fiscal';
 
 export const invoices = new Hono();
@@ -73,6 +70,8 @@ invoices.post('/', async (c) => {
   const [invoice] = await sql`
     INSERT INTO invoices ${sql({
       ...rest,
+      // Aliquota dal regime (0 in forfettario) se non indicata: prima il DEFAULT 22 della colonna.
+      tax_rate: rest.tax_rate ?? await defaultTaxRate(),
       status: 'draft',
       amount_due: body.total,
       issue_date: issue_date || new Date().toISOString().split('T')[0],
@@ -150,14 +149,6 @@ function str(value: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
-async function loadSetting<K extends SettingKey>(key: K) {
-  const rows = (await sql`
-    SELECT value FROM site_settings WHERE key = ${key} LIMIT 1
-  `) as Array<{ value: unknown }>;
-  const raw = rows[0]?.value;
-  const parsed = validateSettingValue(key, raw);
-  return parsed.success ? parsed.data : getDefaultSettingValue(key);
-}
 
 /**
  * The admin "Impostazioni → Profilo" form writes flat keys (address_street,
@@ -270,11 +261,16 @@ function buildInvoicePayload(row: AnyRecord): {
       const quantity = Number(item.quantity ?? 1);
       const unitPrice = Number(item.unit_price ?? item.price ?? 0);
       const amount = Number(item.amount ?? quantity * unitPrice);
+      const description = str(item.description) ?? 'Servizio';
+      // Rivalsa del bollo: marcata dalla conversione delle proforma (kind) o
+      // riconosciuta dalla descrizione nelle fatture inserite a mano.
+      const stampDuty = item.kind === 'stamp_duty' || /rivalsa[^\n]*bollo|marca da bollo|imposta di bollo/i.test(description);
       return {
-        description: str(item.description) ?? 'Servizio',
+        description,
         quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
         unit_price: Number.isFinite(unitPrice) ? unitPrice : 0,
         amount: Number.isFinite(amount) ? amount : 0,
+        kind: stampDuty ? 'stamp_duty' as const : 'service' as const,
       };
     });
 
@@ -355,7 +351,14 @@ invoices.get('/:id/sdi-xml', async (c) => {
     );
   }
 
-  const xml = generateFatturaPAXml(invoice.invoice, cessionario.customer, cedente.config);
+  const quoteSettings = await loadSetting('quote.settings') as AnyRecord;
+  const xml = generateFatturaPAXml(invoice.invoice, cessionario.customer, {
+    ...cedente.config,
+    stamp_duty: {
+      threshold: Number(quoteSettings.soglia_bollo ?? 77.47),
+      amount: Number(quoteSettings.importo_bollo ?? 2),
+    },
+  });
 
   const progressivo = invoice.invoice.id
     .replace(/-/g, '')

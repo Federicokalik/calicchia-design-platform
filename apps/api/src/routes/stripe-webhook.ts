@@ -7,6 +7,7 @@ import { maskPII } from '../lib/webhook-sanitize';
 import { captureException } from '../lib/bugsink';
 import { logger } from '../lib/logger';
 import { syncCustomerFromStripe } from '../lib/stripe-customer-sync';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 
 const log = logger.child({ scope: 'stripe-webhook' });
 
@@ -207,6 +208,10 @@ stripeWebhook.post('/', async (c) => {
               invoice_number: invoice.number || `INV-${Date.now()}`,
               status,
               subtotal: (invoice.subtotal || 0) / 100,
+              // Aliquota effettiva di Stripe se c'è imposta, altrimenti quella del regime.
+              tax_rate: invoice.tax && invoice.subtotal
+                ? Math.round((invoice.tax / invoice.subtotal) * 10000) / 100
+                : await defaultTaxRate(),
               total: (invoice.total || 0) / 100,
               amount_paid: (invoice.amount_paid || 0) / 100,
               amount_due: (invoice.amount_due || 0) / 100,

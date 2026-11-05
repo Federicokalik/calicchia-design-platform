@@ -147,3 +147,39 @@ export function fakePdf(size = 2048): Buffer {
   const filler = randomBytes(Math.max(0, size - head.length - tail.length));
   return Buffer.concat([head, filler, tail]);
 }
+
+/**
+ * Imposta alcune righe di site_settings per la durata di `fn` e poi
+ * ripristina lo stato precedente (riga tolta se prima non c'era).
+ */
+export async function withSettings<T>(values: Record<string, unknown>, fn: () => Promise<T>): Promise<T> {
+  const keys = Object.keys(values);
+  const before = await sql<Array<{ key: string; value: unknown }>>`SELECT key, value FROM site_settings WHERE key = ANY(${keys})`;
+  try {
+    for (const [key, value] of Object.entries(values)) {
+      await sql`
+        INSERT INTO site_settings (key, value) VALUES (${key}, ${jsonb(value)})
+        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+      `;
+    }
+    return await fn();
+  } finally {
+    for (const key of keys) {
+      const prev = before.find((r) => r.key === key);
+      if (prev) await sql`UPDATE site_settings SET value = ${jsonb(prev.value)} WHERE key = ${key}`;
+      else await sql`DELETE FROM site_settings WHERE key = ${key}`;
+    }
+  }
+}
+
+/** Profilo del fornitore valido per l'XML SDI (P.IVA e CF di esempio con cifra di controllo valida). */
+export const TEST_BUSINESS_PROFILE = {
+  company_name: 'Studio di test',
+  vat_number: '12345678903',
+  fiscal_code: 'RSSMRA80A01H501U',
+  address_street: 'Via dei Test 1',
+  address_zip: '03023',
+  address_city: 'Ceccano',
+  address_province: 'FR',
+  address_country: 'IT',
+};

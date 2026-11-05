@@ -21,6 +21,7 @@ import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
 import { renderQuoteHtml, injectSignatureIntoCustomHtml } from '../lib/quote-renderer';
 import { generateQuotePdf } from '../lib/quote-pdf';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 import { savePrivateFile, readPrivateFile } from '../lib/private-files';
 import { unbundleArtifactHtml, cleanCustomQuoteHtml } from '../lib/artifact-unbundle';
 import {
@@ -270,7 +271,7 @@ quotesV2.post('/', async (c) => {
   // Calculate totals
   const parsedItems = sanitizeItems(items || []);
   const subtotal = parsedItems.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
-  const rate = tax_rate ?? 22;
+  const rate = tax_rate ?? await defaultTaxRate();
   const taxAmount = subtotal * (rate / 100);
   const total = subtotal + taxAmount;
 
@@ -380,7 +381,7 @@ quotesV2.put('/:id', async (c) => {
   // A signed quote is a binding contract — its content must not change after
   // signature (would desync the "✓ Firmato digitalmente" PDF from what was
   // approved). The editor is reachable by URL even for signed quotes.
-  const [existing] = await sql`SELECT status FROM quotes_v2 WHERE id = ${id}`;
+  const [existing] = await sql`SELECT status, tax_rate FROM quotes_v2 WHERE id = ${id}`;
   if (!existing) return c.json({ error: 'Preventivo non trovato' }, 404);
   if (existing.status === 'signed') {
     return c.json({ error: 'Preventivo già firmato: non modificabile' }, 409);
@@ -394,7 +395,9 @@ quotesV2.put('/:id', async (c) => {
   if (body.items) {
     body.items = sanitizeItems(body.items);
     subtotal = body.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
-    const rate = body.tax_rate ?? 22;
+    // Senza tax_rate nel body vale quella salvata (prima: 22 fisso, mentre la
+    // colonna restava invariata → imposta e aliquota incoerenti).
+    const rate = Number(body.tax_rate ?? existing.tax_rate ?? await defaultTaxRate());
     taxAmount = subtotal * (rate / 100);
     total = subtotal + taxAmount;
   }
@@ -405,10 +408,11 @@ quotesV2.put('/:id', async (c) => {
       title = COALESCE(${body.title || null}, title),
       description = ${body.description !== undefined ? body.description : sql`description`},
       items = COALESCE(${body.items ? jsonb(body.items) : null}, items),
-      subtotal = COALESCE(${subtotal}, subtotal),
-      tax_rate = COALESCE(${body.tax_rate}, tax_rate),
-      tax_amount = COALESCE(${taxAmount}, tax_amount),
-      total = COALESCE(${total}, total),
+      -- ?? null: un parametro undefined (campo assente nel body) faceva fallire la query (UNDEFINED_VALUE → 500).
+      subtotal = COALESCE(${subtotal ?? null}, subtotal),
+      tax_rate = COALESCE(${body.tax_rate ?? null}, tax_rate),
+      tax_amount = COALESCE(${taxAmount ?? null}, tax_amount),
+      total = COALESCE(${total ?? null}, total),
       valid_until = ${body.valid_until !== undefined ? body.valid_until : sql`valid_until`},
       notes = ${body.notes !== undefined ? body.notes : sql`notes`},
       internal_notes = ${body.internal_notes !== undefined ? body.internal_notes : sql`internal_notes`},

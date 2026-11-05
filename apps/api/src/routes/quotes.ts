@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { sql, sqlv } from '../db';
 import { logger } from '../lib/logger';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 
 const log = logger.child({ scope: 'quotes' });
 
@@ -468,20 +469,20 @@ quotes.get('/:id', async (c) => {
   return c.json({ quote: rows[0] });
 });
 
-function computeQuoteTotals(body: Record<string, unknown>) {
+function computeQuoteTotals(body: Record<string, unknown>, fallbackTaxRate: number) {
   const items: Array<{ quantity: number; unit_price: number }> = Array.isArray(body.line_items) ? body.line_items as Array<{ quantity: number; unit_price: number }> : [];
   const subtotal = items.reduce((sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
   const discountAmount = Number(body.discount) || Number(body.discount_amount) || 0;
-  const taxRate = Number(body.tax_rate ?? 22);
+  const taxRate = Number(body.tax_rate ?? fallbackTaxRate);
   const afterDiscount = subtotal - discountAmount;
   const taxAmount = afterDiscount * (taxRate / 100);
   const total = afterDiscount + taxAmount;
-  return { subtotal, discountAmount, taxAmount, total };
+  return { subtotal, discountAmount, taxAmount, total, taxRate };
 }
 
 quotes.post('/', async (c) => {
   const body = await c.req.json() as Record<string, unknown>;
-  const { subtotal, discountAmount, taxAmount, total } = computeQuoteTotals(body);
+  const { subtotal, discountAmount, taxAmount, total, taxRate } = computeQuoteTotals(body, await defaultTaxRate());
   const currency = typeof body.currency === 'string' && body.currency ? body.currency : 'EUR';
 
   const quoteData: Record<string, unknown> = {
@@ -493,7 +494,7 @@ quotes.post('/', async (c) => {
     issue_date: body.issue_date || new Date().toISOString().split('T')[0],
     valid_until: body.valid_until || null,
     discount_amount: discountAmount,
-    tax_rate: body.tax_rate ?? 22,
+    tax_rate: taxRate,
     subtotal,
     tax_amount: taxAmount,
     total,
@@ -550,7 +551,10 @@ quotes.post('/', async (c) => {
 quotes.put('/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json() as Record<string, unknown>;
-  const { subtotal, discountAmount, taxAmount, total } = computeQuoteTotals(body);
+  // Senza tax_rate nel body resta quella salvata (prima veniva riscritta a 22).
+  const [stored] = await sql<Array<{ tax_rate: string | null }>>`SELECT tax_rate FROM quotes WHERE id = ${id}`;
+  const fallbackRate = stored?.tax_rate != null ? Number(stored.tax_rate) : await defaultTaxRate();
+  const { subtotal, discountAmount, taxAmount, total, taxRate } = computeQuoteTotals(body, fallbackRate);
   const currency = typeof body.currency === 'string' && body.currency ? body.currency : 'EUR';
 
   const quoteData: Record<string, unknown> = {
@@ -562,7 +566,7 @@ quotes.put('/:id', async (c) => {
     issue_date: body.issue_date,
     valid_until: body.valid_until || null,
     discount_amount: discountAmount,
-    tax_rate: body.tax_rate ?? 22,
+    tax_rate: taxRate,
     subtotal,
     tax_amount: taxAmount,
     total,
