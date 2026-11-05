@@ -7,6 +7,8 @@ export interface Customer {
   email: string | null;
   phone: string | null;
   billing_address: Record<string, unknown>;
+  /** Destinatari delle comunicazioni amministrative (fatture, rinnovi). Vuoto = email. */
+  billing_emails: string[];
   notes: string | null;
   tags: string[];
   status: CustomerStatus;

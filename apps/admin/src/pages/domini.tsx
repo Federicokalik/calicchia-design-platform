@@ -38,7 +38,8 @@ function urgencyBadge(days: number) {
 
 const EMPTY_FORM = {
   domain_name: '', tld: 'it', registrar: 'aruba', registration_date: '',
-  expiration_date: '', auto_renew: true, customer_id: '', hosting_server: '',
+  // false: i domini rinnovati su proforma non si rinnovano da soli (l'API richiede il campo).
+  expiration_date: '', auto_renew: false, customer_id: '', hosting_server: '',
   ssl_status: 'none', notes: '',
 };
 
@@ -98,7 +99,7 @@ export default function DominiPage() {
       registrar: d.registrar || 'altro',
       registration_date: d.registration_date?.split('T')[0] || '',
       expiration_date: d.expiration_date?.split('T')[0] || d.expiry_date?.split('T')[0] || '',
-      auto_renew: d.auto_renew ?? true,
+      auto_renew: d.auto_renew ?? false,
       customer_id: d.customer_id || '',
       hosting_server: d.hosting_server || '',
       ssl_status: d.ssl_status || 'none',
