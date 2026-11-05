@@ -79,6 +79,22 @@ function errorPayload(code: string, error: string, details?: Record<string, unkn
   return { code, error, ...(details ?? {}) };
 }
 
+/**
+ * Campi diagnostici di un errore di tool da inoltrare al client MCP oltre al
+ * messaggio: lo SQLSTATE (`db_code`) o il codice del tool (`tool_code`, es.
+ * invalid_arguments) e i dettagli per campo. Il `code` del payload resta
+ * 'tool_error' per compatibilità con i client esistenti.
+ */
+function toolErrorExtras(tool: string, parsed: Record<string, unknown>): Record<string, unknown> {
+  const extras: Record<string, unknown> = { tool };
+  if (typeof parsed.code === 'string') {
+    if (/^[0-9A-Z]{5}$/.test(parsed.code)) extras.db_code = parsed.code;
+    else extras.tool_code = parsed.code;
+  }
+  if (Array.isArray(parsed.details) && parsed.details.length) extras.details = parsed.details;
+  return extras;
+}
+
 // ─── Tool MCP-only (non nel registry dell'agente) ─────────────────────────────
 
 const MCP_UNLOCK_TOOL_DEF = {
@@ -280,7 +296,7 @@ mcp.post('/execute', async (c) => {
       {
         type: 'text',
         text: toolError
-          ? JSON.stringify(errorPayload('tool_error', String((parsed as { error: unknown }).error), { tool: name }))
+          ? JSON.stringify(errorPayload('tool_error', String((parsed as { error: unknown }).error), toolErrorExtras(name, parsed as Record<string, unknown>)))
           : typeof parsed === 'string'
             ? parsed
             : JSON.stringify(parsed),

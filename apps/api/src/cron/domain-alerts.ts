@@ -2,6 +2,7 @@ import { sql } from '../db';
 import { sendTelegramMessage, isTelegramConfigured } from '../lib/telegram';
 import { fireEvent, WORKFLOW_EVENTS } from '../lib/workflow/triggers';
 import { logger } from '../lib/logger';
+import { billingRecipients } from '../lib/customer-recipients';
 
 const log = logger.child({ scope: 'domain-alerts' });
 
@@ -23,6 +24,7 @@ interface ExpiringDomain {
   customer_name: string | null;
   company_name: string | null;
   customer_email: string | null;
+  billing_emails: string[] | null;
   customer_phone: string | null;
 }
 
@@ -50,6 +52,7 @@ export async function runDomainAlerts() {
       c.contact_name  AS customer_name,
       c.company_name,
       c.email         AS customer_email,
+      c.billing_emails,
       c.phone         AS customer_phone
     FROM domains d
     LEFT JOIN customers c ON c.id = d.customer_id
@@ -74,6 +77,12 @@ export async function runDomainAlerts() {
     );
     if (!milestone) continue;
 
+    // Scadenza di un dominio = comunicazione amministrativa: i workflow che
+    // scrivono al cliente usano {{customer_email}}, che qui contiene i
+    // destinatari amministrativi (billing_emails se popolato, altrimenti
+    // email) separati da virgola. L'email principale resta in
+    // {{customer_primary_email}}.
+    const recipients = billingRecipients({ email: d.customer_email, billing_emails: d.billing_emails });
     try {
       await fireEvent(WORKFLOW_EVENTS.DOMINIO_SCADENZA, {
         domain_id: d.domain_id,
@@ -85,7 +94,9 @@ export async function runDomainAlerts() {
         customer_id: d.customer_id,
         customer_name: d.customer_name || d.company_name,
         customer_company: d.company_name,
-        customer_email: d.customer_email,
+        customer_email: recipients.join(', ') || null,
+        customer_primary_email: d.customer_email,
+        customer_billing_emails: recipients,
         customer_phone: d.customer_phone,
       });
       await sql`UPDATE domains SET last_alert_milestone = ${milestone} WHERE id = ${d.domain_id}`;

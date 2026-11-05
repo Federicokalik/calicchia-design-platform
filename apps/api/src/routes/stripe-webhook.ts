@@ -6,12 +6,12 @@ import { recordPaymentSuccess, recordRefund } from '../lib/payment-events';
 import { maskPII } from '../lib/webhook-sanitize';
 import { captureException } from '../lib/bugsink';
 import { logger } from '../lib/logger';
+import { syncCustomerFromStripe } from '../lib/stripe-customer-sync';
 
 const log = logger.child({ scope: 'stripe-webhook' });
 
 export const stripeWebhook = new Hono();
 
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
 
 // Audit J-K-09: error responses must not leak which check failed (signature
 // missing vs invalid vs payload malformed) — that information turns the
@@ -24,6 +24,9 @@ const STRIPE_GENERIC_REJECT = { error: 'Invalid request' } as const;
 const STRIPE_GENERIC_FAILURE = { error: 'Internal error' } as const;
 
 stripeWebhook.post('/', async (c) => {
+  // Letto a ogni richiesta (non all'import): una rotazione del secret o un
+  // ambiente impostato dopo il caricamento del modulo valgono subito.
+  const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
   if (!isStripeConfigured() || !STRIPE_WEBHOOK_SECRET) {
     log.warn('stripe-webhook hit but STRIPE_WEBHOOK_SECRET / stripe client not configured');
     return c.json(STRIPE_GENERIC_REJECT, 503);
@@ -79,30 +82,13 @@ stripeWebhook.post('/', async (c) => {
     switch (event.type) {
       case 'customer.created':
       case 'customer.updated': {
+        // Prima: upsert che sovrascriveva billing_address (perdendo vat_number,
+        // fiscal_code, sdi_code, pec) e contact_name a ogni salvataggio fatto
+        // dal gestionale. Regole in lib/stripe-customer-sync.ts.
         const customer = event.data.object as Stripe.Customer;
         if (!customer.deleted) {
-          await sql`
-            INSERT INTO customers ${sql({
-              stripe_customer_id: customer.id,
-              email: customer.email || '',
-              contact_name: customer.name || '',
-              company_name: customer.metadata?.company_name || customer.name || '',
-              phone: customer.phone || null,
-              billing_address: customer.address ? {
-                street: customer.address.line1,
-                city: customer.address.city,
-                postal_code: customer.address.postal_code,
-                province: customer.address.state,
-                country: customer.address.country,
-              } : null,
-            })}
-            ON CONFLICT (stripe_customer_id) DO UPDATE SET
-              email = EXCLUDED.email,
-              contact_name = EXCLUDED.contact_name,
-              company_name = EXCLUDED.company_name,
-              phone = EXCLUDED.phone,
-              billing_address = EXCLUDED.billing_address
-          `;
+          const previous = (event.data as { previous_attributes?: Record<string, unknown> }).previous_attributes;
+          await syncCustomerFromStripe(event.type, customer, previous);
         }
         break;
       }

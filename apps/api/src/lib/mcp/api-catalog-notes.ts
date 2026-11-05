@@ -5,7 +5,7 @@
  * risorsa esistente e riusarne i campi.
  */
 export const DOMAIN_NOTES: Readonly<Record<string, string>> = {
-  '/api/customers': 'Anagrafica clienti (CRUD), link di pagamento, accesso portale, sync Stripe.',
+  '/api/customers': 'Anagrafica clienti (CRUD), link di pagamento, accesso portale, sync Stripe. PUT: campi sconosciuti → 400; billing_address è un merge (chiave a null = rimuovi; vat_number, fiscal_code, sdi_code, pec dentro billing_address); billing_emails = destinatari amministrativi (fatture, rinnovi), vuoto = email.',
   '/api/leads': 'Lead commerciali: CRUD, cambio stato pipeline, conversione in cliente.',
   '/api/contacts': 'Richieste dal form contatti del sito: lettura, archivio, promozione a lead.',
   '/api/customer-notes': 'Note interne collegate ai clienti.',
@@ -33,14 +33,14 @@ export const DOMAIN_NOTES: Readonly<Record<string, string>> = {
   '/api/collaborators-v2': 'Collaboratori (v2): CRUD e invio accesso portale.',
   '/api/portal-admin': 'Gestione portale clienti: messaggi al cliente, report, richiesta materiali, timeline, traduzioni.',
   '/api/websites': 'Siti web gestiti per i clienti.',
-  '/api/domains': 'Domini dei clienti: scadenze, rinnovi, invio promemoria.',
+  '/api/domains': 'Domini dei clienti: scadenze, rinnovi, invio promemoria (a billing_emails del cliente se popolato). POST: customer_id, registration_date, expiration_date (YYYY-MM-DD) e auto_renew obbligatori; dominio come full_domain ("crimatek.co.uk") oppure domain_name + tld; prezzo in renewal_cost. Campi sconosciuti → 400.',
   '/api/blog': 'Blog: post (CRUD, traduzioni), generazione AI, SEO, pubblicazione programmata, config.',
   '/api/cms': 'Contenuti del sito: servizi, team, FAQ, glossario, curiosità, città SEO, clienti, approccio.',
   '/api/media': 'Libreria media: upload (multipart, campo file), elenco, eliminazione.',
   '/api/marketing': 'Strumenti marketing vari.',
   '/api/email-marketing': 'Email marketing self-hosted: contatti, liste, segmenti, import, campagne (send/test), senders, form, automazioni.',
   '/api/newsletter': 'Iscritti alla newsletter del sito.',
-  '/api/mail': 'Casella email: account, messaggi, invio (send), sync, collegamenti a clienti, regole, bozze.',
+  '/api/mail': 'Casella email: account, messaggi, invio (send), sync, collegamenti a clienti, regole, bozze. POST /api/mail/send: {account_id, to, cc?, bcc?, subject, text|html, attachments?} con attachments [{media_id, filename?} | {url} | {filename, content (base64)}] (max 10 MB/file, 20 MB totali; preferire media_id dopo upload su /api/media/upload); copia salvata in Inviati. Bozze: POST /api/mail/drafts con lo stesso schema allegati.',
   '/api/inbox': 'Inbox unificata (email, WhatsApp, form).',
   '/api/whatsapp-admin': 'WhatsApp: conversazioni, invio messaggi/media, programmati, modalità AI, approvazione bozze, device.',
   '/api/notifications': 'Notifiche interne dell\'admin.',

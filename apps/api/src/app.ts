@@ -4,6 +4,7 @@ import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { bodyLimit } from 'hono/body-limit';
+import { RequestValidationError } from './lib/validation';
 import { HTTPException } from 'hono/http-exception';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { mkdirSync } from 'fs';
@@ -153,6 +154,10 @@ const LARGE_BODY_PREFIXES = [
   // 20 MB, limite applicato dal router (routes/calendar/migration.ts, contratto
   // f3-modules §10.2).
   '/api/admin/calendar/migration/phase0/archive',
+  // Posta con allegati: fino a 20 MB di file (lib/mail/attachments.ts), che in
+  // JSON base64 diventano ~27 MB.
+  '/api/mail/send',
+  '/api/mail/drafts',
 ];
 app.use('*', async (c, next) => {
   const path = c.req.path.toLowerCase();
@@ -164,6 +169,9 @@ app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
 app.use('/api/whatsapp-admin/conversations/*', bodyLimit({ maxSize: 16 * 1024 * 1024 }));
 app.use('/api/portal/upload', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/portal/upload/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
+app.use('/api/mail/send', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
+app.use('/api/mail/drafts', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
+app.use('/api/mail/drafts/*', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
 // Refuse to start outside development without an explicit allowlist —
@@ -612,6 +620,10 @@ app.notFound((c) => {
 
 // Error handler
 app.onError((err, c) => {
+  // Validazione con dettagli per campo (lib/validation.ts): { error, details }.
+  if (err instanceof RequestValidationError) {
+    return c.json({ error: err.message, details: err.details }, 400);
+  }
   // HTTPException from fail() helper — expected errors (4xx)
   if (err instanceof HTTPException) {
     return c.json({ error: err.message }, err.status);

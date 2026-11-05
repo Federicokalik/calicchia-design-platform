@@ -13,10 +13,45 @@
  */
 
 import { fromZonedTime } from 'date-fns-tz';
+import { z, type ZodTypeAny } from 'zod';
 import { sql, jsonb } from '../../db';
 import { logger } from '../logger';
+import { billingEmailsSchema, billingRecipients } from '../customer-recipients';
+import { mergePatch } from '../json-merge-patch';
+import { itErrorMap, RequestValidationError, validationMessage, zodDetails, type ValidationDetail } from '../validation';
+import { ATTACHMENT_FIELD_HINTS, attachmentInputSchema, describeAttachment, MAX_ATTACHMENTS, resolveAttachments } from '../mail/attachments';
+import { addressListSchema, formatAddress, MESSAGE_FIELD_HINTS } from '../mail/message-schema';
 
 const log = logger.child({ scope: 'tools' });
+
+/** Argomenti di un tool non validi: executeTool li restituisce come errore leggibile, senza log di errore. */
+export class ToolInputError extends Error {
+  constructor(message: string, readonly details: ValidationDetail[] = []) {
+    super(message);
+    this.name = 'ToolInputError';
+  }
+}
+
+/**
+ * Valida gli argomenti di un tool. Gli oggetti sono `strict`: un argomento
+ * sconosciuto (es. "allegati" al posto di "attachments") è un errore che lo
+ * nomina, invece di essere ignorato. Uno schema con .refine() non è più uno
+ * ZodObject: va reso `.strict()` PRIMA del refine.
+ */
+export function parseToolArgs<S extends ZodTypeAny>(
+  toolName: string,
+  args: unknown,
+  schema: S,
+  hints: Readonly<Record<string, string>> = {},
+): z.output<S> {
+  const strict = schema instanceof z.ZodObject ? schema.strict() : schema;
+  const result = strict.safeParse(args ?? {}, { errorMap: itErrorMap });
+  if (!result.success) {
+    const details = zodDetails(result.error, hints);
+    throw new ToolInputError(validationMessage(details, `Argomenti non validi per ${toolName}`), details);
+  }
+  return result.data;
+}
 
 export interface ToolDefinition {
   name: string;
@@ -29,6 +64,31 @@ export interface ToolDefinition {
   confirmLabel?: string; // Human-readable label for the confirmation button (admin AI bar)
   execute: (args: Record<string, unknown>) => Promise<string>;
 }
+
+/** Parametro `attachments` dei tool email (stesso schema di POST /api/mail/send). */
+const ATTACHMENTS_PARAM = {
+  type: 'array',
+  maxItems: MAX_ATTACHMENTS,
+  description:
+    'Allegati: max 10 MB ciascuno e 20 MB in totale; tipi pdf, png, jpg, webp, zip, docx, xlsx, txt, csv. ' +
+    'Usa preferibilmente media_id (key di un file della libreria /api/media, caricato per esempio con api_request ' +
+    'multipart su /api/media/upload) oppure url interno (/media/<key> o URL firmato /api/files/...). ' +
+    'Il base64 inline in content costa molti token: solo per file piccoli (< ~50 KB).',
+  items: {
+    type: 'object',
+    properties: {
+      media_id: { type: 'string', description: 'key del file nella libreria media, es. "uploads/1730000000000-ab12cd-proforma.pdf"' },
+      url: { type: 'string', description: 'URL interno: /media/<key> oppure URL firmato /api/files/<categoria>/<nome>?exp=..&sig=..' },
+      filename: { type: 'string', description: 'Nome mostrato al destinatario, es. "Proforma PF 3-2026.pdf" (obbligatorio con content)' },
+      contentType: { type: 'string', description: 'MIME type, facoltativo (ricavato dall\'estensione)' },
+      content: { type: 'string', description: 'Contenuto in base64, solo per file piccoli' },
+      encoding: { type: 'string', enum: ['base64'] },
+    },
+    additionalProperties: false,
+  },
+};
+
+const TOOL_EMAIL_HINTS = { ...ATTACHMENT_FIELD_HINTS, ...MESSAGE_FIELD_HINTS, body: 'body (HTML), html o text' };
 
 // === GUARDRAILS ===
 
@@ -379,15 +439,65 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'get_domains_expiring',
-    description: 'Ottieni i domini in scadenza nei prossimi N giorni',
+    description:
+      'Domini dei clienti in scadenza nei prossimi N giorni (default 30), con costo di rinnovo, auto_renew e ' +
+      'destinatari amministrativi del cliente (billing_emails, altrimenti email). Con include_expired=true ' +
+      'include anche quelli già scaduti. Restituisce count=0 e domains=[] se non ce ne sono.',
     parameters: {
       type: 'object',
-      properties: { days: { type: 'number', description: 'Giorni (default 30)' } },
+      properties: {
+        days: { type: 'integer', minimum: 1, maximum: 3650, description: 'Finestra in giorni da oggi (default 30)' },
+        include_expired: { type: 'boolean', description: 'Includi i domini già scaduti (default false)' },
+      },
+      additionalProperties: false,
     },
     execute: async (args) => {
-      const days = (args.days as number) || 30;
-      const rows = await sql`SELECT domain_name, expiry_date, auto_renew, customer_id FROM domains WHERE expiry_date <= CURRENT_DATE + ${days} * INTERVAL '1 day' AND expiry_date >= CURRENT_DATE ORDER BY expiry_date`;
-      return JSON.stringify({ domains: rows, count: rows.length });
+      const { days, include_expired: includeExpired } = parseToolArgs('get_domains_expiring', args, z.object({
+        // coerce: i client MCP/LLM passano a volte "90" come stringa.
+        days: z.coerce.number().int().min(1).max(3650).default(30),
+        include_expired: z.boolean().default(false),
+      }));
+      // Colonna reale: expiration_date (la query leggeva expiry_date, inesistente:
+      // il tool falliva sempre, anche con la tabella vuota).
+      const lowerBound = includeExpired ? sql`` : sql`AND d.expiration_date >= CURRENT_DATE`;
+      const rows = await sql<Array<{
+        id: string; full_domain: string; domain_name: string; tld: string; expiration_date: string;
+        days_until_expiration: number; auto_renew: boolean | null; status: string | null;
+        renewal_cost: string | null; currency: string | null; registrar: string | null;
+        customer_id: string | null; company_name: string | null; contact_name: string | null;
+        customer_email: string | null; billing_emails: string[] | null;
+      }>>`
+        SELECT d.id, d.full_domain, d.domain_name, d.tld, d.expiration_date::text AS expiration_date,
+               (d.expiration_date - CURRENT_DATE)::int AS days_until_expiration,
+               d.auto_renew, d.status, d.renewal_cost, d.currency, d.registrar,
+               c.id AS customer_id, c.company_name, c.contact_name, c.email AS customer_email, c.billing_emails
+        FROM domains d
+        LEFT JOIN customers c ON c.id = d.customer_id
+        WHERE d.expiration_date <= CURRENT_DATE + ${days}::int
+          ${lowerBound}
+        ORDER BY d.expiration_date ASC, d.full_domain ASC
+      `;
+      const domains = rows.map((r) => ({
+        id: r.id,
+        full_domain: r.full_domain,
+        expiration_date: r.expiration_date,
+        days_until_expiration: r.days_until_expiration,
+        auto_renew: r.auto_renew,
+        status: r.status,
+        renewal_cost: r.renewal_cost === null ? null : Number(r.renewal_cost),
+        currency: r.currency,
+        registrar: r.registrar,
+        customer: r.customer_id
+          ? {
+              id: r.customer_id,
+              name: r.company_name || r.contact_name,
+              email: r.customer_email,
+              billing_emails: r.billing_emails ?? [],
+              recipients: billingRecipients({ email: r.customer_email, billing_emails: r.billing_emails }),
+            }
+          : null,
+      }));
+      return JSON.stringify({ days, include_expired: includeExpired, count: domains.length, domains });
     },
   },
   {
@@ -464,26 +574,40 @@ export const tools: ToolDefinition[] = [
         phone: { type: 'string' },
         notes: { type: 'string' },
         tags: { type: 'array', items: { type: 'string' } },
+        billing_emails: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Destinatari amministrativi (fatture, rinnovi, solleciti), es. ["amministrazione@azienda.it", "titolare@gmail.com"]. Se vuoto si usa email. Sostituisce l\'elenco intero; [] lo svuota.',
+        },
+        billing_address: {
+          type: 'object',
+          description: 'Dati di fatturazione: street, postal_code, city, province, country, vat_number, fiscal_code, sdi_code, pec.',
+          additionalProperties: true,
+        },
       },
       required: ['contact_name', 'email'],
     },
     execute: async (args) => {
       const email = (args.email as string).toLowerCase().trim();
+      const billingEmails = args.billing_emails === undefined ? [] : parseToolArgs('create_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
+      const billingAddress = args.billing_address === undefined ? {} : parseToolArgs('create_customer', { billing_address: args.billing_address }, z.object({ billing_address: z.record(z.unknown()) })).billing_address;
       const existing = await sql`SELECT id, contact_name FROM customers WHERE email = ${email} AND deleted_at IS NULL LIMIT 1`;
       if (existing.length > 0) {
         return JSON.stringify({ error: 'Cliente con questa email già esistente', existing: existing[0] });
       }
       const [row] = await sql`
-        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags)
+        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags, billing_emails, billing_address)
         VALUES (
           ${args.contact_name as string},
           ${email},
           ${(args.company_name as string) || null},
           ${(args.phone as string) || null},
           ${(args.notes as string) || null},
-          ${jsonb((args.tags as string[]) || [])}::jsonb
+          ${jsonb((args.tags as string[]) || [])}::jsonb,
+          ${billingEmails}::text[],
+          ${jsonb(billingAddress)}::jsonb
         )
-        RETURNING id, contact_name, company_name, email
+        RETURNING id, contact_name, company_name, email, billing_emails
       `;
       return JSON.stringify({ created: row });
     },
@@ -796,27 +920,84 @@ export const tools: ToolDefinition[] = [
   },
   {
     name: 'send_email',
-    description: 'Invia un\'email. RICHIEDE CONFERMA UTENTE.',
+    description:
+      "Invia un'email, anche con allegati (attachments: preferisci media_id). RICHIEDE CONFERMA UTENTE. " +
+      'Se esiste una casella collegata (Posta) parte da lì e la copia finisce in Inviati; altrimenti usa il ' +
+      'trasporto di sistema. Per le comunicazioni amministrative a un cliente usa i suoi billing_emails ' +
+      '(get_domains_expiring / find_customer li restituiscono).',
     riskLevel: 'high',
     requiresConfirmation: true,
     parameters: {
       type: 'object',
       properties: {
-        to: { type: 'string', description: 'Indirizzo email destinatario' },
+        to: {
+          description: 'Destinatari: stringa con indirizzi separati da virgola oppure array',
+          anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+        },
+        cc: { description: 'CC (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
+        bcc: { description: 'CCN (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
         subject: { type: 'string' },
         body: { type: 'string', description: 'Corpo email in HTML' },
+        text: { type: 'string', description: 'Corpo in testo semplice (in alternativa o in aggiunta a body)' },
+        account_id: { type: 'string', description: 'UUID della casella mittente (default: la prima casella attiva)' },
+        attachments: ATTACHMENTS_PARAM,
       },
-      required: ['to', 'subject', 'body'],
+      required: ['to', 'subject'],
+      additionalProperties: false,
     },
     execute: async (args) => {
-      try {
-        const { sendEmail } = await import('../email');
-        const result = await sendEmail({ to: args.to as string, subject: args.subject as string, html: args.body as string });
-        if (!result.success) return JSON.stringify({ error: `Email non inviata: ${result.error || 'errore sconosciuto'}` });
-        return JSON.stringify({ sent: true });
-      } catch (err) {
-        return JSON.stringify({ error: 'Errore invio email' });
+      const input = parseToolArgs('send_email', args, z.object({
+        to: addressListSchema.refine((l) => l.length > 0, 'almeno un destinatario'),
+        cc: addressListSchema.optional(),
+        bcc: addressListSchema.optional(),
+        subject: z.string().trim().min(1),
+        body: z.string().optional(),
+        text: z.string().optional(),
+        account_id: z.string().uuid().optional(),
+        attachments: z.array(attachmentInputSchema).optional(),
+      }).strict().refine((m) => Boolean(m.body?.trim() || m.text?.trim()), { path: ['body'], message: 'serve body (HTML) o text' }), TOOL_EMAIL_HINTS);
+      const attachments = await resolveAttachments(input.attachments ?? []);
+
+      const { loadOutboundAccount, sendFromAccount, MailDeliveryError } = await import('../mail/outbound');
+      const account = await loadOutboundAccount(null, input.account_id);
+      if (input.account_id && !account) return JSON.stringify({ error: 'Casella email (account_id) non trovata o non attiva' });
+
+      if (account) {
+        try {
+          const result = await sendFromAccount(account, {
+            to: input.to, cc: input.cc, bcc: input.bcc, subject: input.subject,
+            html: input.body, text: input.text, attachments,
+          });
+          return JSON.stringify({
+            sent: true,
+            via: 'mailbox',
+            from: account.email,
+            message_id: result.messageId,
+            accepted: result.accepted,
+            rejected: result.rejected,
+            attachments: attachments.map(describeAttachment),
+            sent_copy: result.sentCopy,
+          });
+        } catch (err) {
+          if (err instanceof MailDeliveryError) return JSON.stringify({ error: `Email non inviata: ${err.message}` });
+          throw err;
+        }
       }
+
+      // Nessuna casella collegata: trasporto di sistema (SMTP/Resend), senza copia in Inviati.
+      if (input.cc?.length || input.bcc?.length) {
+        return JSON.stringify({ error: 'cc e bcc richiedono una casella email collegata (Posta): il trasporto di sistema invia solo a "to"' });
+      }
+      const { sendEmail } = await import('../email');
+      const result = await sendEmail({
+        to: input.to.map(formatAddress),
+        subject: input.subject,
+        html: input.body ?? `<pre style="font-family:inherit;white-space:pre-wrap">${(input.text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')}</pre>`,
+        text: input.text,
+        attachments: attachments.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType })),
+      });
+      if (!result.success) return JSON.stringify({ error: `Email non inviata: ${result.error || 'errore sconosciuto'}` });
+      return JSON.stringify({ sent: true, via: result.via ?? 'system', message_id: result.messageId, attachments: attachments.map(describeAttachment) });
     },
   },
   {
@@ -1187,65 +1368,67 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
   },
   {
     name: 'draft_email',
-    description: 'Crea una BOZZA email pronta da rivedere e inviare. NON invia direttamente - crea un link cliccabile che apre la finestra di invio pre-compilata. Usa SEMPRE questo tool quando l\'utente chiede di "scrivere/rispondere/inviare" una email. Se è una risposta, passa reply_to_email_id per mantenere il thread.',
+    description:
+      'Crea una BOZZA email pronta da rivedere e inviare, anche con allegati (attachments: preferisci media_id). ' +
+      'NON invia direttamente: restituisce un link che apre la finestra di invio pre-compilata con gli allegati. ' +
+      'Usa SEMPRE questo tool quando l\'utente chiede di "scrivere/rispondere/inviare" una email. Se è una risposta, ' +
+      'passa reply_to_email_id per mantenere il thread.',
     riskLevel: 'medium',
     parameters: {
       type: 'object',
       properties: {
-        to: { type: 'string', description: 'Destinatario principale (email). Più destinatari separati da virgola.' },
-        cc: { type: 'string', description: 'CC opzionale, virgole.' },
+        to: {
+          description: 'Destinatari: stringa con indirizzi separati da virgola oppure array',
+          anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+        },
+        cc: { description: 'CC opzionale (stringa o array)', anyOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }] },
         subject: { type: 'string', description: 'Oggetto dell\'email.' },
         body: { type: 'string', description: 'Corpo del messaggio in testo semplice. Includi saluto e firma.' },
         reply_to_email_id: { type: 'string', description: 'Opzionale: UUID di una email esistente cui si sta rispondendo (per mantenere il thread).' },
+        account_id: { type: 'string', description: 'UUID della casella mittente (default: la prima casella attiva)' },
+        attachments: ATTACHMENTS_PARAM,
       },
       required: ['to', 'subject', 'body'],
+      additionalProperties: false,
     },
     execute: async (args) => {
-      const to = (args.to as string).split(',').map((s) => s.trim()).filter(Boolean);
-      const cc = (args.cc as string | undefined)?.split(',').map((s) => s.trim()).filter(Boolean) ?? [];
+      const input = parseToolArgs('draft_email', args, z.object({
+        to: addressListSchema.refine((l) => l.length > 0, 'almeno un destinatario'),
+        cc: addressListSchema.optional(),
+        subject: z.string().trim().min(1),
+        body: z.string(),
+        reply_to_email_id: z.string().uuid().optional(),
+        account_id: z.string().uuid().optional(),
+        attachments: z.array(attachmentInputSchema).optional(),
+      }), TOOL_EMAIL_HINTS);
+      // Allegati validati PRIMA di creare la bozza: un riferimento sbagliato non lascia bozze a metà.
+      const attachments = await resolveAttachments(input.attachments ?? []);
 
-      // Resolve user + active account (single-user assumption)
-      const [acc] = await sql`
-        SELECT id, user_id FROM email_accounts WHERE active = true ORDER BY created_at ASC LIMIT 1
-      `;
+      const { loadOutboundAccount } = await import('../mail/outbound');
+      const { createDraft, resolveReplyTarget } = await import('../mail/drafts');
+      // Single-user: la casella indicata o la prima attiva.
+      const acc = await loadOutboundAccount(null, input.account_id);
       if (!acc) return JSON.stringify({ error: 'Nessun account email configurato. Configura prima la casella in /posta.' });
 
-      // If replying, fetch the target email to thread correctly
-      let inReplyToMsgid: string | null = null;
-      let replyToMessageId: string | null = null;
-      if (args.reply_to_email_id) {
-        const [ref] = await sql`
-          SELECT m.id, m.message_id
-          FROM email_messages m
-          JOIN email_accounts a ON a.id = m.account_id AND a.user_id = ${acc.user_id}
-          WHERE m.id = ${args.reply_to_email_id as string}
-          LIMIT 1
-        `;
-        if (ref) {
-          inReplyToMsgid = (ref.message_id as string | null) || null;
-          replyToMessageId = ref.id as string;
-        }
-      }
-
-      const [draft] = await sql`
-        INSERT INTO email_drafts (
-          user_id, account_id, to_addrs, cc_addrs, subject, body,
-          in_reply_to_msgid, reply_to_message_id, source
-        ) VALUES (
-          ${acc.user_id}, ${acc.id},
-          ${jsonb(to)}::jsonb,
-          ${jsonb(cc)}::jsonb,
-          ${args.subject as string}, ${args.body as string},
-          ${inReplyToMsgid}, ${replyToMessageId}, 'ai'
-        )
-        RETURNING id
-      `;
+      const reply = await resolveReplyTarget(acc.user_id, input.reply_to_email_id);
+      const draft = await createDraft({
+        userId: acc.user_id,
+        accountId: acc.id,
+        to: input.to,
+        cc: input.cc ?? [],
+        subject: input.subject,
+        body: input.body,
+        ...reply,
+        source: 'ai',
+        attachments,
+      });
 
       return JSON.stringify({
         status: 'drafted',
         draft_id: draft.id,
         open_url: `/posta?draft=${draft.id}`,
-        message: `Bozza creata. Apri [questa bozza](/posta?draft=${draft.id}) per revisionare e inviare.`,
+        attachments: attachments.map(describeAttachment),
+        message: `Bozza creata${attachments.length ? ` con ${attachments.length} allegat${attachments.length === 1 ? 'o' : 'i'}` : ''}. Apri [questa bozza](/posta?draft=${draft.id}) per revisionare e inviare.`,
       });
     },
   },
@@ -1295,6 +1478,16 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
         status: { type: 'string', description: 'Stato cliente (es: active, vip, churned, prospect)' },
         notes: { type: 'string' },
         tags: { type: 'array', items: { type: 'string' } },
+        billing_emails: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Destinatari amministrativi (fatture, rinnovi, solleciti), es. ["amministrazione@azienda.it", "titolare@gmail.com"]. Se vuoto si usa email. Sostituisce l\'elenco intero; [] lo svuota.',
+        },
+        billing_address: {
+          type: 'object',
+          description: 'Merge con i dati salvati (chiave a null = rimuovi):  street, postal_code, city, province, country, vat_number, fiscal_code, sdi_code, pec.',
+          additionalProperties: true,
+        },
       },
     },
     execute: async (args) => {
@@ -1313,11 +1506,28 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       if (args.phone !== undefined) updates.phone = args.phone;
       if (args.status !== undefined) updates.status = args.status;
       if (args.notes !== undefined) updates.notes = args.notes;
-      if (args.tags !== undefined) updates.tags = JSON.stringify(args.tags as string[]);
+      // jsonb(): JSON.stringify produceva uno scalare stringa nella colonna jsonb.
+      if (args.tags !== undefined) updates.tags = jsonb(args.tags as string[]);
+      if (args.billing_emails !== undefined) {
+        updates.billing_emails = parseToolArgs('update_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
+      }
+      const addressPatch = args.billing_address === undefined
+        ? undefined
+        : parseToolArgs('update_customer', { billing_address: args.billing_address }, z.object({ billing_address: z.record(z.unknown()) })).billing_address;
       updates.updated_at = new Date().toISOString();
-      if (Object.keys(updates).length === 1) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
+      if (Object.keys(updates).length === 1 && addressPatch === undefined) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
 
-      const [row] = await sql`UPDATE customers SET ${sql(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, status`;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
+      const row = await sql.begin(async (tx: any) => {
+        if (addressPatch !== undefined) {
+          const [current] = await tx`SELECT billing_address FROM customers WHERE id = ${customerId} AND deleted_at IS NULL FOR UPDATE`;
+          if (!current) return null;
+          // Merge (RFC 7396), come PUT /api/customers/:id: le chiavi non passate restano.
+          updates.billing_address = jsonb(mergePatch(current.billing_address ?? {}, addressPatch));
+        }
+        const [updated] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, billing_emails, billing_address, status`;
+        return updated ?? null;
+      });
       if (!row) return JSON.stringify({ error: 'Aggiornamento fallito' });
       return JSON.stringify({ updated: row });
     },
@@ -2388,7 +2598,19 @@ export async function executeTool(name: string, args: Record<string, unknown>): 
   try {
     return await tool.execute(args);
   } catch (err) {
+    if (err instanceof ToolInputError) {
+      return JSON.stringify({ error: err.message, code: 'invalid_arguments', details: err.details });
+    }
+    // Validazioni condivise con le route (allegati, riferimenti): stesso messaggio del 400.
+    if (err instanceof RequestValidationError) {
+      return JSON.stringify({ error: err.message, code: 'invalid_arguments', details: err.details });
+    }
     log.error({ err }, `Tool ${name} error`);
-    return JSON.stringify({ error: `Errore esecuzione tool "${name}"` });
+    // Il messaggio reale (e lo SQLSTATE per gli errori del database) arriva al
+    // chiamante: i tool sono usati solo da admin (chat AI, Telegram, MCP con
+    // token) e un testo generico rendeva impossibile capire cosa correggere.
+    const message = err instanceof Error ? err.message : String(err);
+    const code = typeof (err as { code?: unknown })?.code === 'string' ? (err as { code: string }).code : undefined;
+    return JSON.stringify({ error: `Errore esecuzione tool "${name}": ${message}`, ...(code ? { code } : {}) });
   }
 }

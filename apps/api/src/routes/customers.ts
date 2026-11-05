@@ -1,8 +1,14 @@
 import { Hono } from 'hono';
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
-import { sql } from '../db';
+import { z } from 'zod';
+import { jsonb, sql } from '../db';
 import { stripe, isStripeConfigured } from '../lib/stripe';
+import { CALDES_ORIGIN_METADATA } from '../lib/stripe-customer-sync';
+import { billingEmailsSchema } from '../lib/customer-recipients';
+import { mergePatch } from '../lib/json-merge-patch';
+import { fieldError, parseOr400 } from '../lib/validation';
+import { logger } from '../lib/logger';
 import { sendEmail } from '../lib/email';
 import { canSendWhatsApp } from '../lib/whatsapp-policy';
 import { sendWhatsAppText } from '../lib/whatsapp';
@@ -14,22 +20,94 @@ function stripPortalSecrets(row: Record<string, unknown>): Record<string, unknow
   return { ...safe, has_portal_access: Boolean(portal_access_code_hash), _total_count };
 }
 
-async function prepareCustomerUpdate(body: Record<string, unknown>): Promise<Record<string, unknown>> {
-  const next = { ...body };
-  delete next.portal_access_code_hash;
+const log = logger.child({ scope: 'customers' });
 
-  if (typeof next.email === 'string') {
-    next.email = next.email.trim() || null;
-  }
-  if (typeof next.phone === 'string') {
-    next.phone = next.phone.trim() || null;
-  }
+/** Valore JSON ammesso in billing_address (oggetto piatto o annidato). */
+const jsonValue: z.ZodType<unknown> = z.lazy(() =>
+  z.union([z.string(), z.number(), z.boolean(), z.null(), z.array(jsonValue), z.record(jsonValue)]),
+);
 
-  if (typeof next.portal_access_code === 'string' && next.portal_access_code.trim()) {
-    next.portal_access_code_hash = await bcrypt.hash(next.portal_access_code.trim(), 12);
+const optionalText = z
+  .string()
+  .nullable()
+  .transform((v) => (typeof v === 'string' && v.trim() === '' ? null : v));
+
+const emailOrNull = z
+  .string()
+  .trim()
+  .nullable()
+  .transform((v) => (v ? v : null))
+  .refine((v) => v === null || isValidEmail(v), 'indirizzo email non valido');
+
+/** Nomi sbagliati frequenti → campo giusto (suggerimento nel 400). */
+const CUSTOMER_FIELD_HINTS: Readonly<Record<string, string>> = {
+  vat: 'billing_address.vat_number',
+  vat_number: 'billing_address.vat_number',
+  piva: 'billing_address.vat_number',
+  partita_iva: 'billing_address.vat_number',
+  fiscal_code: 'billing_address.fiscal_code',
+  codice_fiscale: 'billing_address.fiscal_code',
+  sdi: 'billing_address.sdi_code',
+  sdi_code: 'billing_address.sdi_code',
+  pec: 'billing_address.pec',
+  address: 'billing_address',
+  name: 'contact_name',
+  company: 'company_name',
+  billing_email: 'billing_emails',
+  emails: 'billing_emails',
+};
+
+/**
+ * Campi scrivibili con PUT /api/customers/:id. Un campo sconosciuto è un 400
+ * che lo nomina (prima arrivava a Postgres come colonna inesistente: 500).
+ * billing_address è un JSON Merge Patch (RFC 7396): le chiavi presenti
+ * sostituiscono quelle salvate, una chiave a null le rimuove, le altre
+ * restano. Un PUT senza billing_address non lo tocca.
+ */
+const customerUpdateSchema = z
+  .object({
+    company_name: optionalText,
+    contact_name: z.string().trim().min(1),
+    email: emailOrNull,
+    phone: optionalText,
+    billing_address: z.record(jsonValue),
+    billing_emails: billingEmailsSchema,
+    notes: z.string().nullable(),
+    tags: z.array(z.string()).max(50),
+    status: z.enum(['active', 'inactive', 'suspended']),
+    portal_logo: optionalText,
+    portal_access_code: z.string(),
+    lead_id: z.string().uuid().nullable(),
+    stripe_customer_id: optionalText,
+  })
+  .partial()
+  .strict();
+
+const customerCreateSchema = z
+  .object({
+    company_name: optionalText.optional(),
+    contact_name: z.string().trim().min(1),
+    email: emailOrNull.optional(),
+    phone: optionalText.optional(),
+    billing_address: z.record(jsonValue).optional(),
+    billing_emails: billingEmailsSchema.optional(),
+    notes: z.string().nullable().optional(),
+    tags: z.array(z.string()).max(50).optional(),
+    createOnStripe: z.boolean().optional(),
+  })
+  .strict();
+
+type CustomerUpdate = z.output<typeof customerUpdateSchema>;
+
+async function prepareCustomerUpdate(body: CustomerUpdate): Promise<Record<string, unknown>> {
+  const { billing_address: _patch, portal_access_code, tags, ...rest } = body;
+  const next: Record<string, unknown> = { ...rest };
+
+  if (tags !== undefined) next.tags = jsonb(tags);
+  if (typeof portal_access_code === 'string' && portal_access_code.trim()) {
+    next.portal_access_code_hash = await bcrypt.hash(portal_access_code.trim(), 12);
     next.portal_access_code_rotated_at = new Date().toISOString();
   }
-  delete next.portal_access_code;
 
   return next;
 }
@@ -153,16 +231,16 @@ customers.get('/:id', async (c) => {
 });
 
 customers.post('/', async (c) => {
-  const body = await c.req.json();
-  const { company_name, contact_name, email, phone, billing_address, notes, tags, createOnStripe = true } = body;
-  const normalizedEmail = typeof email === 'string' ? email.trim() : '';
-  const normalizedPhone = typeof phone === 'string' ? phone.trim() : '';
+  const raw = await c.req.json().catch(() => {
+    throw fieldError([], 'body JSON non valido');
+  });
+  const body = parseOr400(customerCreateSchema, raw, CUSTOMER_FIELD_HINTS);
+  const { company_name, contact_name, billing_address, billing_emails, notes, tags, createOnStripe = true } = body;
+  const normalizedEmail = body.email ?? '';
+  const normalizedPhone = body.phone?.trim() ?? '';
 
-  if (!contact_name || (!normalizedEmail && !normalizedPhone)) {
+  if (!normalizedEmail && !normalizedPhone) {
     return c.json({ error: 'Nome e almeno un contatto tra email e telefono richiesti' }, 400);
-  }
-  if (normalizedEmail && !isValidEmail(normalizedEmail)) {
-    return c.json({ error: 'Email non valida' }, 400);
   }
 
   let stripeCustomerId: string | null = null;
@@ -173,43 +251,67 @@ customers.post('/', async (c) => {
       email: normalizedEmail || undefined,
       phone: normalizedPhone || undefined,
       address: billing_address ? {
-        line1: billing_address.street,
-        city: billing_address.city,
-        postal_code: billing_address.postal_code,
-        state: billing_address.province,
-        country: billing_address.country || 'IT',
+        line1: typeof billing_address.street === 'string' ? billing_address.street : undefined,
+        city: typeof billing_address.city === 'string' ? billing_address.city : undefined,
+        postal_code: typeof billing_address.postal_code === 'string' ? billing_address.postal_code : undefined,
+        state: typeof billing_address.province === 'string' ? billing_address.province : undefined,
+        country: typeof billing_address.country === 'string' ? billing_address.country : 'IT',
       } : undefined,
-      metadata: { company_name: company_name || '' },
+      // caldes_origin: il webhook customer.created non deve inserire un
+      // duplicato prima che questa POST salvi il cliente (stripe-customer-sync).
+      metadata: { company_name: company_name || '', ...CALDES_ORIGIN_METADATA },
     });
     stripeCustomerId = sc.id;
   }
 
   const [customer] = await sql`
-    INSERT INTO customers (company_name, contact_name, email, phone, billing_address, notes, tags, stripe_customer_id)
-    VALUES (${company_name || null}, ${contact_name}, ${normalizedEmail || null}, ${normalizedPhone || null}, ${billing_address || {}}, ${notes || null}, ${tags || []}, ${stripeCustomerId})
+    INSERT INTO customers (company_name, contact_name, email, phone, billing_address, billing_emails, notes, tags, stripe_customer_id)
+    VALUES (${company_name || null}, ${contact_name}, ${normalizedEmail || null}, ${normalizedPhone || null}, ${jsonb(billing_address ?? {})}, ${billing_emails ?? []}::text[], ${notes || null}, ${jsonb(tags ?? [])}, ${stripeCustomerId})
     RETURNING *
   `;
 
-  return c.json({ customer }, 201);
+  return c.json({ customer: stripPortalSecrets(customer) }, 201);
 });
 
 customers.put('/:id', async (c) => {
   const id = c.req.param('id');
-  const body = await c.req.json();
+  const raw = await c.req.json().catch(() => {
+    throw fieldError([], 'body JSON non valido');
+  });
+  const body = parseOr400(customerUpdateSchema, raw, CUSTOMER_FIELD_HINTS);
+  if (!Object.keys(body).length) throw fieldError([], 'nessun campo da aggiornare');
 
   const updates = await prepareCustomerUpdate(body);
-  const [customer] = await sql`UPDATE customers SET ${sql(updates)} WHERE id = ${id} RETURNING *`;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
+  const customer = await sql.begin(async (tx: any) => {
+    const [current] = await tx`SELECT billing_address FROM customers WHERE id = ${id} FOR UPDATE`;
+    if (!current) return null;
+    if (body.billing_address !== undefined) {
+      updates.billing_address = jsonb(mergePatch(current.billing_address ?? {}, body.billing_address));
+    }
+    const [row] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${id} RETURNING *`;
+    return row as Record<string, unknown>;
+  });
   if (!customer) return c.json({ error: 'Cliente non trovato' }, 404);
 
-  if (customer?.stripe_customer_id && isStripeConfigured()) {
-    await stripe.customers.update(customer.stripe_customer_id as string, {
-      name: body.company_name || body.contact_name,
-      email: isValidEmail(body.email) ? body.email.trim() : undefined,
-      phone: typeof body.phone === 'string' && body.phone.trim() ? body.phone.trim() : undefined,
-    });
+  const warnings: string[] = [];
+  const stripeFields: { name?: string; email?: string; phone?: string } = {};
+  if (body.company_name || body.contact_name) stripeFields.name = (body.company_name || body.contact_name) as string;
+  if (body.email) stripeFields.email = body.email;
+  if (body.phone) stripeFields.phone = body.phone;
+  if (customer.stripe_customer_id && isStripeConfigured() && Object.keys(stripeFields).length) {
+    // Il webhook customer.updated che ne deriva applica solo i campi cambiati
+    // (previous_attributes): non riscrive più billing_address né i nomi.
+    try {
+      await stripe.customers.update(customer.stripe_customer_id as string, stripeFields);
+    } catch (err) {
+      log.warn({ err, customerId: id }, 'sincronizzazione Stripe del cliente fallita');
+      warnings.push(`Cliente salvato, ma l'aggiornamento su Stripe non è riuscito: ${(err as Error).message}`);
+    }
   }
 
-  return c.json({ customer: stripPortalSecrets(customer) });
+  return c.json({ customer: stripPortalSecrets(customer), ...(warnings.length ? { warnings } : {}) });
 });
 
 customers.delete('/:id', async (c) => {

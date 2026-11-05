@@ -31,6 +31,8 @@ const SUITES: Record<string, string> = {
   smoke: 'test/smoke/**/*.test.ts',
   contracts: 'test/contracts/**/*.test.ts',
   calendar: 'test/calendar/**/*.test.ts',
+  // Clienti, domini, posta (allegati, bozze, copia in Inviati), webhook Stripe dei clienti.
+  crm: 'test/crm/**/*.test.ts',
   // Radicale reale, mock di verify-credentials e inventario: senza Radicale le
   // suite che lo richiedono vengono saltate (helpers/radicale.ts).
   integration: 'test/integration/**/*.test.ts',

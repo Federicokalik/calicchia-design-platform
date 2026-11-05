@@ -3,6 +3,7 @@ import { sql } from '../db';
 import { sendDomainExpiringEmail } from '../lib/email';
 import { verifyCronSecret } from '../lib/cron-auth';
 import { logger } from '../lib/logger';
+import { billingRecipients } from '../lib/customer-recipients';
 
 const log = logger.child({ scope: 'domain-cron' });
 
@@ -15,7 +16,8 @@ interface ExpiringDomain {
   days_until_expiration: number;
   urgency_level: string;
   customer_id: string;
-  customer_email: string;
+  customer_email: string | null;
+  billing_emails: string[] | null;
   contact_name: string;
   company_name: string | null;
 }
@@ -36,9 +38,12 @@ export async function checkAndSendReminders(): Promise<{
 }> {
   const result = { sent: 0, skipped: 0, errors: [] as string[] };
 
+  // billing_emails: destinatari amministrativi del cliente (vuoto = email).
   const expiringDomains = await sql`
-    SELECT * FROM expiring_domains
-    WHERE urgency_level IN ('expired', 'critical', 'warning', 'upcoming')
+    SELECT ed.*, c.billing_emails
+    FROM expiring_domains ed
+    JOIN customers c ON c.id = ed.customer_id
+    WHERE ed.urgency_level IN ('expired', 'critical', 'warning', 'upcoming')
   ` as ExpiringDomain[];
 
   if (!expiringDomains.length) return result;
@@ -76,9 +81,15 @@ export async function checkAndSendReminders(): Promise<{
   for (const [, domains] of byCustomer) {
     const first = domains[0];
     const customerName = first.company_name || first.contact_name;
+    const recipients = billingRecipients({ email: first.customer_email, billing_emails: first.billing_emails });
+    if (!recipients.length) {
+      result.errors.push(`${customerName}: nessun indirizzo email (né billing_emails né email)`);
+      continue;
+    }
+    const sentTo = recipients.join(', ');
 
     const emailResult = await sendDomainExpiringEmail({
-      to: first.customer_email,
+      to: recipients,
       customerName,
       domains: domains.map((d) => ({
         name: d.full_domain,
@@ -95,7 +106,7 @@ export async function checkAndSendReminders(): Promise<{
         domain_id: d.id,
         alert_type: d.alertType,
         sent_via: 'email',
-        sent_to: first.customer_email,
+        sent_to: sentTo,
         metadata: { message_id: emailResult.messageId },
       }));
 
@@ -126,7 +137,7 @@ export async function checkAndSendReminders(): Promise<{
         log.warn({ err, customerName }, 'domain-cron: notifica interna non registrata');
       }
     } else {
-      result.errors.push(`${customerName} (${first.customer_email}): ${emailResult.error}`);
+      result.errors.push(`${customerName} (${sentTo}): ${emailResult.error}`);
     }
   }
 

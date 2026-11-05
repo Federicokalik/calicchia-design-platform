@@ -84,7 +84,10 @@ function gridPos(col: number, row = 0): { x: number; y: number } {
  *   booking_creato     (calendar/public.ts)  { booking_uid, event_type_slug, attendee_name, attendee_email, start_time }
  *   dominio_scadenza   (domain-alerts.ts)    { domain_id, domain_name, expiration_date, days_remaining,
  *                                              milestone, auto_renew, customer_id, customer_name,
- *                                              customer_company, customer_email, customer_phone }
+ *                                              customer_company, customer_email, customer_phone,
+ *                                              customer_primary_email, customer_billing_emails }
+ *                      customer_email = destinatari amministrativi (billing_emails se popolato,
+ *                      altrimenti email) separati da virgola; customer_primary_email = customers.email.
  *
  * If you add a new template, grep `fireEvent(` first to confirm the
  * event is actually emitted AND to see what fields are in the payload.
