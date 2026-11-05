@@ -7,6 +7,13 @@ import { stripe, isStripeConfigured } from '../lib/stripe';
 import { CALDES_ORIGIN_METADATA } from '../lib/stripe-customer-sync';
 import { billingEmailsSchema } from '../lib/customer-recipients';
 import { mergePatch } from '../lib/json-merge-patch';
+import {
+  dropLegacyKeys,
+  fiscalSchemas,
+  resolveFiscalInput,
+  withFiscalInBillingAddress,
+  type FiscalColumn,
+} from '../lib/customers/fiscal';
 import { fieldError, parseOr400 } from '../lib/validation';
 import { logger } from '../lib/logger';
 import { sendEmail } from '../lib/email';
@@ -15,9 +22,14 @@ import { sendWhatsAppText } from '../lib/whatsapp';
 
 export const customers = new Hono();
 
+/**
+ * Cliente per le risposte: niente segreti del portale; P.IVA, CF, SDI e PEC
+ * (colonne dalla 169) anche dentro billing_address per i client che li
+ * leggevano da lì.
+ */
 function stripPortalSecrets(row: Record<string, unknown>): Record<string, unknown> {
   const { portal_access_code, portal_access_code_hash, _total_count, ...safe } = row;
-  return { ...safe, has_portal_access: Boolean(portal_access_code_hash), _total_count };
+  return { ...withFiscalInBillingAddress(safe), has_portal_access: Boolean(portal_access_code_hash), _total_count };
 }
 
 const log = logger.child({ scope: 'customers' });
@@ -41,15 +53,15 @@ const emailOrNull = z
 
 /** Nomi sbagliati frequenti → campo giusto (suggerimento nel 400). */
 const CUSTOMER_FIELD_HINTS: Readonly<Record<string, string>> = {
-  vat: 'billing_address.vat_number',
-  vat_number: 'billing_address.vat_number',
-  piva: 'billing_address.vat_number',
-  partita_iva: 'billing_address.vat_number',
-  fiscal_code: 'billing_address.fiscal_code',
-  codice_fiscale: 'billing_address.fiscal_code',
-  sdi: 'billing_address.sdi_code',
-  sdi_code: 'billing_address.sdi_code',
-  pec: 'billing_address.pec',
+  vat: 'vat_number',
+  piva: 'vat_number',
+  partita_iva: 'vat_number',
+  codice_fiscale: 'fiscal_code',
+  cf: 'fiscal_code',
+  sdi: 'sdi_code',
+  codice_destinatario: 'sdi_code',
+  codice_sdi: 'sdi_code',
+  pec_email: 'pec',
   address: 'billing_address',
   name: 'contact_name',
   company: 'company_name',
@@ -72,6 +84,10 @@ const customerUpdateSchema = z
     phone: optionalText,
     billing_address: z.record(jsonValue),
     billing_emails: billingEmailsSchema,
+    vat_number: fiscalSchemas.vat_number,
+    fiscal_code: fiscalSchemas.fiscal_code,
+    sdi_code: fiscalSchemas.sdi_code,
+    pec: fiscalSchemas.pec,
     notes: z.string().nullable(),
     tags: z.array(z.string()).max(50),
     status: z.enum(['active', 'inactive', 'suspended']),
@@ -91,6 +107,10 @@ const customerCreateSchema = z
     phone: optionalText.optional(),
     billing_address: z.record(jsonValue).optional(),
     billing_emails: billingEmailsSchema.optional(),
+    vat_number: fiscalSchemas.vat_number.optional(),
+    fiscal_code: fiscalSchemas.fiscal_code.optional(),
+    sdi_code: fiscalSchemas.sdi_code.optional(),
+    pec: fiscalSchemas.pec.optional(),
     notes: z.string().nullable().optional(),
     tags: z.array(z.string()).max(50).optional(),
     createOnStripe: z.boolean().optional(),
@@ -100,7 +120,7 @@ const customerCreateSchema = z
 type CustomerUpdate = z.output<typeof customerUpdateSchema>;
 
 async function prepareCustomerUpdate(body: CustomerUpdate): Promise<Record<string, unknown>> {
-  const { billing_address: _patch, portal_access_code, tags, ...rest } = body;
+  const { billing_address: _patch, portal_access_code, tags, vat_number: _v, fiscal_code: _f, sdi_code: _s, pec: _p, ...rest } = body;
   const next: Record<string, unknown> = { ...rest };
 
   if (tags !== undefined) next.tags = jsonb(tags);
@@ -235,7 +255,9 @@ customers.post('/', async (c) => {
     throw fieldError([], 'body JSON non valido');
   });
   const body = parseOr400(customerCreateSchema, raw, CUSTOMER_FIELD_HINTS);
-  const { company_name, contact_name, billing_address, billing_emails, notes, tags, createOnStripe = true } = body;
+  const { company_name, contact_name, billing_emails, notes, tags, createOnStripe = true } = body;
+  const { addressPatch, fiscal } = resolveFiscalInput(body);
+  const billing_address = addressPatch;
   const normalizedEmail = body.email ?? '';
   const normalizedPhone = body.phone?.trim() ?? '';
 
@@ -265,8 +287,10 @@ customers.post('/', async (c) => {
   }
 
   const [customer] = await sql`
-    INSERT INTO customers (company_name, contact_name, email, phone, billing_address, billing_emails, notes, tags, stripe_customer_id)
-    VALUES (${company_name || null}, ${contact_name}, ${normalizedEmail || null}, ${normalizedPhone || null}, ${jsonb(billing_address ?? {})}, ${billing_emails ?? []}::text[], ${notes || null}, ${jsonb(tags ?? [])}, ${stripeCustomerId})
+    INSERT INTO customers (company_name, contact_name, email, phone, billing_address, billing_emails, notes, tags, stripe_customer_id,
+                           vat_number, fiscal_code, sdi_code, pec)
+    VALUES (${company_name || null}, ${contact_name}, ${normalizedEmail || null}, ${normalizedPhone || null}, ${jsonb(billing_address ?? {})}, ${billing_emails ?? []}::text[], ${notes || null}, ${jsonb(tags ?? [])}, ${stripeCustomerId},
+            ${fiscal.vat_number ?? null}, ${fiscal.fiscal_code ?? null}, ${fiscal.sdi_code ?? null}, ${fiscal.pec ?? null})
     RETURNING *
   `;
 
@@ -282,13 +306,19 @@ customers.put('/:id', async (c) => {
   if (!Object.keys(body).length) throw fieldError([], 'nessun campo da aggiornare');
 
   const updates = await prepareCustomerUpdate(body);
+  const { addressPatch, fiscal } = resolveFiscalInput(body);
+  Object.assign(updates, fiscal);
+  const fiscalWritten = Object.keys(fiscal) as FiscalColumn[];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
   const customer = await sql.begin(async (tx: any) => {
     const [current] = await tx`SELECT billing_address FROM customers WHERE id = ${id} FOR UPDATE`;
     if (!current) return null;
-    if (body.billing_address !== undefined) {
-      updates.billing_address = jsonb(mergePatch(current.billing_address ?? {}, body.billing_address));
+    if (addressPatch !== undefined || fiscalWritten.length) {
+      // Le colonne fiscali scritte tolgono l'eventuale valore legacy dal jsonb,
+      // altrimenti il fallback dei lettori lo farebbe ricomparire.
+      const merged = mergePatch(current.billing_address ?? {}, addressPatch ?? {}) as Record<string, unknown>;
+      updates.billing_address = jsonb(dropLegacyKeys(merged, fiscalWritten));
     }
     const [row] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${id} RETURNING *`;
     return row as Record<string, unknown>;

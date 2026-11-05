@@ -148,10 +148,10 @@ quotesV2.post('/generate-from-markdown', async (c) => {
       try {
         suggested = await sql`
           SELECT id, contact_name, company_name, email,
-                 billing_address->>'vat_number' AS vat_number
+                 COALESCE(vat_number, billing_address->>'vat_number') AS vat_number
           FROM customers
           WHERE (${nameHint} <> '' AND (contact_name ILIKE ${'%' + nameHint + '%'} OR company_name ILIKE ${'%' + nameHint + '%'}))
-             OR (${pivaHint} <> '' AND billing_address->>'vat_number' ILIKE ${'%' + pivaHint + '%'})
+             OR (${pivaHint} <> '' AND COALESCE(vat_number, billing_address->>'vat_number') ILIKE ${'%' + pivaHint.replace(/^IT(?=\d{11}$)/i, '') + '%'})
           LIMIT 5
         `;
       } catch (err) {

@@ -12,6 +12,7 @@ import {
   validateSettingValue,
   type SettingKey,
 } from '../lib/settings-schema';
+import { effectiveFiscal } from '../lib/customers/fiscal';
 
 export const invoices = new Hono();
 
@@ -209,20 +210,22 @@ function buildCessionarioCustomer(customer: AnyRecord): {
 } {
   const billing = isRecord(customer.billing_address) ? customer.billing_address : {};
   const name = str(customer.company_name) ?? str(customer.contact_name);
-  const vat = str(billing.vat_number);
-  const fiscal = str(billing.fiscal_code);
+  // Colonne fiscali (169) con fallback sui valori legacy rimasti nel jsonb.
+  const fiscalData = effectiveFiscal(customer as Parameters<typeof effectiveFiscal>[0]);
+  const vat = str(fiscalData.vat_number);
+  const fiscal = str(fiscalData.fiscal_code);
   const street = str(billing.street);
   const postalCode = str(billing.postal_code);
   const city = str(billing.city);
   const province = str(billing.province);
   const country = str(billing.country) ?? 'IT';
-  const sdiCode = str(billing.sdi_code);
-  const pec = str(billing.pec_email) ?? str(customer.pec_email);
+  const sdiCode = str(fiscalData.sdi_code);
+  const pec = str(fiscalData.pec) ?? str(customer.pec_email);
   const isCompany = Boolean(str(customer.company_name));
 
   const missing: string[] = [];
   if (!name) missing.push('customer.contact_name (o company_name)');
-  if (!vat && !fiscal) missing.push('customer.billing_address.vat_number (o fiscal_code)');
+  if (!vat && !fiscal) missing.push('customer.vat_number (o fiscal_code)');
   if (!street) missing.push('customer.billing_address.street');
   if (!postalCode) missing.push('customer.billing_address.postal_code');
   if (!city) missing.push('customer.billing_address.city');
@@ -346,7 +349,7 @@ invoices.get('/:id/sdi-xml', async (c) => {
         error: 'Dati mancanti per generare XML FatturaPA',
         missing,
         hint:
-          'Compila i campi mancanti in Impostazioni → Profilo e nel record cliente (billing_address).',
+          'Compila i campi mancanti in Impostazioni → Profilo e nella scheda cliente (indirizzo di fatturazione, P.IVA o codice fiscale).',
       },
       400,
     );

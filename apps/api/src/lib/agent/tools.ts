@@ -18,6 +18,7 @@ import { sql, jsonb } from '../../db';
 import { logger } from '../logger';
 import { billingEmailsSchema, billingRecipients } from '../customer-recipients';
 import { mergePatch } from '../json-merge-patch';
+import { dropLegacyKeys, fiscalSchemas, resolveFiscalInput, withFiscalInBillingAddress, type FiscalColumn } from '../customers/fiscal';
 import { itErrorMap, RequestValidationError, validationMessage, zodDetails, type ValidationDetail } from '../validation';
 import { ATTACHMENT_FIELD_HINTS, attachmentInputSchema, describeAttachment, MAX_ATTACHMENTS, resolveAttachments } from '../mail/attachments';
 import { addressListSchema, formatAddress, MESSAGE_FIELD_HINTS } from '../mail/message-schema';
@@ -581,22 +582,38 @@ export const tools: ToolDefinition[] = [
         },
         billing_address: {
           type: 'object',
-          description: 'Dati di fatturazione: street, postal_code, city, province, country, vat_number, fiscal_code, sdi_code, pec.',
+          description: 'Indirizzo di fatturazione: street, postal_code, city, province, country.',
           additionalProperties: true,
         },
+        vat_number: { type: 'string', description: 'Partita IVA (11 cifre IT, con o senza "IT"; estero con prefisso paese). Stringa vuota = cancella' },
+        fiscal_code: { type: 'string', description: 'Codice fiscale (16 caratteri o 11 cifre). Stringa vuota = cancella' },
+        sdi_code: { type: 'string', description: 'Codice destinatario SDI (7 caratteri). Stringa vuota = cancella' },
+        pec: { type: 'string', description: 'PEC per la fatturazione elettronica. Stringa vuota = cancella' },
       },
       required: ['contact_name', 'email'],
     },
     execute: async (args) => {
       const email = (args.email as string).toLowerCase().trim();
       const billingEmails = args.billing_emails === undefined ? [] : parseToolArgs('create_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
-      const billingAddress = args.billing_address === undefined ? {} : parseToolArgs('create_customer', { billing_address: args.billing_address }, z.object({ billing_address: z.record(z.unknown()) })).billing_address;
+      const parsedBilling = parseToolArgs('create_customer', {
+        billing_address: args.billing_address, vat_number: args.vat_number, fiscal_code: args.fiscal_code, sdi_code: args.sdi_code, pec: args.pec,
+      }, z.object({
+        billing_address: z.record(z.unknown()).optional(),
+        vat_number: fiscalSchemas.vat_number.optional(),
+        fiscal_code: fiscalSchemas.fiscal_code.optional(),
+        sdi_code: fiscalSchemas.sdi_code.optional(),
+        pec: fiscalSchemas.pec.optional(),
+      }));
+      // P.IVA & co. nelle colonne (169), anche se passate dentro billing_address.
+      const { addressPatch, fiscal } = resolveFiscalInput(parsedBilling);
+      const billingAddress = addressPatch ?? {};
       const existing = await sql`SELECT id, contact_name FROM customers WHERE email = ${email} AND deleted_at IS NULL LIMIT 1`;
       if (existing.length > 0) {
         return JSON.stringify({ error: 'Cliente con questa email già esistente', existing: existing[0] });
       }
       const [row] = await sql`
-        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags, billing_emails, billing_address)
+        INSERT INTO customers (contact_name, email, company_name, phone, notes, tags, billing_emails, billing_address,
+                               vat_number, fiscal_code, sdi_code, pec)
         VALUES (
           ${args.contact_name as string},
           ${email},
@@ -605,9 +622,10 @@ export const tools: ToolDefinition[] = [
           ${(args.notes as string) || null},
           ${jsonb((args.tags as string[]) || [])}::jsonb,
           ${billingEmails}::text[],
-          ${jsonb(billingAddress)}::jsonb
+          ${jsonb(billingAddress)}::jsonb,
+          ${fiscal.vat_number ?? null}, ${fiscal.fiscal_code ?? null}, ${fiscal.sdi_code ?? null}, ${fiscal.pec ?? null}
         )
-        RETURNING id, contact_name, company_name, email, billing_emails
+        RETURNING id, contact_name, company_name, email, billing_emails, vat_number, fiscal_code, sdi_code, pec
       `;
       return JSON.stringify({ created: row });
     },
@@ -1485,9 +1503,13 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
         },
         billing_address: {
           type: 'object',
-          description: 'Merge con i dati salvati (chiave a null = rimuovi):  street, postal_code, city, province, country, vat_number, fiscal_code, sdi_code, pec.',
+          description: 'Indirizzo di fatturazione, in merge con quello salvato (chiave a null = rimuovi): street, postal_code, city, province, country.',
           additionalProperties: true,
         },
+        vat_number: { type: 'string', description: 'Partita IVA (11 cifre IT, con o senza "IT"; estero con prefisso paese). Stringa vuota = cancella' },
+        fiscal_code: { type: 'string', description: 'Codice fiscale (16 caratteri o 11 cifre). Stringa vuota = cancella' },
+        sdi_code: { type: 'string', description: 'Codice destinatario SDI (7 caratteri). Stringa vuota = cancella' },
+        pec: { type: 'string', description: 'PEC per la fatturazione elettronica. Stringa vuota = cancella' },
       },
     },
     execute: async (args) => {
@@ -1511,25 +1533,36 @@ Genera 5-12 task specifici e concreti. Le ore stimate devono essere realistiche 
       if (args.billing_emails !== undefined) {
         updates.billing_emails = parseToolArgs('update_customer', { billing_emails: args.billing_emails }, z.object({ billing_emails: billingEmailsSchema })).billing_emails;
       }
-      const addressPatch = args.billing_address === undefined
-        ? undefined
-        : parseToolArgs('update_customer', { billing_address: args.billing_address }, z.object({ billing_address: z.record(z.unknown()) })).billing_address;
+      const parsedBilling = parseToolArgs('update_customer', {
+        billing_address: args.billing_address, vat_number: args.vat_number, fiscal_code: args.fiscal_code, sdi_code: args.sdi_code, pec: args.pec,
+      }, z.object({
+        billing_address: z.record(z.unknown()).optional(),
+        vat_number: fiscalSchemas.vat_number.optional(),
+        fiscal_code: fiscalSchemas.fiscal_code.optional(),
+        sdi_code: fiscalSchemas.sdi_code.optional(),
+        pec: fiscalSchemas.pec.optional(),
+      }));
+      const { addressPatch, fiscal } = resolveFiscalInput(parsedBilling);
+      Object.assign(updates, fiscal);
+      const fiscalWritten = Object.keys(fiscal) as FiscalColumn[];
       updates.updated_at = new Date().toISOString();
       if (Object.keys(updates).length === 1 && addressPatch === undefined) return JSON.stringify({ error: 'Nessun campo da aggiornare' });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any -- tx di postgres-js
       const row = await sql.begin(async (tx: any) => {
-        if (addressPatch !== undefined) {
+        if (addressPatch !== undefined || fiscalWritten.length) {
           const [current] = await tx`SELECT billing_address FROM customers WHERE id = ${customerId} AND deleted_at IS NULL FOR UPDATE`;
           if (!current) return null;
-          // Merge (RFC 7396), come PUT /api/customers/:id: le chiavi non passate restano.
-          updates.billing_address = jsonb(mergePatch(current.billing_address ?? {}, addressPatch));
+          // Merge (RFC 7396), come PUT /api/customers/:id: le chiavi non passate restano;
+          // i dati fiscali scritti nelle colonne escono dal jsonb.
+          const merged = mergePatch(current.billing_address ?? {}, addressPatch ?? {}) as Record<string, unknown>;
+          updates.billing_address = jsonb(dropLegacyKeys(merged, fiscalWritten));
         }
-        const [updated] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, billing_emails, billing_address, status`;
+        const [updated] = await tx`UPDATE customers SET ${tx(updates)} WHERE id = ${customerId} AND deleted_at IS NULL RETURNING id, contact_name, company_name, email, billing_emails, billing_address, vat_number, fiscal_code, sdi_code, pec, status`;
         return updated ?? null;
       });
       if (!row) return JSON.stringify({ error: 'Aggiornamento fallito' });
-      return JSON.stringify({ updated: row });
+      return JSON.stringify({ updated: withFiscalInBillingAddress(row as Record<string, unknown>) });
     },
   },
   {

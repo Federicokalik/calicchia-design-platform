@@ -115,7 +115,8 @@ describe('PUT /api/customers/:id', () => {
     const res = await api.put(`/api/customers/${c.id}`, { auth: 'admin', body: { vat: 'IT1', notes: 'x' } });
     assert.equal(res.status, 400);
     assert.match(res.json.error, /vat/);
-    assert.match(res.json.error, /billing_address\.vat_number/);
+    // Dalla 169 la P.IVA è una colonna: il suggerimento è vat_number.
+    assert.match(res.json.error, /usa vat_number/);
   });
 });
 
