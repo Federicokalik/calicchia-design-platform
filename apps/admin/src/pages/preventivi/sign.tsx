@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckCircle2, FileText, Loader2, Send, PenTool } from 'lucide-react';
+import { CheckCircle2, Download, FileText, Loader2, Send, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -249,22 +249,41 @@ export default function QuoteSignPage() {
             </div>
           )}
 
-          {/* Custom-HTML quotes: the items table above is just a stub — the
-              real contract lives in the imported document. Embed it so the
-              customer reads what they sign; new-tab link as fallback. */}
+          {quote.amount_summary && (
+            <div className="mt-3 flex items-baseline justify-between gap-3 rounded-lg bg-orange-50 px-4 py-3 text-sm">
+              <span className="text-gray-700">Importo per te</span>
+              <span className="font-semibold text-orange-700 text-right">{quote.amount_summary}</span>
+            </div>
+          )}
+
+          {/* The items table above is only a summary — the real contract is the
+              document (imported HTML or rendered PDF). Embed it so the
+              customer reads what they sign; new-tab / download as fallback
+              (mobile browsers often render only the first PDF page inline). */}
           {quote.has_document && (
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-gray-500 uppercase font-medium">Documento completo</p>
-                <a
-                  href={`${API_BASE}/api/quote-sign/${token}/document`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-700"
-                >
-                  <FileText className="h-3.5 w-3.5" />
-                  Apri a schermo intero
-                </a>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <p className="text-xs text-gray-500 uppercase font-medium">Documento completo · da leggere prima della firma</p>
+                <div className="flex items-center gap-4">
+                  <a
+                    href={`${API_BASE}/api/quote-sign/${token}/document`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-700"
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Apri a schermo intero
+                  </a>
+                  {quote.document_type === 'pdf' && (
+                    <a
+                      href={`${API_BASE}/api/quote-sign/${token}/document?download=1`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-orange-600 hover:text-orange-700"
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      Scarica PDF
+                    </a>
+                  )}
+                </div>
               </div>
               <iframe
                 src={`${API_BASE}/api/quote-sign/${token}/document`}

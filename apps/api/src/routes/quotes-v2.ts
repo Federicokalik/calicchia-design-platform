@@ -19,8 +19,7 @@ function sanitizeItems(items: unknown): unknown[] {
 }
 import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
-import { renderQuoteHtml, injectSignatureIntoCustomHtml } from '../lib/quote-renderer';
-import { generateQuotePdf } from '../lib/quote-pdf';
+import { renderAndStoreQuotePdf, QuotePdfError } from '../lib/quotes/pdf';
 import { defaultTaxRate } from '../lib/tax/default-rate';
 import { savePrivateFile, readPrivateFile } from '../lib/private-files';
 import { unbundleArtifactHtml, cleanCustomQuoteHtml } from '../lib/artifact-unbundle';
@@ -402,6 +401,11 @@ quotesV2.put('/:id', async (c) => {
     total = subtotal + taxAmount;
   }
 
+  // Fields that end up in the rendered document. Internal notes, materials
+  // checklist and the auto-project flag don't, so they keep the PDF valid.
+  const contentChanged = ['customer_id', 'title', 'description', 'items', 'tax_rate', 'valid_until', 'notes', 'project_template']
+    .some((k) => body[k] !== undefined);
+
   const rows = await sql`
     UPDATE quotes_v2 SET
       customer_id = COALESCE(${body.customer_id || null}, customer_id),
@@ -419,6 +423,10 @@ quotesV2.put('/:id', async (c) => {
       materials_checklist = COALESCE(${body.materials_checklist ? jsonb(body.materials_checklist) : null}, materials_checklist),
       project_template = ${body.project_template !== undefined ? jsonb(body.project_template) : sql`project_template`},
       auto_create_project = ${body.auto_create_project !== undefined ? body.auto_create_project : sql`auto_create_project`},
+      -- Content edited → the stored PDF no longer matches what the customer
+      -- would sign. Drop it: the sign page hides a stale document and the next
+      -- send / "Genera PDF" renders a fresh one.
+      pdf_path = ${contentChanged ? null : sql`pdf_path`},
       updated_at = now()
     WHERE id = ${id}
     RETURNING *
@@ -544,55 +552,13 @@ quotesV2.post('/:id/materials', async (c) => {
 // POST /api/quotes-v2/:id/generate-pdf — generate PDF
 quotesV2.post('/:id/generate-pdf', async (c) => {
   const { id } = c.req.param();
-
-  const rows = await sql`
-    SELECT q.*, c.contact_name AS customer_name, c.company_name
-    FROM quotes_v2 q
-    LEFT JOIN customers c ON c.id = q.customer_id
-    WHERE q.id = ${id}
-  `;
-  if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
-
-  const quote = rows[0];
-
-  // Custom HTML quotes render the hand-crafted document as-is (signature
-  // injected into its data-sign placeholders once signed); everything else
-  // goes through the shared Swiss-editorial template.
-  let html: string;
-  if (quote.custom_html_path) {
-    const name = String(quote.custom_html_path).split('/').pop() || '';
-    try {
-      html = (await readPrivateFile('quotes', name)).toString('utf-8');
-    } catch {
-      return c.json({ error: 'Documento HTML non trovato nello storage' }, 404);
-    }
-    html = injectSignatureIntoCustomHtml(html, quote);
-  } else {
-    // Get settings for PDF styling
-    const settingsRows = await sql`SELECT value FROM site_settings WHERE key = 'quote.settings'`;
-    const settings = settingsRows[0]?.value || {};
-    // Render HTML (quote row has all required QuoteData fields from the JOIN)
-    html = renderQuoteHtml(quote as Parameters<typeof renderQuoteHtml>[0], settings);
+  try {
+    const result = await renderAndStoreQuotePdf(id);
+    return c.json({ pdf_url: result.pdfUrl, pdf_hash: result.pdfHash });
+  } catch (err) {
+    if (err instanceof QuotePdfError) return c.json({ error: err.message }, err.status);
+    throw err;
   }
-
-  // Generate PDF
-  const result = await generateQuotePdf(html, `Preventivo_${quote.title}`);
-
-  // Update quote with PDF path + hash. NEVER overwrite the hash once signed —
-  // for a signed quote pdf_hash_sha256 is the evidentiary signature hash, and
-  // regenerating the PDF would otherwise destroy the link to the approved content.
-  await sql`
-    UPDATE quotes_v2 SET
-      pdf_path = ${result.pdfPath},
-      pdf_hash_sha256 = CASE WHEN status = 'signed' THEN pdf_hash_sha256 ELSE ${result.pdfHash} END,
-      updated_at = now()
-    WHERE id = ${id}
-  `;
-
-  return c.json({
-    pdf_url: result.pdfUrl,
-    pdf_hash: result.pdfHash,
-  });
 });
 
 // Public endpoints are in quote-public.ts (mounted without auth)
