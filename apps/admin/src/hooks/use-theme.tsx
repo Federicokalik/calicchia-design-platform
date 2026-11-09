@@ -10,6 +10,23 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+/**
+ * Customer-facing pages (quote signing) are designed light-only — hardcoded
+ * bg-white / gray-* surfaces. Following the visitor's OS dark mode made the
+ * inherited text-foreground near-white on those white cards (invisible
+ * items table) and turned shadcn inputs dark. Always light there.
+ */
+function forcesLight(): boolean {
+  return typeof window !== 'undefined' && window.location.pathname.startsWith('/firma/');
+}
+
+function applyTheme(resolved: 'light' | 'dark'): void {
+  const root = window.document.documentElement;
+  root.classList.remove('light', 'dark');
+  root.classList.add(resolved);
+  root.style.colorScheme = resolved;
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     if (typeof window !== 'undefined') {
@@ -21,22 +38,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    const root = window.document.documentElement;
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const resolved = theme === 'system' ? systemTheme : theme;
+    const resolved = forcesLight() ? 'light' : theme === 'system' ? systemTheme : theme;
 
-    root.classList.remove('light', 'dark');
-    root.classList.add(resolved);
+    applyTheme(resolved);
     setResolvedTheme(resolved);
   }, [theme]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
-      if (theme === 'system') {
+      if (theme === 'system' && !forcesLight()) {
         const resolved = mediaQuery.matches ? 'dark' : 'light';
-        document.documentElement.classList.remove('light', 'dark');
-        document.documentElement.classList.add(resolved);
+        applyTheme(resolved);
         setResolvedTheme(resolved);
       }
     };
