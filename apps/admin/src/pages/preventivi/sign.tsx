@@ -19,6 +19,18 @@ interface PagamentoOption {
   rate: Array<{ percentuale: number; momento: string }>;
 }
 
+/**
+ * "1490" → "1.490,00". Hand-rolled: Intl it-IT omits the thousands separator
+ * below 10.000 (CLDR min grouping digits = 2), so "€1490,00" next to
+ * "€12.500,00" would look inconsistent.
+ */
+function formatEuro(value: unknown, decimals = 2): string {
+  const n = parseFloat(String(value ?? 0)) || 0;
+  const [int, dec] = Math.abs(n).toFixed(decimals).split('.');
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${n < 0 ? '-' : ''}€${grouped}${dec ? `,${dec}` : ''}`;
+}
+
 export default function QuoteSignPage() {
   const { token } = useParams();
   const [quote, setQuote] = useState<any>(null);
@@ -203,7 +215,7 @@ export default function QuoteSignPage() {
   const items = Array.isArray(rawItems) ? rawItems : [];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-3">
@@ -235,14 +247,14 @@ export default function QuoteSignPage() {
                   {items.map((item: any, i: number) => (
                     <tr key={i} className="border-t">
                       <td className="px-4 py-3">{item.description}</td>
-                      <td className="px-4 py-3 text-right font-medium">€{parseFloat(item.total || 0).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-medium">{formatEuro(item.total)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr className="border-t bg-gray-50 font-semibold">
                     <td className="px-4 py-3">Totale</td>
-                    <td className="px-4 py-3 text-right text-orange-600">€{parseFloat(quote.total || 0).toFixed(2)}</td>
+                    <td className="px-4 py-3 text-right text-orange-600">{formatEuro(quote.total)}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -312,7 +324,7 @@ export default function QuoteSignPage() {
                     </span>
                     <span className="shrink-0 text-right">
                       {p.importo != null && (
-                        <span className="font-semibold text-gray-900">€{p.importo.toLocaleString('it-IT')}</span>
+                        <span className="font-semibold text-gray-900">{formatEuro(p.importo, Number.isInteger(p.importo) ? 0 : 2)}</span>
                       )}
                       {p.sconto_percentuale != null && (
                         <span className="ml-2 text-xs text-green-600 font-medium">-{p.sconto_percentuale}%</span>
