@@ -1,0 +1,223 @@
+{
+  "slug": "consulenti-fiscali",
+  "queries": [
+    "paper invoices desk",
+    "office binders shelves",
+    "receipts on table"
+  ],
+  "generatedAt": "2026-10-16T16:27:07.040Z",
+  "photos": [
+    {
+      "id": "ZH4FUYiaczY",
+      "small": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LQ9Q:ZRjIAs:Mwogt7WB8^ofx]WC",
+      "color": "#a6a6c0",
+      "alt": "a woman sitting at a table with lots of papers",
+      "author": "Dimitri Karastelev",
+      "authorUrl": "https://unsplash.com/@dkfra19?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-sitting-at-a-table-with-lots-of-papers-ZH4FUYiaczY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100F12",
+          "w": 0.371
+        },
+        {
+          "hex": "#010101",
+          "w": 0.321
+        },
+        {
+          "hex": "#92A0B4",
+          "w": 0.308
+        }
+      ]
+    },
+    {
+      "id": "8DEDp6S93Po",
+      "small": "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554224155-cfa08c2a758f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4965,
+      "height": 3490,
+      "blurHash": "LRD0M-jY4nkDIUj]t7WB00WB-;oe",
+      "color": "#c0c0c0",
+      "alt": "Tax forms, a pen, and a coffee mug on a dark desk",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/tax-forms-and-coffee-on-desk-8DEDp6S93Po?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0B3B7",
+          "w": 0.4049
+        },
+        {
+          "hex": "#191910",
+          "w": 0.3275
+        },
+        {
+          "hex": "#090904",
+          "w": 0.2676
+        }
+      ]
+    },
+    {
+      "id": "tQQ4BwN_UFs",
+      "small": "https://images.unsplash.com/photo-1554224155-1696413565d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554224155-1696413565d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "L3H2Zk_4%N-h$^MwV@xu%h%0%KS7",
+      "color": "#8c8c8c",
+      "alt": "stack of papers flat lay photography",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-papers-flat-lay-photography-tQQ4BwN_UFs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#989797",
+          "w": 0.9243
+        },
+        {
+          "hex": "#7E7B7A",
+          "w": 0.0757
+        }
+      ]
+    },
+    {
+      "id": "3CLPBgNuX40",
+      "small": "https://images.unsplash.com/photo-1771758249853-415175dc29b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771758249853-415175dc29b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXBlciUyMGludm9pY2VzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDIzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2961,
+      "height": 1969,
+      "blurHash": "LOJ@zgIU01t7aJM|fkt7XAt6RPWC",
+      "color": "#d9d9d9",
+      "alt": "A close-up of a stack of papers",
+      "author": "Camilo Rueda Lopez",
+      "authorUrl": "https://unsplash.com/@kozumel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-stack-of-papers-3CLPBgNuX40?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E2D6D7",
+          "w": 0.376
+        },
+        {
+          "hex": "#B3A198",
+          "w": 0.3609
+        },
+        {
+          "hex": "#7E614D",
+          "w": 0.2631
+        }
+      ]
+    },
+    {
+      "id": "fM35dYst3Rs",
+      "small": "https://images.unsplash.com/photo-1625674967351-655dfa7362c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625674967351-655dfa7362c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3368,
+      "blurHash": "LVIORt%h9F%g8w9Ft7M{nhofR*M{",
+      "color": "#d9d9d9",
+      "alt": "white printer paper beside white ceramic mug on brown wooden table",
+      "author": "Daizy Isumi",
+      "authorUrl": "https://unsplash.com/@daizyisumi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-printer-paper-beside-white-ceramic-mug-on-brown-wooden-table-fM35dYst3Rs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2D6D4",
+          "w": 0.485
+        },
+        {
+          "hex": "#A78E7F",
+          "w": 0.3273
+        },
+        {
+          "hex": "#685243",
+          "w": 0.1877
+        }
+      ]
+    },
+    {
+      "id": "zR7nFjjIAWE",
+      "small": "https://images.unsplash.com/photo-1725258080098-727051947997?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725258080098-727051947997?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2001,
+      "blurHash": "LII5G2-;xsX-E2kD%Mn%01pJx]xt",
+      "color": "#a6a6a6",
+      "alt": "A calculator sitting on top of a pile of money",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-calculator-sitting-on-top-of-a-pile-of-money-zR7nFjjIAWE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2987B",
+          "w": 0.435
+        },
+        {
+          "hex": "#C0BFAE",
+          "w": 0.3175
+        },
+        {
+          "hex": "#7B684B",
+          "w": 0.2475
+        }
+      ]
+    },
+    {
+      "id": "5ucvYH2hdqw",
+      "small": "https://images.unsplash.com/photo-1706894037802-42fdc083c72b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706894037802-42fdc083c72b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2999,
+      "height": 2000,
+      "blurHash": "LNFh*NR50LtRMynjW.tRs8t6t8RQ",
+      "color": "#402626",
+      "alt": "a close up of a coffee maker with cups",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-coffee-maker-with-cups-5ucvYH2hdqw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#422823",
+          "w": 0.3738
+        },
+        {
+          "hex": "#C0B6B0",
+          "w": 0.3277
+        },
+        {
+          "hex": "#A07E71",
+          "w": 0.2985
+        }
+      ]
+    },
+    {
+      "id": "jWF_ObPpwzA",
+      "small": "https://images.unsplash.com/photo-1706894075115-f140b40493cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706894075115-f140b40493cb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZWNlaXB0cyUyMG9uJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2998,
+      "height": 2000,
+      "blurHash": "LLHBbw~A4nIU^*={t8R*9F%MyEoe",
+      "color": "#8c7359",
+      "alt": "a stack of white cups sitting on top of a counter",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-stack-of-white-cups-sitting-on-top-of-a-counter-jWF_ObPpwzA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AF8B6C",
+          "w": 0.3739
+        },
+        {
+          "hex": "#70563E",
+          "w": 0.3538
+        },
+        {
+          "hex": "#DAD2C6",
+          "w": 0.2723
+        }
+      ]
+    }
+  ]
+}

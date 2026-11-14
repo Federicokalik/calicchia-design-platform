@@ -1,0 +1,335 @@
+{
+  "slug": "imprese-edili",
+  "queries": [
+    "construction site crane",
+    "building construction scaffolding",
+    "unfinished house exterior"
+  ],
+  "generatedAt": "2026-10-16T17:46:19.898Z",
+  "photos": [
+    {
+      "id": "VoI2jd75M6Q",
+      "small": "https://images.unsplash.com/photo-1599707254554-027aeb4deacd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599707254554-027aeb4deacd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5678,
+      "height": 3785,
+      "blurHash": "LnHVG50Ji_Rj%Mf,jERjbbt7oMWB",
+      "color": "#a6c0c0",
+      "alt": "yellow crane near building during daytime",
+      "author": "Frames For Your Heart",
+      "authorUrl": "https://unsplash.com/@framesforyourheart?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-crane-near-building-during-daytime-VoI2jd75M6Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AFB6C7",
+          "w": 0.6713
+        },
+        {
+          "hex": "#424042",
+          "w": 0.2161
+        },
+        {
+          "hex": "#8B868D",
+          "w": 0.1126
+        }
+      ]
+    },
+    {
+      "id": "c9p30E94OUU",
+      "small": "https://images.unsplash.com/photo-1575230167650-dce335edc7f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1575230167650-dce335edc7f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4952,
+      "height": 3288,
+      "blurHash": "LZHwZQ^iNajs0gIos.WVXQkDR*s:",
+      "color": "#735973",
+      "alt": "several tower cranes",
+      "author": "Artem Labunsky",
+      "authorUrl": "https://unsplash.com/@labunsky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/several-tower-cranes-c9p30E94OUU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B4C63",
+          "w": 0.4268
+        },
+        {
+          "hex": "#A77276",
+          "w": 0.3174
+        },
+        {
+          "hex": "#E0A797",
+          "w": 0.2558
+        }
+      ]
+    },
+    {
+      "id": "hbe2OSnR4vU",
+      "small": "https://images.unsplash.com/photo-1746364742672-c6383331b032?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1746364742672-c6383331b032?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2957,
+      "height": 2218,
+      "blurHash": "LjHVM8ofofof~qWBofj[M{Rjj[ay",
+      "color": "#c0c0c0",
+      "alt": "Construction cranes populate the cityscape",
+      "author": "Raymond Yeung",
+      "authorUrl": "https://unsplash.com/@optiny?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/construction-cranes-populate-the-cityscape-hbe2OSnR4vU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B9BDBE",
+          "w": 0.5636
+        },
+        {
+          "hex": "#7E8184",
+          "w": 0.2512
+        },
+        {
+          "hex": "#13161A",
+          "w": 0.1852
+        }
+      ]
+    },
+    {
+      "id": "YNm1fhRIMa8",
+      "small": "https://images.unsplash.com/photo-1655975719898-8f3432eed322?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1655975719898-8f3432eed322?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25zdHJ1Y3Rpb24lMjBzaXRlJTIwY3JhbmV8ZW58MXwwfHx8MTc5MjE3Mjc3M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5456,
+      "height": 3632,
+      "blurHash": "LK7gUJR:gRWZIiobVWoJv_W?o~jE",
+      "color": "#268cd9",
+      "alt": "a crane lifting a building",
+      "author": "Adesh Bankar",
+      "authorUrl": "https://unsplash.com/@adesh_bankar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-crane-lifting-a-building-YNm1fhRIMa8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2F8AE3",
+          "w": 0.5106
+        },
+        {
+          "hex": "#2078DD",
+          "w": 0.3127
+        },
+        {
+          "hex": "#62A0D4",
+          "w": 0.1767
+        }
+      ]
+    },
+    {
+      "id": "EqUFBrTIdeE",
+      "small": "https://images.unsplash.com/photo-1519143009590-e3800b9df468?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1519143009590-e3800b9df468?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3211,
+      "height": 2378,
+      "blurHash": "LBDvfyay%Mj[~qayWBWB-;t7RjfQ",
+      "color": "#8c8c8c",
+      "alt": "grayscale photography of piled racks",
+      "author": "Ricardo Gomez Angel",
+      "authorUrl": "https://unsplash.com/@rgaleriacom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photography-of-piled-racks-EqUFBrTIdeE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8E8E8E",
+          "w": 0.6604
+        },
+        {
+          "hex": "#686868",
+          "w": 0.217
+        },
+        {
+          "hex": "#353535",
+          "w": 0.1226
+        }
+      ]
+    },
+    {
+      "id": "-7QPeGK2_iU",
+      "small": "https://images.unsplash.com/photo-1664662568348-24b1482b6354?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1664662568348-24b1482b6354?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9360,
+      "height": 6240,
+      "blurHash": "LEB:sou4E1-A_No}IooL9aM{RQog",
+      "color": "#262626",
+      "alt": "a person on a ladder",
+      "author": "Thatselby",
+      "authorUrl": "https://unsplash.com/@thatselby?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-on-a-ladder--7QPeGK2_iU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#737874",
+          "w": 0.4456
+        },
+        {
+          "hex": "#544A44",
+          "w": 0.3032
+        },
+        {
+          "hex": "#1F1F23",
+          "w": 0.2512
+        }
+      ]
+    },
+    {
+      "id": "gIuwiRLL0TU",
+      "small": "https://images.unsplash.com/photo-1626471671222-9d89fe4c2668?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1626471671222-9d89fe4c2668?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LNF=%I~qD%xZRjM{adtRMxM{RPV?",
+      "color": "#402626",
+      "alt": "3 men climbing on ladder",
+      "author": "Jon Tyson",
+      "authorUrl": "https://unsplash.com/@jontyson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/3-men-climbing-on-ladder-gIuwiRLL0TU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#948D84",
+          "w": 0.4147
+        },
+        {
+          "hex": "#BAB8B3",
+          "w": 0.3347
+        },
+        {
+          "hex": "#3B301F",
+          "w": 0.2506
+        }
+      ]
+    },
+    {
+      "id": "WN9QRESOu5c",
+      "small": "https://images.unsplash.com/photo-1504964670878-71b73cec0ce1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1504964670878-71b73cec0ce1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidWlsZGluZyUyMGNvbnN0cnVjdGlvbiUyMHNjYWZmb2xkaW5nfGVufDF8MHx8fDE3OTIxNzI3NzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5955,
+      "height": 4000,
+      "blurHash": "L5CGA2t5^*Rk~pRjNGWB?bs:NGog",
+      "color": "#262626",
+      "alt": "grey and brown concrete building",
+      "author": "Reto Simonet",
+      "authorUrl": "https://unsplash.com/@reetoo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grey-and-brown-concrete-building-WN9QRESOu5c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#726E65",
+          "w": 0.3712
+        },
+        {
+          "hex": "#4E4C46",
+          "w": 0.3375
+        },
+        {
+          "hex": "#A0977C",
+          "w": 0.2913
+        }
+      ]
+    },
+    {
+      "id": "jEP4vsHrSM8",
+      "small": "https://images.unsplash.com/photo-1593786267440-550458cc882a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1593786267440-550458cc882a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "LzJH,Sxtt7Rj~qj]ofae-;RjRkoz",
+      "color": "#f3f3f3",
+      "alt": "brown brick building during daytime",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-brick-building-during-daytime-jEP4vsHrSM8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EEEBEA",
+          "w": 0.3612
+        },
+        {
+          "hex": "#6B645B",
+          "w": 0.3459
+        },
+        {
+          "hex": "#9C9083",
+          "w": 0.2929
+        }
+      ]
+    },
+    {
+      "id": "nz-cBSChvUw",
+      "small": "https://images.unsplash.com/photo-1593012671976-1422185230fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1593012671976-1422185230fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "LZIE;HNH%NRP~qozxua#?vxaWBf5",
+      "color": "#f3f3f3",
+      "alt": "brown wooden ladder beside brown wooden wall",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-ladder-beside-brown-wooden-wall-nz-cBSChvUw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#706A64",
+          "w": 0.3962
+        },
+        {
+          "hex": "#9F928D",
+          "w": 0.3229
+        },
+        {
+          "hex": "#E2E1E4",
+          "w": 0.2809
+        }
+      ]
+    },
+    {
+      "id": "yica25Tg73w",
+      "small": "https://images.unsplash.com/photo-1606383446056-eb3fc3cde97b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1606383446056-eb3fc3cde97b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4108,
+      "height": 3245,
+      "blurHash": "LJHLVe0MNzRPXq%Mxto#tmaxM_%L",
+      "color": "#8c8ca6",
+      "alt": "white and brown concrete building",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-concrete-building-yica25Tg73w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A19C9B",
+          "w": 0.5736
+        },
+        {
+          "hex": "#787168",
+          "w": 0.2386
+        },
+        {
+          "hex": "#37312B",
+          "w": 0.1878
+        }
+      ]
+    },
+    {
+      "id": "0BFBMBLRZ0I",
+      "small": "https://images.unsplash.com/photo-1778164920913-dbcf62cca52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778164920913-dbcf62cca52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx1bmZpbmlzaGVkJTIwaG91c2UlMjBleHRlcmlvcnxlbnwxfDB8fHwxNzkyMTcyNzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 2533,
+      "blurHash": "L=JJ9.V?ITj=*0WBoIV@nNkCbIax",
+      "color": "#c0f3f3",
+      "alt": "A modern house under construction with a gray roof",
+      "author": "Roger Starnes Sr",
+      "authorUrl": "https://unsplash.com/@rstar50?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-modern-house-under-construction-with-a-gray-roof-0BFBMBLRZ0I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BAEEFD",
+          "w": 0.6979
+        },
+        {
+          "hex": "#656A6B",
+          "w": 0.1561
+        },
+        {
+          "hex": "#9E9D78",
+          "w": 0.146
+        }
+      ]
+    }
+  ]
+}

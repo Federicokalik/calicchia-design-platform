@@ -1,0 +1,223 @@
+{
+  "slug": "osteopati",
+  "queries": [
+    "osteopathy treatment room",
+    "anatomical spine model",
+    "treatment table linen"
+  ],
+  "generatedAt": "2026-10-12T19:51:42.598Z",
+  "photos": [
+    {
+      "id": "OijVdM3Zx4I",
+      "small": "https://images.unsplash.com/photo-1624716346720-6c96dfd07807?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624716346720-6c96dfd07807?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LsKK.w-;IUR*00jXofRjNJa#xaWA",
+      "color": "#d9d9d9",
+      "alt": "white pasta on white paper",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-pasta-on-white-paper-OijVdM3Zx4I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0E0D9",
+          "w": 0.5469
+        },
+        {
+          "hex": "#100E11",
+          "w": 0.291
+        },
+        {
+          "hex": "#B1A794",
+          "w": 0.1621
+        }
+      ]
+    },
+    {
+      "id": "1eL99eGXp0g",
+      "small": "https://images.unsplash.com/photo-1624716346716-303904799c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624716346716-303904799c92?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LXL;W]%gE3RO~qNKRjob4oV?ROWE",
+      "color": "#d9d9d9",
+      "alt": "white and yellow ice cream with cone",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-yellow-ice-cream-with-cone-1eL99eGXp0g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DADBD7",
+          "w": 0.5128
+        },
+        {
+          "hex": "#C8B492",
+          "w": 0.333
+        },
+        {
+          "hex": "#281F18",
+          "w": 0.1542
+        }
+      ]
+    },
+    {
+      "id": "n8H0vAfGceM",
+      "small": "https://images.unsplash.com/photo-1618939279360-762c59d86c4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618939279360-762c59d86c4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LbKBXbD*E3M{~qRjaeRjE1WAs,WC",
+      "color": "#d9d9d9",
+      "alt": "white and yellow cake on white table",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-yellow-cake-on-white-table-n8H0vAfGceM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2D2D7",
+          "w": 0.5409
+        },
+        {
+          "hex": "#767D87",
+          "w": 0.2491
+        },
+        {
+          "hex": "#AFB0B0",
+          "w": 0.21
+        }
+      ]
+    },
+    {
+      "id": "CKxD_Qh6ULY",
+      "small": "https://images.unsplash.com/photo-1508387027939-27cccde53673?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1508387027939-27cccde53673?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbmF0b21pY2FsJTIwc3BpbmUlMjBtb2RlbHxlbnwxfDB8fHwxNzkxODM0Njk5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 1992,
+      "blurHash": "LBM@ZVj?%%tR%hfkR4aeM}fRt6j[",
+      "color": "#c0c0c0",
+      "alt": "beige and white skeleton",
+      "author": "Nino Liverani",
+      "authorUrl": "https://unsplash.com/@ninoliverani?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/beige-and-white-skeleton-CKxD_Qh6ULY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CAC7C8",
+          "w": 0.9296
+        },
+        {
+          "hex": "#B7A89C",
+          "w": 0.0704
+        }
+      ]
+    },
+    {
+      "id": "VxAwTeiqDao",
+      "small": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "LPLW^ll84Trs9DVZV@bu.8xax]of",
+      "color": "#d9d9d9",
+      "alt": "white plastic pump bottle beside pink tulips and gray towel",
+      "author": "Camille Brodard",
+      "authorUrl": "https://unsplash.com/@kmile_ch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-pump-bottle-beside-pink-tulips-and-gray-towel-VxAwTeiqDao?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A29D",
+          "w": 0.3846
+        },
+        {
+          "hex": "#DDDDE0",
+          "w": 0.3446
+        },
+        {
+          "hex": "#978581",
+          "w": 0.2709
+        }
+      ]
+    },
+    {
+      "id": "c6D1r0ail8o",
+      "small": "https://images.unsplash.com/photo-1625471592808-3b848a6e9ffd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625471592808-3b848a6e9ffd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4320,
+      "height": 3456,
+      "blurHash": "LTLqd{?Hxu%M.8VtMxRj_4WAM{Rj",
+      "color": "#d9d9c0",
+      "alt": "green and blue bath towels",
+      "author": "Ekaterina Grosheva",
+      "authorUrl": "https://unsplash.com/@kitkat93?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-blue-bath-towels-c6D1r0ail8o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7D9CD",
+          "w": 0.6766
+        },
+        {
+          "hex": "#A89E83",
+          "w": 0.1679
+        },
+        {
+          "hex": "#342811",
+          "w": 0.1555
+        }
+      ]
+    },
+    {
+      "id": "Srm9V2U6l7U",
+      "small": "https://images.unsplash.com/photo-1593525242232-4e0f496e78f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1593525242232-4e0f496e78f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4477,
+      "height": 2489,
+      "blurHash": "LHLz~vIo9GRi00j[D$M{M}t7E0of",
+      "color": "#d9d9d9",
+      "alt": "clear wine glass beside silver spoon and fork on white table",
+      "author": "Richard Payette",
+      "authorUrl": "https://unsplash.com/@thisusuallyworks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clear-wine-glass-beside-silver-spoon-and-fork-on-white-table-Srm9V2U6l7U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1D0CF",
+          "w": 0.7818
+        },
+        {
+          "hex": "#ABAAA3",
+          "w": 0.1354
+        },
+        {
+          "hex": "#727367",
+          "w": 0.0828
+        }
+      ]
+    },
+    {
+      "id": "W0LEbos6Lbg",
+      "small": "https://images.unsplash.com/photo-1760914939577-93a80c34e206?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760914939577-93a80c34e206?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmVhdG1lbnQlMjB0YWJsZSUyMGxpbmVufGVufDF8MHx8fDE3OTE4MzQ3MDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3280,
+      "blurHash": "L9AA8XIq0LE14:ni%MM|D*NG-:oz",
+      "color": "#26260c",
+      "alt": "A dining table with a tablecloth and dishes",
+      "author": "Redd Francisco",
+      "authorUrl": "https://unsplash.com/@reddfrancisco?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dining-table-with-a-tablecloth-and-dishes-W0LEbos6Lbg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#171610",
+          "w": 0.4258
+        },
+        {
+          "hex": "#665C48",
+          "w": 0.3061
+        },
+        {
+          "hex": "#403521",
+          "w": 0.2681
+        }
+      ]
+    }
+  ]
+}

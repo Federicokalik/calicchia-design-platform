@@ -1,0 +1,335 @@
+{
+  "slug": "case-vacanza",
+  "queries": [
+    "apartment balcony sunlight",
+    "vacation rental kitchen",
+    "stone cottage terrace"
+  ],
+  "generatedAt": "2026-10-16T19:52:43.893Z",
+  "photos": [
+    {
+      "id": "hyXD0-carj8",
+      "small": "https://images.unsplash.com/photo-1618483474128-991a146dc60b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618483474128-991a146dc60b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4288,
+      "height": 2848,
+      "blurHash": "LbGu5yo#ozi^~Xxut8V@kDX8oge.",
+      "color": "#260c0c",
+      "alt": "green plant on white ceramic pot",
+      "author": "Aleksey Cherenkevich",
+      "authorUrl": "https://unsplash.com/@cherenkevich?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-plant-on-white-ceramic-pot-hyXD0-carj8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8BAC6",
+          "w": 0.367
+        },
+        {
+          "hex": "#1C0909",
+          "w": 0.3298
+        },
+        {
+          "hex": "#6A3738",
+          "w": 0.3032
+        }
+      ]
+    },
+    {
+      "id": "8QbyE8bBjzU",
+      "small": "https://images.unsplash.com/photo-1600776216872-b39b2a3dd995?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600776216872-b39b2a3dd995?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3375,
+      "blurHash": "LEDIzS0jnM4:_NN|Vr9ZI[?GIVRO",
+      "color": "#40260c",
+      "alt": "white wooden table beside window",
+      "author": "Daniel Lerman",
+      "authorUrl": "https://unsplash.com/@dlerman6?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-wooden-table-beside-window-8QbyE8bBjzU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5E452D",
+          "w": 0.4444
+        },
+        {
+          "hex": "#7B746D",
+          "w": 0.3302
+        },
+        {
+          "hex": "#35200D",
+          "w": 0.2254
+        }
+      ]
+    },
+    {
+      "id": "MLIHTkUcQ8Y",
+      "small": "https://images.unsplash.com/photo-1581612480645-f46b7c5172d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581612480645-f46b7c5172d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4194,
+      "height": 2796,
+      "blurHash": "LQGlM1M}M|?b0NIpt7IAETt6oyo#",
+      "color": "#0c408c",
+      "alt": "white and brown concrete building under blue sky during daytime",
+      "author": "Mauro Shared Pictures",
+      "authorUrl": "https://unsplash.com/@maurosharedpictures?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-concrete-building-under-blue-sky-during-daytime-MLIHTkUcQ8Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#244685",
+          "w": 0.3623
+        },
+        {
+          "hex": "#D6D6D6",
+          "w": 0.3506
+        },
+        {
+          "hex": "#918683",
+          "w": 0.2871
+        }
+      ]
+    },
+    {
+      "id": "HcyFtJqiT-0",
+      "small": "https://images.unsplash.com/photo-1772656674442-a37d93baae3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1772656674442-a37d93baae3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBiYWxjb255JTIwc3VubGlnaHR8ZW58MXwwfHx8MTc5MjE4MDM1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 5152,
+      "blurHash": "LC9@Ch?uj{RVxuayR*ay01IVoat3",
+      "color": "#262626",
+      "alt": "Two oval mirrors hang on a wall near plants",
+      "author": "izabelle wilding",
+      "authorUrl": "https://unsplash.com/@izzywilding?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-oval-mirrors-hang-on-a-wall-near-plants-HcyFtJqiT-0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#322B26",
+          "w": 0.4554
+        },
+        {
+          "hex": "#68615E",
+          "w": 0.3045
+        },
+        {
+          "hex": "#090505",
+          "w": 0.2401
+        }
+      ]
+    },
+    {
+      "id": "_mHaBgbbHZU",
+      "small": "https://images.unsplash.com/photo-1588796460718-f457ad1e1a1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1588796460718-f457ad1e1a1f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6960,
+      "height": 4640,
+      "blurHash": "LMKKi^8^~BXAtm-.xts+tR9}IU%0",
+      "color": "#c0c0a6",
+      "alt": "white and brown wooden kitchen cabinet",
+      "author": "Lotus Design N Print",
+      "authorUrl": "https://unsplash.com/@lotusdnp?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-kitchen-cabinet-_mHaBgbbHZU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFC4B8",
+          "w": 0.6055
+        },
+        {
+          "hex": "#3F6C89",
+          "w": 0.2404
+        },
+        {
+          "hex": "#AA9078",
+          "w": 0.1541
+        }
+      ]
+    },
+    {
+      "id": "x7UCASMXRTY",
+      "small": "https://images.unsplash.com/photo-1668910231038-e342ad670789?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668910231038-e342ad670789?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LUJkTAxtWXRj?wWBoKae?at6WBof",
+      "color": "#c0c0c0",
+      "alt": "a kitchen with white cabinets",
+      "author": "Point3D Commercial Imaging Ltd.",
+      "authorUrl": "https://unsplash.com/@3dottawa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-with-white-cabinets-x7UCASMXRTY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B4ABA4",
+          "w": 0.4114
+        },
+        {
+          "hex": "#CBCACA",
+          "w": 0.305
+        },
+        {
+          "hex": "#8E8680",
+          "w": 0.2835
+        }
+      ]
+    },
+    {
+      "id": "QPivxTs7QVU",
+      "small": "https://images.unsplash.com/photo-1713707131810-d53b3b1ecced?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1713707131810-d53b3b1ecced?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3200,
+      "height": 2133,
+      "blurHash": "LHEVj70KWY4nS#xZkWs:4nxv%1o#",
+      "color": "#260c0c",
+      "alt": "a kitchen with a table and a refrigerator",
+      "author": "Clay Banks",
+      "authorUrl": "https://unsplash.com/@claybanks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-with-a-table-and-a-refrigerator-QPivxTs7QVU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#83766A",
+          "w": 0.3628
+        },
+        {
+          "hex": "#170E08",
+          "w": 0.3479
+        },
+        {
+          "hex": "#B7B3AB",
+          "w": 0.2893
+        }
+      ]
+    },
+    {
+      "id": "wDkYC1-4lwo",
+      "small": "https://images.unsplash.com/photo-1659720879171-5fb849451fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659720879171-5fb849451fe4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2YWNhdGlvbiUyMHJlbnRhbCUyMGtpdGNoZW58ZW58MXwwfHx8MTc5MjE4MDM1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4143,
+      "height": 2762,
+      "blurHash": "L9HBMHMv_3MxVBxb-mw^z=rqtOt7",
+      "color": "#a6a68c",
+      "alt": "a kitchen with a sink and a mirror",
+      "author": "Hans",
+      "authorUrl": "https://unsplash.com/@hansphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-kitchen-with-a-sink-and-a-mirror-wDkYC1-4lwo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B99E85",
+          "w": 0.4025
+        },
+        {
+          "hex": "#9A7D61",
+          "w": 0.3214
+        },
+        {
+          "hex": "#795940",
+          "w": 0.2761
+        }
+      ]
+    },
+    {
+      "id": "2tG2sVd1d_g",
+      "small": "https://images.unsplash.com/photo-1766777323830-6ed16e01fecf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766777323830-6ed16e01fecf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LdFiMrE2nhWr?wogV@bco~xuWAoz",
+      "color": "#262626",
+      "alt": "Stone cottage with a slate roof and wooden fence",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stone-cottage-with-a-slate-roof-and-wooden-fence-2tG2sVd1d_g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A19B98",
+          "w": 0.3651
+        },
+        {
+          "hex": "#736A62",
+          "w": 0.3194
+        },
+        {
+          "hex": "#343127",
+          "w": 0.3155
+        }
+      ]
+    },
+    {
+      "id": "06DvFN3poPw",
+      "small": "https://images.unsplash.com/photo-1785407446300-3d89e2158956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785407446300-3d89e2158956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4032,
+      "blurHash": "LHCQ0hRn9ZWB_NofIURj%LtPM|WB",
+      "color": "#404026",
+      "alt": "A traditional house nestled among green trees and plants",
+      "author": "Sunil kumar",
+      "authorUrl": "https://unsplash.com/@insidergoa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-traditional-house-nestled-among-green-trees-and-plants-06DvFN3poPw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4E532F",
+          "w": 0.3619
+        },
+        {
+          "hex": "#777E57",
+          "w": 0.3412
+        },
+        {
+          "hex": "#2A2710",
+          "w": 0.2969
+        }
+      ]
+    },
+    {
+      "id": "KKgQlHTTedU",
+      "small": "https://images.unsplash.com/photo-1604864166432-921f0018e563?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604864166432-921f0018e563?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2364,
+      "blurHash": "LWHoO6H?jDtR~WIVM{s:.8MxNGW;",
+      "color": "#f3f3d9",
+      "alt": "brown clay pot on swimming pool during daytime",
+      "author": "Joana Abreu",
+      "authorUrl": "https://unsplash.com/@joanacabreu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-clay-pot-on-swimming-pool-during-daytime-KKgQlHTTedU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A4AE94",
+          "w": 0.4209
+        },
+        {
+          "hex": "#7C7B59",
+          "w": 0.4005
+        },
+        {
+          "hex": "#E3E0D8",
+          "w": 0.1787
+        }
+      ]
+    },
+    {
+      "id": "omsriVMVd_A",
+      "small": "https://images.unsplash.com/photo-1766823343386-586aac281b28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766823343386-586aac281b28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdG9uZSUyMGNvdHRhZ2UlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODAzNjF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LODl[@M|R+D$_4oMkBIUXnxvV@WA",
+      "color": "#264026",
+      "alt": "Outdoor patio with stone wall and furniture",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/outdoor-patio-with-stone-wall-and-furniture-omsriVMVd_A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#394928",
+          "w": 0.5155
+        },
+        {
+          "hex": "#746B63",
+          "w": 0.2775
+        },
+        {
+          "hex": "#99908F",
+          "w": 0.207
+        }
+      ]
+    }
+  ]
+}

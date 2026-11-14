@@ -1,0 +1,335 @@
+{
+  "slug": "mercerie",
+  "queries": [
+    "buttons and thread display",
+    "yarn balls shop shelf",
+    "haberdashery counter drawers"
+  ],
+  "generatedAt": "2026-10-16T20:56:33.633Z",
+  "photos": [
+    {
+      "id": "B3P7x5DRt_M",
+      "small": "https://images.unsplash.com/photo-1711610378090-779a7881a789?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711610378090-779a7881a789?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "L67^-]R6ERo}Kis:xYbt01o}t5nR",
+      "color": "#262626",
+      "alt": "a collection of buttons and buttons on a table",
+      "author": "Olga Kovalski",
+      "authorUrl": "https://unsplash.com/@kovalskihelga?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-collection-of-buttons-and-buttons-on-a-table-B3P7x5DRt_M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#222120",
+          "w": 0.7201
+        },
+        {
+          "hex": "#4A3D36",
+          "w": 0.1464
+        },
+        {
+          "hex": "#6B6558",
+          "w": 0.1335
+        }
+      ]
+    },
+    {
+      "id": "sFubXOglx7g",
+      "small": "https://images.unsplash.com/photo-1613555612473-90cf723dfb60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613555612473-90cf723dfb60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LQJ[*K4TxvxZ^+%gxut8?voMozWF",
+      "color": "#d9f3f3",
+      "alt": "blue and white buttons with blue and red buttons",
+      "author": "Merve Sehirli Nasir",
+      "authorUrl": "https://unsplash.com/@32steps?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-white-buttons-with-blue-and-red-buttons-sFubXOglx7g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8E4E4",
+          "w": 0.5168
+        },
+        {
+          "hex": "#959F9D",
+          "w": 0.305
+        },
+        {
+          "hex": "#5A605E",
+          "w": 0.1781
+        }
+      ]
+    },
+    {
+      "id": "da_0dNX5aew",
+      "small": "https://images.unsplash.com/photo-1613555793439-c50b6274176a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613555793439-c50b6274176a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LlJu+H4TR,tRR%M{aKt7xuoeayoz",
+      "color": "#d9f3f3",
+      "alt": "thread spool and thread on white surface",
+      "author": "Merve Sehirli Nasir",
+      "authorUrl": "https://unsplash.com/@32steps?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/thread-spool-and-thread-on-white-surface-da_0dNX5aew?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1DFE5",
+          "w": 0.6023
+        },
+        {
+          "hex": "#A5B2AC",
+          "w": 0.2134
+        },
+        {
+          "hex": "#6F7875",
+          "w": 0.1843
+        }
+      ]
+    },
+    {
+      "id": "IkbM-licKEE",
+      "small": "https://images.unsplash.com/photo-1613632148096-7b2177bcfa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613632148096-7b2177bcfa0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxidXR0b25zJTIwYW5kJTIwdGhyZWFkJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LVJb~q4n?w%gobM_t7x]%gt7M{V@",
+      "color": "#c0d9d9",
+      "alt": "assorted color thread roll on white surface",
+      "author": "Merve Sehirli Nasir",
+      "authorUrl": "https://unsplash.com/@32steps?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-thread-roll-on-white-surface-IkbM-licKEE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C5D8DF",
+          "w": 0.6955
+        },
+        {
+          "hex": "#92A49D",
+          "w": 0.1532
+        },
+        {
+          "hex": "#5F6F6D",
+          "w": 0.1514
+        }
+      ]
+    },
+    {
+      "id": "Z3Uxrt6o9kE",
+      "small": "https://images.unsplash.com/photo-1714922938267-befc65aad0cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1714922938267-befc65aad0cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7355,
+      "height": 5149,
+      "blurHash": "LJB4dy-:m*4:xzsq%IXNH;S2NKxH",
+      "color": "#a6a6c0",
+      "alt": "several balls of yarn are in a box",
+      "author": "Gabriele Motter",
+      "authorUrl": "https://unsplash.com/@gabe_motter?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/several-balls-of-yarn-are-in-a-box-Z3Uxrt6o9kE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#437687",
+          "w": 0.4034
+        },
+        {
+          "hex": "#97A8AD",
+          "w": 0.3264
+        },
+        {
+          "hex": "#243F58",
+          "w": 0.2702
+        }
+      ]
+    },
+    {
+      "id": "TgBqxQCeC3M",
+      "small": "https://images.unsplash.com/photo-1786723172688-d0e27a4bd4c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786723172688-d0e27a4bd4c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LbJ8U|IpD*t6~qNGIURjM{oeoeWB",
+      "color": "#d9d9d9",
+      "alt": "Rows of yarn balls in plastic packaging on a store shelf",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yarn-balls-on-store-shelf-TgBqxQCeC3M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDDBD6",
+          "w": 0.4841
+        },
+        {
+          "hex": "#A6A6A1",
+          "w": 0.2634
+        },
+        {
+          "hex": "#414748",
+          "w": 0.2525
+        }
+      ]
+    },
+    {
+      "id": "ajIOpN20TYI",
+      "small": "https://images.unsplash.com/photo-1641060889144-1cc91e6871ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1641060889144-1cc91e6871ce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 3000,
+      "blurHash": "LvL.+2{,ITNqx^Nab]bat+RjMwt8",
+      "color": "#f3f3f3",
+      "alt": "a pile of balls of yarn sitting next to each other",
+      "author": "Nancy Hughes",
+      "authorUrl": "https://unsplash.com/@mostlymarvelling?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-balls-of-yarn-sitting-next-to-each-other-ajIOpN20TYI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D982AE",
+          "w": 0.3987
+        },
+        {
+          "hex": "#303B1E",
+          "w": 0.3009
+        },
+        {
+          "hex": "#E7D9E0",
+          "w": 0.3005
+        }
+      ]
+    },
+    {
+      "id": "jx_L6fj2yDE",
+      "small": "https://images.unsplash.com/photo-1780764256034-2c31b81ee6ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780764256034-2c31b81ee6ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5YXJuJTIwYmFsbHMlMjBzaG9wJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE4NDE4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4138,
+      "height": 2759,
+      "blurHash": "LDBeq1$x1iWFM{6QJ%|tD*nT$wSz",
+      "color": "#262626",
+      "alt": "Colorful balls of yarn scattered on a dark patterned fabric",
+      "author": "Margo Evardson",
+      "authorUrl": "https://unsplash.com/@stadinstudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/colorful-balls-of-yarn-scattered-on-a-dark-patterned-fabric-jx_L6fj2yDE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#201D27",
+          "w": 0.4177
+        },
+        {
+          "hex": "#453A3B",
+          "w": 0.4074
+        },
+        {
+          "hex": "#557466",
+          "w": 0.1749
+        }
+      ]
+    },
+    {
+      "id": "BngKr53ZvR4",
+      "small": "https://images.unsplash.com/photo-1676907228185-6869277a9f8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676907228185-6869277a9f8f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LXNmG|9FxaM|R4o#%LRj~qxtM{oe",
+      "color": "#f3f3f3",
+      "alt": "an open drawer in a kitchen filled with dishes",
+      "author": "Orgalux",
+      "authorUrl": "https://unsplash.com/@orgalux?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-open-drawer-in-a-kitchen-filled-with-dishes-BngKr53ZvR4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDE0D4",
+          "w": 0.4711
+        },
+        {
+          "hex": "#CBA888",
+          "w": 0.4385
+        },
+        {
+          "hex": "#645A51",
+          "w": 0.0903
+        }
+      ]
+    },
+    {
+      "id": "3xBaec8_NWA",
+      "small": "https://images.unsplash.com/photo-1782406747410-2b4a8feb41ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782406747410-2b4a8feb41ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6438,
+      "height": 4292,
+      "blurHash": "LjLENPt7WAV@%gM_Riae0KIUoKof",
+      "color": "#f3f3f3",
+      "alt": "Open drawers filled with snacks in a modern kitchen island",
+      "author": "Madeline Liu",
+      "authorUrl": "https://unsplash.com/@madeline_sd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/open-drawers-filled-with-snacks-in-a-modern-kitchen-island-3xBaec8_NWA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8E7E5",
+          "w": 0.4045
+        },
+        {
+          "hex": "#BAB5AC",
+          "w": 0.3105
+        },
+        {
+          "hex": "#8B8C81",
+          "w": 0.285
+        }
+      ]
+    },
+    {
+      "id": "T-H8RqFb-iU",
+      "small": "https://images.unsplash.com/photo-1569820229202-fcd68422edf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1569820229202-fcd68422edf8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6036,
+      "height": 4024,
+      "blurHash": "LcF$Il~qogxt%Mt7Rjj]NHaeRjM{",
+      "color": "#c0c0c0",
+      "alt": "boxes inside black wooden drawer",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/boxes-inside-black-wooden-drawer-T-H8RqFb-iU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2BEB8",
+          "w": 0.4359
+        },
+        {
+          "hex": "#090404",
+          "w": 0.318
+        },
+        {
+          "hex": "#7F7775",
+          "w": 0.2461
+        }
+      ]
+    },
+    {
+      "id": "1PISEieR0Bo",
+      "small": "https://images.unsplash.com/photo-1680358963139-572462e6bac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1680358963139-572462e6bac9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYWJlcmRhc2hlcnklMjBjb3VudGVyJTIwZHJhd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LPOp[B?wtSozoMR%ofayRjayozj[",
+      "color": "#d9d9d9",
+      "alt": "a close up of a white dresser with brass handles",
+      "author": "Eline Marrieth",
+      "authorUrl": "https://unsplash.com/@elinemarrieth?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-white-dresser-with-brass-handles-1PISEieR0Bo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4E7E1",
+          "w": 0.4688
+        },
+        {
+          "hex": "#D5D7CA",
+          "w": 0.4067
+        },
+        {
+          "hex": "#BBB89A",
+          "w": 0.1246
+        }
+      ]
+    }
+  ]
+}

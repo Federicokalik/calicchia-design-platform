@@ -1,0 +1,335 @@
+{
+  "slug": "amministratori-di-condominio",
+  "queries": [
+    "apartment building entrance",
+    "residential building balconies",
+    "apartment stairwell daylight"
+  ],
+  "generatedAt": "2026-10-16T16:27:03.091Z",
+  "photos": [
+    {
+      "id": "NycGWaEgtm8",
+      "small": "https://images.unsplash.com/photo-1760799264625-2abcfe55e59c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760799264625-2abcfe55e59c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5015,
+      "height": 3761,
+      "blurHash": "LA9@CT%eR%S2EPSOt6j[~oozM|fk",
+      "color": "#260c0c",
+      "alt": "Entrance to a mid-century modern apartment building",
+      "author": "Linus Belanger",
+      "authorUrl": "https://unsplash.com/@linusbelanger?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/entrance-to-a-mid-century-modern-apartment-building-NycGWaEgtm8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#240C0E",
+          "w": 0.3498
+        },
+        {
+          "hex": "#5A5835",
+          "w": 0.3464
+        },
+        {
+          "hex": "#7F7B5D",
+          "w": 0.3038
+        }
+      ]
+    },
+    {
+      "id": "yscCpM8NBXg",
+      "small": "https://images.unsplash.com/photo-1762529484700-1a7aa5992aff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762529484700-1a7aa5992aff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBAw9uR%ofo000Rj%MbIWA%MD%Rj",
+      "color": "#404040",
+      "alt": "Double metal doors on a building facade",
+      "author": "Maxim Klimashin",
+      "authorUrl": "https://unsplash.com/@maxim_klimashin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/double-metal-doors-on-a-building-facade-yscCpM8NBXg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#413D3B",
+          "w": 0.4393
+        },
+        {
+          "hex": "#6D6969",
+          "w": 0.3093
+        },
+        {
+          "hex": "#1E1B18",
+          "w": 0.2515
+        }
+      ]
+    },
+    {
+      "id": "EK6B1Dg00bg",
+      "small": "https://images.unsplash.com/photo-1704489457735-c3930e83081a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1704489457735-c3930e83081a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5204,
+      "height": 3472,
+      "blurHash": "L12$T=M{RPt7_NM{Mxt7?]M{RPof",
+      "color": "#262626",
+      "alt": "a row of metal poles with a building in the background",
+      "author": "kyle mcdonald",
+      "authorUrl": "https://unsplash.com/@special_k1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-metal-poles-with-a-building-in-the-background-EK6B1Dg00bg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#090A08",
+          "w": 0.4791
+        },
+        {
+          "hex": "#1B1E1E",
+          "w": 0.3561
+        },
+        {
+          "hex": "#000000",
+          "w": 0.1648
+        }
+      ]
+    },
+    {
+      "id": "DPa2SfuZJoE",
+      "small": "https://images.unsplash.com/photo-1788098527571-94e2fa8a67e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788098527571-94e2fa8a67e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBidWlsZGluZyUyMGVudHJhbmNlfGVufDF8MHx8fDE3OTIxNjgwMTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LIDvi=XLD$og~pNDRit8~qbXWBt7",
+      "color": "#737373",
+      "alt": "A pedestrian street sign and a sign reading SOMMAR GATA in a courtyard",
+      "author": "Marek Lumi",
+      "authorUrl": "https://unsplash.com/@mareklumi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pedestrian-street-sign-in-courtyard-DPa2SfuZJoE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#70727A",
+          "w": 0.4985
+        },
+        {
+          "hex": "#B0AFB3",
+          "w": 0.2716
+        },
+        {
+          "hex": "#4B4E4F",
+          "w": 0.2299
+        }
+      ]
+    },
+    {
+      "id": "hK-jdvutWoU",
+      "small": "https://images.unsplash.com/photo-1623051786509-57224cdc43e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1623051786509-57224cdc43e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4973,
+      "height": 3647,
+      "blurHash": "LVG924cZwuSO.TpIt7jtpJNGnhof",
+      "color": "#a67359",
+      "alt": "a very tall building with many balconies on it",
+      "author": "the blowup",
+      "authorUrl": "https://unsplash.com/@theblowup?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-very-tall-building-with-many-balconies-on-it-hK-jdvutWoU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A17F68",
+          "w": 0.4919
+        },
+        {
+          "hex": "#96BBCB",
+          "w": 0.335
+        },
+        {
+          "hex": "#52534F",
+          "w": 0.1731
+        }
+      ]
+    },
+    {
+      "id": "xRy-fzHF5rs",
+      "small": "https://images.unsplash.com/photo-1711203605191-d879424e7ec2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711203605191-d879424e7ec2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LCHw$4EM4mE,~WELM{ozIp-oxas;",
+      "color": "#c08c59",
+      "alt": "a tall orange building with balconies and balconies",
+      "author": "Alex Skobe",
+      "authorUrl": "https://unsplash.com/@alex_skobe?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tall-orange-building-with-balconies-and-balconies-xRy-fzHF5rs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AF7249",
+          "w": 0.5102
+        },
+        {
+          "hex": "#624233",
+          "w": 0.2805
+        },
+        {
+          "hex": "#A5999A",
+          "w": 0.2093
+        }
+      ]
+    },
+    {
+      "id": "X5o8QLYvzXs",
+      "small": "https://images.unsplash.com/photo-1768118421324-8bae7959ad23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768118421324-8bae7959ad23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3888,
+      "height": 2592,
+      "blurHash": "LJGbq=~q.9tS0L9FM{s,01WBMxj[",
+      "color": "#d9d9c0",
+      "alt": "Buildings with balconies and plants in need of repair",
+      "author": "Nguyen Minh",
+      "authorUrl": "https://unsplash.com/@ngminh8895?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/buildings-with-balconies-and-plants-in-need-of-repair-X5o8QLYvzXs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C8C5B9",
+          "w": 0.4084
+        },
+        {
+          "hex": "#524E32",
+          "w": 0.334
+        },
+        {
+          "hex": "#1C1D14",
+          "w": 0.2576
+        }
+      ]
+    },
+    {
+      "id": "hNsCwRFN6wQ",
+      "small": "https://images.unsplash.com/photo-1775116396366-a701ec9a633a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775116396366-a701ec9a633a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXNpZGVudGlhbCUyMGJ1aWxkaW5nJTIwYmFsY29uaWVzfGVufDF8MHx8fDE3OTIxNjgwMTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6192,
+      "height": 3480,
+      "blurHash": "LZJ7?I?EIVEm~nocD+M~oeWBRkWC",
+      "color": "#f3d98c",
+      "alt": "A balcony on a light green building with yellow windows",
+      "author": "boris misevic",
+      "authorUrl": "https://unsplash.com/@borisview?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-balcony-on-a-light-green-building-with-yellow-windows-hNsCwRFN6wQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8D481",
+          "w": 0.4602
+        },
+        {
+          "hex": "#9D915D",
+          "w": 0.3647
+        },
+        {
+          "hex": "#695422",
+          "w": 0.1751
+        }
+      ]
+    },
+    {
+      "id": "0LJpa1D4ClA",
+      "small": "https://images.unsplash.com/photo-1774124284962-f51970cf2a88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774124284962-f51970cf2a88?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LaF~jzXVs;t7yZXTV?WBE2n%jEbH",
+      "color": "#8ca6d9",
+      "alt": "Modern apartment building with balconies and cars",
+      "author": "daniel mironov",
+      "authorUrl": "https://unsplash.com/@cheesy_daniel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-apartment-building-with-balconies-and-cars-0LJpa1D4ClA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9AAAC7",
+          "w": 0.5263
+        },
+        {
+          "hex": "#665651",
+          "w": 0.2503
+        },
+        {
+          "hex": "#8C8083",
+          "w": 0.2235
+        }
+      ]
+    },
+    {
+      "id": "-JJZMzuxYAI",
+      "small": "https://images.unsplash.com/photo-1631970508655-a98bb9593e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631970508655-a98bb9593e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3287,
+      "height": 2191,
+      "blurHash": "L5AclI%jPEO^9vJWtlROVWI8Sy-.",
+      "color": "#402626",
+      "alt": "a red brick building with a metal hand rail",
+      "author": "sq lim",
+      "authorUrl": "https://unsplash.com/@sql?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-red-brick-building-with-a-metal-hand-rail--JJZMzuxYAI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#512D2B",
+          "w": 0.4901
+        },
+        {
+          "hex": "#68433C",
+          "w": 0.3272
+        },
+        {
+          "hex": "#494854",
+          "w": 0.1827
+        }
+      ]
+    },
+    {
+      "id": "6wOrVwlER7Y",
+      "small": "https://images.unsplash.com/photo-1754956042991-213b2e27db67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1754956042991-213b2e27db67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9352,
+      "height": 6235,
+      "blurHash": "LADJCaD$0gjZB%sQ?I9a_3ngxbE1",
+      "color": "#262626",
+      "alt": "Concrete stairs and planters with green bushes and trees",
+      "author": "Dennis Zhang",
+      "authorUrl": "https://unsplash.com/@windagh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/concrete-stairs-and-planters-with-green-bushes-and-trees-6wOrVwlER7Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#827F62",
+          "w": 0.3868
+        },
+        {
+          "hex": "#535144",
+          "w": 0.3375
+        },
+        {
+          "hex": "#27241C",
+          "w": 0.2756
+        }
+      ]
+    },
+    {
+      "id": "-EJbpbSYU1I",
+      "small": "https://images.unsplash.com/photo-1668156387408-568256e1b4cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668156387408-568256e1b4cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhcGFydG1lbnQlMjBzdGFpcndlbGwlMjBkYXlsaWdodHxlbnwxfDB8fHwxNzkyMTY4MDIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5135,
+      "height": 3426,
+      "blurHash": "LCHe2tMxIU#7.mI9bcVs.8RP9FSh",
+      "color": "#c0c0c0",
+      "alt": "a person standing on a staircase",
+      "author": "Marius Muresan",
+      "authorUrl": "https://unsplash.com/@muresan113?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-standing-on-a-staircase--EJbpbSYU1I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8B6555",
+          "w": 0.392
+        },
+        {
+          "hex": "#AE8F83",
+          "w": 0.3118
+        },
+        {
+          "hex": "#5B4034",
+          "w": 0.2962
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "slug": "imprese-funebri",
+  "queries": [
+    "funeral flowers white",
+    "candle memorial quiet",
+    "hearse car flowers"
+  ],
+  "generatedAt": "2026-10-16T21:58:46.400Z",
+  "photos": [
+    {
+      "id": "gwIuwbwVhZE",
+      "small": "https://images.unsplash.com/photo-1528564031703-bf3181c2294e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1528564031703-bf3181c2294e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3936,
+      "height": 2624,
+      "blurHash": "LMNwixM|R+jc_4t6oft7IVt8j?oH",
+      "color": "#d9d9d9",
+      "alt": "white petaled flowers",
+      "author": "Jez Timms",
+      "authorUrl": "https://unsplash.com/@jeztimms?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-petaled-flowers-gwIuwbwVhZE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DEE1DA",
+          "w": 0.5384
+        },
+        {
+          "hex": "#C7CBBA",
+          "w": 0.3359
+        },
+        {
+          "hex": "#A2A98A",
+          "w": 0.1257
+        }
+      ]
+    },
+    {
+      "id": "AU1RwsIjuLg",
+      "small": "https://images.unsplash.com/photo-1659902374294-0a97f40b8877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659902374294-0a97f40b8877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LXOdvyE40it5]jI=kUkBS}WCo2oe",
+      "color": "#f3a640",
+      "alt": "a white plate with flowers and candles",
+      "author": "Kaja Sariwating",
+      "authorUrl": "https://unsplash.com/@k_sariwating?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-plate-with-flowers-and-candles-AU1RwsIjuLg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3A448",
+          "w": 0.3961
+        },
+        {
+          "hex": "#BC7B26",
+          "w": 0.3432
+        },
+        {
+          "hex": "#925305",
+          "w": 0.2607
+        }
+      ]
+    },
+    {
+      "id": "_mturSj64iY",
+      "small": "https://images.unsplash.com/photo-1758334587549-0c80dbf4dd3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758334587549-0c80dbf4dd3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2670,
+      "blurHash": "LA6*sxkA4WV_jZazWVj@4qaf-.ox",
+      "color": "#26400c",
+      "alt": "A circular floral arrangement with white and green flowers",
+      "author": "Patrik Svoboda",
+      "authorUrl": "https://unsplash.com/@fredon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-circular-floral-arrangement-with-white-and-green-flowers-_mturSj64iY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#000000",
+          "w": 0.7347
+        },
+        {
+          "hex": "#4F5E2F",
+          "w": 0.133
+        },
+        {
+          "hex": "#9AA56A",
+          "w": 0.1323
+        }
+      ]
+    },
+    {
+      "id": "PM96qlpCrPA",
+      "small": "https://images.unsplash.com/photo-1557153824-70aaf758721c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1557153824-70aaf758721c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdW5lcmFsJTIwZmxvd2VycyUyMHdoaXRlfGVufDF8MHx8fDE3OTIxODc5MjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 1634,
+      "blurHash": "LcH.G~9F01%M%3ayWARjM{aeof%M",
+      "color": "#d9d9d9",
+      "alt": "white flowers blooming",
+      "author": "Mitchel Boot",
+      "authorUrl": "https://unsplash.com/@valeon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-flowers-blooming-PM96qlpCrPA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCD9CF",
+          "w": 0.5285
+        },
+        {
+          "hex": "#6D693B",
+          "w": 0.2985
+        },
+        {
+          "hex": "#494918",
+          "w": 0.173
+        }
+      ]
+    },
+    {
+      "id": "AaZlf5FgUws",
+      "small": "https://images.unsplash.com/photo-1561212856-44e9bae482aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1561212856-44e9bae482aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L65Nu=%10z0zOrX8wJr?57NG={=|",
+      "color": "#260c0c",
+      "alt": "close-up of lighted candle",
+      "author": "David Tomaseti",
+      "authorUrl": "https://unsplash.com/@dtomaseti?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-of-lighted-candle-AaZlf5FgUws?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030000",
+          "w": 0.9259
+        },
+        {
+          "hex": "#380300",
+          "w": 0.0741
+        }
+      ]
+    },
+    {
+      "id": "KY6NHtBWJB8",
+      "small": "https://images.unsplash.com/photo-1528351655744-27cc30462816?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1528351655744-27cc30462816?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LMByjW-:0#I;pIxu$$oe5pbb^ixZ",
+      "color": "#262626",
+      "alt": "tea light on brown surface",
+      "author": "Paolo Nicolello",
+      "authorUrl": "https://unsplash.com/@paul_nic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/tea-light-on-brown-surface-KY6NHtBWJB8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#24242A",
+          "w": 0.533
+        },
+        {
+          "hex": "#453F43",
+          "w": 0.2825
+        },
+        {
+          "hex": "#8F8171",
+          "w": 0.1845
+        }
+      ]
+    },
+    {
+      "id": "fvl4b1gjpbk",
+      "small": "https://images.unsplash.com/photo-1476900164809-ff19b8ae5968?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1476900164809-ff19b8ae5968?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3888,
+      "height": 2592,
+      "blurHash": "L79ZltM|0gs.?ZRk9bt7EM-UV@WC",
+      "color": "#260c0c",
+      "alt": "low-angle photo of lightened candles",
+      "author": "Mike Labrum",
+      "authorUrl": "https://unsplash.com/@labrum777?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/low-angle-photo-of-lightened-candles-fvl4b1gjpbk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0A0502",
+          "w": 0.7278
+        },
+        {
+          "hex": "#462103",
+          "w": 0.1733
+        },
+        {
+          "hex": "#986F45",
+          "w": 0.0989
+        }
+      ]
+    },
+    {
+      "id": "vRH__teNKBM",
+      "small": "https://images.unsplash.com/photo-1489101960932-eb71762e6bc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1489101960932-eb71762e6bc8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYW5kbGUlMjBtZW1vcmlhbCUyMHF1aWV0fGVufDF8MHx8fDE3OTIxODc5MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L12h?hay0Ks:-:ayD*oe57j[^jWV",
+      "color": "#260c0c",
+      "alt": "red lit candle",
+      "author": "David Monje",
+      "authorUrl": "https://unsplash.com/@davidmonje?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-lit-candle-vRH__teNKBM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#020101",
+          "w": 0.8807
+        },
+        {
+          "hex": "#0C0403",
+          "w": 0.1193
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "caldaisti",
+  "queries": [
+    "wall mounted boiler",
+    "boiler pressure gauge",
+    "boiler room pipes"
+  ],
+  "generatedAt": "2026-10-16T18:49:36.856Z",
+  "photos": [
+    {
+      "id": "ci0I3-1_oy0",
+      "small": "https://images.unsplash.com/photo-1710829558487-53baf9e26003?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1710829558487-53baf9e26003?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LVHLbyIq?F4m_4Z~o#M{IpnMS%xu",
+      "color": "#262626",
+      "alt": "a white and black air conditioner sitting outside of a building",
+      "author": "alpha innotec",
+      "authorUrl": "https://unsplash.com/@alpha_innotec?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-and-black-air-conditioner-sitting-outside-of-a-building-ci0I3-1_oy0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9CCCE",
+          "w": 0.3601
+        },
+        {
+          "hex": "#918A88",
+          "w": 0.3549
+        },
+        {
+          "hex": "#1F1C1C",
+          "w": 0.285
+        }
+      ]
+    },
+    {
+      "id": "ii5IRyypPhs",
+      "small": "https://images.unsplash.com/photo-1575299737366-39c143459bc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1575299737366-39c143459bc5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5911,
+      "height": 3941,
+      "blurHash": "LJDS{__N9FIU9FRjxujuD%Rjt6kC",
+      "color": "#8c8c8c",
+      "alt": "water heater on wall above sink",
+      "author": "Michal Balog",
+      "authorUrl": "https://unsplash.com/@mikbutcher?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/water-heater-on-wall-above-sink-ii5IRyypPhs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A8AAA7",
+          "w": 0.417
+        },
+        {
+          "hex": "#383F3E",
+          "w": 0.2936
+        },
+        {
+          "hex": "#6E7270",
+          "w": 0.2893
+        }
+      ]
+    },
+    {
+      "id": "SYdhFwICWJU",
+      "small": "https://images.unsplash.com/photo-1601914697928-0b536e76d048?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1601914697928-0b536e76d048?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJMtK#I__3Mx~pM{M{kCIVxtV@Rj",
+      "color": "#c0c0c0",
+      "alt": "white and black water heater",
+      "author": "iMattSmart",
+      "authorUrl": "https://unsplash.com/@imattsmart?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-black-water-heater-SYdhFwICWJU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2BDBB",
+          "w": 0.4526
+        },
+        {
+          "hex": "#E1DAD2",
+          "w": 0.406
+        },
+        {
+          "hex": "#756C65",
+          "w": 0.1414
+        }
+      ]
+    },
+    {
+      "id": "WgAmt-mJ9QA",
+      "small": "https://images.unsplash.com/photo-1762500824903-0f96b202e8f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762500824903-0f96b202e8f4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YWxsJTIwbW91bnRlZCUyMGJvaWxlcnxlbnwxfDB8fHwxNzkyMTc2NTY4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5000,
+      "height": 3750,
+      "blurHash": "LhHLh;_NE1M_x^x]j[aexwx^xujF",
+      "color": "#a6a6a6",
+      "alt": "Woman and dog relax by large window with robot vacuum",
+      "author": "Dreame Vacuum Cleaner",
+      "authorUrl": "https://unsplash.com/@dreametech?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-and-dog-relax-by-large-window-with-robot-vacuum-WgAmt-mJ9QA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5A092",
+          "w": 0.3886
+        },
+        {
+          "hex": "#1C130F",
+          "w": 0.3103
+        },
+        {
+          "hex": "#D6DDDE",
+          "w": 0.3011
+        }
+      ]
+    },
+    {
+      "id": "eLaCt0BRQvU",
+      "small": "https://images.unsplash.com/photo-1744302570296-d4bcb55b7002?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1744302570296-d4bcb55b7002?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5834,
+      "height": 3879,
+      "blurHash": "LDATi,%M00WBM{IURj%M9Fxu?bRj",
+      "color": "#262626",
+      "alt": "Pressure gauges and valves are shown in monochrome",
+      "author": "Miguel Ángel Padriñán Alba",
+      "authorUrl": "https://unsplash.com/@padrinan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pressure-gauges-and-valves-are-shown-in-monochrome-eLaCt0BRQvU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2C2C2C",
+          "w": 0.4439
+        },
+        {
+          "hex": "#020202",
+          "w": 0.3054
+        },
+        {
+          "hex": "#5F5F5F",
+          "w": 0.2508
+        }
+      ]
+    },
+    {
+      "id": "4r45RJsld74",
+      "small": "https://images.unsplash.com/photo-1621319270118-a8d3b1396899?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1621319270118-a8d3b1396899?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3089,
+      "height": 2048,
+      "blurHash": "LcLq2w8^?G%L%1t7M{W=s+kCIVs:",
+      "color": "#d9d9c0",
+      "alt": "green and brown wooden analog wall clock",
+      "author": "Chanhee Lee",
+      "authorUrl": "https://unsplash.com/@jjik_da?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-brown-wooden-analog-wall-clock-4r45RJsld74?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1D8C7",
+          "w": 0.408
+        },
+        {
+          "hex": "#B5A079",
+          "w": 0.3961
+        },
+        {
+          "hex": "#837353",
+          "w": 0.1959
+        }
+      ]
+    },
+    {
+      "id": "Y3brPR0gjb4",
+      "small": "https://images.unsplash.com/photo-1530122577122-6b8010d1a6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1530122577122-6b8010d1a6b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LPKxM7-;%gxu_4RjogRj%NRjIUj?",
+      "color": "#d9d9d9",
+      "alt": "black and brown gauge manifold",
+      "author": "Emma Steinhobel",
+      "authorUrl": "https://unsplash.com/@emsteinhobel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-brown-gauge-manifold-Y3brPR0gjb4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CDD3D3",
+          "w": 0.646
+        },
+        {
+          "hex": "#A4A59E",
+          "w": 0.1928
+        },
+        {
+          "hex": "#696B64",
+          "w": 0.1612
+        }
+      ]
+    },
+    {
+      "id": "-GqvJ5g-Z4A",
+      "small": "https://images.unsplash.com/photo-1703041555997-f51216e6a532?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1703041555997-f51216e6a532?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib2lsZXIlMjBwcmVzc3VyZSUyMGdhdWdlfGVufDF8MHx8fDE3OTIxNzY1NzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LdF$6A4T%gIU-paKRkayofocj?fQ",
+      "color": "#c0c0c0",
+      "alt": "a close up of a pressure gauge attached to a pipe",
+      "author": "Salah Ait Mokhtar",
+      "authorUrl": "https://unsplash.com/@motosha?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-pressure-gauge-attached-to-a-pipe--GqvJ5g-Z4A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#694E2E",
+          "w": 0.363
+        },
+        {
+          "hex": "#927D57",
+          "w": 0.3354
+        },
+        {
+          "hex": "#392314",
+          "w": 0.3016
+        }
+      ]
+    },
+    {
+      "id": "IukQrXhSvPY",
+      "small": "https://images.unsplash.com/photo-1618840626133-54463084a141?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618840626133-54463084a141?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LFCiXR9tS2R5~CIo-pIAShM{s:R*",
+      "color": "#262626",
+      "alt": "grayscale photo of metal pipe",
+      "author": "Peter Herrmann",
+      "authorUrl": "https://unsplash.com/@tama66?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-metal-pipe-IukQrXhSvPY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100F12",
+          "w": 0.4428
+        },
+        {
+          "hex": "#393537",
+          "w": 0.3322
+        },
+        {
+          "hex": "#7C6B6D",
+          "w": 0.225
+        }
+      ]
+    },
+    {
+      "id": "letkPVWDX3Y",
+      "small": "https://images.unsplash.com/photo-1785344737419-5aeaa4139143?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785344737419-5aeaa4139143?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8368,
+      "height": 5584,
+      "blurHash": "L87w~U_4?w-;_N-;x^t78^D%IARP",
+      "color": "#262626",
+      "alt": "Industrial pipes and machinery in a dark, confined space",
+      "author": "John Crix",
+      "authorUrl": "https://unsplash.com/@jccrix?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/industrial-pipes-and-machinery-in-a-dark-confined-space-letkPVWDX3Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#262526",
+          "w": 0.3951
+        },
+        {
+          "hex": "#07090A",
+          "w": 0.3587
+        },
+        {
+          "hex": "#48494B",
+          "w": 0.2462
+        }
+      ]
+    },
+    {
+      "id": "vIdQ3jScGrg",
+      "small": "https://images.unsplash.com/photo-1773517459405-67adee847117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773517459405-67adee847117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "L89Qmq~qD%xuD%Rj%Mt7IUIUM{of",
+      "color": "#262626",
+      "alt": "Industrial interior with large machinery and pipes",
+      "author": "Dave Meckler",
+      "authorUrl": "https://unsplash.com/@phosphorvs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/industrial-interior-with-large-machinery-and-pipes-vIdQ3jScGrg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1E1E1E",
+          "w": 0.4752
+        },
+        {
+          "hex": "#434343",
+          "w": 0.359
+        },
+        {
+          "hex": "#747474",
+          "w": 0.1659
+        }
+      ]
+    },
+    {
+      "id": "1Xb5mJ9KxOw",
+      "small": "https://images.unsplash.com/photo-1773517458906-b2c7c94ad5b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773517458906-b2c7c94ad5b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxib2lsZXIlMjByb29tJTIwcGlwZXN8ZW58MXwwfHx8MTc5MjE3NjU3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8256,
+      "height": 5504,
+      "blurHash": "LJB|KZRjayM{~qIURjRj%Mofj[WB",
+      "color": "#595959",
+      "alt": "Industrial pipes and valves above an open furnace door",
+      "author": "Dave Meckler",
+      "authorUrl": "https://unsplash.com/@phosphorvs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/industrial-pipes-and-valves-above-an-open-furnace-door-1Xb5mJ9KxOw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C5C5C",
+          "w": 0.3998
+        },
+        {
+          "hex": "#919191",
+          "w": 0.3591
+        },
+        {
+          "hex": "#2A2A2A",
+          "w": 0.2412
+        }
+      ]
+    }
+  ]
+}

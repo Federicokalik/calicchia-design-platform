@@ -19,8 +19,10 @@ export const WEB_DESIGN_EXTRAS = {
     { slug: 'sviluppo-web', title: 'Sviluppo Web', shortPitch: 'Per dashboard, aree clienti e flussi custom il web design da solo non basta.' },
   ] satisfies readonly ServiceRelated[],
   leadMagnetCopy: {
-    eyebrow: 'Audit gratuito · 15 minuti',
-    title: 'Vuoi capire dove perdi clienti prima di iniziare?',
-    body: 'Guardo struttura, mobile, CTA, form e tracciamenti. 15 minuti su Meet, niente preventivo travestito da consulenza.',
+    eyebrow: 'Strumento gratuito · Palette di settore',
+    title: 'Prima di scegliere i colori, guarda il tuo settore',
+    body: "Scrivi la tua attività: lo strumento prende i colori da foto reali del settore, li prova su un'anteprima del sito e controlla il contrasto. Poi li esporti per Canva, CSS o Tailwind.",
+    href: '/risorse/palette-di-settore',
+    buttonLabel: 'Apri la palette di settore',
   } satisfies ServiceLeadMagnetCopy,
 } as const;

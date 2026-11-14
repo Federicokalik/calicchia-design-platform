@@ -1,0 +1,335 @@
+{
+  "slug": "scuole-private",
+  "queries": [
+    "classroom students desks",
+    "school corridor lockers",
+    "school science lab"
+  ],
+  "generatedAt": "2026-10-16T20:57:08.212Z",
+  "photos": [
+    {
+      "id": "PDRFeeDniCk",
+      "small": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580582932707-520aed937b7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4668,
+      "height": 2626,
+      "blurHash": "LQHoF0Ou0MfQ?wR:%Nt8?bj]M{j[",
+      "color": "#c0c0c0",
+      "alt": "empty classroom with desks and chalkboard",
+      "author": "Ivan Aleksic",
+      "authorUrl": "https://unsplash.com/@ivalex?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-classroom-with-desks-and-chalkboard-PDRFeeDniCk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AEAAAB",
+          "w": 0.4878
+        },
+        {
+          "hex": "#D6CFCB",
+          "w": 0.2773
+        },
+        {
+          "hex": "#7E7877",
+          "w": 0.2349
+        }
+      ]
+    },
+    {
+      "id": "dFohf_GUZJ0",
+      "small": "https://images.unsplash.com/photo-1635424239131-32dc44986b56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635424239131-32dc44986b56?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUH-#@xEIVD%~pt7M{ad9Fflt7kC",
+      "color": "#260c0c",
+      "alt": "an empty classroom with wooden desks and windows",
+      "author": "2y.kang",
+      "authorUrl": "https://unsplash.com/@2ykang?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-empty-classroom-with-wooden-desks-and-windows-dFohf_GUZJ0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFD4CB",
+          "w": 0.372
+        },
+        {
+          "hex": "#A78977",
+          "w": 0.3183
+        },
+        {
+          "hex": "#220A04",
+          "w": 0.3097
+        }
+      ]
+    },
+    {
+      "id": "Qw6wa96IvvQ",
+      "small": "https://images.unsplash.com/photo-1740635341299-3b8e3490f546?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1740635341299-3b8e3490f546?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LJGuRF.Tbvx^%}o}oHS1%1e.RkWB",
+      "color": "#8c7359",
+      "alt": "A classroom filled with lots of desks and chairs",
+      "author": "Nathan Cima",
+      "authorUrl": "https://unsplash.com/@nathan_cima?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-classroom-filled-with-lots-of-desks-and-chairs-Qw6wa96IvvQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#987E65",
+          "w": 0.4377
+        },
+        {
+          "hex": "#B4B1A6",
+          "w": 0.3062
+        },
+        {
+          "hex": "#74523B",
+          "w": 0.256
+        }
+      ]
+    },
+    {
+      "id": "PC91Jm1DlWA",
+      "small": "https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604134967494-8a9ed3adea0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGFzc3Jvb20lMjBzdHVkZW50cyUyMGRlc2tzfGVufDF8MHx8fDE3OTIxODQyMjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2736,
+      "blurHash": "LfJH:TRiM{WC~qM{WBfP-;j[t7Rj",
+      "color": "#f3f3f3",
+      "alt": "white table with black chairs",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-table-with-black-chairs-PC91Jm1DlWA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3C3826",
+          "w": 0.3381
+        },
+        {
+          "hex": "#ADAA94",
+          "w": 0.3356
+        },
+        {
+          "hex": "#EFEFE4",
+          "w": 0.3264
+        }
+      ]
+    },
+    {
+      "id": "2IX_qCZcpmI",
+      "small": "https://images.unsplash.com/photo-1599036495538-ee049546a069?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599036495538-ee049546a069?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4898,
+      "height": 3266,
+      "blurHash": "LD9QQ@s.4ToexAoe%Mj[IUa}x]a|",
+      "color": "#26260c",
+      "alt": "brown wooden chairs inside building",
+      "author": "Rebecca Campbell",
+      "authorUrl": "https://unsplash.com/@campbellcreates?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-chairs-inside-building-2IX_qCZcpmI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#373128",
+          "w": 0.3944
+        },
+        {
+          "hex": "#170E07",
+          "w": 0.3112
+        },
+        {
+          "hex": "#62594B",
+          "w": 0.2944
+        }
+      ]
+    },
+    {
+      "id": "0SOgn-svgUo",
+      "small": "https://images.unsplash.com/photo-1789106374683-f294e446711c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789106374683-f294e446711c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LdFEy3WCxZof~Uj[f+of%2oLR,j[",
+      "color": "#402626",
+      "alt": "A dimly lit school hallway with wooden paneling and white walls",
+      "author": "Yanhao Fang",
+      "authorUrl": "https://unsplash.com/@alamanga?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/school-hallway-with-wooden-paneling-0SOgn-svgUo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4C3428",
+          "w": 0.3712
+        },
+        {
+          "hex": "#C6A087",
+          "w": 0.3302
+        },
+        {
+          "hex": "#29140B",
+          "w": 0.2986
+        }
+      ]
+    },
+    {
+      "id": "ow-cBNB05fY",
+      "small": "https://images.unsplash.com/photo-1775574439461-d845b358984a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775574439461-d845b358984a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3528,
+      "height": 2302,
+      "blurHash": "LOKIhsTc0|R*AtRPxGo}5Rx]tQic",
+      "color": "#c0260c",
+      "alt": "Red and white striped hallway with timeline graphics",
+      "author": "Brett Jordan",
+      "authorUrl": "https://unsplash.com/@brett_jordan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-white-striped-hallway-with-timeline-graphics-ow-cBNB05fY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B92101",
+          "w": 0.4205
+        },
+        {
+          "hex": "#CD6B4F",
+          "w": 0.295
+        },
+        {
+          "hex": "#D6B7A7",
+          "w": 0.2845
+        }
+      ]
+    },
+    {
+      "id": "I4fugY03tyA",
+      "small": "https://images.unsplash.com/photo-1791477515808-20301fe8e7dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1791477515808-20301fe8e7dc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzY2hvb2wlMjBjb3JyaWRvciUyMGxvY2tlcnN8ZW58MXwwfHx8MTc5MjE4NDIyNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6960,
+      "height": 4640,
+      "blurHash": "L9Ad7faextWB?^WB%fW;9GR*WBRj",
+      "color": "#595959",
+      "alt": "An empty school hallway with red and white walls and a reflective floor",
+      "author": "Milo Stubbs",
+      "authorUrl": "https://unsplash.com/@milostubbsofficial?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-school-hallway-with-reflective-floor-I4fugY03tyA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4C4D4F",
+          "w": 0.5211
+        },
+        {
+          "hex": "#341516",
+          "w": 0.3189
+        },
+        {
+          "hex": "#808484",
+          "w": 0.16
+        }
+      ]
+    },
+    {
+      "id": "UStQpco0TWo",
+      "small": "https://images.unsplash.com/photo-1758685734030-a31d96462eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758685734030-a31d96462eec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LIEMLD4nI:t60KoMozxGxBt7oLR+",
+      "color": "#404040",
+      "alt": "Teacher and student conducting science experiment in classroom",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/teacher-and-student-conducting-science-experiment-in-classroom-UStQpco0TWo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A5254",
+          "w": 0.4698
+        },
+        {
+          "hex": "#B3AEAA",
+          "w": 0.2936
+        },
+        {
+          "hex": "#807D7B",
+          "w": 0.2367
+        }
+      ]
+    },
+    {
+      "id": "ZULXcjv2lug",
+      "small": "https://images.unsplash.com/photo-1758685734062-165cc0094e61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758685734062-165cc0094e61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LGG[$m4mo}9F0LRPX9s;,mR*R--p",
+      "color": "#a6a6a6",
+      "alt": "Teacher and student conducting science experiment in classroom",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/teacher-and-student-conducting-science-experiment-in-classroom-ZULXcjv2lug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6AFAC",
+          "w": 0.4064
+        },
+        {
+          "hex": "#8E8886",
+          "w": 0.3017
+        },
+        {
+          "hex": "#585A5E",
+          "w": 0.2919
+        }
+      ]
+    },
+    {
+      "id": "djpFyD7rZnU",
+      "small": "https://images.unsplash.com/photo-1784989966384-d802a16be6f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784989966384-d802a16be6f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LGDvQD~q%g%M?bxaofozIoRjRPRj",
+      "color": "#737373",
+      "alt": "Empty classroom with desks, chairs, computers, and a screen",
+      "author": "Brecht Corbeel",
+      "authorUrl": "https://unsplash.com/@brechtcorbeel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-classroom-with-desks-chairs-computers-and-a-screen-djpFyD7rZnU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#69635A",
+          "w": 0.4235
+        },
+        {
+          "hex": "#87837A",
+          "w": 0.3164
+        },
+        {
+          "hex": "#4B331F",
+          "w": 0.2601
+        }
+      ]
+    },
+    {
+      "id": "g8Xg4wx0WDo",
+      "small": "https://images.unsplash.com/photo-1608037222011-cbf484177126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1608037222011-cbf484177126?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzY2hvb2wlMjBzY2llbmNlJTIwbGFifGVufDF8MHx8fDE3OTIxODQyMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5106,
+      "height": 3404,
+      "blurHash": "LHHe5q01%L$%t8In?HIo.7$%Ipxu",
+      "color": "#c0c0a6",
+      "alt": "white and black coffee maker",
+      "author": "Trnava University",
+      "authorUrl": "https://unsplash.com/@trnavskauni?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-black-coffee-maker-g8Xg4wx0WDo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BDAA97",
+          "w": 0.4413
+        },
+        {
+          "hex": "#947D63",
+          "w": 0.3346
+        },
+        {
+          "hex": "#604F31",
+          "w": 0.2241
+        }
+      ]
+    }
+  ]
+}

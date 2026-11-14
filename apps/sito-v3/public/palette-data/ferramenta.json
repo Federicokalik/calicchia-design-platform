@@ -1,0 +1,254 @@
+{
+  "slug": "ferramenta",
+  "queries": [
+    "hardware store aisle",
+    "tools on wall display",
+    "paint cans shelf hardware"
+  ],
+  "generatedAt": "2026-10-16T19:54:08.423Z",
+  "photos": [
+    {
+      "id": "sf6YUxvCoro",
+      "small": "https://images.unsplash.com/photo-1774273177331-4c19e9912071?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYXJkd2FyZSUyMHN0b3JlJTIwYWlzbGV8ZW58MXwwfHx8MTc5MjE4MDQ0MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774273177331-4c19e9912071?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYXJkd2FyZSUyMHN0b3JlJTIwYWlzbGV8ZW58MXwwfHx8MTc5MjE4MDQ0MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7405,
+      "height": 4628,
+      "blurHash": "LJB{#~Ip0fRj%2WCS2WBxaj[M|R*",
+      "color": "#262626",
+      "alt": "Person walks down aisle of stocked warehouse shelves",
+      "author": "Tianlei Wu",
+      "authorUrl": "https://unsplash.com/@wutianlei?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-walks-down-aisle-of-stocked-warehouse-shelves-sf6YUxvCoro?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7C684E",
+          "w": 0.3627
+        },
+        {
+          "hex": "#413F34",
+          "w": 0.3479
+        },
+        {
+          "hex": "#1C1C16",
+          "w": 0.2894
+        }
+      ]
+    },
+    {
+      "id": "q-WLyccTUIM",
+      "small": "https://images.unsplash.com/photo-1780277523521-d8aa6b94a4fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780277523521-d8aa6b94a4fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 3384,
+      "blurHash": "L6F#{.~X_4pID$ocRiV[_Lkr9Zi_",
+      "color": "#8c8c73",
+      "alt": "Firefighter helmet, axe, and pictures hanging on a textured wall",
+      "author": "Aubrey Odom",
+      "authorUrl": "https://unsplash.com/@octoberroses?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/firefighter-helmet-axe-and-pictures-hanging-on-a-textured-wall-q-WLyccTUIM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A7E73",
+          "w": 0.4731
+        },
+        {
+          "hex": "#9C948F",
+          "w": 0.3842
+        },
+        {
+          "hex": "#70362C",
+          "w": 0.1427
+        }
+      ]
+    },
+    {
+      "id": "CNHufFzwoEE",
+      "small": "https://images.unsplash.com/photo-1774542884084-524781c30db3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774542884084-524781c30db3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5191,
+      "height": 3461,
+      "blurHash": "L9MPp_k7NgW90f-.xu%1I;t7~VM|",
+      "color": "#d9c0a6",
+      "alt": "Antique farming tools hang on a wall",
+      "author": "Gio L",
+      "authorUrl": "https://unsplash.com/@presenzetransitorie?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/antique-farming-tools-hang-on-a-wall-CNHufFzwoEE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7B69A",
+          "w": 0.6937
+        },
+        {
+          "hex": "#824C25",
+          "w": 0.1639
+        },
+        {
+          "hex": "#B18B72",
+          "w": 0.1424
+        }
+      ]
+    },
+    {
+      "id": "NnxlPsz14E0",
+      "small": "https://images.unsplash.com/photo-1716757026492-ecda04f2d82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1716757026492-ecda04f2d82e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6053,
+      "height": 4035,
+      "blurHash": "L59~sN}=J8ENSOofRkn%=w-9t5R*",
+      "color": "#40260c",
+      "alt": "a brick wall with a bunch of items on it",
+      "author": "Eric Prouzet",
+      "authorUrl": "https://unsplash.com/@eprouzet?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-brick-wall-with-a-bunch-of-items-on-it-NnxlPsz14E0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#49260D",
+          "w": 0.4334
+        },
+        {
+          "hex": "#673E20",
+          "w": 0.2962
+        },
+        {
+          "hex": "#2A1405",
+          "w": 0.2703
+        }
+      ]
+    },
+    {
+      "id": "HqnIbX3uxP4",
+      "small": "https://images.unsplash.com/photo-1779309065658-1d9bf5288873?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779309065658-1d9bf5288873?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0b29scyUyMG9uJTIwd2FsbCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQ0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 2268,
+      "blurHash": "LNGI7dDiIoT0DN-;t7V?-mM{V[og",
+      "color": "#735959",
+      "alt": "Antique clocks and decor displayed on wooden shelves",
+      "author": "Arpita Ghosh",
+      "authorUrl": "https://unsplash.com/@arpitamukh1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/antique-clocks-and-decor-displayed-on-wooden-shelves-HqnIbX3uxP4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7A5D57",
+          "w": 0.4395
+        },
+        {
+          "hex": "#A68A84",
+          "w": 0.3817
+        },
+        {
+          "hex": "#CCC9CC",
+          "w": 0.1788
+        }
+      ]
+    },
+    {
+      "id": "rJBP9uqNyz0",
+      "small": "https://images.unsplash.com/photo-1510016290251-68aaad49723e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510016290251-68aaad49723e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4928,
+      "height": 3264,
+      "blurHash": "LEEoVx8zXlEg5+EfxYaK+[=ws:NI",
+      "color": "#8c8c73",
+      "alt": "assorted-color paint tin cans",
+      "author": "Bente Whyatt",
+      "authorUrl": "https://unsplash.com/@morratryne?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-paint-tin-cans-rJBP9uqNyz0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9D9576",
+          "w": 0.4056
+        },
+        {
+          "hex": "#615E57",
+          "w": 0.3537
+        },
+        {
+          "hex": "#272730",
+          "w": 0.2408
+        }
+      ]
+    },
+    {
+      "id": "qXqXTTfLdEw",
+      "small": "https://images.unsplash.com/photo-1605201470550-f107ba6fdad3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1605201470550-f107ba6fdad3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5463,
+      "height": 3642,
+      "blurHash": "LMH_lN?H?^NGD%W;%Mt79FM{n%xb",
+      "color": "#c0c0c0",
+      "alt": "red and silver scissors on white plastic container",
+      "author": "Gabriella Clare Marino",
+      "authorUrl": "https://unsplash.com/@gabiontheroad?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-silver-scissors-on-white-plastic-container-qXqXTTfLdEw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C8C7C2",
+          "w": 0.4568
+        },
+        {
+          "hex": "#6C4629",
+          "w": 0.312
+        },
+        {
+          "hex": "#A18771",
+          "w": 0.2312
+        }
+      ]
+    },
+    {
+      "id": "h2uzMQtlInk",
+      "small": "https://images.unsplash.com/photo-1542238060-646c7ed65622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1542238060-646c7ed65622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LEHwruQ+0#9G?bD*w^n$MxNLa1x[",
+      "color": "#260c0c",
+      "alt": "assorted-brand paint bucket lot",
+      "author": "Jacob Campbell",
+      "authorUrl": "https://unsplash.com/@jacobsoup?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-brand-paint-bucket-lot-h2uzMQtlInk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B27A55",
+          "w": 0.4177
+        },
+        {
+          "hex": "#7A452D",
+          "w": 0.3317
+        },
+        {
+          "hex": "#E7BF9C",
+          "w": 0.2507
+        }
+      ]
+    },
+    {
+      "id": "AwlaRei1BsM",
+      "small": "https://images.unsplash.com/photo-1670843842444-3b0dccc8f598?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1670843842444-3b0dccc8f598?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYWludCUyMGNhbnMlMjBzaGVsZiUyMGhhcmR3YXJlfGVufDF8MHx8fDE3OTIxODA0NDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8134,
+      "height": 5423,
+      "blurHash": "L9E{U$r;0KS70fWCxZs+jXaz%3aw",
+      "color": "#737373",
+      "alt": "a shelf filled with lots of different types of paint",
+      "author": "Joanna Stołowicz",
+      "authorUrl": "https://unsplash.com/@joanna_stolowicz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-filled-with-lots-of-different-types-of-paint-AwlaRei1BsM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#898684",
+          "w": 0.4671
+        },
+        {
+          "hex": "#696560",
+          "w": 0.3855
+        },
+        {
+          "hex": "#BDB3AB",
+          "w": 0.1473
+        }
+      ]
+    }
+  ]
+}

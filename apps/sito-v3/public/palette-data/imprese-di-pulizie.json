@@ -1,0 +1,308 @@
+{
+  "slug": "imprese-di-pulizie",
+  "queries": [
+    "mop bucket floor",
+    "cleaning supplies shelf",
+    "window cleaning squeegee"
+  ],
+  "generatedAt": "2026-10-16T17:47:14.571Z",
+  "photos": [
+    {
+      "id": "DyM3Cv1r4I0",
+      "small": "https://images.unsplash.com/photo-1749214317455-efbdd57df844?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1749214317455-efbdd57df844?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 5464,
+      "blurHash": "LIJ*#R%2J=~oIVI@NKt84_-n$|9b",
+      "color": "#a6a6c0",
+      "alt": "Adding cleaning powder to a mop bucket",
+      "author": "Spruce Refillable Cleaning",
+      "authorUrl": "https://unsplash.com/@wearespruce?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/adding-cleaning-powder-to-a-mop-bucket-DyM3Cv1r4I0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAB0B8",
+          "w": 0.4317
+        },
+        {
+          "hex": "#DCD8C8",
+          "w": 0.2859
+        },
+        {
+          "hex": "#7F8388",
+          "w": 0.2824
+        }
+      ]
+    },
+    {
+      "id": "0FTI9ceTUOc",
+      "small": "https://images.unsplash.com/photo-1669101602108-fa5ba89507ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1669101602108-fa5ba89507ee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LdMQ*RM|%Mt500Rkxuj?-;ofj@Rj",
+      "color": "#d9d9f3",
+      "alt": "A person in blue scrubs mopping a white floor in a clinical hallway",
+      "author": "Toon Lambrechts",
+      "authorUrl": "https://unsplash.com/@mycellhub?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-mopping-clinical-hallway-floor-0FTI9ceTUOc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDDCE4",
+          "w": 0.6411
+        },
+        {
+          "hex": "#AEADB2",
+          "w": 0.247
+        },
+        {
+          "hex": "#465A82",
+          "w": 0.1118
+        }
+      ]
+    },
+    {
+      "id": "8skNUw3Z1FA",
+      "small": "https://images.unsplash.com/photo-1605164612754-da6d7c6ba723?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1605164612754-da6d7c6ba723?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3449,
+      "height": 2333,
+      "blurHash": "L7H2J~s,~0-30KV@E7Rn%#fjI_Iq",
+      "color": "#8c8c8c",
+      "alt": "yellow and black plastic bottle beside blue plastic cup",
+      "author": "Galen Crout",
+      "authorUrl": "https://unsplash.com/@galen_crout?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-and-black-plastic-bottle-beside-blue-plastic-cup-8skNUw3Z1FA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A8886",
+          "w": 0.4314
+        },
+        {
+          "hex": "#A8A49B",
+          "w": 0.4023
+        },
+        {
+          "hex": "#9A7813",
+          "w": 0.1664
+        }
+      ]
+    },
+    {
+      "id": "loXX7MAtCqQ",
+      "small": "https://images.unsplash.com/photo-1706201901028-0bc4632db11f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706201901028-0bc4632db11f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtb3AlMjBidWNrZXQlMjBmbG9vcnxlbnwxfDB8fHwxNzkyMTcyODI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4800,
+      "height": 3200,
+      "blurHash": "LJCO,h-:NZR6-VbboejF1LIqspt6",
+      "color": "#262626",
+      "alt": "buckets and a broom sitting on the ground",
+      "author": "C Cai",
+      "authorUrl": "https://unsplash.com/@asabasai?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/buckets-and-a-broom-sitting-on-the-ground-loXX7MAtCqQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#673025",
+          "w": 0.3936
+        },
+        {
+          "hex": "#2C1614",
+          "w": 0.3628
+        },
+        {
+          "hex": "#9F5C30",
+          "w": 0.2436
+        }
+      ]
+    },
+    {
+      "id": "0LsedJ58Vbo",
+      "small": "https://images.unsplash.com/photo-1585742832798-c3baf787b43d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585742832798-c3baf787b43d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5222,
+      "height": 3468,
+      "blurHash": "L69%@wa#DgWrt8WBn}of$_ozx_V?",
+      "color": "#262626",
+      "alt": "blue and white plastic bottle",
+      "author": "Mick Haupt",
+      "authorUrl": "https://unsplash.com/@rocinante_11?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-white-plastic-bottle-0LsedJ58Vbo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B1B1A",
+          "w": 0.7911
+        },
+        {
+          "hex": "#585A64",
+          "w": 0.1286
+        },
+        {
+          "hex": "#A8A8AE",
+          "w": 0.0803
+        }
+      ]
+    },
+    {
+      "id": "Y3vDCL7_das",
+      "small": "https://images.unsplash.com/photo-1758272421751-963195322eaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758272421751-963195322eaa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2138,
+      "blurHash": "LBGuj=wb010f~WIqE0%NW9xuIr-:",
+      "color": "#c0c0c0",
+      "alt": "Woman wearing yellow gloves cleaning wooden surface",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-wearing-yellow-gloves-cleaning-wooden-surface-Y3vDCL7_das?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C0BCB9",
+          "w": 0.4162
+        },
+        {
+          "hex": "#303744",
+          "w": 0.3091
+        },
+        {
+          "hex": "#A08A7A",
+          "w": 0.2747
+        }
+      ]
+    },
+    {
+      "id": "lVorfF9Le2o",
+      "small": "https://images.unsplash.com/photo-1758272421772-5b08f08dc2ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758272421772-5b08f08dc2ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGVhbmluZyUyMHN1cHBsaWVzJTIwc2hlbGZ8ZW58MXwwfHx8MTc5MjE3MjgyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2138,
+      "blurHash": "LLHU^IjF4n0K?HNHIUt7f5t7NH%2",
+      "color": "#c0c0c0",
+      "alt": "Woman cleaning while listening to music on headphones",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-cleaning-while-listening-to-music-on-headphones-lVorfF9Le2o?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2C1C2",
+          "w": 0.4734
+        },
+        {
+          "hex": "#A29891",
+          "w": 0.2647
+        },
+        {
+          "hex": "#303A4D",
+          "w": 0.2619
+        }
+      ]
+    },
+    {
+      "id": "ZN6zQY6gVvM",
+      "small": "https://images.unsplash.com/photo-1775654063422-54e0a71578ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775654063422-54e0a71578ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4365,
+      "height": 2910,
+      "blurHash": "LsFiDVs:M{xu~qbHM{t7?bWXRjaz",
+      "color": "#404040",
+      "alt": "A man cleaning windows on a tall building",
+      "author": "Georgi Kalaydzhiev",
+      "authorUrl": "https://unsplash.com/@jorok?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-cleaning-windows-on-a-tall-building-ZN6zQY6gVvM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3C3E3D",
+          "w": 0.4625
+        },
+        {
+          "hex": "#E9E3ED",
+          "w": 0.2689
+        },
+        {
+          "hex": "#181C1D",
+          "w": 0.2686
+        }
+      ]
+    },
+    {
+      "id": "DegtJzVkJUI",
+      "small": "https://images.unsplash.com/photo-1786550765700-0e901866b135?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786550765700-0e901866b135?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11164,
+      "height": 6280,
+      "blurHash": "LHBD7*NHRjt7~WofR*of9Zt7azWB",
+      "color": "#8c8c8c",
+      "alt": "A person cleaning a window with a long squeegee on a building exterior",
+      "author": "Heng Chiu",
+      "authorUrl": "https://unsplash.com/@chiuchuuu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-cleaning-window-with-squeegee-DegtJzVkJUI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C0705",
+          "w": 0.5485
+        },
+        {
+          "hex": "#A39892",
+          "w": 0.2933
+        },
+        {
+          "hex": "#39302A",
+          "w": 0.1582
+        }
+      ]
+    },
+    {
+      "id": "OsZtsysUQmk",
+      "small": "https://images.unsplash.com/photo-1769767677770-debe851c95d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1769767677770-debe851c95d4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LjGIGfxt4:V[~pt6D*a#%gR*RPt7",
+      "color": "#f3f3d9",
+      "alt": "Man reflected in glass door looking out at beach",
+      "author": "Jessica Lenihan",
+      "authorUrl": "https://unsplash.com/@jessleni?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-reflected-in-glass-door-looking-out-at-beach-OsZtsysUQmk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070201",
+          "w": 0.3676
+        },
+        {
+          "hex": "#806432",
+          "w": 0.3248
+        },
+        {
+          "hex": "#473008",
+          "w": 0.3076
+        }
+      ]
+    },
+    {
+      "id": "wO1Z1V8Wuw0",
+      "small": "https://images.unsplash.com/photo-1668346604084-fc652b61babe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668346604084-fc652b61babe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5kb3clMjBjbGVhbmluZyUyMHNxdWVlZ2VlfGVufDF8MHx8fDE3OTIxNzI4MzF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5740,
+      "height": 3827,
+      "blurHash": "LAAKjvx]4mRj.Tj?M_Rj4TM{xuWA",
+      "color": "#405959",
+      "alt": "a close up of a car windshield",
+      "author": "Mingrui Han",
+      "authorUrl": "https://unsplash.com/@moononmoons?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-car-windshield-wO1Z1V8Wuw0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8C9BA6",
+          "w": 0.3522
+        },
+        {
+          "hex": "#01151D",
+          "w": 0.3388
+        },
+        {
+          "hex": "#58707D",
+          "w": 0.3091
+        }
+      ]
+    }
+  ]
+}

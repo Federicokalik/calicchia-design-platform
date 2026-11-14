@@ -1,0 +1,335 @@
+{
+  "slug": "arredamenti",
+  "queries": [
+    "furniture showroom interior",
+    "living room sofa neutral",
+    "wooden dining table daylight"
+  ],
+  "generatedAt": "2026-10-16T19:53:45.897Z",
+  "photos": [
+    {
+      "id": "olf4wlZgmGk",
+      "small": "https://images.unsplash.com/photo-1680503146454-0fe569cef4eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1680503146454-0fe569cef4eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5894,
+      "height": 3929,
+      "blurHash": "LCE_:J9G-m%MpIt8R,-o8^%goKWB",
+      "color": "#8c7359",
+      "alt": "a living room filled with furniture and a flat screen tv",
+      "author": "Albero Furniture Bratislava",
+      "authorUrl": "https://unsplash.com/@alberofurniture?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-flat-screen-tv-olf4wlZgmGk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A7157",
+          "w": 0.5068
+        },
+        {
+          "hex": "#483724",
+          "w": 0.2488
+        },
+        {
+          "hex": "#150C08",
+          "w": 0.2444
+        }
+      ]
+    },
+    {
+      "id": "D3r0iKZ8YxE",
+      "small": "https://images.unsplash.com/photo-1687180497278-ca4d736ecc99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687180497278-ca4d736ecc99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LAG8M=~V9$o~EN?G^%M|9Z01RQ$|",
+      "color": "#735940",
+      "alt": "a room with a table, chairs, and a couch",
+      "author": "Albero Furniture Bratislava",
+      "authorUrl": "https://unsplash.com/@alberofurniture?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-table-chairs-and-a-couch-D3r0iKZ8YxE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6F5439",
+          "w": 0.482
+        },
+        {
+          "hex": "#A5835A",
+          "w": 0.3154
+        },
+        {
+          "hex": "#442913",
+          "w": 0.2026
+        }
+      ]
+    },
+    {
+      "id": "3RfIi22Y97Y",
+      "small": "https://images.unsplash.com/photo-1687180498602-5a1046defaa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687180498602-5a1046defaa4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBE2nK8_RO%L~C$$xuxt#7xtx]t7",
+      "color": "#262626",
+      "alt": "a living room filled with furniture and a wooden floor",
+      "author": "Albero Furniture Bratislava",
+      "authorUrl": "https://unsplash.com/@alberofurniture?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-wooden-floor-3RfIi22Y97Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#664E42",
+          "w": 0.3794
+        },
+        {
+          "hex": "#967869",
+          "w": 0.3367
+        },
+        {
+          "hex": "#302420",
+          "w": 0.2839
+        }
+      ]
+    },
+    {
+      "id": "75yyUu7BVlo",
+      "small": "https://images.unsplash.com/photo-1687180497716-5872969e5125?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687180497716-5872969e5125?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdXJuaXR1cmUlMjBzaG93cm9vbSUyMGludGVyaW9yfGVufDF8MHx8fDE3OTIxODA0MTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LFFrIjIpjEWCX6jZs+NI01%MR-RP",
+      "color": "#735940",
+      "alt": "a living room filled with furniture and a flat screen tv",
+      "author": "Albero Furniture Bratislava",
+      "authorUrl": "https://unsplash.com/@alberofurniture?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-flat-screen-tv-75yyUu7BVlo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#674E34",
+          "w": 0.4297
+        },
+        {
+          "hex": "#9B7F5E",
+          "w": 0.3198
+        },
+        {
+          "hex": "#D1B99B",
+          "w": 0.2505
+        }
+      ]
+    },
+    {
+      "id": "EVjqpcn79AM",
+      "small": "https://images.unsplash.com/photo-1632829882891-5047ccc421bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1632829882891-5047ccc421bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8533,
+      "height": 4800,
+      "blurHash": "LGN,;:8_4.%M~p-:xut8aLIoWXM{",
+      "color": "#d9d9d9",
+      "alt": "a living room filled with furniture and a fire place",
+      "author": "Spacejoy",
+      "authorUrl": "https://unsplash.com/@spacejoy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-fire-place-EVjqpcn79AM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E1D9",
+          "w": 0.4648
+        },
+        {
+          "hex": "#D0CCC0",
+          "w": 0.4287
+        },
+        {
+          "hex": "#9F9888",
+          "w": 0.1065
+        }
+      ]
+    },
+    {
+      "id": "x3mSC1WnWhc",
+      "small": "https://images.unsplash.com/photo-1633505899118-4ca6bd143043?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633505899118-4ca6bd143043?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8000,
+      "height": 4500,
+      "blurHash": "LJOpul9Ex]M{_NMxs.V@Mxt7Rjt7",
+      "color": "#d9d9d9",
+      "alt": "a living room filled with furniture and a large window",
+      "author": "Spacejoy",
+      "authorUrl": "https://unsplash.com/@spacejoy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-living-room-filled-with-furniture-and-a-large-window-x3mSC1WnWhc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3CEC3",
+          "w": 0.444
+        },
+        {
+          "hex": "#EDEBE5",
+          "w": 0.3872
+        },
+        {
+          "hex": "#AFA38D",
+          "w": 0.1688
+        }
+      ]
+    },
+    {
+      "id": "RqO6kwm4tZY",
+      "small": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6912,
+      "height": 3888,
+      "blurHash": "LTK_5n9FIU%N~qM|M{%Ma#j?ayRj",
+      "color": "#d9d9d9",
+      "alt": "brown wooden round table with chairs",
+      "author": "Spacejoy",
+      "authorUrl": "https://unsplash.com/@spacejoy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-round-table-with-chairs-RqO6kwm4tZY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B5AFA4",
+          "w": 0.4052
+        },
+        {
+          "hex": "#E3E1DA",
+          "w": 0.3546
+        },
+        {
+          "hex": "#908A7C",
+          "w": 0.2401
+        }
+      ]
+    },
+    {
+      "id": "Kh4tedFdHz4",
+      "small": "https://images.unsplash.com/photo-1631510390389-c1e4fb20ff31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631510390389-c1e4fb20ff31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxsaXZpbmclMjByb29tJTIwc29mYSUyMG5ldXRyYWx8ZW58MXwwfHx8MTc5MjE4MDQyMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5688,
+      "height": 4166,
+      "blurHash": "LVNmfzWB9GRk_NtRxuoex^t7ocof",
+      "color": "#f3f3f3",
+      "alt": "white and gray sofa chair near window",
+      "author": "Spacejoy",
+      "authorUrl": "https://unsplash.com/@spacejoy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-gray-sofa-chair-near-window-Kh4tedFdHz4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDE5D9",
+          "w": 0.461
+        },
+        {
+          "hex": "#C4B39A",
+          "w": 0.4007
+        },
+        {
+          "hex": "#8A6C49",
+          "w": 0.1383
+        }
+      ]
+    },
+    {
+      "id": "rJDwHzhqA2c",
+      "small": "https://images.unsplash.com/photo-1781084533117-2b714dd0b844?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781084533117-2b714dd0b844?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 3512,
+      "blurHash": "LPK1m=4n01-:yEV@t7R-ITt7t7V@",
+      "color": "#c0c0c0",
+      "alt": "Empty cafe interior with wicker stools and wooden tables",
+      "author": "Zeg Young",
+      "authorUrl": "https://unsplash.com/@zeg?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-cafe-interior-with-wicker-stools-and-wooden-tables-rJDwHzhqA2c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBB5A7",
+          "w": 0.37
+        },
+        {
+          "hex": "#D3D0C8",
+          "w": 0.3547
+        },
+        {
+          "hex": "#978F78",
+          "w": 0.2754
+        }
+      ]
+    },
+    {
+      "id": "14ZrI_7Pq0Y",
+      "small": "https://images.unsplash.com/photo-1780339542741-4aa43027646e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780339542741-4aa43027646e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L59tAU_20Lkptn9bofxZ-=xvM~IV",
+      "color": "#26260c",
+      "alt": "Elegant dining table set with flowers and city view",
+      "author": "Ingeborg Korme",
+      "authorUrl": "https://unsplash.com/@ingeborgkorme?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elegant-dining-table-set-with-flowers-and-city-view-14ZrI_7Pq0Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0B09",
+          "w": 0.4055
+        },
+        {
+          "hex": "#3A322C",
+          "w": 0.3838
+        },
+        {
+          "hex": "#6A655D",
+          "w": 0.2108
+        }
+      ]
+    },
+    {
+      "id": "JXCyBAXyQ5c",
+      "small": "https://images.unsplash.com/photo-1762186541075-c9d28c5a7507?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762186541075-c9d28c5a7507?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGAJcwrDrC~B?HMyV@%MI;J7NdNx",
+      "color": "#262626",
+      "alt": "Table setting by a window with rustic objects",
+      "author": "Sofie D.",
+      "authorUrl": "https://unsplash.com/@needeeja?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/table-setting-by-a-window-with-rustic-objects-JXCyBAXyQ5c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#141210",
+          "w": 0.5814
+        },
+        {
+          "hex": "#342B25",
+          "w": 0.2153
+        },
+        {
+          "hex": "#6E5A51",
+          "w": 0.2033
+        }
+      ]
+    },
+    {
+      "id": "wECWO-JlDEg",
+      "small": "https://images.unsplash.com/photo-1777802069538-a6bdfcfbb060?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777802069538-a6bdfcfbb060?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjBkaW5pbmclMjB0YWJsZSUyMGRheWxpZ2h0fGVufDF8MHx8fDE3OTIxODA0MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3240,
+      "height": 2160,
+      "blurHash": "L6C?in%M9ZM{%J9F00%M4-%M?bM{",
+      "color": "#595959",
+      "alt": "Rain falling on a wooden outdoor table and chairs",
+      "author": "Oliver Hayes",
+      "authorUrl": "https://unsplash.com/@hayzo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rain-falling-on-a-wooden-outdoor-table-and-chairs-wECWO-JlDEg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#534F4A",
+          "w": 0.4012
+        },
+        {
+          "hex": "#827C78",
+          "w": 0.3527
+        },
+        {
+          "hex": "#1A1819",
+          "w": 0.2461
+        }
+      ]
+    }
+  ]
+}

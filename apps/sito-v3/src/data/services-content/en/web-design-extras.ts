@@ -38,9 +38,11 @@ export const WEB_DESIGN_EXTRAS_EN = {
     },
   ] satisfies readonly ServiceRelated[],
   leadMagnetCopy: {
-    eyebrow: 'Free audit · 15 minutes',
-    title: 'Want to know where you lose customers before starting?',
+    eyebrow: 'Free tool · Industry colour palette',
+    title: 'Before you pick colours, look at your industry',
     body:
-      "I look at structure, mobile, CTAs, forms and tracking. 15 minutes on Meet, no quote disguised as consulting.",
+      'Type in your business: the tool takes colours from real photos of your trade, tries them on a preview of your site and checks the contrast. Then export them for Canva, CSS or Tailwind.',
+    href: '/risorse/palette-di-settore',
+    buttonLabel: 'Open the colour palette tool',
   } satisfies ServiceLeadMagnetCopy,
 } as const;

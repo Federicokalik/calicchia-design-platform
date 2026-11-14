@@ -1,0 +1,335 @@
+{
+  "slug": "musicisti",
+  "queries": [
+    "musician playing guitar",
+    "piano keys close up",
+    "concert stage lights"
+  ],
+  "generatedAt": "2026-10-16T21:58:36.317Z",
+  "photos": [
+    {
+      "id": "fCEJGBzAkrU",
+      "small": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LGC$Dq^jE3Io0fE2xZtR%1-UWqNG",
+      "color": "#402626",
+      "alt": "person playing guitar",
+      "author": "Jefferson Santos",
+      "authorUrl": "https://unsplash.com/@jefflssantos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-playing-guitar-fCEJGBzAkrU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3F322D",
+          "w": 0.6363
+        },
+        {
+          "hex": "#6F4835",
+          "w": 0.2136
+        },
+        {
+          "hex": "#9D7357",
+          "w": 0.1502
+        }
+      ]
+    },
+    {
+      "id": "2UuhMZEChdc",
+      "small": "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1471478331149-c72f17e33c73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7358,
+      "height": 4912,
+      "blurHash": "LB9%bdwH9Z~qRjM{IoR*OsIVMx-;",
+      "color": "#0c2626",
+      "alt": "person playing guitar",
+      "author": "Gabriel Gurrola",
+      "authorUrl": "https://unsplash.com/@gabrielgurrola?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-playing-guitar-2UuhMZEChdc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#121115",
+          "w": 0.5893
+        },
+        {
+          "hex": "#4B3B36",
+          "w": 0.266
+        },
+        {
+          "hex": "#927769",
+          "w": 0.1447
+        }
+      ]
+    },
+    {
+      "id": "7WfcHibcR3Y",
+      "small": "https://images.unsplash.com/photo-1595971294624-80bcf0d7eb24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1595971294624-80bcf0d7eb24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LEAwF=00Rjxu?b9Ft7xuM{t7ofay",
+      "color": "#262626",
+      "alt": "man in black t-shirt and hat playing guitar",
+      "author": "Chris",
+      "authorUrl": "https://unsplash.com/@chris_ainsworth22?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-black-t-shirt-and-hat-playing-guitar-7WfcHibcR3Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2D2D2D",
+          "w": 0.5711
+        },
+        {
+          "hex": "#545454",
+          "w": 0.2152
+        },
+        {
+          "hex": "#878787",
+          "w": 0.2138
+        }
+      ]
+    },
+    {
+      "id": "Hz3Kjzgyv_Q",
+      "small": "https://images.unsplash.com/photo-1444623151656-030273ddb785?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1444623151656-030273ddb785?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtdXNpY2lhbiUyMHBsYXlpbmclMjBndWl0YXJ8ZW58MXwwfHx8MTc5MjE4NzkxMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4104,
+      "height": 2736,
+      "blurHash": "LDB:vz~qfQt7IU9FD%of4nxu?bxu",
+      "color": "#262626",
+      "alt": "grayscale photo of person playing guitar",
+      "author": "Austin Prock",
+      "authorUrl": "https://unsplash.com/@prock?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-person-playing-guitar-Hz3Kjzgyv_Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1D1D",
+          "w": 0.5786
+        },
+        {
+          "hex": "#464646",
+          "w": 0.2148
+        },
+        {
+          "hex": "#898989",
+          "w": 0.2065
+        }
+      ]
+    },
+    {
+      "id": "8QrPJ3Kfie4",
+      "small": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LDD9Ct~A0fNbaL^%%29at4R+xuxa",
+      "color": "#0c2640",
+      "alt": "a close up of a piano with a person in the background",
+      "author": "Geert Pieters",
+      "authorUrl": "https://unsplash.com/@shotsbywolf?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-piano-with-a-person-in-the-background-8QrPJ3Kfie4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#29303B",
+          "w": 0.4666
+        },
+        {
+          "hex": "#5D504E",
+          "w": 0.3019
+        },
+        {
+          "hex": "#937B68",
+          "w": 0.2314
+        }
+      ]
+    },
+    {
+      "id": "cHUBZFjY13g",
+      "small": "https://images.unsplash.com/photo-1561014816-50ce5acb5e73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1561014816-50ce5acb5e73?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LbGlS8-;IURj00t7%2ofRjD%M{ax",
+      "color": "#d9d9d9",
+      "alt": "grayscale photography of piano",
+      "author": "Amir Doreh",
+      "authorUrl": "https://unsplash.com/@amirdoreh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photography-of-piano-cHUBZFjY13g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFCFD0",
+          "w": 0.5004
+        },
+        {
+          "hex": "#030304",
+          "w": 0.2623
+        },
+        {
+          "hex": "#363637",
+          "w": 0.2373
+        }
+      ]
+    },
+    {
+      "id": "RWytwNueNng",
+      "small": "https://images.unsplash.com/photo-1512733596533-7b00ccf8ebaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1512733596533-7b00ccf8ebaf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 2916,
+      "blurHash": "LcCGV@jtIUay00azxufk-;j[RjfQ",
+      "color": "#d9d9d9",
+      "alt": "piano keys",
+      "author": "Johannes Plenio",
+      "authorUrl": "https://unsplash.com/@jplenio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/piano-keys-RWytwNueNng?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#010102",
+          "w": 0.5464
+        },
+        {
+          "hex": "#CACACA",
+          "w": 0.2473
+        },
+        {
+          "hex": "#282A2F",
+          "w": 0.2063
+        }
+      ]
+    },
+    {
+      "id": "H5Iw3Xz0vxM",
+      "small": "https://images.unsplash.com/photo-1571974599782-87624638275e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571974599782-87624638275e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWFubyUyMGtleXMlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTIxODc5MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5242,
+      "height": 2949,
+      "blurHash": "LHBz5vkrDO01-:NIskWBtRt6M|oc",
+      "color": "#262626",
+      "alt": "selective focus photography of black wooden piano keys",
+      "author": "Ebuen Clemente Jr",
+      "authorUrl": "https://unsplash.com/@ebuenclemente205?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-black-wooden-piano-keys-H5Iw3Xz0vxM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#26231F",
+          "w": 0.3985
+        },
+        {
+          "hex": "#9CA194",
+          "w": 0.3344
+        },
+        {
+          "hex": "#484439",
+          "w": 0.2671
+        }
+      ]
+    },
+    {
+      "id": "QOajY0MNp8Y",
+      "small": "https://images.unsplash.com/photo-1657208431551-cbf415b8ef26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1657208431551-cbf415b8ef26?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LM5PzqM_Qkx^yrMwZ$tno?RPsHk;",
+      "color": "#0c2640",
+      "alt": "Bright teal and purple spotlights cutting through a dark hazy nightclub atmosphere",
+      "author": "Scarlett Alt",
+      "authorUrl": "https://unsplash.com/@scarlettalt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/teal-and-purple-nightclub-spotlights-QOajY0MNp8Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#001A39",
+          "w": 0.55
+        },
+        {
+          "hex": "#003869",
+          "w": 0.3051
+        },
+        {
+          "hex": "#2B75BE",
+          "w": 0.1449
+        }
+      ]
+    },
+    {
+      "id": "9lUGIJsf9iw",
+      "small": "https://images.unsplash.com/photo-1729553199933-c897fea4f41f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1729553199933-c897fea4f41f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3024,
+      "height": 2016,
+      "blurHash": "LT8=sckCH;jFyYaeROj[MbaetmbH",
+      "color": "#0c2640",
+      "alt": "A large crowd of people in a dark room",
+      "author": "Bennie Bates",
+      "authorUrl": "https://unsplash.com/@bennieray?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-crowd-of-people-in-a-dark-room-9lUGIJsf9iw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#084165",
+          "w": 0.358
+        },
+        {
+          "hex": "#0A1017",
+          "w": 0.3442
+        },
+        {
+          "hex": "#307DAB",
+          "w": 0.2977
+        }
+      ]
+    },
+    {
+      "id": "TVV49SQuQ_c",
+      "small": "https://images.unsplash.com/photo-1602369944529-c237ca143d09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1602369944529-c237ca143d09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LM9%SdWB4,t6?dWBD$oebJayjcj@",
+      "color": "#262626",
+      "alt": "people watching concert during night time",
+      "author": "Leslie del Moral",
+      "authorUrl": "https://unsplash.com/@lesliedelmoral?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-watching-concert-during-night-time-TVV49SQuQ_c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C0407",
+          "w": 0.4348
+        },
+        {
+          "hex": "#422B34",
+          "w": 0.3242
+        },
+        {
+          "hex": "#73549E",
+          "w": 0.241
+        }
+      ]
+    },
+    {
+      "id": "XOLIrILp-vI",
+      "small": "https://images.unsplash.com/photo-1558258021-971dd2148be5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1558258021-971dd2148be5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodHN8ZW58MXwwfHx8MTc5MjE4NzkxNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L7AwF=?bIUay?bM{00xu00D%00%M",
+      "color": "#262626",
+      "alt": "grayscale photo of man on stga",
+      "author": "Chase Fade",
+      "authorUrl": "https://unsplash.com/@chasefade?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-man-on-stga-XOLIrILp-vI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2D2D2D",
+          "w": 0.5854
+        },
+        {
+          "hex": "#4E4E4E",
+          "w": 0.2553
+        },
+        {
+          "hex": "#7C7C7C",
+          "w": 0.1593
+        }
+      ]
+    }
+  ]
+}

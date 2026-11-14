@@ -1,0 +1,254 @@
+{
+  "slug": "pasticcerie",
+  "queries": [
+    "pastry shop display",
+    "fruit tart closeup",
+    "chocolate pastries counter"
+  ],
+  "generatedAt": "2026-10-16T19:52:51.415Z",
+  "photos": [
+    {
+      "id": "go3DT3PpIw4",
+      "small": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4271,
+      "height": 2851,
+      "blurHash": "LJHm[c-80z%MyEI=sloeEMt7n$bY",
+      "color": "#260c0c",
+      "alt": "breads in display shelf",
+      "author": "Yeh Xintong",
+      "authorUrl": "https://unsplash.com/@blsnki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/breads-in-display-shelf-go3DT3PpIw4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B27750",
+          "w": 0.3805
+        },
+        {
+          "hex": "#D9AA85",
+          "w": 0.3323
+        },
+        {
+          "hex": "#7B412A",
+          "w": 0.2872
+        }
+      ]
+    },
+    {
+      "id": "RndRFJ1v1kk",
+      "small": "https://images.unsplash.com/photo-1587241321921-91a834d6d191?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587241321921-91a834d6d191?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LNEdx5Rj10Rjn4t7I;s:EkRj-URk",
+      "color": "#262626",
+      "alt": "man in white dress shirt standing in front of brown wooden shelf",
+      "author": "Andy Li",
+      "authorUrl": "https://unsplash.com/@andylid0?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-white-dress-shirt-standing-in-front-of-brown-wooden-shelf-RndRFJ1v1kk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3B231B",
+          "w": 0.572
+        },
+        {
+          "hex": "#7A4027",
+          "w": 0.2301
+        },
+        {
+          "hex": "#B26945",
+          "w": 0.198
+        }
+      ]
+    },
+    {
+      "id": "IYjXGUpJH74",
+      "small": "https://images.unsplash.com/photo-1711672284661-bd70e38f31b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711672284661-bd70e38f31b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LXIO5[D%jvS4_NIAbINGx^Rjadof",
+      "color": "#c0c0c0",
+      "alt": "a bakery filled with lots of baked goods",
+      "author": "Elisha Terada",
+      "authorUrl": "https://unsplash.com/@elishaterada?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bakery-filled-with-lots-of-baked-goods-IYjXGUpJH74?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9180",
+          "w": 0.3708
+        },
+        {
+          "hex": "#7B5834",
+          "w": 0.3405
+        },
+        {
+          "hex": "#D1C9C2",
+          "w": 0.2888
+        }
+      ]
+    },
+    {
+      "id": "jN_M0McVNeI",
+      "small": "https://images.unsplash.com/photo-1511018556340-d16986a1c194?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1511018556340-d16986a1c194?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXN0cnklMjBzaG9wJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTgwMzY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5329,
+      "height": 3553,
+      "blurHash": "L8BpUw~UXT-p9_%L^%tRxut6S5Rj",
+      "color": "#0c2626",
+      "alt": "person inside bakery shop",
+      "author": "Nick Karvounis",
+      "authorUrl": "https://unsplash.com/@nickkarvounis?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-inside-bakery-shop-jN_M0McVNeI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4C4C48",
+          "w": 0.3899
+        },
+        {
+          "hex": "#202624",
+          "w": 0.3581
+        },
+        {
+          "hex": "#80776C",
+          "w": 0.252
+        }
+      ]
+    },
+    {
+      "id": "fTez0QvAOJA",
+      "small": "https://images.unsplash.com/photo-1677945720736-4a13839b8d97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcnVpdCUyMHRhcnQlMjBjbG9zZXVwfGVufDF8MHx8fDE3OTIxODAzNjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1677945720736-4a13839b8d97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcnVpdCUyMHRhcnQlMjBjbG9zZXVwfGVufDF8MHx8fDE3OTIxODAzNjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5690,
+      "height": 3793,
+      "blurHash": "LQEU[MWX4;V@E*o0V[WV0gjZ={of",
+      "color": "#404040",
+      "alt": "a peeled orange sitting on top of a wooden table",
+      "author": "Ian Talmacs",
+      "authorUrl": "https://unsplash.com/@iantalmacs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-peeled-orange-sitting-on-top-of-a-wooden-table-fTez0QvAOJA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#414036",
+          "w": 0.5354
+        },
+        {
+          "hex": "#7B583B",
+          "w": 0.3647
+        },
+        {
+          "hex": "#C68C5B",
+          "w": 0.0999
+        }
+      ]
+    },
+    {
+      "id": "_jOJkjd8S-0",
+      "small": "https://images.unsplash.com/photo-1686578220035-eb8530720b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1686578220035-eb8530720b5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LCDuML0#57kC^%xYI;Ip9u%1xZoL",
+      "color": "#260c0c",
+      "alt": "a bunch of doughnuts that are on a table",
+      "author": "Doğu Tuncer",
+      "authorUrl": "https://unsplash.com/@tuncerdogu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-doughnuts-that-are-on-a-table-_jOJkjd8S-0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#261206",
+          "w": 0.3824
+        },
+        {
+          "hex": "#572E16",
+          "w": 0.3255
+        },
+        {
+          "hex": "#875B3B",
+          "w": 0.2922
+        }
+      ]
+    },
+    {
+      "id": "S1Z_Cudra0k",
+      "small": "https://images.unsplash.com/photo-1491223111273-505dc52e1cf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1491223111273-505dc52e1cf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3835,
+      "height": 2557,
+      "blurHash": "LnG98S%%OttRt7X9xZxXRPV@WCWB",
+      "color": "#8c7373",
+      "alt": "woman slicing cake",
+      "author": "Toa Heftiba",
+      "authorUrl": "https://unsplash.com/@heftiba?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-slicing-cake-S1Z_Cudra0k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#939294",
+          "w": 0.4575
+        },
+        {
+          "hex": "#6C6261",
+          "w": 0.3088
+        },
+        {
+          "hex": "#BECCD7",
+          "w": 0.2337
+        }
+      ]
+    },
+    {
+      "id": "PFVTZSqIqn0",
+      "small": "https://images.unsplash.com/photo-1551645701-0e68cfc880f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1551645701-0e68cfc880f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4771,
+      "height": 3181,
+      "blurHash": "LOF~N*~qxvf,Z$xXxaWE9FRiadR-",
+      "color": "#262626",
+      "alt": "man holding box on top of display counter",
+      "author": "Maria Teneva",
+      "authorUrl": "https://unsplash.com/@miteneva?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-holding-box-on-top-of-display-counter-PFVTZSqIqn0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#262426",
+          "w": 0.3723
+        },
+        {
+          "hex": "#A69077",
+          "w": 0.3513
+        },
+        {
+          "hex": "#CFCDC6",
+          "w": 0.2764
+        }
+      ]
+    },
+    {
+      "id": "FEkdybfb0nE",
+      "small": "https://images.unsplash.com/photo-1717095859889-aadb894e8e03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717095859889-aadb894e8e03?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaG9jb2xhdGUlMjBwYXN0cmllcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM2OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LLGRq}j?Rls.~oR-Rjs.IpbHRjae",
+      "color": "#262626",
+      "alt": "a display case filled with lots of different types of cakes",
+      "author": "Robert Katzki",
+      "authorUrl": "https://unsplash.com/@ro_ka?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-display-case-filled-with-lots-of-different-types-of-cakes-FEkdybfb0nE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#957E66",
+          "w": 0.4361
+        },
+        {
+          "hex": "#D0BA9B",
+          "w": 0.3064
+        },
+        {
+          "hex": "#594735",
+          "w": 0.2574
+        }
+      ]
+    }
+  ]
+}

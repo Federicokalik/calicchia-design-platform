@@ -1,0 +1,335 @@
+{
+  "slug": "scuole-calcio",
+  "queries": [
+    "children football training pitch",
+    "football cones grass",
+    "youth football bibs"
+  ],
+  "generatedAt": "2026-10-12T19:51:18.410Z",
+  "photos": [
+    {
+      "id": "eEhOyEtBGMQ",
+      "small": "https://images.unsplash.com/photo-1600077063877-22118d6290eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600077063877-22118d6290eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LLEo^|xuN2xu0[oz%KtRyEj]a%tR",
+      "color": "#c0a659",
+      "alt": "group of men playing soccer during daytime",
+      "author": "Omar Ramadan",
+      "authorUrl": "https://unsplash.com/@omarvellous14?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/group-of-men-playing-soccer-during-daytime-eEhOyEtBGMQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A9A964",
+          "w": 0.4516
+        },
+        {
+          "hex": "#495556",
+          "w": 0.2766
+        },
+        {
+          "hex": "#898230",
+          "w": 0.2718
+        }
+      ]
+    },
+    {
+      "id": "_Kp1WFKoCRk",
+      "small": "https://images.unsplash.com/photo-1505305976870-c0be1cd39939?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1505305976870-c0be1cd39939?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LMFYu70iM}X7D,eVw|XOQ;NJtOs-",
+      "color": "#0c2626",
+      "alt": "people playing soccer on soccer field",
+      "author": "William Smith",
+      "authorUrl": "https://unsplash.com/@misterwillsmith?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-playing-soccer-on-soccer-field-_Kp1WFKoCRk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9CA34D",
+          "w": 0.5198
+        },
+        {
+          "hex": "#6C7E3C",
+          "w": 0.2541
+        },
+        {
+          "hex": "#042A1F",
+          "w": 0.2261
+        }
+      ]
+    },
+    {
+      "id": "PrEgSKqnrIQ",
+      "small": "https://images.unsplash.com/photo-1531861218190-f90c89febf69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1531861218190-f90c89febf69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5715,
+      "height": 3810,
+      "blurHash": "L-J+Srj]R-of_NWBayWCs=kBj?j[",
+      "color": "#d9f3d9",
+      "alt": "empty green stadium",
+      "author": "Ben Wiens",
+      "authorUrl": "https://unsplash.com/@benwiens?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-green-stadium-PrEgSKqnrIQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDEFE3",
+          "w": 0.5181
+        },
+        {
+          "hex": "#335436",
+          "w": 0.2552
+        },
+        {
+          "hex": "#749056",
+          "w": 0.2267
+        }
+      ]
+    },
+    {
+      "id": "21Cg_fsFBGc",
+      "small": "https://images.unsplash.com/photo-1510526292299-20af3f62d453?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510526292299-20af3f62d453?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGZvb3RiYWxsJTIwdHJhaW5pbmclMjBwaXRjaHxlbnwxfDB8fHwxNzkxODM0NjcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3628,
+      "height": 2543,
+      "blurHash": "L9BX*boz9aWENBR+x_j]omj]RMae",
+      "color": "#59730c",
+      "alt": "aerial photo of soccer field",
+      "author": "Willian Justen de Vasconcellos",
+      "authorUrl": "https://unsplash.com/@willianjusten?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/aerial-photo-of-soccer-field-21Cg_fsFBGc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#65890D",
+          "w": 0.6026
+        },
+        {
+          "hex": "#4E7A0D",
+          "w": 0.3397
+        },
+        {
+          "hex": "#608E69",
+          "w": 0.0577
+        }
+      ]
+    },
+    {
+      "id": "xrwEqCaofws",
+      "small": "https://images.unsplash.com/photo-1658112667921-bc4ee54c667b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1658112667921-bc4ee54c667b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2656,
+      "blurHash": "LCEp^|kB9JIst79xxY-Q0QEP-m-k",
+      "color": "#598c40",
+      "alt": "a group of yellow objects on grass",
+      "author": "oghenovo egbegbedia",
+      "authorUrl": "https://unsplash.com/@novosky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-yellow-objects-on-grass-xrwEqCaofws?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#678748",
+          "w": 0.4448
+        },
+        {
+          "hex": "#779755",
+          "w": 0.4288
+        },
+        {
+          "hex": "#E0D964",
+          "w": 0.1265
+        }
+      ]
+    },
+    {
+      "id": "vsJsZmm0zv4",
+      "small": "https://images.unsplash.com/photo-1658112667639-e310e134d478?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1658112667639-e310e134d478?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2656,
+      "blurHash": "LFG,y}s;V]kC8*E2ovjt8~M}-oRk",
+      "color": "#8cc073",
+      "alt": "a group of yellow objects on a green surface",
+      "author": "oghenovo egbegbedia",
+      "authorUrl": "https://unsplash.com/@novosky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-yellow-objects-on-a-green-surface-vsJsZmm0zv4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9CBE75",
+          "w": 0.659
+        },
+        {
+          "hex": "#6C8E60",
+          "w": 0.2058
+        },
+        {
+          "hex": "#7EA06C",
+          "w": 0.1352
+        }
+      ]
+    },
+    {
+      "id": "QbOGgJasjWE",
+      "small": "https://images.unsplash.com/photo-1785812739504-94e7b1848dc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785812739504-94e7b1848dc6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3207,
+      "height": 1804,
+      "blurHash": "L56bV.EQ4;^gIpt6t5Ne0M$~?E9x",
+      "color": "#264040",
+      "alt": "A yellow disc cone sits on green grass",
+      "author": "julio Galvao",
+      "authorUrl": "https://unsplash.com/@julioo_mov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-yellow-disc-cone-sits-on-green-grass-QbOGgJasjWE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#284040",
+          "w": 0.4633
+        },
+        {
+          "hex": "#162F2E",
+          "w": 0.317
+        },
+        {
+          "hex": "#3D5554",
+          "w": 0.2197
+        }
+      ]
+    },
+    {
+      "id": "PHcTIpyLvXk",
+      "small": "https://images.unsplash.com/photo-1658112667658-1a0f8c4e911a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1658112667658-1a0f8c4e911a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb290YmFsbCUyMGNvbmVzJTIwZ3Jhc3N8ZW58MXwwfHx8MTc5MTgzNDY3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2656,
+      "blurHash": "LDH3.FxvDmI.WC58xY$+0ME2%1s;",
+      "color": "#73a659",
+      "alt": "a group of yellow objects on grass",
+      "author": "oghenovo egbegbedia",
+      "authorUrl": "https://unsplash.com/@novosky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-yellow-objects-on-grass-PHcTIpyLvXk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#86AC5D",
+          "w": 0.7161
+        },
+        {
+          "hex": "#A1C36F",
+          "w": 0.1615
+        },
+        {
+          "hex": "#ECEF9D",
+          "w": 0.1224
+        }
+      ]
+    },
+    {
+      "id": "jkhis90HL4k",
+      "small": "https://images.unsplash.com/photo-1534209755134-2bdac1525cee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1534209755134-2bdac1525cee?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LKHoUJ4.XKaP?JD%r_t8~pWA9Zt7",
+      "color": "#a6a68c",
+      "alt": "selective focus photography of boy wearing American football gear",
+      "author": "Chris Benson",
+      "authorUrl": "https://unsplash.com/@lordmaui?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-boy-wearing-american-football-gear-jkhis90HL4k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#98A377",
+          "w": 0.489
+        },
+        {
+          "hex": "#D5D4C7",
+          "w": 0.2618
+        },
+        {
+          "hex": "#65745A",
+          "w": 0.2491
+        }
+      ]
+    },
+    {
+      "id": "xVPwR7o_UTs",
+      "small": "https://images.unsplash.com/photo-1510698655094-bc8d2addb43b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1510698655094-bc8d2addb43b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3759,
+      "height": 2506,
+      "blurHash": "LMIg11Tt;NIX0jztoc=_G9k8EgR.",
+      "color": "#c05940",
+      "alt": "two boys walking on green field at daytime",
+      "author": "Ben Hershey",
+      "authorUrl": "https://unsplash.com/@benhershey?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-boys-walking-on-green-field-at-daytime-xVPwR7o_UTs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CE674A",
+          "w": 0.4213
+        },
+        {
+          "hex": "#6F6937",
+          "w": 0.3562
+        },
+        {
+          "hex": "#252222",
+          "w": 0.2225
+        }
+      ]
+    },
+    {
+      "id": "jdon8X05ZPU",
+      "small": "https://images.unsplash.com/photo-1562282370-dc688fad733f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562282370-dc688fad733f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LFFi_Fl6.QRR~XbZMyx]%4s:t7Rj",
+      "color": "#8ca68c",
+      "alt": "person wearing green and white shirt",
+      "author": "Jeffrey F Lin",
+      "authorUrl": "https://unsplash.com/@jeffreyflin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-green-and-white-shirt-jdon8X05ZPU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7D9B80",
+          "w": 0.5221
+        },
+        {
+          "hex": "#B1BFB3",
+          "w": 0.3236
+        },
+        {
+          "hex": "#0D1014",
+          "w": 0.1543
+        }
+      ]
+    },
+    {
+      "id": "HV3C8Q1ERmo",
+      "small": "https://images.unsplash.com/photo-1508354895968-a7ceee083492?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1508354895968-a7ceee083492?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx5b3V0aCUyMGZvb3RiYWxsJTIwYmlic3xlbnwxfDB8fHwxNzkxODM0Njc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3764,
+      "height": 2509,
+      "blurHash": "LkH2u,%iohxo~ox[Rks*%FRPRPot",
+      "color": "#d9d973",
+      "alt": "selective focus photography of two football players",
+      "author": "Ben Hershey",
+      "authorUrl": "https://unsplash.com/@benhershey?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-two-football-players-HV3C8Q1ERmo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6C7300",
+          "w": 0.4048
+        },
+        {
+          "hex": "#16171B",
+          "w": 0.3208
+        },
+        {
+          "hex": "#DEE181",
+          "w": 0.2743
+        }
+      ]
+    }
+  ]
+}

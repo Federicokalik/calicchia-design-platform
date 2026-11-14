@@ -1,0 +1,335 @@
+{
+  "slug": "gioiellerie",
+  "queries": [
+    "jewelry store window",
+    "gold rings on velvet",
+    "watch display case"
+  ],
+  "generatedAt": "2026-10-16T19:53:53.948Z",
+  "photos": [
+    {
+      "id": "G-8xZTir9jA",
+      "small": "https://images.unsplash.com/photo-1689560025810-4599bc195814?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1689560025810-4599bc195814?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7654,
+      "height": 5105,
+      "blurHash": "LKE.Rk580NNN9H%2tPayD*Rk%LxW",
+      "color": "#262640",
+      "alt": "a row of white chairs sitting in front of a window",
+      "author": "Xiangkun ZHU",
+      "authorUrl": "https://unsplash.com/@arttoinspire?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-row-of-white-chairs-sitting-in-front-of-a-window-G-8xZTir9jA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBA174",
+          "w": 0.4022
+        },
+        {
+          "hex": "#3D2E2F",
+          "w": 0.3679
+        },
+        {
+          "hex": "#785528",
+          "w": 0.2299
+        }
+      ]
+    },
+    {
+      "id": "omYSP6oYUs4",
+      "small": "https://images.unsplash.com/photo-1580582202907-d01fd0bd4c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580582202907-d01fd0bd4c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LI8=i=H?DOx]R4bbtQax8xyDxsWV",
+      "color": "#0c2626",
+      "alt": "white tissue paper in white box",
+      "author": "Brooks Leibee",
+      "authorUrl": "https://unsplash.com/@baleibee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-tissue-paper-in-white-box-omYSP6oYUs4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#081925",
+          "w": 0.4416
+        },
+        {
+          "hex": "#204147",
+          "w": 0.3314
+        },
+        {
+          "hex": "#3F8781",
+          "w": 0.2269
+        }
+      ]
+    },
+    {
+      "id": "mle8YcOtcAc",
+      "small": "https://images.unsplash.com/photo-1604306354577-68136efdf03b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604306354577-68136efdf03b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4269,
+      "height": 2846,
+      "blurHash": "LGBy,4RiE1bH-pR*Rkof01t7t7ae",
+      "color": "#260c0c",
+      "alt": "brown wooden shelf with assorted items",
+      "author": "Marius Cern",
+      "authorUrl": "https://unsplash.com/@mariuscern?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-shelf-with-assorted-items-mle8YcOtcAc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A3622",
+          "w": 0.3633
+        },
+        {
+          "hex": "#0B0403",
+          "w": 0.3227
+        },
+        {
+          "hex": "#7B6E5B",
+          "w": 0.3139
+        }
+      ]
+    },
+    {
+      "id": "N1D6PRck1bI",
+      "small": "https://images.unsplash.com/photo-1576723417715-6b408c988c23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1576723417715-6b408c988c23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxqZXdlbHJ5JTIwc3RvcmUlMjB3aW5kb3d8ZW58MXwwfHx8MTc5MjE4MDQyNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7735,
+      "height": 5159,
+      "blurHash": "LVF#?xs:4.kCShRkRjj]0KWC-;WB",
+      "color": "#402626",
+      "alt": "several assorted-color necklaces with pendants and boxes",
+      "author": "Yiran Ding",
+      "authorUrl": "https://unsplash.com/@yiranding?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/several-assorted-color-necklaces-with-pendants-and-boxes-N1D6PRck1bI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#61514F",
+          "w": 0.3645
+        },
+        {
+          "hex": "#2D2322",
+          "w": 0.3515
+        },
+        {
+          "hex": "#A18E8A",
+          "w": 0.284
+        }
+      ]
+    },
+    {
+      "id": "z3RuOvGU9ys",
+      "small": "https://images.unsplash.com/photo-1565034582189-195bb0084dcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1565034582189-195bb0084dcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LFBDWj%e4oD*-oRiM}R-01Mz%Lxt",
+      "color": "#737373",
+      "alt": "wedding ring set",
+      "author": "Denny Müller",
+      "authorUrl": "https://unsplash.com/@redaquamedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/wedding-ring-set-z3RuOvGU9ys?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E6F6B",
+          "w": 0.4574
+        },
+        {
+          "hex": "#0B0808",
+          "w": 0.2786
+        },
+        {
+          "hex": "#41453E",
+          "w": 0.2641
+        }
+      ]
+    },
+    {
+      "id": "hNo86T4HMZM",
+      "small": "https://images.unsplash.com/photo-1766963026693-e73b058176dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766963026693-e73b058176dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4938,
+      "height": 3292,
+      "blurHash": "LEK1]~%N01i]D%oct6t8E3ITi^tS",
+      "color": "#c0c0c0",
+      "alt": "Two gold wedding rings on white fabric",
+      "author": "Adi Albulescu",
+      "authorUrl": "https://unsplash.com/@adialbulescu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-gold-wedding-rings-on-white-fabric-hNo86T4HMZM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3B7C0",
+          "w": 0.4419
+        },
+        {
+          "hex": "#A0A4AD",
+          "w": 0.312
+        },
+        {
+          "hex": "#C5C9D0",
+          "w": 0.246
+        }
+      ]
+    },
+    {
+      "id": "IOtZhN3nBjw",
+      "small": "https://images.unsplash.com/photo-1684616290775-9b1722dbe9b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1684616290775-9b1722dbe9b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LEMQYNI9w@xZ*0I[XUR.?vDgV?Vq",
+      "color": "#d9d9d9",
+      "alt": "a close up of food on a cloth",
+      "author": "Amina Atar",
+      "authorUrl": "https://unsplash.com/@minaslens?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-food-on-a-cloth-IOtZhN3nBjw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6D0D5",
+          "w": 0.4455
+        },
+        {
+          "hex": "#BEB3B3",
+          "w": 0.329
+        },
+        {
+          "hex": "#A58F83",
+          "w": 0.2256
+        }
+      ]
+    },
+    {
+      "id": "Z4BJfx59yqY",
+      "small": "https://images.unsplash.com/photo-1567523977592-7959bc5df51e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1567523977592-7959bc5df51e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnb2xkJTIwcmluZ3MlMjBvbiUyMHZlbHZldHxlbnwxfDB8fHwxNzkyMTgwNDI5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3126,
+      "height": 2262,
+      "blurHash": "LF9ZDjR*0#juoyWVjFof5Sa|=xoL",
+      "color": "#40260c",
+      "alt": "gold-colored ring",
+      "author": "Felipe Salgado",
+      "authorUrl": "https://unsplash.com/@fesaza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gold-colored-ring-Z4BJfx59yqY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#392B19",
+          "w": 0.5639
+        },
+        {
+          "hex": "#1F1205",
+          "w": 0.3039
+        },
+        {
+          "hex": "#7A4E1C",
+          "w": 0.1322
+        }
+      ]
+    },
+    {
+      "id": "uDSMTV06s4U",
+      "small": "https://images.unsplash.com/photo-1604242692760-2f7b0c26856d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1604242692760-2f7b0c26856d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3617,
+      "height": 2415,
+      "blurHash": "L9GR3UtSMxVr59Q,T05XDNVqK7kD",
+      "color": "#73400c",
+      "alt": "gold and white analog watch",
+      "author": "Amin Hasani",
+      "authorUrl": "https://unsplash.com/@aminhasani?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gold-and-white-analog-watch-uDSMTV06s4U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1E1A1F",
+          "w": 0.4265
+        },
+        {
+          "hex": "#624733",
+          "w": 0.3473
+        },
+        {
+          "hex": "#B4844E",
+          "w": 0.2262
+        }
+      ]
+    },
+    {
+      "id": "pooVzgc3y6k",
+      "small": "https://images.unsplash.com/photo-1526743655626-e3d757b13d61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1526743655626-e3d757b13d61?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LLFEihJ8R*jb0#-UxZWVR*EMS3NG",
+      "color": "#594040",
+      "alt": "three round silver-colored chronograph watches on white mounts",
+      "author": "Christian Wiediger",
+      "authorUrl": "https://unsplash.com/@christianw?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/three-round-silver-colored-chronograph-watches-on-white-mounts-pooVzgc3y6k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#614A3B",
+          "w": 0.3537
+        },
+        {
+          "hex": "#362E29",
+          "w": 0.331
+        },
+        {
+          "hex": "#9B6F53",
+          "w": 0.3154
+        }
+      ]
+    },
+    {
+      "id": "IxH4xiteQZQ",
+      "small": "https://images.unsplash.com/photo-1690220108517-1630df158fb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1690220108517-1630df158fb8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2667,
+      "blurHash": "LWJ8eOt800xu4-a#ogayRQoet6WB",
+      "color": "#d9d9d9",
+      "alt": "a couple of watches sitting inside of a green box",
+      "author": "Kool C",
+      "authorUrl": "https://unsplash.com/@koolcreation?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-couple-of-watches-sitting-inside-of-a-green-box-IxH4xiteQZQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0E0DF",
+          "w": 0.4993
+        },
+        {
+          "hex": "#3E6567",
+          "w": 0.2574
+        },
+        {
+          "hex": "#90999D",
+          "w": 0.2433
+        }
+      ]
+    },
+    {
+      "id": "btSAf5f2TMo",
+      "small": "https://images.unsplash.com/photo-1717157197005-b851de4abc63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717157197005-b851de4abc63?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3YXRjaCUyMGRpc3BsYXklMjBjYXNlfGVufDF8MHx8fDE3OTIxODA0MzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2560,
+      "blurHash": "LdF~s_jXIpV@.9t7aeRj_Nt7t6of",
+      "color": "#c0d9d9",
+      "alt": "a watch sitting on top of a leather case",
+      "author": "QUENTIN Mahe",
+      "authorUrl": "https://unsplash.com/@quentinmahe?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-watch-sitting-on-top-of-a-leather-case-btSAf5f2TMo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C4CBD3",
+          "w": 0.4078
+        },
+        {
+          "hex": "#424249",
+          "w": 0.3183
+        },
+        {
+          "hex": "#7A7A82",
+          "w": 0.2739
+        }
+      ]
+    }
+  ]
+}

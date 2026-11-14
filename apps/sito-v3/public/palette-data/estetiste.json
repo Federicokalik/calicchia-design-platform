@@ -1,0 +1,335 @@
+{
+  "slug": "estetiste",
+  "queries": [
+    "facial treatment",
+    "skincare products on shelf",
+    "beauty treatment bed"
+  ],
+  "generatedAt": "2026-10-12T19:50:24.798Z",
+  "photos": [
+    {
+      "id": "g-m8EDc4X6Q",
+      "small": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4032,
+      "blurHash": "LRL|yB-B-;Or?wXkS%IAxbWAnN%2",
+      "color": "#d9d9d9",
+      "alt": "woman lying on blue towel with white cream on face",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-lying-on-blue-towel-with-white-cream-on-face-g-m8EDc4X6Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D0D5",
+          "w": 0.4672
+        },
+        {
+          "hex": "#B4ABA4",
+          "w": 0.3083
+        },
+        {
+          "hex": "#A08078",
+          "w": 0.2245
+        }
+      ]
+    },
+    {
+      "id": "Pe9IXUuC6QU",
+      "small": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LRJ7?q000fIUIAxusmtR.9IUr=x]",
+      "color": "#d9d9d9",
+      "alt": "woman receiving facial mask treatment at spa",
+      "author": "Rosa Rafael",
+      "authorUrl": "https://unsplash.com/@rosarafael?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-receiving-facial-mask-treatment-at-spa-Pe9IXUuC6QU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BF9A80",
+          "w": 0.441
+        },
+        {
+          "hex": "#DDDAD4",
+          "w": 0.3034
+        },
+        {
+          "hex": "#724F2D",
+          "w": 0.2556
+        }
+      ]
+    },
+    {
+      "id": "HtXyytr9304",
+      "small": "https://images.unsplash.com/photo-1713085085470-fba013d67e65?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1713085085470-fba013d67e65?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LOKA{CI:-RDi%%VskWxub^xtIUNe",
+      "color": "#c0c0c0",
+      "alt": "a woman getting a facial peel from a doctor",
+      "author": "Look Studio",
+      "authorUrl": "https://unsplash.com/@lookphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-getting-a-facial-peel-from-a-doctor-HtXyytr9304?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B1A79F",
+          "w": 0.377
+        },
+        {
+          "hex": "#987B62",
+          "w": 0.3131
+        },
+        {
+          "hex": "#C8C6C5",
+          "w": 0.3099
+        }
+      ]
+    },
+    {
+      "id": "VxAwTeiqDao",
+      "small": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYWNpYWwlMjB0cmVhdG1lbnR8ZW58MXwwfHx8MTc5MTgzNDYxN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "LPLW^ll84Trs9DVZV@bu.8xax]of",
+      "color": "#d9d9d9",
+      "alt": "white plastic pump bottle beside pink tulips and gray towel",
+      "author": "Camille Brodard",
+      "authorUrl": "https://unsplash.com/@kmile_ch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-plastic-pump-bottle-beside-pink-tulips-and-gray-towel-VxAwTeiqDao?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A29D",
+          "w": 0.3846
+        },
+        {
+          "hex": "#DDDDE0",
+          "w": 0.3446
+        },
+        {
+          "hex": "#978581",
+          "w": 0.2709
+        }
+      ]
+    },
+    {
+      "id": "R14UnPOsI5s",
+      "small": "https://images.unsplash.com/photo-1687293375393-26b74ce252f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687293375393-26b74ce252f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjE5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5845,
+      "height": 3861,
+      "blurHash": "L8K1tB_4v}-o-pInM_od8_xuR-W;",
+      "color": "#a6a6a6",
+      "alt": "a shelf filled with lots of different types of skin care products",
+      "author": "Omar Lopez",
+      "authorUrl": "https://unsplash.com/@omarlopez1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-shelf-filled-with-lots-of-different-types-of-skin-care-products-R14UnPOsI5s?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0ABA5",
+          "w": 0.5245
+        },
+        {
+          "hex": "#8E8E88",
+          "w": 0.2494
+        },
+        {
+          "hex": "#D0D1CE",
+          "w": 0.2262
+        }
+      ]
+    },
+    {
+      "id": "7NPphZS4rfw",
+      "small": "https://images.unsplash.com/photo-1760614034530-a0d34463e03d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760614034530-a0d34463e03d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2800,
+      "height": 1865,
+      "blurHash": "L8Dl7u}@RP-:0LD*IUjFvf%0?bNG",
+      "color": "#735940",
+      "alt": "Woman holding product in a store with shelves",
+      "author": "Ela De Pure",
+      "authorUrl": "https://unsplash.com/@eladepure?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-holding-product-in-a-store-with-shelves-7NPphZS4rfw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#84614F",
+          "w": 0.3923
+        },
+        {
+          "hex": "#5B3928",
+          "w": 0.3891
+        },
+        {
+          "hex": "#B79D8C",
+          "w": 0.2186
+        }
+      ]
+    },
+    {
+      "id": "B-xOubb2A7I",
+      "small": "https://images.unsplash.com/photo-1774124055560-37a5ff05617e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774124055560-37a5ff05617e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHHUL7%KE4I;0nw|$~xtxtx@M{jr",
+      "color": "#8c7373",
+      "alt": "Rows of colorful tiles arranged by shade on a shelf",
+      "author": "daniel mironov",
+      "authorUrl": "https://unsplash.com/@cheesy_daniel?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-colorful-tiles-arranged-by-shade-on-a-shelf-B-xOubb2A7I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9B7C56",
+          "w": 0.4504
+        },
+        {
+          "hex": "#80653E",
+          "w": 0.293
+        },
+        {
+          "hex": "#C1A368",
+          "w": 0.2566
+        }
+      ]
+    },
+    {
+      "id": "ZWNO4bzUP7k",
+      "small": "https://images.unsplash.com/photo-1556229181-695df2bf2d6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1556229181-695df2bf2d6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxza2luY2FyZSUyMHByb2R1Y3RzJTIwb24lMjBzaGVsZnxlbnwxfDB8fHwxNzkxODM0NjIwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5238,
+      "height": 3492,
+      "blurHash": "LDM?M9tS}+D*~WoJRibIw@fRNLax",
+      "color": "#d9c0a6",
+      "alt": "three assorted toiletries on brown shelf",
+      "author": "Curology",
+      "authorUrl": "https://unsplash.com/@curology?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/three-assorted-toiletries-on-brown-shelf-ZWNO4bzUP7k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CEA588",
+          "w": 0.5471
+        },
+        {
+          "hex": "#E4BFA5",
+          "w": 0.2647
+        },
+        {
+          "hex": "#AE836C",
+          "w": 0.1882
+        }
+      ]
+    },
+    {
+      "id": "6xlyKFFvufg",
+      "small": "https://images.unsplash.com/photo-1595871151608-bc7abd1caca3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1595871151608-bc7abd1caca3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LBF~gbIo0LgOsER$?vtS%gRPD%Ri",
+      "color": "#8c8c8c",
+      "alt": "white wooden vanity table with mirror",
+      "author": "Atikah Akhtar",
+      "authorUrl": "https://unsplash.com/@atikahakhtar?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-wooden-vanity-table-with-mirror-6xlyKFFvufg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F8C8A",
+          "w": 0.5229
+        },
+        {
+          "hex": "#716F6C",
+          "w": 0.2591
+        },
+        {
+          "hex": "#BABEBF",
+          "w": 0.218
+        }
+      ]
+    },
+    {
+      "id": "lJ08BI6NILg",
+      "small": "https://images.unsplash.com/photo-1789135840288-120fb0eb0e57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789135840288-120fb0eb0e57?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "L68f$IIV5RAC~ANaIoNH0}t7$jni",
+      "color": "#260c0c",
+      "alt": "A woman lying on a bed with a red light panel in a bedroom",
+      "author": "Nico Wagemans",
+      "authorUrl": "https://unsplash.com/@norahlux?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-lying-on-bed-with-red-light-lJ08BI6NILg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#140A07",
+          "w": 0.4346
+        },
+        {
+          "hex": "#301510",
+          "w": 0.3428
+        },
+        {
+          "hex": "#815C53",
+          "w": 0.2226
+        }
+      ]
+    },
+    {
+      "id": "Rox00cOm1SY",
+      "small": "https://images.unsplash.com/photo-1775642549793-6c94f764b227?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775642549793-6c94f764b227?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LQFf.|5SofAD}qI=s.R+Naofn%sn",
+      "color": "#260c0c",
+      "alt": "Person in pajamas using a tablet on a bed",
+      "author": "Christian Agbede",
+      "authorUrl": "https://unsplash.com/@chriscreations__?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-pajamas-using-a-tablet-on-a-bed-Rox00cOm1SY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C0501",
+          "w": 0.3604
+        },
+        {
+          "hex": "#A14A22",
+          "w": 0.3585
+        },
+        {
+          "hex": "#5A1F06",
+          "w": 0.2811
+        }
+      ]
+    },
+    {
+      "id": "6ptIOEW18yI",
+      "small": "https://images.unsplash.com/photo-1775642548998-751986fb4099?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775642548998-751986fb4099?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWF1dHklMjB0cmVhdG1lbnQlMjBiZWR8ZW58MXwwfHx8MTc5MTgzNDYyMnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LSG?b70$S#Nb=tAGoJn*WUN^sAxF",
+      "color": "#260c0c",
+      "alt": "Woman with face mask reads book in dimly lit room",
+      "author": "Christian Agbede",
+      "authorUrl": "https://unsplash.com/@chriscreations__?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-with-face-mask-reads-book-in-dimly-lit-room-6ptIOEW18yI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A85015",
+          "w": 0.3542
+        },
+        {
+          "hex": "#220500",
+          "w": 0.3262
+        },
+        {
+          "hex": "#5C2100",
+          "w": 0.3197
+        }
+      ]
+    }
+  ]
+}

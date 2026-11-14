@@ -1,0 +1,277 @@
+{
+  "slug": "agenzie-assicurative",
+  "queries": [
+    "car keys desk",
+    "house keys wood",
+    "paper documents pen"
+  ],
+  "generatedAt": "2026-10-16T16:27:28.668Z",
+  "photos": [
+    {
+      "id": "PxiAc1aElFQ",
+      "small": "https://images.unsplash.com/photo-1643804926339-e94f0a655185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643804926339-e94f0a655185?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LMEexu0MRPxt^iI;V@s:w[t7RkWB",
+      "color": "#a68c73",
+      "alt": "a bunch of keys sitting on top of a wooden table",
+      "author": "Filip Szalbot",
+      "authorUrl": "https://unsplash.com/@fess0?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-keys-sitting-on-top-of-a-wooden-table-PxiAc1aElFQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#736757",
+          "w": 0.3551
+        },
+        {
+          "hex": "#B09575",
+          "w": 0.3408
+        },
+        {
+          "hex": "#514232",
+          "w": 0.3041
+        }
+      ]
+    },
+    {
+      "id": "iTHT1gXJuS8",
+      "small": "https://images.unsplash.com/photo-1562003596-a5827707367d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562003596-a5827707367d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LhEMk0%hNGWB~Wt6NGay%1M{RjoL",
+      "color": "#264059",
+      "alt": "black key fob",
+      "author": "Bence Balla-Schottner",
+      "authorUrl": "https://unsplash.com/@ballaschottner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-key-fob-iTHT1gXJuS8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2A576A",
+          "w": 0.3887
+        },
+        {
+          "hex": "#143343",
+          "w": 0.3239
+        },
+        {
+          "hex": "#D3CCC9",
+          "w": 0.2873
+        }
+      ]
+    },
+    {
+      "id": "zI_FuGSk-B8",
+      "small": "https://images.unsplash.com/photo-1694026038113-e2591c0dda19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1694026038113-e2591c0dda19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "L24_%.00Dj%MI9t8kCt701xYxso#",
+      "color": "#262626",
+      "alt": "a close up of a car's gear lever",
+      "author": "lucas clarysse",
+      "authorUrl": "https://unsplash.com/@lucky_photography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-cars-gear-lever-zI_FuGSk-B8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#050707",
+          "w": 0.4212
+        },
+        {
+          "hex": "#1C1D1E",
+          "w": 0.3195
+        },
+        {
+          "hex": "#34373A",
+          "w": 0.2592
+        }
+      ]
+    },
+    {
+      "id": "PKwmiy1JafE",
+      "small": "https://images.unsplash.com/photo-1633818807431-14d29e583bcb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1633818807431-14d29e583bcb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBrZXlzJTIwZGVza3xlbnwxfDB8fHwxNzkyMTY4MDQzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "L99HFU~qD%aeD%8_8_Di_3%MWBM{",
+      "color": "#0c2626",
+      "alt": "a close up of a car key chain",
+      "author": "Erik Mclean",
+      "authorUrl": "https://unsplash.com/@introspectivedsgn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-car-key-chain-PKwmiy1JafE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#151B1C",
+          "w": 0.7674
+        },
+        {
+          "hex": "#454B51",
+          "w": 0.1226
+        },
+        {
+          "hex": "#888E93",
+          "w": 0.11
+        }
+      ]
+    },
+    {
+      "id": "tqW-iXIp6ss",
+      "small": "https://images.unsplash.com/photo-1687641924511-9f78e6988a55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3VzZSUyMGtleXMlMjB3b29kfGVufDF8MHx8fDE3OTIxNjgwNDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1687641924511-9f78e6988a55?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxob3VzZSUyMGtleXMlMjB3b29kfGVufDF8MHx8fDE3OTIxNjgwNDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 10260,
+      "height": 6840,
+      "blurHash": "LEFFZ}Di-;R%yDM{k9o10LozE1xG",
+      "color": "#404040",
+      "alt": "a building that has a bunch of clocks on it",
+      "author": "Eric Prouzet",
+      "authorUrl": "https://unsplash.com/@eprouzet?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-building-that-has-a-bunch-of-clocks-on-it-tqW-iXIp6ss?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#666057",
+          "w": 0.436
+        },
+        {
+          "hex": "#90877E",
+          "w": 0.2922
+        },
+        {
+          "hex": "#45403A",
+          "w": 0.2718
+        }
+      ]
+    },
+    {
+      "id": "F8E2tks5N04",
+      "small": "https://images.unsplash.com/photo-1470019693664-1d202d2c0907?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3VzZSUyMGtleXMlMjB3b29kfGVufDF8MHx8fDE3OTIxNjgwNDV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1470019693664-1d202d2c0907?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxob3VzZSUyMGtleXMlMjB3b29kfGVufDF8MHx8fDE3OTIxNjgwNDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LNDS%bM|9Fxu~qt7M{j[Rjt7xuM{",
+      "color": "#262626",
+      "alt": "greyscale photo of man playing spinet piano close-up photo",
+      "author": "Darius",
+      "authorUrl": "https://unsplash.com/@dsoodmand?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/greyscale-photo-of-man-playing-spinet-piano-close-up-photo-F8E2tks5N04?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#201F1E",
+          "w": 0.5052
+        },
+        {
+          "hex": "#C0BEBC",
+          "w": 0.2874
+        },
+        {
+          "hex": "#8B8887",
+          "w": 0.2075
+        }
+      ]
+    },
+    {
+      "id": "ZH4FUYiaczY",
+      "small": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LQ9Q:ZRjIAs:Mwogt7WB8^ofx]WC",
+      "color": "#a6a6c0",
+      "alt": "a woman sitting at a table with lots of papers",
+      "author": "Dimitri Karastelev",
+      "authorUrl": "https://unsplash.com/@dkfra19?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-sitting-at-a-table-with-lots-of-papers-ZH4FUYiaczY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100F12",
+          "w": 0.371
+        },
+        {
+          "hex": "#010101",
+          "w": 0.321
+        },
+        {
+          "hex": "#92A0B4",
+          "w": 0.308
+        }
+      ]
+    },
+    {
+      "id": "spScdgWY-_c",
+      "small": "https://images.unsplash.com/photo-1631651693480-97f1132e333d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1631651693480-97f1132e333d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3576,
+      "height": 2384,
+      "blurHash": "LsMaIr4TIAIAt7ayV@t7IAayt7xu",
+      "color": "#f3f3f3",
+      "alt": "a wooden table topped with papers and a pen",
+      "author": "2H Media",
+      "authorUrl": "https://unsplash.com/@2hmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-table-topped-with-papers-and-a-pen-spScdgWY-_c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8ECEF",
+          "w": 0.6624
+        },
+        {
+          "hex": "#803B19",
+          "w": 0.1977
+        },
+        {
+          "hex": "#511500",
+          "w": 0.1399
+        }
+      ]
+    },
+    {
+      "id": "tQQ4BwN_UFs",
+      "small": "https://images.unsplash.com/photo-1554224155-1696413565d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1554224155-1696413565d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "L3H2Zk_4%N-h$^MwV@xu%h%0%KS7",
+      "color": "#8c8c8c",
+      "alt": "stack of papers flat lay photography",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-papers-flat-lay-photography-tQQ4BwN_UFs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#989797",
+          "w": 0.9243
+        },
+        {
+          "hex": "#7E7B7A",
+          "w": 0.0757
+        }
+      ]
+    },
+    {
+      "id": "hjwKMkehBco",
+      "small": "https://images.unsplash.com/photo-1473186505569-9c61870c11f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1473186505569-9c61870c11f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwYXBlciUyMGRvY3VtZW50cyUyMHBlbnxlbnwxfDB8fHwxNzkyMTY4MDQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LiJtxP%2M{s:0KoLbHfQD*Rjj[WC",
+      "color": "#d9c0c0",
+      "alt": "black and silver fountain pen",
+      "author": "Álvaro Serrano",
+      "authorUrl": "https://unsplash.com/@alvaroserrano?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-fountain-pen-hjwKMkehBco?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D0C3BD",
+          "w": 0.5642
+        },
+        {
+          "hex": "#2D3335",
+          "w": 0.2934
+        },
+        {
+          "hex": "#B9A9A2",
+          "w": 0.1424
+        }
+      ]
+    }
+  ]
+}

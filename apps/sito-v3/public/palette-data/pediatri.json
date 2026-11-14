@@ -1,0 +1,335 @@
+{
+  "slug": "pediatri",
+  "queries": [
+    "pediatric clinic waiting room",
+    "children examination room",
+    "wooden toys waiting room"
+  ],
+  "generatedAt": "2026-10-12T21:02:37.259Z",
+  "photos": [
+    {
+      "id": "FFA8yd4OynY",
+      "small": "https://images.unsplash.com/photo-1581982231900-6a1a46b744c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581982231900-6a1a46b744c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LFINgS-;$gNdP;XASOt7HXf%%LtR",
+      "color": "#8c7359",
+      "alt": "brown and white padded armchairs",
+      "author": "smallbox",
+      "authorUrl": "https://unsplash.com/@reoutput?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-white-padded-armchairs-FFA8yd4OynY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F7952",
+          "w": 0.5531
+        },
+        {
+          "hex": "#BAB2A5",
+          "w": 0.2597
+        },
+        {
+          "hex": "#80542C",
+          "w": 0.1872
+        }
+      ]
+    },
+    {
+      "id": "W3A3DUhPkVM",
+      "small": "https://images.unsplash.com/photo-1618506429948-1746e6e8093f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1618506429948-1746e6e8093f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LLHLVfOa%0Ny~q%2S%r=57w[Ipsl",
+      "color": "#c0c0c0",
+      "alt": "black leather armchair beside brown wooden shelf",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-leather-armchair-beside-brown-wooden-shelf-W3A3DUhPkVM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BFBBB7",
+          "w": 0.4017
+        },
+        {
+          "hex": "#918F8C",
+          "w": 0.375
+        },
+        {
+          "hex": "#585A57",
+          "w": 0.2233
+        }
+      ]
+    },
+    {
+      "id": "Qin4G_Y_xEE",
+      "small": "https://images.unsplash.com/photo-1779281887548-f676406dea2f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779281887548-f676406dea2f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 2268,
+      "blurHash": "LXFrnrt8ozo0~Vjuj[WBsosljFWB",
+      "color": "#262626",
+      "alt": "Modern waiting room with blue chairs and abstract art",
+      "author": "Yulaan",
+      "authorUrl": "https://unsplash.com/@yulaan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-waiting-room-with-blue-chairs-and-abstract-art-Qin4G_Y_xEE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A398",
+          "w": 0.4195
+        },
+        {
+          "hex": "#877F74",
+          "w": 0.2964
+        },
+        {
+          "hex": "#474B52",
+          "w": 0.2841
+        }
+      ]
+    },
+    {
+      "id": "xeNNZw4hnlk",
+      "small": "https://images.unsplash.com/photo-1580615633399-a69c661568c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580615633399-a69c661568c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwZWRpYXRyaWMlMjBjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LzJIOr00RPoL?IM{M{oLM{s;a{ay",
+      "color": "#f3f3f3",
+      "alt": "green and white sofa chairs",
+      "author": "Greg Rosenke",
+      "authorUrl": "https://unsplash.com/@greg_rosenke?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-white-sofa-chairs-xeNNZw4hnlk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECF0F2",
+          "w": 0.4349
+        },
+        {
+          "hex": "#0B3327",
+          "w": 0.2848
+        },
+        {
+          "hex": "#95B3A9",
+          "w": 0.2803
+        }
+      ]
+    },
+    {
+      "id": "oCqGFVUpgm4",
+      "small": "https://images.unsplash.com/photo-1758691462284-9eeec33fb0e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691462284-9eeec33fb0e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LAFPB2~9{x_2DhOYiwIVD*Z$bEDi",
+      "color": "#8c7359",
+      "alt": "Doctor examines child's chest with stethoscope",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-examines-childs-chest-with-stethoscope-oCqGFVUpgm4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#676B61",
+          "w": 0.5306
+        },
+        {
+          "hex": "#8E9186",
+          "w": 0.2663
+        },
+        {
+          "hex": "#B5BBB3",
+          "w": 0.2031
+        }
+      ]
+    },
+    {
+      "id": "0geEiqWD2G0",
+      "small": "https://images.unsplash.com/photo-1758691463080-30a990ef61bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463080-30a990ef61bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LPGS7K?wic574nDiM{ShjGtRx]n$",
+      "color": "#264040",
+      "alt": "Doctor examines child with stethoscope in clinic",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-examines-child-with-stethoscope-in-clinic-0geEiqWD2G0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#46544A",
+          "w": 0.3602
+        },
+        {
+          "hex": "#95826E",
+          "w": 0.3213
+        },
+        {
+          "hex": "#C3CBCA",
+          "w": 0.3185
+        }
+      ]
+    },
+    {
+      "id": "lDH1fxwguxw",
+      "small": "https://images.unsplash.com/photo-1758691462268-fbe66c4f3e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691462268-fbe66c4f3e28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LQIOUq}??va0bvt8adxuI:nhniS4",
+      "color": "#c0a68c",
+      "alt": "Doctor using stethoscope to examine patient's chest",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-using-stethoscope-to-examine-patients-chest-lDH1fxwguxw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C5B9A0",
+          "w": 0.3924
+        },
+        {
+          "hex": "#918A7A",
+          "w": 0.3357
+        },
+        {
+          "hex": "#6A6759",
+          "w": 0.2719
+        }
+      ]
+    },
+    {
+      "id": "6eDFSCSwkSo",
+      "small": "https://images.unsplash.com/photo-1758691462119-792279713969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691462119-792279713969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMGV4YW1pbmF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM4OTUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LGFPTwDO-qs;00NGRiWANFW?D%oy",
+      "color": "#a6a6a6",
+      "alt": "Doctor talking to mother and child at desk",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-talking-to-mother-and-child-at-desk-6eDFSCSwkSo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ABAFAE",
+          "w": 0.4879
+        },
+        {
+          "hex": "#414D48",
+          "w": 0.2679
+        },
+        {
+          "hex": "#7E7A74",
+          "w": 0.2442
+        }
+      ]
+    },
+    {
+      "id": "MM2P78oFkRw",
+      "small": "https://images.unsplash.com/photo-1773670567196-0b2aa493e280?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1773670567196-0b2aa493e280?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5713,
+      "height": 4512,
+      "blurHash": "LUHUwM^*%LRk~Ut7s:ofxYIpD+xa",
+      "color": "#26260c",
+      "alt": "A spacious room with a fireplace and furniture",
+      "author": "Navy Medicine",
+      "authorUrl": "https://unsplash.com/@navymedicine?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-spacious-room-with-a-fireplace-and-furniture-MM2P78oFkRw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#706546",
+          "w": 0.4175
+        },
+        {
+          "hex": "#3A311A",
+          "w": 0.3281
+        },
+        {
+          "hex": "#B2A37D",
+          "w": 0.2544
+        }
+      ]
+    },
+    {
+      "id": "Cyfsv4qZFWw",
+      "small": "https://images.unsplash.com/photo-1779726607562-62f404aec484?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779726607562-62f404aec484?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "L5Amb$RN-?%N:g-n8^RjL~RQOsWD",
+      "color": "#735959",
+      "alt": "Higher town quay waiting room sign on a wooden building",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/higher-town-quay-waiting-room-sign-on-a-wooden-building-Cyfsv4qZFWw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#635757",
+          "w": 0.5532
+        },
+        {
+          "hex": "#35353A",
+          "w": 0.2511
+        },
+        {
+          "hex": "#080A13",
+          "w": 0.1957
+        }
+      ]
+    },
+    {
+      "id": "qdFVjIfuvw4",
+      "small": "https://images.unsplash.com/photo-1789121274455-093c5e944263?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789121274455-093c5e944263?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4160,
+      "height": 2773,
+      "blurHash": "LVM6|+n$R4o#~qayM{kCITazR+WB",
+      "color": "#d9c0a6",
+      "alt": "Two white armchairs with red cushions flanking a small table against a wall",
+      "author": "Hari's Court Hotel",
+      "authorUrl": "https://unsplash.com/@hariscourtdelhi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/armchairs-and-table-in-living-room-qdFVjIfuvw4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBCDBF",
+          "w": 0.4839
+        },
+        {
+          "hex": "#C2A180",
+          "w": 0.3107
+        },
+        {
+          "hex": "#A4775A",
+          "w": 0.2054
+        }
+      ]
+    },
+    {
+      "id": "BFbVytfo1HM",
+      "small": "https://images.unsplash.com/photo-1790193719174-0de2bb09d3a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790193719174-0de2bb09d3a4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3b29kZW4lMjB0b3lzJTIwd2FpdGluZyUyMHJvb218ZW58MXwwfHx8MTc5MTgzODk1NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L23+Gs.l_LyWvzMea0a1MyMyM{Rj",
+      "color": "#260c0c",
+      "alt": "Two dark leather armchairs beside a teal partition and a wooden slat wall",
+      "author": "geister",
+      "authorUrl": "https://unsplash.com/@geisterbilder?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dark-leather-armchairs-in-modern-office-BFbVytfo1HM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100B06",
+          "w": 0.7253
+        },
+        {
+          "hex": "#2E1B07",
+          "w": 0.1582
+        },
+        {
+          "hex": "#3D4C43",
+          "w": 0.1165
+        }
+      ]
+    }
+  ]
+}

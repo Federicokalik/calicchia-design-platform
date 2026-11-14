@@ -1,0 +1,335 @@
+{
+  "slug": "negozi-di-abbigliamento",
+  "queries": [
+    "clothing store interior",
+    "clothes rack boutique",
+    "folded knitwear shelf"
+  ],
+  "generatedAt": "2026-10-16T19:53:37.778Z",
+  "photos": [
+    {
+      "id": "6D_1ODPb7Os",
+      "small": "https://images.unsplash.com/photo-1729487151777-b4be9098ecbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1729487151777-b4be9098ecbb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "LEE{FKJRE1Vs^*s:n$WC01sVV@NH",
+      "color": "#8c7373",
+      "alt": "A rack of shirts and pants in a store",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-rack-of-shirts-and-pants-in-a-store-6D_1ODPb7Os?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#897F78",
+          "w": 0.4301
+        },
+        {
+          "hex": "#5A514D",
+          "w": 0.3138
+        },
+        {
+          "hex": "#0C0A0C",
+          "w": 0.2561
+        }
+      ]
+    },
+    {
+      "id": "Kaqi_fX8LfE",
+      "small": "https://images.unsplash.com/photo-1776000680544-ebf0989a71df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1776000680544-ebf0989a71df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8952,
+      "height": 5968,
+      "blurHash": "LKEVNSE3I;x].7E2s:xa0KofxajE",
+      "color": "#260c0c",
+      "alt": "Clothing racks filled with colorful garments in a store",
+      "author": "Farida Tania",
+      "authorUrl": "https://unsplash.com/@taart_work?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clothing-racks-filled-with-colorful-garments-in-a-store-Kaqi_fX8LfE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F1511",
+          "w": 0.4067
+        },
+        {
+          "hex": "#604534",
+          "w": 0.3589
+        },
+        {
+          "hex": "#977B5F",
+          "w": 0.2344
+        }
+      ]
+    },
+    {
+      "id": "rYFZ8U0xJuM",
+      "small": "https://images.unsplash.com/photo-1770226415002-dbbd40327ec7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1770226415002-dbbd40327ec7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LsH.QbWBM{Rj~qWBayRjxuRjayfQ",
+      "color": "#f3f3f3",
+      "alt": "Mannequins in a clothing store window display",
+      "author": "atelierbyvineeth ...",
+      "authorUrl": "https://unsplash.com/@atelierbyvineeth?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/mannequins-in-a-clothing-store-window-display-rYFZ8U0xJuM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E3E3",
+          "w": 0.4498
+        },
+        {
+          "hex": "#020202",
+          "w": 0.3544
+        },
+        {
+          "hex": "#868686",
+          "w": 0.1958
+        }
+      ]
+    },
+    {
+      "id": "a8nQ-h4Xtrg",
+      "small": "https://images.unsplash.com/photo-1791975364944-75ff8830f3b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1791975364944-75ff8830f3b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbG90aGluZyUyMHN0b3JlJTIwaW50ZXJpb3J8ZW58MXwwfHx8MTc5MjE4MDQwOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4112,
+      "height": 3088,
+      "blurHash": "LBA0dkRiWYxtjDRjoIoe0M%L$$WD",
+      "color": "#262626",
+      "alt": "Clothing store interior with mannequins wearing sweaters and jackets in Amsterdam",
+      "author": "Fons Heijnsbroek",
+      "authorUrl": "https://unsplash.com/@fonsheijnsbroek_amsterdam_photos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clothing-store-interior-with-mannequins-a8nQ-h4Xtrg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#302924",
+          "w": 0.5289
+        },
+        {
+          "hex": "#5F554D",
+          "w": 0.2678
+        },
+        {
+          "hex": "#090604",
+          "w": 0.2033
+        }
+      ]
+    },
+    {
+      "id": "UdQt3FT6rxM",
+      "small": "https://images.unsplash.com/photo-1596484552993-aec4311d3381?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1596484552993-aec4311d3381?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LEF~N@s.00IT4o~Wae9G~q00WV-:",
+      "color": "#262626",
+      "alt": "clothes hanged on clothes hanger",
+      "author": "Artem Beliaikin",
+      "authorUrl": "https://unsplash.com/@belart84?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clothes-hanged-on-clothes-hanger-UdQt3FT6rxM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C171C",
+          "w": 0.4007
+        },
+        {
+          "hex": "#534D52",
+          "w": 0.3062
+        },
+        {
+          "hex": "#E3DBDB",
+          "w": 0.2931
+        }
+      ]
+    },
+    {
+      "id": "5RzI_EwVzcc",
+      "small": "https://images.unsplash.com/photo-1766934587163-186d20bf3d40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766934587163-186d20bf3d40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LKAw9t00-;Io?bD%xuRj4n-;aej[",
+      "color": "#262626",
+      "alt": "Interior of a clothing store with racks of garments",
+      "author": "Gaku Suyama",
+      "authorUrl": "https://unsplash.com/@gakusuyama?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/interior-of-a-clothing-store-with-racks-of-garments-5RzI_EwVzcc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#090707",
+          "w": 0.6278
+        },
+        {
+          "hex": "#2C2926",
+          "w": 0.2331
+        },
+        {
+          "hex": "#72706D",
+          "w": 0.1391
+        }
+      ]
+    },
+    {
+      "id": "zoWuHiPJYHc",
+      "small": "https://images.unsplash.com/photo-1761370571873-5d869310d731?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761370571873-5d869310d731?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3960,
+      "height": 2640,
+      "blurHash": "LVH_GO4oyC%1~CIAS4IU-:V[x[oL",
+      "color": "#f3f3f3",
+      "alt": "Woman in a clothing store with racks of clothes",
+      "author": "Muhammad-Taha Ibrahim",
+      "authorUrl": "https://unsplash.com/@planeteelevene?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-a-clothing-store-with-racks-of-clothes-zoWuHiPJYHc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E4D6C8",
+          "w": 0.3591
+        },
+        {
+          "hex": "#0D0302",
+          "w": 0.3434
+        },
+        {
+          "hex": "#A97666",
+          "w": 0.2975
+        }
+      ]
+    },
+    {
+      "id": "et_6mGFGneE",
+      "small": "https://images.unsplash.com/photo-1758706552384-500fb98ba029?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758706552384-500fb98ba029?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbG90aGVzJTIwcmFjayUyMGJvdXRpcXVlfGVufDF8MHx8fDE3OTIxODA0MTN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LLDcT@_09Hay~n-:WBWUD*xt-.WB",
+      "color": "#26260c",
+      "alt": "Clothes hanging on a rack in plastic covers",
+      "author": "Mel —",
+      "authorUrl": "https://unsplash.com/@melwasthis?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clothes-hanging-on-a-rack-in-plastic-covers-et_6mGFGneE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#23231A",
+          "w": 0.4402
+        },
+        {
+          "hex": "#B1AF81",
+          "w": 0.3601
+        },
+        {
+          "hex": "#48472D",
+          "w": 0.1997
+        }
+      ]
+    },
+    {
+      "id": "wH_avVRSuJM",
+      "small": "https://images.unsplash.com/photo-1699797467199-6bdf301649e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1699797467199-6bdf301649e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LOExz|4;4:%L0f%1ofWC9as;=|NG",
+      "color": "#0c2626",
+      "alt": "a pile of folded towels sitting on top of a bed",
+      "author": "Nellie Adamyan",
+      "authorUrl": "https://unsplash.com/@nellie_adamyan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-folded-towels-sitting-on-top-of-a-bed-wH_avVRSuJM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#041824",
+          "w": 0.4989
+        },
+        {
+          "hex": "#A78377",
+          "w": 0.2889
+        },
+        {
+          "hex": "#D5BCA1",
+          "w": 0.2123
+        }
+      ]
+    },
+    {
+      "id": "nMdC42MrwN8",
+      "small": "https://images.unsplash.com/photo-1613152768223-c17cb6e85bc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613152768223-c17cb6e85bc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "LIF$Fd?aWnR4%MtS%Mae_N%MRQIV",
+      "color": "#8c8c8c",
+      "alt": "brown and white yarn roll",
+      "author": "Nynne Schrøder",
+      "authorUrl": "https://unsplash.com/@seasonsdiary?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-white-yarn-roll-nMdC42MrwN8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7D6E68",
+          "w": 0.3938
+        },
+        {
+          "hex": "#A8A4A2",
+          "w": 0.3077
+        },
+        {
+          "hex": "#352823",
+          "w": 0.2985
+        }
+      ]
+    },
+    {
+      "id": "SAczk-zC3qY",
+      "small": "https://images.unsplash.com/photo-1573845022655-078596fec37d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1573845022655-078596fec37d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6466,
+      "height": 4293,
+      "blurHash": "LCHeOSI9aJRP_3IVWBodDNo#f,t7",
+      "color": "#c0c0c0",
+      "alt": "assorted-colored towel near brown leather boots on brown wooden shelf",
+      "author": "Rachel McDermott",
+      "authorUrl": "https://unsplash.com/@mrsrachelmcdermott?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-colored-towel-near-brown-leather-boots-on-brown-wooden-shelf-SAczk-zC3qY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9C9084",
+          "w": 0.3615
+        },
+        {
+          "hex": "#BEB9B6",
+          "w": 0.3499
+        },
+        {
+          "hex": "#7A6048",
+          "w": 0.2886
+        }
+      ]
+    },
+    {
+      "id": "NPPlYOnhBuQ",
+      "small": "https://images.unsplash.com/photo-1643015862949-5c8d15a4242e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1643015862949-5c8d15a4242e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb2xkZWQlMjBrbml0d2VhciUyMHNoZWxmfGVufDF8MHx8fDE3OTIxODA0MTV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKHU@1~q-=9]?bRkozkCV[axjsWB",
+      "color": "#c0c0c0",
+      "alt": "a pile of sweaters sitting next to each other",
+      "author": "Ruta Gudeliene",
+      "authorUrl": "https://unsplash.com/@rutaurban?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-sweaters-sitting-next-to-each-other-NPPlYOnhBuQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B7B3AB",
+          "w": 0.3592
+        },
+        {
+          "hex": "#716F65",
+          "w": 0.3332
+        },
+        {
+          "hex": "#9E9489",
+          "w": 0.3076
+        }
+      ]
+    }
+  ]
+}

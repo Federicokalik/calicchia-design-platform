@@ -19,7 +19,7 @@
  * visitatore usa davvero la foto (POST /api/palette/download).
  *
  * Uso (da apps/api; serve UNSPLASH_ACCESS_KEY nell'ambiente o nel .env della root):
- *   pnpm palette:precompute                        settori senza JSON
+ *   pnpm palette:precompute                        settori senza JSON o con ricerche cambiate
  *   pnpm palette:precompute -- --only pizzerie     solo i settori indicati (ripetibile)
  *   pnpm palette:precompute -- --force             riscrive anche i JSON presenti
  *   pnpm palette:precompute -- --check             verifica che gli URL small salvati rispondano ancora
@@ -159,19 +159,26 @@ async function precompute(): Promise<number> {
   const failed: string[] = [];
   const thin: string[] = [];
   let written = 0;
+  let stopped = false;
 
   for (const sector of sectors) {
     const file = resolve(OUT_DIR, `${sector.slug}.json`);
     if (existsSync(file) && !opts.force) {
-      console.log(`[skip] ${sector.slug} — JSON già presente (--force per rifarlo)`);
-      continue;
+      // Un JSON fatto con ricerche diverse da quelle attuali del settore va rifatto.
+      const saved = JSON.parse(await readFile(file, 'utf8')) as SectorPhotoSet;
+      if (saved.queries.join('\n') === sector.queriesEn.join('\n')) {
+        console.log(`[skip] ${sector.slug} — JSON già presente (--force per rifarlo)`);
+        continue;
+      }
+      console.log(`[stale] ${sector.slug} — ricerche cambiate, lo rifaccio`);
     }
     if (remaining !== null && remaining < MIN_REMAINING) {
       console.error(
         `\nQuota Unsplash quasi finita (${remaining} richieste rimaste). Riprendi tra ${RESUME_MINUTES} minuti ` +
           'con lo stesso comando: i settori già scritti vengono saltati.',
       );
-      return 2;
+      stopped = true;
+      break;
     }
 
     console.log(`[run] ${sector.slug}`);
@@ -194,7 +201,8 @@ async function precompute(): Promise<number> {
           `\n${e.message}: quota esaurita. Riprendi tra ${RESUME_MINUTES} minuti con lo stesso comando ` +
             `(${sector.slug} non è stato scritto).`,
         );
-        return 2;
+        stopped = true;
+        break;
       }
       if (e instanceof UnsplashError && e.status === 401) throw e;
       failed.push(`${sector.slug}: ${(e as Error).message}`);
@@ -202,9 +210,14 @@ async function precompute(): Promise<number> {
     }
   }
 
-  console.log(`\n=== Summary ===\nScritti: ${written}  |  Falliti: ${failed.length}  |  Quota rimasta: ${remaining ?? '?'}`);
+  const missing = sectors.filter((s) => !existsSync(resolve(OUT_DIR, `${s.slug}.json`))).length;
+  console.log(
+    `\n=== Summary ===\nScritti: ${written}  |  Falliti: ${failed.length}  |  Senza JSON: ${missing}  |  ` +
+      `Quota rimasta: ${remaining ?? '?'}`,
+  );
   if (thin.length) console.log(`Settori con meno di ${MIN_PHOTOS} foto:\n  - ${thin.join('\n  - ')}`);
   if (failed.length) console.log(`Falliti:\n  - ${failed.join('\n  - ')}`);
+  if (stopped) return 2;
   return failed.length ? 1 : 0;
 }
 

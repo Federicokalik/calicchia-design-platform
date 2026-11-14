@@ -1,0 +1,335 @@
+{
+  "slug": "consulenti-finanziari",
+  "queries": [
+    "calculator notebook desk",
+    "financial charts desk",
+    "office meeting table"
+  ],
+  "generatedAt": "2026-10-16T16:27:13.282Z",
+  "photos": [
+    {
+      "id": "Vs6ip7fsld8",
+      "small": "https://images.unsplash.com/photo-1648201637025-1c77b9be3013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1648201637025-1c77b9be3013?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5167,
+      "height": 3445,
+      "blurHash": "LNHxZ*_2-pV@H;ITIVxu?GM{NGNG",
+      "color": "#d9d9d9",
+      "alt": "a calculator and a pen sitting on top of a piece of paper",
+      "author": "Aaron Lefler",
+      "authorUrl": "https://unsplash.com/@alefler?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-calculator-and-a-pen-sitting-on-top-of-a-piece-of-paper-Vs6ip7fsld8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A1896D",
+          "w": 0.4684
+        },
+        {
+          "hex": "#71665A",
+          "w": 0.2787
+        },
+        {
+          "hex": "#DCD8D5",
+          "w": 0.2529
+        }
+      ]
+    },
+    {
+      "id": "h2aDKwigQeA",
+      "small": "https://images.unsplash.com/photo-1611125832047-1d7ad1e8e48f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611125832047-1d7ad1e8e48f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LeOWjJ-p_NNGxuWBRjoe?bR*IAoM",
+      "color": "#f3f3f3",
+      "alt": "black and silver calculator beside black pen",
+      "author": "Recha Oktaviani",
+      "authorUrl": "https://unsplash.com/@rechaoktaviani?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-calculator-beside-black-pen-h2aDKwigQeA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E9E6E8",
+          "w": 0.76
+        },
+        {
+          "hex": "#7E191E",
+          "w": 0.1221
+        },
+        {
+          "hex": "#7D7273",
+          "w": 0.1178
+        }
+      ]
+    },
+    {
+      "id": "8wLZi9OhsWU",
+      "small": "https://images.unsplash.com/photo-1709880945165-d2208c6ad2ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1709880945165-d2208c6ad2ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3148,
+      "height": 2100,
+      "blurHash": "LVG+R5NGIUIV01%Lt7RjD%M|M{of",
+      "color": "#c0c0c0",
+      "alt": "a calculator sitting on top of a table next to a laptop",
+      "author": "Jakub Żerdzicki",
+      "authorUrl": "https://unsplash.com/@jakubzerdzicki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-calculator-sitting-on-top-of-a-table-next-to-a-laptop-8wLZi9OhsWU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3C3B9",
+          "w": 0.4904
+        },
+        {
+          "hex": "#1B1612",
+          "w": 0.2958
+        },
+        {
+          "hex": "#949385",
+          "w": 0.2138
+        }
+      ]
+    },
+    {
+      "id": "Hlbfm6J7VR8",
+      "small": "https://images.unsplash.com/photo-1711344397160-b23d5deaa012?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711344397160-b23d5deaa012?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYWxjdWxhdG9yJTIwbm90ZWJvb2slMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4016,
+      "height": 3012,
+      "blurHash": "L47U6j~BIV9GXnE1f+kC9aD%%2%L",
+      "color": "#262626",
+      "alt": "a calculator sitting on top of a table",
+      "author": "dostonxd",
+      "authorUrl": "https://unsplash.com/@dostonxd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-calculator-sitting-on-top-of-a-table-Hlbfm6J7VR8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#121316",
+          "w": 0.422
+        },
+        {
+          "hex": "#2F2F33",
+          "w": 0.3797
+        },
+        {
+          "hex": "#51504D",
+          "w": 0.1982
+        }
+      ]
+    },
+    {
+      "id": "nApaSgkzaxg",
+      "small": "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4536,
+      "height": 3027,
+      "blurHash": "LaHB}SrBjDMv0LD*%hM{ogjbRjae",
+      "color": "#d9d9d9",
+      "alt": "person in black suit jacket holding white tablet computer",
+      "author": "Towfiqu barbhuiya",
+      "authorUrl": "https://unsplash.com/@towfiqu999999?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-black-suit-jacket-holding-white-tablet-computer-nApaSgkzaxg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFCFD3",
+          "w": 0.4165
+        },
+        {
+          "hex": "#0D1720",
+          "w": 0.328
+        },
+        {
+          "hex": "#8F878E",
+          "w": 0.2555
+        }
+      ]
+    },
+    {
+      "id": "N__BnvQ_w18",
+      "small": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L36@=_D$55=~9D%NxvMxACs:-AJn",
+      "color": "#262626",
+      "alt": "screen showing bitcoin trading chart",
+      "author": "Nick Chong",
+      "authorUrl": "https://unsplash.com/@nick604?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/screen-showing-bitcoin-trading-chart-N__BnvQ_w18?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2A292F",
+          "w": 0.7299
+        },
+        {
+          "hex": "#3F3C47",
+          "w": 0.191
+        },
+        {
+          "hex": "#665F6E",
+          "w": 0.0792
+        }
+      ]
+    },
+    {
+      "id": "hpjSkU2UYSU",
+      "small": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2426,
+      "height": 1728,
+      "blurHash": "LJEfTn-?D$8w_3ozf+M{9EV@%gx]",
+      "color": "#404040",
+      "alt": "laptop computer on glass-top table",
+      "author": "Carlos Muza",
+      "authorUrl": "https://unsplash.com/@kmuza?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/laptop-computer-on-glass-top-table-hpjSkU2UYSU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D5253",
+          "w": 0.4324
+        },
+        {
+          "hex": "#BFC6CF",
+          "w": 0.2916
+        },
+        {
+          "hex": "#312C30",
+          "w": 0.276
+        }
+      ]
+    },
+    {
+      "id": "fiXLQXAhCfk",
+      "small": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmaW5hbmNpYWwlMjBjaGFydHMlMjBkZXNrfGVufDF8MHx8fDE3OTIxNjgwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L24UW-wH0xo#I]=x$e9]55F3=|;f",
+      "color": "#260c0c",
+      "alt": "stock market candlestick chart on dark screen",
+      "author": "Maxim Hopman",
+      "authorUrl": "https://unsplash.com/@nampoh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stock-market-candlestick-chart-on-dark-screen-fiXLQXAhCfk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#000102",
+          "w": 0.5848
+        },
+        {
+          "hex": "#06090F",
+          "w": 0.3066
+        },
+        {
+          "hex": "#342C34",
+          "w": 0.1086
+        }
+      ]
+    },
+    {
+      "id": "RNsKphkdBTk",
+      "small": "https://images.unsplash.com/photo-1628062699790-7c45262b82b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628062699790-7c45262b82b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7799,
+      "height": 4387,
+      "blurHash": "LLK1RK9w01?HJC?HWAIU-ot7IUIU",
+      "color": "#d9c0c0",
+      "alt": "Black office chairs with chrome arms in a row at a conference table",
+      "author": "Michael Fousert",
+      "authorUrl": "https://unsplash.com/@michaelfousert?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/office-chairs-at-conference-table-RNsKphkdBTk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCCFC4",
+          "w": 0.5697
+        },
+        {
+          "hex": "#A69990",
+          "w": 0.2236
+        },
+        {
+          "hex": "#1D1915",
+          "w": 0.2067
+        }
+      ]
+    },
+    {
+      "id": "1RT4txDDAbM",
+      "small": "https://images.unsplash.com/photo-1571624436279-b272aff752b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571624436279-b272aff752b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2662,
+      "blurHash": "LQFrx0t8JCaK?^s:kCS49ZkCxut7",
+      "color": "#c0c0c0",
+      "alt": "brown wooden 9-piece office table and chairs",
+      "author": "S O C I A L . C U T",
+      "authorUrl": "https://unsplash.com/@socialcut?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-9-piece-office-table-and-chairs-1RT4txDDAbM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BCBAB5",
+          "w": 0.3743
+        },
+        {
+          "hex": "#694A38",
+          "w": 0.3396
+        },
+        {
+          "hex": "#8B8B87",
+          "w": 0.2861
+        }
+      ]
+    },
+    {
+      "id": "bIZJRVBLfOM",
+      "small": "https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "LdH2QGjYWCof~qofofWBD*ofj?R*",
+      "color": "#262626",
+      "alt": "white and gray office rolling chairs",
+      "author": "Danielle Cerullo",
+      "authorUrl": "https://unsplash.com/@dncerullo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-gray-office-rolling-chairs-bIZJRVBLfOM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#322C2B",
+          "w": 0.4073
+        },
+        {
+          "hex": "#B2ACA4",
+          "w": 0.3934
+        },
+        {
+          "hex": "#7A756F",
+          "w": 0.1993
+        }
+      ]
+    },
+    {
+      "id": "J1rNS2qv8BQ",
+      "small": "https://images.unsplash.com/photo-1497366858526-0766cadbe8fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1497366858526-0766cadbe8fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvZmZpY2UlMjBtZWV0aW5nJTIwdGFibGV8ZW58MXwwfHx8MTc5MjE2ODAzMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2301,
+      "height": 1536,
+      "blurHash": "LFBWPdof00RjIoRjoft70Kt6?bay",
+      "color": "#262626",
+      "alt": "pink dining table with four chairs inside room",
+      "author": "Nastuh Abootalebi",
+      "authorUrl": "https://unsplash.com/@sunday_digital?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-dining-table-with-four-chairs-inside-room-J1rNS2qv8BQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B1512",
+          "w": 0.397
+        },
+        {
+          "hex": "#3D3430",
+          "w": 0.3806
+        },
+        {
+          "hex": "#7A756F",
+          "w": 0.2224
+        }
+      ]
+    }
+  ]
+}

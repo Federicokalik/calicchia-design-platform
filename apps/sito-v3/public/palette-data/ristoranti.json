@@ -1,0 +1,335 @@
+{
+  "slug": "ristoranti",
+  "queries": [
+    "restaurant dining room",
+    "set dinner table",
+    "chef plating dishes"
+  ],
+  "generatedAt": "2026-10-16T18:51:01.165Z",
+  "photos": [
+    {
+      "id": "vG-HDgrepRg",
+      "small": "https://images.unsplash.com/photo-1703565426315-4209c2e88eea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1703565426315-4209c2e88eea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5736,
+      "height": 4302,
+      "blurHash": "LFG7}5xV0fOY_MxuVEI@=|R.I:xt",
+      "color": "#734026",
+      "alt": "a dining room with a lot of tables and chairs",
+      "author": "Zoshua Colah",
+      "authorUrl": "https://unsplash.com/@zoshuacolah?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dining-room-with-a-lot-of-tables-and-chairs-vG-HDgrepRg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#764020",
+          "w": 0.4188
+        },
+        {
+          "hex": "#A8774C",
+          "w": 0.3694
+        },
+        {
+          "hex": "#301511",
+          "w": 0.2118
+        }
+      ]
+    },
+    {
+      "id": "Cyyc0THKaB4",
+      "small": "https://images.unsplash.com/photo-1649553413086-50f78d330a3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1649553413086-50f78d330a3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5152,
+      "height": 3864,
+      "blurHash": "LJFE.W4otSxZ~VVsxuNI9ZxuIU%2",
+      "color": "#735940",
+      "alt": "a restaurant with booths, tables, and chairs",
+      "author": "Mandell Smock",
+      "authorUrl": "https://unsplash.com/@photo_lover75?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-restaurant-with-booths-tables-and-chairs-Cyyc0THKaB4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#724C3A",
+          "w": 0.3969
+        },
+        {
+          "hex": "#33202B",
+          "w": 0.3085
+        },
+        {
+          "hex": "#A48269",
+          "w": 0.2946
+        }
+      ]
+    },
+    {
+      "id": "Le7UM046mTI",
+      "small": "https://images.unsplash.com/photo-1673663096530-f34ca2255ff1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1673663096530-f34ca2255ff1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LIKdJ5S%00xZ^F%LtSxZtSRORiV@",
+      "color": "#c0c0c0",
+      "alt": "a dining room with tables and chairs and a fireplace",
+      "author": "Martin Baron",
+      "authorUrl": "https://unsplash.com/@elmartinbaron?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dining-room-with-tables-and-chairs-and-a-fireplace-Le7UM046mTI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBB9A1",
+          "w": 0.5136
+        },
+        {
+          "hex": "#B5936D",
+          "w": 0.3339
+        },
+        {
+          "hex": "#90663B",
+          "w": 0.1525
+        }
+      ]
+    },
+    {
+      "id": "Uo-f7XeSqgg",
+      "small": "https://images.unsplash.com/photo-1648663938900-789fec780d19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1648663938900-789fec780d19?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxyZXN0YXVyYW50JTIwZGluaW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkyMTc2NjU1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LKAmbuRP00%MROofxvRi9Zof-pWB",
+      "color": "#26260c",
+      "alt": "a room with a table chairs and a view of the mountains",
+      "author": "Ray Albrow",
+      "authorUrl": "https://unsplash.com/@rayalbrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-with-a-table-chairs-and-a-view-of-the-mountains-Uo-f7XeSqgg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#372D22",
+          "w": 0.4229
+        },
+        {
+          "hex": "#0B0802",
+          "w": 0.3485
+        },
+        {
+          "hex": "#A9A5A5",
+          "w": 0.2287
+        }
+      ]
+    },
+    {
+      "id": "fb0_wj2MZk4",
+      "small": "https://images.unsplash.com/photo-1536392706976-e486e2ba97af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1536392706976-e486e2ba97af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4974,
+      "height": 3316,
+      "blurHash": "LG9PiuoL0#R+9va|$%jtI;WVxZoe",
+      "color": "#260c0c",
+      "alt": "A long dining table set for a dinner party with flowers and candles",
+      "author": "M F",
+      "authorUrl": "https://unsplash.com/@mfe1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/long-dining-table-with-festive-flowers-fb0_wj2MZk4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#10080D",
+          "w": 0.5362
+        },
+        {
+          "hex": "#4D2B19",
+          "w": 0.2388
+        },
+        {
+          "hex": "#7E4E2B",
+          "w": 0.225
+        }
+      ]
+    },
+    {
+      "id": "0hAdietsUrE",
+      "small": "https://images.unsplash.com/photo-1562050344-f7ad946cee35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562050344-f7ad946cee35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6124,
+      "height": 4083,
+      "blurHash": "L9C~;v~W00-pR4NH.8%M00IUsmD%",
+      "color": "#8c8c8c",
+      "alt": "A long dining table set with white plates, candles, and glass bottles",
+      "author": "Nadia Valko",
+      "authorUrl": "https://unsplash.com/@nadiavalko?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dining-table-set-with-candles-0hAdietsUrE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#51453C",
+          "w": 0.4081
+        },
+        {
+          "hex": "#7E756F",
+          "w": 0.3612
+        },
+        {
+          "hex": "#19120B",
+          "w": 0.2306
+        }
+      ]
+    },
+    {
+      "id": "aEnH4hJ_Mrs",
+      "small": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LOL4NRt,OssC16XB%MD$Kk%fIUkq",
+      "color": "#d9d9d9",
+      "alt": "elegant table setting with floral centerpiece",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elegant-table-setting-with-floral-centerpiece-aEnH4hJ_Mrs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2A370",
+          "w": 0.3953
+        },
+        {
+          "hex": "#D5D7CC",
+          "w": 0.3925
+        },
+        {
+          "hex": "#8B6A48",
+          "w": 0.2122
+        }
+      ]
+    },
+    {
+      "id": "BCkLxilDvJU",
+      "small": "https://images.unsplash.com/photo-1484156818044-c040038b0719?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1484156818044-c040038b0719?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXQlMjBkaW5uZXIlMjB0YWJsZXxlbnwxfDB8fHwxNzkyMTc2NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4720,
+      "height": 3147,
+      "blurHash": "LiHeqL?bWTWn4mWUozWBo#M{oft7",
+      "color": "#262626",
+      "alt": "focused photo of wine glasses lined on table",
+      "author": "Nils Stahl",
+      "authorUrl": "https://unsplash.com/@nilsjakob?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/focused-photo-of-wine-glasses-lined-on-table-BCkLxilDvJU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2B2724",
+          "w": 0.3964
+        },
+        {
+          "hex": "#D4D4D3",
+          "w": 0.3549
+        },
+        {
+          "hex": "#ABA8A3",
+          "w": 0.2487
+        }
+      ]
+    },
+    {
+      "id": "cQbOSRpElxw",
+      "small": "https://images.unsplash.com/photo-1577106263724-2c8e03bfe9cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1577106263724-2c8e03bfe9cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4280,
+      "height": 2855,
+      "blurHash": "LNHBG4J:tljFENWX-pNH.m-p-UWB",
+      "color": "#0c2626",
+      "alt": "person putting food on plate",
+      "author": "Sebastian Coman Photography",
+      "authorUrl": "https://unsplash.com/@sebastiancoman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-putting-food-on-plate-cQbOSRpElxw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#040407",
+          "w": 0.4598
+        },
+        {
+          "hex": "#E0CBBA",
+          "w": 0.2974
+        },
+        {
+          "hex": "#C18C67",
+          "w": 0.2428
+        }
+      ]
+    },
+    {
+      "id": "KDVGz-qnHfc",
+      "small": "https://images.unsplash.com/photo-1681270496598-13c5365730c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1681270496598-13c5365730c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4109,
+      "blurHash": "LLHTpi580gozV{-nxFxu$fR,%L%L",
+      "color": "#260c0c",
+      "alt": "a person holding a chopstick over a plate of food",
+      "author": "Lucas Law",
+      "authorUrl": "https://unsplash.com/@lucaslaw__?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-chopstick-over-a-plate-of-food-KDVGz-qnHfc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#804222",
+          "w": 0.3719
+        },
+        {
+          "hex": "#B7713C",
+          "w": 0.3504
+        },
+        {
+          "hex": "#E5B07F",
+          "w": 0.2777
+        }
+      ]
+    },
+    {
+      "id": "boaDpmC-_Xo",
+      "small": "https://images.unsplash.com/photo-1488992783499-418eb1f62d08?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1488992783499-418eb1f62d08?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4687,
+      "height": 2750,
+      "blurHash": "LJDl$o_34.D%01D%oJt74:n*xYbb",
+      "color": "#262640",
+      "alt": "person preparing cooked dish",
+      "author": "Fabrizio Magoni",
+      "authorUrl": "https://unsplash.com/@fabmag?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-preparing-cooked-dish-boaDpmC-_Xo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#191E33",
+          "w": 0.5608
+        },
+        {
+          "hex": "#524F58",
+          "w": 0.2342
+        },
+        {
+          "hex": "#9D918E",
+          "w": 0.205
+        }
+      ]
+    },
+    {
+      "id": "I2Erl2cU_A4",
+      "small": "https://images.unsplash.com/photo-1541557435984-1c79685a082b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1541557435984-1c79685a082b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGVmJTIwcGxhdGluZyUyMGRpc2hlc3xlbnwxfDB8fHwxNzkyMTc2NjU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LNCiErs956kq10bHwIn%-oIpR+x]",
+      "color": "#262626",
+      "alt": "man standing beside table while holding food",
+      "author": "Jesson Mata",
+      "authorUrl": "https://unsplash.com/@jessonmata?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-standing-beside-table-while-holding-food-I2Erl2cU_A4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#130D10",
+          "w": 0.4306
+        },
+        {
+          "hex": "#423433",
+          "w": 0.3231
+        },
+        {
+          "hex": "#95644F",
+          "w": 0.2463
+        }
+      ]
+    }
+  ]
+}

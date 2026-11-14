@@ -28,6 +28,7 @@ import { LandingFeatures } from '@/components/seo-landing/LandingFeatures';
 import { LandingMicroStory } from '@/components/seo-landing/LandingMicroStory';
 import { LandingFaq } from '@/components/seo-landing/LandingFaq';
 import { LandingCta } from '@/components/seo-landing/LandingCta';
+import { LandingPaletteTeaser } from '@/components/seo-landing/LandingPaletteTeaser';
 import { RelatedProfessions } from '@/components/seo-landing/RelatedProfessions';
 import { StructuredData } from '@/components/seo/StructuredData';
 import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/data/structured-data';
@@ -339,6 +340,8 @@ export default async function SeoMatrixPage({
       ) : null}
 
       <LandingFaq faqs={renderFaqs} index={microStory ? '04' : '03'} />
+
+      <LandingPaletteTeaser professionSlug={profession.slug} professionLabel={profLower} />
 
       <RelatedProfessions currentSlug={profession.slug} limit={5} />
 

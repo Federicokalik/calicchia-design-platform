@@ -1,0 +1,335 @@
+{
+  "slug": "enoteche",
+  "queries": [
+    "wine shop shelves",
+    "wine bottles display",
+    "wine cellar shelves"
+  ],
+  "generatedAt": "2026-10-16T19:53:28.758Z",
+  "photos": [
+    {
+      "id": "GUFe4-7-YB4",
+      "small": "https://images.unsplash.com/photo-1622726196226-cf6501c63184?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1622726196226-cf6501c63184?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5530,
+      "height": 3687,
+      "blurHash": "LDEVf~W-01sSb_V[jEW=D$a$I;j[",
+      "color": "#262626",
+      "alt": "brown wooden wine bottle rack",
+      "author": "Benjamin DeYoung",
+      "authorUrl": "https://unsplash.com/@benjamin_deyoung?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-wine-bottle-rack-GUFe4-7-YB4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#463F3B",
+          "w": 0.351
+        },
+        {
+          "hex": "#C5B9AE",
+          "w": 0.3301
+        },
+        {
+          "hex": "#837B73",
+          "w": 0.3189
+        }
+      ]
+    },
+    {
+      "id": "lmlxroLj8_U",
+      "small": "https://images.unsplash.com/photo-1684159890786-5406275a5ebf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1684159890786-5406275a5ebf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LMH2G@RjWCE101RjWAbb-;ofxujY",
+      "color": "#404040",
+      "alt": "a wine shop with many bottles of wine behind glass",
+      "author": "Anna Lopatinski",
+      "authorUrl": "https://unsplash.com/@wadadaaaa?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wine-shop-with-many-bottles-of-wine-behind-glass-lmlxroLj8_U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6B615B",
+          "w": 0.381
+        },
+        {
+          "hex": "#9E958D",
+          "w": 0.3403
+        },
+        {
+          "hex": "#393632",
+          "w": 0.2787
+        }
+      ]
+    },
+    {
+      "id": "JZSRulqQd8A",
+      "small": "https://images.unsplash.com/photo-1714583357209-5371d908a33f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1714583357209-5371d908a33f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LbF=BYfkoLV@~UWWoeayM|R*t6ay",
+      "color": "#260c0c",
+      "alt": "bottles of wine are lined up on a shelf",
+      "author": "Mirza Polat",
+      "authorUrl": "https://unsplash.com/@mirzapolat?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bottles-of-wine-are-lined-up-on-a-shelf-JZSRulqQd8A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4E3421",
+          "w": 0.3877
+        },
+        {
+          "hex": "#190802",
+          "w": 0.3499
+        },
+        {
+          "hex": "#EBCBA2",
+          "w": 0.2624
+        }
+      ]
+    },
+    {
+      "id": "bAlL8dQ5gOw",
+      "small": "https://images.unsplash.com/photo-1789305577982-6248bc742a23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789305577982-6248bc742a23?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwc2hvcCUyMHNoZWx2ZXN8ZW58MXwwfHx8MTc5MjE4MDQwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3200,
+      "height": 2400,
+      "blurHash": "LDEp4i^,xu,.01oL?HNHa1kCNGS2",
+      "color": "#c0c0c0",
+      "alt": "Various glass bottles of spirits arranged on a retail store shelf",
+      "author": "fishy fishy",
+      "authorUrl": "https://unsplash.com/@its12_06pm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bottles-of-spirits-on-store-shelf-bAlL8dQ5gOw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7E857E",
+          "w": 0.3907
+        },
+        {
+          "hex": "#B9B7B3",
+          "w": 0.3051
+        },
+        {
+          "hex": "#505650",
+          "w": 0.3043
+        }
+      ]
+    },
+    {
+      "id": "aK6WGqxyHFw",
+      "small": "https://images.unsplash.com/photo-1562601579-599dec564e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1562601579-599dec564e06?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBATfp9F0Kxu9ZM{?bM{?bV?IU%g",
+      "color": "#26260c",
+      "alt": "selective focus photography of bottles",
+      "author": "Hermes Rivera",
+      "authorUrl": "https://unsplash.com/@hermez777?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/selective-focus-photography-of-bottles-aK6WGqxyHFw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100D06",
+          "w": 0.5127
+        },
+        {
+          "hex": "#3E3722",
+          "w": 0.3007
+        },
+        {
+          "hex": "#736F60",
+          "w": 0.1865
+        }
+      ]
+    },
+    {
+      "id": "jDU4yYk5Kgs",
+      "small": "https://images.unsplash.com/photo-1611575189074-9dfbbceb258a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611575189074-9dfbbceb258a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "L5CFbL-obd$$01D*58EMDj=w={%L",
+      "color": "#260c0c",
+      "alt": "black and white bottles on brown wooden shelf",
+      "author": "Javier Balseiro",
+      "authorUrl": "https://unsplash.com/@javier_balseiro?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-white-bottles-on-brown-wooden-shelf-jDU4yYk5Kgs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0402",
+          "w": 0.5793
+        },
+        {
+          "hex": "#402816",
+          "w": 0.214
+        },
+        {
+          "hex": "#8D603C",
+          "w": 0.2067
+        }
+      ]
+    },
+    {
+      "id": "IGJ_21drT3g",
+      "small": "https://images.unsplash.com/photo-1548025396-689d647d00c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1548025396-689d647d00c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "L02PDFH=baaeofV@ogj[Mwt8aeoz",
+      "color": "#262626",
+      "alt": "close-up photography of glass bottles with lid",
+      "author": "Biljana Martinić",
+      "authorUrl": "https://unsplash.com/@biljaminai?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/close-up-photography-of-glass-bottles-with-lid-IGJ_21drT3g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070608",
+          "w": 0.8046
+        },
+        {
+          "hex": "#22272D",
+          "w": 0.0986
+        },
+        {
+          "hex": "#010103",
+          "w": 0.0968
+        }
+      ]
+    },
+    {
+      "id": "h4AGlo55tTA",
+      "small": "https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516594915697-87eb3b1c14ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwYm90dGxlcyUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDQwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LVHxvh8^xuD%NHE2x]Rj0KX9ofkC",
+      "color": "#0c2626",
+      "alt": "organized bottles on shelf",
+      "author": "Scott Warman",
+      "authorUrl": "https://unsplash.com/@scottiewarman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/organized-bottles-on-shelf-h4AGlo55tTA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AAA096",
+          "w": 0.3393
+        },
+        {
+          "hex": "#D9DAD8",
+          "w": 0.3313
+        },
+        {
+          "hex": "#162225",
+          "w": 0.3294
+        }
+      ]
+    },
+    {
+      "id": "Sx15E8AtZh0",
+      "small": "https://images.unsplash.com/photo-1765850257843-aa029ab7769c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1765850257843-aa029ab7769c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L06tH;^hRk%0R7ofxZNHr@$$RlNH",
+      "color": "#260c0c",
+      "alt": "Rows of dark glass wine bottles stacked on shelves",
+      "author": "Joao Vitor Marcilio",
+      "authorUrl": "https://unsplash.com/@jvmarcilio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-dark-glass-wine-bottles-stacked-on-shelves-Sx15E8AtZh0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C100F",
+          "w": 0.51
+        },
+        {
+          "hex": "#30221E",
+          "w": 0.3984
+        },
+        {
+          "hex": "#5D3F29",
+          "w": 0.0916
+        }
+      ]
+    },
+    {
+      "id": "Snuf1NU7Vc8",
+      "small": "https://images.unsplash.com/photo-1784386126762-cb3c91cb92f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784386126762-cb3c91cb92f0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LDI.=,E*I[^zOTVuIqSw};EkxG=^",
+      "color": "#262626",
+      "alt": "Wine bottles stored on shelves in a brick cellar",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/wine-bottles-stored-on-shelves-in-a-brick-cellar-Snuf1NU7Vc8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#352825",
+          "w": 0.387
+        },
+        {
+          "hex": "#C35F1C",
+          "w": 0.3592
+        },
+        {
+          "hex": "#8A3F21",
+          "w": 0.2538
+        }
+      ]
+    },
+    {
+      "id": "aLI249hz7Rw",
+      "small": "https://images.unsplash.com/photo-1784386126765-ddcadd813ba8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784386126765-ddcadd813ba8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LNGsxqEPNJ%I0+t4owN0AYjaoKJ9",
+      "color": "#262626",
+      "alt": "Stacked wine bottles in a dark brick cellar",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stacked-wine-bottles-in-a-dark-brick-cellar-aLI249hz7Rw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#372825",
+          "w": 0.4591
+        },
+        {
+          "hex": "#904023",
+          "w": 0.3506
+        },
+        {
+          "hex": "#D17320",
+          "w": 0.1902
+        }
+      ]
+    },
+    {
+      "id": "IY0X2ep8Cdo",
+      "small": "https://images.unsplash.com/photo-1786034759981-9192a650692d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786034759981-9192a650692d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3aW5lJTIwY2VsbGFyJTIwc2hlbHZlc3xlbnwxfDB8fHwxNzkyMTgwNDA2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2562,
+      "blurHash": "LLE1sk}r9vEMr?s9xZjbEONdoesl",
+      "color": "#260c0c",
+      "alt": "Wine bottles on wooden pallet shelves and a metal rack in a cellar",
+      "author": "Jose Gaspar",
+      "authorUrl": "https://unsplash.com/@kingjoseph1?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/wine-bottles-on-wooden-cellar-shelves-IY0X2ep8Cdo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#190901",
+          "w": 0.4497
+        },
+        {
+          "hex": "#AE6221",
+          "w": 0.277
+        },
+        {
+          "hex": "#68340C",
+          "w": 0.2733
+        }
+      ]
+    }
+  ]
+}

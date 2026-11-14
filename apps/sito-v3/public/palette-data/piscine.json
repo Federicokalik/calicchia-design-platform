@@ -1,0 +1,281 @@
+{
+  "slug": "piscine",
+  "queries": [
+    "indoor swimming pool lanes",
+    "swimming pool blue tiles",
+    "pool water sunlight reflections"
+  ],
+  "generatedAt": "2026-10-12T19:51:11.837Z",
+  "photos": [
+    {
+      "id": "7D9d-2hnOho",
+      "small": "https://images.unsplash.com/photo-1782958995190-75701221aab4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmRvb3IlMjBzd2ltbWluZyUyMHBvb2wlMjBsYW5lc3xlbnwxfDB8fHwxNzkxODM0NjY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782958995190-75701221aab4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmRvb3IlMjBzd2ltbWluZyUyMHBvb2wlMjBsYW5lc3xlbnwxfDB8fHwxNzkxODM0NjY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5626,
+      "height": 4219,
+      "blurHash": "LND9xFeUaKNx+Xt5aeSO0OxZkWjF",
+      "color": "#0c598c",
+      "alt": "Modern indoor swimming pool with lanes and natural light",
+      "author": "Andy Wang",
+      "authorUrl": "https://unsplash.com/@space_launch_system?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-indoor-swimming-pool-with-lanes-and-natural-light-7D9d-2hnOho?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2A6083",
+          "w": 0.3386
+        },
+        {
+          "hex": "#8A7157",
+          "w": 0.3315
+        },
+        {
+          "hex": "#444039",
+          "w": 0.3299
+        }
+      ]
+    },
+    {
+      "id": "d9IQfJ2Fhg4",
+      "small": "https://images.unsplash.com/photo-1790698342175-5d6d5cfc414e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmRvb3IlMjBzd2ltbWluZyUyMHBvb2wlMjBsYW5lc3xlbnwxfDB8fHwxNzkxODM0NjY0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790698342175-5d6d5cfc414e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmRvb3IlMjBzd2ltbWluZyUyMHBvb2wlMjBsYW5lc3xlbnwxfDB8fHwxNzkxODM0NjY0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7560,
+      "height": 5040,
+      "blurHash": "L79kNjQ-8{.7*0%L%LIUDiXSRP%M",
+      "color": "#0c2626",
+      "alt": "A swimmer adjusting a blue cap at the edge of an indoor pool",
+      "author": "Ricardo IV Tamayo",
+      "authorUrl": "https://unsplash.com/@ricardo4to?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/swimmer-at-indoor-pool-edge-d9IQfJ2Fhg4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#354648",
+          "w": 0.3837
+        },
+        {
+          "hex": "#162427",
+          "w": 0.3342
+        },
+        {
+          "hex": "#5F7475",
+          "w": 0.2821
+        }
+      ]
+    },
+    {
+      "id": "nq18MYhxdGs",
+      "small": "https://images.unsplash.com/photo-1614667288602-9ac6e37318a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614667288602-9ac6e37318a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LG1?vslVk?bcX;gif+j=pef*kCfk",
+      "color": "#0c73a6",
+      "alt": "An underwater view of a blue tiled swimming pool with a drain",
+      "author": "Clark Tai",
+      "authorUrl": "https://unsplash.com/@clarktai?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-tiled-swimming-pool-underwater-nq18MYhxdGs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#006BA4",
+          "w": 0.4047
+        },
+        {
+          "hex": "#0B84BC",
+          "w": 0.3525
+        },
+        {
+          "hex": "#005184",
+          "w": 0.2428
+        }
+      ]
+    },
+    {
+      "id": "xVPWv8VVxYY",
+      "small": "https://images.unsplash.com/photo-1644056368311-c8054df845d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1644056368311-c8054df845d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "L5AD1rysbtpIt-g4nNS$SbnhXSoJ",
+      "color": "#0c8cc0",
+      "alt": "a close up of a blue tiled wall",
+      "author": "David Pisnoy",
+      "authorUrl": "https://unsplash.com/@davidpisnoy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-blue-tiled-wall-xVPWv8VVxYY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5CA7D8",
+          "w": 0.4473
+        },
+        {
+          "hex": "#328DC4",
+          "w": 0.3315
+        },
+        {
+          "hex": "#87C0EA",
+          "w": 0.2212
+        }
+      ]
+    },
+    {
+      "id": "GBLZAb0Rcvw",
+      "small": "https://images.unsplash.com/photo-1724660583299-2356fe880e54?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1724660583299-2356fe880e54?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11656,
+      "height": 8742,
+      "blurHash": "LD6.Kc%~Vtj]HXg3s:kCvNWVWUV@",
+      "color": "#40a6c0",
+      "alt": "A swimming pool with a tiled floor and blue water",
+      "author": "Declan Sun",
+      "authorUrl": "https://unsplash.com/@declansun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-swimming-pool-with-a-tiled-floor-and-blue-water-GBLZAb0Rcvw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#49B1C2",
+          "w": 0.5062
+        },
+        {
+          "hex": "#199CAF",
+          "w": 0.3466
+        },
+        {
+          "hex": "#0C7E94",
+          "w": 0.1472
+        }
+      ]
+    },
+    {
+      "id": "GopikeAEE80",
+      "small": "https://images.unsplash.com/photo-1693852657003-bdcf9f784be4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1693852657003-bdcf9f784be4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzd2ltbWluZyUyMHBvb2wlMjBibHVlJTIwdGlsZXN8ZW58MXwwfHx8MTc5MTgzNDY2NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUEPM:3XiHOZ1cvz$knNm+w0R*OX",
+      "color": "#c0d9d9",
+      "alt": "a swimming pool with a long metal railing next to it",
+      "author": "Artem Kniaz",
+      "authorUrl": "https://unsplash.com/@artem_kniaz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-swimming-pool-with-a-long-metal-railing-next-to-it-GopikeAEE80?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1FDBD1",
+          "w": 0.5137
+        },
+        {
+          "hex": "#BAE1D8",
+          "w": 0.3065
+        },
+        {
+          "hex": "#13B5AB",
+          "w": 0.1798
+        }
+      ]
+    },
+    {
+      "id": "iUmoREuqGbo",
+      "small": "https://images.unsplash.com/photo-1527904188605-3424bcc2d107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1527904188605-3424bcc2d107?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4994,
+      "height": 4000,
+      "blurHash": "L3EhIY?^DNtSA^V@s.odIAV?M{j[",
+      "color": "#73a6a6",
+      "alt": "clear body of watter",
+      "author": "Anna Sullivan",
+      "authorUrl": "https://unsplash.com/@aesullivan2010?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clear-body-of-watter-iUmoREuqGbo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#83B7BD",
+          "w": 0.4115
+        },
+        {
+          "hex": "#72A7AC",
+          "w": 0.4038
+        },
+        {
+          "hex": "#98CBD1",
+          "w": 0.1847
+        }
+      ]
+    },
+    {
+      "id": "3Ik7xWYJv3U",
+      "small": "https://images.unsplash.com/photo-1505236732171-72a5b19c4981?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1505236732171-72a5b19c4981?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LAA.*^x]RQWV.TkCf4jbMdV@kCkC",
+      "color": "#267373",
+      "alt": "Sunlight reflecting on the surface of clear blue swimming pool water",
+      "author": "Chris Lawton",
+      "authorUrl": "https://unsplash.com/@chrislawton?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-reflecting-on-blue-water-3Ik7xWYJv3U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#46888E",
+          "w": 0.3917
+        },
+        {
+          "hex": "#64A3AA",
+          "w": 0.3645
+        },
+        {
+          "hex": "#26696E",
+          "w": 0.2438
+        }
+      ]
+    },
+    {
+      "id": "SEo36R0QV9Q",
+      "small": "https://images.unsplash.com/photo-1587276548285-81f6152dc428?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587276548285-81f6152dc428?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LNG],FMx4ToMtRWBj?WB9Ff8t7ae",
+      "color": "#8ca6a6",
+      "alt": "blue and white water during daytime",
+      "author": "Corina Rainer",
+      "authorUrl": "https://unsplash.com/@corina_rainer_?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-and-white-water-during-daytime-SEo36R0QV9Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9BB7B1",
+          "w": 0.4138
+        },
+        {
+          "hex": "#7A9792",
+          "w": 0.3181
+        },
+        {
+          "hex": "#C1DAD2",
+          "w": 0.268
+        }
+      ]
+    },
+    {
+      "id": "3uTzZrHXHbw",
+      "small": "https://images.unsplash.com/photo-1600291994772-1e7d606e9307?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600291994772-1e7d606e9307?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwb29sJTIwd2F0ZXIlMjBzdW5saWdodCUyMHJlZmxlY3Rpb25zfGVufDF8MHx8fDE3OTE4MzQ2Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "L68kHGMx#+bc%%R5ocoyQ-ofRPoz",
+      "color": "#40a6c0",
+      "alt": "blue water with white light",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-water-with-white-light-3uTzZrHXHbw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#649FC2",
+          "w": 0.4048
+        },
+        {
+          "hex": "#75AFD0",
+          "w": 0.3335
+        },
+        {
+          "hex": "#528EB4",
+          "w": 0.2618
+        }
+      ]
+    }
+  ]
+}

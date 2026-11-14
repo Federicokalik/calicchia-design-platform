@@ -1,0 +1,335 @@
+{
+  "slug": "giardinieri",
+  "queries": [
+    "gardener trimming hedge",
+    "freshly mowed lawn",
+    "garden flower beds"
+  ],
+  "generatedAt": "2026-10-16T17:46:27.578Z",
+  "photos": [
+    {
+      "id": "Apips1tJsXo",
+      "small": "https://images.unsplash.com/photo-1668189777890-495c36095340?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668189777890-495c36095340?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4800,
+      "height": 3200,
+      "blurHash": "L6A,gq?QIT4p?1xI9GIU?Kt79GM_",
+      "color": "#59590c",
+      "alt": "a person playing golf",
+      "author": "Anthony",
+      "authorUrl": "https://unsplash.com/@pigeon_forge?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-playing-golf-Apips1tJsXo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#504025",
+          "w": 0.39
+        },
+        {
+          "hex": "#786E16",
+          "w": 0.3521
+        },
+        {
+          "hex": "#211B11",
+          "w": 0.2579
+        }
+      ]
+    },
+    {
+      "id": "ppTZiBwULsw",
+      "small": "https://images.unsplash.com/photo-1637531347055-4fa8aa80c111?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1637531347055-4fa8aa80c111?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L:L4+?aet7V@_4R*bHWVWAayRjay",
+      "color": "#f3f3f3",
+      "alt": "a man in a green shirt holding a pair of gardening tools",
+      "author": "Noorulabdeen Ahmad",
+      "authorUrl": "https://unsplash.com/@noorulabdeen?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-in-a-green-shirt-holding-a-pair-of-gardening-tools-ppTZiBwULsw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0E3EB",
+          "w": 0.5547
+        },
+        {
+          "hex": "#6F6A26",
+          "w": 0.28
+        },
+        {
+          "hex": "#ABA8A2",
+          "w": 0.1652
+        }
+      ]
+    },
+    {
+      "id": "rBY5Ek86oOI",
+      "small": "https://images.unsplash.com/photo-1734079692079-172d8243ebd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1734079692079-172d8243ebd3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6197,
+      "height": 4131,
+      "blurHash": "L9BM}E%ND=VqpX00xbx[4:01-:W;",
+      "color": "#26260c",
+      "alt": "A person in a green jacket is holding a chainsaw",
+      "author": "FRAEM GmbH",
+      "authorUrl": "https://unsplash.com/@fraem?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-in-a-green-jacket-is-holding-a-chainsaw-rBY5Ek86oOI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0B0E05",
+          "w": 0.3885
+        },
+        {
+          "hex": "#343A12",
+          "w": 0.3244
+        },
+        {
+          "hex": "#6E7344",
+          "w": 0.287
+        }
+      ]
+    },
+    {
+      "id": "G0H2TJW3wm0",
+      "small": "https://images.unsplash.com/photo-1706920925080-be07c32398e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1706920925080-be07c32398e1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnYXJkZW5lciUyMHRyaW1taW5nJTIwaGVkZ2V8ZW58MXwwfHx8MTc5MjE3Mjc4MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7728,
+      "height": 5152,
+      "blurHash": "LFCssvEK03n%R:^+D%4.-Xt7NEIU",
+      "color": "#264040",
+      "alt": "a close up of a hedge on a street",
+      "author": "Haberdoedas II",
+      "authorUrl": "https://unsplash.com/@haberdoedas2?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-hedge-on-a-street-G0H2TJW3wm0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3A4143",
+          "w": 0.4398
+        },
+        {
+          "hex": "#5D6C48",
+          "w": 0.3241
+        },
+        {
+          "hex": "#8C8D6F",
+          "w": 0.2361
+        }
+      ]
+    },
+    {
+      "id": "8vBpYpTGo90",
+      "small": "https://images.unsplash.com/photo-1458245201577-fc8a130b8829?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1458245201577-fc8a130b8829?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4538,
+      "height": 3006,
+      "blurHash": "LM8G+4Z+ivXR.ka2nNbuu2V[i_kV",
+      "color": "#267326",
+      "alt": "green and black lawnmower on green grass",
+      "author": "Daniel Watson",
+      "authorUrl": "https://unsplash.com/@danielwatsondesign?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-and-black-lawnmower-on-green-grass-8vBpYpTGo90?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3F8D35",
+          "w": 0.5743
+        },
+        {
+          "hex": "#056624",
+          "w": 0.2586
+        },
+        {
+          "hex": "#5CD78B",
+          "w": 0.1671
+        }
+      ]
+    },
+    {
+      "id": "bsld7GjQwjI",
+      "small": "https://images.unsplash.com/photo-1734303023491-db8037a21f09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1734303023491-db8037a21f09?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 1868,
+      "blurHash": "LSAw^zXTaLbwXYkEj;kXTNW?n#kX",
+      "color": "#597340",
+      "alt": "A man mowing a lawn with a lawn mower",
+      "author": "Michael Smith",
+      "authorUrl": "https://unsplash.com/@cutabovelandscapingnc?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-mowing-a-lawn-with-a-lawn-mower-bsld7GjQwjI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#647A41",
+          "w": 0.4876
+        },
+        {
+          "hex": "#454F2C",
+          "w": 0.3295
+        },
+        {
+          "hex": "#498DD2",
+          "w": 0.1829
+        }
+      ]
+    },
+    {
+      "id": "WdsLOJ5BViU",
+      "small": "https://images.unsplash.com/photo-1540470174401-f25e9eb17c1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1540470174401-f25e9eb17c1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3872,
+      "height": 2592,
+      "blurHash": "LCC7bytMM~WC_GocWDazaOWDWCaf",
+      "color": "#59730c",
+      "alt": "macro photography of green grass ground",
+      "author": "Bradley Brister",
+      "authorUrl": "https://unsplash.com/@bradley_brister?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/macro-photography-of-green-grass-ground-WdsLOJ5BViU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E7F16",
+          "w": 0.3904
+        },
+        {
+          "hex": "#819222",
+          "w": 0.3415
+        },
+        {
+          "hex": "#596A0F",
+          "w": 0.2681
+        }
+      ]
+    },
+    {
+      "id": "1wAmm_d2TDM",
+      "small": "https://images.unsplash.com/photo-1628340981113-fe1949fe5cc0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1628340981113-fe1949fe5cc0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmcmVzaGx5JTIwbW93ZWQlMjBsYXdufGVufDF8MHx8fDE3OTIxNzI3ODN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LACS6??=.htPLZM}bFRlXPbaMgoJ",
+      "color": "#598c26",
+      "alt": "green grass field during daytime",
+      "author": "Se. Tsuchiya",
+      "authorUrl": "https://unsplash.com/@s_tsuchiya?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/green-grass-field-during-daytime-1wAmm_d2TDM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6EA838",
+          "w": 0.6045
+        },
+        {
+          "hex": "#5B9527",
+          "w": 0.2028
+        },
+        {
+          "hex": "#83C24D",
+          "w": 0.1927
+        }
+      ]
+    },
+    {
+      "id": "63j8unc6U3A",
+      "small": "https://images.unsplash.com/photo-1630257334364-d1dfe34cc166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630257334364-d1dfe34cc166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LEFs3bDk?YVt?[M}?HW-H8WYtRb]",
+      "color": "#738c59",
+      "alt": "red and white flower garden",
+      "author": "AH Morgan",
+      "authorUrl": "https://unsplash.com/@ahmorgan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-white-flower-garden-63j8unc6U3A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6D8B4E",
+          "w": 0.5111
+        },
+        {
+          "hex": "#AEC293",
+          "w": 0.2929
+        },
+        {
+          "hex": "#4E3D1F",
+          "w": 0.196
+        }
+      ]
+    },
+    {
+      "id": "qD_KGPIdSO8",
+      "small": "https://images.unsplash.com/photo-1696247049449-c97d03c23f64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1696247049449-c97d03c23f64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDCjUf4WIUD%#]tLM|D%.PjJV{D~",
+      "color": "#405926",
+      "alt": "a flower garden with a gazebo in the middle of it",
+      "author": "Ronin",
+      "authorUrl": "https://unsplash.com/@roninkgd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-flower-garden-with-a-gazebo-in-the-middle-of-it-qD_KGPIdSO8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#455A2E",
+          "w": 0.391
+        },
+        {
+          "hex": "#727F5D",
+          "w": 0.3585
+        },
+        {
+          "hex": "#A5B480",
+          "w": 0.2505
+        }
+      ]
+    },
+    {
+      "id": "i_djUT-mE-M",
+      "small": "https://images.unsplash.com/photo-1750832615155-60aba40dd5ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1750832615155-60aba40dd5ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3072,
+      "blurHash": "LIDmW,x@?GR$D%aeM{jZ0LNIM|xb",
+      "color": "#597359",
+      "alt": "Wildflowers and trees decorate a tranquil garden",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/wildflowers-and-trees-decorate-a-tranquil-garden-i_djUT-mE-M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#758960",
+          "w": 0.4415
+        },
+        {
+          "hex": "#526D42",
+          "w": 0.3829
+        },
+        {
+          "hex": "#2E481E",
+          "w": 0.1756
+        }
+      ]
+    },
+    {
+      "id": "V0VkgqkIiec",
+      "small": "https://images.unsplash.com/photo-1713802620653-7390a1a6da00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1713802620653-7390a1a6da00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnYXJkZW4lMjBmbG93ZXIlMjBiZWRzfGVufDF8MHx8fDE3OTIxNzI3ODV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4825,
+      "height": 3217,
+      "blurHash": "L7C77SE1IEi{*ZASoOov_LE2,^-o",
+      "color": "#26260c",
+      "alt": "a purple flower is in the middle of a garden",
+      "author": "Vladimira Slyusarenko",
+      "authorUrl": "https://unsplash.com/@svladimira?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-purple-flower-is-in-the-middle-of-a-garden-V0VkgqkIiec?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#586428",
+          "w": 0.392
+        },
+        {
+          "hex": "#7B972B",
+          "w": 0.3349
+        },
+        {
+          "hex": "#373E0C",
+          "w": 0.273
+        }
+      ]
+    }
+  ]
+}

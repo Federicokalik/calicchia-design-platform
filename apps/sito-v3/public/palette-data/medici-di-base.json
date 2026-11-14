@@ -1,0 +1,331 @@
+{
+  "slug": "medici-di-base",
+  "queries": [
+    "family doctor",
+    "blood pressure check",
+    "medical clipboard notes"
+  ],
+  "generatedAt": "2026-10-12T21:02:43.140Z",
+  "photos": [
+    {
+      "id": "hIgeoQjS_iE",
+      "small": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3072,
+      "height": 1728,
+      "blurHash": "LEJ[0H.R0K8^=^fUt5WFTKDhIA%g",
+      "color": "#c0c0c0",
+      "alt": "doctor holding red stethoscope",
+      "author": "Online Marketing",
+      "authorUrl": "https://unsplash.com/@impulsq?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-holding-red-stethoscope-hIgeoQjS_iE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CAC9C8",
+          "w": 0.5125
+        },
+        {
+          "hex": "#AEAAAC",
+          "w": 0.2853
+        },
+        {
+          "hex": "#894528",
+          "w": 0.2022
+        }
+      ]
+    },
+    {
+      "id": "J5UTvRgse7Q",
+      "small": "https://images.unsplash.com/photo-1666886573531-48d2e3c2b684?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1666886573531-48d2e3c2b684?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LuI#.U01t7%L%NWBt7WBRlxuWAWB",
+      "color": "#f3f3f3",
+      "alt": "a doctor showing a patient something on the tablet",
+      "author": "Nappy",
+      "authorUrl": "https://unsplash.com/@nappystudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-doctor-showing-a-patient-something-on-the-tablet-J5UTvRgse7Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1E1E3",
+          "w": 0.41
+        },
+        {
+          "hex": "#8F9CC0",
+          "w": 0.3252
+        },
+        {
+          "hex": "#596284",
+          "w": 0.2648
+        }
+      ]
+    },
+    {
+      "id": "EiL21cqvo58",
+      "small": "https://images.unsplash.com/photo-1758691463331-2ac00e6f676f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463331-2ac00e6f676f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LNF?5}tlVsMx0KIBs;t8IUM{WBRj",
+      "color": "#405959",
+      "alt": "Doctor examines a young boy with his mother present",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-examines-a-young-boy-with-his-mother-present-EiL21cqvo58?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#54605A",
+          "w": 0.429
+        },
+        {
+          "hex": "#978F82",
+          "w": 0.304
+        },
+        {
+          "hex": "#C6CECA",
+          "w": 0.267
+        }
+      ]
+    },
+    {
+      "id": "EKPk2Z9G6CU",
+      "small": "https://images.unsplash.com/photo-1657028310103-f53dd49a856a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1657028310103-f53dd49a856a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmYW1pbHklMjBkb2N0b3J8ZW58MXwwfHx8MTc5MTgzODk1N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2333,
+      "blurHash": "LAQmCr%MIB0JIn-;%MD%~q%M-qWA",
+      "color": "#f3f3f3",
+      "alt": "a set of glasses",
+      "author": "Markus Spiske",
+      "authorUrl": "https://unsplash.com/@markusspiske?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-set-of-glasses-EKPk2Z9G6CU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F3F3",
+          "w": 0.8379
+        },
+        {
+          "hex": "#BEC0BC",
+          "w": 0.0858
+        },
+        {
+          "hex": "#898E82",
+          "w": 0.0764
+        }
+      ]
+    },
+    {
+      "id": "i1iqQRLULlg",
+      "small": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1615486511484-92e172cc4fe0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4720,
+      "height": 3146,
+      "blurHash": "LVO|FP9GkDnh_NMwIAIU?v-;aes.",
+      "color": "#f3f3f3",
+      "alt": "A person using a digital blood pressure monitor with a grey cuff on their arm",
+      "author": "Mockup Graphics",
+      "authorUrl": "https://unsplash.com/@mockupgraphics?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blood-pressure-monitor-with-grey-cuff-i1iqQRLULlg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#FAF8F7",
+          "w": 0.4161
+        },
+        {
+          "hex": "#B1A8A1",
+          "w": 0.2932
+        },
+        {
+          "hex": "#D8CBC3",
+          "w": 0.2907
+        }
+      ]
+    },
+    {
+      "id": "f0h8EIdTXWo",
+      "small": "https://images.unsplash.com/photo-1700832082152-0416a3ee5e60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1700832082152-0416a3ee5e60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4000,
+      "blurHash": "LNM@iu?HRk?vR%-p9F%M~qD%x]M_",
+      "color": "#f3f3f3",
+      "alt": "a stethoscope laying on top of a bed next to a medical bag",
+      "author": "Immo Wegmann",
+      "authorUrl": "https://unsplash.com/@tinkerman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-stethoscope-laying-on-top-of-a-bed-next-to-a-medical-bag-f0h8EIdTXWo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EAEAEA",
+          "w": 0.5936
+        },
+        {
+          "hex": "#B4B4B4",
+          "w": 0.2466
+        },
+        {
+          "hex": "#6D6D70",
+          "w": 0.1598
+        }
+      ]
+    },
+    {
+      "id": "vN5s_G5SPkY",
+      "small": "https://images.unsplash.com/photo-1725870953863-4ad4db0acfc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725870953863-4ad4db0acfc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LLKAm60KEMrp%#R5-TWBE1WEM{R-",
+      "color": "#d9d9c0",
+      "alt": "A person with a blood pressure device in their hand",
+      "author": "Julia Taubitz",
+      "authorUrl": "https://unsplash.com/@justmejuliee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-with-a-blood-pressure-device-in-their-hand-vN5s_G5SPkY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1C8B4",
+          "w": 0.4049
+        },
+        {
+          "hex": "#B18F77",
+          "w": 0.3303
+        },
+        {
+          "hex": "#7C6049",
+          "w": 0.2648
+        }
+      ]
+    },
+    {
+      "id": "J0benOYAPbw",
+      "small": "https://images.unsplash.com/photo-1623658045230-605cb00c80d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1623658045230-605cb00c80d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxibG9vZCUyMHByZXNzdXJlJTIwY2hlY2t8ZW58MXwwfHx8MTc5MTgzODk1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3984,
+      "height": 2656,
+      "blurHash": "LJH13{m7rsEg1i%KNenOItK5Iobt",
+      "color": "#c08c73",
+      "alt": "a person with a blood pressure meter on a table",
+      "author": "Mufid Majnun",
+      "authorUrl": "https://unsplash.com/@mufidpwt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-with-a-blood-pressure-meter-on-a-table-J0benOYAPbw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#922C2C",
+          "w": 0.4033
+        },
+        {
+          "hex": "#95726E",
+          "w": 0.334
+        },
+        {
+          "hex": "#C9A597",
+          "w": 0.2627
+        }
+      ]
+    },
+    {
+      "id": "UEQedPdLXVU",
+      "small": "https://images.unsplash.com/photo-1651760680066-db9d32bd0357?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1651760680066-db9d32bd0357?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "L3Qvzb?bbdIU-;WBt8t700Rj~qxu",
+      "color": "#f3f3f3",
+      "alt": "a white framed picture",
+      "author": "mockupbee",
+      "authorUrl": "https://unsplash.com/@mockupbee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-white-framed-picture-UEQedPdLXVU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EDEDED",
+          "w": 0.9443
+        },
+        {
+          "hex": "#D0CFCE",
+          "w": 0.0557
+        }
+      ]
+    },
+    {
+      "id": "eXcF6L9pEug",
+      "small": "https://images.unsplash.com/photo-1761558794306-466448dab4bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761558794306-466448dab4bc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LUHBxdTK0L%1ENxaM|%M9FIV-pM|",
+      "color": "#262626",
+      "alt": "Hand holding pen over a blue clipboard",
+      "author": "Phil Hearing",
+      "authorUrl": "https://unsplash.com/@philhearing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hand-holding-pen-over-a-blue-clipboard-eXcF6L9pEug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#161A1B",
+          "w": 0.3817
+        },
+        {
+          "hex": "#E0D9CF",
+          "w": 0.3217
+        },
+        {
+          "hex": "#AA9D90",
+          "w": 0.2966
+        }
+      ]
+    },
+    {
+      "id": "zQCDJZLS-Ms",
+      "small": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1743385779431-45d26d9775b1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LVGbYT={DNoJV?WWt7ofDhj[yDfQ",
+      "color": "#594026",
+      "alt": "Clipboard, pencil, and pen on a wooden surface",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clipboard-pencil-and-pen-on-a-wooden-surface-zQCDJZLS-Ms?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B1BBC1",
+          "w": 0.3924
+        },
+        {
+          "hex": "#67431F",
+          "w": 0.3616
+        },
+        {
+          "hex": "#A27B4E",
+          "w": 0.246
+        }
+      ]
+    },
+    {
+      "id": "IG96K_HiDk0",
+      "small": "https://images.unsplash.com/photo-1539815208687-a0f05e15d601?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1539815208687-a0f05e15d601?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxtZWRpY2FsJTIwY2xpcGJvYXJkJTIwbm90ZXN8ZW58MXwwfHx8MTc5MTgzODk2MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8192,
+      "height": 6144,
+      "blurHash": "LTNm+yjEM_x]~qV[f8ofRjt7t7WA",
+      "color": "#d9d9d9",
+      "alt": "brown and black clipboard with white spinal cord print manual",
+      "author": "Joyce Hankins",
+      "authorUrl": "https://unsplash.com/@moonshadowpress?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-black-clipboard-with-white-spinal-cord-print-manual-IG96K_HiDk0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFE0E3",
+          "w": 0.5825
+        },
+        {
+          "hex": "#B8B6B6",
+          "w": 0.3413
+        },
+        {
+          "hex": "#8F8278",
+          "w": 0.0761
+        }
+      ]
+    }
+  ]
+}

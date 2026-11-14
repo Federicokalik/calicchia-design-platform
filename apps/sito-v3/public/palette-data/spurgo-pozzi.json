@@ -1,0 +1,335 @@
+{
+  "slug": "spurgo-pozzi",
+  "queries": [
+    "septic tank",
+    "manhole cover street",
+    "vacuum truck"
+  ],
+  "generatedAt": "2026-10-16T18:49:56.518Z",
+  "photos": [
+    {
+      "id": "Ac97OqAWDvg",
+      "small": "https://images.unsplash.com/photo-1533077162801-86490c593afb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1533077162801-86490c593afb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3839,
+      "height": 2877,
+      "blurHash": "LDG*$wMcM{D%NI-UxuWY0KtS-Uoe",
+      "color": "#262626",
+      "alt": "top view of concrete structures",
+      "author": "Ivan Bandura",
+      "authorUrl": "https://unsplash.com/@unstable_affliction?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/top-view-of-concrete-structures-Ac97OqAWDvg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#978988",
+          "w": 0.3902
+        },
+        {
+          "hex": "#C9ACA5",
+          "w": 0.3492
+        },
+        {
+          "hex": "#685F5E",
+          "w": 0.2606
+        }
+      ]
+    },
+    {
+      "id": "qInNqopxh5I",
+      "small": "https://images.unsplash.com/photo-1653204461265-b5b52c0579a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1653204461265-b5b52c0579a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LEAdQ04o8^-qtQ%2D%xaMwk9%NIV",
+      "color": "#26260c",
+      "alt": "a large blue truck parked next to a lush green forest",
+      "author": "shubham kumar",
+      "authorUrl": "https://unsplash.com/@shubham897?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-blue-truck-parked-next-to-a-lush-green-forest-qInNqopxh5I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3B4B34",
+          "w": 0.3884
+        },
+        {
+          "hex": "#202419",
+          "w": 0.3365
+        },
+        {
+          "hex": "#6D7473",
+          "w": 0.2751
+        }
+      ]
+    },
+    {
+      "id": "8QvN0G-zff0",
+      "small": "https://images.unsplash.com/photo-1533163598089-2136626258e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1533163598089-2136626258e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3992,
+      "height": 2992,
+      "blurHash": "LEEyb_t70JIU_NWBIUIUxuM{IURj",
+      "color": "#404040",
+      "alt": "a black and white photo of a bunch of metal bars",
+      "author": "Ivan Bandura",
+      "authorUrl": "https://unsplash.com/@unstable_affliction?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-black-and-white-photo-of-a-bunch-of-metal-bars-8QvN0G-zff0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#909092",
+          "w": 0.3878
+        },
+        {
+          "hex": "#686769",
+          "w": 0.334
+        },
+        {
+          "hex": "#BDBDBF",
+          "w": 0.2782
+        }
+      ]
+    },
+    {
+      "id": "LXx9SWP13Ws",
+      "small": "https://images.unsplash.com/photo-1780417955185-1d12c72855c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780417955185-1d12c72855c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzZXB0aWMlMjB0YW5rfGVufDF8MHx8fDE3OTIxNzY1ODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4866,
+      "height": 3223,
+      "blurHash": "LuEq2OV@bIogO_j[jta}RjozjFWB",
+      "color": "#73a6d9",
+      "alt": "Several large industrial storage tanks behind a chain-link fence",
+      "author": "Roger Starnes Sr",
+      "authorUrl": "https://unsplash.com/@rstar50?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/several-large-industrial-storage-tanks-behind-a-chain-link-fence-LXx9SWP13Ws?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#60A6DA",
+          "w": 0.4197
+        },
+        {
+          "hex": "#87894D",
+          "w": 0.3395
+        },
+        {
+          "hex": "#9ABDC3",
+          "w": 0.2408
+        }
+      ]
+    },
+    {
+      "id": "62TGZEabYTA",
+      "small": "https://images.unsplash.com/photo-1785606145825-05aaf430aa7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785606145825-05aaf430aa7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11656,
+      "height": 6557,
+      "blurHash": "LKJ@:$~VOGxa%#-pDhxu_3RjE1Io",
+      "color": "#d9d9d9",
+      "alt": "Decorative manhole cover with yellow flowers and ginkgo leaves",
+      "author": "Heng Chiu",
+      "authorUrl": "https://unsplash.com/@chiuchuuu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/decorative-manhole-cover-with-yellow-flowers-and-ginkgo-leaves-62TGZEabYTA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BA9782",
+          "w": 0.3996
+        },
+        {
+          "hex": "#DEDAD5",
+          "w": 0.346
+        },
+        {
+          "hex": "#746A62",
+          "w": 0.2545
+        }
+      ]
+    },
+    {
+      "id": "AIimVQEiK78",
+      "small": "https://images.unsplash.com/photo-1783615312378-e21359822ed1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783615312378-e21359822ed1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L6BM_URi00M|f,WA9Fof0Jog?boI",
+      "color": "#595959",
+      "alt": "Decorative manhole cover with colorful floral patterns on a sidewalk",
+      "author": "Alexandre Valdivia",
+      "authorUrl": "https://unsplash.com/@alevaldivia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/decorative-manhole-cover-with-colorful-floral-patterns-on-a-sidewalk-AIimVQEiK78?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#57585E",
+          "w": 0.4561
+        },
+        {
+          "hex": "#79797E",
+          "w": 0.2762
+        },
+        {
+          "hex": "#2F2F33",
+          "w": 0.2676
+        }
+      ]
+    },
+    {
+      "id": "wUFj6spgbsU",
+      "small": "https://images.unsplash.com/photo-1768682038345-ed97f30ec1b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768682038345-ed97f30ec1b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6192,
+      "height": 4128,
+      "blurHash": "L6D+C]~9?Y?u.7%2n*tl-Q%Mk?WB",
+      "color": "#8c7359",
+      "alt": "Pokemon manhole cover with brown and blue characters",
+      "author": "Ivan Yurkin",
+      "authorUrl": "https://unsplash.com/@yuru_in?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pokemon-manhole-cover-with-brown-and-blue-characters-wUFj6spgbsU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#836651",
+          "w": 0.7245
+        },
+        {
+          "hex": "#5E3526",
+          "w": 0.1844
+        },
+        {
+          "hex": "#281007",
+          "w": 0.0911
+        }
+      ]
+    },
+    {
+      "id": "RTu8mM0uLlE",
+      "small": "https://images.unsplash.com/photo-1759200285246-b163ffc71e4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759200285246-b163ffc71e4b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYW5ob2xlJTIwY292ZXIlMjBzdHJlZXR8ZW58MXwwfHx8MTc5MjE3NjU5MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LQI#DR0KK7s,00IoRj%1%N%LV@%M",
+      "color": "#c0c0c0",
+      "alt": "Manhole cover with cartoon samurai warriors design",
+      "author": "Darien Attridge",
+      "authorUrl": "https://unsplash.com/@dariendesigns?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/manhole-cover-with-cartoon-samurai-warriors-design-RTu8mM0uLlE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBBFB3",
+          "w": 0.5505
+        },
+        {
+          "hex": "#241F15",
+          "w": 0.2253
+        },
+        {
+          "hex": "#A68864",
+          "w": 0.2242
+        }
+      ]
+    },
+    {
+      "id": "CQmjpqa6m90",
+      "small": "https://images.unsplash.com/photo-1785069897242-04e921c40301?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785069897242-04e921c40301?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8397,
+      "height": 5577,
+      "blurHash": "LCB:vz00t7WB9Fofj[Rjt7xu-;IU",
+      "color": "#262626",
+      "alt": "Two construction workers talking next to a large vacuum truck",
+      "author": "Hanlin Sun",
+      "authorUrl": "https://unsplash.com/@hanlin_sun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-construction-workers-talking-next-to-a-large-vacuum-truck-CQmjpqa6m90?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#494949",
+          "w": 0.3461
+        },
+        {
+          "hex": "#212121",
+          "w": 0.3341
+        },
+        {
+          "hex": "#737373",
+          "w": 0.3198
+        }
+      ]
+    },
+    {
+      "id": "OLylMpE8tKk",
+      "small": "https://images.unsplash.com/photo-1785069897424-16eeed4e1389?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785069897424-16eeed4e1389?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 9528,
+      "height": 6328,
+      "blurHash": "LMDcXT~qxufQt7xuxuM{-;%MWBWB",
+      "color": "#262626",
+      "alt": "City street construction with workers and a large vacuum truck",
+      "author": "Hanlin Sun",
+      "authorUrl": "https://unsplash.com/@hanlin_sun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/city-street-construction-with-workers-and-a-large-vacuum-truck-OLylMpE8tKk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5A5A5A",
+          "w": 0.4801
+        },
+        {
+          "hex": "#272727",
+          "w": 0.3083
+        },
+        {
+          "hex": "#898989",
+          "w": 0.2117
+        }
+      ]
+    },
+    {
+      "id": "EAgHYIIKJcQ",
+      "small": "https://images.unsplash.com/photo-1757191462487-6c6c0fe97edd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1757191462487-6c6c0fe97edd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4868,
+      "height": 4000,
+      "blurHash": "LNE:0i%LRjRiIooLWBWB00D%xuxu",
+      "color": "#262626",
+      "alt": "A large white vacuum truck parked outdoors",
+      "author": "Fr0ggy5",
+      "authorUrl": "https://unsplash.com/@fr0ggy5_fr0ggy5?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-white-vacuum-truck-parked-outdoors-EAgHYIIKJcQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A4D3D",
+          "w": 0.4632
+        },
+        {
+          "hex": "#8A8681",
+          "w": 0.3301
+        },
+        {
+          "hex": "#191915",
+          "w": 0.2067
+        }
+      ]
+    },
+    {
+      "id": "6tLRuQt3BXo",
+      "small": "https://images.unsplash.com/photo-1757191462578-7c59fa85b016?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1757191462578-7c59fa85b016?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx2YWN1dW0lMjB0cnVja3xlbnwxfDB8fHwxNzkyMTc2NTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5191,
+      "height": 3930,
+      "blurHash": "LGFiV[_4In4n_N_3IU9FM{ITV[Mx",
+      "color": "#404040",
+      "alt": "Silver vacuum truck tank with hoses and pipes",
+      "author": "Fr0ggy5",
+      "authorUrl": "https://unsplash.com/@fr0ggy5_fr0ggy5?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/silver-vacuum-truck-tank-with-hoses-and-pipes-6tLRuQt3BXo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4D524F",
+          "w": 0.4676
+        },
+        {
+          "hex": "#888988",
+          "w": 0.2894
+        },
+        {
+          "hex": "#D1D1D3",
+          "w": 0.243
+        }
+      ]
+    }
+  ]
+}

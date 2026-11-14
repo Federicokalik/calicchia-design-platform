@@ -1,0 +1,254 @@
+{
+  "slug": "mobili",
+  "queries": [
+    "furniture store warehouse",
+    "oak dining chairs",
+    "wardrobe showroom"
+  ],
+  "generatedAt": "2026-10-16T20:55:50.453Z",
+  "photos": [
+    {
+      "id": "jr1DdTyU7eA",
+      "small": "https://images.unsplash.com/photo-1624927637280-f033784c1279?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624927637280-f033784c1279?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4288,
+      "height": 2848,
+      "blurHash": "LNF5:6WU01W=?HR*oIxaX9RlM|WC",
+      "color": "#262626",
+      "alt": "brown wooden shelf on white floor tiles",
+      "author": "tommao wang",
+      "authorUrl": "https://unsplash.com/@tommaomaoer?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-shelf-on-white-floor-tiles-jr1DdTyU7eA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#554A3E",
+          "w": 0.3682
+        },
+        {
+          "hex": "#908566",
+          "w": 0.3485
+        },
+        {
+          "hex": "#CEC8AE",
+          "w": 0.2833
+        }
+      ]
+    },
+    {
+      "id": "JWaXthlA9Cc",
+      "small": "https://images.unsplash.com/photo-1549194388-2469d59ec75c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1549194388-2469d59ec75c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LCHV3dnO%g%24Tn4RkRj00NGt7xt",
+      "color": "#c0c0c0",
+      "alt": "gray metal multi-layer rack inside building",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-metal-multi-layer-rack-inside-building-JWaXthlA9Cc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B8B8B6",
+          "w": 0.4706
+        },
+        {
+          "hex": "#908883",
+          "w": 0.3273
+        },
+        {
+          "hex": "#5B514D",
+          "w": 0.2021
+        }
+      ]
+    },
+    {
+      "id": "m-HDOBfSI7I",
+      "small": "https://images.unsplash.com/photo-1587006158786-7b79525a2147?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587006158786-7b79525a2147?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5496,
+      "height": 3544,
+      "blurHash": "LDFOlpMw_3o30eD*R5NG%1S$-oV@",
+      "color": "#260c0c",
+      "alt": "brown wooden chairs and tables",
+      "author": "Anastase Maragos",
+      "authorUrl": "https://unsplash.com/@visualsbyroyalz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-chairs-and-tables-m-HDOBfSI7I?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#94705D",
+          "w": 0.379
+        },
+        {
+          "hex": "#5E4538",
+          "w": 0.3467
+        },
+        {
+          "hex": "#BCAEA7",
+          "w": 0.2743
+        }
+      ]
+    },
+    {
+      "id": "md4QnifG-Io",
+      "small": "https://images.unsplash.com/photo-1520299287249-296a6c957518?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1520299287249-296a6c957518?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmdXJuaXR1cmUlMjBzdG9yZSUyMHdhcmVob3VzZXxlbnwxfDB8fHwxNzkyMTg0MTQ2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2208,
+      "height": 1478,
+      "blurHash": "LDEyD49u4TtSwdRjD%s:kraexaWX",
+      "color": "#a6a6a6",
+      "alt": "man sitting on gray trolley",
+      "author": "Brooke Winters",
+      "authorUrl": "https://unsplash.com/@brookeowinters?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-sitting-on-gray-trolley-md4QnifG-Io?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8F867D",
+          "w": 0.4024
+        },
+        {
+          "hex": "#625B52",
+          "w": 0.3136
+        },
+        {
+          "hex": "#B4AEA6",
+          "w": 0.284
+        }
+      ]
+    },
+    {
+      "id": "O3kl3xylLDg",
+      "small": "https://images.unsplash.com/photo-1758977403395-5ae10579231f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758977403395-5ae10579231f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2500,
+      "height": 2200,
+      "blurHash": "LSJ%?{yC%M-;_MITW9k8%#V@kVs:",
+      "color": "#a68c73",
+      "alt": "Dining room with wooden table and upholstered chairs",
+      "author": "Costa Live",
+      "authorUrl": "https://unsplash.com/@vendedorescostalive?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dining-room-with-wooden-table-and-upholstered-chairs-O3kl3xylLDg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B58C74",
+          "w": 0.4874
+        },
+        {
+          "hex": "#D8D1C4",
+          "w": 0.2893
+        },
+        {
+          "hex": "#8D4824",
+          "w": 0.2233
+        }
+      ]
+    },
+    {
+      "id": "pyo3gzTa-qM",
+      "small": "https://images.unsplash.com/photo-1601014599619-869ce54a5d87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1601014599619-869ce54a5d87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LtK1RF%NWXay~VofR*j[s+WBWCf6",
+      "color": "#d9c0a6",
+      "alt": "brown wooden table with chairs",
+      "author": "amira aldia amal",
+      "authorUrl": "https://unsplash.com/@amiraldia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-table-with-chairs-pyo3gzTa-qM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1D7C9",
+          "w": 0.3823
+        },
+        {
+          "hex": "#7C7065",
+          "w": 0.3459
+        },
+        {
+          "hex": "#B8AD9E",
+          "w": 0.2718
+        }
+      ]
+    },
+    {
+      "id": "tgjYpr9sMnE",
+      "small": "https://images.unsplash.com/photo-1733774669529-420fd738c0c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1733774669529-420fd738c0c2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LiLWqk4TT0x]%Ls,M|ogNdRkxZn$",
+      "color": "#8c7359",
+      "alt": "A wooden chair sitting next to a white bath tub",
+      "author": "Aaron Boucicault",
+      "authorUrl": "https://unsplash.com/@nwiths?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-wooden-chair-sitting-next-to-a-white-bath-tub-tgjYpr9sMnE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8D9C3",
+          "w": 0.3924
+        },
+        {
+          "hex": "#8D6C4A",
+          "w": 0.3082
+        },
+        {
+          "hex": "#CF9F6A",
+          "w": 0.2994
+        }
+      ]
+    },
+    {
+      "id": "g37DJ4dvMlk",
+      "small": "https://images.unsplash.com/photo-1587438899760-3f45b5ad6b34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587438899760-3f45b5ad6b34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxvYWslMjBkaW5pbmclMjBjaGFpcnN8ZW58MXwwfHx8MTc5MjE4NDE0OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "L5F#aT5S0fRj^JoLxuD%o}NHNd%2",
+      "color": "#735940",
+      "alt": "brown wooden chairs and table",
+      "author": "Nareeta Martin",
+      "authorUrl": "https://unsplash.com/@splashabout?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-wooden-chairs-and-table-g37DJ4dvMlk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#856042",
+          "w": 0.4587
+        },
+        {
+          "hex": "#6D492E",
+          "w": 0.3231
+        },
+        {
+          "hex": "#9F8065",
+          "w": 0.2182
+        }
+      ]
+    },
+    {
+      "id": "Rug_4KezQgU",
+      "small": "https://images.unsplash.com/photo-1662986788528-0851badbf423?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXJkcm9iZSUyMHNob3dyb29tfGVufDF8MHx8fDE3OTIxODQxNTB8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1662986788528-0851badbf423?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3YXJkcm9iZSUyMHNob3dyb29tfGVufDF8MHx8fDE3OTIxODQxNTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6138,
+      "height": 4092,
+      "blurHash": "LfIEkXxZ%MV@0Kt8Ris:jZjZRjRj",
+      "color": "#d9c0c0",
+      "alt": "a closet full of clothes",
+      "author": "Kamil Kalkan",
+      "authorUrl": "https://unsplash.com/@kamilklkn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-closet-full-of-clothes-Rug_4KezQgU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CEC1BB",
+          "w": 0.4886
+        },
+        {
+          "hex": "#958680",
+          "w": 0.2621
+        },
+        {
+          "hex": "#0C0A0D",
+          "w": 0.2493
+        }
+      ]
+    }
+  ]
+}

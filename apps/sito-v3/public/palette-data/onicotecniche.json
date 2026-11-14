@@ -1,0 +1,219 @@
+{
+  "slug": "onicotecniche",
+  "queries": [
+    "nail studio workstation",
+    "nail polish bottles",
+    "gel nails close up"
+  ],
+  "generatedAt": "2026-10-12T19:50:35.330Z",
+  "photos": [
+    {
+      "id": "sp6wzdYJ7QQ",
+      "small": "https://images.unsplash.com/photo-1636019411401-82485711b6ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1636019411401-82485711b6ba?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4614,
+      "height": 3392,
+      "blurHash": "LkO|eHoe~qa#-:fQRjoe-;f6M{j?",
+      "color": "#f3f3f3",
+      "alt": "a group of five different colored nail polishes",
+      "author": "Maria Lupan",
+      "authorUrl": "https://unsplash.com/@luandmario?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-five-different-colored-nail-polishes-sp6wzdYJ7QQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F2F4F8",
+          "w": 0.7438
+        },
+        {
+          "hex": "#B0B4BC",
+          "w": 0.1541
+        },
+        {
+          "hex": "#666C95",
+          "w": 0.1021
+        }
+      ]
+    },
+    {
+      "id": "sggvubXCOQ0",
+      "small": "https://images.unsplash.com/photo-1544816135-b44f18b3c5d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1544816135-b44f18b3c5d6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LDOp#?_NozMxxuofofWB%gMxWB%M",
+      "color": "#d9d9d9",
+      "alt": "pink and clear labeled bottle",
+      "author": "Kelly Sikkema",
+      "authorUrl": "https://unsplash.com/@kellysikkema?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-and-clear-labeled-bottle-sggvubXCOQ0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9D9D9",
+          "w": 1
+        }
+      ]
+    },
+    {
+      "id": "v-5d3hP0loo",
+      "small": "https://images.unsplash.com/photo-1640958903443-1e49d720650d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1640958903443-1e49d720650d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LCRfd|fNysr?-px]XTDiT1RjIA%L",
+      "color": "#f3f3f3",
+      "alt": "a bottle of liquid sitting next to a tube of liquid",
+      "author": "Gabriel Mihalcea",
+      "authorUrl": "https://unsplash.com/@lovelyscape?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bottle-of-liquid-sitting-next-to-a-tube-of-liquid-v-5d3hP0loo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F4F6",
+          "w": 0.8737
+        },
+        {
+          "hex": "#E3D1CC",
+          "w": 0.0686
+        },
+        {
+          "hex": "#D1ADA2",
+          "w": 0.0576
+        }
+      ]
+    },
+    {
+      "id": "jzC0pvbXdN8",
+      "small": "https://images.unsplash.com/photo-1667242197482-ffe672de74da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1667242197482-ffe672de74da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxuYWlsJTIwcG9saXNoJTIwYm90dGxlc3xlbnwxfDB8fHwxNzkxODM0NjMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5127,
+      "height": 3418,
+      "blurHash": "LYOWg701-=s*x^xtxtIp?wxaMxM}",
+      "color": "#f3f3f3",
+      "alt": "a group of different colored bottles",
+      "author": "Maria Lupan",
+      "authorUrl": "https://unsplash.com/@luandmario?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-different-colored-bottles-jzC0pvbXdN8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F2F1",
+          "w": 0.4477
+        },
+        {
+          "hex": "#CEC4BC",
+          "w": 0.3876
+        },
+        {
+          "hex": "#937C77",
+          "w": 0.1646
+        }
+      ]
+    },
+    {
+      "id": "GnLWFC4B9_M",
+      "small": "https://images.unsplash.com/photo-1753285311550-154917dab783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1753285311550-154917dab783?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "LYLfdh-V0fx]Iqxus9RjNabvkXMy",
+      "color": "#d9a68c",
+      "alt": "A manicurist paints long artificial nails",
+      "author": "Ondrej Supitar",
+      "authorUrl": "https://unsplash.com/@drewsonixx?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-manicurist-paints-long-artificial-nails-GnLWFC4B9_M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E8BCAB",
+          "w": 0.4145
+        },
+        {
+          "hex": "#D38E7C",
+          "w": 0.4145
+        },
+        {
+          "hex": "#925649",
+          "w": 0.171
+        }
+      ]
+    },
+    {
+      "id": "VHy0qH7QuWY",
+      "small": "https://images.unsplash.com/photo-1572743686183-729b40b9230e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1572743686183-729b40b9230e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LIF55UEL4.WA?HE1E2%10xRjxbt6",
+      "color": "#262626",
+      "alt": "woman with manicure and ring",
+      "author": "Kevin kevin",
+      "authorUrl": "https://unsplash.com/@0x00kevin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-with-manicure-and-ring-VHy0qH7QuWY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#161216",
+          "w": 0.3822
+        },
+        {
+          "hex": "#BD9BA2",
+          "w": 0.3741
+        },
+        {
+          "hex": "#8F7079",
+          "w": 0.2436
+        }
+      ]
+    },
+    {
+      "id": "Y5P9SyEEQWM",
+      "small": "https://images.unsplash.com/photo-1777287216958-84144739db83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777287216958-84144739db83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3433,
+      "height": 2746,
+      "blurHash": "LQKKH0-pF|M{8wIp0L%Lb]IVVsxZ",
+      "color": "#d9d9d9",
+      "alt": "Woman's hand with long black stiletto nails",
+      "author": "de Aura",
+      "authorUrl": "https://unsplash.com/@deaura2026?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/womans-hand-with-long-black-stiletto-nails-Y5P9SyEEQWM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBCCC0",
+          "w": 0.4573
+        },
+        {
+          "hex": "#BB947F",
+          "w": 0.2961
+        },
+        {
+          "hex": "#715041",
+          "w": 0.2466
+        }
+      ]
+    },
+    {
+      "id": "3J5K-Jb6GRM",
+      "small": "https://images.unsplash.com/photo-1619615787228-ce0fa8440e18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1619615787228-ce0fa8440e18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxnZWwlMjBuYWlscyUyMGNsb3NlJTIwdXB8ZW58MXwwfHx8MTc5MTgzNDYzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4836,
+      "height": 3263,
+      "blurHash": "LSJH,UyAMcpK~WnNRjXAvMrCkDS$",
+      "color": "#c0c0d9",
+      "alt": "person holding silver iphone 6",
+      "author": "Anna Kumpan",
+      "authorUrl": "https://unsplash.com/@ankumpan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-silver-iphone-6-3J5K-Jb6GRM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3CAC9",
+          "w": 0.4325
+        },
+        {
+          "hex": "#9E948F",
+          "w": 0.3538
+        },
+        {
+          "hex": "#816153",
+          "w": 0.2137
+        }
+      ]
+    }
+  ]
+}

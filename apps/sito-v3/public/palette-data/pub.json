@@ -1,0 +1,254 @@
+{
+  "slug": "pub",
+  "queries": [
+    "pub interior warm light",
+    "beer taps counter",
+    "pint glasses table"
+  ],
+  "generatedAt": "2026-10-16T19:53:05.154Z",
+  "photos": [
+    {
+      "id": "F-u9yyYHMKg",
+      "small": "https://images.unsplash.com/photo-1675419092955-3dfff1351e01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1675419092955-3dfff1351e01?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LEA+yq9aWENM~9EMoLogIpt6smt5",
+      "color": "#260c0c",
+      "alt": "a group of people sitting around a bar",
+      "author": "Evgeniy Smersh",
+      "authorUrl": "https://unsplash.com/@igrindphoto?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-sitting-around-a-bar-F-u9yyYHMKg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#190702",
+          "w": 0.4726
+        },
+        {
+          "hex": "#5A3206",
+          "w": 0.3183
+        },
+        {
+          "hex": "#976725",
+          "w": 0.2091
+        }
+      ]
+    },
+    {
+      "id": "MQMtw6VU5ug",
+      "small": "https://images.unsplash.com/photo-1779114643756-5ad19aad1110?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779114643756-5ad19aad1110?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6960,
+      "height": 4640,
+      "blurHash": "L65#Lkxa0Mj[WBR*RkRk0MWV~Bt6",
+      "color": "#260c0c",
+      "alt": "The word bros. glows brightly on a dark background",
+      "author": "Mihajlo Sivč",
+      "authorUrl": "https://unsplash.com/@sivc?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/the-word-bros-glows-brightly-on-a-dark-background-MQMtw6VU5ug?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0A0705",
+          "w": 0.5355
+        },
+        {
+          "hex": "#1B140E",
+          "w": 0.3465
+        },
+        {
+          "hex": "#4A3C2C",
+          "w": 0.118
+        }
+      ]
+    },
+    {
+      "id": "5CdoatZcdlQ",
+      "small": "https://images.unsplash.com/photo-1779221596208-94d03c53ff85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779221596208-94d03c53ff85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3121,
+      "height": 2080,
+      "blurHash": "LUHUUg00?bIAI@EM%LadwHt8WAkC",
+      "color": "#26260c",
+      "alt": "Various wine and champagne bottles displayed on a wooden shelf",
+      "author": "Margo Evardson",
+      "authorUrl": "https://unsplash.com/@stadinstudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/various-wine-and-champagne-bottles-displayed-on-a-wooden-shelf-5CdoatZcdlQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BD945D",
+          "w": 0.348
+        },
+        {
+          "hex": "#765A37",
+          "w": 0.3264
+        },
+        {
+          "hex": "#34200A",
+          "w": 0.3256
+        }
+      ]
+    },
+    {
+      "id": "Omyk3J_LPfk",
+      "small": "https://images.unsplash.com/photo-1761515397046-44035db91504?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761515397046-44035db91504?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwdWIlMjBpbnRlcmlvciUyMHdhcm0lMjBsaWdodHxlbnwxfDB8fHwxNzkyMTgwMzc4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LJGuRJ?vY6IB.8tmR5RP01NGDi%2",
+      "color": "#8c5940",
+      "alt": "A crispy chicken burger with french fries",
+      "author": "Allen Y",
+      "authorUrl": "https://unsplash.com/@yanahd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-crispy-chicken-burger-with-french-fries-Omyk3J_LPfk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#814E32",
+          "w": 0.4111
+        },
+        {
+          "hex": "#AE8465",
+          "w": 0.3417
+        },
+        {
+          "hex": "#3B291D",
+          "w": 0.2472
+        }
+      ]
+    },
+    {
+      "id": "KMWd5kYTbww",
+      "small": "https://images.unsplash.com/photo-1774109049275-6b6fa2f7cd4a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1774109049275-6b6fa2f7cd4a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6073,
+      "height": 4049,
+      "blurHash": "LFEw,Y=x9]xb~UNHIoR-x[NGIVNG",
+      "color": "#260c0c",
+      "alt": "Beer taps lined up at a bar counter",
+      "author": "Karl Joshua Bernal",
+      "authorUrl": "https://unsplash.com/@karljosh16?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/beer-taps-lined-up-at-a-bar-counter-KMWd5kYTbww?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#642708",
+          "w": 0.4402
+        },
+        {
+          "hex": "#96593B",
+          "w": 0.3062
+        },
+        {
+          "hex": "#200600",
+          "w": 0.2536
+        }
+      ]
+    },
+    {
+      "id": "c3YF1RU1tis",
+      "small": "https://images.unsplash.com/photo-1651980909099-ddb028d72855?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1651980909099-ddb028d72855?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5314,
+      "height": 3543,
+      "blurHash": "L7Ach^Md10WVvzxai_R+0Ko}xtf5",
+      "color": "#260c0c",
+      "alt": "a bar with many bottles of alcohol",
+      "author": "Daniel",
+      "authorUrl": "https://unsplash.com/@unsplashbydan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bar-with-many-bottles-of-alcohol-c3YF1RU1tis?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A2A16",
+          "w": 0.377
+        },
+        {
+          "hex": "#725946",
+          "w": 0.3181
+        },
+        {
+          "hex": "#150A04",
+          "w": 0.3049
+        }
+      ]
+    },
+    {
+      "id": "B1yu5dSr9Xc",
+      "small": "https://images.unsplash.com/photo-1789290608393-2f29560d8882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789290608393-2f29560d8882?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3648,
+      "height": 2432,
+      "blurHash": "LAD9eepK0M?Y0i$cxAWE~CI@D%M{",
+      "color": "#595959",
+      "alt": "A row of chrome beer taps with black handles in a bar",
+      "author": "MChe Lee",
+      "authorUrl": "https://unsplash.com/@mclee?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/chrome-beer-taps-in-bar-B1yu5dSr9Xc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#756B63",
+          "w": 0.4442
+        },
+        {
+          "hex": "#463A34",
+          "w": 0.3479
+        },
+        {
+          "hex": "#1C130F",
+          "w": 0.2079
+        }
+      ]
+    },
+    {
+      "id": "S1XEgujxOc4",
+      "small": "https://images.unsplash.com/photo-1763264296087-ea5f487297d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763264296087-ea5f487297d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWVyJTIwdGFwcyUyMGNvdW50ZXJ8ZW58MXwwfHx8MTc5MjE4MDM4Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5584,
+      "height": 3987,
+      "blurHash": "LSC6[cROD$NG?wRiM_bbtRWBo0oJ",
+      "color": "#262626",
+      "alt": "Bartender serving drinks behind a modern bar counter",
+      "author": "Kris Tian",
+      "authorUrl": "https://unsplash.com/@kris_tian?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bartender-serving-drinks-behind-a-modern-bar-counter-S1XEgujxOc4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#121110",
+          "w": 0.3907
+        },
+        {
+          "hex": "#403B39",
+          "w": 0.3478
+        },
+        {
+          "hex": "#777C82",
+          "w": 0.2615
+        }
+      ]
+    },
+    {
+      "id": "5TucLNzfDX8",
+      "small": "https://images.unsplash.com/photo-1779636334638-9b55a47e2c1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaW50JTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzODR8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779636334638-9b55a47e2c1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaW50JTIwZ2xhc3NlcyUyMHRhYmxlfGVufDF8MHx8fDE3OTIxODAzODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7645,
+      "height": 5097,
+      "blurHash": "LYKKNO-;tm4nystRn$IoZ~kCRjs:",
+      "color": "#c0c0c0",
+      "alt": "Glass of golden beer on a wet outdoor wooden table",
+      "author": "Blake Wisz",
+      "authorUrl": "https://unsplash.com/@blakewisz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/glass-of-golden-beer-on-a-wet-outdoor-wooden-table-5TucLNzfDX8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2CED1",
+          "w": 0.4551
+        },
+        {
+          "hex": "#B98F72",
+          "w": 0.2873
+        },
+        {
+          "hex": "#9A542B",
+          "w": 0.2576
+        }
+      ]
+    }
+  ]
+}

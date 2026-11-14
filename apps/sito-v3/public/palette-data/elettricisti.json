@@ -1,0 +1,335 @@
+{
+  "slug": "elettricisti",
+  "queries": [
+    "electrician working indoors",
+    "circuit breaker panel",
+    "electrical wiring close up"
+  ],
+  "generatedAt": "2026-10-16T16:28:16.552Z",
+  "photos": [
+    {
+      "id": "rKxZQ-2lNUk",
+      "small": "https://images.unsplash.com/photo-1673294418169-58bf31574007?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1673294418169-58bf31574007?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3888,
+      "blurHash": "LaC$o%0L%KWYxGWVR+t69F-;M|jr",
+      "color": "#260c0c",
+      "alt": "a man standing in a dark room with a light on",
+      "author": "Reneé Thompson",
+      "authorUrl": "https://unsplash.com/@reneethompsonco?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-standing-in-a-dark-room-with-a-light-on-rKxZQ-2lNUk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0D0102",
+          "w": 0.5587
+        },
+        {
+          "hex": "#391307",
+          "w": 0.2418
+        },
+        {
+          "hex": "#7F5323",
+          "w": 0.1995
+        }
+      ]
+    },
+    {
+      "id": "7nNXiSAuCM8",
+      "small": "https://images.unsplash.com/photo-1762512346990-22d810fe4252?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762512346990-22d810fe4252?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2666,
+      "blurHash": "LFAc-%~TE3IVM}jExuWBM{R*ofWW",
+      "color": "#737359",
+      "alt": "Person wearing a baseball cap at a desk",
+      "author": "Jaykumar Bherwani",
+      "authorUrl": "https://unsplash.com/@hashcode_error?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-wearing-a-baseball-cap-at-a-desk-7nNXiSAuCM8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1A2037",
+          "w": 0.5206
+        },
+        {
+          "hex": "#796E5C",
+          "w": 0.3827
+        },
+        {
+          "hex": "#5A5650",
+          "w": 0.0967
+        }
+      ]
+    },
+    {
+      "id": "Hnnl43_lerw",
+      "small": "https://images.unsplash.com/photo-1783869084308-b9f4006c9bc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783869084308-b9f4006c9bc3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5547,
+      "height": 4160,
+      "blurHash": "LRD]0b}Z#9rX.lWERQRP%zozaeWB",
+      "color": "#260c0c",
+      "alt": "Four people in a dimly lit room with red light",
+      "author": "Tri Vo",
+      "authorUrl": "https://unsplash.com/@mtmanhtri?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/four-people-in-a-dimly-lit-room-with-red-light-Hnnl43_lerw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#56311F",
+          "w": 0.3564
+        },
+        {
+          "hex": "#120906",
+          "w": 0.3375
+        },
+        {
+          "hex": "#AAAB9D",
+          "w": 0.306
+        }
+      ]
+    },
+    {
+      "id": "5zv4yTdTdsU",
+      "small": "https://images.unsplash.com/photo-1494512163437-5d01c88c0e5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1494512163437-5d01c88c0e5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbGVjdHJpY2lhbiUyMHdvcmtpbmclMjBpbmRvb3JzfGVufDF8MHx8fDE3OTIxNjgwODl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2560,
+      "height": 1707,
+      "blurHash": "LgJHUGxu0KIU?bofIUWUE1jZxaog",
+      "color": "#260c0c",
+      "alt": "person standing near hallway table and window",
+      "author": "David Hellmann",
+      "authorUrl": "https://unsplash.com/@davidhellmann?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-standing-near-hallway-table-and-window-5zv4yTdTdsU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E9DBD9",
+          "w": 0.4059
+        },
+        {
+          "hex": "#120B05",
+          "w": 0.3425
+        },
+        {
+          "hex": "#C5AB9A",
+          "w": 0.2516
+        }
+      ]
+    },
+    {
+      "id": "47jO5Y8nsYo",
+      "small": "https://images.unsplash.com/photo-1635335874521-7987db781153?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635335874521-7987db781153?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LPH_.74nD%M_4Tt6WC-;-=RjM_t7",
+      "color": "#f3f3f3",
+      "alt": "a bunch of wires are plugged into a switch box",
+      "author": "mostafa mahmoudi",
+      "authorUrl": "https://unsplash.com/@mostafa_mahmoudi24?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-wires-are-plugged-into-a-switch-box-47jO5Y8nsYo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#EBEBEF",
+          "w": 0.3582
+        },
+        {
+          "hex": "#252326",
+          "w": 0.3321
+        },
+        {
+          "hex": "#59585D",
+          "w": 0.3097
+        }
+      ]
+    },
+    {
+      "id": "oj1zW_PNI4k",
+      "small": "https://images.unsplash.com/photo-1576446470246-499c738d1c8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1576446470246-499c738d1c8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LII=0[0LrVxu$x%MNHt8xbM{xut6",
+      "color": "#c0c0c0",
+      "alt": "white circuit breakers",
+      "author": "Mark Kats",
+      "authorUrl": "https://unsplash.com/@bulava92?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-circuit-breakers-oj1zW_PNI4k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CCC5C0",
+          "w": 0.4965
+        },
+        {
+          "hex": "#978F88",
+          "w": 0.3007
+        },
+        {
+          "hex": "#52565B",
+          "w": 0.2028
+        }
+      ]
+    },
+    {
+      "id": "maXnRLszYY0",
+      "small": "https://images.unsplash.com/photo-1566417110090-6b15a06ec800?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1566417110090-6b15a06ec800?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LBEe#+~BMxIVxHR5rr%1D%sm-URj",
+      "color": "#595940",
+      "alt": "gray power switch box",
+      "author": "Troy Bridges",
+      "authorUrl": "https://unsplash.com/@esptroy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-power-switch-box-maXnRLszYY0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D5346",
+          "w": 0.502
+        },
+        {
+          "hex": "#312C22",
+          "w": 0.2659
+        },
+        {
+          "hex": "#8D7A66",
+          "w": 0.2321
+        }
+      ]
+    },
+    {
+      "id": "kXC6XhVL1e4",
+      "small": "https://images.unsplash.com/photo-1607631697491-61972eecf928?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1607631697491-61972eecf928?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaXJjdWl0JTIwYnJlYWtlciUyMHBhbmVsfGVufDF8MHx8fDE3OTIxNjgwOTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LGHxA]~9^%9#-po~-oRPV}ENa~xZ",
+      "color": "#735940",
+      "alt": "black and gray audio mixer",
+      "author": "Troy Bridges",
+      "authorUrl": "https://unsplash.com/@esptroy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-audio-mixer-kXC6XhVL1e4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E8A74",
+          "w": 0.3771
+        },
+        {
+          "hex": "#6F5B47",
+          "w": 0.3374
+        },
+        {
+          "hex": "#CBB89D",
+          "w": 0.2855
+        }
+      ]
+    },
+    {
+      "id": "SdjlUCZk9Hc",
+      "small": "https://images.unsplash.com/photo-1751486289945-989724789188?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1751486289945-989724789188?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LELN.3D$^+%MD$WE-;Ri~qof00bI",
+      "color": "#c0c0c0",
+      "alt": "An electrical socket is exposed in a wall",
+      "author": "Fabian Kleiser",
+      "authorUrl": "https://unsplash.com/@fabiankleiser?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/an-electrical-socket-is-exposed-in-a-wall-SdjlUCZk9Hc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9C8C7",
+          "w": 0.7593
+        },
+        {
+          "hex": "#959897",
+          "w": 0.1319
+        },
+        {
+          "hex": "#676867",
+          "w": 0.1088
+        }
+      ]
+    },
+    {
+      "id": "lQa1ZX0R3Os",
+      "small": "https://images.unsplash.com/photo-1751486289947-4f5f5961b3aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1751486289947-4f5f5961b3aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LeM7rz00IUxuV@WCogj[xuxuRjRj",
+      "color": "#d9d9d9",
+      "alt": "Electrical outlet disassembled, revealing the wiring",
+      "author": "Fabian Kleiser",
+      "authorUrl": "https://unsplash.com/@fabiankleiser?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/electrical-outlet-disassembled-revealing-the-wiring-lQa1ZX0R3Os?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9D8D7",
+          "w": 0.6237
+        },
+        {
+          "hex": "#A9A9A6",
+          "w": 0.2607
+        },
+        {
+          "hex": "#7C766B",
+          "w": 0.1156
+        }
+      ]
+    },
+    {
+      "id": "RiUExAxHJ1g",
+      "small": "https://images.unsplash.com/photo-1745210477280-373b1978c3fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1745210477280-373b1978c3fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5078,
+      "height": 3385,
+      "blurHash": "LKD2b7?wtomi4?NLRjs:xaa~jEkD",
+      "color": "#73c0f3",
+      "alt": "Power lines crisscrossing across a bright blue sky",
+      "author": "Kelsey Todd",
+      "authorUrl": "https://unsplash.com/@sparkledump?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/power-lines-crisscrossing-across-a-bright-blue-sky-RiUExAxHJ1g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#50A7F0",
+          "w": 0.552
+        },
+        {
+          "hex": "#88C2FC",
+          "w": 0.3873
+        },
+        {
+          "hex": "#4E6F92",
+          "w": 0.0607
+        }
+      ]
+    },
+    {
+      "id": "a80lu0SHbjM",
+      "small": "https://images.unsplash.com/photo-1754821480110-640afbc89b44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1754821480110-640afbc89b44?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxlbGVjdHJpY2FsJTIwd2lyaW5nJTIwY2xvc2UlMjB1cHxlbnwxfDB8fHwxNzkyMTY4MDk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5824,
+      "height": 4368,
+      "blurHash": "LbP?ZY8[-pa#ILRqt2R%x-W,WAoc",
+      "color": "#f3f359",
+      "alt": "A hand touches computer cables on a yellow background",
+      "author": "Andrey Matveev",
+      "authorUrl": "https://unsplash.com/@zelebb?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-hand-touches-computer-cables-on-a-yellow-background-a80lu0SHbjM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F8F253",
+          "w": 0.5866
+        },
+        {
+          "hex": "#E3C1B9",
+          "w": 0.2721
+        },
+        {
+          "hex": "#9D824C",
+          "w": 0.1413
+        }
+      ]
+    }
+  ]
+}

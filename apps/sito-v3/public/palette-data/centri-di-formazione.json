@@ -1,0 +1,227 @@
+{
+  "slug": "centri-di-formazione",
+  "queries": [
+    "training room projector",
+    "adults classroom workshop",
+    "computer course room"
+  ],
+  "generatedAt": "2026-10-16T21:58:29.668Z",
+  "photos": [
+    {
+      "id": "M6hRIy1kLwU",
+      "small": "https://images.unsplash.com/photo-1762176263996-a0713a49ee4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762176263996-a0713a49ee4d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LVD9;l%MIUs:s.ofa}ae00M{tRWB",
+      "color": "#262626",
+      "alt": "Modern conference room with long tables and large windows",
+      "author": "runda choo",
+      "authorUrl": "https://unsplash.com/@rundachoo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-conference-room-with-long-tables-and-large-windows-M6hRIy1kLwU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#111213",
+          "w": 0.489
+        },
+        {
+          "hex": "#3D4040",
+          "w": 0.2971
+        },
+        {
+          "hex": "#DADDDD",
+          "w": 0.2139
+        }
+      ]
+    },
+    {
+      "id": "xoU7zcW097U",
+      "small": "https://images.unsplash.com/photo-1786840671048-df00f3fbb8c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786840671048-df00f3fbb8c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5950,
+      "height": 3966,
+      "blurHash": "L76*dhxu4nM{%Mj[WAay00WB?bt7",
+      "color": "#262626",
+      "alt": "People in a dim room facing a window with a view of city buildings",
+      "author": "Spencer Liao",
+      "authorUrl": "https://unsplash.com/@spencerliao?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-in-dim-room-with-window-xoU7zcW097U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2A2A2A",
+          "w": 0.5411
+        },
+        {
+          "hex": "#040404",
+          "w": 0.2513
+        },
+        {
+          "hex": "#444344",
+          "w": 0.2076
+        }
+      ]
+    },
+    {
+      "id": "8seo3zZSoBM",
+      "small": "https://images.unsplash.com/photo-1762176264161-09219da49794?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762176264161-09219da49794?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LQCP;V_3M|IUxut7WCWC009Foft7",
+      "color": "#262626",
+      "alt": "Rows of empty desks in a modern conference room",
+      "author": "runda choo",
+      "authorUrl": "https://unsplash.com/@rundachoo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-empty-desks-in-a-modern-conference-room-8seo3zZSoBM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#151516",
+          "w": 0.5413
+        },
+        {
+          "hex": "#484643",
+          "w": 0.2869
+        },
+        {
+          "hex": "#8A8885",
+          "w": 0.1718
+        }
+      ]
+    },
+    {
+      "id": "tqr2fbCZy88",
+      "small": "https://images.unsplash.com/photo-1766476210492-824c8a4b79b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766476210492-824c8a4b79b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFpbmluZyUyMHJvb20lMjBwcm9qZWN0b3J8ZW58MXwwfHx8MTc5MjE4NzkwNnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5631,
+      "height": 3754,
+      "blurHash": "LCGITAo#?wRkGHV@?axu9GRk8_M{",
+      "color": "#8c8c8c",
+      "alt": "Empty classroom with tables, chairs, and a tripod camera",
+      "author": "rawkkim",
+      "authorUrl": "https://unsplash.com/@rawkkim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-classroom-with-tables-chairs-and-a-tripod-camera-tqr2fbCZy88?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#959290",
+          "w": 0.4329
+        },
+        {
+          "hex": "#453731",
+          "w": 0.2837
+        },
+        {
+          "hex": "#73655D",
+          "w": 0.2833
+        }
+      ]
+    },
+    {
+      "id": "1-aA2Fadydc",
+      "small": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5101,
+      "height": 3401,
+      "blurHash": "LIC?=b-;XSxu.8ofRjoL8wMxMxWV",
+      "color": "#262626",
+      "alt": "a group of people in a room with a projector screen",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-people-in-a-room-with-a-projector-screen-1-aA2Fadydc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#323635",
+          "w": 0.3483
+        },
+        {
+          "hex": "#5D5E55",
+          "w": 0.3377
+        },
+        {
+          "hex": "#83877F",
+          "w": 0.314
+        }
+      ]
+    },
+    {
+      "id": "vBg0dxwfIYM",
+      "small": "https://images.unsplash.com/photo-1758270704080-e3556e6794a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758270704080-e3556e6794a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2138,
+      "blurHash": "LcJa[.x]WYX9~qofRjo#?bkCt8xu",
+      "color": "#f3f3f3",
+      "alt": "Teacher lecturing students in a classroom setting",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/teacher-lecturing-students-in-a-classroom-setting-vBg0dxwfIYM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DDE0E6",
+          "w": 0.4571
+        },
+        {
+          "hex": "#7D6B6F",
+          "w": 0.3101
+        },
+        {
+          "hex": "#AEA4A3",
+          "w": 0.2328
+        }
+      ]
+    },
+    {
+      "id": "14jNrPntbgk",
+      "small": "https://images.unsplash.com/photo-1758270704925-fa59d93119c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758270704925-fa59d93119c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2138,
+      "blurHash": "LPI#AW9vyEe;%d4TIAI:%Lt7X9X8",
+      "color": "#0c2640",
+      "alt": "Teacher lecturing students in a classroom setting",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/teacher-lecturing-students-in-a-classroom-setting-14jNrPntbgk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B28F7F",
+          "w": 0.386
+        },
+        {
+          "hex": "#CEC4BF",
+          "w": 0.3451
+        },
+        {
+          "hex": "#242A45",
+          "w": 0.2689
+        }
+      ]
+    },
+    {
+      "id": "l0E0Y1TdzxE",
+      "small": "https://images.unsplash.com/photo-1758691736067-b309ee3ef7b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691736067-b309ee3ef7b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhZHVsdHMlMjBjbGFzc3Jvb20lMjB3b3Jrc2hvcHxlbnwxfDB8fHwxNzkyMTg3OTA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LXK-tVNeIU%h?wogIUoIxua}s:Rj",
+      "color": "#d9d9d9",
+      "alt": "Business people in a modern conference room during a presentation",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/business-people-in-a-modern-conference-room-during-a-presentation-l0E0Y1TdzxE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7DADC",
+          "w": 0.5224
+        },
+        {
+          "hex": "#A9A69B",
+          "w": 0.3208
+        },
+        {
+          "hex": "#7D7862",
+          "w": 0.1568
+        }
+      ]
+    }
+  ]
+}

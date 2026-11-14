@@ -1,0 +1,331 @@
+{
+  "slug": "cartongessisti",
+  "queries": [
+    "drywall installation",
+    "plasterboard ceiling",
+    "interior wall framing"
+  ],
+  "generatedAt": "2026-10-16T17:48:00.986Z",
+  "photos": [
+    {
+      "id": "3coKbdfnAFg",
+      "small": "https://images.unsplash.com/photo-1482731215275-a1f151646268?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1482731215275-a1f151646268?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3264,
+      "blurHash": "LAATD+0fIUt7~VE2RkRjWBM|%LRj",
+      "color": "#262626",
+      "alt": "man on white ladder",
+      "author": "H&CO",
+      "authorUrl": "https://unsplash.com/@hngstrm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-on-white-ladder-3coKbdfnAFg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#454243",
+          "w": 0.3778
+        },
+        {
+          "hex": "#23262A",
+          "w": 0.3696
+        },
+        {
+          "hex": "#70625C",
+          "w": 0.2527
+        }
+      ]
+    },
+    {
+      "id": "2ZMe-E2NBZ0",
+      "small": "https://images.unsplash.com/photo-1733431772808-82d878e59000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1733431772808-82d878e59000?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LAJ8LnR%9D$_$xMxX9og0JRjtSX9",
+      "color": "#a6a68c",
+      "alt": "A large room with a lot of white paint on the walls",
+      "author": "Brian Wangenheim",
+      "authorUrl": "https://unsplash.com/@brianwangenheim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-room-with-a-lot-of-white-paint-on-the-walls-2ZMe-E2NBZ0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A3A096",
+          "w": 0.6794
+        },
+        {
+          "hex": "#C0BCB4",
+          "w": 0.2238
+        },
+        {
+          "hex": "#7F7665",
+          "w": 0.0968
+        }
+      ]
+    },
+    {
+      "id": "wTHQ-wMorp0",
+      "small": "https://images.unsplash.com/photo-1733431774078-692252a6605e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1733431774078-692252a6605e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7841,
+      "height": 5230,
+      "blurHash": "LEJa+T.TJBV?-3xqoJRj9to$R-WB",
+      "color": "#a6a68c",
+      "alt": "A large room with a lot of paint on the walls",
+      "author": "Brian Wangenheim",
+      "authorUrl": "https://unsplash.com/@brianwangenheim?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-room-with-a-lot-of-paint-on-the-walls-wTHQ-wMorp0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ACA59A",
+          "w": 0.502
+        },
+        {
+          "hex": "#978E80",
+          "w": 0.2991
+        },
+        {
+          "hex": "#C6C1B9",
+          "w": 0.1989
+        }
+      ]
+    },
+    {
+      "id": "Fxv9QVauyD0",
+      "small": "https://images.unsplash.com/photo-1718816281207-3b253cff549a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1718816281207-3b253cff549a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkcnl3YWxsJTIwaW5zdGFsbGF0aW9ufGVufDF8MHx8fDE3OTIxNzI4Njd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7762,
+      "height": 5177,
+      "blurHash": "LLHek80L4:S2aeRlWBWB-.M_s+j[",
+      "color": "#a6a68c",
+      "alt": "A room that has some paint on the floor",
+      "author": "Steffen Lemmerzahl",
+      "authorUrl": "https://unsplash.com/@steffen_l?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-that-has-some-paint-on-the-floor-Fxv9QVauyD0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3AEA8",
+          "w": 0.5408
+        },
+        {
+          "hex": "#82838A",
+          "w": 0.2764
+        },
+        {
+          "hex": "#4F596E",
+          "w": 0.1827
+        }
+      ]
+    },
+    {
+      "id": "6U3ujgJdjAs",
+      "small": "https://images.unsplash.com/photo-1550932372-3080d57e4e74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1550932372-3080d57e4e74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3144,
+      "height": 2281,
+      "blurHash": "LJJa+a0KaxofMcR+R*s:t7t7WX%M",
+      "color": "#a6a6a6",
+      "alt": "white painted ceiling",
+      "author": "Sven Brandsma",
+      "authorUrl": "https://unsplash.com/@seffen99?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-painted-ceiling-6U3ujgJdjAs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADA7A3",
+          "w": 0.5076
+        },
+        {
+          "hex": "#8C837B",
+          "w": 0.2662
+        },
+        {
+          "hex": "#CAC7C5",
+          "w": 0.2261
+        }
+      ]
+    },
+    {
+      "id": "M8LiVogRPAE",
+      "small": "https://images.unsplash.com/photo-1582203423341-64b918240e25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1582203423341-64b918240e25?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LFONB[4nD%j[M{ayWBM{00%MIUj[",
+      "color": "#d9d9d9",
+      "alt": "white ceiling with light fixture",
+      "author": "SJ 📸",
+      "authorUrl": "https://unsplash.com/@uxsj_ph?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ceiling-with-light-fixture-M8LiVogRPAE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9D9D9",
+          "w": 0.5105
+        },
+        {
+          "hex": "#F0F0F0",
+          "w": 0.2567
+        },
+        {
+          "hex": "#C1C1C1",
+          "w": 0.2327
+        }
+      ]
+    },
+    {
+      "id": "MMOFmcOo99g",
+      "small": "https://images.unsplash.com/photo-1501622832816-1ea85e83687a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1501622832816-1ea85e83687a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5837,
+      "height": 3891,
+      "blurHash": "L+P$j*tRWBof*0bHjZfkX8i_ayf6",
+      "color": "#f3f3f3",
+      "alt": "a man riding a skateboard on top of a ramp",
+      "author": "Lance Anderson",
+      "authorUrl": "https://unsplash.com/@lanceanderson?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-riding-a-skateboard-on-top-of-a-ramp-MMOFmcOo99g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DEAD8E",
+          "w": 0.3498
+        },
+        {
+          "hex": "#F2F4F6",
+          "w": 0.3395
+        },
+        {
+          "hex": "#E3DEDC",
+          "w": 0.3107
+        }
+      ]
+    },
+    {
+      "id": "aJEcOKsNlzs",
+      "small": "https://images.unsplash.com/photo-1571439807981-d5cb74394688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571439807981-d5cb74394688?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwbGFzdGVyYm9hcmQlMjBjZWlsaW5nfGVufDF8MHx8fDE3OTIxNzI4NzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3159,
+      "height": 2369,
+      "blurHash": "LAE3C,NK~qkC-:ofxuays.ofs:kC",
+      "color": "#737373",
+      "alt": "the ceiling of a building with a clock on it",
+      "author": "Yves Cedric Schulze",
+      "authorUrl": "https://unsplash.com/@yvced?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/the-ceiling-of-a-building-with-a-clock-on-it-aJEcOKsNlzs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#88898A",
+          "w": 0.7871
+        },
+        {
+          "hex": "#A4A5A5",
+          "w": 0.152
+        },
+        {
+          "hex": "#CFD0D0",
+          "w": 0.0609
+        }
+      ]
+    },
+    {
+      "id": "n0kHn6QomlY",
+      "small": "https://images.unsplash.com/photo-1784719642586-08a6649808b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784719642586-08a6649808b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LBCiHkj;0M%MV{RjWTxu4pSPkWMx",
+      "color": "#594026",
+      "alt": "A box filled with assorted picture frames in a store",
+      "author": "Liana S",
+      "authorUrl": "https://unsplash.com/@cherstve_pechivo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-box-filled-with-assorted-picture-frames-in-a-store-n0kHn6QomlY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5C3B1C",
+          "w": 0.4162
+        },
+        {
+          "hex": "#2E1503",
+          "w": 0.345
+        },
+        {
+          "hex": "#88673B",
+          "w": 0.2388
+        }
+      ]
+    },
+    {
+      "id": "x3rBMsh4JcQ",
+      "small": "https://images.unsplash.com/photo-1768321913976-be576fce5763?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768321913976-be576fce5763?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8448,
+      "height": 6336,
+      "blurHash": "LIEolH~B4o0L4ot7-:x]9FIVt8xu",
+      "color": "#595959",
+      "alt": "Interior construction with exposed pipes and framing",
+      "author": "Olek Buzunov",
+      "authorUrl": "https://unsplash.com/@olek_bznv_photo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/interior-construction-with-exposed-pipes-and-framing-x3rBMsh4JcQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#61584E",
+          "w": 0.4297
+        },
+        {
+          "hex": "#29231C",
+          "w": 0.3083
+        },
+        {
+          "hex": "#9D8C77",
+          "w": 0.262
+        }
+      ]
+    },
+    {
+      "id": "l_GY5aCBRns",
+      "small": "https://images.unsplash.com/photo-1789656435794-ee3f1426d05e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789656435794-ee3f1426d05e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LUI}z}}--:-:rWTKr=xujYtRs:RP",
+      "color": "#d9d9c0",
+      "alt": "A person in a blue checkered shirt holding a framed bright blue print",
+      "author": "Barney Goodman",
+      "authorUrl": "https://unsplash.com/@bgoodpic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-framed-blue-print-l_GY5aCBRns?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D7C5A3",
+          "w": 0.4106
+        },
+        {
+          "hex": "#9E8C7A",
+          "w": 0.3757
+        },
+        {
+          "hex": "#563C40",
+          "w": 0.2137
+        }
+      ]
+    },
+    {
+      "id": "lvsOPL3-suM",
+      "small": "https://images.unsplash.com/photo-1765137102474-422a4f3834e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1765137102474-422a4f3834e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbnRlcmlvciUyMHdhbGwlMjBmcmFtaW5nfGVufDF8MHx8fDE3OTIxNzI4Nzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "L7A,j]0KM|_2%Madax-:9G-;WBae",
+      "color": "#595940",
+      "alt": "A silver frame on a grey wall",
+      "author": "Pict4life",
+      "authorUrl": "https://unsplash.com/@pict4life?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-silver-frame-on-a-grey-wall-lvsOPL3-suM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D5647",
+          "w": 0.7156
+        },
+        {
+          "hex": "#39352C",
+          "w": 0.2844
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "asili-nido",
+  "queries": [
+    "nursery playroom toys",
+    "children playing kindergarten",
+    "daycare classroom colorful"
+  ],
+  "generatedAt": "2026-10-16T21:58:19.853Z",
+  "photos": [
+    {
+      "id": "gDiRwIYAMA8",
+      "small": "https://images.unsplash.com/photo-1545558014-8692077e9b5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1545558014-8692077e9b5c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LINmvRR~t:kD.8t6kVIo?cnhM_kr",
+      "color": "#f3f3f3",
+      "alt": "multicolored learning toys",
+      "author": "Vanessa Bucceri",
+      "authorUrl": "https://unsplash.com/@vbcreative?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/multicolored-learning-toys-gDiRwIYAMA8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E7EAEA",
+          "w": 0.5638
+        },
+        {
+          "hex": "#A48B5E",
+          "w": 0.2241
+        },
+        {
+          "hex": "#CEC287",
+          "w": 0.2122
+        }
+      ]
+    },
+    {
+      "id": "wFV3YFoVLz0",
+      "small": "https://images.unsplash.com/photo-1786667395574-8121327f52c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786667395574-8121327f52c8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LJF=UF=Y9}TH~Vr?R*Ipx]baWAM{",
+      "color": "#c0c0c0",
+      "alt": "Colorful plastic storage bins filled with various educational toys on white classroom shelves",
+      "author": "Far Chinberdiev",
+      "authorUrl": "https://unsplash.com/@fardevio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/classroom-storage-shelves-with-educational-toys-wFV3YFoVLz0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#664641",
+          "w": 0.356
+        },
+        {
+          "hex": "#C5B29D",
+          "w": 0.3288
+        },
+        {
+          "hex": "#947B70",
+          "w": 0.3152
+        }
+      ]
+    },
+    {
+      "id": "X1gTLgWMDKg",
+      "small": "https://images.unsplash.com/photo-1555448049-f8657e9fc8f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1555448049-f8657e9fc8f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5617,
+      "height": 3745,
+      "blurHash": "LeQvaZo~%%Vrs:W@oIs*b|WEV?t6",
+      "color": "#f3f3f3",
+      "alt": "yellow ukulele, cars, emoji plush toy on white surface",
+      "author": "Vanessa Bucceri",
+      "authorUrl": "https://unsplash.com/@vbcreative?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/yellow-ukulele-cars-emoji-plush-toy-on-white-surface-X1gTLgWMDKg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F0F1ED",
+          "w": 0.5957
+        },
+        {
+          "hex": "#F8D735",
+          "w": 0.2223
+        },
+        {
+          "hex": "#D8B974",
+          "w": 0.182
+        }
+      ]
+    },
+    {
+      "id": "7uWoR9rEcEQ",
+      "small": "https://images.unsplash.com/photo-1555448049-8affc0fd79f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1555448049-8affc0fd79f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxudXJzZXJ5JTIwcGxheXJvb20lMjB0b3lzfGVufDF8MHx8fDE3OTIxODc4OTF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5550,
+      "height": 3700,
+      "blurHash": "LUQ[#|Mdu5smxabbWBn%UHogROX9",
+      "color": "#f3f3f3",
+      "alt": "orange plastic toys",
+      "author": "Vanessa Bucceri",
+      "authorUrl": "https://unsplash.com/@vbcreative?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/orange-plastic-toys-7uWoR9rEcEQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECECF1",
+          "w": 0.5639
+        },
+        {
+          "hex": "#F9C2A7",
+          "w": 0.2222
+        },
+        {
+          "hex": "#EE5F16",
+          "w": 0.2139
+        }
+      ]
+    },
+    {
+      "id": "mKbZ3zAdiB4",
+      "small": "https://images.unsplash.com/photo-1627764940620-90393d0e8c34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1627764940620-90393d0e8c34?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3240,
+      "height": 2160,
+      "blurHash": "LKHfLX_3RzE04bo~n:e.o{%Lxbae",
+      "color": "#a6c059",
+      "alt": "A group of children holding hands in a circle on a sunny park lawn",
+      "author": "Jay Chen",
+      "authorUrl": "https://unsplash.com/@forhiskingdom?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/children-holding-hands-in-park-mKbZ3zAdiB4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7B925D",
+          "w": 0.3601
+        },
+        {
+          "hex": "#B1C765",
+          "w": 0.3568
+        },
+        {
+          "hex": "#4F663F",
+          "w": 0.283
+        }
+      ]
+    },
+    {
+      "id": "1w20Cysy1cg",
+      "small": "https://images.unsplash.com/photo-1578349035260-9f3d4042f1f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1578349035260-9f3d4042f1f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4501,
+      "height": 3000,
+      "blurHash": "LFHLPNx.XlR4}v%2xai]yTbEbcR*",
+      "color": "#8c8c8c",
+      "alt": "a group of children playing with toys on the floor",
+      "author": "BBC Creative",
+      "authorUrl": "https://unsplash.com/@bethbapchurch?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-children-playing-with-toys-on-the-floor-1w20Cysy1cg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7D7572",
+          "w": 0.4456
+        },
+        {
+          "hex": "#A39C92",
+          "w": 0.3757
+        },
+        {
+          "hex": "#5E2F51",
+          "w": 0.1787
+        }
+      ]
+    },
+    {
+      "id": "TciuHvwoK0k",
+      "small": "https://images.unsplash.com/photo-1599376672737-bd66af54c8f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1599376672737-bd66af54c8f5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LGFr;Qxt9t%10J-=%NX8DPRkR6V[",
+      "color": "#404040",
+      "alt": "2 boys sitting on red and black ride on toy car",
+      "author": "Alexandr Podvalny",
+      "authorUrl": "https://unsplash.com/@freestockpro?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/2-boys-sitting-on-red-and-black-ride-on-toy-car-TciuHvwoK0k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#908B7F",
+          "w": 0.3527
+        },
+        {
+          "hex": "#5A5D50",
+          "w": 0.3323
+        },
+        {
+          "hex": "#C5C8C3",
+          "w": 0.315
+        }
+      ]
+    },
+    {
+      "id": "SAHBl2UpXco",
+      "small": "https://images.unsplash.com/photo-1469406396016-013bfae5d83e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1469406396016-013bfae5d83e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaGlsZHJlbiUyMHBsYXlpbmclMjBraW5kZXJnYXJ0ZW58ZW58MXwwfHx8MTc5MjE4Nzg5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5168,
+      "height": 3448,
+      "blurHash": "LVHLF:-.4.Mxl8E2RPMy~Dr^InNY",
+      "color": "#f3f3f3",
+      "alt": "boy in blue shirt screaming near boy in green crew-neck shirt",
+      "author": "Ashton Bingham",
+      "authorUrl": "https://unsplash.com/@ashtonbingham?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/boy-in-blue-shirt-screaming-near-boy-in-green-crew-neck-shirt-SAHBl2UpXco?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B48F6F",
+          "w": 0.383
+        },
+        {
+          "hex": "#4C6233",
+          "w": 0.3329
+        },
+        {
+          "hex": "#131A1B",
+          "w": 0.2841
+        }
+      ]
+    },
+    {
+      "id": "78Ae6N7rNvI",
+      "small": "https://images.unsplash.com/photo-1567746455504-cb3213f8f5b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1567746455504-cb3213f8f5b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3000,
+      "height": 2000,
+      "blurHash": "LHJHszInXB%f0gM{%2M|L~-oRjnO",
+      "color": "#8c7359",
+      "alt": "nursery room interior view",
+      "author": "Gautam Arora",
+      "authorUrl": "https://unsplash.com/@gautamarora1991?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/nursery-room-interior-view-78Ae6N7rNvI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBAA7C",
+          "w": 0.4001
+        },
+        {
+          "hex": "#918666",
+          "w": 0.3701
+        },
+        {
+          "hex": "#D2CFBF",
+          "w": 0.2298
+        }
+      ]
+    },
+    {
+      "id": "OVDtgUhUPBY",
+      "small": "https://images.unsplash.com/photo-1564429238817-393bd4286b2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1564429238817-393bd4286b2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LLJj#cMf.9M{tA4T-oRP_4%2IVr=",
+      "color": "#f3f3f3",
+      "alt": "brown letters on table",
+      "author": "Gautam Arora",
+      "authorUrl": "https://unsplash.com/@gautamarora1991?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-letters-on-table-OVDtgUhUPBY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#815839",
+          "w": 0.3678
+        },
+        {
+          "hex": "#B59375",
+          "w": 0.3437
+        },
+        {
+          "hex": "#E3DBD0",
+          "w": 0.2885
+        }
+      ]
+    },
+    {
+      "id": "4UFIg9htJgE",
+      "small": "https://images.unsplash.com/photo-1761208663763-c4d30657c910?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761208663763-c4d30657c910?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LuLN[d%g%Gt9~ojEWaWAbeM|WAWA",
+      "color": "#f3f3f3",
+      "alt": "Children playing with toys in a bright room",
+      "author": "Rewired Digital",
+      "authorUrl": "https://unsplash.com/@rewired41?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/children-playing-with-toys-in-a-bright-room-4UFIg9htJgE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E1E6E9",
+          "w": 0.5414
+        },
+        {
+          "hex": "#5568D6",
+          "w": 0.2529
+        },
+        {
+          "hex": "#A0979A",
+          "w": 0.2057
+        }
+      ]
+    },
+    {
+      "id": "7Lbw1Dxwj3Y",
+      "small": "https://images.unsplash.com/photo-1763310225230-6e15b125935a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763310225230-6e15b125935a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkYXljYXJlJTIwY2xhc3Nyb29tJTIwY29sb3JmdWx8ZW58MXwwfHx8MTc5MjE4Nzg5OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5994,
+      "height": 3994,
+      "blurHash": "LLH_GQ~W_3_3JBIp?Hxai^oLbIRj",
+      "color": "#c0a6a6",
+      "alt": "Children's playroom with small tables and chairs",
+      "author": "Camila Mofsovich",
+      "authorUrl": "https://unsplash.com/@camila_mof?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/childrens-playroom-with-small-tables-and-chairs-7Lbw1Dxwj3Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BA9C90",
+          "w": 0.4442
+        },
+        {
+          "hex": "#91796D",
+          "w": 0.3017
+        },
+        {
+          "hex": "#6A5243",
+          "w": 0.2542
+        }
+      ]
+    }
+  ]
+}

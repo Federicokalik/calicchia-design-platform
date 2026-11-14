@@ -1,0 +1,254 @@
+{
+  "slug": "autolavaggi",
+  "queries": [
+    "car wash foam",
+    "car wash brushes",
+    "car wash bay"
+  ],
+  "generatedAt": "2026-10-16T18:50:48.481Z",
+  "photos": [
+    {
+      "id": "Ng3xrviPrhk",
+      "small": "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "LpJRN[V?~qM{xZs.t7tR%M%MWBof",
+      "color": "#f3f3f3",
+      "alt": "grayscale photo of black car",
+      "author": "Clément M.",
+      "authorUrl": "https://unsplash.com/@cmreflections?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grayscale-photo-of-black-car-Ng3xrviPrhk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD4D6",
+          "w": 0.3572
+        },
+        {
+          "hex": "#978B8B",
+          "w": 0.3376
+        },
+        {
+          "hex": "#5B5050",
+          "w": 0.3053
+        }
+      ]
+    },
+    {
+      "id": "9iH_6JO7Ufs",
+      "small": "https://images.unsplash.com/photo-1605164598708-25701594473e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1605164598708-25701594473e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5840,
+      "height": 3893,
+      "blurHash": "LOD9u8-ovysRbwjtIoRj00NGOtR-",
+      "color": "#F4CA49",
+      "alt": "a car is covered in snow in a garage",
+      "author": "Zulfahmi Khani",
+      "authorUrl": "https://unsplash.com/@fahmivamiola?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-car-is-covered-in-snow-in-a-garage-9iH_6JO7Ufs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#49494B",
+          "w": 0.3978
+        },
+        {
+          "hex": "#807671",
+          "w": 0.3251
+        },
+        {
+          "hex": "#18191B",
+          "w": 0.2772
+        }
+      ]
+    },
+    {
+      "id": "sh_7sFEFICI",
+      "small": "https://images.unsplash.com/photo-1575844611398-2a68400b437c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1575844611398-2a68400b437c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LaHn{Q8_IoxaJURkt6js00t7ozoz",
+      "color": "#d9d9d9",
+      "alt": "white Ford Mustang coupe",
+      "author": "Jan Kopřiva",
+      "authorUrl": "https://unsplash.com/@jxk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ford-mustang-coupe-sh_7sFEFICI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1CFCA",
+          "w": 0.4173
+        },
+        {
+          "hex": "#A68E7C",
+          "w": 0.3217
+        },
+        {
+          "hex": "#140E0A",
+          "w": 0.2609
+        }
+      ]
+    },
+    {
+      "id": "phP5Qa0CauQ",
+      "small": "https://images.unsplash.com/photo-1694678505383-676d78ea3b96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1694678505383-676d78ea3b96?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjB3YXNoJTIwZm9hbXxlbnwxfDB8fHwxNzkyMTc2NjQyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5568,
+      "height": 3712,
+      "blurHash": "LYECwwIQbz$|xuRjj]j=D%afxZNG",
+      "color": "#404040",
+      "alt": "a man washing a car with a sponge",
+      "author": "Nik",
+      "authorUrl": "https://unsplash.com/@helloimnik?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-washing-a-car-with-a-sponge-phP5Qa0CauQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#888DB3",
+          "w": 0.4134
+        },
+        {
+          "hex": "#5D5F63",
+          "w": 0.399
+        },
+        {
+          "hex": "#262626",
+          "w": 0.1876
+        }
+      ]
+    },
+    {
+      "id": "9gvFjMVS9A0",
+      "small": "https://images.unsplash.com/photo-1605164599901-f8a1464a2c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1605164599901-f8a1464a2c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LPAnfpM{DNV@xukDR%V?8^t6x^ae",
+      "color": "#59738c",
+      "alt": "water fountain in the middle of the road",
+      "author": "Zulfahmi Khani",
+      "authorUrl": "https://unsplash.com/@fahmivamiola?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/water-fountain-in-the-middle-of-the-road-9gvFjMVS9A0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D7D97",
+          "w": 0.475
+        },
+        {
+          "hex": "#324B5F",
+          "w": 0.2759
+        },
+        {
+          "hex": "#091A28",
+          "w": 0.2491
+        }
+      ]
+    },
+    {
+      "id": "dTsSLALhjoc",
+      "small": "https://images.unsplash.com/photo-1641494639075-5571f7ef486b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1641494639075-5571f7ef486b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LTDb.]-VRjD%-pxaaeV@0KWoso%M",
+      "color": "#262626",
+      "alt": "a close up of an umbrella",
+      "author": "Brian Lundquist",
+      "authorUrl": "https://unsplash.com/@bwl667?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-an-umbrella-dTsSLALhjoc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1E1D1D",
+          "w": 0.5037
+        },
+        {
+          "hex": "#514849",
+          "w": 0.3274
+        },
+        {
+          "hex": "#A78588",
+          "w": 0.1689
+        }
+      ]
+    },
+    {
+      "id": "bhRTtuNTHCE",
+      "small": "https://images.unsplash.com/photo-1641494639501-b0bd9fb90ecc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1641494639501-b0bd9fb90ecc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LQCO|70|-pso~CEL%2spozV@o}ni",
+      "color": "#262626",
+      "alt": "a close up of a cake",
+      "author": "Brian Lundquist",
+      "authorUrl": "https://unsplash.com/@bwl667?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-cake-bhRTtuNTHCE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070202",
+          "w": 0.4962
+        },
+        {
+          "hex": "#3A2625",
+          "w": 0.2777
+        },
+        {
+          "hex": "#985552",
+          "w": 0.226
+        }
+      ]
+    },
+    {
+      "id": "_YU2u99cwPk",
+      "small": "https://images.unsplash.com/photo-1505761283622-7fe50142c97f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1505761283622-7fe50142c97f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxjYXIlMjB3YXNoJTIwYnJ1c2hlc3xlbnwxfDB8fHwxNzkyMTc2NjQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4753,
+      "height": 3161,
+      "blurHash": "LUINzPxu8_t8~BofxuoeTce.oyf6",
+      "color": "#c0c0d9",
+      "alt": "white Ford vehicle on car wash shop",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ford-vehicle-on-car-wash-shop-_YU2u99cwPk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C9C5CF",
+          "w": 0.4558
+        },
+        {
+          "hex": "#3E293D",
+          "w": 0.281
+        },
+        {
+          "hex": "#937A8A",
+          "w": 0.2632
+        }
+      ]
+    },
+    {
+      "id": "QihJ1Rd8XnY",
+      "small": "https://images.unsplash.com/photo-1760827797819-4361cd5cd353?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjB3YXNoJTIwYmF5fGVufDF8MHx8fDE3OTIxNzY2NDh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1760827797819-4361cd5cd353?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjB3YXNoJTIwYmF5fGVufDF8MHx8fDE3OTIxNzY2NDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LRCGS*M{4n%M~qM{Dixuofj[RjWB",
+      "color": "#262626",
+      "alt": "Man washing car in a dimly lit garage",
+      "author": "Andrew Lvov",
+      "authorUrl": "https://unsplash.com/@lvovandrewph?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-washing-car-in-a-dimly-lit-garage-QihJ1Rd8XnY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#342E2D",
+          "w": 0.4485
+        },
+        {
+          "hex": "#676460",
+          "w": 0.2784
+        },
+        {
+          "hex": "#BABCBB",
+          "w": 0.2732
+        }
+      ]
+    }
+  ]
+}

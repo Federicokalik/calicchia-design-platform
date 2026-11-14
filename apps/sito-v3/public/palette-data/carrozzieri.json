@@ -1,0 +1,227 @@
+{
+  "slug": "carrozzieri",
+  "queries": [
+    "auto body shop",
+    "car paint booth",
+    "car bumper repair"
+  ],
+  "generatedAt": "2026-10-16T18:50:09.486Z",
+  "photos": [
+    {
+      "id": "8t6tk7LYLrE",
+      "small": "https://images.unsplash.com/photo-1727893119356-1702fe921cf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1727893119356-1702fe921cf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8632,
+      "height": 4356,
+      "blurHash": "LGJkl+_34oi^IUMx-;kB~pw^t8X8",
+      "color": "#c0c0c0",
+      "alt": "Mechanics working on cars in a bright, spacious automotive repair workshop",
+      "author": "Mehmet Talha Onuk",
+      "authorUrl": "https://unsplash.com/@mtonuk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/mechanics-working-in-automotive-repair-workshop-8t6tk7LYLrE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CDCDCF",
+          "w": 0.5218
+        },
+        {
+          "hex": "#A7A7AB",
+          "w": 0.2889
+        },
+        {
+          "hex": "#7D7B84",
+          "w": 0.1893
+        }
+      ]
+    },
+    {
+      "id": "S0cqn0mZU0E",
+      "small": "https://images.unsplash.com/photo-1591278169757-deac26e49555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1591278169757-deac26e49555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LGFYlWM_01Rj_34oxt?GIUWAxuM|",
+      "color": "#262626",
+      "alt": "white vintage car in garage",
+      "author": "Egor Vikhrev",
+      "authorUrl": "https://unsplash.com/@egor_vikhrev?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-vintage-car-in-garage-S0cqn0mZU0E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#90897A",
+          "w": 0.3968
+        },
+        {
+          "hex": "#1F1C17",
+          "w": 0.3041
+        },
+        {
+          "hex": "#CCC5B4",
+          "w": 0.2991
+        }
+      ]
+    },
+    {
+      "id": "VdXnpwrp1qc",
+      "small": "https://images.unsplash.com/photo-1767681092416-bccf9410bda4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1767681092416-bccf9410bda4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKG8}{?bD$%2_Nx]IUM|$ytRX9ah",
+      "color": "#262626",
+      "alt": "Cars being repaired in a workshop",
+      "author": "Winston Chen",
+      "authorUrl": "https://unsplash.com/@winstonchen?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cars-being-repaired-in-a-workshop-VdXnpwrp1qc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#959595",
+          "w": 0.3877
+        },
+        {
+          "hex": "#63595A",
+          "w": 0.3119
+        },
+        {
+          "hex": "#CBCCCC",
+          "w": 0.3004
+        }
+      ]
+    },
+    {
+      "id": "5M-72czGFl4",
+      "small": "https://images.unsplash.com/photo-1727893294198-e85137574f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1727893294198-e85137574f5b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhdXRvJTIwYm9keSUyMHNob3B8ZW58MXwwfHx8MTc5MjE3NjYwNXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5731,
+      "height": 3821,
+      "blurHash": "LAE:0m_300rqDhx^x^W;_M%MRPtR",
+      "color": "#737373",
+      "alt": "A warehouse filled with lots of cars and trucks",
+      "author": "Mehmet Talha Onuk",
+      "authorUrl": "https://unsplash.com/@mtonuk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-warehouse-filled-with-lots-of-cars-and-trucks-5M-72czGFl4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#777572",
+          "w": 0.4374
+        },
+        {
+          "hex": "#A3A6A7",
+          "w": 0.2866
+        },
+        {
+          "hex": "#4D4341",
+          "w": 0.276
+        }
+      ]
+    },
+    {
+      "id": "kE__1vnDxg4",
+      "small": "https://images.unsplash.com/photo-1673187139211-1e7ec3dd60ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1673187139211-1e7ec3dd60ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJG7}Z[oM}r=Y,,utRo0_3X9J6S5",
+      "color": "#262626",
+      "alt": "a red car is on a flatbed tow truck",
+      "author": "Usman Malik",
+      "authorUrl": "https://unsplash.com/@usmanbim94?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-red-car-is-on-a-flatbed-tow-truck-kE__1vnDxg4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A2414E",
+          "w": 0.3979
+        },
+        {
+          "hex": "#707079",
+          "w": 0.3088
+        },
+        {
+          "hex": "#372C32",
+          "w": 0.2934
+        }
+      ]
+    },
+    {
+      "id": "CSkriQWeTVs",
+      "small": "https://images.unsplash.com/photo-1597328290883-50c5787b7c7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1597328290883-50c5787b7c7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LABg0s#6DN-q.9IURjt84.ENI;Rj",
+      "color": "#262626",
+      "alt": "A damaged silver car with a crushed hood and broken headlight assembly",
+      "author": "Clark Van Der Beken",
+      "authorUrl": "https://unsplash.com/@snapsbyclark?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/damaged-silver-car-with-crushed-hood-CSkriQWeTVs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#42424B",
+          "w": 0.35
+        },
+        {
+          "hex": "#74737A",
+          "w": 0.3343
+        },
+        {
+          "hex": "#101016",
+          "w": 0.3157
+        }
+      ]
+    },
+    {
+      "id": "c-ebQX7w9FI",
+      "small": "https://images.unsplash.com/photo-1652987086612-d948b775d358?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1652987086612-d948b775d358?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LTHUkPOr0Kic?HR%IU-;kW$%RPkX",
+      "color": "#0c2626",
+      "alt": "a man waxing a car in a garage",
+      "author": "David Glessner | Photographer & Director",
+      "authorUrl": "https://unsplash.com/@davidglessnerworks?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-waxing-a-car-in-a-garage-c-ebQX7w9FI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8D1D5",
+          "w": 0.3496
+        },
+        {
+          "hex": "#6F4848",
+          "w": 0.3367
+        },
+        {
+          "hex": "#AD8480",
+          "w": 0.3137
+        }
+      ]
+    },
+    {
+      "id": "fi9zsbf3f5Y",
+      "small": "https://images.unsplash.com/photo-1550565076-b2371ea1a324?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1550565076-b2371ea1a324?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBidW1wZXIlMjByZXBhaXJ8ZW58MXwwfHx8MTc5MjE3NjYwN3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4368,
+      "height": 2912,
+      "blurHash": "LVB|W=%gIAM{_N%MIUWB%MWBRjt7",
+      "color": "#262626",
+      "alt": "a close up of a black car with rain drops on it",
+      "author": "Tuomas Nylund",
+      "authorUrl": "https://unsplash.com/@tuomasnylund?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-close-up-of-a-black-car-with-rain-drops-on-it-fi9zsbf3f5Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#313339",
+          "w": 0.4015
+        },
+        {
+          "hex": "#131419",
+          "w": 0.3193
+        },
+        {
+          "hex": "#B8BFC6",
+          "w": 0.2793
+        }
+      ]
+    }
+  ]
+}

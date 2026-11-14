@@ -1,0 +1,227 @@
+{
+  "slug": "termoidraulici",
+  "queries": [
+    "underfloor heating pipes",
+    "radiator valves close up",
+    "copper pipe fittings"
+  ],
+  "generatedAt": "2026-10-16T17:47:22.808Z",
+  "photos": [
+    {
+      "id": "fu3iLPBe964",
+      "small": "https://images.unsplash.com/photo-1667491295131-c6ccecd35f65?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1667491295131-c6ccecd35f65?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LWJRN=sj%0XA_Mn#WCf+r;V@M|Ws",
+      "color": "#c0c0a6",
+      "alt": "a group of colorful wires",
+      "author": "Steffen Lemmerzahl",
+      "authorUrl": "https://unsplash.com/@steffen_l?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-group-of-colorful-wires-fu3iLPBe964?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CBC9C1",
+          "w": 0.4322
+        },
+        {
+          "hex": "#A49F9A",
+          "w": 0.3398
+        },
+        {
+          "hex": "#7C7478",
+          "w": 0.228
+        }
+      ]
+    },
+    {
+      "id": "TR6GDzFR0WE",
+      "small": "https://images.unsplash.com/photo-1783419036401-1c01c1039267?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783419036401-1c01c1039267?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6333,
+      "height": 4222,
+      "blurHash": "LMHek6_NSz%L-;jGxaIUW;s:%2Rj",
+      "color": "#595959",
+      "alt": "Hands holding a smartphone displaying a mobile application",
+      "author": "Aleksandr Lyaptsev",
+      "authorUrl": "https://unsplash.com/@lyaptseviridi?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hands-holding-a-smartphone-displaying-a-mobile-application-TR6GDzFR0WE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C4C5C2",
+          "w": 0.347
+        },
+        {
+          "hex": "#7D7773",
+          "w": 0.3431
+        },
+        {
+          "hex": "#5D5653",
+          "w": 0.3099
+        }
+      ]
+    },
+    {
+      "id": "JnEEVYuKWbw",
+      "small": "https://images.unsplash.com/photo-1785934753268-b44b9be378af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785934753268-b44b9be378af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4939,
+      "height": 3092,
+      "blurHash": "LBBydB~V%M$L?c^*xas8xuozxZWA",
+      "color": "#260c0c",
+      "alt": "A cross-section diagram of a Roman house with a hypocaust heating system",
+      "author": "David Billington",
+      "authorUrl": "https://unsplash.com/@davelo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/roman-house-cross-section-diagram-JnEEVYuKWbw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#55371C",
+          "w": 0.4405
+        },
+        {
+          "hex": "#785B36",
+          "w": 0.3117
+        },
+        {
+          "hex": "#31180A",
+          "w": 0.2479
+        }
+      ]
+    },
+    {
+      "id": "MUFQ8Nh05IE",
+      "small": "https://images.unsplash.com/photo-1614409938983-65f12e272ee4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1614409938983-65f12e272ee4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx1bmRlcmZsb29yJTIwaGVhdGluZyUyMHBpcGVzfGVufDF8MHx8fDE3OTIxNzI4MzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4000,
+      "blurHash": "LPL;,9og00j[RjRkfjj[9Fogt6j?",
+      "color": "#c0c0c0",
+      "alt": "white blue red and black textile",
+      "author": "Angeles Pérez",
+      "authorUrl": "https://unsplash.com/@angieprz21?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-blue-red-and-black-textile-MUFQ8Nh05IE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C7CCD1",
+          "w": 0.3575
+        },
+        {
+          "hex": "#B3B8BE",
+          "w": 0.3545
+        },
+        {
+          "hex": "#DDE2E4",
+          "w": 0.288
+        }
+      ]
+    },
+    {
+      "id": "Uwq_F5G4yOo",
+      "small": "https://images.unsplash.com/photo-1584774354932-62ceb99e6053?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584774354932-62ceb99e6053?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "LI9Ziuxt0fE1-UWVIps:IoRkxa%2",
+      "color": "#260c0c",
+      "alt": "white and brown spiral light",
+      "author": "Ra Dragon",
+      "authorUrl": "https://unsplash.com/@radragon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-spiral-light-Uwq_F5G4yOo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070303",
+          "w": 0.6347
+        },
+        {
+          "hex": "#3E1C11",
+          "w": 0.2327
+        },
+        {
+          "hex": "#865744",
+          "w": 0.1327
+        }
+      ]
+    },
+    {
+      "id": "2jftyBtoqzQ",
+      "small": "https://images.unsplash.com/photo-1589870446935-ce8bc41685b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1589870446935-ce8bc41685b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LjPQNut7o~ae~Vj[Rjj[W@WBM_kC",
+      "color": "#f3f3f3",
+      "alt": "gold and silver round coins",
+      "author": "Vladyslav Cherkasenko",
+      "authorUrl": "https://unsplash.com/@vl_cherkasenko?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gold-and-silver-round-coins-2jftyBtoqzQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F3F6FA",
+          "w": 0.5561
+        },
+        {
+          "hex": "#BFCCE6",
+          "w": 0.3772
+        },
+        {
+          "hex": "#A89F92",
+          "w": 0.0667
+        }
+      ]
+    },
+    {
+      "id": "ONZIRho_-TM",
+      "small": "https://images.unsplash.com/photo-1711571603482-6023e3721132?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711571603482-6023e3721132?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6043,
+      "height": 4062,
+      "blurHash": "LA8zl}Me%EtS~kIA$zxu%dITN3xs",
+      "color": "#8c8c8c",
+      "alt": "a bunch of blue bins filled with lots of copper",
+      "author": "Guille B",
+      "authorUrl": "https://unsplash.com/@guilleb?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bunch-of-blue-bins-filled-with-lots-of-copper-ONZIRho_-TM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C0A88",
+          "w": 0.3918
+        },
+        {
+          "hex": "#0C0349",
+          "w": 0.3565
+        },
+        {
+          "hex": "#858185",
+          "w": 0.2518
+        }
+      ]
+    },
+    {
+      "id": "h5If_bg7898",
+      "small": "https://images.unsplash.com/photo-1769376695235-d3253548a5d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1769376695235-d3253548a5d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3BwZXIlMjBwaXBlJTIwZml0dGluZ3N8ZW58MXwwfHx8MTc5MjE3Mjg0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LKB}XhoI3sX8,.enVsrXPpnOb^nh",
+      "color": "#26a6c0",
+      "alt": "Copper pipes forming a cross shape on blue background",
+      "author": "Zach M",
+      "authorUrl": "https://unsplash.com/@zachmmalin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/copper-pipes-forming-a-cross-shape-on-blue-background-h5If_bg7898?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#80736F",
+          "w": 0.423
+        },
+        {
+          "hex": "#23A6BB",
+          "w": 0.3226
+        },
+        {
+          "hex": "#A49890",
+          "w": 0.2544
+        }
+      ]
+    }
+  ]
+}

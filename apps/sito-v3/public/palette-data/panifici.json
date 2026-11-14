@@ -1,0 +1,335 @@
+{
+  "slug": "panifici",
+  "queries": [
+    "sourdough bread loaves",
+    "bakery bread display",
+    "hands kneading dough"
+  ],
+  "generatedAt": "2026-10-16T19:52:57.954Z",
+  "photos": [
+    {
+      "id": "USg-3Z9T4uY",
+      "small": "https://images.unsplash.com/photo-1586765501019-cbe3973ef8fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1586765501019-cbe3973ef8fa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5056,
+      "height": 3379,
+      "blurHash": "LLK0QUkCsjjF~Uxtf5jE%Lt7WBae",
+      "color": "#c08c59",
+      "alt": "bread on brown wooden table",
+      "author": "Tommaso Urli",
+      "authorUrl": "https://unsplash.com/@tunnuz?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/bread-on-brown-wooden-table-USg-3Z9T4uY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ECBD96",
+          "w": 0.3514
+        },
+        {
+          "hex": "#7E5334",
+          "w": 0.3285
+        },
+        {
+          "hex": "#B7845A",
+          "w": 0.32
+        }
+      ]
+    },
+    {
+      "id": "HJ3tXZpY1Qw",
+      "small": "https://images.unsplash.com/photo-1547978059-2639fd612c66?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1547978059-2639fd612c66?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3375,
+      "blurHash": "LUIqDZn~RkIA~VM|R*IUEgNGt7R+",
+      "color": "#594026",
+      "alt": "baked bread",
+      "author": "DDP",
+      "authorUrl": "https://unsplash.com/@moino007?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/baked-bread-HJ3tXZpY1Qw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BC8861",
+          "w": 0.3791
+        },
+        {
+          "hex": "#8A512A",
+          "w": 0.357
+        },
+        {
+          "hex": "#E7D2BE",
+          "w": 0.2639
+        }
+      ]
+    },
+    {
+      "id": "bIyRC9uuPt0",
+      "small": "https://images.unsplash.com/photo-1594403758808-58d9e13cff40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1594403758808-58d9e13cff40?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4704,
+      "height": 3136,
+      "blurHash": "LmL3[VVr%2aK?wE1R+aex]xtV@W=",
+      "color": "#d9d9d9",
+      "alt": "brown and white cookies on white surface",
+      "author": "Dan Burton",
+      "authorUrl": "https://unsplash.com/@dan__burton?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-white-cookies-on-white-surface-bIyRC9uuPt0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD4CE",
+          "w": 0.4395
+        },
+        {
+          "hex": "#614021",
+          "w": 0.2819
+        },
+        {
+          "hex": "#D29C74",
+          "w": 0.2786
+        }
+      ]
+    },
+    {
+      "id": "BhhAN6b4ffk",
+      "small": "https://images.unsplash.com/photo-1686578219916-33196efbebed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1686578219916-33196efbebed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzb3VyZG91Z2glMjBicmVhZCUyMGxvYXZlc3xlbnwxfDB8fHwxNzkyMTgwMzcyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LPDRsL$zxZoz9uR+RkWB0#xtxZni",
+      "color": "#26260c",
+      "alt": "a loaf of bread sitting on top of a piece of paper",
+      "author": "Doğu Tuncer",
+      "authorUrl": "https://unsplash.com/@tuncerdogu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-loaf-of-bread-sitting-on-top-of-a-piece-of-paper-BhhAN6b4ffk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#13130F",
+          "w": 0.5465
+        },
+        {
+          "hex": "#CA9864",
+          "w": 0.2356
+        },
+        {
+          "hex": "#4E280E",
+          "w": 0.2179
+        }
+      ]
+    },
+    {
+      "id": "go3DT3PpIw4",
+      "small": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1568254183919-78a4f43a2877?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4271,
+      "height": 2851,
+      "blurHash": "LJHm[c-80z%MyEI=sloeEMt7n$bY",
+      "color": "#260c0c",
+      "alt": "breads in display shelf",
+      "author": "Yeh Xintong",
+      "authorUrl": "https://unsplash.com/@blsnki?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/breads-in-display-shelf-go3DT3PpIw4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B27750",
+          "w": 0.3805
+        },
+        {
+          "hex": "#D9AA85",
+          "w": 0.3323
+        },
+        {
+          "hex": "#7B412A",
+          "w": 0.2872
+        }
+      ]
+    },
+    {
+      "id": "RndRFJ1v1kk",
+      "small": "https://images.unsplash.com/photo-1587241321921-91a834d6d191?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1587241321921-91a834d6d191?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LNEdx5Rj10Rjn4t7I;s:EkRj-URk",
+      "color": "#262626",
+      "alt": "man in white dress shirt standing in front of brown wooden shelf",
+      "author": "Andy Li",
+      "authorUrl": "https://unsplash.com/@andylid0?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-white-dress-shirt-standing-in-front-of-brown-wooden-shelf-RndRFJ1v1kk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#3B231B",
+          "w": 0.572
+        },
+        {
+          "hex": "#7A4027",
+          "w": 0.2301
+        },
+        {
+          "hex": "#B26945",
+          "w": 0.198
+        }
+      ]
+    },
+    {
+      "id": "2-U0A2tNYhM",
+      "small": "https://images.unsplash.com/photo-1579697096985-41fe1430e5df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1579697096985-41fe1430e5df?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5806,
+      "height": 3863,
+      "blurHash": "L6B2_c0zn$?a%25R9a%19uWo-UE2",
+      "color": "#262626",
+      "alt": "grilled meat on black grill",
+      "author": "Angelo Pantazis",
+      "authorUrl": "https://unsplash.com/@angelopantazis?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grilled-meat-on-black-grill-2-U0A2tNYhM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1B1714",
+          "w": 0.4357
+        },
+        {
+          "hex": "#4A3224",
+          "w": 0.3325
+        },
+        {
+          "hex": "#815841",
+          "w": 0.2318
+        }
+      ]
+    },
+    {
+      "id": "IYjXGUpJH74",
+      "small": "https://images.unsplash.com/photo-1711672284661-bd70e38f31b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711672284661-bd70e38f31b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiYWtlcnklMjBicmVhZCUyMGRpc3BsYXl8ZW58MXwwfHx8MTc5MjE4MDM3NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LXIO5[D%jvS4_NIAbINGx^Rjadof",
+      "color": "#c0c0c0",
+      "alt": "a bakery filled with lots of baked goods",
+      "author": "Elisha Terada",
+      "authorUrl": "https://unsplash.com/@elishaterada?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-bakery-filled-with-lots-of-baked-goods-IYjXGUpJH74?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9E9180",
+          "w": 0.3708
+        },
+        {
+          "hex": "#7B5834",
+          "w": 0.3405
+        },
+        {
+          "hex": "#D1C9C2",
+          "w": 0.2888
+        }
+      ]
+    },
+    {
+      "id": "Hx7xdwhj2AY",
+      "small": "https://images.unsplash.com/flagged/photo-1561668038-2742fcef75d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/flagged/photo-1561668038-2742fcef75d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4906,
+      "height": 3271,
+      "blurHash": "LGJas30fF1v~4:tmM{xaFL-pVXa{",
+      "color": "#c0c0c0",
+      "alt": "person standing and making dough",
+      "author": "Theme Photos",
+      "authorUrl": "https://unsplash.com/@themephotos?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-standing-and-making-dough-Hx7xdwhj2AY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8A817E",
+          "w": 0.3557
+        },
+        {
+          "hex": "#B5A59E",
+          "w": 0.3312
+        },
+        {
+          "hex": "#D1C8C2",
+          "w": 0.3131
+        }
+      ]
+    },
+    {
+      "id": "uOKmuYb9H_Q",
+      "small": "https://images.unsplash.com/photo-1666356011542-0acf82fb16a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1666356011542-0acf82fb16a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LBCYzBIr0M$$eoi_jFxu0Moe?FE3",
+      "color": "#260c0c",
+      "alt": "hands holding a pile of dirt",
+      "author": "Ian Talmacs",
+      "authorUrl": "https://unsplash.com/@iantalmacs?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hands-holding-a-pile-of-dirt-uOKmuYb9H_Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4A3626",
+          "w": 0.3454
+        },
+        {
+          "hex": "#7C634E",
+          "w": 0.3312
+        },
+        {
+          "hex": "#211205",
+          "w": 0.3234
+        }
+      ]
+    },
+    {
+      "id": "8Fled6qer2Q",
+      "small": "https://images.unsplash.com/photo-1652283319196-9288add2d60c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1652283319196-9288add2d60c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7200,
+      "height": 5760,
+      "blurHash": "LMFE_q0LR-xZ4:oeIo%LIU?HV@Ip",
+      "color": "#402626",
+      "alt": "hands holding a rock",
+      "author": "Skyler Ewing",
+      "authorUrl": "https://unsplash.com/@skylerewing?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hands-holding-a-rock-8Fled6qer2Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4B3526",
+          "w": 0.3636
+        },
+        {
+          "hex": "#8C6F5A",
+          "w": 0.3288
+        },
+        {
+          "hex": "#C8AF97",
+          "w": 0.3076
+        }
+      ]
+    },
+    {
+      "id": "2fQam6yRm04",
+      "small": "https://images.unsplash.com/photo-1620567845971-d4d280176e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1620567845971-d4d280176e68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxoYW5kcyUyMGtuZWFkaW5nJTIwZG91Z2h8ZW58MXwwfHx8MTc5MjE4MDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LhMGkuVsxaWW?^S2Nat7oztQnOaf",
+      "color": "#d9d9d9",
+      "alt": "persons hand on white textile",
+      "author": "Ivan Rohovchenko",
+      "authorUrl": "https://unsplash.com/@ivrn?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/persons-hand-on-white-textile-2fQam6yRm04?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD7CD",
+          "w": 0.4583
+        },
+        {
+          "hex": "#CE9F8D",
+          "w": 0.3144
+        },
+        {
+          "hex": "#A86D5D",
+          "w": 0.2273
+        }
+      ]
+    }
+  ]
+}

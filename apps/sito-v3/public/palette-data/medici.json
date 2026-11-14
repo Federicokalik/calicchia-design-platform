@@ -1,0 +1,335 @@
+{
+  "slug": "medici",
+  "queries": [
+    "medical consultation room",
+    "clinic waiting room",
+    "stethoscope on desk"
+  ],
+  "generatedAt": "2026-10-12T19:51:32.564Z",
+  "photos": [
+    {
+      "id": "XjpH81N6rDc",
+      "small": "https://images.unsplash.com/photo-1758691463198-dc663b8a64e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463198-dc663b8a64e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LVGu%YOEMxR*0Kn$ogozD%oJWCof",
+      "color": "#a6a6a6",
+      "alt": "Doctor writing notes while patient sits opposite",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-writing-notes-while-patient-sits-opposite-XjpH81N6rDc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A09990",
+          "w": 0.4233
+        },
+        {
+          "hex": "#4F5B57",
+          "w": 0.3267
+        },
+        {
+          "hex": "#C9CDC9",
+          "w": 0.25
+        }
+      ]
+    },
+    {
+      "id": "IDM3n0LfNCY",
+      "small": "https://images.unsplash.com/photo-1758691461935-202e2ef6b69f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691461935-202e2ef6b69f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LNIFG3H?RP$j00NHbbxaDibIM{WA",
+      "color": "#a6c0c0",
+      "alt": "Doctor talking to patient in an office",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-talking-to-patient-in-an-office-IDM3n0LfNCY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADB2AD",
+          "w": 0.4147
+        },
+        {
+          "hex": "#CDD7D5",
+          "w": 0.3469
+        },
+        {
+          "hex": "#32423E",
+          "w": 0.2385
+        }
+      ]
+    },
+    {
+      "id": "iyeUwItlIPk",
+      "small": "https://images.unsplash.com/photo-1758691462878-6edc3d3da1be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691462878-6edc3d3da1be?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LMHe%tOsDiR%01s,e=ozI9s:bI%2",
+      "color": "#c0c0c0",
+      "alt": "Doctor consults with patient in medical office",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-consults-with-patient-in-medical-office-iyeUwItlIPk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3C9CA",
+          "w": 0.4065
+        },
+        {
+          "hex": "#969994",
+          "w": 0.3697
+        },
+        {
+          "hex": "#4C5651",
+          "w": 0.2238
+        }
+      ]
+    },
+    {
+      "id": "nUQIh8RH2XQ",
+      "small": "https://images.unsplash.com/photo-1758691463084-17ed846d4a50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463084-17ed846d4a50?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWRpY2FsJTIwY29uc3VsdGF0aW9uJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LLGu%aE3DiNF0Ks.xvW=RPaJo#t7",
+      "color": "#c0c0c0",
+      "alt": "Doctor consults with a distressed male patient in office",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-consults-with-a-distressed-male-patient-in-office-nUQIh8RH2XQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BBBEBC",
+          "w": 0.4416
+        },
+        {
+          "hex": "#939089",
+          "w": 0.3319
+        },
+        {
+          "hex": "#5E625E",
+          "w": 0.2265
+        }
+      ]
+    },
+    {
+      "id": "rqdWlkRzerg",
+      "small": "https://images.unsplash.com/photo-1758654860024-9e352f70d1f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758654860024-9e352f70d1f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5644,
+      "height": 4496,
+      "blurHash": "LFGIo.-;~qj[~qof_3ay_3xuayof",
+      "color": "#8c8c8c",
+      "alt": "People waiting in a hallway with chairs and chairs",
+      "author": "Navy Medicine",
+      "authorUrl": "https://unsplash.com/@navymedicine?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-waiting-in-a-hallway-with-chairs-and-chairs-rqdWlkRzerg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#878787",
+          "w": 0.4752
+        },
+        {
+          "hex": "#5D5D5D",
+          "w": 0.2716
+        },
+        {
+          "hex": "#C4C4C4",
+          "w": 0.2532
+        }
+      ]
+    },
+    {
+      "id": "Pk-KuizxQv8",
+      "small": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777269749032-d8d458ae594d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5552,
+      "height": 4164,
+      "blurHash": "LALhG79ZDjR*4TxuxGa#v{RjDit7",
+      "color": "#c0c0c0",
+      "alt": "Empty hospital corridor with benches and doors",
+      "author": "Tasha Kostyuk",
+      "authorUrl": "https://unsplash.com/@tashakostyuk?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-hospital-corridor-with-benches-and-doors-Pk-KuizxQv8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B3B9B7",
+          "w": 0.4878
+        },
+        {
+          "hex": "#CED4D6",
+          "w": 0.4287
+        },
+        {
+          "hex": "#8B9695",
+          "w": 0.0835
+        }
+      ]
+    },
+    {
+      "id": "51603303NTc",
+      "small": "https://images.unsplash.com/photo-1754294437684-7898b3701ac7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1754294437684-7898b3701ac7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LIJaT5s=R6R%0JadNGxaIYbdNeWA",
+      "color": "#8c7359",
+      "alt": "A jigsaw puzzle head represents thinking",
+      "author": "Babak Eshaghian",
+      "authorUrl": "https://unsplash.com/@babak22ir?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-jigsaw-puzzle-head-represents-thinking-51603303NTc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BEA58D",
+          "w": 0.4866
+        },
+        {
+          "hex": "#877552",
+          "w": 0.41
+        },
+        {
+          "hex": "#E4D7B6",
+          "w": 0.1034
+        }
+      ]
+    },
+    {
+      "id": "_UJDZiZt5XY",
+      "small": "https://images.unsplash.com/photo-1784434675513-9bbbae1b5d0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784434675513-9bbbae1b5d0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjbGluaWMlMjB3YWl0aW5nJTIwcm9vbXxlbnwxfDB8fHwxNzkxODM0Njg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6774,
+      "height": 4492,
+      "blurHash": "LRBM_Pay00xu%MayM{t79Fj[-;WB",
+      "color": "#262626",
+      "alt": "Dimly lit room with a table lamp, chairs, and magazines",
+      "author": "C. Stone",
+      "authorUrl": "https://unsplash.com/@sunnymoth?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/dimly-lit-room-with-a-table-lamp-chairs-and-magazines-_UJDZiZt5XY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1C1C1C",
+          "w": 0.5108
+        },
+        {
+          "hex": "#424242",
+          "w": 0.3538
+        },
+        {
+          "hex": "#868686",
+          "w": 0.1354
+        }
+      ]
+    },
+    {
+      "id": "XuB10o8080c",
+      "small": "https://images.unsplash.com/photo-1758691463333-c79215e8bc3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463333-c79215e8bc3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LSHe|89F9Fxa00t8t7WBDiWVtRWB",
+      "color": "#405959",
+      "alt": "Doctor wearing a white coat sits at a desk",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-wearing-a-white-coat-sits-at-a-desk-XuB10o8080c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D0DAD7",
+          "w": 0.4297
+        },
+        {
+          "hex": "#94958C",
+          "w": 0.3321
+        },
+        {
+          "hex": "#4A5752",
+          "w": 0.2382
+        }
+      ]
+    },
+    {
+      "id": "vHm47nsCBkM",
+      "small": "https://images.unsplash.com/photo-1758691461888-b74515208d7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691461888-b74515208d7a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LWG]N?00E1sVR*Mx%Nads.azx]RP",
+      "color": "#a6a6a6",
+      "alt": "Doctor typing on computer in office",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-typing-on-computer-in-office-vHm47nsCBkM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A0A8A3",
+          "w": 0.4013
+        },
+        {
+          "hex": "#62675E",
+          "w": 0.3023
+        },
+        {
+          "hex": "#D2DCDC",
+          "w": 0.2964
+        }
+      ]
+    },
+    {
+      "id": "JJEOuvnY1Tw",
+      "small": "https://images.unsplash.com/photo-1758691463384-771db2f192b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691463384-771db2f192b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LSHy5day00xu01s:xuaxI9M{x]of",
+      "color": "#264040",
+      "alt": "Doctor wearing a stethoscope sits at a desk",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-wearing-a-stethoscope-sits-at-a-desk-JJEOuvnY1Tw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D0DAD7",
+          "w": 0.4657
+        },
+        {
+          "hex": "#9B9D95",
+          "w": 0.2698
+        },
+        {
+          "hex": "#525F5B",
+          "w": 0.2645
+        }
+      ]
+    },
+    {
+      "id": "FQQoUPVb_1c",
+      "small": "https://images.unsplash.com/photo-1758691462848-ba1e929da259?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1758691462848-ba1e929da259?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGV0aG9zY29wZSUyMG9uJTIwZGVza3xlbnwxfDB8fHwxNzkxODM0NjkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3840,
+      "height": 2160,
+      "blurHash": "LFLg;G4TtlyD?GDiOsXAE1tm.9rr",
+      "color": "#d9d9d9",
+      "alt": "Doctor typing on keyboard with stethoscope nearby",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/doctor-typing-on-keyboard-with-stethoscope-nearby-FQQoUPVb_1c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D8DA",
+          "w": 0.4171
+        },
+        {
+          "hex": "#BAB3AB",
+          "w": 0.37
+        },
+        {
+          "hex": "#9F836D",
+          "w": 0.2129
+        }
+      ]
+    }
+  ]
+}

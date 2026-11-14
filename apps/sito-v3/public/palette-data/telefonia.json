@@ -1,0 +1,227 @@
+{
+  "slug": "telefonia",
+  "queries": [
+    "phone shop counter",
+    "smartphone on display",
+    "phone case wall"
+  ],
+  "generatedAt": "2026-10-16T20:56:00.405Z",
+  "photos": [
+    {
+      "id": "MAGhG3x_AII",
+      "small": "https://images.unsplash.com/photo-1753351050724-511764d227e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1753351050724-511764d227e3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3800,
+      "height": 2138,
+      "blurHash": "LNIr1,?F_M#k^jt-8_%Mi^ocITWV",
+      "color": "#d9d9d9",
+      "alt": "Customer pays at a coffee shop",
+      "author": "Vitaly Gariev",
+      "authorUrl": "https://unsplash.com/@silverkblack?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/customer-pays-at-a-coffee-shop-MAGhG3x_AII?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D6CEC4",
+          "w": 0.4319
+        },
+        {
+          "hex": "#1F283F",
+          "w": 0.3433
+        },
+        {
+          "hex": "#B3957C",
+          "w": 0.2248
+        }
+      ]
+    },
+    {
+      "id": "_CWlrK9IJS0",
+      "small": "https://images.unsplash.com/photo-1785224927898-91f556232106?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1785224927898-91f556232106?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5474,
+      "height": 3649,
+      "blurHash": "L98|^lD%00xut7%MRjD%xuj[RjWB",
+      "color": "#262626",
+      "alt": "Night view of an illuminated",
+      "author": "Adhitya Sibikumar",
+      "authorUrl": "https://unsplash.com/@adhitya_2505?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/night-view-of-an-illuminated-_CWlrK9IJS0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#070707",
+          "w": 0.518
+        },
+        {
+          "hex": "#323232",
+          "w": 0.2701
+        },
+        {
+          "hex": "#6A6A6A",
+          "w": 0.212
+        }
+      ]
+    },
+    {
+      "id": "M5MKf70PHi8",
+      "small": "https://images.unsplash.com/photo-1790404231069-27c3762660ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790404231069-27c3762660ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5072,
+      "height": 3623,
+      "blurHash": "LMFYZ29Z0L?G4n%MxuNGE4s.xsRk",
+      "color": "#c0a6a6",
+      "alt": "Two people sitting on a bench outside a coffee shop in Beijing",
+      "author": "Kris Tian",
+      "authorUrl": "https://unsplash.com/@kris_tian?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/coffee-shop-with-people-in-beijing-M5MKf70PHi8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6B7AB",
+          "w": 0.3866
+        },
+        {
+          "hex": "#877E73",
+          "w": 0.3147
+        },
+        {
+          "hex": "#040304",
+          "w": 0.2987
+        }
+      ]
+    },
+    {
+      "id": "unqYQ16Qclg",
+      "small": "https://images.unsplash.com/photo-1787547286003-96917397e64b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787547286003-96917397e64b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaG9uZSUyMHNob3AlMjBjb3VudGVyfGVufDF8MHx8fDE3OTIxODQxNTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5952,
+      "height": 3968,
+      "blurHash": "LNGbxH_300WB_3-;ayM{xu%MxuIU",
+      "color": "#a6a6a6",
+      "alt": "A man in a cap using a smartphone at a table in a clothing shop",
+      "author": "Rendy Novantino",
+      "authorUrl": "https://unsplash.com/@novantino?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-using-smartphone-in-clothing-shop-unqYQ16Qclg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9B9B9B",
+          "w": 0.4181
+        },
+        {
+          "hex": "#5E5E5E",
+          "w": 0.3192
+        },
+        {
+          "hex": "#D4D4D4",
+          "w": 0.2627
+        }
+      ]
+    },
+    {
+      "id": "9e9PD9blAto",
+      "small": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LFIO@K56pH^+0}^k%M9u?GkrV@xV",
+      "color": "#a6c0c0",
+      "alt": "space gray iPhone X",
+      "author": "William Hook",
+      "authorUrl": "https://unsplash.com/@williamtm?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/space-gray-iphone-x-9e9PD9blAto?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A1B3BB",
+          "w": 0.6221
+        },
+        {
+          "hex": "#E0D4D2",
+          "w": 0.1927
+        },
+        {
+          "hex": "#5C8093",
+          "w": 0.1852
+        }
+      ]
+    },
+    {
+      "id": "J82GxqnwKSs",
+      "small": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585060544812-6b45742d762f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4341,
+      "height": 2861,
+      "blurHash": "LCL4f]_MvcRP?GbIIAkCrBM{O]tS",
+      "color": "#c0c0a6",
+      "alt": "A black smartphone with a blank white screen on a light wooden surface",
+      "author": "Vojtech Bruzek",
+      "authorUrl": "https://unsplash.com/@vojtechbruzek?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/smartphone-with-blank-screen-on-wood-J82GxqnwKSs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C5C4BA",
+          "w": 0.4805
+        },
+        {
+          "hex": "#A99C84",
+          "w": 0.3162
+        },
+        {
+          "hex": "#B6AD98",
+          "w": 0.2033
+        }
+      ]
+    },
+    {
+      "id": "0VGG7cqTwCo",
+      "small": "https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LZECIr~Xxtxb?K?I%LocIUWCxubD",
+      "color": "#262640",
+      "alt": "person holding smartphone",
+      "author": "Rodion Kutsaiev",
+      "authorUrl": "https://unsplash.com/@frostroomhead?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-smartphone-0VGG7cqTwCo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#392F68",
+          "w": 0.3899
+        },
+        {
+          "hex": "#110513",
+          "w": 0.3147
+        },
+        {
+          "hex": "#D4B4E0",
+          "w": 0.2955
+        }
+      ]
+    },
+    {
+      "id": "Pvck4ScQH9E",
+      "small": "https://images.unsplash.com/photo-1612442058361-178007e5e498?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1612442058361-178007e5e498?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzbWFydHBob25lJTIwb24lMjBkaXNwbGF5fGVufDF8MHx8fDE3OTIxODQxNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LIMtgnMw?@JD?vMxnOSe-,o~Dkv|",
+      "color": "#d9d9d9",
+      "alt": "person holding black iphone 4",
+      "author": "Adrien",
+      "authorUrl": "https://unsplash.com/@adrien?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-holding-black-iphone-4-Pvck4ScQH9E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D3D6DA",
+          "w": 0.8003
+        },
+        {
+          "hex": "#BD8FB1",
+          "w": 0.1289
+        },
+        {
+          "hex": "#6460B2",
+          "w": 0.0708
+        }
+      ]
+    }
+  ]
+}

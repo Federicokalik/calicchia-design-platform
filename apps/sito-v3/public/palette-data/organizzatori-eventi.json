@@ -1,0 +1,335 @@
+{
+  "slug": "organizzatori-eventi",
+  "queries": [
+    "conference room setup",
+    "event hall empty chairs",
+    "trade fair stands"
+  ],
+  "generatedAt": "2026-10-16T20:56:53.240Z",
+  "photos": [
+    {
+      "id": "GWe0dlVD9e0",
+      "small": "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LjJ836M{%Mfk_3WBWXj[00ayM{j[",
+      "color": "#f3f3f3",
+      "alt": "oval brown wooden conference table and chairs inside conference room",
+      "author": "Benjamin Child",
+      "authorUrl": "https://unsplash.com/@bchild311?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/oval-brown-wooden-conference-table-and-chairs-inside-conference-room-GWe0dlVD9e0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#443829",
+          "w": 0.4058
+        },
+        {
+          "hex": "#F3EAEA",
+          "w": 0.3115
+        },
+        {
+          "hex": "#7D7060",
+          "w": 0.2827
+        }
+      ]
+    },
+    {
+      "id": "bIZJRVBLfOM",
+      "small": "https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4272,
+      "height": 2848,
+      "blurHash": "LdH2QGjYWCof~qofofWBD*ofj?R*",
+      "color": "#262626",
+      "alt": "white and gray office rolling chairs",
+      "author": "Danielle Cerullo",
+      "authorUrl": "https://unsplash.com/@dncerullo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-gray-office-rolling-chairs-bIZJRVBLfOM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#322C2B",
+          "w": 0.4073
+        },
+        {
+          "hex": "#B2ACA4",
+          "w": 0.3934
+        },
+        {
+          "hex": "#7A756F",
+          "w": 0.1993
+        }
+      ]
+    },
+    {
+      "id": "0sT9YhNgSEs",
+      "small": "https://images.unsplash.com/photo-1462826303086-329426d1aef5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1462826303086-329426d1aef5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LXHLrF9YX8oz~qM_xvWBoNxas;t8",
+      "color": "#c0c0c0",
+      "alt": "rectangular brown wooden table with chair lot inside building",
+      "author": "Benjamin Child",
+      "authorUrl": "https://unsplash.com/@bchild311?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rectangular-brown-wooden-table-with-chair-lot-inside-building-0sT9YhNgSEs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#646861",
+          "w": 0.3495
+        },
+        {
+          "hex": "#989794",
+          "w": 0.3325
+        },
+        {
+          "hex": "#D2D3D4",
+          "w": 0.318
+        }
+      ]
+    },
+    {
+      "id": "Le6lJeyCSrs",
+      "small": "https://images.unsplash.com/photo-1697059361461-b81d0e98c3af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1697059361461-b81d0e98c3af?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb25mZXJlbmNlJTIwcm9vbSUyMHNldHVwfGVufDF8MHx8fDE3OTIxODQyMDZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 2920,
+      "blurHash": "LYI}L+V@00tR?cWBR5oz%MaeM{og",
+      "color": "#d9d9d9",
+      "alt": "a conference room with a projector screen and chairs",
+      "author": "Jonathan Wells",
+      "authorUrl": "https://unsplash.com/@thedigstudios?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-conference-room-with-a-projector-screen-and-chairs-Le6lJeyCSrs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A5887A",
+          "w": 0.4441
+        },
+        {
+          "hex": "#C0AEA5",
+          "w": 0.3073
+        },
+        {
+          "hex": "#6D5850",
+          "w": 0.2486
+        }
+      ]
+    },
+    {
+      "id": "5nGCyV51P60",
+      "small": "https://images.unsplash.com/photo-1763706320063-b210731b37a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763706320063-b210731b37a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3936,
+      "height": 2624,
+      "blurHash": "L213wOt.adj[cGkskDjsbcbdkDfP",
+      "color": "#0c2640",
+      "alt": "Rows of empty blue theater seats in dim lighting",
+      "author": "Hayk Badalyan",
+      "authorUrl": "https://unsplash.com/@hayko_badalyan?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-empty-blue-theater-seats-in-dim-lighting-5nGCyV51P60?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0C1721",
+          "w": 0.4103
+        },
+        {
+          "hex": "#142636",
+          "w": 0.3448
+        },
+        {
+          "hex": "#040910",
+          "w": 0.2449
+        }
+      ]
+    },
+    {
+      "id": "_90H7yhqRLU",
+      "small": "https://images.unsplash.com/photo-1768158988974-4fb3e48d9c24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1768158988974-4fb3e48d9c24?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4792,
+      "height": 3594,
+      "blurHash": "LaGH@yNb9aoe0Loe%LayNyWBM|tQ",
+      "color": "#262626",
+      "alt": "Rows of empty wooden chairs with woven seats",
+      "author": "Richard Heinen",
+      "authorUrl": "https://unsplash.com/@richard_he?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rows-of-empty-wooden-chairs-with-woven-seats-_90H7yhqRLU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#554633",
+          "w": 0.3528
+        },
+        {
+          "hex": "#1D1A16",
+          "w": 0.3244
+        },
+        {
+          "hex": "#A0815A",
+          "w": 0.3228
+        }
+      ]
+    },
+    {
+      "id": "Q99ZUYLAFlQ",
+      "small": "https://images.unsplash.com/photo-1777259759592-e4643a72db8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1777259759592-e4643a72db8d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LKCGS+D%D%of~qM{M{t7t7WBayxu",
+      "color": "#737373",
+      "alt": "Chairs stacked neatly in a large room with windows",
+      "author": "Vida Huang",
+      "authorUrl": "https://unsplash.com/@rebylulu?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/chairs-stacked-neatly-in-a-large-room-with-windows-Q99ZUYLAFlQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#757575",
+          "w": 0.4359
+        },
+        {
+          "hex": "#464646",
+          "w": 0.3018
+        },
+        {
+          "hex": "#202020",
+          "w": 0.2623
+        }
+      ]
+    },
+    {
+      "id": "wmgCip0rvSg",
+      "small": "https://images.unsplash.com/photo-1769667693426-6ce4b8732060?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1769667693426-6ce4b8732060?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxldmVudCUyMGhhbGwlMjBlbXB0eSUyMGNoYWlyc3xlbnwxfDB8fHwxNzkyMTg0MjA4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5902,
+      "height": 3935,
+      "blurHash": "LdG+H.kDE1Rj~padRjWC.8R+off5",
+      "color": "#f3f3f3",
+      "alt": "Grand hall with rows of chairs and large mural",
+      "author": "yanzheng xia",
+      "authorUrl": "https://unsplash.com/@novaspark?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/grand-hall-with-rows-of-chairs-and-large-mural-wmgCip0rvSg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#676563",
+          "w": 0.4213
+        },
+        {
+          "hex": "#2F2922",
+          "w": 0.297
+        },
+        {
+          "hex": "#A6A099",
+          "w": 0.2817
+        }
+      ]
+    },
+    {
+      "id": "NXhweP5ShCg",
+      "small": "https://images.unsplash.com/photo-1761195696518-6384573549ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761195696518-6384573549ea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4000,
+      "height": 2666,
+      "blurHash": "LOF699jC4mIU%gj[IARk4-ogxC%M",
+      "color": "#262626",
+      "alt": "Crowd at an exhibition with booths and displays",
+      "author": "Trans Russia",
+      "authorUrl": "https://unsplash.com/@transrussia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/crowd-at-an-exhibition-with-booths-and-displays-NXhweP5ShCg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5B5A64",
+          "w": 0.3869
+        },
+        {
+          "hex": "#27252B",
+          "w": 0.3071
+        },
+        {
+          "hex": "#8B94AB",
+          "w": 0.3059
+        }
+      ]
+    },
+    {
+      "id": "pllryrlWiSM",
+      "small": "https://images.unsplash.com/photo-1778402566957-c21d77a67d0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778402566957-c21d77a67d0d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5082,
+      "height": 3388,
+      "blurHash": "LUH2J|MxM|s.~qIUoJWC-;WBayWB",
+      "color": "#c0c0c0",
+      "alt": "Crowd gathered inside a large tent with decorated stalls",
+      "author": "Margo Evardson",
+      "authorUrl": "https://unsplash.com/@stadinstudio?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/crowd-gathered-inside-a-large-tent-with-decorated-stalls-pllryrlWiSM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#958B80",
+          "w": 0.3586
+        },
+        {
+          "hex": "#615B50",
+          "w": 0.3302
+        },
+        {
+          "hex": "#CDC8C1",
+          "w": 0.3112
+        }
+      ]
+    },
+    {
+      "id": "KVvEpFVq_-U",
+      "small": "https://images.unsplash.com/photo-1775314054195-85f31de0c944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775314054195-85f31de0c944?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L8F~gc0L4.%MVq%M4moetnI9IU%M",
+      "color": "#737373",
+      "alt": "Busy exhibition hall with many booths and attendees",
+      "author": "Euronewsweek Media",
+      "authorUrl": "https://unsplash.com/@euronewsweek?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/busy-exhibition-hall-with-many-booths-and-attendees-KVvEpFVq_-U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#63615E",
+          "w": 0.3781
+        },
+        {
+          "hex": "#8D8B87",
+          "w": 0.3329
+        },
+        {
+          "hex": "#C1C2C4",
+          "w": 0.289
+        }
+      ]
+    },
+    {
+      "id": "g7iSoF8NwYA",
+      "small": "https://images.unsplash.com/photo-1775902087078-ecee948a7c6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775902087078-ecee948a7c6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0cmFkZSUyMGZhaXIlMjBzdGFuZHN8ZW58MXwwfHx8MTc5MjE4NDIxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LADJFuNa4TNL_3xZMxEMn2ac%MV[",
+      "color": "#262626",
+      "alt": "Crowd gathered at an indoor event with a large screen",
+      "author": "Euronewsweek Media",
+      "authorUrl": "https://unsplash.com/@euronewsweek?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/crowd-gathered-at-an-indoor-event-with-a-large-screen-g7iSoF8NwYA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5A5251",
+          "w": 0.4156
+        },
+        {
+          "hex": "#8F8881",
+          "w": 0.345
+        },
+        {
+          "hex": "#221F1D",
+          "w": 0.2393
+        }
+      ]
+    }
+  ]
+}

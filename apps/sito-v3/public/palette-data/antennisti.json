@@ -1,0 +1,331 @@
+{
+  "slug": "antennisti",
+  "queries": [
+    "television antenna rooftop",
+    "satellite dish roof",
+    "antenna cables tools"
+  ],
+  "generatedAt": "2026-10-16T17:48:24.294Z",
+  "photos": [
+    {
+      "id": "H9RkvByHP8U",
+      "small": "https://images.unsplash.com/photo-1779706682433-bee409ff929c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1779706682433-bee409ff929c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4800,
+      "height": 3200,
+      "blurHash": "LRBXW#xrS#oy1mNHniaf+rt5ovfi",
+      "color": "#2673a6",
+      "alt": "Multiple TV antennas and satellite dishes on a weathered rooftop",
+      "author": "Gio L",
+      "authorUrl": "https://unsplash.com/@presenzetransitorie?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/multiple-tv-antennas-and-satellite-dishes-on-a-weathered-rooftop-H9RkvByHP8U?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2A78AF",
+          "w": 0.7767
+        },
+        {
+          "hex": "#B07766",
+          "w": 0.1122
+        },
+        {
+          "hex": "#7F342B",
+          "w": 0.1111
+        }
+      ]
+    },
+    {
+      "id": "wRoedNk10PM",
+      "small": "https://images.unsplash.com/photo-1762359364911-409d0a7c1cd1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1762359364911-409d0a7c1cd1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LJE.|fR+IAxu_Noft7RjD%fkt7of",
+      "color": "#8c8c8c",
+      "alt": "Overcast sky above rooftops with antenna",
+      "author": "T",
+      "authorUrl": "https://unsplash.com/@tanyabarrow?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/overcast-sky-above-rooftops-with-antenna-wRoedNk10PM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#979798",
+          "w": 0.4817
+        },
+        {
+          "hex": "#898788",
+          "w": 0.3569
+        },
+        {
+          "hex": "#170C05",
+          "w": 0.1614
+        }
+      ]
+    },
+    {
+      "id": "lOjSqXqHbXM",
+      "small": "https://images.unsplash.com/photo-1783750076716-d4af0089a0e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783750076716-d4af0089a0e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3456,
+      "blurHash": "L75YZ+n#j@azpfazWBkCROa~oJay",
+      "color": "#264059",
+      "alt": "Old television antenna on a building roof with a balcony",
+      "author": "Mahdi",
+      "authorUrl": "https://unsplash.com/@mahdi_so?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/old-television-antenna-on-a-building-roof-with-a-balcony-lOjSqXqHbXM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2D4856",
+          "w": 0.6525
+        },
+        {
+          "hex": "#2E3228",
+          "w": 0.2316
+        },
+        {
+          "hex": "#0C0C06",
+          "w": 0.116
+        }
+      ]
+    },
+    {
+      "id": "-CDfNWTsTxs",
+      "small": "https://images.unsplash.com/photo-1788382429904-3f767119147d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788382429904-3f767119147d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx0ZWxldmlzaW9uJTIwYW50ZW5uYSUyMHJvb2Z0b3B8ZW58MXwwfHx8MTc5MjE3Mjg5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4896,
+      "height": 3672,
+      "blurHash": "LZEwgpj[Iqaz}rjtR+a|aKazt5j@",
+      "color": "#734040",
+      "alt": "Television antennas silhouetted against a large orange sun in a hazy sky",
+      "author": "Joao",
+      "authorUrl": "https://unsplash.com/@kashizara?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/television-antennas-against-orange-sun--CDfNWTsTxs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6E4033",
+          "w": 0.4028
+        },
+        {
+          "hex": "#A85937",
+          "w": 0.3619
+        },
+        {
+          "hex": "#121010",
+          "w": 0.2353
+        }
+      ]
+    },
+    {
+      "id": "qyMLSH9DMmo",
+      "small": "https://images.unsplash.com/photo-1736181188872-db061ff70e0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1736181188872-db061ff70e0e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4912,
+      "height": 3264,
+      "blurHash": "LHBgV@=o0LE3xoS*E4Rj0LIU-nt7",
+      "color": "#264073",
+      "alt": "A satellite dish sitting on top of a roof",
+      "author": "maks_d",
+      "authorUrl": "https://unsplash.com/@maks_d?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-satellite-dish-sitting-on-top-of-a-roof-qyMLSH9DMmo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#274F88",
+          "w": 0.7867
+        },
+        {
+          "hex": "#DACEBF",
+          "w": 0.144
+        },
+        {
+          "hex": "#858389",
+          "w": 0.0693
+        }
+      ]
+    },
+    {
+      "id": "EYRirw5hO5g",
+      "small": "https://images.unsplash.com/photo-1622311538967-3aaaeec90346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1622311538967-3aaaeec90346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LkG+EvxvIokB0JRnofRj_3kCjFt6",
+      "color": "#f3f3f3",
+      "alt": "man in blue and red suit holding white and black basketball hoop",
+      "author": "Eddie Zhang",
+      "authorUrl": "https://unsplash.com/@eddie2023?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-in-blue-and-red-suit-holding-white-and-black-basketball-hoop-EYRirw5hO5g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#554D41",
+          "w": 0.4636
+        },
+        {
+          "hex": "#E6E3DD",
+          "w": 0.3326
+        },
+        {
+          "hex": "#252500",
+          "w": 0.2038
+        }
+      ]
+    },
+    {
+      "id": "7-2r_59iy_Y",
+      "small": "https://images.unsplash.com/photo-1630466468507-fc0f1678d155?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1630466468507-fc0f1678d155?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LMDToJN*o~xS01D+oGNLxt${t2a#",
+      "color": "#2659a6",
+      "alt": "white ferris wheel under blue sky during daytime",
+      "author": "Chris DeRoin",
+      "authorUrl": "https://unsplash.com/@chrisderoin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-ferris-wheel-under-blue-sky-during-daytime-7-2r_59iy_Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1F5ABC",
+          "w": 0.3637
+        },
+        {
+          "hex": "#5F76B0",
+          "w": 0.3297
+        },
+        {
+          "hex": "#839AC8",
+          "w": 0.3067
+        }
+      ]
+    },
+    {
+      "id": "VNOgBbn1AEo",
+      "small": "https://images.unsplash.com/photo-1728675715488-fff18b91c1e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1728675715488-fff18b91c1e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzYXRlbGxpdGUlMjBkaXNoJTIwcm9vZnxlbnwxfDB8fHwxNzkyMTcyODk3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2384,
+      "blurHash": "LQEqHzxuRjxuG^xajFadITRjWAo0",
+      "color": "#a6a6a6",
+      "alt": "A tall building with a weather vane on top of it",
+      "author": "Patrick von der Wehd",
+      "authorUrl": "https://unsplash.com/@patrick_von_der_wehd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-tall-building-with-a-weather-vane-on-top-of-it-VNOgBbn1AEo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#86BFD1",
+          "w": 0.4156
+        },
+        {
+          "hex": "#949A9C",
+          "w": 0.2936
+        },
+        {
+          "hex": "#3DA6C0",
+          "w": 0.2907
+        }
+      ]
+    },
+    {
+      "id": "ioAUyH-MkYs",
+      "small": "https://images.unsplash.com/photo-1607631755187-298a3f9a640a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1607631755187-298a3f9a640a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "L5FYPtE14;%2~UaeR+M|~pRjxtM|",
+      "color": "#8c8c73",
+      "alt": "black and red wire roll",
+      "author": "Troy Bridges",
+      "authorUrl": "https://unsplash.com/@esptroy?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-wire-roll-ioAUyH-MkYs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#948673",
+          "w": 0.5057
+        },
+        {
+          "hex": "#6B5B4A",
+          "w": 0.2634
+        },
+        {
+          "hex": "#BAAB94",
+          "w": 0.2309
+        }
+      ]
+    },
+    {
+      "id": "G4ekirU5aFQ",
+      "small": "https://images.unsplash.com/photo-1585406666850-82f7532fdae3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1585406666850-82f7532fdae3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LEIOR,t8%N%N~qxvWXWBo#WBIToJ",
+      "color": "#a6a6a6",
+      "alt": "red and yellow handle pliers",
+      "author": "hosein zanbori",
+      "authorUrl": "https://unsplash.com/@hoseincameraman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-yellow-handle-pliers-G4ekirU5aFQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B8B3BB",
+          "w": 0.4336
+        },
+        {
+          "hex": "#9B959B",
+          "w": 0.4294
+        },
+        {
+          "hex": "#685F58",
+          "w": 0.137
+        }
+      ]
+    },
+    {
+      "id": "BYTMWQfQU4Y",
+      "small": "https://images.unsplash.com/photo-1584677191047-38f48d0db64e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1584677191047-38f48d0db64e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4257,
+      "height": 2816,
+      "blurHash": "LBS6V%?a?bWF4m%L-;Rlf4WAt7og",
+      "color": "#f3f3f3",
+      "alt": "black and yellow screw driver",
+      "author": "Julie Molliver",
+      "authorUrl": "https://unsplash.com/@jmolliver?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-yellow-screw-driver-BYTMWQfQU4Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#FAFAFB",
+          "w": 0.8953
+        },
+        {
+          "hex": "#D4D5D0",
+          "w": 0.1047
+        }
+      ]
+    },
+    {
+      "id": "zPo9pPnUNdA",
+      "small": "https://images.unsplash.com/photo-1600152015632-77c2aa5565d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1600152015632-77c2aa5565d5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxhbnRlbm5hJTIwY2FibGVzJTIwdG9vbHN8ZW58MXwwfHx8MTc5MjE3MjkwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3456,
+      "height": 2592,
+      "blurHash": "LYEV$xV?IoWB01kCxaj]-;oJj?ay",
+      "color": "#405959",
+      "alt": "black and gray audio mixer",
+      "author": "Michel Didier Joomun",
+      "authorUrl": "https://unsplash.com/@didierjoomun?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-audio-mixer-zPo9pPnUNdA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#374144",
+          "w": 0.3853
+        },
+        {
+          "hex": "#06090C",
+          "w": 0.323
+        },
+        {
+          "hex": "#717673",
+          "w": 0.2917
+        }
+      ]
+    }
+  ]
+}

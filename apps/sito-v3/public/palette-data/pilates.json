@@ -1,0 +1,335 @@
+{
+  "slug": "pilates",
+  "queries": [
+    "pilates reformer studio",
+    "pilates mats sunlight",
+    "pilates reformer springs"
+  ],
+  "generatedAt": "2026-10-12T19:50:52.396Z",
+  "photos": [
+    {
+      "id": "0xn-8kRWOhE",
+      "small": "https://images.unsplash.com/photo-1717500252573-d31d4bf5ddf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500252573-d31d4bf5ddf1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LSLzpqX.-oIU.TaKR*WV?GxvMxRP",
+      "color": "#c0c0c0",
+      "alt": "a woman is doing exercises on a rowing machine",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-doing-exercises-on-a-rowing-machine-0xn-8kRWOhE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D2D2CD",
+          "w": 0.525
+        },
+        {
+          "hex": "#C7A285",
+          "w": 0.3423
+        },
+        {
+          "hex": "#7B716A",
+          "w": 0.1326
+        }
+      ]
+    },
+    {
+      "id": "2sXYx7sd-kg",
+      "small": "https://images.unsplash.com/photo-1717500252709-05a73fc4f1da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500252709-05a73fc4f1da?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LRLX9_0KE0krtmt7n$of.8ROWXkC",
+      "color": "#d9d9d9",
+      "alt": "a room filled with lots of different types of equipment",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-room-filled-with-lots-of-different-types-of-equipment-2sXYx7sd-kg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBDBD6",
+          "w": 0.3759
+        },
+        {
+          "hex": "#BFB6AB",
+          "w": 0.3501
+        },
+        {
+          "hex": "#9F825F",
+          "w": 0.274
+        }
+      ]
+    },
+    {
+      "id": "xtR4JjZeogY",
+      "small": "https://images.unsplash.com/photo-1717500251741-cdbc93342d5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500251741-cdbc93342d5a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LiNJ?=s.xuNG*0WBf6adnNt7R+bc",
+      "color": "#d9d9d9",
+      "alt": "a woman is doing exercises on a pilates",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-doing-exercises-on-a-pilates-xtR4JjZeogY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCDFDD",
+          "w": 0.5802
+        },
+        {
+          "hex": "#D0A37E",
+          "w": 0.296
+        },
+        {
+          "hex": "#7F685C",
+          "w": 0.1238
+        }
+      ]
+    },
+    {
+      "id": "cD-1u9QQ7xI",
+      "small": "https://images.unsplash.com/photo-1717500251825-b397c67692a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500251825-b397c67692a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzdHVkaW98ZW58MXwwfHx8MTc5MTgzNDY0M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LpM@7YkC%1t7*0kBWVogrqn%fRR*",
+      "color": "#d9d9d9",
+      "alt": "a woman is doing a plank exercise in a gym",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-doing-a-plank-exercise-in-a-gym-cD-1u9QQ7xI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DADBD9",
+          "w": 0.5443
+        },
+        {
+          "hex": "#D9A378",
+          "w": 0.3005
+        },
+        {
+          "hex": "#7E6E65",
+          "w": 0.1552
+        }
+      ]
+    },
+    {
+      "id": "ZJH_wDAjEA4",
+      "small": "https://images.unsplash.com/photo-1482100860609-4f31304a6d28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1482100860609-4f31304a6d28?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LxLg5=%M9ajY~qxuRjoetmf,s.t7",
+      "color": "#f3f3f3",
+      "alt": "woman standing grass field",
+      "author": "Natalie Grainger",
+      "authorUrl": "https://unsplash.com/@missnjc?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-standing-grass-field-ZJH_wDAjEA4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7C5F30",
+          "w": 0.4246
+        },
+        {
+          "hex": "#AE864B",
+          "w": 0.2919
+        },
+        {
+          "hex": "#FCF4E5",
+          "w": 0.2835
+        }
+      ]
+    },
+    {
+      "id": "vMjF0Eg5-iU",
+      "small": "https://images.unsplash.com/photo-1624881961477-dd1491e6fb47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1624881961477-dd1491e6fb47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LgHTd1-oM|niNu$$s.fP0gRj%1of",
+      "color": "#260c0c",
+      "alt": "white and brown woven round basket",
+      "author": "vigor poodo",
+      "authorUrl": "https://unsplash.com/@vigorpoodo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-woven-round-basket-vMjF0Eg5-iU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#230C01",
+          "w": 0.4373
+        },
+        {
+          "hex": "#794519",
+          "w": 0.3513
+        },
+        {
+          "hex": "#CA8043",
+          "w": 0.2114
+        }
+      ]
+    },
+    {
+      "id": "wGuuU0nRYiE",
+      "small": "https://images.unsplash.com/photo-1602217709696-d2d1da53fb37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1602217709696-d2d1da53fb37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LTECLAWZ9Gs*0NxV-.Ro^%NKIVxs",
+      "color": "#595940",
+      "alt": "woman in white shirt and blue denim jeans sitting on brown wooden floor",
+      "author": "Zyanya BMO",
+      "authorUrl": "https://unsplash.com/@zyan_bmo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-white-shirt-and-blue-denim-jeans-sitting-on-brown-wooden-floor-wGuuU0nRYiE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#574A43",
+          "w": 0.517
+        },
+        {
+          "hex": "#1B1314",
+          "w": 0.3202
+        },
+        {
+          "hex": "#F9E1A5",
+          "w": 0.1628
+        }
+      ]
+    },
+    {
+      "id": "Msr8Zh5JG0M",
+      "small": "https://images.unsplash.com/photo-1783833062802-cff7e059db83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783833062802-cff7e059db83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwaWxhdGVzJTIwbWF0cyUyMHN1bmxpZ2h0fGVufDF8MHx8fDE3OTE4MzQ2NDd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LIEerd9G0gR*.SD%V@R*?bM_niR*",
+      "color": "#402626",
+      "alt": "Sunlight creates striped patterns on a table from a window",
+      "author": "Cong Long Vu",
+      "authorUrl": "https://unsplash.com/@vclong2003?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/sunlight-creates-striped-patterns-on-a-table-from-a-window-Msr8Zh5JG0M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#402D19",
+          "w": 0.4386
+        },
+        {
+          "hex": "#774C28",
+          "w": 0.3858
+        },
+        {
+          "hex": "#CABEA8",
+          "w": 0.1757
+        }
+      ]
+    },
+    {
+      "id": "0fiVrPJg5kU",
+      "small": "https://images.unsplash.com/photo-1717500252179-2811af29e4f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500252179-2811af29e4f7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw1fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LmM@4Qo#xZxu*0bHR*t7nNo0ofRj",
+      "color": "#d9d9d9",
+      "alt": "a woman is doing a pivot on a pivot machine",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-doing-a-pivot-on-a-pivot-machine-0fiVrPJg5kU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8D8D5",
+          "w": 0.5874
+        },
+        {
+          "hex": "#D59E74",
+          "w": 0.3004
+        },
+        {
+          "hex": "#796355",
+          "w": 0.1121
+        }
+      ]
+    },
+    {
+      "id": "5BGg2L5nhlU",
+      "small": "https://images.unsplash.com/photo-1717500252106-2a9f83cc61ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500252106-2a9f83cc61ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw2fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6567,
+      "height": 4378,
+      "blurHash": "LdM7W0XT-;R+.Tt8aeae-UozNGR*",
+      "color": "#d9d9d9",
+      "alt": "a woman is doing exercises on a rowing machine",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-is-doing-exercises-on-a-rowing-machine-5BGg2L5nhlU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D8D9D6",
+          "w": 0.5208
+        },
+        {
+          "hex": "#C8AA91",
+          "w": 0.354
+        },
+        {
+          "hex": "#716A67",
+          "w": 0.1253
+        }
+      ]
+    },
+    {
+      "id": "a1IhqqW8JQE",
+      "small": "https://images.unsplash.com/photo-1717500251997-80b234166d00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500251997-80b234166d00?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw3fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LJNTj;?H%gRQyDIoM|%M.Tx]snM{",
+      "color": "#d9d9d9",
+      "alt": "a gym with a row of machines and mirrors",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-gym-with-a-row-of-machines-and-mirrors-a1IhqqW8JQE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD9D4",
+          "w": 0.6958
+        },
+        {
+          "hex": "#BCA390",
+          "w": 0.2026
+        },
+        {
+          "hex": "#82634E",
+          "w": 0.1016
+        }
+      ]
+    },
+    {
+      "id": "wiy6LQelypk",
+      "small": "https://images.unsplash.com/photo-1717500251833-d807c5753ded?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw4fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1717500251833-d807c5753ded?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw4fHxwaWxhdGVzJTIwcmVmb3JtZXIlMjBzcHJpbmdzfGVufDF8MHx8fDE3OTE4MzQ2NDl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "LiNJ:%oc%LWU*0aejaRjrqt7RkkD",
+      "color": "#d9d9d9",
+      "alt": "a woman sitting on a piyor in a room",
+      "author": "Ahmet Kurt",
+      "authorUrl": "https://unsplash.com/@ahmetkurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-sitting-on-a-piyor-in-a-room-wiy6LQelypk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DCDFDD",
+          "w": 0.567
+        },
+        {
+          "hex": "#D2A27B",
+          "w": 0.3
+        },
+        {
+          "hex": "#856D5F",
+          "w": 0.133
+        }
+      ]
+    }
+  ]
+}

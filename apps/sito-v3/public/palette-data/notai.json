@@ -1,0 +1,327 @@
+{
+  "slug": "notai",
+  "queries": [
+    "document signing desk",
+    "fountain pen paper",
+    "rubber stamp documents"
+  ],
+  "generatedAt": "2026-10-12T21:04:07.490Z",
+  "photos": [
+    {
+      "id": "doplSDELX7E",
+      "small": "https://images.unsplash.com/photo-1603796846097-bee99e4a601f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1603796846097-bee99e4a601f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5973,
+      "height": 4480,
+      "blurHash": "LGBpRrMx9F-;4Tja%gR+IV%MIVIU",
+      "color": "#260c0c",
+      "alt": "person in orange long sleeve shirt writing on white paper",
+      "author": "Romain Dancre",
+      "authorUrl": "https://unsplash.com/@romaindancre?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-in-orange-long-sleeve-shirt-writing-on-white-paper-doplSDELX7E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#1D1513",
+          "w": 0.4975
+        },
+        {
+          "hex": "#472B24",
+          "w": 0.2531
+        },
+        {
+          "hex": "#A9A7A2",
+          "w": 0.2493
+        }
+      ]
+    },
+    {
+      "id": "OQMZwNd3ThU",
+      "small": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7360,
+      "height": 4912,
+      "blurHash": "LPGSfbxt01M{4UV@%LkC01WBs+Rj",
+      "color": "#d9f3d9",
+      "alt": "man writing on paper",
+      "author": "Scott Graham",
+      "authorUrl": "https://unsplash.com/@amstram?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-writing-on-paper-OQMZwNd3ThU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D1E1DC",
+          "w": 0.3688
+        },
+        {
+          "hex": "#9894A3",
+          "w": 0.3213
+        },
+        {
+          "hex": "#24444E",
+          "w": 0.3098
+        }
+      ]
+    },
+    {
+      "id": "GJao3ZTX9gU",
+      "small": "https://images.unsplash.com/photo-1521791055366-0d553872125f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1521791055366-0d553872125f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LkP6T{.Tt6t64:-5t5WBDhjEtSRj",
+      "color": "#f3f3f3",
+      "alt": "person writing on white paper",
+      "author": "Cytonn Photography",
+      "authorUrl": "https://unsplash.com/@cytonn_photography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/person-writing-on-white-paper-GJao3ZTX9gU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F0EEF0",
+          "w": 0.4943
+        },
+        {
+          "hex": "#F1C298",
+          "w": 0.3647
+        },
+        {
+          "hex": "#A47965",
+          "w": 0.141
+        }
+      ]
+    },
+    {
+      "id": "ZH4FUYiaczY",
+      "small": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1635859890085-ec8cb5466806?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxkb2N1bWVudCUyMHNpZ25pbmclMjBkZXNrfGVufDF8MHx8fDE3OTE4MzkwMzZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LQ9Q:ZRjIAs:Mwogt7WB8^ofx]WC",
+      "color": "#a6a6c0",
+      "alt": "a woman sitting at a table with lots of papers",
+      "author": "Dimitri Karastelev",
+      "authorUrl": "https://unsplash.com/@dkfra19?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-sitting-at-a-table-with-lots-of-papers-ZH4FUYiaczY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#100F12",
+          "w": 0.371
+        },
+        {
+          "hex": "#010101",
+          "w": 0.321
+        },
+        {
+          "hex": "#92A0B4",
+          "w": 0.308
+        }
+      ]
+    },
+    {
+      "id": "xG8IQMqMITM",
+      "small": "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1471107340929-a87cd0f5b5f3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4592,
+      "height": 3448,
+      "blurHash": "LiGv9VIA9Ft78^x]xvayIUV@tRof",
+      "color": "#595940",
+      "alt": "fountain pen on spiral book",
+      "author": "Aaron Burden",
+      "authorUrl": "https://unsplash.com/@aaronburden?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/fountain-pen-on-spiral-book-xG8IQMqMITM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5A5649",
+          "w": 0.5933
+        },
+        {
+          "hex": "#DBEBF3",
+          "w": 0.3042
+        },
+        {
+          "hex": "#28261E",
+          "w": 0.1024
+        }
+      ]
+    },
+    {
+      "id": "y02jEX_B0O0",
+      "small": "https://images.unsplash.com/photo-1455390582262-044cdead277a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1455390582262-044cdead277a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4592,
+      "height": 3448,
+      "blurHash": "L4FPB1RSs*-oVYs.~p-:-:01xtD%",
+      "color": "#a6a68c",
+      "alt": "fountain pen on black lined paper",
+      "author": "Aaron Burden",
+      "authorUrl": "https://unsplash.com/@aaronburden?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/fountain-pen-on-black-lined-paper-y02jEX_B0O0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9A998C",
+          "w": 0.5264
+        },
+        {
+          "hex": "#7B796C",
+          "w": 0.3428
+        },
+        {
+          "hex": "#383021",
+          "w": 0.1308
+        }
+      ]
+    },
+    {
+      "id": "8XddFc6NkBY",
+      "small": "https://images.unsplash.com/photo-1518674660708-0e2c0473e68e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1518674660708-0e2c0473e68e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2048,
+      "height": 1536,
+      "blurHash": "LLOzY-.8oMj[%Mt7Rjof_NIARjj[",
+      "color": "#d9d9d9",
+      "alt": "A gold fountain pen with an engraved nib on a white surface",
+      "author": "Art Lasovsky",
+      "authorUrl": "https://unsplash.com/@artlasovsky?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gold-fountain-pen-on-white-8XddFc6NkBY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DFE2E1",
+          "w": 1
+        }
+      ]
+    },
+    {
+      "id": "LxphooAHzvc",
+      "small": "https://images.unsplash.com/photo-1531087131490-07836ca4341d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1531087131490-07836ca4341d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxmb3VudGFpbiUyMHBlbiUyMHBhcGVyfGVufDF8MHx8fDE3OTE4MzkwNDF8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LDFF,2_4X9?b?HD%Mx%Mt7M{D%M{",
+      "color": "#8c8c8c",
+      "alt": "fountain pen",
+      "author": "Trey Gibson",
+      "authorUrl": "https://unsplash.com/@treyg12?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/fountain-pen-LxphooAHzvc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#888D8A",
+          "w": 0.4013
+        },
+        {
+          "hex": "#A4AAAB",
+          "w": 0.3415
+        },
+        {
+          "hex": "#696762",
+          "w": 0.2572
+        }
+      ]
+    },
+    {
+      "id": "8wcC0mUSGnk",
+      "small": "https://images.unsplash.com/photo-1611075551111-dfda5f9c6f02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1611075551111-dfda5f9c6f02?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "L17^}W004n-;M{IUM{xu-;9Fxt-;",
+      "color": "#404040",
+      "alt": "black and silver smart watches",
+      "author": "Taylor R",
+      "authorUrl": "https://unsplash.com/@usualmorals?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-silver-smart-watches-8wcC0mUSGnk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#323232",
+          "w": 0.3825
+        },
+        {
+          "hex": "#060606",
+          "w": 0.3121
+        },
+        {
+          "hex": "#5B5B5B",
+          "w": 0.3054
+        }
+      ]
+    },
+    {
+      "id": "upd42iiF5-Q",
+      "small": "https://images.unsplash.com/photo-1593448806592-409752fd816b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1593448806592-409752fd816b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LYKw;6r=%g%MDN_4x]t7%gx]xuof",
+      "color": "#d9f3f3",
+      "alt": "chocolate bar on white ceramic plate",
+      "author": "Glen Carrie",
+      "authorUrl": "https://unsplash.com/@glencarrie?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/chocolate-bar-on-white-ceramic-plate-upd42iiF5-Q?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E4E9",
+          "w": 0.4919
+        },
+        {
+          "hex": "#322425",
+          "w": 0.2604
+        },
+        {
+          "hex": "#BB9D99",
+          "w": 0.2477
+        }
+      ]
+    },
+    {
+      "id": "kodj90fGNoo",
+      "small": "https://images.unsplash.com/photo-1782364742370-8bdf39cc0e3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1782364742370-8bdf39cc0e3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LPDcUJo}8{9a_Ns.D%M{I:a#tQs:",
+      "color": "#262626",
+      "alt": "Collection of vintage rubber stamps and plaques on display",
+      "author": "Anton Borzenkov",
+      "authorUrl": "https://unsplash.com/@borzenkov?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/collection-of-vintage-rubber-stamps-and-plaques-on-display-kodj90fGNoo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D5150",
+          "w": 0.4034
+        },
+        {
+          "hex": "#1D2024",
+          "w": 0.338
+        },
+        {
+          "hex": "#868986",
+          "w": 0.2586
+        }
+      ]
+    },
+    {
+      "id": "aShJEbCMQ_k",
+      "small": "https://images.unsplash.com/photo-1788003947088-dfccdc00bffb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788003947088-dfccdc00bffb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxydWJiZXIlMjBzdGFtcCUyMGRvY3VtZW50c3xlbnwxfDB8fHwxNzkxODM5MDQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2860,
+      "height": 2048,
+      "blurHash": "LER3Te06?a--~qM_M{t8_0-.WCt7",
+      "color": "#f3f3f3",
+      "alt": "A blue circular rubber stamp with text and a handwritten signature below it",
+      "author": "ari sueb",
+      "authorUrl": "https://unsplash.com/@srimulyati?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-circular-stamp-with-signature-aShJEbCMQ_k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#FDFDFE",
+          "w": 0.6891
+        },
+        {
+          "hex": "#D4D4EF",
+          "w": 0.1848
+        },
+        {
+          "hex": "#AFAED2",
+          "w": 0.1262
+        }
+      ]
+    }
+  ]
+}

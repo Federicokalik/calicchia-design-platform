@@ -1,0 +1,227 @@
+{
+  "slug": "b-b",
+  "queries": [
+    "guest bedroom linen",
+    "breakfast tray window",
+    "bedside lamp room"
+  ],
+  "generatedAt": "2026-10-16T18:51:11.785Z",
+  "photos": [
+    {
+      "id": "zWvy2pp-lUw",
+      "small": "https://images.unsplash.com/photo-1790148574034-1d1756d1fcbf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1790148574034-1d1756d1fcbf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LFIY5=WAWBxu4TM{IARjaeRPIUWB",
+      "color": "#a6a6a6",
+      "alt": "Two white towels folded into bow shapes on a bed with grey bedding",
+      "author": "engin akyurt",
+      "authorUrl": "https://unsplash.com/@enginakyurt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/towels-folded-on-hotel-bed-zWvy2pp-lUw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#9F9E9F",
+          "w": 0.4816
+        },
+        {
+          "hex": "#B8B7B9",
+          "w": 0.4045
+        },
+        {
+          "hex": "#7E7B7A",
+          "w": 0.1138
+        }
+      ]
+    },
+    {
+      "id": "1yv5NSV0B-Y",
+      "small": "https://images.unsplash.com/photo-1775744244614-beb197cfac53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775744244614-beb197cfac53?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LBCP;Q?a8_4U_1xuM}IVIEICaw-.",
+      "color": "#594040",
+      "alt": "A vintage bedroom with a metal bed frame and window",
+      "author": "Howard Walsh",
+      "authorUrl": "https://unsplash.com/@hswalsh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-vintage-bedroom-with-a-metal-bed-frame-and-window-1yv5NSV0B-Y?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#544D49",
+          "w": 0.6381
+        },
+        {
+          "hex": "#807F7E",
+          "w": 0.2309
+        },
+        {
+          "hex": "#281E1A",
+          "w": 0.131
+        }
+      ]
+    },
+    {
+      "id": "DEfgoEX4ya8",
+      "small": "https://images.unsplash.com/photo-1766431066492-9bec8410a57b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1766431066492-9bec8410a57b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7845,
+      "height": 5230,
+      "blurHash": "LEKnSU?bXS00s*4nRj-;%gt8IU%M",
+      "color": "#c0c0c0",
+      "alt": "Cozy bedroom with a neatly made bed and bedside table",
+      "author": "Annie Spratt",
+      "authorUrl": "https://unsplash.com/@anniespratt?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cozy-bedroom-with-a-neatly-made-bed-and-bedside-table-DEfgoEX4ya8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1BCB7",
+          "w": 0.7596
+        },
+        {
+          "hex": "#A3998C",
+          "w": 0.1584
+        },
+        {
+          "hex": "#75532E",
+          "w": 0.082
+        }
+      ]
+    },
+    {
+      "id": "a2LzYQ8Nt-E",
+      "small": "https://images.unsplash.com/photo-1759264244764-2cb80f1a67bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759264244764-2cb80f1a67bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxndWVzdCUyMGJlZHJvb20lMjBsaW5lbnxlbnwxfDB8fHwxNzkyMTc2NjY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5100,
+      "height": 3400,
+      "blurHash": "LVJa~0-;M_%M4TRj%g%MD%WBIUD%",
+      "color": "#8c8c8c",
+      "alt": "A neatly made bed with white linens in a bedroom",
+      "author": "ubeyonroad",
+      "authorUrl": "https://unsplash.com/@ubeyonroad?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-neatly-made-bed-with-white-linens-in-a-bedroom-a2LzYQ8Nt-E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9DCE2",
+          "w": 0.3975
+        },
+        {
+          "hex": "#ADA7A7",
+          "w": 0.307
+        },
+        {
+          "hex": "#807E7F",
+          "w": 0.2955
+        }
+      ]
+    },
+    {
+      "id": "e-CP5e8EgC4",
+      "small": "https://images.unsplash.com/photo-1763168421821-e7cb2efcc555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763168421821-e7cb2efcc555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7484,
+      "height": 4989,
+      "blurHash": "LAEVE20K0g={0KxaE3%1Rk-pIVWV",
+      "color": "#262626",
+      "alt": "A dimly lit bedside lamp illuminates a rumpled white duvet",
+      "author": "Shahraiz Tabassam",
+      "authorUrl": "https://unsplash.com/@stabassam?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-dimly-lit-bedside-lamp-illuminates-a-rumpled-white-duvet-e-CP5e8EgC4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#8D7B6C",
+          "w": 0.3486
+        },
+        {
+          "hex": "#694C33",
+          "w": 0.3278
+        },
+        {
+          "hex": "#221D18",
+          "w": 0.3236
+        }
+      ]
+    },
+    {
+      "id": "f2zV4ssYaJ4",
+      "small": "https://images.unsplash.com/photo-1668706936367-2bef7e0e38db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1668706936367-2bef7e0e38db?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LHCh~8_20}D%nOR+Shn%0LD*t7%L",
+      "color": "#260c0c",
+      "alt": "a table with a lamp and a phone on it",
+      "author": "Kristin Snippe",
+      "authorUrl": "https://unsplash.com/@frausnippe?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-table-with-a-lamp-and-a-phone-on-it-f2zV4ssYaJ4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#150200",
+          "w": 0.372
+        },
+        {
+          "hex": "#521E07",
+          "w": 0.3353
+        },
+        {
+          "hex": "#8C4E2F",
+          "w": 0.2927
+        }
+      ]
+    },
+    {
+      "id": "MPQ__ty5PD0",
+      "small": "https://images.unsplash.com/photo-1759363895956-00e009b608ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1759363895956-00e009b608ed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LDFEo;5R0f^jm6%NIoi^OsnN%2Nd",
+      "color": "#400c0c",
+      "alt": "Luxurious bedroom with a lit bedside lamp",
+      "author": "Ariel Nathan ADA MBITA",
+      "authorUrl": "https://unsplash.com/@adambita237?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/luxurious-bedroom-with-a-lit-bedside-lamp-MPQ__ty5PD0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#927061",
+          "w": 0.3593
+        },
+        {
+          "hex": "#663D2A",
+          "w": 0.35
+        },
+        {
+          "hex": "#300C02",
+          "w": 0.2908
+        }
+      ]
+    },
+    {
+      "id": "ig3TQMJElAw",
+      "small": "https://images.unsplash.com/photo-1784295070532-13b4ec3fcda0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1784295070532-13b4ec3fcda0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxiZWRzaWRlJTIwbGFtcCUyMHJvb218ZW58MXwwfHx8MTc5MjE3NjY3MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3935,
+      "height": 2623,
+      "blurHash": "LBD9q|0JNe9Fw]NG?bM{%Mt79F%M",
+      "color": "#595959",
+      "alt": "A simple hotel room with a bed, nightstand, and curtains",
+      "author": "Bora",
+      "authorUrl": "https://unsplash.com/@boramerts?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-simple-hotel-room-with-a-bed-nightstand-and-curtains-ig3TQMJElAw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#635F57",
+          "w": 0.4762
+        },
+        {
+          "hex": "#373333",
+          "w": 0.3788
+        },
+        {
+          "hex": "#B1AEAC",
+          "w": 0.1449
+        }
+      ]
+    }
+  ]
+}

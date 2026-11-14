@@ -1,0 +1,173 @@
+{
+  "slug": "tabaccherie",
+  "queries": [
+    "tobacco shop counter",
+    "cigarette packets display",
+    "magazine rack newsstand"
+  ],
+  "generatedAt": "2026-10-16T20:55:29.779Z",
+  "photos": [
+    {
+      "id": "ZLzYsyTxXj4",
+      "small": "https://images.unsplash.com/photo-1679419858200-25b16ce069aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1679419858200-25b16ce069aa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4160,
+      "height": 2773,
+      "blurHash": "LJJPxetRIVoyIq}@xtIo9vslozR+",
+      "color": "#c07340",
+      "alt": "a store filled with lots of different types of items",
+      "author": "Alek Olson",
+      "authorUrl": "https://unsplash.com/@alekxandrolsonphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-store-filled-with-lots-of-different-types-of-items-ZLzYsyTxXj4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#BC794B",
+          "w": 0.4268
+        },
+        {
+          "hex": "#E4AC88",
+          "w": 0.2966
+        },
+        {
+          "hex": "#834925",
+          "w": 0.2766
+        }
+      ]
+    },
+    {
+      "id": "Nkdor8a6TJs",
+      "small": "https://images.unsplash.com/photo-1788833148606-64fe05ebe397?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1788833148606-64fe05ebe397?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4608,
+      "height": 3072,
+      "blurHash": "LGG[[{t700WB-;RjM{Rj-;WBayt7",
+      "color": "#404040",
+      "alt": "Rows of cigarette packs displayed behind a glass shelf in a shop",
+      "author": "ModernShoot",
+      "authorUrl": "https://unsplash.com/@modernshoot?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/cigarette-packs-on-glass-shop-shelf-Nkdor8a6TJs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CFCFCF",
+          "w": 0.3607
+        },
+        {
+          "hex": "#909090",
+          "w": 0.3281
+        },
+        {
+          "hex": "#4F4F4F",
+          "w": 0.3112
+        }
+      ]
+    },
+    {
+      "id": "apqDAiF_WIY",
+      "small": "https://images.unsplash.com/photo-1771537399775-69eee24ede8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1771537399775-69eee24ede8a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2840,
+      "height": 1883,
+      "blurHash": "LLH1}Mn$9Zo3~W%1Rja|M{a}s:j[",
+      "color": "#d9c0c0",
+      "alt": "Shelves stocked with various cigarette brands and prices",
+      "author": "Jacob Skowronek",
+      "authorUrl": "https://unsplash.com/@jakobethekid?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/shelves-stocked-with-various-cigarette-brands-and-prices-apqDAiF_WIY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C3B7AB",
+          "w": 0.4244
+        },
+        {
+          "hex": "#8D8074",
+          "w": 0.3559
+        },
+        {
+          "hex": "#4E443C",
+          "w": 0.2197
+        }
+      ]
+    },
+    {
+      "id": "qgf5siKQsBg",
+      "small": "https://images.unsplash.com/photo-1783000852180-17be4ed9b63e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783000852180-17be4ed9b63e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjaWdhcmV0dGUlMjBwYWNrZXRzJTIwZGlzcGxheXxlbnwxfDB8fHwxNzkyMTg0MTI1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5696,
+      "height": 3921,
+      "blurHash": "L6G8r{Ioz-Nzx^$y$e?F:gRm59M|",
+      "color": "#a6a6a6",
+      "alt": "Various cigarette packs displayed behind a glass window",
+      "author": "mdreza jalali",
+      "authorUrl": "https://unsplash.com/@mdrezajalali?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/various-cigarette-packs-displayed-behind-a-glass-window-qgf5siKQsBg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADA69F",
+          "w": 0.418
+        },
+        {
+          "hex": "#8C7B61",
+          "w": 0.3721
+        },
+        {
+          "hex": "#585347",
+          "w": 0.2099
+        }
+      ]
+    },
+    {
+      "id": "ntKGuKlLyPI",
+      "small": "https://images.unsplash.com/photo-1763889167910-b13b12b49bd1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWdhemluZSUyMHJhY2slMjBuZXdzc3RhbmR8ZW58MXwwfHx8MTc5MjE4NDEyOHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1763889167910-b13b12b49bd1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWdhemluZSUyMHJhY2slMjBuZXdzc3RhbmR8ZW58MXwwfHx8MTc5MjE4NDEyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7952,
+      "height": 5304,
+      "blurHash": "LFDI|1D%E4^*IU~WxtE29aRj?HWB",
+      "color": "#260c0c",
+      "alt": "Rolling stone magazine cover with liam payne",
+      "author": "Austin",
+      "authorUrl": "https://unsplash.com/@austin_7792?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/rolling-stone-magazine-cover-with-liam-payne-ntKGuKlLyPI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#21170F",
+          "w": 0.4949
+        },
+        {
+          "hex": "#543A25",
+          "w": 0.333
+        },
+        {
+          "hex": "#E5DACE",
+          "w": 0.1722
+        }
+      ]
+    },
+    {
+      "id": "SqlPXGnmfzA",
+      "small": "https://images.unsplash.com/photo-1767818375622-f67d3b504f8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWdhemluZSUyMHJhY2slMjBuZXdzc3RhbmR8ZW58MXwwfHx8MTc5MjE4NDEyOHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1767818375622-f67d3b504f8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWdhemluZSUyMHJhY2slMjBuZXdzc3RhbmR8ZW58MXwwfHx8MTc5MjE4NDEyOHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5382,
+      "height": 3589,
+      "blurHash": "LEDv1a~V~q-:E1E1ofM{IAs,ens:",
+      "color": "#262626",
+      "alt": "A vendor sits at a busy newsstand with many items",
+      "author": "Willian Justen de Vasconcellos",
+      "authorUrl": "https://unsplash.com/@willianjusten?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-vendor-sits-at-a-busy-newsstand-with-many-items-SqlPXGnmfzA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#5D4D4A",
+          "w": 0.4031
+        },
+        {
+          "hex": "#322A29",
+          "w": 0.3485
+        },
+        {
+          "hex": "#877571",
+          "w": 0.2484
+        }
+      ]
+    }
+  ]
+}

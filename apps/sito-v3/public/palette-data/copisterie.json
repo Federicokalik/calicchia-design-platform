@@ -1,0 +1,227 @@
+{
+  "slug": "copisterie",
+  "queries": [
+    "copy shop counter",
+    "printing machines office",
+    "stacked paper reams"
+  ],
+  "generatedAt": "2026-10-16T20:56:12.109Z",
+  "photos": [
+    {
+      "id": "UaMMROu5fq0",
+      "small": "https://images.unsplash.com/photo-1780037190608-1d871be1fe41?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1780037190608-1d871be1fe41?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4992,
+      "height": 3328,
+      "blurHash": "LJE.a;NGE2^%~UWCIVNG%1f6RkR*",
+      "color": "#a68c73",
+      "alt": "Multiple cash registers with computer monitors at a checkout counter",
+      "author": "Allen Y",
+      "authorUrl": "https://unsplash.com/@yanahd?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/multiple-cash-registers-with-computer-monitors-at-a-checkout-counter-UaMMROu5fq0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#AA9879",
+          "w": 0.452
+        },
+        {
+          "hex": "#847256",
+          "w": 0.289
+        },
+        {
+          "hex": "#160F09",
+          "w": 0.259
+        }
+      ]
+    },
+    {
+      "id": "q4-N9h6vx8w",
+      "small": "https://images.unsplash.com/photo-1666101041092-468eb2818c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1666101041092-468eb2818c87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4927,
+      "height": 3279,
+      "blurHash": "LJGu8nMdJ79Z-nRjW@Ri0KR*Rot8",
+      "color": "#8c7359",
+      "alt": "a person holding a tablet",
+      "author": "Centre for Ageing Better",
+      "authorUrl": "https://unsplash.com/@ageing_better?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-person-holding-a-tablet-q4-N9h6vx8w?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A8886D",
+          "w": 0.4351
+        },
+        {
+          "hex": "#795D45",
+          "w": 0.3764
+        },
+        {
+          "hex": "#443020",
+          "w": 0.1884
+        }
+      ]
+    },
+    {
+      "id": "Rohz2qhg8Wg",
+      "small": "https://images.unsplash.com/photo-1524783091248-e1ea991d104f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1524783091248-e1ea991d104f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LIEylF00j]WBo2xuMx%g9FRjtRj?",
+      "color": "#595959",
+      "alt": "people sitting inside room",
+      "author": "Quilia",
+      "authorUrl": "https://unsplash.com/@heyquilia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-sitting-inside-room-Rohz2qhg8Wg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#616364",
+          "w": 0.4059
+        },
+        {
+          "hex": "#8F9190",
+          "w": 0.3106
+        },
+        {
+          "hex": "#393C40",
+          "w": 0.2835
+        }
+      ]
+    },
+    {
+      "id": "1DmEae_U42k",
+      "small": "https://images.unsplash.com/photo-1787749755059-987f52076250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1787749755059-987f52076250?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxwcmludGluZyUyMG1hY2hpbmVzJTIwb2ZmaWNlfGVufDF8MHx8fDE3OTIxODQxNjl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3701,
+      "height": 2955,
+      "blurHash": "LVG+UMIUM{M{~qWBofWBD%ofayt7",
+      "color": "#a6a6a6",
+      "alt": "Five men working at wooden desks in a sunlit office with filing cabinets",
+      "author": "Smithsonian",
+      "authorUrl": "https://unsplash.com/@smithsonian?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/men-working-in-office-with-desks-1DmEae_U42k?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#979797",
+          "w": 0.5215
+        },
+        {
+          "hex": "#535353",
+          "w": 0.2684
+        },
+        {
+          "hex": "#D7D7D7",
+          "w": 0.2101
+        }
+      ]
+    },
+    {
+      "id": "snNHKZ-mGfE",
+      "small": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1583521214690-73421a1829a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LHI=0=MvD%Rk~qaKD%x[xbozM{D%",
+      "color": "#c0c0c0",
+      "alt": "stacks of paper documents and file folders",
+      "author": "Wesley Tingey",
+      "authorUrl": "https://unsplash.com/@wesleyphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stacks-of-paper-documents-and-file-folders-snNHKZ-mGfE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A9A297",
+          "w": 0.424
+        },
+        {
+          "hex": "#CBC7C5",
+          "w": 0.3128
+        },
+        {
+          "hex": "#83745F",
+          "w": 0.2632
+        }
+      ]
+    },
+    {
+      "id": "MldQeWmF2_g",
+      "small": "https://images.unsplash.com/photo-1513705153361-9bc726c8db67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1513705153361-9bc726c8db67?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4032,
+      "height": 3024,
+      "blurHash": "LMH2TL-;RPay01M{azj[t7WBM{js",
+      "color": "#737373",
+      "alt": "pile of papers",
+      "author": "Christa Dodoo",
+      "authorUrl": "https://unsplash.com/@krystagrusseck?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pile-of-papers-MldQeWmF2_g?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#817C73",
+          "w": 0.3653
+        },
+        {
+          "hex": "#A3A097",
+          "w": 0.3375
+        },
+        {
+          "hex": "#C7C5BC",
+          "w": 0.2972
+        }
+      ]
+    },
+    {
+      "id": "V29UWcALNko",
+      "small": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516409590654-e8d51fc2d25c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 2996,
+      "height": 2104,
+      "blurHash": "LgODqR8_-;Rj-;ayRjof~q%MIUa{",
+      "color": "#f3f3f3",
+      "alt": "stack of papers",
+      "author": "ron dyar",
+      "authorUrl": "https://unsplash.com/@prolabprints?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stack-of-papers-V29UWcALNko?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#F6F6F6",
+          "w": 0.5419
+        },
+        {
+          "hex": "#959595",
+          "w": 0.2446
+        },
+        {
+          "hex": "#D0D0D0",
+          "w": 0.2136
+        }
+      ]
+    },
+    {
+      "id": "DQHT-HrfiiQ",
+      "small": "https://images.unsplash.com/photo-1715522594847-67c90b5b8667?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1715522594847-67c90b5b8667?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzdGFja2VkJTIwcGFwZXIlMjByZWFtc3xlbnwxfDB8fHwxNzkyMTg0MTcxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4000,
+      "blurHash": "LCLD[SRN4.t7.8IoRjj?0Kt6WBt7",
+      "color": "#a6a6a6",
+      "alt": "a pile of white shredded paper sitting on top of a table",
+      "author": "Mahen Rin",
+      "authorUrl": "https://unsplash.com/@mahenrin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-pile-of-white-shredded-paper-sitting-on-top-of-a-table-DQHT-HrfiiQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C1B6B2",
+          "w": 0.3892
+        },
+        {
+          "hex": "#A49B97",
+          "w": 0.3583
+        },
+        {
+          "hex": "#DED3CD",
+          "w": 0.2525
+        }
+      ]
+    }
+  ]
+}

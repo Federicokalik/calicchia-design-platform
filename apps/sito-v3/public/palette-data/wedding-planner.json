@@ -1,0 +1,335 @@
+{
+  "slug": "wedding-planner",
+  "queries": [
+    "wedding table setting flowers",
+    "bride and groom rings",
+    "wedding venue terrace"
+  ],
+  "generatedAt": "2026-10-16T20:56:39.203Z",
+  "photos": [
+    {
+      "id": "O38Id_cyV4M",
+      "small": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1519225421980-715cb0215aed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LEKnMF%O9FMdD#kq_4ak?H00s+bW",
+      "color": "#d9d9d9",
+      "alt": "clear wine glass lot on table",
+      "author": "Photos by Lanty",
+      "authorUrl": "https://unsplash.com/@photos_by_lanty?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/clear-wine-glass-lot-on-table-O38Id_cyV4M?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D5D2D1",
+          "w": 0.4577
+        },
+        {
+          "hex": "#B6AFA5",
+          "w": 0.2761
+        },
+        {
+          "hex": "#977E5F",
+          "w": 0.2662
+        }
+      ]
+    },
+    {
+      "id": "nAvodiKjbTM",
+      "small": "https://images.unsplash.com/photo-1525441273400-056e9c7517b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1525441273400-056e9c7517b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LSLE4z4m4:Io.8%MMxIU9FV@ozWB",
+      "color": "#d9d9d9",
+      "alt": "fine dining setup",
+      "author": "Thomas William",
+      "authorUrl": "https://unsplash.com/@thomasw?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/fine-dining-setup-nAvodiKjbTM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E3E2E2",
+          "w": 0.418
+        },
+        {
+          "hex": "#C0B9B3",
+          "w": 0.3004
+        },
+        {
+          "hex": "#9A816D",
+          "w": 0.2816
+        }
+      ]
+    },
+    {
+      "id": "aEnH4hJ_Mrs",
+      "small": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LOL4NRt,OssC16XB%MD$Kk%fIUkq",
+      "color": "#d9d9d9",
+      "alt": "elegant table setting with floral centerpiece",
+      "author": "CHUTTERSNAP",
+      "authorUrl": "https://unsplash.com/@chuttersnap?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/elegant-table-setting-with-floral-centerpiece-aEnH4hJ_Mrs?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C2A370",
+          "w": 0.3953
+        },
+        {
+          "hex": "#D5D7CC",
+          "w": 0.3925
+        },
+        {
+          "hex": "#8B6A48",
+          "w": 0.2122
+        }
+      ]
+    },
+    {
+      "id": "PO56PwADoFU",
+      "small": "https://images.unsplash.com/photo-1676734627786-a3662ff6a243?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676734627786-a3662ff6a243?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwdGFibGUlMjBzZXR0aW5nJTIwZmxvd2Vyc3xlbnwxfDB8fHwxNzkyMTg0MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6557,
+      "height": 4371,
+      "blurHash": "LQI=AIxtD%xu~qI9ROxv%MV?t7oz",
+      "color": "#c0c0c0",
+      "alt": "a table set up for a formal dinner",
+      "author": "Thomas Beaman",
+      "authorUrl": "https://unsplash.com/@paunveiled?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-table-set-up-for-a-formal-dinner-PO56PwADoFU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#ADA8A3",
+          "w": 0.3521
+        },
+        {
+          "hex": "#817568",
+          "w": 0.3366
+        },
+        {
+          "hex": "#D9DBDE",
+          "w": 0.3112
+        }
+      ]
+    },
+    {
+      "id": "N1CZNuM_Fd8",
+      "small": "https://images.unsplash.com/photo-1529634597503-139d3726fed5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1529634597503-139d3726fed5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LOHLF{~p5RIVbH9YIosocERjxGj]",
+      "color": "#c0c0c0",
+      "alt": "woman touch man's hand",
+      "author": "Samantha Gades",
+      "authorUrl": "https://unsplash.com/@srosinger3997?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-touch-mans-hand-N1CZNuM_Fd8?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#C6B8B1",
+          "w": 0.384
+        },
+        {
+          "hex": "#A3978C",
+          "w": 0.3435
+        },
+        {
+          "hex": "#716B60",
+          "w": 0.2724
+        }
+      ]
+    },
+    {
+      "id": "RHAtRIT3-CE",
+      "small": "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6016,
+      "height": 4016,
+      "blurHash": "LLEern,.0fJB^km,R*tl%MwI-Voz",
+      "color": "#404040",
+      "alt": "couple wearing silver-colored rings",
+      "author": "Samantha Gades",
+      "authorUrl": "https://unsplash.com/@srosinger3997?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/couple-wearing-silver-colored-rings-RHAtRIT3-CE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#51483E",
+          "w": 0.3735
+        },
+        {
+          "hex": "#C1A394",
+          "w": 0.3311
+        },
+        {
+          "hex": "#1E1D14",
+          "w": 0.2954
+        }
+      ]
+    },
+    {
+      "id": "Ci9LwmMEyeI",
+      "small": "https://images.unsplash.com/photo-1654699643507-3047b3e07045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1654699643507-3047b3e07045?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4752,
+      "height": 3168,
+      "blurHash": "LFL4vlt69aM|00o}MxRi8|o#R5jY",
+      "color": "#a6a6a6",
+      "alt": "two wedding rings sitting on top of a white cloth",
+      "author": "Paige Johnson",
+      "authorUrl": "https://unsplash.com/@paigelizabethj?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/two-wedding-rings-sitting-on-top-of-a-white-cloth-Ci9LwmMEyeI?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A09B95",
+          "w": 0.3889
+        },
+        {
+          "hex": "#DEDFE2",
+          "w": 0.3121
+        },
+        {
+          "hex": "#BDBCB9",
+          "w": 0.299
+        }
+      ]
+    },
+    {
+      "id": "llWjwo200fo",
+      "small": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlkZSUyMGFuZCUyMGdyb29tJTIwcmluZ3N8ZW58MXwwfHx8MTc5MjE4NDE5NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LTL4EE~UY6ELrr%2IoaxK4yDVYMx",
+      "color": "#8c8c8c",
+      "alt": "man and woman holding hands",
+      "author": "Drew Coffman",
+      "authorUrl": "https://unsplash.com/@drewcoffman?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/man-and-woman-holding-hands-llWjwo200fo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#A6857A",
+          "w": 0.3839
+        },
+        {
+          "hex": "#CDA68F",
+          "w": 0.3299
+        },
+        {
+          "hex": "#E2DFDC",
+          "w": 0.2863
+        }
+      ]
+    },
+    {
+      "id": "vcshPRvJpwo",
+      "small": "https://images.unsplash.com/photo-1721677337543-37b07e7e28b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1721677337543-37b07e7e28b5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4864,
+      "height": 3648,
+      "blurHash": "LYG[G:~UIUIUNLWBM{af-:kCNGV@",
+      "color": "#404026",
+      "alt": "A view of an outdoor wedding venue from a window",
+      "author": "Ben Atkins",
+      "authorUrl": "https://unsplash.com/@benatkinsphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-view-of-an-outdoor-wedding-venue-from-a-window-vcshPRvJpwo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#967F5B",
+          "w": 0.3644
+        },
+        {
+          "hex": "#5B4C32",
+          "w": 0.3366
+        },
+        {
+          "hex": "#D0BC9D",
+          "w": 0.2991
+        }
+      ]
+    },
+    {
+      "id": "JL2n-GWXCJo",
+      "small": "https://images.unsplash.com/photo-1625038032515-308ab14d10b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625038032515-308ab14d10b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4500,
+      "height": 3000,
+      "blurHash": "L8J@??0MH=_3-nDj~q_3n#vzWU?b",
+      "color": "#d9d9d9",
+      "alt": "white and brown wooden tables and chairs",
+      "author": "Vitor Monthay",
+      "authorUrl": "https://unsplash.com/@vitormonthay?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-wooden-tables-and-chairs-JL2n-GWXCJo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B0A39C",
+          "w": 0.3673
+        },
+        {
+          "hex": "#D3CECB",
+          "w": 0.3651
+        },
+        {
+          "hex": "#897266",
+          "w": 0.2676
+        }
+      ]
+    },
+    {
+      "id": "gNg1CWnz6dM",
+      "small": "https://images.unsplash.com/photo-1612599542650-3b98fd99f96a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1612599542650-3b98fd99f96a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3500,
+      "height": 2333,
+      "blurHash": "LQCs:Pj_9DfixtR*oMj^M~Rjn$t7",
+      "color": "#264026",
+      "alt": "people walking on street during daytime",
+      "author": "Carlo Buttinoni",
+      "authorUrl": "https://unsplash.com/@buttinoni?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/people-walking-on-street-during-daytime-gNg1CWnz6dM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#82898D",
+          "w": 0.3992
+        },
+        {
+          "hex": "#4E634C",
+          "w": 0.3844
+        },
+        {
+          "hex": "#243723",
+          "w": 0.2164
+        }
+      ]
+    },
+    {
+      "id": "YvbGuitURjQ",
+      "small": "https://images.unsplash.com/photo-1625076932159-61a032e2b7ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1625076932159-61a032e2b7ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHx3ZWRkaW5nJTIwdmVudWUlMjB0ZXJyYWNlfGVufDF8MHx8fDE3OTIxODQxOTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 8209,
+      "height": 5473,
+      "blurHash": "LUK_RXRkofRj.TbIoIj@?wogodt7",
+      "color": "#f3f3f3",
+      "alt": "white and brown table and chairs set",
+      "author": "Pablo Lancaster Jones",
+      "authorUrl": "https://unsplash.com/@fotolancaster?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-and-brown-table-and-chairs-set-YvbGuitURjQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#E0E3E4",
+          "w": 0.435
+        },
+        {
+          "hex": "#B8BFC4",
+          "w": 0.326
+        },
+        {
+          "hex": "#7D7B73",
+          "w": 0.239
+        }
+      ]
+    }
+  ]
+}

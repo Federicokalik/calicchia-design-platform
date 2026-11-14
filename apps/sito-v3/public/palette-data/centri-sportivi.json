@@ -1,0 +1,254 @@
+{
+  "slug": "centri-sportivi",
+  "queries": [
+    "indoor sports court",
+    "outdoor padel courts",
+    "sports centre entrance"
+  ],
+  "generatedAt": "2026-10-12T19:51:03.583Z",
+  "photos": [
+    {
+      "id": "hEQpoeUuJXA",
+      "small": "https://images.unsplash.com/photo-1559369064-c4d65141e408?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1559369064-c4d65141e408?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5472,
+      "height": 3648,
+      "blurHash": "LC8qB7oL0KWBxHj[E1WB?bj[E0WB",
+      "color": "#260c0c",
+      "alt": "basketball court",
+      "author": "Patrick Schöpflin",
+      "authorUrl": "https://unsplash.com/@patrickschoepflin?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/basketball-court-hEQpoeUuJXA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#595A54",
+          "w": 0.3555
+        },
+        {
+          "hex": "#1B0904",
+          "w": 0.3333
+        },
+        {
+          "hex": "#3C3128",
+          "w": 0.3112
+        }
+      ]
+    },
+    {
+      "id": "AILEpOyczIk",
+      "small": "https://images.unsplash.com/photo-1775993167393-f2add1f8eec2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775993167393-f2add1f8eec2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LO8#,8%Nx]xu%%tStSt8t8t7t6og",
+      "color": "#264073",
+      "alt": "Empty indoor badminton courts with blue flooring",
+      "author": "Palak Pitroda",
+      "authorUrl": "https://unsplash.com/@palak_pitroda?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/empty-indoor-badminton-courts-with-blue-flooring-AILEpOyczIk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#324F7C",
+          "w": 0.3873
+        },
+        {
+          "hex": "#50739D",
+          "w": 0.3811
+        },
+        {
+          "hex": "#1C345B",
+          "w": 0.2316
+        }
+      ]
+    },
+    {
+      "id": "R3S6YdeHA6A",
+      "small": "https://images.unsplash.com/photo-1775993167284-8e6a6e56ab69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1775993167284-8e6a6e56ab69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5958,
+      "height": 3942,
+      "blurHash": "LMCQP#~qI9D%yZRkIUofo$j[oJxt",
+      "color": "#264073",
+      "alt": "Indoor badminton court with blue walls and floor",
+      "author": "Palak Pitroda",
+      "authorUrl": "https://unsplash.com/@palak_pitroda?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/indoor-badminton-court-with-blue-walls-and-floor-R3S6YdeHA6A?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#67809E",
+          "w": 0.397
+        },
+        {
+          "hex": "#334E73",
+          "w": 0.3483
+        },
+        {
+          "hex": "#212630",
+          "w": 0.2547
+        }
+      ]
+    },
+    {
+      "id": "ZqPDkCWq-7c",
+      "small": "https://images.unsplash.com/photo-1761644273884-83839f8f22e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1761644273884-83839f8f22e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxpbmRvb3IlMjBzcG9ydHMlMjBjb3VydHxlbnwxfDB8fHwxNzkxODM0NjU3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 7008,
+      "height": 4672,
+      "blurHash": "L99IJ-R28_WBtpoct6t54oRl--xs",
+      "color": "#4073c0",
+      "alt": "Blue pickleball court with joola logo",
+      "author": "Hoi Pham",
+      "authorUrl": "https://unsplash.com/@hprobotic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-pickleball-court-with-joola-logo-ZqPDkCWq-7c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#406CB9",
+          "w": 0.5588
+        },
+        {
+          "hex": "#3157A5",
+          "w": 0.3733
+        },
+        {
+          "hex": "#7895CA",
+          "w": 0.0679
+        }
+      ]
+    },
+    {
+      "id": "GMyV9wxQmYQ",
+      "small": "https://images.unsplash.com/photo-1786052620683-76306de5e5d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvdXRkb29yJTIwcGFkZWwlMjBjb3VydHN8ZW58MXwwfHx8MTc5MTgzNDY2MHww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1786052620683-76306de5e5d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxvdXRkb29yJTIwcGFkZWwlMjBjb3VydHN8ZW58MXwwfHx8MTc5MTgzNDY2MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LOFFsk.7IUn#_L%fRPaJ%MxtM{Ri",
+      "color": "#8c8c8c",
+      "alt": "Young man sitting, woman standing outdoors by glass fence",
+      "author": "César O'neill",
+      "authorUrl": "https://unsplash.com/@cesaroneill?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/young-man-sitting-woman-standing-outdoors-by-glass-fence-GMyV9wxQmYQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#898781",
+          "w": 0.5056
+        },
+        {
+          "hex": "#615C54",
+          "w": 0.2739
+        },
+        {
+          "hex": "#B7BDB2",
+          "w": 0.2206
+        }
+      ]
+    },
+    {
+      "id": "Uwr_TeE1Ts0",
+      "small": "https://images.unsplash.com/photo-1778957676600-f112c5dc628e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778957676600-f112c5dc628e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5761,
+      "height": 4338,
+      "blurHash": "LIC?1QuPWUV?T#K7aer=4;R5xDS#",
+      "color": "#260c0c",
+      "alt": "Stadium structure and modern building bathed in golden hour sunlight",
+      "author": "Jay Alexander",
+      "authorUrl": "https://unsplash.com/@jasont378?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/stadium-structure-and-modern-building-bathed-in-golden-hour-sunlight-Uwr_TeE1Ts0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#853A02",
+          "w": 0.3532
+        },
+        {
+          "hex": "#4B7093",
+          "w": 0.3274
+        },
+        {
+          "hex": "#271106",
+          "w": 0.3194
+        }
+      ]
+    },
+    {
+      "id": "QuT1R8FbQCw",
+      "small": "https://images.unsplash.com/photo-1778955785258-50b0b3acda3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1778955785258-50b0b3acda3b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5761,
+      "height": 4338,
+      "blurHash": "LeB#J6%$M|M|yZkXaeoKNHM_aeof",
+      "color": "#8cc0d9",
+      "alt": "Modern stadium architecture against a twilight sky",
+      "author": "Jay Alexander",
+      "authorUrl": "https://unsplash.com/@jasont378?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-stadium-architecture-against-a-twilight-sky-QuT1R8FbQCw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#7EB3D0",
+          "w": 0.4686
+        },
+        {
+          "hex": "#030715",
+          "w": 0.2689
+        },
+        {
+          "hex": "#527C9D",
+          "w": 0.2624
+        }
+      ]
+    },
+    {
+      "id": "A4VVwAt0xek",
+      "small": "https://images.unsplash.com/photo-1783201033905-a958c8f54e1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1783201033905-a958c8f54e1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 3259,
+      "height": 2185,
+      "blurHash": "LZHeh0%gIURO_4InI9jES%M_V?xa",
+      "color": "#d9d9f3",
+      "alt": "Modern curved building with flower-lined balconies under blue sky",
+      "author": "Barney Goodman",
+      "authorUrl": "https://unsplash.com/@bgoodpic?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/modern-curved-building-with-flower-lined-balconies-under-blue-sky-A4VVwAt0xek?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D5D6DF",
+          "w": 0.458
+        },
+        {
+          "hex": "#644A2B",
+          "w": 0.2877
+        },
+        {
+          "hex": "#9C8972",
+          "w": 0.2543
+        }
+      ]
+    },
+    {
+      "id": "oxoMSeKkajA",
+      "small": "https://images.unsplash.com/photo-1781443110900-e9d5e5dcb970?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1781443110900-e9d5e5dcb970?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxzcG9ydHMlMjBjZW50cmUlMjBlbnRyYW5jZXxlbnwxfDB8fHwxNzkxODM0NjYxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LUFY=O8_D*j].AMwaJWX4;s.s+WC",
+      "color": "#0c260c",
+      "alt": "A large building with a blue roof and green field",
+      "author": "Irish83",
+      "authorUrl": "https://unsplash.com/@irish83?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-large-building-with-a-blue-roof-and-green-field-oxoMSeKkajA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B6B9B6",
+          "w": 0.4738
+        },
+        {
+          "hex": "#162614",
+          "w": 0.2984
+        },
+        {
+          "hex": "#858B8B",
+          "w": 0.2278
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "slug": "make-up-artist",
+  "queries": [
+    "makeup brushes on table",
+    "bridal makeup application",
+    "cosmetic pigments palette"
+  ],
+  "generatedAt": "2026-10-12T18:56:30.280Z",
+  "photos": [
+    {
+      "id": "pxax5WuM7eY",
+      "small": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4096,
+      "height": 2731,
+      "blurHash": "LGCP-MRj0fa$-;RiIo%M57t7$MjY",
+      "color": "#264040",
+      "alt": "assorted make-up brushes closed up photography",
+      "author": "Rosa Rafael",
+      "authorUrl": "https://unsplash.com/@rosarafael?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-make-up-brushes-closed-up-photography-pxax5WuM7eY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#2B3A3B",
+          "w": 0.5301
+        },
+        {
+          "hex": "#5E605B",
+          "w": 0.2606
+        },
+        {
+          "hex": "#908983",
+          "w": 0.2093
+        }
+      ]
+    },
+    {
+      "id": "G8RhW9reUuc",
+      "small": "https://images.unsplash.com/photo-1659517175423-9e94aa553374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1659517175423-9e94aa553374?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LaHLVexaM|Rj~qM{M|NGx]Rjt7oy",
+      "color": "#c0c0c0",
+      "alt": "a purse with various items",
+      "author": "William Shu",
+      "authorUrl": "https://unsplash.com/@chillhigh?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-purse-with-various-items-G8RhW9reUuc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#CAC5BF",
+          "w": 0.4464
+        },
+        {
+          "hex": "#8D8581",
+          "w": 0.2832
+        },
+        {
+          "hex": "#595250",
+          "w": 0.2704
+        }
+      ]
+    },
+    {
+      "id": "UPJcFTylz5E",
+      "small": "https://images.unsplash.com/photo-1665072123924-5e52cd934d2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1665072123924-5e52cd934d2e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5788,
+      "height": 3864,
+      "blurHash": "LGHLbr-W0LXA_LIAD*M|%#iwIAkC",
+      "color": "#c0c0a6",
+      "alt": "a nice desk with a window",
+      "author": "Erika Fletcher",
+      "authorUrl": "https://unsplash.com/@joyshotsphotography?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-nice-desk-with-a-window-UPJcFTylz5E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#99968D",
+          "w": 0.3514
+        },
+        {
+          "hex": "#73645D",
+          "w": 0.3252
+        },
+        {
+          "hex": "#C3C3BA",
+          "w": 0.3234
+        }
+      ]
+    },
+    {
+      "id": "Kuaf9ch8wiw",
+      "small": "https://images.unsplash.com/photo-1621797064712-2ed3a36fc009?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1621797064712-2ed3a36fc009?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtYWtldXAlMjBicnVzaGVzJTIwb24lMjB0YWJsZXxlbnwxfDB8fHwxNzkxODMxMzgyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LPIqu_00.8RPIot8IUtQ56WCs;WB",
+      "color": "#d9d9d9",
+      "alt": "pink and black make up brushes",
+      "author": "Jessica Johnston",
+      "authorUrl": "https://unsplash.com/@jdjohnston?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/pink-and-black-make-up-brushes-Kuaf9ch8wiw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B1948A",
+          "w": 0.3753
+        },
+        {
+          "hex": "#766861",
+          "w": 0.3469
+        },
+        {
+          "hex": "#DED5D2",
+          "w": 0.2778
+        }
+      ]
+    },
+    {
+      "id": "4gK1Vy2sdJ0",
+      "small": "https://images.unsplash.com/photo-1613966802194-d46a163af70d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1613966802194-d46a163af70d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "LKDSXjWG1IMx%1RiITxZEMkCwIn$",
+      "color": "#402626",
+      "alt": "woman with pink lipstick holding white and purple toothbrush",
+      "author": "Chalo Garcia",
+      "authorUrl": "https://unsplash.com/@photosbychalo?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-with-pink-lipstick-holding-white-and-purple-toothbrush-4gK1Vy2sdJ0?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0A0808",
+          "w": 0.3543
+        },
+        {
+          "hex": "#B3A3A5",
+          "w": 0.3314
+        },
+        {
+          "hex": "#3C2D2A",
+          "w": 0.3144
+        }
+      ]
+    },
+    {
+      "id": "S29gGomXEfU",
+      "small": "https://images.unsplash.com/photo-1684868264466-4c4fcf0a5b37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1684868264466-4c4fcf0a5b37?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6048,
+      "height": 4024,
+      "blurHash": "LKCO,p0~of^jS#aes:s.Efw{k9Rk",
+      "color": "#595959",
+      "alt": "a woman in a red and gold bridal outfit",
+      "author": "gurpreet singh",
+      "authorUrl": "https://unsplash.com/@ajay_gill8054?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-woman-in-a-red-and-gold-bridal-outfit-S29gGomXEfU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0E0B0A",
+          "w": 0.3957
+        },
+        {
+          "hex": "#875B52",
+          "w": 0.341
+        },
+        {
+          "hex": "#59312B",
+          "w": 0.2634
+        }
+      ]
+    },
+    {
+      "id": "_B5vT7ZfCzg",
+      "small": "https://images.unsplash.com/photo-1571332283201-99c82a8b3046?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1571332283201-99c82a8b3046?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4256,
+      "height": 2832,
+      "blurHash": "LLK1wQt700%MD%?b?bju4nD%IURj",
+      "color": "#d9d9d9",
+      "alt": "women's black lipstick",
+      "author": "Jamie Coupaud",
+      "authorUrl": "https://unsplash.com/@jlcoupaud?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/womens-black-lipstick-_B5vT7ZfCzg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#D9D7D8",
+          "w": 0.4549
+        },
+        {
+          "hex": "#ACAAAB",
+          "w": 0.3677
+        },
+        {
+          "hex": "#6D6B6C",
+          "w": 0.1774
+        }
+      ]
+    },
+    {
+      "id": "KdbCwfzcwWE",
+      "small": "https://images.unsplash.com/photo-1602910344008-22f323cc1817?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1602910344008-22f323cc1817?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxicmlkYWwlMjBtYWtldXAlMjBhcHBsaWNhdGlvbnxlbnwxfDB8fHwxNzkxODMxMzg1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6240,
+      "height": 4160,
+      "blurHash": "LDI}9bD$0-}?pxNFRQIUD*MdDi%L",
+      "color": "#c0c0c0",
+      "alt": "woman in blue and red shirt",
+      "author": "Johan Mouchet",
+      "authorUrl": "https://unsplash.com/@johanmouchet?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/woman-in-blue-and-red-shirt-KdbCwfzcwWE?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B7938B",
+          "w": 0.3556
+        },
+        {
+          "hex": "#DBCCC8",
+          "w": 0.326
+        },
+        {
+          "hex": "#845C51",
+          "w": 0.3184
+        }
+      ]
+    },
+    {
+      "id": "3J4HyvV9bwY",
+      "small": "https://images.unsplash.com/photo-1560130055-e3306e04884b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1560130055-e3306e04884b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5754,
+      "height": 3701,
+      "blurHash": "LLNv[ByCxFWBMxV@ozRQ?^VsWXoL",
+      "color": "#d9d9c0",
+      "alt": "assorted-color powders",
+      "author": "Igor Rand",
+      "authorUrl": "https://unsplash.com/@igorrand?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/assorted-color-powders-3J4HyvV9bwY?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DBD3CB",
+          "w": 0.8097
+        },
+        {
+          "hex": "#AC5E54",
+          "w": 0.1
+        },
+        {
+          "hex": "#CA998D",
+          "w": 0.0903
+        }
+      ]
+    },
+    {
+      "id": "l3fh8RDxCvA",
+      "small": "https://images.unsplash.com/photo-1533562389935-457b1ae48a39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1533562389935-457b1ae48a39?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5184,
+      "height": 3456,
+      "blurHash": "LZG@.81*EB$NozR:wKf4xCRjnhoH",
+      "color": "#d98c73",
+      "alt": "macro photograph of eyeshadow palette",
+      "author": "Siora Photography",
+      "authorUrl": "https://unsplash.com/@siora18?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/macro-photograph-of-eyeshadow-palette-l3fh8RDxCvA?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#DD9A5C",
+          "w": 0.4143
+        },
+        {
+          "hex": "#7A818F",
+          "w": 0.3581
+        },
+        {
+          "hex": "#130E12",
+          "w": 0.2276
+        }
+      ]
+    },
+    {
+      "id": "_Y3IuVbPpmU",
+      "small": "https://images.unsplash.com/photo-1581273154768-0a9a16887d2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1581273154768-0a9a16887d2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5601,
+      "height": 3565,
+      "blurHash": "LbEBjZIu0y-O+0s+KgR.#hW.OGn,",
+      "color": "#c0260c",
+      "alt": "blue yellow and red square illustration",
+      "author": "Alexander Grey",
+      "authorUrl": "https://unsplash.com/@sharonmccutcheon?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/blue-yellow-and-red-square-illustration-_Y3IuVbPpmU?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#030202",
+          "w": 0.4213
+        },
+        {
+          "hex": "#6DAF85",
+          "w": 0.3101
+        },
+        {
+          "hex": "#E43D45",
+          "w": 0.2686
+        }
+      ]
+    },
+    {
+      "id": "PZ_-sCaBCaQ",
+      "small": "https://images.unsplash.com/photo-1548954638-082b560e0a66?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1548954638-082b560e0a66?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjb3NtZXRpYyUyMHBpZ21lbnRzJTIwcGFsZXR0ZXxlbnwxfDB8fHwxNzkxODMxMzg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5760,
+      "height": 3840,
+      "blurHash": "LBDb8HaHo~IV}v?ae.E*^*xaACIp",
+      "color": "#262626",
+      "alt": "brown and purple eyeshadow palette",
+      "author": "Lidye",
+      "authorUrl": "https://unsplash.com/@1ncreased?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/brown-and-purple-eyeshadow-palette-PZ_-sCaBCaQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#563C4F",
+          "w": 0.4152
+        },
+        {
+          "hex": "#211920",
+          "w": 0.3224
+        },
+        {
+          "hex": "#8E6182",
+          "w": 0.2624
+        }
+      ]
+    }
+  ]
+}
