@@ -1,4 +1,4 @@
--- Migration 167 — tool "Palette di settore", fase 2: brand kit in PDF.
+-- Migration 172 — tool "Palette di settore", fase 2: brand kit in PDF.
 --
 -- Chi usa il tool si iscrive alla newsletter (scopo dichiarato, consenso
 -- esplicito, double opt-in) e in regalo riceve il PDF della sua palette.
