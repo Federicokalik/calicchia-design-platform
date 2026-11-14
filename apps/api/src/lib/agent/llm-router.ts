@@ -219,12 +219,27 @@ export function getProviderForTask(task: LLMTask): ProviderConfig {
 }
 
 /**
+ * Provider UE (Infomaniak) per un task, senza ripiegare su provider USA.
+ * Serve per il testo libero dei visitatori del sito (es. ricerca del tool
+ * palette): se Infomaniak non è configurato restituisce null invece di
+ * passare a OpenAI come fa getProviderForTask.
+ */
+export function getEuProviderForTask(task: LLMTask): ProviderConfig | null {
+  const candidates = TASK_ROUTING[task] || TASK_ROUTING.chat;
+  for (const name of candidates) {
+    const provider = PROVIDERS[name];
+    if (provider && provider.provider === 'infomaniak' && isAvailable(provider)) return provider;
+  }
+  return null;
+}
+
+/**
  * Call OpenAI-compatible API (works for OpenAI, Perplexity, AND Infomaniak)
  */
 export async function callOpenAICompatible(
   config: ProviderConfig,
   messages: Array<{ role: string; content: string }>,
-  options?: { tools?: any[]; temperature?: number; max_tokens?: number; _task?: string; _channel?: string }
+  options?: { tools?: any[]; temperature?: number; max_tokens?: number; _task?: string; _channel?: string; signal?: AbortSignal }
 ): Promise<any> {
   // BK-11: degrade cleanly when no provider is configured — never send a
   // request with an empty `Authorization: Bearer` header. Callers wrap AI
@@ -252,6 +267,7 @@ export async function callOpenAICompatible(
       temperature: options?.temperature ?? 0.7,
       max_tokens: options?.max_tokens ?? 2000,
     }),
+    signal: options?.signal,
   });
 
   if (!res.ok) {
@@ -316,9 +332,23 @@ export async function callAnthropic(
 export async function generateText(
   task: LLMTask,
   messages: Array<{ role: string; content: string }>,
-  options?: { temperature?: number; max_tokens?: number }
+  options?: {
+    temperature?: number;
+    max_tokens?: number;
+    /** Solo provider UE (Infomaniak): lancia se non ce n'è uno configurato, mai fallback USA. */
+    euOnly?: boolean;
+    /** Interrompe la richiesta HTTP (solo provider OpenAI-compatibili). */
+    signal?: AbortSignal;
+  }
 ): Promise<string> {
-  const config = getProviderForTask(task);
+  let config: ProviderConfig;
+  if (options?.euOnly) {
+    const eu = getEuProviderForTask(task);
+    if (!eu) throw new Error(`Nessun provider UE configurato per il task "${task}"`);
+    config = eu;
+  } else {
+    config = getProviderForTask(task);
+  }
 
   if (config.provider === 'anthropic') {
     return callAnthropic(messages, options);

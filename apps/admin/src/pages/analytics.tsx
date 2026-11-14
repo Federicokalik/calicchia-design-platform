@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import {
   Eye, Users, Activity, MousePointer2, Clock, Smartphone,
   Trash2, Download, Plus, Target, Zap, FileBarChart, Layers, MapPin, Gauge,
-  Bot, Hash, FileWarning, FileCheck,
+  Bot, Hash, FileWarning, FileCheck, Palette,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -113,6 +113,7 @@ export default function AnalyticsPage() {
           <TabsTrigger value="ai" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Agenti AI</TabsTrigger>
           <TabsTrigger value="perf" className="gap-1.5"><Gauge className="h-3.5 w-3.5" />Performance</TabsTrigger>
           <TabsTrigger value="goals" className="gap-1.5"><Target className="h-3.5 w-3.5" />Goals</TabsTrigger>
+          <TabsTrigger value="palette" className="gap-1.5"><Palette className="h-3.5 w-3.5" />Ricerche palette</TabsTrigger>
           <TabsTrigger value="realtime" className="gap-1.5"><Zap className="h-3.5 w-3.5" />Real-time</TabsTrigger>
         </TabsList>
 
@@ -192,6 +193,11 @@ export default function AnalyticsPage() {
         {/* ─── GOALS ─────────────────────────────────────────────────────────── */}
         <TabsContent value="goals">
           <GoalsTab period={period} />
+        </TabsContent>
+
+        {/* ─── RICERCHE PALETTE (tool "Palette di settore") ──────────────────── */}
+        <TabsContent value="palette">
+          <PaletteSearchesTab />
         </TabsContent>
 
         {/* ─── REAL-TIME ─────────────────────────────────────────────────────── */}
@@ -600,3 +606,90 @@ function FunnelPreview({ goalId, period }: { goalId: string; period: PeriodValue
   );
 }
 
+type PaletteSearch = {
+  query_norm: string;
+  query_en: string | null;
+  locale: 'it' | 'en';
+  hits: number;
+  results: number;
+  first_seen: string;
+  last_seen: string;
+};
+
+/**
+ * Registro anonimo delle ricerche libere del tool "Palette di settore"
+ * (GET /api/palette/searches): solo testo normalizzato, niente dati dei
+ * visitatori. I settori curati non passano dall'API e non compaiono qui.
+ */
+function PaletteSearchesTab() {
+  const [sort, setSort] = useState<'recent' | 'hits'>('recent');
+  const { data, isLoading } = useQuery<{ searches: PaletteSearch[]; total: number; totalHits: number }>({
+    queryKey: ['palette-searches', sort],
+    queryFn: () => apiFetch(`/api/palette/searches?sort=${sort}&limit=200`),
+  });
+
+  if (isLoading) return <LoadingState />;
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <StatCard title="Ricerche diverse" value={(data?.total ?? 0).toLocaleString('it-IT')} icon={Palette} />
+        <StatCard title="Ricerche totali" value={(data?.totalHits ?? 0).toLocaleString('it-IT')} icon={Hash} />
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm font-medium">Ricerche palette</CardTitle>
+          <Select value={sort} onValueChange={(v) => setSort(v as 'recent' | 'hits')}>
+            <SelectTrigger className="h-8 w-44 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">Più recenti</SelectItem>
+              <SelectItem value="hits">Più cercate</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardHeader>
+        <CardContent>
+          {(!data?.searches || data.searches.length === 0) ? (
+            <EmptyState
+              title="Nessuna ricerca"
+              description="Le ricerche libere del tool Palette di settore appariranno qui."
+              icon={Palette}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-left text-muted-foreground border-b">
+                    <th className="py-2 pr-3 font-medium">Query</th>
+                    <th className="py-2 pr-3 font-medium">Traduzione</th>
+                    <th className="py-2 pr-3 font-medium text-right">Ricerche</th>
+                    <th className="py-2 pr-3 font-medium text-right">Risultati</th>
+                    <th className="py-2 font-medium text-right">Ultima ricerca</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {data.searches.map((r) => (
+                    <tr key={r.query_norm}>
+                      <td className="py-2 pr-3 font-medium">
+                        {r.query_norm}
+                        <Badge variant="outline" className="ml-2 text-[10px] h-4 px-1 uppercase">{r.locale}</Badge>
+                      </td>
+                      <td className="py-2 pr-3 text-muted-foreground">{r.query_en ?? '—'}</td>
+                      <td className="py-2 pr-3 text-right tabular-nums font-semibold">{r.hits.toLocaleString('it-IT')}</td>
+                      <td className={`py-2 pr-3 text-right tabular-nums ${r.results === 0 ? 'text-destructive' : ''}`}>{r.results}</td>
+                      <td className="py-2 text-right text-muted-foreground whitespace-nowrap">
+                        {new Date(r.last_seen).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

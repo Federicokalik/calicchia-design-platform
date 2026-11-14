@@ -86,7 +86,13 @@ function getMicroCase(row: AuditSequenceRow): string {
   return `In un progetto ${service}, il problema non era "rifare il sito": era togliere attrito nei primi 30 secondi. Abbiamo chiarito la promessa, accorciato il percorso verso il contatto e reso misurabile ogni richiesta. Meno rumore, più richieste buone.`;
 }
 
-async function hasClientRespondedOrBooked(row: AuditSequenceRow): Promise<boolean> {
+/**
+ * Il lead ha già prenotato una call o risposto a un'email dopo il contatto?
+ * Usata anche dalla sequenza palette-onboarding (jobs/lead-palette-sequence.ts).
+ */
+export async function hasClientRespondedOrBooked(
+  row: Pick<AuditSequenceRow, 'cal_booking_uid' | 'email' | 'contact_created_at'>
+): Promise<boolean> {
   if (row.cal_booking_uid) return true;
 
   const [booking] = await sql<{ exists: boolean }[]>`

@@ -38,7 +38,8 @@
       "services": "Servizi di interesse",
       "message": "Messaggio",
       "wantsCall": "Preferisco una chiamata",
-      "wantsMeet": "Preferisco un Google Meet"
+      "wantsMeet": "Preferisco un Google Meet",
+      "palette": "La tua palette"
     },
     "auditRequestType": "Audit gratuito 15min",
     "services": {
@@ -64,7 +65,8 @@
       "servicePlan": "mi interessa il pacchetto \"{plan}\" del servizio \"{service}\".",
       "service": "mi interessa il servizio \"{service}\".",
       "plan": "mi interessa il pacchetto \"{plan}\".",
-      "context": "Contesto: {context}."
+      "context": "Contesto: {context}.",
+      "palette": "ho creato una palette con lo strumento Palette di settore ({colors}) e vorrei usarla per il mio sito."
     },
     "validation": {
       "nameRequired": "Il nome è richiesto",
