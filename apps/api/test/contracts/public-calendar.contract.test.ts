@@ -57,6 +57,8 @@ import {
   type TestResponse,
 } from '../helpers/http';
 import { OFFICE_HOURS, romeIso, useFixtures } from '../helpers/fixtures';
+import { isRadicaleBackend, useCalendarBackend } from '../helpers/calendar-backend';
+import { storeProjectionRows } from '../helpers/calendar-rows';
 import { createNormalizer, type SnapshotNormalizer } from '../helpers/normalize';
 import { freezeTime, restoreTime } from '../helpers/clock';
 import type { Calendar, EventType } from '../../src/lib/calendar/types';
@@ -73,6 +75,7 @@ import {
 } from './_http-contract';
 
 const fx = useFixtures('contratto-sito', { resetBaseline: true });
+useCalendarBackend();
 
 const store = httpContractStore(
   'public-calendar',
@@ -293,6 +296,16 @@ function bookingBody(eventType: EventType, start: string, extra: Record<string, 
   };
 }
 
+/**
+ * Stato delle proiezioni di una prenotazione annullata: con lo store legacy la
+ * riga resta con status 'cancelled'; con lo store Radicale la risorsa
+ * booking-<uid>.ics viene tolta (design §9, stato desiderato "assente").
+ */
+const CANCELLED_PROJECTION_STATUSES: string[] = isRadicaleBackend() ? [] : ['cancelled'];
+
+/** Colonne delle proiezioni registrate negli effetti. */
+const PROJECTION_COLUMNS = ['calendar', 'summary', 'description', 'location', 'url', 'start_time', 'end_time', 'all_day', 'source', 'status'] as const;
+
 /** Stato di una prenotazione nel database: riga, proiezioni nel calendario 'bookings' e lead. */
 async function bookingState(uid: string): Promise<Record<string, unknown>> {
   const [booking] = await sql`
@@ -304,13 +317,16 @@ async function bookingState(uid: string): Promise<Record<string, unknown>> {
            (consent_ip IS NOT NULL) AS has_consent_ip
     FROM calendar_bookings WHERE uid = ${uid}
   `;
-  const projections = await sql`
-    SELECT c.slug AS calendar, e.summary, e.description, e.location, e.url,
-           e.start_time, e.end_time, e.all_day, e.source, e.status
-    FROM calendar_events e JOIN calendars c ON c.id = e.calendar_id
-    WHERE e.source = 'booking' AND e.source_id = ${uid}
-    ORDER BY e.created_at
-  `;
+  // Store Radicale: la risorsa booking-<uid>.ics letta dalla facade (helpers/calendar-rows.ts).
+  const projections = isRadicaleBackend()
+    ? await storeProjectionRows([uid], PROJECTION_COLUMNS)
+    : await sql`
+      SELECT c.slug AS calendar, e.summary, e.description, e.location, e.url,
+             e.start_time, e.end_time, e.all_day, e.source, e.status
+      FROM calendar_events e JOIN calendars c ON c.id = e.calendar_id
+      WHERE e.source = 'booking' AND e.source_id = ${uid}
+      ORDER BY e.created_at
+    `;
   const leads = await sql`
     SELECT name, email, phone, company, source, status, notes
     FROM leads WHERE source_id = ${uid}
@@ -818,7 +834,7 @@ test('POST /bookings/:uid/cancel: annulla con motivo, idempotente, libera lo slo
   assert.equal(row.status, 'cancelled');
   assert.equal(row.cancelled_by, 'attendee');
   assert.equal(row.cancellation_reason, 'Imprevisto di lavoro');
-  assert.deepEqual((state.projections as Array<{ status: string }>).map((p) => p.status), ['cancelled']);
+  assert.deepEqual((state.projections as Array<{ status: string }>).map((p) => p.status), CANCELLED_PROJECTION_STATUSES);
   record('manage/cancel', res, n(), { method: 'POST', path, body }, { effects: state });
 
   // Seconda richiesta: 200 e nessuna modifica (motivo e autore restano).
@@ -866,13 +882,15 @@ test("POST /bookings/:uid/reschedule: nuova prenotazione, originale annullata, p
   assert.equal(newRow.status, 'confirmed');
   assert.equal(newRow.rescheduled_from_uid, original.booking.uid);
   assert.equal(newRow.location_value, s.types.main.location_value);
-  assert.deepEqual((oldState.projections as Array<{ status: string }>).map((p) => p.status), ['cancelled']);
+  assert.deepEqual((oldState.projections as Array<{ status: string }>).map((p) => p.status), CANCELLED_PROJECTION_STATUSES);
   const newProjections = newState.projections as Array<{ status: string; url: string | null; location: string | null }>;
   assert.deepEqual(newProjections.map((p) => p.status), ['confirmed']);
-  // BUG ATTUALE (design §14, "meetingUrl null in riprogrammazione"): la nuova
-  // proiezione perde il link della riunione (url null) anche se la location
-  // della prenotazione lo contiene ancora.
-  assert.equal(newProjections[0].url, null);
+  // BUG ATTUALE dello store legacy (design §14, "meetingUrl null in
+  // riprogrammazione"): la nuova proiezione perde il link della riunione (url
+  // null) anche se la location della prenotazione lo contiene ancora. Con lo
+  // store Radicale il job project_booking lo ricalcola sempre
+  // (resolveLocationForBooking): differenza ammessa per quello store.
+  assert.equal(newProjections[0].url, isRadicaleBackend() ? s.types.main.location_value : null);
   assert.equal(newProjections[0].location, s.types.main.location_value);
 
   const n = normalizer()
@@ -960,6 +978,25 @@ test("POST /bookings/:uid/reschedule: 409 su uno slot sovrapposto all'originale 
   const path = bookingManagePath(original.booking.uid, token, 'reschedule');
   const body = { start: romeIso('2027-04-20', '10:30') };
   const res = await api.post(path, { body });
+  if (isRadicaleBackend()) {
+    // Store Radicale (design §9 "Proiezioni fuori dal busy", §14, piano F2
+    // "Prenotazioni"): la decisione legge con `db: tx` (l'originale è già
+    // annullata nella transazione) e le proiezioni booking-* non bloccano,
+    // quindi la riprogrammazione sovrapposta all'originale è accettata.
+    assert.equal(res.status, 200, res.text);
+    const newUid: string = res.json.booking.uid;
+    assert.equal(res.json.booking.start_time, romeIso('2027-04-20', '10:30'));
+    const oldState = await bookingState(original.booking.uid);
+    const newState = await bookingState(newUid);
+    assert.equal((oldState.booking as { status: string }).status, 'cancelled');
+    assert.deepEqual(oldState.projections, [], 'la proiezione dell\'originale è tolta');
+    assert.equal((newState.booking as { status: string }).status, 'confirmed');
+    assert.deepEqual((newState.projections as Array<{ status: string }>).map((p) => p.status), ['confirmed']);
+    record('manage/reschedule-409-sovrapposta-originale', res,
+      normalizer().alias(original.booking.uid, 'booking:originale').alias(newUid, 'booking:riprogrammata').alias(token, 'token:gestione'),
+      { method: 'POST', path, body }, { effects: oldState });
+    return;
+  }
   // BUG ATTUALE (design §14, "riprogrammazione che legge fuori dalla
   // transazione e resta bloccata dalla vecchia proiezione"): la transazione
   // annulla l'originale, ma computeAvailableSlots legge dal pool globale e
@@ -974,8 +1011,13 @@ test("POST /bookings/:uid/reschedule: 409 su uno slot sovrapposto all'originale 
     { method: 'POST', path, body }, { effects: state });
 });
 
-test.todo("reschedule: uno slot sovrapposto all'originale va accettato (design §14 e §15, F2)");
-test.todo('reschedule: la proiezione della nuova prenotazione conserva il link della riunione (design §14)');
+// Correzioni della F2 attive solo con lo store Radicale (design §12 "Parità
+// prima": con lo store legacy restano i comportamenti di oggi), verificate nel
+// caso 'manage/reschedule-409-sovrapposta-originale' e in 'manage/reschedule'.
+if (!isRadicaleBackend()) {
+  test.todo("reschedule: uno slot sovrapposto all'originale va accettato (design §14 e §15, F2)");
+  test.todo('reschedule: la proiezione della nuova prenotazione conserva il link della riunione (design §14)');
+}
 
 // ─── Form contatti ───────────────────────────────
 

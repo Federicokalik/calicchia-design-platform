@@ -4,6 +4,9 @@ import { cors } from 'hono/cors';
 import { logger as honoLogger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { bodyLimit } from 'hono/body-limit';
+import { RequestValidationError } from './lib/validation';
+import { ProformaError } from './lib/proforma/service';
+import { MailDeliveryError } from './lib/mail/outbound';
 import { HTTPException } from 'hono/http-exception';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { mkdirSync } from 'fs';
@@ -27,6 +30,7 @@ import { customers } from './routes/customers';
 import { subscriptions } from './routes/subscriptions';
 import { invoices } from './routes/invoices';
 import { domains } from './routes/domains';
+import { proformas } from './routes/proformas';
 import { media } from './routes/media';
 import { newsletter } from './routes/newsletter';
 import { blog } from './routes/blog';
@@ -57,6 +61,9 @@ import { calendarPublic } from './routes/calendar/public';
 import { calendarAdmin } from './routes/calendar/admin';
 import { calendarFeed } from './routes/calendar/feed';
 import { caldavBackend } from './routes/calendar/caldav-backend';
+import { calendarHealth } from './routes/calendar/health';
+import { calendarMigration } from './routes/calendar/migration';
+import { calendarAdminV2 } from './routes/calendar/admin-v2';
 import { domainCron } from './routes/domain-cron';
 import { notifications } from './routes/notifications';
 import { dashboard } from './routes/dashboard';
@@ -108,6 +115,7 @@ import { device } from './routes/device';
 import { backup } from './routes/backup';
 import { analyticsTrack } from './routes/analytics-track';
 import { mcpAuthMiddleware } from './middleware/mcp-auth';
+import { setGatewayApp } from './lib/mcp/api-gateway';
 import { caldavServiceAuth } from './middleware/caldav-service-auth';
 import { whatsappPublic, whatsappAdmin } from './routes/whatsapp';
 import { preferencesPublic } from './routes/preferences-public';
@@ -147,6 +155,14 @@ const LARGE_BODY_PREFIXES = [
   '/api/backup/import',
   '/api/whatsapp-admin/conversations/',
   '/api/portal/upload',
+  // Archivio della Fase 0 dello strumento di migrazione del calendario: fino a
+  // 20 MB, limite applicato dal router (routes/calendar/migration.ts, contratto
+  // f3-modules §10.2).
+  '/api/admin/calendar/migration/phase0/archive',
+  // Posta con allegati: fino a 20 MB di file (lib/mail/attachments.ts), che in
+  // JSON base64 diventano ~27 MB.
+  '/api/mail/send',
+  '/api/mail/drafts',
 ];
 app.use('*', async (c, next) => {
   const path = c.req.path.toLowerCase();
@@ -158,6 +174,9 @@ app.use('/api/ai/extract-invoice', bodyLimit({ maxSize: 20 * 1024 * 1024 }));
 app.use('/api/whatsapp-admin/conversations/*', bodyLimit({ maxSize: 16 * 1024 * 1024 }));
 app.use('/api/portal/upload', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 app.use('/api/portal/upload/*', bodyLimit({ maxSize: 50 * 1024 * 1024 }));
+app.use('/api/mail/send', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
+app.use('/api/mail/drafts', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
+app.use('/api/mail/drafts/*', bodyLimit({ maxSize: 32 * 1024 * 1024 }));
 // Full database restore uploads can be large; allow up to 200MB.
 app.use('/api/backup/import', bodyLimit({ maxSize: 200 * 1024 * 1024 }));
 // Refuse to start outside development without an explicit allowlist —
@@ -235,6 +254,8 @@ app.use('/api/assets/*', serveStatic({ root: './assets', rewriteRequestPath: (pa
 
 // Health check (no auth required)
 app.route('/api/health', health);
+// Salute del calendario (F2, design §16.5): stato pubblico, dettaglio con JWT admin.
+app.route('/api/health/calendar', calendarHealth);
 
 // Private files (SEC-10): quote PDFs / receipts / WhatsApp media. Public route —
 // access is gated by the signed URL, not by a session. Must stay OUT of the
@@ -461,6 +482,7 @@ const protectedPaths = [
   '/api/expenses',
   '/api/tax',
   '/api/domains',
+  '/api/proformas',
   '/api/media',
   '/api/blog',
   '/api/projects',
@@ -530,6 +552,7 @@ app.route('/api/invoices', invoices);
 app.route('/api/expenses', expenses);
 app.route('/api/tax', tax);
 app.route('/api/domains', domains);
+app.route('/api/proformas', proformas);
 app.route('/api/media', media);
 app.route('/api/blog', blog);
 app.route('/api/projects', projects);
@@ -543,6 +566,10 @@ app.route('/api/milestones', milestones);
 app.route('/api/time-entries', timeEntries);
 app.route('/api/project-comments', projectComments);
 app.route('/api/calcom', calcom);
+// Strumento di migrazione del calendario a Radicale (F3, contratto f3-modules
+// §10): montato PRIMA di /api/admin/calendar, stesso JWT admin (protectedPaths).
+app.route('/api/admin/calendar/migration', calendarMigration);
+app.route('/api/admin/calendar/v2', calendarAdminV2);
 app.route('/api/admin/calendar', calendarAdmin);
 app.route('/api/notifications', notifications);
 app.route('/api/dashboard', dashboard);
@@ -597,12 +624,19 @@ app.use('/api/mcp', mcpAuthMiddleware);
 app.use('/api/mcp/*', mcpAuthMiddleware);
 app.route('/api/mcp', mcp);
 
-// CalDAV backend — endpoint interni per il plugin Radicale (service-token auth).
-// Path top-level (NON sotto /api/calendar, che è il router pubblico). Mai
-// esposto dal reverse proxy: raggiungibile solo da Radicale su app-net.
+// CalDAV backend — POST /verify-credentials per il plugin caldes_auth di
+// Radicale (service-token auth, contratto control-plane §9.4). Path top-level
+// (NON sotto /api/calendar, che è il router pubblico). Radicale lo chiama sulla
+// rete interna caldav-int (CALDAV_BACKEND_URL=http://api-int:3001/...); il vhost
+// pubblico dell'API inoltra anche questo path, quindi la protezione è il Bearer.
 app.use('/api/caldav-backend', caldavServiceAuth);
 app.use('/api/caldav-backend/*', caldavServiceAuth);
 app.route('/api/caldav-backend', caldavBackend);
+
+// Gateway API generico dell'MCP (tool api_catalog / api_request): esegue le
+// route admin in-process. Registrato dopo tutti i mount così app.routes è
+// completo; i prefissi admin sono gli stessi protetti da authMiddleware.
+setGatewayApp(app, protectedPaths);
 
 // 404 handler
 app.notFound((c) => {
@@ -611,6 +645,17 @@ app.notFound((c) => {
 
 // Error handler
 app.onError((err, c) => {
+  // Validazione con dettagli per campo (lib/validation.ts): { error, details }.
+  if (err instanceof RequestValidationError) {
+    return c.json({ error: err.message, details: err.details }, 400);
+  }
+  // Proforma (stato non valido, numero già usato, dati mancanti) e consegna SMTP.
+  if (err instanceof ProformaError) {
+    return c.json({ error: err.message, ...err.extra }, err.status);
+  }
+  if (err instanceof MailDeliveryError) {
+    return c.json({ error: `Invio fallito: ${err.message}` }, 502);
+  }
   // HTTPException from fail() helper — expected errors (4xx)
   if (err instanceof HTTPException) {
     return c.json({ error: err.message }, err.status);

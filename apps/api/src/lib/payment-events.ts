@@ -17,6 +17,7 @@ import { sendEmail } from './email';
 import { renderPaymentConfirmedEmail } from '../templates/payment-confirmed';
 import { maskPII } from './webhook-sanitize';
 import { logger } from './logger';
+import { billingRecipients } from './customer-recipients';
 
 const log = logger.child({ scope: 'payment-events' });
 
@@ -437,11 +438,13 @@ async function sendPaymentConfirmedEmail(ctx: ConfirmationContext): Promise<void
   if (!ctx.customerId) return;
 
   const [customer] = await sql`
-    SELECT email, contact_name, company_name
+    SELECT email, billing_emails, contact_name, company_name
     FROM customers WHERE id = ${ctx.customerId} LIMIT 1
-  ` as Array<{ email: string | null; contact_name: string | null; company_name: string | null }>;
+  ` as Array<{ email: string | null; billing_emails: string[] | null; contact_name: string | null; company_name: string | null }>;
 
-  if (!customer?.email) return;
+  // Conferma di pagamento = comunicazione amministrativa: billing_emails se popolato.
+  const recipients = customer ? billingRecipients(customer) : [];
+  if (!recipients.length) return;
 
   // Best-effort: pick an invoice number to mention in the email.
   let invoiceNumber = '—';
@@ -489,7 +492,7 @@ async function sendPaymentConfirmedEmail(ctx: ConfirmationContext): Promise<void
   });
 
   await sendEmail({
-    to: customer.email,
+    to: recipients,
     subject: rendered.subject,
     html: rendered.html,
     text: rendered.text,

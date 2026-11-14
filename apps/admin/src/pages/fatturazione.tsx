@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
-  ExternalLink, Receipt, CreditCard, Link2, Repeat, FileCode2,
+  ExternalLink, Receipt, CreditCard, Link2, Repeat, FileCode2, FileText,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTopbar } from '@/hooks/use-topbar';
@@ -10,6 +11,7 @@ const LinksTab = lazy(() => import('@/components/fatturazione/links-tab'));
 const TrackerTab = lazy(() => import('@/components/fatturazione/tracker-tab'));
 const SubscriptionsTab = lazy(() => import('@/components/fatturazione/subscriptions-tab'));
 const SdiTab = lazy(() => import('@/components/fatturazione/sdi-tab'));
+const ProformaTab = lazy(() => import('@/components/fatturazione/proforma-tab'));
 
 function TabFallback() {
   return (
@@ -20,6 +22,8 @@ function TabFallback() {
 }
 
 export default function FatturazionePage() {
+  // ?tab=proforma (link dalla pagina Domini) apre direttamente un tab.
+  const [params] = useSearchParams();
   useTopbar({
     title: 'Fatturazione',
     subtitle: 'Pagamenti, link e tracker',
@@ -27,7 +31,7 @@ export default function FatturazionePage() {
 
   return (
     <div className="space-y-4">
-      <Tabs defaultValue="pagamenti">
+      <Tabs defaultValue={params.get('tab') || 'pagamenti'}>
         <TabsList>
           <TabsTrigger value="desksite" className="gap-1.5">
             <ExternalLink className="h-3.5 w-3.5" />
@@ -49,6 +53,10 @@ export default function FatturazionePage() {
             <Receipt className="h-3.5 w-3.5" />
             Tracker
           </TabsTrigger>
+          <TabsTrigger value="proforma" className="gap-1.5">
+            <FileText className="h-3.5 w-3.5" />
+            Proforma
+          </TabsTrigger>
           <TabsTrigger value="sdi" className="gap-1.5">
             <FileCode2 className="h-3.5 w-3.5" />
             XML SDI
@@ -65,6 +73,13 @@ export default function FatturazionePage() {
               allow="clipboard-write"
             />
           </div>
+        </TabsContent>
+
+        {/* Proforma */}
+        <TabsContent value="proforma" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <ProformaTab />
+          </Suspense>
         </TabsContent>
 
         {/* Payment schedules */}

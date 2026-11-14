@@ -13,7 +13,8 @@ import {
   otpExpiresAt,
   verifyOtpHash,
 } from '../lib/signing';
-import { decodeEntities, escapeHtml, quoteDisplayTitle } from '../lib/quotes/format';
+import { decodeEntities, escapeHtml, quoteCustomAmountSummary, quoteDisplayTitle } from '../lib/quotes/format';
+import { quotePdfAvailable, quotePdfName } from '../lib/quotes/pdf';
 import { ensureProjectForQuote } from '../lib/quotes/project';
 import { readPrivateFile } from '../lib/private-files';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../lib/whatsapp';
@@ -111,6 +112,7 @@ quotePublic.get('/:token', async (c) => {
     SELECT q.id, q.title, q.description, q.items, q.subtotal, q.tax_rate, q.tax_amount, q.total,
            q.currency, q.valid_until, q.notes, q.status, q.signed_at, q.signer_name,
            q.project_template, q.vessatorie_approved_at, q.custom_html_path,
+           q.pdf_path, q.signed_pdf_path,
            c.contact_name AS customer_name, c.company_name,
            c.email AS customer_email, c.phone AS customer_phone
     FROM quotes_v2 q
@@ -131,7 +133,17 @@ quotePublic.get('/:token', async (c) => {
   const pagamento = getPagamentoForQuote(quote.project_template);
   // Raw contacts stay server-side — the page only learns WHICH OTP channels
   // are available; masked hints are returned by the /otp endpoint after use.
-  const { project_template: _pt, custom_html_path, customer_email, customer_phone, ...publicQuote } = quote;
+  const {
+    project_template: _pt, custom_html_path, pdf_path, signed_pdf_path,
+    customer_email, customer_phone, ...publicQuote
+  } = quote;
+  // The document the customer reads before signing: the imported HTML for
+  // custom quotes, otherwise the rendered PDF (signed copy once available).
+  const documentType: 'html' | 'pdf' | null = custom_html_path
+    ? 'html'
+    : quotePdfAvailable(signed_pdf_path) || quotePdfAvailable(pdf_path)
+      ? 'pdf'
+      : null;
   const otpChannels = [
     ...(customer_email ? ['email'] : []),
     ...(customer_phone && isWhatsAppConfigured() ? ['whatsapp'] : []),
@@ -156,8 +168,10 @@ quotePublic.get('/:token', async (c) => {
       ...publicQuote,
       title: decodeEntities(String(publicQuote.title || '')),
       items,
-      // Boolean only — the storage path stays server-side.
-      has_document: !!custom_html_path,
+      // Boolean + kind only — the storage path stays server-side.
+      has_document: documentType !== null,
+      document_type: documentType,
+      amount_summary: quoteCustomAmountSummary(quote.project_template),
       otp_channels: otpChannels,
     },
     pagamento,
@@ -165,43 +179,72 @@ quotePublic.get('/:token', async (c) => {
   });
 });
 
-// GET /api/quote-sign/:token/document — full custom-HTML document, so the
-// customer can READ what they sign (the stub items table is not the contract).
+// GET /api/quote-sign/:token/document — the full document, so the customer
+// can READ what they sign (the items table on the page is only a summary).
+//   - custom-HTML quotes: the imported document (sanitized at import:
+//     cleanCustomQuoteHtml strips scripts/active content)
+//   - template quotes: the rendered PDF (pdf_path, or signed_pdf_path once
+//     signed). sendQuote() regenerates it before every send and the editor
+//     drops it on content changes, so it reflects the current content.
 // Same trust level as the quote itself: possessing the signature token grants
-// view access. The HTML was sanitized at import (cleanCustomQuoteHtml strips
-// scripts/active content). Standard template quotes have no stored document.
+// view access.
 quotePublic.get('/:token/document', async (c) => {
   const { token } = c.req.param();
   if (!UUID_RE.test(token)) return c.json({ error: 'Documento non disponibile' }, 404);
   const rows = await sql`
-    SELECT id, custom_html_path FROM quotes_v2 WHERE signature_token = ${token}
+    SELECT id, title, custom_html_path, pdf_path, signed_pdf_path FROM quotes_v2 WHERE signature_token = ${token}
   `;
-  if (!rows.length || !rows[0].custom_html_path) return c.json({ error: 'Documento non disponibile' }, 404);
+  if (!rows.length) return c.json({ error: 'Documento non disponibile' }, 404);
+  const row = rows[0];
 
-  const name = String(rows[0].custom_html_path).split('/').pop() || '';
-  let html: string;
-  try {
-    html = (await readPrivateFile('quotes', name)).toString('utf-8');
-  } catch {
-    return c.json({ error: 'Documento non trovato nello storage' }, 404);
-  }
-
-  c.header('X-Robots-Tag', 'noindex, nofollow');
-  c.header('Cache-Control', 'private, no-store');
   // The sign page embeds this document in an iframe. The global security
   // headers (X-Frame-Options DENY + frame-ancestors 'none', app.ts) must be
   // relaxed HERE ONLY — same pattern as the trust-index embed in public.ts.
   // Via the admin nginx /api proxy the iframe is same-origin ('self'); the
-  // direct api origin is allowed for the admin host too. The document was
-  // sanitized at import (scripts/active content stripped), CSP still blocks
-  // any script as defense in depth.
+  // direct api origin is allowed for the admin host too.
   const adminOrigin = (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, '');
+  c.header('X-Robots-Tag', 'noindex, nofollow');
+  c.header('Cache-Control', 'private, no-store');
   c.header('X-Frame-Options', 'SAMEORIGIN');
+
+  if (row.custom_html_path) {
+    const name = String(row.custom_html_path).split('/').pop() || '';
+    let html: string;
+    try {
+      html = (await readPrivateFile('quotes', name)).toString('utf-8');
+    } catch {
+      return c.json({ error: 'Documento non trovato nello storage' }, 404);
+    }
+    // CSP still blocks any script as defense in depth.
+    c.header(
+      'Content-Security-Policy',
+      `default-src 'none'; style-src 'unsafe-inline' https:; img-src data: https:; font-src data: https:; frame-ancestors 'self' ${adminOrigin}; base-uri 'none'`,
+    );
+    return c.html(html);
+  }
+
+  const pdfName = [row.signed_pdf_path, row.pdf_path]
+    .filter((p) => quotePdfAvailable(p))
+    .map((p) => quotePdfName(p))
+    .find((n): n is string => !!n);
+  if (!pdfName) return c.json({ error: 'Documento non disponibile' }, 404);
+
+  let pdf: Buffer;
+  try {
+    pdf = await readPrivateFile('quotes', pdfName);
+  } catch {
+    return c.json({ error: 'Documento non trovato nello storage' }, 404);
+  }
+  const filename = `Preventivo ${quoteDisplayTitle(row.title)}`
+    .replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'Preventivo';
+  const download = c.req.query('download') === '1';
+  c.header('Content-Type', 'application/pdf');
   c.header(
-    'Content-Security-Policy',
-    `default-src 'none'; style-src 'unsafe-inline' https:; img-src data: https:; font-src data: https:; frame-ancestors 'self' ${adminOrigin}; base-uri 'none'`,
+    'Content-Disposition',
+    `${download ? 'attachment' : 'inline'}; filename="preventivo.pdf"; filename*=UTF-8''${encodeURIComponent(filename)}.pdf`,
   );
-  return c.html(html);
+  c.header('Content-Security-Policy', `default-src 'none'; frame-ancestors 'self' ${adminOrigin}`);
+  return c.body(new Uint8Array(pdf));
 });
 
 // POST /api/quote-sign/:token/otp — request OTP via email (default) or

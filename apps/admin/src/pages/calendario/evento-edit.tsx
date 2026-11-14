@@ -5,6 +5,8 @@ import { X, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { apiFetch } from '@/lib/api';
 import { isoToZonedInput, zonedInputToIso } from '@/lib/timezone';
+import { allDayRange } from '@/lib/all-day-range';
+import { buildRRule, parseRRule, type RecurrenceState, type RecurrenceType } from '@/lib/recurrence-form';
 import { useConfirm } from '@/hooks/use-confirm';
 
 interface Calendar {
@@ -37,6 +39,8 @@ interface Props {
   initial?: CalendarEvent | null;
   initialStart?: string; // se nuovo evento da slot click
   initialEnd?: string;
+  /** Selezione di giorni interi sul calendario: nuovo evento "tutto il giorno". */
+  initialAllDay?: boolean;
   onClose: () => void;
   onSaved: () => void;
 }
@@ -44,78 +48,6 @@ interface Props {
 interface FormProps extends Props {
   /** original_start dell'occorrenza cliccata, se espansa da un master ricorrente. */
   occurrenceStart?: string | null;
-}
-
-type RecurrenceType = 'none' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
-
-function parseUntil(value?: string): string | undefined {
-  if (!value) return undefined;
-  const compact = value.match(/^(\d{4})(\d{2})(\d{2})T?/);
-  if (compact) return `${compact[1]}-${compact[2]}-${compact[3]}`;
-  const d = new Date(value);
-  return isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
-}
-
-interface RecurrenceState {
-  type: RecurrenceType;
-  count?: number;
-  until?: string;
-  byDay?: string[];
-  raw?: string;
-  useRaw?: boolean;
-  /** Solo MONTHLY: 'monthday' = stesso giorno del mese; 'weekday' = per posizione (es. 2° martedì). */
-  monthlyMode?: 'monthday' | 'weekday';
-  setpos?: number;   // 1..4 oppure -1 (ultimo)
-  setposDay?: string; // MO..SU
-}
-
-// Chiavi RRULE che il form sa rappresentare e ricostruire senza perdite.
-// Qualsiasi altra chiave (INTERVAL, BYMONTHDAY, BYMONTH, WKST, …) forza la
-// modalità raw: si parte dalla stringa completa, mai da una versione lossy.
-const FORM_RRULE_KEYS = new Set(['FREQ', 'COUNT', 'UNTIL', 'BYDAY', 'BYSETPOS']);
-
-function parseRRule(rrule: string | null): RecurrenceState {
-  if (!rrule) return { type: 'none', raw: '' };
-  const parts = Object.fromEntries(rrule.split(';').map((p) => p.split('=')));
-  const freq = parts.FREQ as RecurrenceType;
-  if (!['DAILY', 'WEEKLY', 'MONTHLY'].includes(freq)) return { type: 'none', raw: rrule, useRaw: true };
-  if (Object.keys(parts).some((k) => !FORM_RRULE_KEYS.has(k.toUpperCase()))) {
-    return { type: freq, raw: rrule, useRaw: true };
-  }
-  const state: RecurrenceState = {
-    type: freq,
-    count: parts.COUNT ? parseInt(parts.COUNT) : undefined,
-    until: parseUntil(parts.UNTIL),
-    raw: rrule,
-    useRaw: false,
-  };
-  if (freq === 'MONTHLY' && parts.BYDAY && parts.BYSETPOS) {
-    state.monthlyMode = 'weekday';
-    state.setposDay = parts.BYDAY.split(',')[0];
-    state.setpos = parseInt(parts.BYSETPOS);
-  } else if (freq === 'MONTHLY') {
-    state.monthlyMode = 'monthday';
-  } else if (parts.BYDAY) {
-    state.byDay = parts.BYDAY.split(',');
-  }
-  return state;
-}
-
-function buildRRule(opts: RecurrenceState): string | null {
-  if (opts.useRaw) return opts.raw?.trim() || null;
-  if (opts.type === 'none') return null;
-  const parts: string[] = [`FREQ=${opts.type}`];
-  if (opts.type === 'WEEKLY' && opts.byDay && opts.byDay.length) parts.push(`BYDAY=${opts.byDay.join(',')}`);
-  if (opts.type === 'MONTHLY' && opts.monthlyMode === 'weekday' && opts.setposDay && opts.setpos) {
-    parts.push(`BYDAY=${opts.setposDay}`);
-    parts.push(`BYSETPOS=${opts.setpos}`);
-  }
-  if (opts.count) parts.push(`COUNT=${opts.count}`);
-  if (opts.until) {
-    const d = new Date(opts.until);
-    if (!isNaN(d.getTime())) parts.push(`UNTIL=${d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')}`);
-  }
-  return parts.join(';');
 }
 
 const DAYS_OF_WEEK = [
@@ -191,7 +123,7 @@ export default function EventoEditModal(props: Props) {
   );
 }
 
-function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, occurrenceStart }: FormProps) {
+function EventoEditForm({ initial, initialStart, initialEnd, initialAllDay, onClose, onSaved, occurrenceStart }: FormProps) {
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const isEdit = !!initial?.id;
@@ -219,7 +151,7 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, o
     initialEnd ? isoToZonedInput(initialEnd) :
     isoToZonedInput(new Date(Date.now() + 2 * 60 * 60_000).toISOString())
   );
-  const [allDay, setAllDay] = useState(initial?.all_day || false);
+  const [allDay, setAllDay] = useState(initial ? !!initial.all_day : !!initialAllDay);
   const [recurrence, setRecurrence] = useState(parseRRule(initial?.rrule || null));
   // In edit la rrule viene reinviata SOLO se l'utente tocca la sezione ricorrenza:
   // il round-trip parse→build è lossy e riscriverebbe la serie a ogni rinomina.
@@ -251,8 +183,13 @@ function EventoEditForm({ initial, initialStart, initialEnd, onClose, onSaved, o
       // valori originali del master (date, rrule con INTERVAL & co.) restano
       // intatti in DB — una rinomina è solo una rinomina.
       if (!isEdit || timesTouched) {
-        payload.start_time = zonedInputToIso(startInput);
-        payload.end_time = zonedInputToIso(endInput);
+        if (allDay) {
+          // Tutto il giorno: da mezzanotte a mezzanotte di Roma (fine esclusiva), mai orari arbitrari.
+          Object.assign(payload, allDayRange(startInput, endInput));
+        } else {
+          payload.start_time = zonedInputToIso(startInput);
+          payload.end_time = zonedInputToIso(endInput);
+        }
         payload.all_day = allDay;
       }
       if (!isEdit || recurrenceTouched) payload.rrule = buildRRule(recurrence);

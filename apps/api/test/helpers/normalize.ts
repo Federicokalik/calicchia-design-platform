@@ -199,9 +199,26 @@ export class SnapshotNormalizer {
     }
     if (typeof value !== 'string') return value;
     if (key && this.timestampKeys.has(key)) return value ? '<timestamp>' : value;
+    if (key === 'source_id' && !UUID_FULL_RE.test(value) && !BOOKING_UID_RE.test(value)) {
+      // source_id è un campo semantico (UID remoto di un'iscrizione,
+      // it-holiday-YYYY-MM-DD): resta com'è anche se lo stesso valore compare
+      // altrove come uid (con lo store Radicale l'uid di un evento di
+      // un'iscrizione è proprio l'UID remoto, design §5). Solo UUID e uid di
+      // prenotazione diventano segnaposto, come in collect().
+      return this.replacePrefixes(value);
+    }
     const exact = this.placeholders.get(value) ?? this.placeholders.get(value.toLowerCase());
     if (exact) return exact;
     return this.replaceInText(value);
+  }
+
+  /** Sostituisce i soli prefissi dei dati di test. */
+  private replacePrefixes(text: string): string {
+    let out = text;
+    for (const prefix of this.prefixes) {
+      if (out.includes(prefix)) out = out.split(prefix).join('<prefix>');
+    }
+    return out;
   }
 
   /** Sostituisce dentro un testo UUID, valori volatili già noti e prefissi di test. */
@@ -215,10 +232,7 @@ export class SnapshotNormalizer {
     for (const [raw, ph] of known) {
       if (out.includes(raw)) out = out.split(raw).join(ph);
     }
-    for (const prefix of this.prefixes) {
-      if (out.includes(prefix)) out = out.split(prefix).join('<prefix>');
-    }
-    return out;
+    return this.replacePrefixes(out);
   }
 }
 

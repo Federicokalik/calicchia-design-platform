@@ -3,7 +3,7 @@
  * Files are saved to UPLOAD_DIR and served via Hono static on /media/.
  */
 import { mkdirSync, unlinkSync, readdirSync, statSync, existsSync } from 'fs';
-import { writeFile } from 'fs/promises';
+import { readFile, stat, writeFile } from 'fs/promises';
 import { dirname, extname, join, relative, resolve } from 'path';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
@@ -49,6 +49,25 @@ export async function uploadFile(
 
   await writeFile(filePath, buffer);
   return { url: getFileUrl(key), key, size: buffer.length };
+}
+
+/**
+ * Legge un file della libreria media (`key` come restituita da uploadFile),
+ * con la stessa protezione da path traversal delle altre operazioni. Lancia
+ * ENOENT se il file non esiste.
+ */
+export async function readMediaFile(key: string): Promise<Buffer> {
+  return readFile(safeResolve(key));
+}
+
+/** Dimensione in byte di un file della libreria media, o null se non esiste o non è un file. */
+export async function mediaFileSize(key: string): Promise<number | null> {
+  try {
+    const info = await stat(safeResolve(key));
+    return info.isFile() ? info.size : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteFile(key: string): Promise<void> {
