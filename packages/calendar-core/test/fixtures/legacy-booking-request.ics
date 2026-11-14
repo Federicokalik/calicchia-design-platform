@@ -1,0 +1,35 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Caldes//Booking//IT
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+UID:bk7Hq2xLm9Pa@caldes.it
+SEQUENCE:2
+DTSTAMP:20261009T080000Z
+DTSTART:20261012T080000Z
+DTEND:20261012T090000Z
+SUMMARY:Consulenza\; prima chiamata
+DESCRIPTION:Chiamata conoscitiva di 60 minuti.\nPortare eventuali riferimen
+ ti.\n\nMessaggio: Vorrei parlare del sito: è urgente\; grazie. Più detta
+ gli à la carte 😀 — servizio e-commerce\, SEO\, manutenzione.\n\nLink
+  meeting: https://meet.google.com/abc-defg-hij\n\nGestisci la prenotazione
+ : https://sito.caldes.test/prenota/gestisci/bk7Hq2xLm9Pa?token=abc.def
+LOCATION:https://meet.google.com/abc-defg-hij
+STATUS:CONFIRMED
+ORGANIZER;CN=Federico Calicchia:mailto:info@calicchia.test
+ATTENDEE;CN=Rossi\, Mario;ROLE=REQ-PARTICIPANT;PARTSTAT=ACCEPTED;RSVP=FALSE
+ :mailto:mario.rossi@example.com
+TRANSP:OPAQUE
+BEGIN:VALARM
+TRIGGER:-PT24H
+ACTION:DISPLAY
+DESCRIPTION:Promemoria 24h: Consulenza\; prima chiamata
+END:VALARM
+BEGIN:VALARM
+TRIGGER:-PT30M
+ACTION:DISPLAY
+DESCRIPTION:Promemoria 30 minuti: Consulenza\; prima chiamata
+END:VALARM
+END:VEVENT
+END:VCALENDAR

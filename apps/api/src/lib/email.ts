@@ -581,7 +581,8 @@ export async function sendNewsletterEmail(data: {
 }
 
 export async function sendDomainExpiringEmail(data: {
-  to: string;
+  /** Destinatari amministrativi del cliente (lib/customer-recipients.ts). */
+  to: string | string[];
   customerName: string;
   domains: DomainForEmail[];
   renewUrl: string;

@@ -10,6 +10,7 @@ import {
   BookingConflictError,
   BookingValidationError,
 } from '../lib/calendar/booking';
+import { isCalendarUnavailable } from '../lib/calendar/errors';
 import { computeAvailableSlots } from '../lib/calendar/slots';
 import {
   sendBookingConfirmation,
@@ -58,6 +59,12 @@ contacts.get('/cal-slots', async (c) => {
 
     return c.json({ slots: slotsByDate });
   } catch (err) {
+    // Calendario non verificabile (store Radicale): 503 con il testo del
+    // design §9, come le route del calendario pubblico.
+    if (isCalendarUnavailable(err)) {
+      log.warn({ reason: err.reason, detail: err.detail }, 'cal-slots: calendario non verificabile (503)');
+      return c.json(err.toPublicBody(), 503);
+    }
     log.error({ err }, 'cal-slots error');
     return c.json({ error: 'Errore nel recupero degli slot disponibili' }, 500);
   }

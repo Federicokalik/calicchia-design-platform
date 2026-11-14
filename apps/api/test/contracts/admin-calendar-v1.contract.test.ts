@@ -60,6 +60,7 @@ import {
 } from '../helpers/db';
 import { api, request, signTestToken, type TestResponse } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
+import { isRadicaleBackend, useCalendarBackend } from '../helpers/calendar-backend';
 import { freezeTime, restoreTime } from '../helpers/clock';
 import { updateCalendar } from '../../src/lib/calendar/calendars';
 import type { ParsedEvent } from '../../src/lib/calendar/ics-import';
@@ -85,6 +86,7 @@ import {
 } from './_admin-v1';
 
 const fx = useFixtures('admin-v1', { resetBaseline: true });
+useCalendarBackend();
 
 const CONTRACT = 'admin-calendar-v1';
 const TEST_FILE = 'admin-calendar-v1.contract.test.ts';
@@ -474,13 +476,18 @@ test('events: elenco espanso con override, EXDATE, cancellati, filtro per calend
     method: 'GET', path: '/events', query: { calendar_id: seed.calendars.personale.id, ...range },
   }, { status: 200 });
 
-  // Bug noto (design §14, "expandRRule.between perde gli eventi in corso"):
-  // con `from` dentro lo Standup delle 09:00 l'occorrenza della serie manca,
-  // mentre il singolo già iniziato (Colloquio) c'è.
+  // Bug noto dello store legacy (design §14, "expandRRule.between perde gli
+  // eventi in corso"): con `from` dentro lo Standup delle 09:00 l'occorrenza
+  // della serie manca, mentre il singolo già iniziato (Colloquio) c'è. Lo
+  // store Radicale interroga l'indice per sovrapposizione e le restituisce
+  // entrambe.
   const inProgress = await contract('events/list-evento-in-corso', {
     method: 'GET', path: '/events', query: { calendar_id: cal.id, from: '2030-01-07T08:05:00.000Z', to: '2030-01-07T12:00:00.000Z' },
   }, { status: 200 });
-  assert.deepEqual(inProgress.json.events.map((o: { summary: string }) => o.summary), [fx.name('Colloquio')]);
+  assert.deepEqual(
+    inProgress.json.events.map((o: { summary: string }) => o.summary),
+    isRadicaleBackend() ? [fx.name('Colloquio'), fx.name('Standup')] : [fx.name('Colloquio')],
+  );
 
   await contract('events/list-parametri-mancanti', { method: 'GET', path: '/events', query: { to: range.to } }, { status: 400 });
   await contract('events/list-date-non-valide', { method: 'GET', path: '/events', query: { from: 'ieri', to: range.to } }, { status: 400 });
@@ -542,9 +549,12 @@ test('events: dettaglio per id e per uid, override, uid con forma di UUID', asyn
   await contract('events/get-per-id', { method: 'GET', path: `/events/${series.master.id}` }, { status: 200 });
   await contract('events/get-per-uid', { method: 'GET', path: `/events/${series.master.uid}` }, { status: 200 });
   await contract('events/get-override', { method: 'GET', path: `/events/${series.overrides[0].id}` }, { status: 200 });
-  // Bug noto (design §14, resolver in quattro passi): un UID con forma di
-  // UUID viene cercato come id e l'evento non si trova.
-  await contract('events/get-uid-forma-uuid', { method: 'GET', path: `/events/${UUID_SHAPED_UID}` }, { status: 404 });
+  // Bug noto dello store legacy (design §14, resolver in quattro passi): un
+  // UID con forma di UUID viene cercato come id e l'evento non si trova. Lo
+  // store Radicale lo trova per UID esatto (design §5 "getEvent").
+  await contract('events/get-uid-forma-uuid', { method: 'GET', path: `/events/${UUID_SHAPED_UID}` }, {
+    status: isRadicaleBackend() ? 200 : 404,
+  });
   await contract('events/get-inesistente', { method: 'GET', path: `/events/${MISSING_UUID}` }, { status: 404 });
   await contract('events/get-uid-inesistente', { method: 'GET', path: '/events/uid-inesistente' }, { status: 404 });
 });
@@ -588,15 +598,27 @@ test('events: creazione (singolo, ricorrente, tutto il giorno) e validazione', a
   }, 200);
   await post('events/create-tentative', { ...base, summary: fx.name('Forse'), status: 'tentative' }, 200);
 
-  // Bug noto (design §14, "POST con source arbitraria"): la route accetta
-  // qualsiasi source ammessa dal CHECK, anche 'ics_pull', e l'evento creato
-  // dall'admin diventa di sola lettura.
-  const pulled = await post('events/create-source-ics-pull', {
-    ...base, summary: fx.name('Finto importato'), source: 'ics_pull', source_id: 'remoto-finto',
-  }, 200);
-  await contract('events/update-source-ics-pull-creato-da-admin', {
-    method: 'PUT', path: `/events/${pulled.json.event.id}`, body: { summary: fx.name('Rinominato') },
-  }, { status: 403 });
+  if (isRadicaleBackend()) {
+    // Store Radicale (design §8 "Guardie", §14 "POST con source arbitraria →
+    // Whitelist"): la source dal client è ammessa solo in {admin, manual, mcp,
+    // agent}, quindi 400 e nessun evento; il caso della modifica non ha più
+    // il suo presupposto.
+    await post('events/create-source-ics-pull', {
+      ...base, summary: fx.name('Finto importato'), source: 'ics_pull', source_id: 'remoto-finto',
+    }, 400);
+    store.notApplicable('events/update-source-ics-pull-creato-da-admin',
+      "lo store Radicale non crea eventi con source 'ics_pull' dal client (design §8, §14)");
+  } else {
+    // Bug noto (design §14, "POST con source arbitraria"): la route accetta
+    // qualsiasi source ammessa dal CHECK, anche 'ics_pull', e l'evento creato
+    // dall'admin diventa di sola lettura.
+    const pulled = await post('events/create-source-ics-pull', {
+      ...base, summary: fx.name('Finto importato'), source: 'ics_pull', source_id: 'remoto-finto',
+    }, 200);
+    await contract('events/update-source-ics-pull-creato-da-admin', {
+      method: 'PUT', path: `/events/${pulled.json.event.id}`, body: { summary: fx.name('Rinominato') },
+    }, { status: 403 });
+  }
 
   await post('events/create-calendar-id-mancante', { ...base, calendar_id: undefined, summary: fx.name('Senza calendario') }, 400);
   await post('events/create-titolo-mancante', { ...base, summary: '   ' }, 400);
@@ -742,11 +764,13 @@ test('events: eccezione su singola occorrenza (sposta, cancella, upsert, fuori r
     summary: fx.name('Lezione con ospite'),
   }, 200, () => overrideRows(master.id));
   // Anomalia ORPHAN_OVERRIDE_NOT_IN_RULE (design §13.4): il martedì non è
-  // nella regola, l'override viene accettato e compare come occorrenza autonoma.
+  // nella regola, l'override viene accettato e compare come occorrenza
+  // autonoma. Lo store Radicale non crea nuovi orfani (design §8): 409
+  // CALENDAR_CONFLICT e occorrenze invariate.
   await exception('events/exception-fuori-regola', master.id, {
     original_start: romeIso('2030-01-08', '17:00'),
     summary: fx.name('Lezione extra'),
-  }, 200, async () => occurrences(cal.id, '2030-01-07T00:00:00.000Z', '2030-01-10T00:00:00.000Z'));
+  }, isRadicaleBackend() ? 409 : 200, async () => occurrences(cal.id, '2030-01-07T00:00:00.000Z', '2030-01-10T00:00:00.000Z'));
 
   await exception('events/exception-original-start-mancante', master.id, { new_start: romeIso('2030-01-16', '18:00') }, 400);
   await exception('events/exception-non-ricorrente', single.id, { original_start: romeIso('2030-01-08', '09:00') }, 400);
@@ -795,6 +819,18 @@ test('events: duplicazione di singoli e serie, con spostamento e titolo', async 
 test('closures: GET crea il calendario "Festività e chiusure" quando non esiste', async () => {
   const before = await sql`SELECT count(*)::int AS n FROM calendars WHERE slug IN ('festivita', 'f')`;
   assert.equal(before[0].n, 0, 'la baseline non deve avere un calendario festività');
+  if (isRadicaleBackend()) {
+    // Store Radicale (design §7 "/closures", §14 "GET /closures crea il
+    // calendario → Rimosso"; invariante 7): nessuna creazione come effetto
+    // collaterale di una lettura. Senza collezione festività la lettura
+    // risponde 503 esplicito e non nasce nessun calendario.
+    const res = await contract('closures/get-crea-calendario', { method: 'GET', path: '/closures' }, {
+      status: 503,
+      effects: () => sql`SELECT slug FROM calendars WHERE slug IN ('festivita', 'f') OR role = 'holidays'`,
+    });
+    assert.equal(res.json.code, 'CALENDAR_UNAVAILABLE');
+    return;
+  }
   // Bug noto (design §14, "GET /closures crea il calendario"): una lettura
   // crea il calendario di sistema con lo slug 'festivita'.
   const res = await contract('closures/get-crea-calendario', { method: 'GET', path: '/closures' }, {
@@ -1315,7 +1351,9 @@ test('subscriptions: creazione con sync immediato, cache ETag, errori remoti e S
     const created = await create('subscriptions/create', 'Google lavoro', url('valido'));
     const subId = created.json.subscription.id as string;
     aliases.add(subId, 'sub:google');
-    assert.deepEqual(created.json.sync, { notModified: false, inserted: 0, removed: 0, error: null });
+    // Store Radicale: il pull verso l'indice (ics-split) importa i due eventi
+    // (design §12, differenza ammessa 3; §14 "parseIcs rotto").
+    assert.deepEqual(created.json.sync, { notModified: false, inserted: isRadicaleBackend() ? 2 : 0, removed: 0, error: null });
 
     const sync = (caseId: string, id: string, body: unknown, status = 200): Promise<TestResponse> =>
       contract(caseId, { method: 'POST', path: `/subscriptions/${id}/sync`, body }, {
@@ -1328,7 +1366,11 @@ test('subscriptions: creazione con sync immediato, cache ETag, errori remoti e S
     // fallisce con "Redirect 304 senza Location" e registra last_error invece
     // di risultare notModified. La cache ETag oggi non funziona mai.
     const conditional = await sync('subscriptions/sync-condizionale-304', subId, undefined);
-    assert.deepEqual(conditional.json.sync, { notModified: false, inserted: 0, removed: 0, error: 'Redirect 304 senza Location' });
+    // Store Radicale: validatori propri del pull (design §6.6, §14 "trappola
+    // del 304"): il 304 risulta notModified.
+    assert.deepEqual(conditional.json.sync, isRadicaleBackend()
+      ? { notModified: true, inserted: 0, removed: 0, error: null }
+      : { notModified: false, inserted: 0, removed: 0, error: 'Redirect 304 senza Location' });
     // force: niente header condizionali, scarica di nuovo.
     await sync('subscriptions/sync-force', subId, { force: true });
     await sync('subscriptions/sync-inesistente', MISSING_UUID, {}, 404);
@@ -1430,16 +1472,26 @@ test('subscriptions: anti-wipe al sync con eventi già importati, eventi importa
     const guarded = await contract('subscriptions/sync-anti-wipe', {
       method: 'POST', path: `/subscriptions/${subscription.id}/sync`,
     }, { status: 200, effects: syncEffects });
-    assert.match(guarded.json.sync.error, /protezione anti-wipe/);
+    if (isRadicaleBackend()) {
+      // Store Radicale (design §12, differenza ammessa 3; §14 "parseIcs
+      // rotto"): il pull legge il feed per intero, quindi niente anti-wipe;
+      // i due eventi prendono i titoli del remoto.
+      assert.deepEqual(guarded.json.sync, { notModified: false, inserted: 2, removed: 0, error: null });
+    } else {
+      assert.match(guarded.json.sync.error, /protezione anti-wipe/);
+    }
     assert.equal((await subscriptionEventRows(subscription.id)).length, 2);
-    // Con force il feed "vuoto" svuota davvero l'iscrizione (la copia duplicata resta).
+    // Con force il feed "vuoto" svuota davvero l'iscrizione (la copia duplicata
+    // resta). Con lo store Radicale il feed non è vuoto: nessuna modifica.
     const forced = await contract('subscriptions/sync-force-svuota', {
       method: 'POST', path: `/subscriptions/${subscription.id}/sync`, body: { force: true },
     }, {
       status: 200,
       effects: async () => ({ ...await syncEffects(), eventi_del_calendario: await calendarEventRows(cal.id) }),
     });
-    assert.deepEqual(forced.json.sync, { notModified: false, inserted: 0, removed: 2, error: null });
+    assert.deepEqual(forced.json.sync, isRadicaleBackend()
+      ? { notModified: false, inserted: 0, removed: 0, error: null }
+      : { notModified: false, inserted: 0, removed: 2, error: null });
   } finally {
     remote.restore();
   }

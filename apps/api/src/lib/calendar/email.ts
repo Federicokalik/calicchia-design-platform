@@ -8,6 +8,7 @@
 import { Resend } from 'resend';
 import { sql } from '../../db';
 import { buildIcs } from './ics';
+import { bookingMeetingUrl, hasLocationOverride, meetingProviderLabel } from './meeting-url';
 import { signBookingToken, isTokenSecretConfigured } from './token';
 import type { Booking, EventType } from './types';
 import { logger } from '../logger';
@@ -51,15 +52,21 @@ function formatTime(iso: string, tz: string): string {
 }
 
 function locationLabel(eventType: EventType, booking: Booking): string {
-  switch (eventType.location_type) {
+  // Il luogo della prenotazione (può essere stato scelto per lei, es. MEGA)
+  // vince su quello del tipo evento.
+  const type = hasLocationOverride(booking) ? booking.location_type : eventType.location_type;
+  const link = (url: string) => `<a href="${esc(url)}" style="color:#7c3aed">${esc(url)}</a>`;
+  switch (type) {
     case 'google_meet':
-      return booking.location_value
-        ? `Google Meet — <a href="${esc(booking.location_value)}" style="color:#7c3aed">${esc(booking.location_value)}</a>`
-        : 'Google Meet (link nel calendario)';
-    case 'custom_url':
-      return booking.location_value
-        ? `<a href="${esc(booking.location_value)}" style="color:#7c3aed">${esc(booking.location_value)}</a>`
-        : 'Link videocall';
+    case 'custom_url': {
+      const url = booking.location_value && /^https?:\/\//i.test(booking.location_value) ? booking.location_value : null;
+      if (!url) {
+        if (type === 'google_meet') return booking.location_value ? esc(booking.location_value) : 'Google Meet (link nel calendario)';
+        return booking.location_value ? esc(booking.location_value) : 'Link videocall';
+      }
+      const provider = meetingProviderLabel(url) ?? (type === 'google_meet' ? 'Google Meet' : null);
+      return provider ? `${esc(provider)} — ${link(url)}` : link(url);
+    }
     case 'in_person':
       return booking.location_value ? esc(booking.location_value) : 'In presenza (luogo da concordare)';
     case 'phone':
@@ -240,8 +247,7 @@ export async function sendBookingConfirmation({ booking, eventType }: SendOpts):
     organizerName: ORGANIZER_NAME,
     organizerEmail: ADMIN_EMAIL,
     manageUrl: manage || undefined,
-    meetingUrl: eventType.location_type === 'google_meet' || eventType.location_type === 'custom_url'
-      ? booking.location_value || null : null,
+    meetingUrl: bookingMeetingUrl(booking, eventType),
     method: 'REQUEST',
   });
 
@@ -341,8 +347,7 @@ export async function sendBookingReminder(opts: SendOpts & { kind: '24h' | '2h' 
     organizerName: ORGANIZER_NAME,
     organizerEmail: ADMIN_EMAIL,
     manageUrl: manage || undefined,
-    meetingUrl: eventType.location_type === 'google_meet' || eventType.location_type === 'custom_url'
-      ? booking.location_value || null : null,
+    meetingUrl: bookingMeetingUrl(booking, eventType),
     method: 'REQUEST',
     sequence: 0,
   });
@@ -439,6 +444,7 @@ export async function sendBookingRescheduled({
     organizerName: ORGANIZER_NAME,
     organizerEmail: ADMIN_EMAIL,
     manageUrl: manage || undefined,
+    meetingUrl: bookingMeetingUrl(booking, eventType),
     method: 'REQUEST',
     sequence: 1,
   });
@@ -531,8 +537,7 @@ export async function sendBookingApproved({ booking, eventType }: SendOpts): Pro
     organizerName: ORGANIZER_NAME,
     organizerEmail: ADMIN_EMAIL,
     manageUrl: manage || undefined,
-    meetingUrl: eventType.location_type === 'google_meet' || eventType.location_type === 'custom_url'
-      ? booking.location_value || null : null,
+    meetingUrl: bookingMeetingUrl(booking, eventType),
     method: 'REQUEST',
   });
 

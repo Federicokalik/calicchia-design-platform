@@ -19,8 +19,8 @@ function sanitizeItems(items: unknown): unknown[] {
 }
 import { sendEmail } from '../lib/email';
 import { sendWhatsAppText, sendWhatsAppMedia, isWhatsAppConfigured } from '../lib/whatsapp';
-import { renderQuoteHtml, injectSignatureIntoCustomHtml } from '../lib/quote-renderer';
-import { generateQuotePdf } from '../lib/quote-pdf';
+import { renderAndStoreQuotePdf, QuotePdfError } from '../lib/quotes/pdf';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 import { savePrivateFile, readPrivateFile } from '../lib/private-files';
 import { unbundleArtifactHtml, cleanCustomQuoteHtml } from '../lib/artifact-unbundle';
 import {
@@ -148,10 +148,10 @@ quotesV2.post('/generate-from-markdown', async (c) => {
       try {
         suggested = await sql`
           SELECT id, contact_name, company_name, email,
-                 billing_address->>'vat_number' AS vat_number
+                 COALESCE(vat_number, billing_address->>'vat_number') AS vat_number
           FROM customers
           WHERE (${nameHint} <> '' AND (contact_name ILIKE ${'%' + nameHint + '%'} OR company_name ILIKE ${'%' + nameHint + '%'}))
-             OR (${pivaHint} <> '' AND billing_address->>'vat_number' ILIKE ${'%' + pivaHint + '%'})
+             OR (${pivaHint} <> '' AND COALESCE(vat_number, billing_address->>'vat_number') ILIKE ${'%' + pivaHint.replace(/^IT(?=\d{11}$)/i, '') + '%'})
           LIMIT 5
         `;
       } catch (err) {
@@ -270,7 +270,7 @@ quotesV2.post('/', async (c) => {
   // Calculate totals
   const parsedItems = sanitizeItems(items || []);
   const subtotal = parsedItems.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
-  const rate = tax_rate ?? 22;
+  const rate = tax_rate ?? await defaultTaxRate();
   const taxAmount = subtotal * (rate / 100);
   const total = subtotal + taxAmount;
 
@@ -380,7 +380,7 @@ quotesV2.put('/:id', async (c) => {
   // A signed quote is a binding contract — its content must not change after
   // signature (would desync the "✓ Firmato digitalmente" PDF from what was
   // approved). The editor is reachable by URL even for signed quotes.
-  const [existing] = await sql`SELECT status FROM quotes_v2 WHERE id = ${id}`;
+  const [existing] = await sql`SELECT status, tax_rate FROM quotes_v2 WHERE id = ${id}`;
   if (!existing) return c.json({ error: 'Preventivo non trovato' }, 404);
   if (existing.status === 'signed') {
     return c.json({ error: 'Preventivo già firmato: non modificabile' }, 409);
@@ -394,10 +394,17 @@ quotesV2.put('/:id', async (c) => {
   if (body.items) {
     body.items = sanitizeItems(body.items);
     subtotal = body.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
-    const rate = body.tax_rate ?? 22;
+    // Senza tax_rate nel body vale quella salvata (prima: 22 fisso, mentre la
+    // colonna restava invariata → imposta e aliquota incoerenti).
+    const rate = Number(body.tax_rate ?? existing.tax_rate ?? await defaultTaxRate());
     taxAmount = subtotal * (rate / 100);
     total = subtotal + taxAmount;
   }
+
+  // Fields that end up in the rendered document. Internal notes, materials
+  // checklist and the auto-project flag don't, so they keep the PDF valid.
+  const contentChanged = ['customer_id', 'title', 'description', 'items', 'tax_rate', 'valid_until', 'notes', 'project_template']
+    .some((k) => body[k] !== undefined);
 
   const rows = await sql`
     UPDATE quotes_v2 SET
@@ -405,16 +412,21 @@ quotesV2.put('/:id', async (c) => {
       title = COALESCE(${body.title || null}, title),
       description = ${body.description !== undefined ? body.description : sql`description`},
       items = COALESCE(${body.items ? jsonb(body.items) : null}, items),
-      subtotal = COALESCE(${subtotal}, subtotal),
-      tax_rate = COALESCE(${body.tax_rate}, tax_rate),
-      tax_amount = COALESCE(${taxAmount}, tax_amount),
-      total = COALESCE(${total}, total),
+      -- ?? null: un parametro undefined (campo assente nel body) faceva fallire la query (UNDEFINED_VALUE → 500).
+      subtotal = COALESCE(${subtotal ?? null}, subtotal),
+      tax_rate = COALESCE(${body.tax_rate ?? null}, tax_rate),
+      tax_amount = COALESCE(${taxAmount ?? null}, tax_amount),
+      total = COALESCE(${total ?? null}, total),
       valid_until = ${body.valid_until !== undefined ? body.valid_until : sql`valid_until`},
       notes = ${body.notes !== undefined ? body.notes : sql`notes`},
       internal_notes = ${body.internal_notes !== undefined ? body.internal_notes : sql`internal_notes`},
       materials_checklist = COALESCE(${body.materials_checklist ? jsonb(body.materials_checklist) : null}, materials_checklist),
       project_template = ${body.project_template !== undefined ? jsonb(body.project_template) : sql`project_template`},
       auto_create_project = ${body.auto_create_project !== undefined ? body.auto_create_project : sql`auto_create_project`},
+      -- Content edited → the stored PDF no longer matches what the customer
+      -- would sign. Drop it: the sign page hides a stale document and the next
+      -- send / "Genera PDF" renders a fresh one.
+      pdf_path = ${contentChanged ? null : sql`pdf_path`},
       updated_at = now()
     WHERE id = ${id}
     RETURNING *
@@ -540,55 +552,13 @@ quotesV2.post('/:id/materials', async (c) => {
 // POST /api/quotes-v2/:id/generate-pdf — generate PDF
 quotesV2.post('/:id/generate-pdf', async (c) => {
   const { id } = c.req.param();
-
-  const rows = await sql`
-    SELECT q.*, c.contact_name AS customer_name, c.company_name
-    FROM quotes_v2 q
-    LEFT JOIN customers c ON c.id = q.customer_id
-    WHERE q.id = ${id}
-  `;
-  if (!rows.length) return c.json({ error: 'Non trovato' }, 404);
-
-  const quote = rows[0];
-
-  // Custom HTML quotes render the hand-crafted document as-is (signature
-  // injected into its data-sign placeholders once signed); everything else
-  // goes through the shared Swiss-editorial template.
-  let html: string;
-  if (quote.custom_html_path) {
-    const name = String(quote.custom_html_path).split('/').pop() || '';
-    try {
-      html = (await readPrivateFile('quotes', name)).toString('utf-8');
-    } catch {
-      return c.json({ error: 'Documento HTML non trovato nello storage' }, 404);
-    }
-    html = injectSignatureIntoCustomHtml(html, quote);
-  } else {
-    // Get settings for PDF styling
-    const settingsRows = await sql`SELECT value FROM site_settings WHERE key = 'quote.settings'`;
-    const settings = settingsRows[0]?.value || {};
-    // Render HTML (quote row has all required QuoteData fields from the JOIN)
-    html = renderQuoteHtml(quote as Parameters<typeof renderQuoteHtml>[0], settings);
+  try {
+    const result = await renderAndStoreQuotePdf(id);
+    return c.json({ pdf_url: result.pdfUrl, pdf_hash: result.pdfHash });
+  } catch (err) {
+    if (err instanceof QuotePdfError) return c.json({ error: err.message }, err.status);
+    throw err;
   }
-
-  // Generate PDF
-  const result = await generateQuotePdf(html, `Preventivo_${quote.title}`);
-
-  // Update quote with PDF path + hash. NEVER overwrite the hash once signed —
-  // for a signed quote pdf_hash_sha256 is the evidentiary signature hash, and
-  // regenerating the PDF would otherwise destroy the link to the approved content.
-  await sql`
-    UPDATE quotes_v2 SET
-      pdf_path = ${result.pdfPath},
-      pdf_hash_sha256 = CASE WHEN status = 'signed' THEN pdf_hash_sha256 ELSE ${result.pdfHash} END,
-      updated_at = now()
-    WHERE id = ${id}
-  `;
-
-  return c.json({
-    pdf_url: result.pdfUrl,
-    pdf_hash: result.pdfHash,
-  });
 });
 
 // Public endpoints are in quote-public.ts (mounted without auth)

@@ -1,7 +1,15 @@
 import { Hono } from 'hono';
 import { sql } from '../db';
+import { defaultTaxRate } from '../lib/tax/default-rate';
 
 export const clientProjects = new Hono();
+
+/** Data `YYYY-MM-DD` esistente nel calendario (2026-02-30 no): un valore non valido non filtra. */
+function validDay(value: string | undefined): value is string {
+  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === value;
+}
 
 const PREVIEW_PROVIDERS = ['netlify', 'vercel', 'wordpress', 'custom'] as const;
 const PREVIEW_STATUSES = ['draft', 'review', 'approved', 'archived'] as const;
@@ -145,11 +153,18 @@ clientProjects.get('/', async (c) => {
     ? sql`AND (name ILIKE ${'%' + search + '%'} OR customer_name ILIKE ${'%' + search + '%'} OR customer_company ILIKE ${'%' + search + '%'})`
     : sql``;
 
+  // Finestra di sovrapposizione (estremi inclusi) per la vista calendario e il widget agenda:
+  // progetti con start_date <= overlap_to e coalesce(target_end_date, start_date) >= overlap_from.
+  const overlapFrom = c.req.query('overlap_from');
+  const overlapTo = c.req.query('overlap_to');
+  const overlapFromFilter = validDay(overlapFrom) ? sql`AND COALESCE(target_end_date, start_date) >= ${overlapFrom}::date` : sql``;
+  const overlapToFilter = validDay(overlapTo) ? sql`AND start_date <= ${overlapTo}::date` : sql``;
+
   const [projects, allProjects] = await Promise.all([
     sql`
       SELECT *, COUNT(*) OVER() AS _total_count
       FROM client_projects_view
-      WHERE 1=1 ${statusFilter} ${customerFilter} ${typeFilter} ${categoryFilter} ${searchFilter}
+      WHERE 1=1 ${statusFilter} ${customerFilter} ${typeFilter} ${categoryFilter} ${searchFilter} ${overlapFromFilter} ${overlapToFilter}
       ORDER BY updated_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `,
@@ -265,15 +280,11 @@ clientProjects.post('/:id/create-invoice', async (c) => {
       return { __error: 'Progetto senza cliente', __status: 422 };
     }
 
-    const [settings] = await txSql`
-      SELECT (value->>'vat_regime') AS regime
-      FROM site_settings
-      WHERE key = 'freelancer.studio'
-      LIMIT 1
-    `;
-    const regime = settings?.regime ?? 'forfettario';
+    // Aliquota dal regime (lib/tax/default-rate.ts): prima l'imposta era 0 ma
+    // tax_rate restava al DEFAULT 22 della colonna, dati che si contraddicevano.
+    const taxRate = await defaultTaxRate();
     const subtotal = body.amount;
-    const tax = regime === 'forfettario' || regime === 'none' ? 0 : Math.round(body.amount * 0.22 * 100) / 100;
+    const tax = Math.round(body.amount * taxRate) / 100;
     const total = subtotal + tax;
     const lineItems = [
       {
@@ -286,7 +297,7 @@ clientProjects.post('/:id/create-invoice', async (c) => {
 
     const [invoice] = await txSql`
       INSERT INTO invoices (
-        customer_id, project_id, subtotal, tax, total, amount_due,
+        customer_id, project_id, subtotal, tax, tax_rate, total, amount_due,
         currency, status, issue_date, due_date, line_items, notes
       )
       VALUES (
@@ -294,6 +305,7 @@ clientProjects.post('/:id/create-invoice', async (c) => {
         ${project.id},
         ${subtotal},
         ${tax},
+        ${taxRate},
         ${total},
         ${total},
         COALESCE(${project.currency}, 'EUR'),

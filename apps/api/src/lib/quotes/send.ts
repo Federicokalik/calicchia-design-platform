@@ -2,15 +2,24 @@
  * Quote sending — shared by the immediate route (POST /api/quotes-v2/:id/send)
  * and the scheduled-send cron. Honest per-channel reporting: nothing is
  * marked "sent" unless at least one channel actually went out.
+ *
+ * The customer must be able to READ what they sign: before every send the PDF
+ * is regenerated from the current content, attached to the email and exposed
+ * on the sign page (GET /api/quote-sign/:token/document).
  */
 
 import { sql } from '../../db';
-import { sendEmail } from '../email';
+import { sendEmail, type EmailAttachment } from '../email';
 import { sendWhatsAppText, isWhatsAppConfigured } from '../whatsapp';
 import { logger } from '../logger';
-import { escapeHtml, quoteDisplayTitle, quoteSignUrl } from './format';
+import { readPrivateFile } from '../private-files';
+import { escapeHtml, quoteAmountSummary, quoteDisplayTitle, quoteSignUrl } from './format';
+import { quotePdfName, renderAndStoreQuotePdf } from './pdf';
 
 const log = logger.child({ scope: 'quote-send' });
+
+/** Above this size the PDF is not attached (the sign page still shows it). */
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
 
 export interface QuoteSendResult {
   ok: boolean;
@@ -38,10 +47,6 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
   const sentVia: string[] = [];
   const failed: Record<string, string> = {};
 
-  const displayTitle = quoteDisplayTitle(quote.title);
-  const contactName = String(quote.contact_name || '').trim();
-  const totalFmt = parseFloat(quote.total).toLocaleString('it-IT');
-
   if (channels?.includes('email') && !quote.customer_email) {
     failed.email = 'Email cliente mancante in anagrafica';
   }
@@ -51,22 +56,79 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
     failed.whatsapp = 'WhatsApp (GOWA) non configurato';
   }
 
-  if (channels?.includes('email') && quote.customer_email) {
+  const willEmail = channels?.includes('email') && !!quote.customer_email;
+  const willWhatsApp = channels?.includes('whatsapp') && !!quote.customer_phone && isWhatsAppConfigured();
+
+  // Template quotes: the sign page's items table is only a summary — the
+  // document is the PDF. Render it fresh from the current content; if that
+  // fails, do NOT send a link to a page where the customer can't read the
+  // document they would sign. Custom-HTML quotes already expose their document.
+  let pdfAttachment: EmailAttachment | null = null;
+  if ((willEmail || willWhatsApp) && !quote.custom_html_path) {
     try {
+      const pdf = await renderAndStoreQuotePdf(quoteId);
+      const name = quotePdfName(pdf.pdfPath);
+      if (willEmail && name) {
+        const buffer = await readPrivateFile('quotes', name);
+        if (buffer.length <= MAX_ATTACHMENT_BYTES) {
+          pdfAttachment = {
+            filename: `${safeFilename(`Preventivo ${quoteDisplayTitle(quote.title)}`)}.pdf`,
+            content: buffer,
+            contentType: 'application/pdf',
+          };
+        } else {
+          log.warn({ quoteId, bytes: buffer.length }, 'Quote PDF too large to attach — link only');
+        }
+      }
+    } catch (err) {
+      log.error({ err, quoteId }, 'Quote PDF generation failed before send');
+      return {
+        ok: false,
+        sentVia,
+        failed,
+        signUrl,
+        error: 'Generazione del PDF non riuscita: preventivo non inviato (il cliente non potrebbe leggere il documento da firmare)',
+      };
+    }
+  }
+
+  const displayTitle = quoteDisplayTitle(quote.title);
+  const contactName = String(quote.contact_name || '').trim();
+  const amount = quoteAmountSummary(quote);
+  const validUntil = quote.valid_until ? new Date(quote.valid_until).toLocaleDateString('it-IT') : 'revoca';
+
+  if (willEmail) {
+    try {
+      const attachedLine = pdfAttachment
+        ? 'In allegato trovi il documento completo in PDF: è lo stesso che firmerai online.'
+        : 'Al link trovi anche il documento completo da leggere prima della firma.';
       // sendEmail non lancia: restituisce { success: false } su errore o senza trasporto.
       const result = await sendEmail({
         to: quote.customer_email,
         subject: `Preventivo: ${displayTitle}`,
         html: `
+          <p style="margin:0 0 16px;font-size:12px;color:#999;">Messaggio automatico inviato dal gestionale di Calicchia Design. Puoi rispondere direttamente a questa email per qualsiasi domanda.</p>
           <p>Ciao${contactName ? ' ' + escapeHtml(contactName) : ''},</p>
-          <p>Ti invio il preventivo <strong>${escapeHtml(displayTitle)}</strong> per un totale di <strong>€${totalFmt}</strong>.</p>
+          <p>Ti invio il preventivo <strong>${escapeHtml(displayTitle)}</strong>.<br>Importo: <strong>${escapeHtml(amount)}</strong>.</p>
+          <p>${attachedLine}</p>
           <p>Puoi visionarlo e firmarlo digitalmente al seguente link:</p>
           <p><a href="${signUrl}" style="display:inline-block;padding:12px 24px;background:#f97316;color:white;border-radius:8px;text-decoration:none;font-weight:bold;">Visualizza e Firma</a></p>
-          <p>Il preventivo è valido fino al ${quote.valid_until ? new Date(quote.valid_until).toLocaleDateString('it-IT') : 'revoca'}.</p>
+          <p>Il preventivo è valido fino al ${validUntil}.</p>
           <br>
           <p>Federico Calicchia<br>Web Designer</p>
-          <p style="margin-top:16px;font-size:12px;color:#999;">Questo è un messaggio automatico inviato dal gestionale di Calicchia Design. Puoi rispondere direttamente a questa email per qualsiasi domanda.</p>
         `,
+        text: [
+          'Messaggio automatico inviato dal gestionale di Calicchia Design.',
+          '',
+          `Ciao${contactName ? ' ' + contactName : ''},`,
+          `ti invio il preventivo "${displayTitle}". Importo: ${amount}.`,
+          attachedLine,
+          `Puoi visionarlo e firmarlo qui: ${signUrl}`,
+          `Il preventivo è valido fino al ${validUntil}.`,
+          '',
+          'Federico Calicchia',
+        ].join('\n'),
+        attachments: pdfAttachment ? [pdfAttachment] : undefined,
       });
       if (!result.success) throw new Error(result.error || 'Invio email fallito');
       sentVia.push('email');
@@ -76,9 +138,12 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
     }
   }
 
-  if (channels?.includes('whatsapp') && quote.customer_phone && isWhatsAppConfigured()) {
+  if (willWhatsApp) {
     try {
-      const message = `Ciao${contactName ? ' ' + contactName : ''}! 👋\n\nTi invio il preventivo *${displayTitle}* per un totale di *€${totalFmt}*.\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!\n\n_Messaggio automatico inviato dal gestionale di Calicchia Design — puoi rispondere direttamente qui._`;
+      const docLine = quote.custom_html_path || !willEmail
+        ? 'Al link trovi il documento completo da leggere prima della firma.'
+        : 'Al link trovi il documento completo; te l\'ho inviato anche in PDF via email.';
+      const message = `_Messaggio automatico inviato dal gestionale di Calicchia Design — puoi rispondere direttamente qui._\n\nCiao${contactName ? ' ' + contactName : ''}! 👋\n\nTi invio il preventivo *${displayTitle}*.\nImporto: *${amount}*\n\n${docLine}\n\nPuoi visionarlo e firmarlo qui:\n${signUrl}\n\nPer qualsiasi domanda sono a disposizione!`;
       await sendWhatsAppText(quote.customer_phone, message);
       sentVia.push('whatsapp');
     } catch (err) {
@@ -107,4 +172,9 @@ export async function sendQuote(quoteId: string, channels: string[]): Promise<Qu
   `;
 
   return { ok: true, sentVia, failed, signUrl };
+}
+
+/** Filename safe for mail clients: no path/reserved chars, bounded length. */
+function safeFilename(s: string): string {
+  return s.replace(/[\\/:*?"<>|\u0000-\u001f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120) || 'Preventivo';
 }

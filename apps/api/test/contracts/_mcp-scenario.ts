@@ -36,6 +36,8 @@
 import assert from 'node:assert/strict';
 import { getBookingsCalendar } from '../../src/lib/calendar/calendars';
 import type { Calendar, CalendarEvent, EventType } from '../../src/lib/calendar/types';
+import { isRadicaleBackend } from '../helpers/calendar-backend';
+import { storeEventRows, storeOverrideRows, storeProjectionRows } from '../helpers/calendar-rows';
 import { SEED_CALENDAR_SLUGS, sql } from '../helpers/db';
 import {
   OFFICE_HOURS,
@@ -66,6 +68,22 @@ export const WEEK_TO = romeIso('2027-04-05');
  */
 export const DST_SHIFTED_EXDATE = '2027-04-01T08:00:00.000Z';
 export const DST_SHIFTED_OVERRIDE_START = '2027-03-29T08:00:00.000Z';
+
+/**
+ * Le stesse due eccezioni riallineate sulla griglia della serie (09:00 di
+ * Roma, 07:00Z dopo il cambio d'ora), come le scrive la migrazione con
+ * l'anomalia DST_SHIFTED_EXCEPTION (design §13.4, riallineamento attivo di
+ * default). Con lo store Radicale lo scenario usa queste: RadicaleStore non
+ * crea un override fuori regola (409, design §8 "niente nuovi orfani") e i dati
+ * migrati arrivano già riallineati (allowed-diffs, punto 5).
+ */
+export const REALIGNED_EXDATE = '2027-04-01T07:00:00.000Z';
+export const REALIGNED_OVERRIDE_START = '2027-03-29T07:00:00.000Z';
+
+/** Eccezioni della serie 'Standup' dello scenario per lo store sotto test. */
+export const STANDUP_EXCEPTIONS = isRadicaleBackend()
+  ? { exdate: REALIGNED_EXDATE, overrideStart: REALIGNED_OVERRIDE_START }
+  : { exdate: DST_SHIFTED_EXDATE, overrideStart: DST_SHIFTED_OVERRIDE_START };
 
 /** UID con forma di UUID (maiuscolo, come quelli generati da Apple Calendar). */
 export const UUID_SHAPED_UID = 'A1B2C3D4-E5F6-4A7B-8C9D-0E1F2A3B4C5D';
@@ -105,10 +123,18 @@ export class AliasRegistry {
     if (fixture.projection) this.event(`proiezione-${key}`, fixture.projection);
   }
 
-  /** Serie: master più override con le chiavi indicate (nello stesso ordine). */
+  /**
+   * Serie: master più override con le chiavi indicate (nello stesso ordine).
+   * Con lo store Radicale un override ha l'UID del master (RFC 5545, design
+   * §12 differenza ammessa 1): il suo uid resta con l'alias del master.
+   */
   series(key: string, series: SeriesFixture, overrideKeys: string[] = []): void {
     this.event(key, series.master);
-    series.overrides.forEach((ov, i) => this.event(overrideKeys[i] ?? `${key}-override-${i + 1}`, ov));
+    series.overrides.forEach((ov, i) => {
+      const overrideKey = overrideKeys[i] ?? `${key}-override-${i + 1}`;
+      if (ov.uid === series.master.uid) this.add(ov.id, `ev:${overrideKey}`);
+      else this.event(overrideKey, ov);
+    });
   }
 
   apply(normalizer: SnapshotNormalizer): SnapshotNormalizer {
@@ -211,11 +237,11 @@ export async function createBaseScenario(fx: Fixtures, registry: AliasRegistry):
     start_time: romeIso('2027-03-22', '09:00'),
     end_time: romeIso('2027-03-22', '09:15'),
     rrule: 'FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;COUNT=10',
-    exdates: [romeIso('2027-03-24', '09:00'), DST_SHIFTED_EXDATE],
+    exdates: [romeIso('2027-03-24', '09:00'), STANDUP_EXCEPTIONS.exdate],
     overrides: [
       { originalStart: romeIso('2027-03-30', '09:00'), start: romeIso('2027-03-30', '09:30'), end: romeIso('2027-03-30', '09:45'), summary: 'Standup posticipato' },
       { originalStart: romeIso('2027-03-31', '09:00'), status: 'cancelled' },
-      { originalStart: DST_SHIFTED_OVERRIDE_START, start: romeIso('2027-03-29', '12:00') },
+      { originalStart: STANDUP_EXCEPTIONS.overrideStart, start: romeIso('2027-03-29', '12:00') },
     ],
   });
   const palestra = await fx.series({
@@ -390,19 +416,26 @@ export async function bookingState(uid: string): Promise<{ booking: Record<strin
     JOIN calendar_event_types et ON et.id = b.event_type_id
     WHERE b.uid = ${uid}
   `;
-  const projections = await sql<Array<Record<string, unknown>>>`
-    SELECT c.slug AS calendar, e.id, e.summary, e.description, e.location, e.url,
-           e.start_time, e.end_time, e.all_day, e.source, e.source_id, e.status
-    FROM calendar_events e
-    JOIN calendars c ON c.id = e.calendar_id
-    WHERE e.source = 'booking' AND e.source_id = ${uid}
-    ORDER BY e.start_time, e.status
-  `;
+  // Store Radicale: la risorsa booking-<uid>.ics letta dalla facade (helpers/calendar-rows.ts).
+  const projections = isRadicaleBackend()
+    ? await storeProjectionRows([uid], ['calendar', 'id', 'summary', 'description', 'location', 'url', 'start_time', 'end_time', 'all_day', 'source', 'source_id', 'status'])
+    : await sql<Array<Record<string, unknown>>>`
+      SELECT c.slug AS calendar, e.id, e.summary, e.description, e.location, e.url,
+             e.start_time, e.end_time, e.all_day, e.source, e.source_id, e.status
+      FROM calendar_events e
+      JOIN calendars c ON c.id = e.calendar_id
+      WHERE e.source = 'booking' AND e.source_id = ${uid}
+      ORDER BY e.start_time, e.status
+    `;
   return { booking: booking ?? null, projections: [...projections] };
 }
 
 /** Righe di calendar_events per id (assenti = cancellate fisicamente), nell'ordine richiesto. */
 export async function eventRows(ids: string[]): Promise<Array<Record<string, unknown>>> {
+  if (isRadicaleBackend()) {
+    return storeEventRows(ids, ['calendar', 'id', 'uid', 'summary', 'description', 'location', 'url', 'start_time', 'end_time',
+      'all_day', 'rrule', 'exdates', 'recurrence_id', 'recurrence_master_id', 'source', 'source_id', 'status']);
+  }
   const rows = await sql<Array<Record<string, unknown>>>`
     SELECT c.slug AS calendar, e.id, e.uid, e.summary, e.description, e.location, e.url,
            e.start_time, e.end_time, e.all_day, e.rrule, e.exdates, e.recurrence_id,
@@ -417,6 +450,7 @@ export async function eventRows(ids: string[]): Promise<Array<Record<string, unk
 
 /** Override di una serie (righe con recurrence_master_id), ordinati per recurrence_id. */
 export async function overrideRows(masterId: string): Promise<Array<Record<string, unknown>>> {
+  if (isRadicaleBackend()) return storeOverrideRows(masterId, ['id', 'summary', 'start_time', 'end_time', 'recurrence_id', 'status']);
   return [...await sql<Array<Record<string, unknown>>>`
     SELECT id, summary, start_time, end_time, recurrence_id, status
     FROM calendar_events
