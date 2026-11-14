@@ -32,7 +32,7 @@ const sizeStyles: Record<Size, string> = {
 };
 
 const variantStyles: Record<Variant, string> = {
-  solid: 'text-white',
+  solid: '',
   ghost:
     'border border-current transition-hover-color hover:bg-[var(--color-text-primary)] hover:text-[var(--color-surface)]',
   underline:

@@ -11,6 +11,7 @@
     "percheScegliereMe": "Perché scegliere me",
     "blog": "Blog",
     "risorse": "Risorse",
+    "paletteDiSettore": "Palette di settore",
     "areaClienti": "Area Clienti",
     "faq": "FAQ",
     "freelance": "Web Designer Freelance"
@@ -47,7 +48,8 @@
     "quickPaths": "Percorsi rapidi",
     "studio": "Studio",
     "secondary": {
-      "resourcesDescription": "White paper e glossari curati.",
+      "resourcesDescription": "White paper, glossari e strumenti gratuiti.",
+      "paletteDescription": "Strumento gratuito: i colori del tuo settore, pronti da usare.",
       "clientAreaDescription": "Documenti, file e avanzamento progetto.",
       "professionsDescription": "Landing verticali per categorie e attività.",
       "faqDescription": "Dubbi frequenti prima di iniziare."

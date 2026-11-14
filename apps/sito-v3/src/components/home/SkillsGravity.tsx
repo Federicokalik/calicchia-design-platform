@@ -46,8 +46,9 @@ const VARIANT_STYLES: Record<typeof CHIPS[number]['variant'], React.CSSPropertie
 function iconColorFor(variant: typeof CHIPS[number]['variant']): string {
   switch (variant) {
     case 'ink':
-    case 'accent':
       return '#FAFAF7';
+    case 'accent':
+      return 'var(--color-accent-ink)';
     case 'outline':
     case 'cream':
       return 'var(--color-ink)';

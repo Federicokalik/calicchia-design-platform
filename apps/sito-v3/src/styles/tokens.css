@@ -17,7 +17,7 @@
   /* Accent ambra (lava) — single hue, no deep variant */
   --color-accent: #F57F44;
   --color-accent-deep: #F57F44;       /* alias of --color-accent (decisione utente: accent unico) */
-  --color-accent-ink: #FFFFFF;        /* fg over accent */
+  --color-accent-ink: #111111;        /* fg over accent: inchiostro, 7,2:1 su #F57F44 (il bianco era 2,6:1) */
 
   /* Type families */
   --font-display: 'Funnel Display', ui-sans-serif, system-ui, sans-serif;

@@ -1,10 +1,16 @@
 import { Link } from '@/i18n/navigation';
 import { breadcrumbSchema, type BreadcrumbItem } from '@/data/structured-data';
+import { localizedPath, type Locale } from '@/lib/i18n';
 import { StructuredData } from './StructuredData';
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
   className?: string;
+  /**
+   * Lingua della pagina: se passata, gli URL dello schema BreadcrumbList sono
+   * localizzati (/en/...). I link visibili restano path IT: li localizza Link.
+   */
+  locale?: Locale;
 }
 
 /**
@@ -18,12 +24,13 @@ interface BreadcrumbsProps {
  *     { name: 'Web Design', url: '/servizi/web-design' },
  *   ]} />
  */
-export function Breadcrumbs({ items, className = '' }: BreadcrumbsProps) {
+export function Breadcrumbs({ items, className = '', locale }: BreadcrumbsProps) {
   if (items.length < 2) return null;
+  const schemaItems = locale ? items.map((i) => ({ ...i, url: localizedPath(i.url, locale) })) : items;
 
   return (
     <>
-      <StructuredData json={breadcrumbSchema(items)} />
+      <StructuredData json={breadcrumbSchema(schemaItems)} />
       <nav
         aria-label="Breadcrumb"
         className={`text-xs uppercase tracking-[0.18em] ${className}`}

@@ -1,0 +1,335 @@
+{
+  "slug": "officine-meccaniche",
+  "queries": [
+    "car repair garage",
+    "mechanic tools workbench",
+    "car engine close up"
+  ],
+  "generatedAt": "2026-10-12T18:42:42.119Z",
+  "photos": [
+    {
+      "id": "Fd6osyVbtG4",
+      "small": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 11648,
+      "height": 8736,
+      "blurHash": "L99Pfq0#Ip=_=xR+xFWV58-U-U9v",
+      "color": "#260c0c",
+      "alt": "Hands with grease working on a car engine with a metal wrench",
+      "author": "Christian Buehner",
+      "authorUrl": "https://unsplash.com/@christianbuehner?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/hands-working-on-car-engine-Fd6osyVbtG4?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#271A17",
+          "w": 0.4191
+        },
+        {
+          "hex": "#070203",
+          "w": 0.3327
+        },
+        {
+          "hex": "#5D3E2B",
+          "w": 0.2481
+        }
+      ]
+    },
+    {
+      "id": "n99UTGfbvFQ",
+      "small": "https://images.unsplash.com/photo-1711386689622-1cda23e10217?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1711386689622-1cda23e10217?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L59%PE~XLL%#+Y?a-=#R^i-6nNx^",
+      "color": "#590c0c",
+      "alt": "a man working on a car in a garage",
+      "author": "Joseph Pillado",
+      "authorUrl": "https://unsplash.com/@rvisionmedia?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-working-on-a-car-in-a-garage-n99UTGfbvFQ?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#4B2325",
+          "w": 0.4528
+        },
+        {
+          "hex": "#554F53",
+          "w": 0.3073
+        },
+        {
+          "hex": "#1D1514",
+          "w": 0.2399
+        }
+      ]
+    },
+    {
+      "id": "KhF58h0hTbc",
+      "small": "https://images.unsplash.com/photo-1676018366904-c083ed678e60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1676018366904-c083ed678e60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4898,
+      "height": 3266,
+      "blurHash": "LUD9S5%MR-bw~U%LWXozxCt5WVae",
+      "color": "#262626",
+      "alt": "a man working on a machine in a garage",
+      "author": "Kato Blackmore 🇺🇦",
+      "authorUrl": "https://unsplash.com/@katoblackmore?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/a-man-working-on-a-machine-in-a-garage-KhF58h0hTbc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#B7A07D",
+          "w": 0.357
+        },
+        {
+          "hex": "#140D14",
+          "w": 0.3383
+        },
+        {
+          "hex": "#3C3432",
+          "w": 0.3047
+        }
+      ]
+    },
+    {
+      "id": "S0cqn0mZU0E",
+      "small": "https://images.unsplash.com/photo-1591278169757-deac26e49555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1591278169757-deac26e49555?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjByZXBhaXIlMjBnYXJhZ2V8ZW58MXwwfHx8MTc5MTgzMDU1M3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4240,
+      "height": 2832,
+      "blurHash": "LGFYlWM_01Rj_34oxt?GIUWAxuM|",
+      "color": "#262626",
+      "alt": "white vintage car in garage",
+      "author": "Egor Vikhrev",
+      "authorUrl": "https://unsplash.com/@egor_vikhrev?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/white-vintage-car-in-garage-S0cqn0mZU0E?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#90897A",
+          "w": 0.3968
+        },
+        {
+          "hex": "#1F1C17",
+          "w": 0.3041
+        },
+        {
+          "hex": "#CCC5B4",
+          "w": 0.2991
+        }
+      ]
+    },
+    {
+      "id": "LtphNTXHQAc",
+      "small": "https://images.unsplash.com/photo-1580401884879-27237ae4468e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580401884879-27237ae4468e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 4810,
+      "height": 2706,
+      "blurHash": "LNF6CB00tQxuI^WCR+t6tRbcWCsm",
+      "color": "#8c8c8c",
+      "alt": "black and gray metal tool",
+      "author": "Tekton",
+      "authorUrl": "https://unsplash.com/@tekton_tools?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-gray-metal-tool-LtphNTXHQAc?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#96989B",
+          "w": 0.5932
+        },
+        {
+          "hex": "#57647A",
+          "w": 0.2664
+        },
+        {
+          "hex": "#222632",
+          "w": 0.1403
+        }
+      ]
+    },
+    {
+      "id": "WZqcWxzOnak",
+      "small": "https://images.unsplash.com/photo-1595345263387-c01f60e7c1b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1595345263387-c01f60e7c1b9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6720,
+      "height": 4480,
+      "blurHash": "LBCFR:0h%0oy9HxaI:W;={s.WXs:",
+      "color": "#260c0c",
+      "alt": "black and red handle tool",
+      "author": "James Lewis",
+      "authorUrl": "https://unsplash.com/@jamesplewis?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-handle-tool-WZqcWxzOnak?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#240F03",
+          "w": 0.3778
+        },
+        {
+          "hex": "#4E301B",
+          "w": 0.3459
+        },
+        {
+          "hex": "#A27E4E",
+          "w": 0.2763
+        }
+      ]
+    },
+    {
+      "id": "j8UApawyq_c",
+      "small": "https://images.unsplash.com/photo-1789639859519-6af84dcd4ab7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1789639859519-6af84dcd4ab7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5497,
+      "height": 4122,
+      "blurHash": "LNA9s8-nNIIpW=j[oLWC0hIps.xs",
+      "color": "#260c0c",
+      "alt": "A workbench with various hand tools hanging on a wall under two lamps",
+      "author": "Ali Kaan Uçar",
+      "authorUrl": "https://unsplash.com/@alik04?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/workbench-with-tools-and-lamps-j8UApawyq_c?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#0A0503",
+          "w": 0.5466
+        },
+        {
+          "hex": "#322010",
+          "w": 0.2967
+        },
+        {
+          "hex": "#7C5124",
+          "w": 0.1568
+        }
+      ]
+    },
+    {
+      "id": "B5jHf_4vBeg",
+      "small": "https://images.unsplash.com/photo-1580402427914-a6cc60d7d44f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1580402427914-a6cc60d7d44f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxtZWNoYW5pYyUyMHRvb2xzJTIwd29ya2JlbmNofGVufDF8MHx8fDE3OTE4MzA1NTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5100,
+      "height": 3373,
+      "blurHash": "LEDc5e_NTIi_j^spkWNtEyV@nPXR",
+      "color": "#737373",
+      "alt": "red and silver multi tool",
+      "author": "Tekton",
+      "authorUrl": "https://unsplash.com/@tekton_tools?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/red-and-silver-multi-tool-B5jHf_4vBeg?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#6A6563",
+          "w": 0.3897
+        },
+        {
+          "hex": "#8A8687",
+          "w": 0.3873
+        },
+        {
+          "hex": "#514441",
+          "w": 0.223
+        }
+      ]
+    },
+    {
+      "id": "u3RhNe3QJeM",
+      "small": "https://images.unsplash.com/photo-1725289339928-06ee31684df5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1725289339928-06ee31684df5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwxfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L9BWukRks:IT_NwuxZs.WE%2%g%M",
+      "color": "#262626",
+      "alt": "The engine compartment of a car with the hood up",
+      "author": "Luca Hooijer",
+      "authorUrl": "https://unsplash.com/@luxunderscore?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/the-engine-compartment-of-a-car-with-the-hood-up-u3RhNe3QJeM?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#383F47",
+          "w": 0.3759
+        },
+        {
+          "hex": "#676E76",
+          "w": 0.3486
+        },
+        {
+          "hex": "#0C1016",
+          "w": 0.2756
+        }
+      ]
+    },
+    {
+      "id": "xFjti9rYILo",
+      "small": "https://images.unsplash.com/photo-1429772011165-0c2e054367b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1429772011165-0c2e054367b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwyfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 5616,
+      "height": 3744,
+      "blurHash": "LFFFNk0LE2-o%LM{M{Ip9ZbHM{kD",
+      "color": "#26260c",
+      "alt": "gray engine bay",
+      "author": "Garett Mizunaka",
+      "authorUrl": "https://unsplash.com/@garett3?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/gray-engine-bay-xFjti9rYILo?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#887E71",
+          "w": 0.3586
+        },
+        {
+          "hex": "#4C4338",
+          "w": 0.3498
+        },
+        {
+          "hex": "#18120C",
+          "w": 0.2915
+        }
+      ]
+    },
+    {
+      "id": "aXxu0nVMGmk",
+      "small": "https://images.unsplash.com/photo-1686082307524-c89fb0bfadde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1686082307524-c89fb0bfadde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHwzfHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 4000,
+      "blurHash": "L78E6$9Fx]M{_N00xvMx_ND%-:M_",
+      "color": "#262626",
+      "alt": "the engine compartment of a car with its hood open",
+      "author": "igor constantino",
+      "authorUrl": "https://unsplash.com/@igoorconstantino?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/the-engine-compartment-of-a-car-with-its-hood-open-aXxu0nVMGmk?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#272627",
+          "w": 0.4424
+        },
+        {
+          "hex": "#040304",
+          "w": 0.3132
+        },
+        {
+          "hex": "#545353",
+          "w": 0.2444
+        }
+      ]
+    },
+    {
+      "id": "8vf8d5CVicw",
+      "small": "https://images.unsplash.com/photo-1622062934364-496d0b8b6959?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "regular": "https://images.unsplash.com/photo-1622062934364-496d0b8b6959?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w4NjEzODN8MHwxfHNlYXJjaHw0fHxjYXIlMjBlbmdpbmUlMjBjbG9zZSUyMHVwfGVufDF8MHx8fDE3OTE4MzA1NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "width": 6000,
+      "height": 3376,
+      "blurHash": "L7C~SWeT0|v${frsg3ix9[ix}tv~",
+      "color": "#262626",
+      "alt": "black and red engine bay",
+      "author": "Joshua Aragon",
+      "authorUrl": "https://unsplash.com/@goshua13?utm_source=calicchia_design&utm_medium=referral",
+      "photoUrl": "https://unsplash.com/photos/black-and-red-engine-bay-8vf8d5CVicw?utm_source=calicchia_design&utm_medium=referral",
+      "clusters": [
+        {
+          "hex": "#62595B",
+          "w": 0.4175
+        },
+        {
+          "hex": "#28262B",
+          "w": 0.3586
+        },
+        {
+          "hex": "#A39592",
+          "w": 0.2238
+        }
+      ]
+    }
+  ]
+}
