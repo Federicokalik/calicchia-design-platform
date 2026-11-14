@@ -38,6 +38,7 @@ import { projects } from './routes/projects';
 import { contacts } from './routes/contacts';
 import { geoAudit } from './routes/geo-audit';
 import { palette, paletteAdmin } from './routes/palette';
+import { paletteKit } from './routes/palette-kit';
 import { publicLeads } from './routes/public-leads';
 import { analytics } from './routes/analytics';
 import { keys } from './routes/keys';
@@ -317,6 +318,11 @@ app.route('/api/geo-audit', geoAudit);
 app.use('/api/palette/search', getOnly(createRateLimit(20, 10 * 60 * 1000)));
 app.use('/api/palette/download', postOnly(createRateLimit(30, 10 * 60 * 1000)));
 app.use('/api/palette/unsubscribe', createRateLimit(20, 60 * 1000));
+// Brand kit in PDF (fase 2): richiesta con captcha, conferma in POST dalla
+// pagina servita dall'API (i link in GET li aprono anche gli antivirus).
+app.use('/api/palette/kit', postOnly(createRateLimit(5, 10 * 60 * 1000)));
+app.use('/api/palette/kit/confirm', createRateLimit(20, 60 * 1000));
+app.route('/api/palette/kit', paletteKit);
 app.route('/api/palette', palette);
 app.route('/api/public-leads', publicLeads);
 app.route('/api/calendar', calendarPublic);

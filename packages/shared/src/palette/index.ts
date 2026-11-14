@@ -6,4 +6,5 @@ export * from './presets';
 export * from './select';
 export * from './export';
 export * from './share';
+export * from './kit';
 export type * from './types';

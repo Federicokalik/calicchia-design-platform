@@ -1,9 +1,11 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { EXPORT_FORMATS, type ExportFormat } from '@calicchia/shared/palette';
+import { EXPORT_FORMATS, type ExportFormat, type SharedPalette } from '@calicchia/shared/palette';
 import { Button } from '@/components/ui/Button';
 import { MonoLabel } from '@/components/ui/MonoLabel';
+import type { Locale } from '@/lib/i18n';
+import { KitForm } from './KitForm';
 import type { ToolStrings } from './strings';
 import { Chip, Step } from './ui';
 import styles from './PaletteTool.module.css';
@@ -19,6 +21,12 @@ interface ExportStepProps {
   onTab: (tab: ExportFormat) => void;
   onCopied: () => void;
   onShared: () => void;
+  locale: Locale;
+  /** Palette per il brand kit in PDF (stessa del link condiviso). */
+  shared: SharedPalette | null;
+  /** Etichetta del settore curato; null per il testo libero. */
+  sectorLabel: string | null;
+  onKitRequested: () => void;
 }
 
 async function writeClipboard(text: string): Promise<boolean> {
@@ -34,7 +42,20 @@ async function writeClipboard(text: string): Promise<boolean> {
   }
 }
 
-export function ExportStep({ t, tab, code, shareQuery, sharePath, onTab, onCopied, onShared }: ExportStepProps) {
+export function ExportStep({
+  t,
+  tab,
+  code,
+  shareQuery,
+  sharePath,
+  onTab,
+  onCopied,
+  onShared,
+  locale,
+  shared,
+  sectorLabel,
+  onKitRequested,
+}: ExportStepProps) {
   const codeRef = useRef<HTMLPreElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const [copyMsg, setCopyMsg] = useState<{ code: string; text: string } | null>(null);
@@ -137,6 +158,8 @@ export function ExportStep({ t, tab, code, shareQuery, sharePath, onTab, onCopie
           {t.shareNote}
         </MonoLabel>
       </div>
+
+      <KitForm t={t} locale={locale} shared={shared} sectorLabel={sectorLabel} onRequested={onKitRequested} />
     </Step>
   );
 }
