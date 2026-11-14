@@ -1,13 +1,20 @@
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { sql } from '../db';
 import { authMiddleware } from '../middleware/auth';
 import { captcha } from '../lib/captcha';
 import { getClientIp } from '../lib/client-ip';
 import { sendEmail } from '../lib/email';
+import { calendarErase, type CalendarErasureReport, normalizeErasureEmail } from '../lib/calendar/gdpr';
 import { renderGdprRequestEmail } from '../templates/gdpr-request';
 import { logger } from '../lib/logger';
 
 const log = logger.child({ scope: 'gdpr' });
+
+/** Attore della cancellazione del calendario (admin:<id>), dal JWT impostato da authMiddleware. */
+function adminActor(c: Context): string {
+  const user = (c.get as (key: string) => unknown)('user') as { id?: string } | undefined;
+  return user?.id ? `admin:${user.id}` : 'admin';
+}
 
 export const gdprRequests = new Hono();
 
@@ -179,7 +186,7 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
     // Anagrafiche e dati principali: l'export (art. 15/20) li ometteva, cioè
     // proprio i dati che riguardano di più l'interessato.
     customerIds.length
-      ? sql`SELECT id, company_name, contact_name, email, phone, billing_address, notes, tags, status, created_at, updated_at
+      ? sql`SELECT id, company_name, contact_name, email, phone, billing_address, billing_emails, vat_number, fiscal_code, sdi_code, pec, notes, tags, status, created_at, updated_at
             FROM customers WHERE id = ANY(${customerIds as any})`
       : Promise.resolve([] as any[]),
     leadIds.length
@@ -246,8 +253,17 @@ gdprRequests.get('/export/:email', authMiddleware, async (c) => {
 //      correspondence — controller's business record, manual review),
 //      client_uploads files on storage, and the Stripe customer (separate
 //      processor). cookie_consents/analytics hold no person-linkable PII.
+//
+//  • CALENDARIO (fase F3, lib/calendar/gdpr.ts calendarErase): prenotazioni
+//      anonimizzate, proiezioni ridotte a "Prenotazione", email tolta dagli
+//      eventi e dagli audit, ledger e righe dello strumento di migrazione
+//      redatti, versioni dell'indice cancellate, riscrittura su Radicale
+//      accodata. Gira dopo la transazione principale ed è idempotente: se
+//      fallisce la risposta è 500 e la richiesta si può ripetere.
 gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
   const email = decodeURIComponent(c.req.param('email')).trim().toLowerCase();
+  // Un'email vuota o generica farebbe corrispondere qualsiasi testo nella ricerca del calendario.
+  if (!normalizeErasureEmail(email)) return c.json({ error: 'Email non valida' }, 400);
 
   // Resolve linked records BEFORE anonymizing (anonymization changes the email).
   const linked = await sql`
@@ -299,6 +315,11 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             email = 'erased-' || id::text || '@deleted.invalid',
             phone = NULL,
             billing_address = '{}'::jsonb,
+            billing_emails = '{}'::text[],
+            vat_number = NULL,
+            fiscal_code = NULL,
+            sdi_code = NULL,
+            pec = NULL,
             notes = NULL,
             tags = '[]'::jsonb,
             portal_access_code_hash = NULL,
@@ -306,6 +327,15 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
             updated_at = NOW()
           WHERE id = ANY(${customerIds as any}) RETURNING id`
       : [];
+    // L'interessato può essere un destinatario amministrativo di un ALTRO
+    // cliente (es. il Gmail personale nei billing_emails di un'azienda): il
+    // suo indirizzo esce dall'elenco, il cliente resta.
+    const strippedBillingEmails = await tx`
+      UPDATE customers
+      SET billing_emails = ARRAY(SELECT e FROM unnest(billing_emails) AS e WHERE lower(e) <> ${email}),
+          updated_at = NOW()
+      WHERE EXISTS (SELECT 1 FROM unnest(billing_emails) AS e WHERE lower(e) = ${email})
+      RETURNING id`;
     const anonLeads = leadIds.length
       ? await tx`
           UPDATE leads SET
@@ -333,30 +363,52 @@ gdprRequests.delete('/erase/:email', authMiddleware, async (c) => {
       anonGeoAudits: anonGeoAudits.length,
       anonCustomers: anonCustomers.length,
       anonLeads: anonLeads.length,
+      strippedBillingEmails: strippedBillingEmails.length,
     };
   });
+
+  const deleted = {
+    contacts: result.deletedContacts,
+    newsletter: result.deletedNewsletter,
+    communication_preferences: result.deletedPrefs,
+    whatsapp_conversations: result.deletedWaConvs,
+    portal_login_events: result.deletedLoginEvents,
+    marketing_contacts: result.deletedMktContacts,
+  };
+  const anonymized = {
+    geo_audits: result.anonGeoAudits,
+    customers: result.anonCustomers,
+    leads: result.anonLeads,
+    customer_billing_emails: result.strippedBillingEmails,
+  };
+
+  // Calendario: prenotazioni, eventi, audit, indice, strumento di migrazione e Radicale (design §16.4).
+  let calendar: CalendarErasureReport;
+  try {
+    calendar = await calendarErase(email, { actor: adminActor(c) });
+  } catch (err) {
+    log.error({ err: err instanceof Error ? err.message : String(err) }, 'cancellazione GDPR dei dati del calendario non riuscita');
+    return c.json({
+      erased: false,
+      email,
+      error: 'Dati rimossi dalle anagrafiche, ma la cancellazione dei dati del calendario non è riuscita: ripetere la richiesta (operazione idempotente).',
+      deleted,
+      anonymized,
+    }, 500);
+  }
 
   return c.json({
     erased: true,
     email,
-    deleted: {
-      contacts: result.deletedContacts,
-      newsletter: result.deletedNewsletter,
-      communication_preferences: result.deletedPrefs,
-      whatsapp_conversations: result.deletedWaConvs,
-      portal_login_events: result.deletedLoginEvents,
-      marketing_contacts: result.deletedMktContacts,
-    },
-    anonymized: {
-      geo_audits: result.anonGeoAudits,
-      customers: result.anonCustomers,
-      leads: result.anonLeads,
-    },
+    deleted,
+    anonymized,
+    calendar,
     retained: 'Fatture, pagamenti e preventivi sono conservati per obbligo fiscale (10 anni); il cliente collegato è stato anonimizzato.',
     manual_followup: [
       "Verificare ed eventualmente eliminare la corrispondenza dell'interessato nella casella email (email_messages).",
       'Eliminare dallo storage i file caricati collegati (client_uploads).',
       "Se l'interessato esiste come cliente Stripe, richiedere la cancellazione anche lì (responsabile esterno).",
+      ...calendar.manual_followup,
     ],
   });
 });

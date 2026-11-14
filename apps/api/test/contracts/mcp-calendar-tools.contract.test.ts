@@ -43,6 +43,7 @@ import { fileURLToPath } from 'node:url';
 import { onBeforeDatabaseClose, onDatabaseReady, sql } from '../helpers/db';
 import { api } from '../helpers/http';
 import { romeIso, useFixtures } from '../helpers/fixtures';
+import { alignCalendarHorizon, isRadicaleBackend, settleCalendar, useCalendarBackend } from '../helpers/calendar-backend';
 import { freezeTime, restoreTime } from '../helpers/clock';
 import { executeTool } from '../../src/lib/agent/tools';
 import {
@@ -78,6 +79,8 @@ import {
   overrideRows,
   PROMEMORIA_COUNT,
   PROMEMORIA_LIMIT,
+  REALIGNED_EXDATE,
+  REALIGNED_OVERRIDE_START,
   UUID_SHAPED_UID,
   WEEK_FROM,
   WEEK_TO,
@@ -85,6 +88,7 @@ import {
 } from './_mcp-scenario';
 
 const fx = useFixtures('mcp-calendario', { resetBaseline: true });
+useCalendarBackend();
 
 const OUTPUTS_PATH = resolve(dirname(fileURLToPath(import.meta.url)), '__snapshots__/mcp-calendar-tools.outputs.json');
 const UPDATE_COMMAND = 'UPDATE_SNAPSHOTS=1 pnpm --filter @calicchia/api test test/contracts/mcp-calendar-tools.contract.test.ts';
@@ -168,6 +172,19 @@ function parseOutput(raw: string): ToolOutput {
  * `select` riduce l'output registrato (es. 500 occorrenze → conteggio, prima e
  * ultima); il valore restituito resta l'output completo.
  */
+/**
+ * Parte stabile di un errore lanciato da un tool: executeTool scrive
+ * 'Errore esecuzione tool "<nome>": <messaggio reale>' (più `code` per gli
+ * errori del database). Il messaggio reale dipende dallo store e dal driver,
+ * quindi il contratto congela solo il prefisso, come prima del dettaglio.
+ */
+function stableToolError(output: ToolOutput): unknown {
+  const error = (output as { error?: unknown }).error;
+  if (typeof error !== 'string') return output;
+  const prefix = /^(Errore esecuzione tool "[^"]+")/.exec(error)?.[1];
+  return prefix ? { error: prefix } : output;
+}
+
 async function runTool(
   caseName: string,
   tool: string,
@@ -175,7 +192,11 @@ async function runTool(
   effects?: (output: ToolOutput) => Promise<unknown>,
   opts: { select?: (output: ToolOutput) => unknown } = {},
 ): Promise<ToolOutput> {
+  // Store Radicale: orizzonte dell'indice allineato all'orologio fermo (come il cron giornaliero).
+  await alignCalendarHorizon();
   const output = parseOutput(await executeTool(tool, args));
+  // Store Radicale: i job accodati dal tool (proiezioni delle prenotazioni) come li eseguirebbe il worker.
+  await settleCalendar();
   const effect = effects ? await effects(output) : undefined;
   const n = await createScenarioNormalizer(fx, aliases);
   const recorded = opts.select ? opts.select(output) : output;
@@ -334,10 +355,18 @@ test('list_events: tetto di 500 occorrenze per serie e override che eredita loca
   }, undefined, {
     select: (out: ToolOutput) => ({ count: out.count, first: out.events[0], last: out.events[out.events.length - 1] }),
   });
-  assert.equal(capped.count, PROMEMORIA_LIMIT);
   assert.equal(capped.events[0].start_time, romeIso('2027-06-07', '00:00'));
-  // 500ª occorrenza: 499 ore dopo la prima (tutto in ora legale).
-  assert.equal(capped.events[PROMEMORIA_LIMIT - 1].start_time, '2027-06-27T17:00:00.000Z');
+  if (isRadicaleBackend()) {
+    // Store Radicale (design §6.4, §14): l'indice materializza fino a 5000
+    // occorrenze nell'orizzonte, quindi la serie arriva intera (600ª
+    // occorrenza: 599 ore dopo la prima).
+    assert.equal(capped.count, PROMEMORIA_COUNT);
+    assert.equal(capped.events[PROMEMORIA_COUNT - 1].start_time, '2027-07-01T21:00:00.000Z');
+  } else {
+    assert.equal(capped.count, PROMEMORIA_LIMIT);
+    // 500ª occorrenza: 499 ore dopo la prima (tutto in ora legale).
+    assert.equal(capped.events[PROMEMORIA_LIMIT - 1].start_time, '2027-06-27T17:00:00.000Z');
+  }
 
   // L'override spostato al martedì 13 copia location e url dal master.
   const inherited = await runTool('override-eredita-location-url', 'list_events', {
@@ -364,26 +393,41 @@ test('list_events: settimana, f, bookings, serie attraverso il cambio d\'ora, is
   });
   const standup = dst.events.filter((e: { summary: string }) => e.summary.endsWith('Standup'));
   const starts = standup.map((e: { start_time: string }) => e.start_time);
-  // EXDATE del 24 (ora solare, corretto) applicato; EXDATE "DST_SHIFTED" del 1° aprile
-  // ignorato: l'occorrenza delle 07:00Z ricompare (comportamento attuale).
-  assert.ok(base.series.standup.master.exdates.includes(DST_SHIFTED_EXDATE));
+  // EXDATE del 24 (ora solare, corretto) applicato.
   assert.ok(!starts.includes('2027-03-24T08:00:00.000Z'));
-  assert.ok(starts.includes('2027-04-01T07:00:00.000Z'));
-  // Override "DST_SHIFTED" del 29: orfano, emesso accanto all'occorrenza regolare.
-  assert.ok(starts.includes('2027-03-29T07:00:00.000Z'));
-  const orphan = dst.events.find((e: { original_start: string | null; is_override: boolean }) =>
-    e.is_override && e.original_start === DST_SHIFTED_OVERRIDE_START);
-  assert.ok(orphan, 'override orfano assente');
+  if (isRadicaleBackend()) {
+    // Store Radicale: le eccezioni arrivano riallineate (design §13.4,
+    // allowed-diffs punto 5): l'EXDATE del 1° aprile toglie l'occorrenza delle
+    // 07:00Z e l'override del 29 la sostituisce (spostata alle 12:00 di Roma).
+    assert.ok(base.series.standup.master.exdates.includes(REALIGNED_EXDATE));
+    assert.ok(!starts.includes('2027-04-01T07:00:00.000Z'));
+    assert.ok(!starts.includes('2027-03-29T07:00:00.000Z'));
+    const realigned = dst.events.find((e: { original_start: string | null; is_override: boolean }) =>
+      e.is_override && e.original_start === REALIGNED_OVERRIDE_START);
+    assert.equal(realigned?.start_time, romeIso('2027-03-29', '12:00'));
+  } else {
+    // EXDATE "DST_SHIFTED" del 1° aprile ignorato: l'occorrenza delle 07:00Z
+    // ricompare (comportamento attuale).
+    assert.ok(base.series.standup.master.exdates.includes(DST_SHIFTED_EXDATE));
+    assert.ok(starts.includes('2027-04-01T07:00:00.000Z'));
+    // Override "DST_SHIFTED" del 29: orfano, emesso accanto all'occorrenza regolare.
+    assert.ok(starts.includes('2027-03-29T07:00:00.000Z'));
+    const orphan = dst.events.find((e: { original_start: string | null; is_override: boolean }) =>
+      e.is_override && e.original_start === DST_SHIFTED_OVERRIDE_START);
+    assert.ok(orphan, 'override orfano assente');
+  }
 
   await runTool('iscrizione', 'list_events', { calendar: base.calendars.esterno.slug, from: WEEK_FROM, to: WEEK_TO });
 
-  // BUG ATTUALE (design §14, "expandRRule.between perde gli eventi in corso"):
-  // la Palestra (16:00-17:00Z) è in corso alle 16:30Z ma l'espansione parte da
-  // `from` e la scarta; un evento singolo nella stessa situazione comparirebbe.
+  // BUG ATTUALE dello store legacy (design §14, "expandRRule.between perde gli
+  // eventi in corso"): la Palestra (16:00-17:00Z) è in corso alle 16:30Z ma
+  // l'espansione parte da `from` e la scarta; un evento singolo nella stessa
+  // situazione comparirebbe. Lo store Radicale interroga l'indice per
+  // sovrapposizione su span e la restituisce.
   const inProgress = await runTool('occorrenza-in-corso', 'list_events', {
     from: '2027-03-30T16:30:00.000Z', to: '2027-03-30T17:30:00.000Z',
   });
-  assert.equal(inProgress.count, 0);
+  assert.equal(inProgress.count, isRadicaleBackend() ? 1 : 0);
 
   const missing = await runTool('calendario-inesistente', 'list_events', { calendar: 'inesistente', from: WEEK_FROM, to: WEEK_TO });
   assert.deepEqual(missing, { error: 'Calendario non trovato' });
@@ -403,10 +447,12 @@ test('find_free_slots: finestre libere nella settimana, orario personalizzato, d
   await runTool('orario-personalizzato', 'find_free_slots', {
     from: WEEK_FROM, to: WEEK_TO, duration_minutes: 30, working_hours_start: '07:00', working_hours_end: '16:00',
   });
-  // Errore lanciato dalla query (cast di una data non valida): executeTool lo
-  // trasforma nel messaggio generico.
-  const invalid = await runTool('data-non-valida', 'find_free_slots', { from: 'non-una-data', to: WEEK_TO, duration_minutes: 30 });
-  assert.deepEqual(invalid, { error: 'Errore esecuzione tool "find_free_slots"' });
+  // Errore lanciato dalla query (cast di una data non valida): executeTool
+  // restituisce il prefisso stabile "Errore esecuzione tool" seguito dal
+  // messaggio reale. Il testo del messaggio (e l'eventuale SQLSTATE in `code`)
+  // dipende dallo store, quindi nello snapshot si registra solo il prefisso.
+  const invalid = await runTool('data-non-valida', 'find_free_slots', { from: 'non-una-data', to: WEEK_TO, duration_minutes: 30 }, undefined, { select: stableToolError });
+  assert.match(String(invalid.error), /^Errore esecuzione tool "find_free_slots": \S/);
 });
 
 test('list_event_types: pubblici, privati, inattivi e seminati', async () => {
@@ -470,7 +516,14 @@ test('routes/mcp.ts: GET /tools espone per scope gli stessi tool e schemi dello 
     const res = await api.get('/api/mcp/tools', { auth: { bearer: token } });
     assert.equal(res.status, 200);
     assert.equal(res.json.scope, scope);
-    const listed = res.json.tools.filter((t: { name: string }) => names.has(t.name));
+    // title e annotations (hint MCP derivati) non fanno parte del contratto dello schema.
+    const listed = res.json.tools
+      .filter((t: { name: string }) => names.has(t.name))
+      .map((t: { name: string; description: string; inputSchema: unknown }) => ({
+        name: t.name,
+        description: t.description,
+        inputSchema: t.inputSchema,
+      }));
     const expected = schema.tools
       .filter((t) => t.mcp.scopes.includes(scope))
       .map((t) => ({ name: t.name, description: t.description, inputSchema: t.inputSchema }));
@@ -635,6 +688,32 @@ test('reschedule_booking e update_cal_booking: successo, sovrapposizione, confli
   await runTool('successo-booking-id', 'update_cal_booking', { booking_id: viaAlias, start: at('2027-04-07', '16:00') }, effects('spostare-alias', viaAlias));
 });
 
+test('update_booking_location: link MEGA per la prenotazione, mantenuto nella riprogrammazione', async () => {
+  const { consulenza } = base.eventTypes;
+  const at = (date: string, time: string) => romeIso(date, time);
+  const created = await fx.booking({ eventType: consulenza, start: at('2027-04-08', '09:00'), attendee: { name: 'Cliente mega', email: fx.email('luogo-mega') } });
+  aliases.booking('luogo-mega', created);
+  const uid = created.booking.uid;
+  const mega = 'https://mega.nz/chat/AbCdEfGh#xYz123';
+
+  const set = await runTool('successo-mega', 'update_booking_location', { uid, meeting_url: mega }, () => bookingState(uid));
+  assert.equal(set.success, true);
+  assert.equal(set.location_type, 'custom_url');
+  assert.equal(set.location_value, mega);
+  assert.equal(set.notified, false);
+
+  // La riprogrammazione eredita il link scelto per la prenotazione (non torna al tipo evento).
+  const moved = await runTool('riprogrammata-mantiene-mega', 'reschedule_booking', { uid, start: at('2027-04-08', '11:00'), notify: false }, async (out) => {
+    if (typeof out.uid === 'string') aliases.add(out.uid, 'bk:luogo-mega-nuova');
+    return typeof out.uid === 'string' ? bookingState(out.uid) : null;
+  });
+  assert.equal(moved.location_value, mega);
+
+  await runTool('url-non-valido', 'update_booking_location', { uid, meeting_url: 'javascript:alert(1)' });
+  await runTool('senza-luogo', 'update_booking_location', { uid });
+  await runTool('inesistente', 'update_booking_location', { uid: 'nonesiste000', meeting_url: mega });
+});
+
 test('cancel_booking e cancel_cal_booking: successo, idempotenza ed errori', async () => {
   const { consulenza } = base.eventTypes;
   const make = async (key: string, time: string) => {
@@ -768,7 +847,15 @@ test('update_event: per id e uid, serie, override, proiezioni, sola lettura ed e
   // id"): cercato per uid, l'evento non viene trovato; per id sì.
   assert.equal(base.events.uidUuid.uid, UUID_SHAPED_UID);
   const byUuidUid = await runTool('uid-con-forma-di-uuid', 'update_event', { id_or_uid: UUID_SHAPED_UID, summary: fx.name('Mai applicato') });
-  assert.deepEqual(byUuidUid, { error: 'Evento non trovato' });
+  if (isRadicaleBackend()) {
+    // Store Radicale: resolver in quattro passi (design §5 "getEvent", §14):
+    // un UID con forma di UUID che non è un id si trova per UID esatto, e la
+    // modifica si applica.
+    assert.equal(byUuidUid.success, true);
+    assert.equal(byUuidUid.event.id, base.events.uidUuid.id);
+  } else {
+    assert.deepEqual(byUuidUid, { error: 'Evento non trovato' });
+  }
 
   await runTool('iscrizione-sola-lettura', 'update_event', { id_or_uid: base.events.webinar.id, summary: fx.name('Mai applicato') });
   await runTool('inesistente', 'update_event', { id_or_uid: '00000000-0000-4000-8000-000000000000', summary: 'x' });
@@ -819,9 +906,10 @@ test('delete_event: singolo, per uid, override, serie, proiezioni, sola lettura 
 
   await runTool('iscrizione-sola-lettura', 'delete_event', { id_or_uid: base.events.webinar.id }, () => eventRows([base.events.webinar.id]));
   await runTool('inesistente', 'delete_event', { id_or_uid: '00000000-0000-4000-8000-000000000000' });
-  // Errore lanciato (parametro undefined nella query): messaggio generico di executeTool.
-  const generic = await runTool('id-mancante', 'delete_event', {});
-  assert.deepEqual(generic, { error: 'Errore esecuzione tool "delete_event"' });
+  // Errore lanciato (parametro undefined nella query): prefisso stabile di
+  // executeTool più il messaggio reale (registrato solo il prefisso).
+  const generic = await runTool('id-mancante', 'delete_event', {}, undefined, { select: stableToolError });
+  assert.match(String(generic.error), /^Errore esecuzione tool "delete_event": \S/);
 });
 
 // ─── Copertura ───────────────────────────────

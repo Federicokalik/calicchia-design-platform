@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://calicchia.design/schemas/caldes/policy.v1.schema.json",
+  "title": "policy.json (schema 1)",
+  "description": "Policy dei device CalDAV scritta dall'API sul volume caldes_control e letta da caldes_rights (permessi) e caldes_auth (credential_epoch). Deriva solo da calendar_backend_state e dal sidecar tramite policyFromState(). Contratto: control-plane.md §5-§6. Lo schema descrive ciò che il writer DEVE produrre (chiuso: nessun campo in più); i lettori validano i campi richiesti e ignorano quelli sconosciuti (§5.4).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "generated_at",
+    "backend_mode",
+    "mode",
+    "reasons",
+    "principal",
+    "volume_id",
+    "epoch",
+    "credential_epoch",
+    "readonly",
+    "hidden"
+  ],
+  "properties": {
+    "schema": {
+      "description": "Versione del formato. I lettori rifiutano qualsiasi valore diverso da 1.",
+      "const": 1
+    },
+    "version": {
+      "description": "calendar_backend_state.policy_version: cresce a ogni cambio dello stato da cui dipende la policy.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "generated_at": {
+      "description": "Istante di generazione, ISO 8601 UTC con millisecondi (Date.prototype.toISOString). Solo informativo.",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "backend_mode": {
+      "description": "calendar_backend_state.mode da cui la policy è derivata. Solo informativo per i rights.",
+      "$ref": "#/$defs/backendMode"
+    },
+    "mode": {
+      "description": "Modalità dei device: shadow (sola lettura, mode postgres), live (scrittura), frozen (sola lettura forzata).",
+      "enum": ["shadow", "live", "frozen"]
+    },
+    "reasons": {
+      "description": "Condizioni che hanno forzato frozen, nell'ordine fisso di control-plane.md §6.2. Vuoto se mode è la modalità base dello stato.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "write_freeze",
+          "restore_guard",
+          "rebuild_required",
+          "identity_uninitialized",
+          "identity_mismatch",
+          "identity_unverified"
+        ]
+      }
+    },
+    "principal": {
+      "description": "Principal canonico (RADICALE_PRINCIPAL). Deve coincidere con quello configurato in Radicale, altrimenti la policy è invalida.",
+      "$ref": "#/$defs/principal"
+    },
+    "volume_id": {
+      "description": "Identità del volume registrata in PG (UUID minuscolo) o null se il volume non è inizializzato.",
+      "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/uuid" }]
+    },
+    "epoch": {
+      "description": "Epoch registrato in PG: 0 = volume non inizializzato, altrimenti ≥ 1.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "credential_epoch": {
+      "description": "Epoch delle credenziali: quando cambia caldes_auth svuota la cache in memoria e quella persistita.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "readonly": {
+      "description": "Collezioni in sola lettura per i device (ruoli bookings, holidays, deadlines, subscription), ordinate e senza duplicati.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/collectionName" }
+    },
+    "hidden": {
+      "description": "Collezioni senza alcun permesso per i device (non elencate): sempre _canary, più quelle con device_visible=false o lifecycle diverso da active. Ordinate e senza duplicati.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/pathSegment" },
+      "contains": { "const": "_canary" }
+    }
+  },
+  "allOf": [
+    {
+      "description": "Volume non inizializzato ⇔ epoch 0.",
+      "if": { "properties": { "volume_id": { "type": "null" } } },
+      "then": { "properties": { "epoch": { "const": 0 } } },
+      "else": { "properties": { "epoch": { "minimum": 1 } } }
+    },
+    {
+      "description": "live richiede un volume identificato e nessuna condizione di blocco.",
+      "if": { "properties": { "mode": { "const": "live" } } },
+      "then": {
+        "properties": {
+          "volume_id": { "$ref": "#/$defs/uuid" },
+          "reasons": { "maxItems": 0 },
+          "backend_mode": { "enum": ["radicale", "finalized"] }
+        }
+      }
+    },
+    {
+      "description": "shadow solo da mode postgres senza condizioni di blocco.",
+      "if": { "properties": { "mode": { "const": "shadow" } } },
+      "then": {
+        "properties": {
+          "backend_mode": { "const": "postgres" },
+          "reasons": { "maxItems": 0 }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "backendMode": {
+      "enum": ["postgres", "cutover", "radicale", "rollback", "finalized"]
+    },
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "principal": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "not": { "pattern": "^caldes-" }
+    },
+    "pathSegment": {
+      "description": "Un segmento di path sotto il principal: 1-255 caratteri, niente '/', '\\' né caratteri di controllo, non inizia con '.'.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "pattern": "^[^/\\\\.\\u0000-\\u001f\\u007f-\\u009f][^/\\\\\\u0000-\\u001f\\u007f-\\u009f]*$"
+    },
+    "collectionName": {
+      "description": "Nome di collezione del sidecar: pathSegment che non inizia con '_' (prefisso riservato alle collezioni di sistema).",
+      "allOf": [{ "$ref": "#/$defs/pathSegment" }, { "not": { "pattern": "^_" } }]
+    }
+  },
+  "examples": [
+    {
+      "schema": 1,
+      "version": 3,
+      "generated_at": "2026-10-09T18:00:00.000Z",
+      "backend_mode": "postgres",
+      "mode": "shadow",
+      "reasons": [],
+      "principal": "federico",
+      "volume_id": "3f2b8c1e-7d4a-4e9b-9c2a-1b2c3d4e5f60",
+      "epoch": 1,
+      "credential_epoch": 0,
+      "readonly": ["bookings", "f", "scadenze"],
+      "hidden": ["_canary"]
+    },
+    {
+      "schema": 1,
+      "version": 1,
+      "generated_at": "2026-10-09T18:00:00.000Z",
+      "backend_mode": "postgres",
+      "mode": "shadow",
+      "reasons": [],
+      "principal": "federico",
+      "volume_id": null,
+      "epoch": 0,
+      "credential_epoch": 0,
+      "readonly": ["bookings", "scadenze"],
+      "hidden": ["_canary"]
+    }
+  ]
+}

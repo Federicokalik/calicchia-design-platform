@@ -23,7 +23,10 @@ const RESOLVED_BASE = resolve(PRIVATE_DIR);
 // must still open weeks/months later. Tunable via env.
 const URL_TTL_SEC = (Number(process.env.PRIVATE_URL_TTL_DAYS) || 180) * 24 * 60 * 60;
 
-export const PRIVATE_CATEGORIES = ['quotes', 'receipts', 'whatsapp'] as const;
+// 'mail': allegati delle bozze email (routes/mail/drafts.ts), snapshot dei
+// file scelti alla creazione della bozza.
+// 'proformas': PDF delle proforma (lib/proforma/service.ts).
+export const PRIVATE_CATEGORIES = ['quotes', 'receipts', 'whatsapp', 'mail', 'proformas'] as const;
 export type PrivateCategory = (typeof PRIVATE_CATEGORIES)[number];
 
 mkdirSync(PRIVATE_DIR, { recursive: true });
@@ -106,4 +109,17 @@ export async function deletePrivateFile(category: PrivateCategory, name: string)
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') throw err;
   }
+}
+
+/**
+ * Riconosce un URL firmato prodotto da signFileUrl (assoluto sull'origine
+ * dell'API oppure relativo "/api/files/...") e ne verifica firma e scadenza.
+ * Restituisce categoria e nome del file, oppure null.
+ */
+export function parseSignedFileUrl(url: URL): { category: PrivateCategory; name: string } | null {
+  const m = /^\/api\/files\/([^/]+)\/([^/]+)$/.exec(url.pathname);
+  if (!m) return null;
+  const [, category, name] = m;
+  if (!verifyFileSig(category, name, url.searchParams.get('exp') ?? undefined, url.searchParams.get('sig') ?? undefined)) return null;
+  return { category: category as PrivateCategory, name };
 }

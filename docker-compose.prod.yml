@@ -1,3 +1,13 @@
+# DEPRECATO — non più mantenuto, non usarlo per nuovi deploy.
+# La produzione gira su Dockhand + CloudPanel con docker-compose.portainer.yml
+# (docs/portainer-cloudpanel.md). Questo file NON contiene lo stack del
+# calendario su Radicale della fase F1 (servizio radicale con tag sha, rete
+# interna caldav-int, volumi radicale_collections, caldes_control e
+# radicale_authcache, variabili RADICALE_* e CALDES_* dell'API): avviato così,
+# l'API non scriverebbe policy e heartbeat e i device CalDAV non
+# funzionerebbero. Resta solo come riferimento per un eventuale ritorno a
+# Dokploy, da riallineare prima a docker-compose.portainer.yml.
+#
 # Production stack — Calicchia Design Platform — target: VPS con Dokploy (Traefik + SSL integrati).
 #
 # Deploy: in Dokploy crea un servizio "Compose", punta a questo file. Le variabili

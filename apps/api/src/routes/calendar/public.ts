@@ -29,11 +29,27 @@ import {
 } from '../../lib/calendar/email';
 import { buildIcs } from '../../lib/calendar/ics';
 import type { EventType } from '../../lib/calendar/types';
+import { isCalendarUnavailable } from '../../lib/calendar/errors';
 import { logger } from '../../lib/logger';
 
 const log = logger.child({ scope: 'calendar-public' });
 
 export const calendarPublic = new Hono();
+
+/**
+ * Calendario non verificabile (CalendarUnavailableError, solo con lo store
+ * Radicale o con lo stato del backend illeggibile): 503 con il testo generico
+ * del design §9 e `code`, mai il motivo (contratto f2-modules §1.4). Il sito
+ * tratta già ogni stato diverso da 400/403/409 come errore generico. Gli altri
+ * errori vanno all'handler globale di app.ts come prima.
+ */
+calendarPublic.onError((err, c) => {
+  if (isCalendarUnavailable(err)) {
+    log.warn({ reason: err.reason, detail: err.detail, url: c.req.url, method: c.req.method }, 'calendario non verificabile: 503');
+    return c.json(err.toPublicBody(), 503);
+  }
+  throw err;
+});
 
 const isValidDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s);
 
@@ -260,6 +276,10 @@ calendarPublic.post('/bookings', async (c) => {
     if (err instanceof BookingValidationError) {
       return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
     }
+    if (isCalendarUnavailable(err)) {
+      log.warn({ reason: err.reason, detail: err.detail }, 'prenotazione rifiutata: calendario non verificabile (503)');
+      return c.json(err.toPublicBody(), 503);
+    }
     log.error({ err }, 'booking create error');
     return c.json({ error: 'Errore creazione prenotazione' }, 500);
   }
@@ -375,6 +395,10 @@ calendarPublic.post('/bookings/:uid/reschedule', async (c) => {
     }
     if (err instanceof BookingValidationError) {
       return c.json({ error: err.message, code: 'BOOKING_VALIDATION' }, 400);
+    }
+    if (isCalendarUnavailable(err)) {
+      log.warn({ reason: err.reason, detail: err.detail }, 'riprogrammazione rifiutata: calendario non verificabile (503)');
+      return c.json(err.toPublicBody(), 503);
     }
     log.error({ err }, 'reschedule error');
     return c.json({ error: 'Errore riprogrammazione' }, 500);

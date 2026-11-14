@@ -14,6 +14,7 @@
 import { sql, sqlv } from '../db';
 import { sendEmail } from '../lib/email';
 import { logger } from '../lib/logger';
+import { billingRecipients } from '../lib/customer-recipients';
 
 const log = logger.child({ scope: 'dunning' });
 
@@ -30,6 +31,7 @@ type DunningRow = Record<string, unknown> & {
   last_dunning_at: string | Date | null;
   dunning_state: string | null;
   customer_email: string | null;
+  billing_emails: string[] | null;
   contact_name: string | null;
   company_name: string | null;
   days_late: string | number;
@@ -47,7 +49,7 @@ export async function runDunningEngine(): Promise<void> {
       s.id, s.name, s.amount, s.currency, s.next_billing_date, s.status,
       s.dunning_grace_days, s.dunning_reminder_days, s.dunning_suspend_days,
       s.last_dunning_at, s.dunning_state,
-      c.email AS customer_email, c.contact_name, c.company_name,
+      c.email AS customer_email, c.billing_emails, c.contact_name, c.company_name,
       (CURRENT_DATE - s.next_billing_date) AS days_late,
       (s.last_dunning_at::date = CURRENT_DATE) AS processed_today
     FROM subscriptions s
@@ -92,10 +94,10 @@ export async function runDunningEngine(): Promise<void> {
         `;
         await writeAudit('SUSPEND', row);
 
-        const email = String(row.customer_email ?? '');
-        if (email) {
+        const to = billingRecipients({ email: row.customer_email, billing_emails: row.billing_emails });
+        if (to.length) {
           await sendEmail({
-            to: email,
+            to,
             subject: `Sospensione abbonamento "${row.name}" - ritardo pagamento`,
             html: renderSuspendHtml(row, daysLate),
             transport: 'critical',
@@ -107,10 +109,10 @@ export async function runDunningEngine(): Promise<void> {
 
     const isReminderDay = reminderDays.includes(daysLate);
     if (isReminderDay && !processedToday) {
-      const email = String(row.customer_email ?? '');
-      if (email) {
+      const to = billingRecipients({ email: row.customer_email, billing_emails: row.billing_emails });
+      if (to.length) {
         const sent: SendEmailResult | { success: false } = await sendEmail({
-          to: email,
+          to,
           subject: `Promemoria pagamento "${row.name}" - ${daysLate} giorni di ritardo`,
           html: renderReminderHtml(row, daysLate),
           transport: 'critical',

@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { fiscalSchemas } from '../lib/customers/fiscal';
 import { sql } from '../db';
 
 export const importRoutes = new Hono();
@@ -38,17 +39,23 @@ importRoutes.post('/customers', async (c) => {
 
   for (const row of rows) {
     try {
+      // P.IVA valida → colonna customers.vat_number (169); non valida → resta
+      // in billing_address come dato da correggere, senza bloccare l'import.
+      const rawVat = row.vat_number || row.VAT || null;
+      const vat = rawVat ? fiscalSchemas.vat_number.safeParse(rawVat) : null;
+      if (vat && !vat.success) results.errors.push(`P.IVA non valida per ${row.email || row.Email}: "${rawVat}" (lasciata in billing_address)`);
       const data = {
         contact_name: row.contact_name || row.name || row.Name,
         email: row.email || row.Email,
         company_name: row.company_name || row.company || row.Company || null,
         phone: row.phone || row.Phone || null,
+        ...(vat?.success ? { vat_number: vat.data } : {}),
         billing_address: {
           street: row.address || row.Address || null,
           city: row.city || row.City || null,
           postal_code: row.postal_code || row.PostalCode || null,
           country: row.country || row.Country || 'IT',
-          vat_number: row.vat_number || row.VAT || null,
+          ...(vat && !vat.success ? { vat_number: rawVat } : {}),
         },
       };
 
