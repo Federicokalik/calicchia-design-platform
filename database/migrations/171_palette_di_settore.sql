@@ -1,4 +1,4 @@
--- Migration 166 — tool "Palette di settore" (/risorse/palette-di-settore).
+-- Migration 171 — tool "Palette di settore" (/risorse/palette-di-settore).
 --
 -- 1. brand_palette su contacts e leads: la palette che il visitatore porta nel
 --    modulo contatti dal link "condividi" (forma: brandPaletteSchema di

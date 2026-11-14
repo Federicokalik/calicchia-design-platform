@@ -18,7 +18,7 @@ export interface Lead {
   lost_reason: string | null;
   converted_customer_id: string | null;
   converted_project_id: string | null;
-  /** Palette portata dal tool "Palette di settore" nel modulo contatti (migrazione 166). */
+  /** Palette portata dal tool "Palette di settore" nel modulo contatti (migrazione 171). */
   brand_palette?: BrandPalette | null;
   created_at: string;
   updated_at: string;
