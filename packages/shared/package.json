@@ -10,6 +10,7 @@
     "./types": "./src/types/index.ts",
     "./validators": "./src/validators.ts",
     "./utils": "./src/utils.ts",
+    "./calendar-v2": "./src/calendar-v2.ts",
     "./palette": "./src/palette/index.ts"
   },
   "scripts": {

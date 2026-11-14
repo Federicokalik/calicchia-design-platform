@@ -126,6 +126,9 @@ export default function PreventivoEditorPage() {
   const [tipoCliente, setTipoCliente] = useState('azienda');
   const [validUntil, setValidUntil] = useState('');
   const [internalNotes, setInternalNotes] = useState('');
+  // Customer-facing amount for send messages and the sign page (e.g.
+  // "€540 al mese per 12 mesi"). Empty → the quote total is shown.
+  const [amountSummary, setAmountSummary] = useState('');
 
   // Sections
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS);
@@ -229,7 +232,8 @@ export default function PreventivoEditorPage() {
           }]);
         }
         if (pt && typeof pt === 'object') {
-          const { sections: _s, ...extras } = pt;
+          setAmountSummary(typeof pt.riepilogo_importo === 'string' ? pt.riepilogo_importo : '');
+          const { sections: _s, riepilogo_importo: _r, ...extras } = pt;
           customTemplateExtrasRef.current = extras;
           if (extras.custom_html) {
             setIsCustomDoc(true);
@@ -310,7 +314,11 @@ export default function PreventivoEditorPage() {
           return loaded ? { ...loaded, label: l } : { label: l, received: false };
         }) || [],
         auto_create_project: isCustomDoc ? undefined : sections.find((s) => s.type === 'contratto')?.data.auto ?? true,
-        project_template: isCustomDoc ? { ...customTemplateExtrasRef.current } : { ...customTemplateExtrasRef.current, sections },
+        project_template: {
+          ...customTemplateExtrasRef.current,
+          ...(isCustomDoc ? {} : { sections }),
+          ...(amountSummary.trim() ? { riepilogo_importo: amountSummary.trim() } : {}),
+        },
       };
       if (isNew) return apiFetch('/api/quotes-v2', { method: 'POST', body: JSON.stringify(body) });
       return apiFetch(`/api/quotes-v2/${id}`, { method: 'PUT', body: JSON.stringify(body) });
@@ -722,6 +730,16 @@ export default function PreventivoEditorPage() {
                 <Label>Valido fino al</Label>
                 <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Importo mostrato al cliente</Label>
+              <Input
+                value={amountSummary}
+                onChange={(e) => setAmountSummary(e.target.value)}
+                maxLength={120}
+                placeholder={`Vuoto = totale (€${subtotal.toLocaleString('it-IT')}). Es. €540 al mese per 12 mesi`}
+              />
+              <p className="text-[11px] text-muted-foreground">Usato nel messaggio di invio (email e WhatsApp) e nella pagina di firma, al posto del totale. Utile per canoni mensili o quote fatturate da un partner.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">

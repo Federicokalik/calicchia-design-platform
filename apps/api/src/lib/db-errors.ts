@@ -11,7 +11,8 @@
  * branch, so any route that already catches the error and re-throws via
  * `fail()` keeps full control — this is purely the fallback for unhandled
  * driver errors. Messages are intentionally generic (Italian, UI language):
- * they never leak table, column or constraint names.
+ * they never leak table or constraint names; the only column name exposed is
+ * the missing field of a not-null violation (23502), which is an API field.
  */
 import postgres from 'postgres';
 
@@ -74,8 +75,19 @@ export function mapDbError(err: unknown): MappedDbError | null {
       return { status: 409, message: 'Esiste già un record con questi dati.', client: true };
     case '23503': // foreign_key_violation
       return { status: 409, message: 'Operazione non consentita: i dati sono collegati ad altri record.', client: true };
-    case '23502': // not_null_violation
-      return { status: 400, message: 'Dati incompleti: manca un campo obbligatorio.', client: true };
+    case '23502': { // not_null_violation
+      // Il nome della colonna dice al chiamante QUALE campo manca (prima il
+      // messaggio era generico). È un nome di campo dell'API, non un dettaglio
+      // sensibile dello schema.
+      const column = typeof err.column_name === 'string' && err.column_name ? err.column_name : null;
+      return {
+        status: 400,
+        message: column
+          ? `Dati incompleti: manca il campo obbligatorio "${column}".`
+          : 'Dati incompleti: manca un campo obbligatorio.',
+        client: true,
+      };
+    }
     case '23514': // check_violation
       return { status: 400, message: 'Dati non validi: un valore non rispetta i vincoli richiesti.', client: true };
     case '23P01': // exclusion_violation

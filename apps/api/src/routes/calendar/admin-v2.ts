@@ -1,0 +1,393 @@
+/**
+ * API admin del calendario v2 `/api/admin/calendar/v2` (fase F6 del piano:
+ * admin client CalDAV quasi 1:1; contratto
+ * docs/calendar-radicale/contracts/f6-modules.md §3).
+ *
+ * Protetta dal JWT admin come il resto di /api/admin/calendar (protectedPaths
+ * di app.ts); montata PRIMA di /api/admin/calendar. Regole comuni:
+ *  - risposte JSON (tranne GET /objects/:id/ics); errori
+ *    `{ error, code, details? }` con i codici del §3.10; un 412 porta la
+ *    versione del server (`current`) e i conflitti per campo;
+ *  - difesa CSRF delle richieste che scrivono: Sec-Fetch-Site, Origin ammesse
+ *    e corpo solo application/json (lib/http/same-origin-writes.ts);
+ *  - corpo al più 2 MB (un oggetto è al più 1 MB, design §8), 10 MB per
+ *    `POST /calendars/:id/import`; oltre → 413 PAYLOAD_TOO_LARGE;
+ *  - le route `objects` lavorano solo sullo store Radicale: con lo store
+ *    postgres rispondono 409 STORE_MODE_UNSUPPORTED senza toccare nulla;
+ *  - PATCH, DELETE e, dalla tranche C, PUT /ics, POST /move e POST /restore
+ *    richiedono If-Match con un ETag esatto (428 se manca o è `*`);
+ *  - nessun testo di evento nei log.
+ */
+
+import { type Context, Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
+import { CAL_V2_SCOPES, type CalV2Scope } from '@calicchia/shared';
+import { logger } from '../../lib/logger';
+import { isCalendarUnavailable } from '../../lib/calendar/errors';
+import {
+  createCalendarRouteV2,
+  deleteCalendarRouteV2,
+  listCalendarsV2,
+  orderCalendarsRouteV2,
+  parseCalendarCreateRequest,
+  parseCalendarOrderRequest,
+  parseCalendarPatchRequest,
+  patchCalendarRouteV2,
+  rotateCalendarTokenV2,
+} from '../../lib/calendar/v2/calendars';
+import { assertV2ObjectsAvailable, readCalendarV2Capabilities } from '../../lib/calendar/v2/capabilities';
+import { CalendarV2Error, invalidValue, payloadTooLarge, v2ErrorFrom } from '../../lib/calendar/v2/errors';
+import { holdActionV2, parseHoldActionRequest } from '../../lib/calendar/v2/hold';
+import { getVersionV2, listTrashV2, listVersionsV2, parseRestoreRequest, parseTrashQuery, parseTrashRestoreRequest, restoreFromTrashV2, restoreVersionV2 } from '../../lib/calendar/v2/history';
+import { duplicateObjectV2, moveObjectV2, parseDuplicateRequest, parseMoveRequest } from '../../lib/calendar/v2/move';
+import { IMPORT_MAX_BYTES, importCalendarV2, openCalendarExportV2, parseImportRequest, readJobV2 } from '../../lib/calendar/v2/import-export';
+import { listOccurrencesV2, listOverlaysV2, parseCalendarIds, parseOccurrenceWindow } from '../../lib/calendar/v2/occurrences';
+import { parseRawPutRequest, putRawIcsV2 } from '../../lib/calendar/v2/raw';
+import {
+  createObjectV2,
+  deleteObjectV2,
+  parseCreateRequest,
+  parsePatchRequest,
+  patchObjectV2,
+  readObjectIcsV2,
+  readObjectV2,
+  requireIfMatch,
+} from '../../lib/calendar/v2/objects';
+import { getSyncStateV2 } from '../../lib/calendar/v2/sync-state';
+import { sameOriginWrites } from '../../lib/http/same-origin-writes';
+
+const log = logger.child({ scope: 'calendar-admin-v2-routes' });
+
+interface AdminUser { id: string; email?: string | null; role?: string | null }
+type Env = { Variables: { user: AdminUser | undefined } };
+
+export const calendarAdminV2 = new Hono<Env>();
+
+const MAX_BODY_BYTES = 2 * 1024 * 1024;
+/** Percorso di `POST /calendars/:id/import`, l'unico con un limite del corpo diverso. */
+const IMPORT_PATH_RE = /\/calendars\/[^/]+\/import\/?$/;
+/** Limite del solo `POST /calendars/:id/import` (il file ICS arriva dentro il JSON). */
+const MAX_IMPORT_BODY_BYTES = IMPORT_MAX_BYTES;
+const BASE_PATH = '/api/admin/calendar/v2';
+
+// ─── Errori ───────────────────────────────
+
+calendarAdminV2.onError((err, c) => {
+  // Corpo senza Content-Length (trasferimento a blocchi) oltre il limite: lo segnala la lettura, non il controllo iniziale.
+  if (err instanceof Error && err.name === 'BodyLimitError') {
+    // Risposta già decisa qui: senza questo il bodyLimit globale dell'app, che vede lo stesso errore, la sostituirebbe con un 413 senza codice.
+    c.error = undefined;
+    return c.json(payloadTooLarge(c.req.method === 'POST' && IMPORT_PATH_RE.test(c.req.path) ? 10 : 2).toBody(), 413);
+  }
+  const v2 = v2ErrorFrom(err);
+  if (v2) {
+    if (v2.status >= 500) log.error({ code: v2.code, url: c.req.path, method: c.req.method }, v2.message);
+    return c.json(v2.toBody(), v2.status);
+  }
+  if (isCalendarUnavailable(err)) {
+    log.warn({ reason: err.reason, url: c.req.path, method: c.req.method }, 'calendario non disponibile');
+    return c.json({ error: err.message, code: 'CALENDAR_UNAVAILABLE' }, 503);
+  }
+  throw err;
+});
+
+// Difesa in profondità: il JWT admin lo verifica già authMiddleware (protectedPaths di app.ts).
+calendarAdminV2.use('*', async (c, next) => {
+  if (!c.get('user')?.id) return c.json({ error: 'Autenticazione richiesta', code: 'VALIDATION_FAILED' }, 401);
+  await next();
+});
+
+// Difesa CSRF (contratto §3.1): vedi lib/http/same-origin-writes.ts. Nessun percorso multipart.
+calendarAdminV2.use('*', sameOriginWrites({ log }));
+
+// Limite del corpo: 2 MB ovunque tranne l'import, che ha il proprio (10 MB) sulla route. Oltre → 413 PAYLOAD_TOO_LARGE.
+const globalBodyLimit = bodyLimit({
+  maxSize: MAX_BODY_BYTES,
+  onError: (c) => c.json(payloadTooLarge(2).toBody(), 413),
+});
+calendarAdminV2.use('*', async (c, next) => {
+  if (c.req.method === 'POST' && IMPORT_PATH_RE.test(c.req.path)) return next();
+  return globalBodyLimit(c, next);
+});
+const importBodyLimit = bodyLimit({
+  maxSize: MAX_IMPORT_BODY_BYTES,
+  onError: (c) => c.json(payloadTooLarge(10).toBody(), 413),
+});
+
+// ─── Utilità ───────────────────────────────
+
+function actorOf(c: { get(key: 'user'): AdminUser | undefined }): { userId: string | null } {
+  return { userId: c.get('user')?.id ?? null };
+}
+
+async function readJson(c: { req: { text(): Promise<string> } }): Promise<unknown> {
+  const text = await c.req.text();
+  if (!text.trim()) throw invalidValue('Corpo della richiesta mancante');
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw invalidValue('Il corpo della richiesta non è JSON valido');
+  }
+}
+
+/** Nome del file di GET /objects/:id/ics: l'UID senza caratteri che romperebbero l'header. */
+function safeFilename(uid: string): string {
+  const base = uid.replace(/[^A-Za-z0-9._@-]+/g, '_').replace(/^\.+/, '').slice(0, 100);
+  return `${base || 'evento'}.ics`;
+}
+
+// ─── Capacità ───────────────────────────────
+
+calendarAdminV2.get('/capabilities', async (c) => c.json(await readCalendarV2Capabilities()));
+
+// ─── Letture ───────────────────────────────
+
+calendarAdminV2.get('/objects/:id/ics', async (c) => {
+  const { ics, etag, uid } = await readObjectIcsV2(c.req.param('id'));
+  if (etag) c.header('ETag', etag);
+  c.header('Content-Type', 'text/calendar; charset=utf-8');
+  c.header('Content-Disposition', `inline; filename="${safeFilename(uid)}"`);
+  c.header('Cache-Control', 'no-store');
+  return c.body(ics);
+});
+
+calendarAdminV2.get('/objects/:id', async (c) => {
+  const view = await readObjectV2(c.req.param('id'), {
+    recurrenceKey: c.req.query('recurrence_key'),
+    originalStart: c.req.query('original_start'),
+  });
+  if (view.etag) c.header('ETag', view.etag);
+  c.header('Cache-Control', 'no-store');
+  return c.json(view);
+});
+
+// ─── Scritture ───────────────────────────────
+
+calendarAdminV2.patch('/objects/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parsePatchRequest(await readJson(c));
+  const res = await patchObjectV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.post('/objects', async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseCreateRequest(await readJson(c));
+  const res = await createObjectV2(req, actorOf(c));
+  if (req.dryRun) return c.json(res);
+  if (res.etag) c.header('ETag', res.etag);
+  if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
+  return c.json(res, 201);
+});
+
+calendarAdminV2.delete('/objects/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  // Senza recurrence_key vale il componente indicato dall'id (un id di override ha come target quell'override);
+  // senza scope lo decide deleteObjectV2: "tutto" solo per il master, per un'istanza va scelto.
+  const recurrenceKey = c.req.query('recurrence_key');
+  const scopeParam = c.req.query('scope');
+  if (scopeParam !== undefined && !(CAL_V2_SCOPES as readonly string[]).includes(scopeParam)) {
+    throw new CalendarV2Error('SCOPE_INVALID', 400, 'scope non valido');
+  }
+  const dry = c.req.query('dry_run');
+  const dryRun = dry === '1' || dry === 'true';
+  const res = await deleteObjectV2(
+    c.req.param('id'),
+    ifMatch,
+    { scope: scopeParam === undefined ? undefined : (scopeParam as CalV2Scope), recurrenceKey, dryRun },
+    actorOf(c),
+  );
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C1 (contratto §9.1.2, §9.1.3): editor raw, strumenti
+// sull'oggetto, cronologia e cestino
+// ═══════════════════════════════════════════════════════════════════
+
+calendarAdminV2.get('/objects/:id/export.ics', async (c) => {
+  const { ics, etag, uid } = await readObjectIcsV2(c.req.param('id'));
+  if (etag) c.header('ETag', etag);
+  c.header('Content-Type', 'text/calendar; charset=utf-8');
+  c.header('Content-Disposition', `attachment; filename="${safeFilename(uid)}"`);
+  c.header('Cache-Control', 'no-store');
+  return c.body(ics);
+});
+
+calendarAdminV2.put('/objects/:id/ics', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseRawPutRequest(await readJson(c));
+  const res = await putRawIcsV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.post('/objects/:id/move', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseMoveRequest(await readJson(c));
+  const res = await moveObjectV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.post('/objects/:id/duplicate', async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseDuplicateRequest(await readJson(c));
+  const res = await duplicateObjectV2(c.req.param('id'), req, actorOf(c));
+  if (req.dryRun) return c.json(res);
+  if (res.etag) c.header('ETag', res.etag);
+  if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
+  return c.json(res, 201);
+});
+
+calendarAdminV2.get('/objects/:id/versions/:versionId', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await getVersionV2(c.req.param('id'), c.req.param('versionId')));
+});
+
+calendarAdminV2.get('/objects/:id/versions', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listVersionsV2(c.req.param('id')));
+});
+
+calendarAdminV2.post('/objects/:id/restore', async (c) => {
+  await assertV2ObjectsAvailable();
+  const ifMatch = c.req.header('If-Match') ?? '';
+  requireIfMatch(ifMatch);
+  const req = parseRestoreRequest(await readJson(c));
+  const res = await restoreVersionV2(c.req.param('id'), ifMatch, req, actorOf(c));
+  if (res.etag) c.header('ETag', res.etag);
+  return c.json(res);
+});
+
+calendarAdminV2.get('/trash', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listTrashV2(parseTrashQuery({ calendar_id: c.req.query('calendar_id'), before: c.req.query('before'), limit: c.req.query('limit') })));
+});
+
+calendarAdminV2.post('/trash/:objectId/restore', async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseTrashRestoreRequest(await readJson(c));
+  const res = await restoreFromTrashV2(c.req.param('objectId'), req, actorOf(c));
+  if (req.dryRun) return c.json(res);
+  if (res.etag) c.header('ETag', res.etag);
+  if (res.object?.id) c.header('Location', `${BASE_PATH}/objects/${encodeURIComponent(res.object.id)}`);
+  return c.json(res, 201);
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C2 (contratto §9.1.4): calendari, import ed export, job
+// ═══════════════════════════════════════════════════════════════════
+
+/** Corpo `{}` di `POST /calendars/:id/rotate-token`: un oggetto senza campi. */
+async function requireEmptyObject(c: { req: { text(): Promise<string> } }): Promise<void> {
+  const body = await readJson(c);
+  if (typeof body !== 'object' || body === null || Array.isArray(body) || Object.keys(body).length > 0) {
+    throw invalidValue('Il corpo della richiesta deve essere {}');
+  }
+}
+
+calendarAdminV2.get('/calendars', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listCalendarsV2());
+});
+
+calendarAdminV2.post('/calendars', async (c) => {
+  await assertV2ObjectsAvailable();
+  const view = await createCalendarRouteV2(parseCalendarCreateRequest(await readJson(c)), actorOf(c));
+  c.header('Location', `${BASE_PATH}/calendars/${encodeURIComponent(view.id)}`);
+  return c.json(view, 201);
+});
+
+// Registrata prima delle route con `:id`: "order" non è un identificativo.
+calendarAdminV2.put('/calendars/order', async (c) => {
+  await assertV2ObjectsAvailable();
+  return c.json(await orderCalendarsRouteV2(parseCalendarOrderRequest(await readJson(c)), actorOf(c)));
+});
+
+calendarAdminV2.patch('/calendars/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  return c.json(await patchCalendarRouteV2(c.req.param('id'), parseCalendarPatchRequest(await readJson(c)), actorOf(c)));
+});
+
+calendarAdminV2.delete('/calendars/:id', async (c) => {
+  await assertV2ObjectsAvailable();
+  const flag = c.req.query('with_objects');
+  return c.json(await deleteCalendarRouteV2(c.req.param('id'), flag === '1' || flag === 'true', actorOf(c)));
+});
+
+calendarAdminV2.post('/calendars/:id/rotate-token', async (c) => {
+  await assertV2ObjectsAvailable();
+  await requireEmptyObject(c);
+  return c.json(await rotateCalendarTokenV2(c.req.param('id'), actorOf(c)));
+});
+
+calendarAdminV2.get('/calendars/:id/export.ics', async (c) => {
+  const { filename, body } = await openCalendarExportV2(c.req.param('id'));
+  return new Response(body, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+      'Cache-Control': 'no-store',
+    },
+  });
+});
+
+calendarAdminV2.post('/calendars/:id/import', importBodyLimit, async (c) => {
+  await assertV2ObjectsAvailable();
+  const req = parseImportRequest(await readJson(c));
+  const res = await importCalendarV2(c.req.param('id'), req, c.req.header('Idempotency-Key'), actorOf(c));
+  c.header('Cache-Control', 'no-store');
+  return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200);
+});
+
+calendarAdminV2.get('/jobs/:jobId', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await readJobV2(c.req.param('jobId')));
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// Tranche C, passo C3 (contratto §9.1.5, §9.1.6): salute e vista
+// ═══════════════════════════════════════════════════════════════════
+
+calendarAdminV2.get('/sync-state', async (c) => {
+  c.header('Cache-Control', 'no-store');
+  return c.json(await getSyncStateV2());
+});
+
+/** Azioni sulla collezione in hold: dry_run → 200 piano; commit (+ Idempotency-Key) → 202 job. */
+async function holdRoute(c: Context<Env>, action: 'apply_deletions' | 'rebuild_from_index'): Promise<Response> {
+  await assertV2ObjectsAvailable();
+  const req = parseHoldActionRequest(await readJson(c));
+  const res = await holdActionV2(action, c.req.param('id'), req, c.req.header('Idempotency-Key'), actorOf(c));
+  c.header('Cache-Control', 'no-store');
+  return res.status === 202 ? c.json(res.body, 202) : c.json(res.body, 200);
+}
+
+calendarAdminV2.post('/collections/:id/apply-deletions', (c) => holdRoute(c, 'apply_deletions'));
+
+calendarAdminV2.post('/collections/:id/rebuild-from-index', (c) => holdRoute(c, 'rebuild_from_index'));
+
+calendarAdminV2.get('/occurrences', async (c) => {
+  const { from, to } = parseOccurrenceWindow(c.req.query('from'), c.req.query('to'));
+  const calendarIds = parseCalendarIds(c.req.queries('calendar_id') ?? []);
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listOccurrencesV2({ from, to, calendarIds }));
+});
+
+calendarAdminV2.get('/overlays', async (c) => {
+  const { from, to } = parseOccurrenceWindow(c.req.query('from'), c.req.query('to'));
+  c.header('Cache-Control', 'no-store');
+  return c.json(await listOverlaysV2({ from, to }));
+});

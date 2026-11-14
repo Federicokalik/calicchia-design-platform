@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://calicchia.design/schemas/caldes/authcache.v1.schema.json",
+  "title": "authcache.json (schema 1)",
+  "description": "Cache persistita delle credenziali device di caldes_auth, sul volume radicale_authcache (file 0600 dell'utente radicale, uid 2999). Usata SOLO come stale-if-error quando verify-credentials non risponde in modo esplicito. Nessuna password o username in chiaro: ogni voce è indicizzata dall'HMAC-SHA256 descritto in control-plane.md §9.5. Un file illeggibile, di schema diverso, con key_id diverso dalla chiave corrente o con credential_epoch diverso da quello della policy vale come cache vuota.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "key_id", "credential_epoch", "entries"],
+  "properties": {
+    "schema": { "const": 1 },
+    "key_id": {
+      "description": "Primi 16 caratteri esadecimali di HMAC-SHA256(CALDES_AUTHCACHE_KEY, \"caldes-authcache/key-id\"): una rotazione della chiave invalida il file.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "credential_epoch": {
+      "description": "credential_epoch della policy con cui le voci sono state validate.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "entries": {
+      "description": "Al massimo 256 voci; oltre si scartano quelle con refreshed più vecchio.",
+      "type": "object",
+      "maxProperties": 256,
+      "propertyNames": { "pattern": "^[0-9a-f]{64}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["exp", "refreshed"],
+        "properties": {
+          "exp": {
+            "description": "Scadenza in secondi Unix: min(refreshed + 86400, expires_at dell'app-password se noto).",
+            "type": "integer",
+            "minimum": 0
+          },
+          "refreshed": {
+            "description": "Ultima conferma positiva del backend, in secondi Unix.",
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema": 1,
+      "key_id": "9f86d081884c7d65",
+      "credential_epoch": 2,
+      "entries": {
+        "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8": { "exp": 1760126400, "refreshed": 1760040000 }
+      }
+    }
+  ]
+}

@@ -244,6 +244,8 @@ function ClienteDetailPage() {
       queryClient.invalidateQueries({ queryKey: ['customer', id] });
       toast.success('Cliente aggiornato');
     },
+    // Errori di validazione (es. email non valida in billing_emails): il messaggio dice quale campo.
+    onError: (err: Error) => toast.error(err.message || 'Aggiornamento non riuscito'),
   });
 
   // WhatsApp send dialog — hooks dichiarati prima dei return condizionali (rules-of-hooks).
@@ -481,6 +483,44 @@ function ClienteDetailPage() {
                   if (e.target.value !== (customer.phone || '')) updateMutation.mutate({ phone: e.target.value || null });
                 }} />
               </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="customer-billing-emails">Email amministrative (fatture, rinnovi, solleciti)</Label>
+                <Input
+                  id="customer-billing-emails"
+                  defaultValue={(customer.billing_emails ?? []).join(', ')}
+                  placeholder={customer.email ? `Vuoto = ${customer.email}` : 'amministrazione@azienda.it, titolare@gmail.com'}
+                  onBlur={(e) => {
+                    const list = e.target.value.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+                    const current = customer.billing_emails ?? [];
+                    if (list.join(',').toLowerCase() !== current.join(',').toLowerCase()) {
+                      updateMutation.mutate({ billing_emails: list });
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Separate da virgola. Se compilato, promemoria domini, fatture e solleciti vanno a questi indirizzi invece che all&apos;email principale.
+                </p>
+              </div>
+              {/* Dati fiscali: validati dall'API (cifra di controllo di P.IVA e codice fiscale). */}
+              {([
+                ['vat_number', 'Partita IVA', '12345678903'],
+                ['fiscal_code', 'Codice fiscale', 'RSSMRA80A01H501U'],
+                ['sdi_code', 'Codice SDI', '0000000'],
+                ['pec', 'PEC', 'azienda@pec.it'],
+              ] as const).map(([field, label, placeholder]) => (
+                <div key={field} className="space-y-1.5">
+                  <Label htmlFor={`customer-${field}`}>{label}</Label>
+                  <Input
+                    id={`customer-${field}`}
+                    defaultValue={customer[field] || ''}
+                    placeholder={placeholder}
+                    onBlur={(e) => {
+                      const value = e.target.value.trim();
+                      if (value !== (customer[field] || '')) updateMutation.mutate({ [field]: value || null } as Partial<Customer>);
+                    }}
+                  />
+                </div>
+              ))}
             </div>
             <div className="space-y-1.5">
               <Label>Note generali</Label>

@@ -289,6 +289,7 @@ export default function PostaPage() {
           body: d.body || '',
           in_reply_to: d.in_reply_to_msgid || undefined,
           draft_id: d.id,
+          attachments: Array.isArray(d.attachments) ? d.attachments : [],
         });
         setComposeOpen(true);
       } catch (err) {

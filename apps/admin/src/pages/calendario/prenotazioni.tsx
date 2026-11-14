@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { Calendar, Mail, Phone, Building, X, CheckCircle2, AlertCircle, Send } from 'lucide-react';
+import { Calendar, Mail, Phone, Building, X, CheckCircle2, AlertCircle, Send, Video, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTopbar } from '@/hooks/use-topbar';
 import { apiFetch } from '@/lib/api';
 import { useConfirm } from '@/hooks/use-confirm';
@@ -33,6 +35,27 @@ interface BookingRow {
   cancellation_reason: string | null;
 }
 
+/** Nome del servizio di videocall dal link (stesse regole di lib/calendar/meeting-url.ts nell'API). */
+function meetingProvider(url: string): string | null {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+  const is = (d: string) => host === d || host.endsWith(`.${d}`);
+  if (is('meet.google.com')) return 'Google Meet';
+  if (is('mega.nz') || is('mega.io') || is('mega.co.nz')) return 'MEGA';
+  if (is('zoom.us') || is('zoom.com')) return 'Zoom';
+  if (is('teams.microsoft.com') || is('teams.live.com')) return 'Microsoft Teams';
+  if (is('meet.jit.si') || host.includes('jitsi')) return 'Jitsi';
+  if (is('whereby.com')) return 'Whereby';
+  if (is('webex.com')) return 'Webex';
+  return null;
+}
+
+const isUrl = (value: string | null | undefined): value is string => !!value && /^https?:\/\//i.test(value);
+
 const STATUS_VARIANT: Record<string, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   pending: 'outline',
   confirmed: 'default',
@@ -49,6 +72,17 @@ export default function PrenotazioniPage() {
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<BookingRow | null>(null);
+  // Editor del link videocall nel pannello di dettaglio.
+  const [linkEditing, setLinkEditing] = useState(false);
+  const [linkDraft, setLinkDraft] = useState('');
+  const [linkNotify, setLinkNotify] = useState(false);
+
+  const selectBooking = (b: BookingRow | null) => {
+    setSelected(b);
+    setLinkEditing(false);
+    setLinkDraft(b && isUrl(b.location_value) ? b.location_value : '');
+    setLinkNotify(false);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['admin-bookings', filter, search],
@@ -72,7 +106,7 @@ export default function PrenotazioniPage() {
       // senza questa invalidation il calendario mostrava ancora l'evento.
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       toast.success(t('calendar.bookings.cancelled'));
-      setSelected(null);
+      selectBooking(null);
     },
   });
 
@@ -85,9 +119,33 @@ export default function PrenotazioniPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       // `selected` è una copia della riga: restava su 'Confermata' con le azioni attive
-      setSelected(null);
+      selectBooking(null);
       toast.success(t('common.updated'));
     },
+  });
+
+  const updateLink = useMutation({
+    mutationFn: async ({ uid, url, notify }: { uid: string; url: string; notify: boolean }) => {
+      const res = await apiFetch(`/api/admin/calendar/bookings/${uid}/location`, {
+        method: 'PATCH', body: JSON.stringify({ meeting_url: url }),
+      });
+      if (notify) {
+        await apiFetch(`/api/admin/calendar/bookings/${uid}/resend-confirmation`, { method: 'POST' });
+      }
+      return { booking: (res?.booking ?? {}) as Partial<BookingRow>, notify };
+    },
+    onSuccess: ({ booking, notify }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
+      // `selected` è una copia della riga: aggiornala subito col nuovo luogo.
+      setSelected((prev) => (prev
+        ? { ...prev, location_type: booking.location_type ?? prev.location_type, location_value: booking.location_value ?? null }
+        : prev));
+      setLinkEditing(false);
+      setLinkNotify(false);
+      toast.success(t(notify ? 'calendar.bookings.meetingLinkSavedNotified' : 'calendar.bookings.meetingLinkSaved'));
+    },
+    onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
   });
 
   const resend = useMutation({
@@ -101,7 +159,7 @@ export default function PrenotazioniPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       toast.success(t('calendar.bookings.approved'));
-      setSelected(null);
+      selectBooking(null);
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
   });
@@ -114,7 +172,7 @@ export default function PrenotazioniPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-bookings'] });
       queryClient.invalidateQueries({ queryKey: ['admin-calendar-events'] });
       toast.success(t('calendar.bookings.rejected'));
-      setSelected(null);
+      selectBooking(null);
     },
     onError: (err) => toast.error(err instanceof Error ? err.message : 'Errore'),
   });
@@ -125,6 +183,8 @@ export default function PrenotazioniPage() {
   });
 
   const bookings: BookingRow[] = data?.bookings || [];
+  const canEditLink = selected?.status === 'confirmed' || selected?.status === 'pending';
+  const draftProvider = linkDraft.trim() ? meetingProvider(linkDraft.trim()) : null;
   const stats = data?.stats || {};
 
   return (
@@ -175,7 +235,7 @@ export default function PrenotazioniPage() {
                 key={b.id}
                 type="button"
                 className={`w-full text-left p-3 hover:bg-accent/50 transition flex items-center gap-3 ${selected?.id === b.id ? 'bg-accent' : ''}`}
-                onClick={() => setSelected(b)}
+                onClick={() => selectBooking(b)}
               >
                 <div className="h-10 w-1 rounded-full shrink-0" style={{ backgroundColor: b.event_type_color }} />
                 <div className="min-w-0 flex-1">
@@ -210,7 +270,7 @@ export default function PrenotazioniPage() {
                   <h3 className="font-semibold text-base">{selected.attendee_name}</h3>
                   <p className="text-xs text-muted-foreground font-mono">{selected.uid}</p>
                 </div>
-                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setSelected(null)}>
+                <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => selectBooking(null)}>
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -249,9 +309,90 @@ export default function PrenotazioniPage() {
                     <span className="text-xs">{selected.attendee_company}</span>
                   </div>
                 )}
-                {selected.location_value && (
+                {selected.location_value && !isUrl(selected.location_value) && (
                   <div className="text-xs text-muted-foreground border-t pt-2 mt-2">
                     📍 {selected.location_value}
+                  </div>
+                )}
+                {/* Link videocall della singola prenotazione (MEGA, Zoom, Meet...): vince sul tipo evento */}
+                {(canEditLink || isUrl(selected.location_value)) && (
+                  <div className="border-t pt-2 mt-2 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Video className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <span className="text-xs font-medium">{t('calendar.bookings.meetingLink')}</span>
+                      {canEditLink && !linkEditing && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-2 ml-auto text-xs"
+                          onClick={() => {
+                            setLinkDraft(isUrl(selected.location_value) ? selected.location_value : '');
+                            setLinkEditing(true);
+                          }}
+                        >
+                          <Pencil className="h-3 w-3 mr-1" />
+                          {isUrl(selected.location_value) ? t('calendar.bookings.meetingLinkEdit') : t('calendar.bookings.meetingLinkAdd')}
+                        </Button>
+                      )}
+                    </div>
+                    {!linkEditing && (isUrl(selected.location_value) ? (
+                      <a
+                        href={selected.location_value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-xs text-primary hover:underline break-all"
+                      >
+                        {meetingProvider(selected.location_value) ? `${meetingProvider(selected.location_value)} — ` : ''}
+                        {selected.location_value}
+                      </a>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">{t('calendar.bookings.meetingLinkNone')}</p>
+                    ))}
+                    {linkEditing && (
+                      <form
+                        className="space-y-2"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          const url = linkDraft.trim();
+                          if (!/^https:\/\/[^\s]+$/i.test(url)) {
+                            toast.error(t('calendar.bookings.meetingLinkInvalid'));
+                            return;
+                          }
+                          updateLink.mutate({ uid: selected.uid, url, notify: linkNotify });
+                        }}
+                      >
+                        <Input
+                          type="url"
+                          inputMode="url"
+                          autoFocus
+                          value={linkDraft}
+                          onChange={(e) => setLinkDraft(e.target.value)}
+                          placeholder="https://mega.nz/... · https://meet.google.com/..."
+                          className="h-8 text-xs"
+                          aria-label={t('calendar.bookings.meetingLink')}
+                        />
+                        {draftProvider && (
+                          <p className="text-[11px] text-muted-foreground">{draftProvider}</p>
+                        )}
+                        <label className="flex items-start gap-2 text-xs cursor-pointer">
+                          <Checkbox
+                            checked={linkNotify}
+                            onCheckedChange={(v) => setLinkNotify(v === true)}
+                            className="mt-0.5"
+                          />
+                          <span>{t('calendar.bookings.meetingLinkNotify')}</span>
+                        </label>
+                        <p className="text-[11px] text-muted-foreground">{t('calendar.bookings.meetingLinkHint')}</p>
+                        <div className="flex gap-1.5">
+                          <Button type="submit" size="sm" disabled={updateLink.isPending || !linkDraft.trim()}>
+                            {updateLink.isPending ? t('common.saving') : t('common.save')}
+                          </Button>
+                          <Button type="button" size="sm" variant="ghost" onClick={() => setLinkEditing(false)} disabled={updateLink.isPending}>
+                            {t('common.cancel')}
+                          </Button>
+                        </div>
+                      </form>
+                    )}
                   </div>
                 )}
                 {selected.attendee_message && (
