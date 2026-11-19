@@ -15,6 +15,7 @@ import { WhatsAppSection } from './impostazioni/whatsapp-section';
 import { MfaSection } from './impostazioni/mfa-section';
 import { KnowledgeBaseSection } from './impostazioni/knowledge-base-section';
 import { CaptchaSection } from './impostazioni/captcha-section';
+import { StackBackupSection } from './impostazioni/stack-backup-section';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1227,6 +1228,8 @@ function BackupSection() {
       </div>
 
       {calendarInfo && <BackupCalendarNotice calendar={calendarInfo} />}
+
+      <StackBackupSection />
 
       {/* Stats */}
       <div className="rounded-xl border bg-card p-6 space-y-4">

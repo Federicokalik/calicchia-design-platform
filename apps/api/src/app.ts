@@ -617,6 +617,8 @@ app.route('/api/palette/searches', paletteAdmin);
 const backupRateLimit = createRateLimit(3, 10 * 60 * 1000);
 app.use('/api/backup/export', backupRateLimit);
 app.use('/api/backup/import', backupRateLimit);
+// Backup coordinato su richiesta: limite proprio, non condiviso con export/import.
+app.use('/api/backup/stack/run', createRateLimit(6, 60 * 60 * 1000));
 app.route('/api/backup', backup);
 
 // MCP endpoints (service-token auth, separato dal JWT admin)
