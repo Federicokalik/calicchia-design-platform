@@ -37,8 +37,9 @@ services:
 
   # One-off: applica le migrazioni pending, poi esce. Stessa immagine dell'api
   # (contiene scripts/migrate.ts + i file SQL). Idempotente — gira a ogni deploy.
+  # Immagine fissata su sha-<short> come l'api (stesso tag, runbook F5).
   migrate:
-    image: ghcr.io/federicokalik/calicchia-api:latest
+    image: ghcr.io/federicokalik/calicchia-api:sha-e069927
     restart: "no"
     command: ["pnpm", "exec", "tsx", "scripts/migrate.ts"]
     environment:
@@ -49,8 +50,12 @@ services:
     networks:
       - app-net
 
+  # Immagine fissata su sha-<short> per il passaggio a Radicale (F5): durante
+  # la finestra di rollback il git-sync non deve poter cambiare l'API. Per
+  # aggiornarla: nuovo tag sha qui, in migrate e in CALDES_API_VERSION, mai
+  # sotto la release F4.
   api:
-    image: ghcr.io/federicokalik/calicchia-api:latest
+    image: ghcr.io/federicokalik/calicchia-api:sha-e069927
     restart: always
     environment:
       NODE_ENV: production
@@ -144,9 +149,10 @@ services:
       # Identità del volume letta dal mount :ro (in mancanza del mount l'API
       # ripiegherebbe su PROPFIND; qui il mount c'è, quindi `file`).
       CALDES_IDENTITY_SOURCE: file
-      # Identificativo della build nel heartbeat (api_version, informativo).
-      # Va allineato al tag dell'immagine API quando viene pinnato (F5).
-      CALDES_API_VERSION: ${CALDES_API_VERSION:-latest}
+      # Identificativo della build nel heartbeat (api_version) e nel criterio
+      # api_image_pinned del passaggio. Valore letterale, non da .env: deve
+      # restare uguale al tag dell'immagine api qui sopra.
+      CALDES_API_VERSION: sha-e069927
       # Già il default del container (alpine senza TZ); esplicito come in
       # Radicale: date e orari si calcolano in Europe/Rome dove serve, mai
       # dal fuso del processo.
