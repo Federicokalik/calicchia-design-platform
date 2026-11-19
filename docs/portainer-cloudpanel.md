@@ -432,6 +432,8 @@ L'inizializzazione del volume (facoltativa in F1, poi nel wizard della F3) e la 
 
 ## 10. Backup coordinato (DB e volume di Radicale)
 
+> **Servizio `backup` dello stack.** Il servizio `backup` ([apps/backup/README.md](../apps/backup/README.md)) sostituisce il cron dell'host. Lancia lo stesso script ogni 6 h dentro lo stack, con S4 e Telegram presi da `.env.dockhand`. L'admin vede lo stato e può lanciare un backup in Impostazioni → Backup. Quando il servizio è in produzione e ha fatto un run completo, vanno tolti il cron e `/root/.caldes-backup.env` descritti sotto. Il ripristino resta quello di questa sezione.
+
 `scripts/backup-calendar-stack.sh` sostituisce l'uso separato di `backup-db.sh`, che resta per compatibilità e gli delega il lavoro. Ogni 6 h, come root sull'host, da una copia del repository (per esempio `/opt/calicchia-design-platform`). **Il cron nuovo si installa dopo il commit 2 della F1** (§9.3): prima il volume di Radicale non esiste e ogni run sarebbe incompleto (exit 3, con alert).
 
 ```sh

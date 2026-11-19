@@ -285,6 +285,12 @@ const F4_STATE_TABLES = [
   'public.cal_migration_transitions',
 ];
 
+/** Coda e heartbeat del servizio `backup` (173). */
+const STACK_BACKUP_STATE_TABLES = [
+  'public.stack_backup_agent',
+  'public.stack_backup_runs',
+];
+
 /** Trappole del gruppo S e di calendars, valide in ogni modalità. */
 const PROTECTED_ALWAYS = [
   { table: 'public.calendars', events: 'TRUNCATE OR DELETE' },
@@ -738,7 +744,7 @@ describe('import del backup JSON', () => {
     assert.equal(res.status, 200, res.text);
     assert.deepEqual(
       res.json.skipped.state,
-      ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES, ...F3_STATE_TABLES, ...F4_STATE_TABLES].sort(),
+      ['public.calendar_backend_state', PROBE, 'public.schema_migrations', ...F2_STATE_TABLES, ...F3_STATE_TABLES, ...F4_STATE_TABLES, ...STACK_BACKUP_STATE_TABLES].sort(),
     );
     assert.deepEqual(res.json.calendar.kept, []);
 

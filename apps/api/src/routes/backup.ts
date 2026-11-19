@@ -10,6 +10,7 @@ import {
   normalizeBackendState,
 } from '../lib/calendar/radicale/types';
 import { buildCalendarExportV2 } from '../lib/calendar/export-v2';
+import { enqueueStackBackup, readStackBackupStatus } from '../lib/stack-backup';
 
 type Env = { Variables: { user: { id: string; email?: string; role?: string } } };
 
@@ -96,6 +97,10 @@ const STATE_TABLES: ReadonlySet<string> = new Set([
   'public.cal_migration_runs',
   'public.cal_migration_items',
   'public.cal_migration_ledger',
+  // Servizio `backup` (173): coda dei run e heartbeat. Riportarli da un file
+  // rimetterebbe in coda (o "in corso") run che nessuno esegue più.
+  'public.stack_backup_runs',
+  'public.stack_backup_agent',
 ]);
 
 /** Prefisso del gruppo S per le tabelle dello strumento di migrazione nate dopo la 165. */
@@ -506,6 +511,41 @@ backup.get('/info', async (c) => {
   const totalRows = stats.reduce((acc, t) => acc + t.rows, 0);
   const calendar = summarizeBackend(await readCalendarBackend(sql));
   return c.json({ version: BACKUP_VERSION, tableCount: tables.length, totalRows, tables: stats, calendar });
+});
+
+// ─── Backup coordinato dello stack (servizio `backup`, migrazione 173) ───────
+//
+// Il backup lo esegue il servizio `backup` dello stack (apps/backup), mai
+// l'API: qui solo lo stato e la messa in coda di un run chiesto dall'admin.
+
+backup.get('/stack', async (c) => c.json(await readStackBackupStatus()));
+
+backup.post('/stack/run', async (c) => {
+  const user = c.get('user');
+  const result = await enqueueStackBackup(`admin:${user?.id ?? 'unknown'}`);
+  switch (result.kind) {
+    case 'queued':
+      return c.json({ run: result.run }, 202);
+    case 'not_installed':
+      return c.json({
+        error: 'Il servizio di backup non è installato: manca la migrazione 173.',
+        code: 'BACKUP_SERVICE_NOT_INSTALLED',
+      }, 409);
+    case 'offline':
+      return c.json({
+        error: result.seen_at
+          ? 'Il servizio di backup non risponde: la richiesta resterebbe in coda senza essere eseguita. Controlla il container backup.'
+          : 'Il servizio di backup non è mai partito: aggiungi il servizio backup allo stack (apps/backup/README.md).',
+        code: 'BACKUP_AGENT_OFFLINE',
+        seen_at: result.seen_at,
+      }, 409);
+    case 'busy':
+      return c.json({
+        error: 'Un backup è già in coda o in corso.',
+        code: 'BACKUP_ALREADY_ACTIVE',
+        run: result.run,
+      }, 409);
+  }
 });
 
 /**
