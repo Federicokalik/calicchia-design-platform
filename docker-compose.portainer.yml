@@ -39,7 +39,7 @@ services:
   # (contiene scripts/migrate.ts + i file SQL). Idempotente — gira a ogni deploy.
   # Immagine fissata su sha-<short> come l'api (stesso tag, runbook F5).
   migrate:
-    image: ghcr.io/federicokalik/calicchia-api:sha-e069927
+    image: ghcr.io/federicokalik/calicchia-api:sha-055378f
     restart: "no"
     command: ["pnpm", "exec", "tsx", "scripts/migrate.ts"]
     environment:
@@ -55,7 +55,7 @@ services:
   # aggiornarla: nuovo tag sha qui, in migrate e in CALDES_API_VERSION, mai
   # sotto la release F4.
   api:
-    image: ghcr.io/federicokalik/calicchia-api:sha-e069927
+    image: ghcr.io/federicokalik/calicchia-api:sha-055378f
     restart: always
     environment:
       NODE_ENV: production
@@ -152,7 +152,7 @@ services:
       # Identificativo della build nel heartbeat (api_version) e nel criterio
       # api_image_pinned del passaggio. Valore letterale, non da .env: deve
       # restare uguale al tag dell'immagine api qui sopra.
-      CALDES_API_VERSION: sha-e069927
+      CALDES_API_VERSION: sha-055378f
       # Già il default del container (alpine senza TZ); esplicito come in
       # Radicale: date e orari si calcolano in Europe/Rome dove serve, mai
       # dal fuso del processo.
@@ -517,6 +517,49 @@ services:
     ports:
       - "127.0.0.1:3011:5232"
 
+  # Backup coordinato (dump del database più snapshot del volume di Radicale,
+  # scripts/backup-calendar-stack.sh) ogni 6 h e su richiesta dall'admin
+  # (Impostazioni → Backup). Sostituisce il cron dell'host. apps/backup/README.md.
+  # Immagine fissata su sha-<short>, come radicale: per aggiornarla nuovo tag
+  # qui e in CALDES_BACKUP_VERSION. Database via DATABASE_URL (niente socket
+  # Docker), volume di Radicale in sola lettura (lock condiviso con flock -s).
+  # S4: stesse chiavi e stesso bucket dell'API (prefisso calendar-stack/), per
+  # ora; una chiave dedicata ai backup resta da fare.
+  backup:
+    image: ghcr.io/federicokalik/calicchia-backup:sha-055378f
+    restart: always
+    init: true
+    cap_drop: [ALL]
+    # Lettura dei file di Radicale (altro utente) senza gli altri privilegi di root.
+    cap_add: [DAC_READ_SEARCH]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      CALDES_BACKUP_VERSION: sha-055378f
+      RADICALE_VOLUME_DIR: /radicale-data
+      BACKUP_DIR: /backups
+      RETENTION_DAYS: 30
+      BACKUP_INTERVAL_HOURS: 6
+      S4_ENDPOINT: ${S4_ENDPOINT}
+      S4_REGION: ${S4_REGION}
+      S4_BUCKET: ${S4_BUCKET}
+      S4_ACCESS_KEY_ID: ${S4_ACCESS_KEY_ID}
+      S4_SECRET_ACCESS_KEY: ${S4_SECRET_ACCESS_KEY}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TZ: UTC
+    volumes:
+      - radicale_collections:/radicale-data:ro
+      - stack_backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - app-net
+
   # Headful capture worker — FASE 3 (apps/worker). Polla capture_sessions
   # per driveare Chromium headful + xvfb + noVNC, così l'admin può loggarsi
   # manualmente su siti dietro login e catturare. Il profilo Chrome per
@@ -587,6 +630,9 @@ volumes:
   # Cache persistita delle credenziali di caldes_auth (solo radicale).
   # Ricostruibile, non va nel backup.
   radicale_authcache:
+  # Backup coordinati del servizio backup (calendar-stack/<id>/, file 0600).
+  # Contengono dati personali: la copia off-site è su S4.
+  stack_backups:
 
 networks:
   app-net:
